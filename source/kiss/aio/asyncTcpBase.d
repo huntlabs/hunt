@@ -108,7 +108,7 @@ class AsyncTcpBase:Event , Timer
 	protected bool onEstablished()
 	{
 		log(LogLevel.info , "on Open");
-		_keepalive = _poll.addTimer(this , _keepalivetime  , WheelType.WHEEL_PERIODIC);
+		//_keepalive = _poll.addTimer(this , _keepalivetime  , WheelType.WHEEL_PERIODIC);
 		_poll.addEvent(this ,_socket.handle ,  _curEventType = IOEventType.IO_EVENT_READ);
 		return true;
 	}
@@ -187,11 +187,11 @@ class AsyncTcpBase:Event , Timer
 	protected bool onClose()
 	{
 		log(LogLevel.info , "on close");
-		if(_keepalive !is null)
-		{	
-			_poll.delTimer(_keepalive);
-			_keepalive = null;
-		}
+//		if(_keepalive !is null)
+//		{	
+//			_poll.delTimer(_keepalive);
+//			_keepalive = null;
+//		}
 		_poll.delEvent(this , _socket.handle , _curEventType = IOEventType.IO_EVENT_NONE);
 		_socket.close();
 		return true;
@@ -202,7 +202,7 @@ class AsyncTcpBase:Event , Timer
 		return _poll;
 	}
 
-	package void setSocket(Socket socket)
+	void setSocket(Socket socket)
 	{
 		_socket = socket;
 	}
@@ -242,11 +242,11 @@ class AsyncTcpBase:Event , Timer
 
 	//static function's below
 
-	static package void setArgs(int keepalivetime = 60 * 1000)
-	{
-		_keepalivetime = keepalivetime;
-		log(LogLevel.info , to!string(_keepalivetime));
-	}
+	//static void setArgs(int keepalivetime = 60 * 1000)
+	//{
+	//	_keepalivetime = keepalivetime;
+	//	log(LogLevel.info , to!string(_keepalivetime));
+	//}
 
 
 	static package bool net_error()
@@ -262,7 +262,7 @@ class AsyncTcpBase:Event , Timer
 	protected bool		_isreadclose = false;
 	protected Socket 	_socket;
 	protected Poll 		_poll;
-	protected TimerFd 	_keepalive;
+//	protected TimerFd 	_keepalive;
 	protected IOEventType 	_curEventType = IOEventType.IO_EVENT_NONE;
 	
 
@@ -270,7 +270,7 @@ class AsyncTcpBase:Event , Timer
 	protected uint			_lastMsgTime;
 	protected string		_remoteipaddr;
 
-	protected static int _keepalivetime;
+	//protected static int _keepalivetime;
 }
 
 

@@ -3,19 +3,19 @@
 import kiss.event.Event;
 import kiss.event.Poll;
 import kiss.aio.Acceptor;
+import kiss.aio.AsyncTcpBase;
 
 import std.socket;
 import std.stdio;
 import std.experimental.logger;
 
-class AsyncTcpServer(T , Args...): Event
+class AsyncTcpServer(T ): Event
 {
 
-	this(Poll poll , Args args)
+	this(Poll poll )
 	{
 		_poll = poll;
 		_acceptor = new Acceptor();
-		T.setArgs(args);
 	}
 
 	bool open(string ipaddr, ushort port ,int back_log = 5 ,  bool breuse = true)
