@@ -20,7 +20,7 @@ class AsyncTcpServer(T ): Event
 		_acceptor = new Acceptor();
 	}
 
-	bool open(string ipaddr, ushort port ,int back_log = 5 ,  bool breuse = false)
+	bool open(string ipaddr, ushort port ,int back_log = 5 ,  bool breuse = true)
 	{
 		if(!_acceptor.open(ipaddr , port , back_log , breuse))
 		{
