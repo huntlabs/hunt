@@ -1,3 +1,4 @@
 # kiss
-##keep it simple stupid
-a dlang base library include aio、event、time etc.
+A dlang base library include aio、event、time etc.<br/>
+We implement it like the netty's nio , but using easily than nio.<br/>
+And we must keep it simple stupid.<br/>
