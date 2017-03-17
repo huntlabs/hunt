@@ -6,8 +6,9 @@ import kiss.time.timer;
 import std.string;
 import std.socket;
 import std.experimental.logger;
-import kiss.event.Poll;
+import kiss.event.GroupPoll;
 import kiss.event.Event;
+import kiss.event.Poll;
 import std.conv;
 
 class AsyncTcpClient:AsyncTcpBase
@@ -15,7 +16,7 @@ class AsyncTcpClient:AsyncTcpBase
 
 	//public function below
 
-	this(Poll poll , int reconnecttime = 5 * 1000, int client_keepalivetime = 60 * 1000)
+	this(Group poll , int reconnecttime = 5 * 1000, int client_keepalivetime = 60 * 1000)
 	{
 		super(poll);
 		_reconnecttime = reconnecttime;
@@ -78,7 +79,7 @@ class AsyncTcpClient:AsyncTcpBase
 			_status = Connect_Status.CLIENT_CONNECTED;
 			return super.open();
 		}
-
+		log(LogLevel.info , "onWrite");
 		return super.onWrite();
 	}
 

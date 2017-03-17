@@ -7,7 +7,7 @@ import std.stdio;
 
 class MyHttpChannel : AsyncTcpBase
 {
-	this(Poll poll)
+	this(Group poll)
 	{
 		readBuff = new byte[1024];
 		super(poll);
@@ -42,16 +42,17 @@ class MyHttpChannel : AsyncTcpBase
 int main()
 {
 
-	import kiss.event.Epoll;
+	import kiss.event.GroupPoll;
 	import kiss.aio.AsyncTcpBase;
 	import kiss.aio.AsyncTcpClient;
 	import kiss.aio.AsyncTcpServer;
 
-	Poll poll = new Epoll();
-	auto server = new AsyncTcpServer!MyHttpChannel (poll);
+	auto poll = new GroupPoll!();
+	auto server = new AsyncTcpServer!MyHttpChannel(poll);
 	server.open("0.0.0.0" , 81);
 
-	poll.run();
+	poll.start();
+	poll.wait();
 
 	return 0;
 }

@@ -6,6 +6,7 @@ import core.stdc.errno;
 import core.stdc.string;
 import std.stdio;
 import std.string;
+import core.thread;
 
 
 import kiss.event.Event;
@@ -70,11 +71,10 @@ extern(C){
 
 
 
-final class Epoll : Poll 
+final class Epoll :Thread , Poll 
 {
-	this()
+	this(int timeout = 10)
 	{
-		// Constructor code
 		_efd = epoll_create1(0);
 		if(_efd == -1)
 		{
@@ -82,6 +82,7 @@ final class Epoll : Poll
 			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 		}
 		_wheeltimer = new WheelTimer();
+		super(&run);
 	}
 
 
@@ -89,7 +90,7 @@ final class Epoll : Poll
 	~this()
 	{
 		close(_efd);
-		delete _wheeltimer;
+		_wheeltimer.destroy();
 	}
 
 	TimerFd addTimer(Timer timer , ulong interval , WheelType type)
@@ -123,7 +124,7 @@ final class Epoll : Poll
 			ev.data.ptr = cast(void *)event;
 		}
 
-		log(LogLevel.info , "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
+		log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
 
 		if(epoll_ctl(_efd , op , fd , &ev) < 0)
 		{
@@ -173,20 +174,36 @@ final class Epoll : Poll
 		return opEvent(event ,fd ,  EPOLL_CTL_MOD , type);
 	}
 
-	bool run(int milltimeout)
+	void start()
 	{
-		_brun = true;
-		while(_brun)
+		if(_flag)
 		{
-			poll(milltimeout);
+			log(LogLevel.warning , "already started");
+			return ;
 		}
-		return true;
+		_flag = true;
+
+		super.start();
+
 	}
 
-	bool stop()
+
+	void run()
 	{
-		_brun = false;
-		return true;
+		while(_flag)
+			poll(_timeout);
+	}
+
+
+	void stop()
+	{
+		_flag = false;
+	}
+
+
+	void wait()
+	{
+		super.join();
 	}
 
 
@@ -269,10 +286,11 @@ version(eventMap)
 {	
 	private Event[int]  		_mapEvents;
 }
+	private	bool				_flag;
+	private int					_timeout;
 	private int 				_efd;
 	private epoll_event[256] 	_pollEvents;
 	private WheelTimer			_wheeltimer;
-	private	bool				_brun;
 }
 
 

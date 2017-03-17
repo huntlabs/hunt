@@ -56,7 +56,7 @@ final private class stWheel
 	}
 	~this()
 	{
-		delete _spokes;
+		_spokes.destroy();
 	}
 };
 
@@ -83,7 +83,7 @@ final class WheelTimer
 	~this()
 	{
 		for(int i = 0 ; i < WHEEL_NUM ; i++)
-			delete _st[i];
+			_st[i].destroy();
 	}
 
 	this()

@@ -8,6 +8,7 @@ import std.experimental.logger;
 import std.conv;
 import kiss.event.Event;
 import kiss.event.Poll;
+import kiss.event.GroupPoll;
 import core.stdc.errno;
 import core.stdc.string;
 import std.container:DList;
@@ -21,10 +22,9 @@ class AsyncTcpBase:Event , Timer
 {
 	//public function below
 
-	this(Poll poll)
+	this(Group poll)
 	{
-		_poll = poll;
-		_readbuffer = new byte[1024];
+		_poll = poll.work_next();
 	}
 
 	~this()
@@ -151,6 +151,12 @@ class AsyncTcpBase:Event , Timer
 
 	protected bool onRead()
 	{
+		if(_readbuffer is null)
+		{
+			log(LogLevel.info , "readBuff is not set");
+			_readbuffer = new byte[1024];
+		}
+
 		long ret = _socket.receive(_readbuffer);
 		if(ret > 0)
 		{

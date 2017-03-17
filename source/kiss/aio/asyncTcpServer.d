@@ -4,6 +4,7 @@ import kiss.event.Event;
 import kiss.event.Poll;
 import kiss.aio.Acceptor;
 import kiss.aio.AsyncTcpBase;
+import kiss.event.GroupPoll;
 
 import std.socket;
 import std.stdio;
@@ -12,13 +13,14 @@ import std.experimental.logger;
 class AsyncTcpServer(T ): Event
 {
 
-	this(Poll poll )
+	this(Group poll )
 	{
-		_poll = poll;
+		_poll = poll.accept_next();
+		_groupworks = poll;
 		_acceptor = new Acceptor();
 	}
 
-	bool open(string ipaddr, ushort port ,int back_log = 5 ,  bool breuse = true)
+	bool open(string ipaddr, ushort port ,int back_log = 5 ,  bool breuse = false)
 	{
 		if(!_acceptor.open(ipaddr , port , back_log , breuse))
 		{
@@ -49,8 +51,9 @@ class AsyncTcpServer(T ): Event
 
 	protected bool onRead()
 	{
-		T t = new T(_poll);
+		T t = new T(_groupworks);
 		Socket socket = _acceptor.accept();
+		log(LogLevel.info , "accept new client");
 		socket.blocking(false);
 		t.setSocket(socket);
 		return t.open();
@@ -62,9 +65,10 @@ class AsyncTcpServer(T ): Event
 		return true;
 	}
 
-	protected bool	   _isreadclose = false;
-	protected Poll	   _poll;
-	protected Acceptor _acceptor;
+	protected bool	   			_isreadclose = false;
+	protected Poll	   			_poll;
+	protected Group				_groupworks;
+	protected Acceptor 			_acceptor;
 }
 
 
@@ -73,17 +77,14 @@ unittest
 	import kiss.event.Epoll;
 	import kiss.aio.AsyncTcpBase;
 	import kiss.aio.AsyncTcpClient;
+	import kiss.event.GroupPoll;
 
 
-	Poll poll = new Epoll();
+	auto poll = new GroupPoll!();
 	auto server = new AsyncTcpServer!AsyncTcpBase(poll);
 	server.open("0.0.0.0" , 8123);
-
-	auto client1 = new AsyncTcpClient(poll);
-	client1.open("127.0.0.1" , 8124);
-
 	auto client0 = new AsyncTcpClient(poll);
 	client0.open("127.0.0.1" , 8123);
-
-	poll.run();
+	poll.start();
+	poll.wait();
 }

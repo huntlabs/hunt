@@ -12,10 +12,22 @@ interface Poll
 	bool modEvent(Event event , int fd , IOEventType type);
 
 	bool poll(int milltimeout);
-	bool run(int milltimeout = 10);
-	bool stop();
 
 	TimerFd addTimer(Timer timer , ulong interval , WheelType type);
 	void delTimer(TimerFd fd);
-	
+
+	// thread 
+	void start();
+	void stop();
+	void wait();
+}
+
+
+interface Group
+{
+	Poll work_next();
+	Poll accept_next();
+	void start();
+	void stop();	
+	void wait();	
 }
