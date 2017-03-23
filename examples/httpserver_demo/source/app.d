@@ -18,7 +18,7 @@ class MyHttpChannel : AsyncTcpBase
 
 	override protected bool onEstablished()
 	{
-		writeln("MyHttpChannel connected");
+		//writeln("MyHttpChannel connected");
 		return super.onEstablished();
 	}
 
@@ -48,7 +48,7 @@ class MyHttpChannel : AsyncTcpBase
 			intlength = to!int(strlength);
 		}
 		 
-		log(LogLevel.info , "length : " ~ to!string(intlength) ~ "header : " ~ to!string(header_pos));
+		//log(LogLevel.info , "length : " ~ to!string(intlength) ~ "header : " ~ to!string(header_pos));
 
 		if(header_pos + 4 + intlength == _index)
 		{
@@ -94,7 +94,7 @@ class MyHttpChannel : AsyncTcpBase
 		string strurl;
 		string strbody;
 
-		log(LogLevel.info , "index : " ~ to!string(_index));
+		//log(LogLevel.info , "index : " ~ to!string(_index));
 
 		if(!is_request_finish(finish , strurl , strbody))
 		{
@@ -118,13 +118,18 @@ class MyHttpChannel : AsyncTcpBase
 	}
 	
 	override protected  bool onClose() {
-		writeln("MyHttpChannel onClose");
+		//writeln("MyHttpChannel onClose");
 		return super.onClose();
 	}
 
 	private int _index ;
 	
 }
+
+
+
+
+
 
 int main()
 {

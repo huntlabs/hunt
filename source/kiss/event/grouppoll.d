@@ -52,13 +52,13 @@ class GroupPoll(T = Epoll) : Group
 
 	Poll work_next()
 	{
-		int r = uniform(0 , cast(int)_works_polls.length);
+		long r = ++_works_index % _works_polls.length;
 		return _works_polls[r];
 	}
 
 	Poll accept_next()
 	{
-		int r = uniform(0 , cast(int)_accept_polls.length);
+		long r = ++_accepts_index % _accept_polls.length;
 		return _accept_polls[r];
 	}
 
@@ -95,6 +95,8 @@ class GroupPoll(T = Epoll) : Group
 
 	private Poll[] 		_accept_polls;
 	private Poll[]		_works_polls;
+	private int			_works_index;
+	private	int			_accepts_index;
 
 }
 

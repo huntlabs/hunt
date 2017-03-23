@@ -29,7 +29,7 @@ class AsyncTcpBase:Event , Timer
 
 	~this()
 	{
-		log(LogLevel.info , "~this");
+
 	}
 
 	public bool doWrite(byte[] writebuf , Object ob , TcpWriteFinish finish )
@@ -77,6 +77,8 @@ class AsyncTcpBase:Event , Timer
 	public void close()
 	{
 		_isreadclose = true;
+		schedule_write();
+
 	}
 
 	public bool open()
@@ -107,7 +109,7 @@ class AsyncTcpBase:Event , Timer
 
 	protected bool onEstablished()
 	{
-		log(LogLevel.info , "on Open");
+//		log(LogLevel.info , "on Open");
 		//_keepalive = _poll.addTimer(this , _keepalivetime  , WheelType.WHEEL_PERIODIC);
 		_poll.addEvent(this ,_socket.handle ,  _curEventType = IOEventType.IO_EVENT_READ);
 		return true;
@@ -151,12 +153,6 @@ class AsyncTcpBase:Event , Timer
 
 	protected bool onRead()
 	{
-		if(_readbuffer is null)
-		{
-			log(LogLevel.info , "readBuff is not set");
-			_readbuffer = new byte[1024];
-		}
-
 		long ret = _socket.receive(_readbuffer);
 		if(ret > 0)
 		{
@@ -192,7 +188,7 @@ class AsyncTcpBase:Event , Timer
 
 	protected bool onClose()
 	{
-		log(LogLevel.info , "on close");
+//		log(LogLevel.info , "on close");
 //		if(_keepalive !is null)
 //		{	
 //			_poll.delTimer(_keepalive);
@@ -248,11 +244,6 @@ class AsyncTcpBase:Event , Timer
 
 	//static function's below
 
-	//static void setArgs(int keepalivetime = 60 * 1000)
-	//{
-	//	_keepalivetime = keepalivetime;
-	//	log(LogLevel.info , to!string(_keepalivetime));
-	//}
 
 
 	static package bool net_error()

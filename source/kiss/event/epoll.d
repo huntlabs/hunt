@@ -81,6 +81,7 @@ final class Epoll :Thread , Poll
 			int err = errno();
 			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 		}
+		_timeout = timeout;
 		_wheeltimer = new WheelTimer();
 		super(&run);
 	}
@@ -115,16 +116,36 @@ final class Epoll :Thread , Poll
 
 		ev.events = mask;
 
-		version(eventMap)
-		{
-			ev.data.fd = fd;
-		}
-		else
-		{
-			ev.data.ptr = cast(void *)event;
-		}
 
-		log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
+
+			version(eventMap)
+			{
+				if(op == EPOLL_CTL_ADD)
+				{
+					//assert(fd !in _mapEvents);
+				synchronized(this){
+					_mapEvents[fd]  = event;}
+				}
+				else if(op == EPOLL_CTL_DEL)
+				{
+					//assert(fd in _mapEvents);
+				synchronized(this){
+					_mapEvents.remove(fd);}
+				}
+				else
+				{
+					//assert(fd in _mapEvents);
+				}
+
+				ev.data.fd = fd;
+			}
+			else
+			{
+				ev.data.ptr = cast(void *)event;
+			}
+
+			//log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
+
 
 		if(epoll_ctl(_efd , op , fd , &ev) < 0)
 		{
@@ -132,40 +153,18 @@ final class Epoll :Thread , Poll
 			log(LogLevel.error , to!string(op) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 			return false;
 		}
-
+		
+		
 		return true;
 	}
 
 	bool addEvent(Event event , int fd ,  IOEventType type) 
 	{
-	
-		version(eventMap){
-		
-			if(event.getFd() in _mapEvents)
-			{	
-				log(LogLevel.error , to!string(event.getFd()) ~ " is in the events");
-				return false;
-			}
-
-			_mapEvents[event.getFd()]  = event;
-
-			}
-
 		return opEvent(event , fd ,  EPOLL_CTL_ADD , type);
 	}
 
 	bool delEvent(Event event , int fd , IOEventType type)
 	{
-		version(eventMap)
-		{	
-			if(event.getFd() !in _mapEvents)
-			{	
-				log(LogLevel.error , to!string(event.getFd()) ~ "is not in the events");
-				return false;
-			}
-
-			_mapEvents.remove(event.getFd());
-		}
 		return opEvent(event , fd , EPOLL_CTL_DEL , type);
 	}
 
@@ -215,7 +214,11 @@ final class Epoll :Thread , Poll
 		int result = epoll_wait(_efd , _pollEvents.ptr , _pollEvents.length , milltimeout);
 		if(result < 0)
 		{
+
 			int err = errno();
+			if(err == EINTR)
+				return true;
+
 			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 			return false;
 		}
@@ -224,14 +227,23 @@ final class Epoll :Thread , Poll
 			return true;
 		}
 
-		log(LogLevel.info , "result:" ~ to!string(result));
+		//log(LogLevel.info , "result:" ~ to!string(result));
 
 		for(int i = 0 ; i < result ; i++)
 		{
 		
 			version(eventMap)
-			{	int fd = _pollEvents[i].data.fd;
-				Event* event =  (fd in _mapEvents);
+			{	
+				int fd = _pollEvents[i].data.fd;
+
+
+				Event* event = null;
+
+				synchronized(this){
+
+					event = (fd in _mapEvents);
+				}
+
 				if(event == null)
 				{
 					log(LogLevel.warning , "fd:" ~ to!string(fd) ~ " maybe close by others");

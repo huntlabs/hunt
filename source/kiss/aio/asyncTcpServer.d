@@ -53,7 +53,6 @@ class AsyncTcpServer(T ): Event
 	{
 		T t = new T(_groupworks);
 		Socket socket = _acceptor.accept();
-		log(LogLevel.info , "accept new client");
 		socket.blocking(false);
 		t.setSocket(socket);
 		return t.open();
