@@ -77,6 +77,17 @@ unittest
 	import kiss.aio.AsyncTcpBase;
 	import kiss.aio.AsyncTcpClient;
 	import kiss.event.GroupPoll;
+	import kiss.util.log;
+
+
+
+	load_log_conf("test.conf");
+	log_debug("debug ~");
+	log_error("error ~");
+	log_critical("critical ~");
+	log_fatal("fatal ~");
+	log_info("info ~");
+	log_warning("warning ~");
 
 
 	auto poll = new GroupPoll!();

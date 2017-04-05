@@ -40,11 +40,11 @@ class MyHttpChannel : AsyncTcpBase
 		long pos = indexOf(str , strlength , 0 , No.caseSensitive);
 		if( pos != -1)
 		{
-			long left = indexOf(str , "\r\n" , pos);
+			long left = indexOf(str , "\r\n" , cast(size_t)pos);
 			if(pos == -1)
 				return false;
 
-			strlength = cast(string)_readbuffer[pos + strlength.length .. left];
+			strlength = cast(string)_readbuffer[cast(size_t)(pos + strlength.length) .. cast(size_t)left];
 			intlength = to!int(strlength);
 		}
 		 
@@ -64,12 +64,12 @@ class MyHttpChannel : AsyncTcpBase
 		if(pos_url == -1)
 			return false;
 
-		auto strs = split(cast(string)_readbuffer[0 .. pos_url]);
+		auto strs = split(cast(string)_readbuffer[0 .. cast(size_t)pos_url]);
 		if(strs.length < 3)
 			return false;
 
 		url = strs[1];
-		strbody = cast(string)_readbuffer[pos + 4 .. _index];
+		strbody = cast(string)_readbuffer[cast(size_t)(pos + 4) .. cast(size_t)_index];
 
 		return true;
 	}

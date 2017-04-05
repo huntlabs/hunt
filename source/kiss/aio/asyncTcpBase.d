@@ -14,6 +14,8 @@ import core.stdc.string;
 import std.container:DList;
 import core.stdc.time;
 
+import kiss.util.log;
+
 
 alias TcpWriteFinish = void delegate(Object ob);
 
@@ -34,43 +36,46 @@ class AsyncTcpBase:Event , Timer
 
 	public bool doWrite(byte[] writebuf , Object ob , TcpWriteFinish finish )
 	{
-		if(_writebuffer.empty())
-		{
-			long ret = _socket.send(writebuf);
-			if(ret == writebuf.length)
+		synchronized(this){
+
+			if(_writebuffer.empty())
 			{
-				if(finish !is null)
+				long ret = _socket.send(writebuf);
+				if(ret == writebuf.length)
 				{
-					finish( ob);
+					if(finish !is null)
+					{
+						finish( ob);
+					}
 				}
-			}
-			else if(ret > 0)
-			{
-				QueueBuffer buffer = {writebuf , ob , cast(int)ret , finish};
-				_writebuffer.insertBack(buffer);
-				schedule_write();
+				else if(ret > 0)
+				{
+					QueueBuffer buffer = {writebuf , ob , cast(int)ret , finish};
+					_writebuffer.insertBack(buffer);
+					schedule_write();
+				}
+				else
+				{
+					if(net_error())
+					{
+						log(LogLevel.error , "write net error");
+						close();
+						return false;
+					}
+					//blocking rarely happened.
+					log(LogLevel.warning , "blocking rarely happened");
+					QueueBuffer buffer = {writebuf , ob , 0 , finish};
+					_writebuffer.insertBack(buffer);
+					schedule_write();
+				}
+				
 			}
 			else
 			{
-				if(net_error())
-				{
-					log(LogLevel.error , "write net error");
-					close();
-					return false;
-				}
-				//blocking rarely happened.
-				log(LogLevel.warning , "blocking rarely happened");
-				QueueBuffer buffer = {writebuf , ob , 0 , finish};
+				QueueBuffer buffer = {writebuf , ob , 0};
 				_writebuffer.insertBack(buffer);
-				schedule_write();
-			}
-			
+			}	
 		}
-		else
-		{
-			QueueBuffer buffer = {writebuf , ob , 0};
-			_writebuffer.insertBack(buffer);
-		}	
 		return true;
 	}
 
@@ -78,7 +83,6 @@ class AsyncTcpBase:Event , Timer
 	{
 		_isreadclose = true;
 		schedule_write();
-
 	}
 
 	public bool open()
@@ -109,42 +113,46 @@ class AsyncTcpBase:Event , Timer
 
 	protected bool onEstablished()
 	{
-//		log(LogLevel.info , "on Open");
+
 		//_keepalive = _poll.addTimer(this , _keepalivetime  , WheelType.WHEEL_PERIODIC);
 		_poll.addEvent(this ,_socket.handle ,  _curEventType = IOEventType.IO_EVENT_READ);
+
 		return true;
 	}
 
 	protected bool onWrite()
 	{
-		while(!_writebuffer.empty())
-		{
-			auto data = _writebuffer.front();
-			long ret = _socket.send(data.buffer[data.index .. data.buffer.length]);
-			if(ret == data.buffer.length - data.index)
-			{
-				if(data.finish !is null)
-				{
-					data.finish(data.ob);
-				}
-				_writebuffer.removeFront();
-			}
-			else if(ret > 0)
-			{
-				data.index += ret;
-				return true;
-			}
-			else if ( ret <= 0)
-			{
-				if(net_error())
-				{
-					log(LogLevel.error , "write net error");
-					close();
-					return false;
-				}
-				return true;
-			}
+		synchronized(this){
 
+			while(!_writebuffer.empty())
+			{
+				auto data = _writebuffer.front();
+				long ret = _socket.send(data.buffer[data.index .. data.buffer.length]);
+				if(ret == data.buffer.length - data.index)
+				{
+					if(data.finish !is null)
+					{
+						data.finish(data.ob);
+					}
+					_writebuffer.removeFront();
+				}
+				else if(ret > 0)
+				{
+					data.index += ret;
+					return true;
+				}
+				else if ( ret <= 0)
+				{
+					if(net_error())
+					{
+						log(LogLevel.error , "write net error");
+						close();
+						return false;
+					}
+					return true;
+				}
+
+			}
 		}
 		schedule_cancel_write();
 		return true;
@@ -160,7 +168,7 @@ class AsyncTcpBase:Event , Timer
 		}
 		if(ret == 0) 
 		{	
-			log(LogLevel.info , "peer close socket");
+			//log(LogLevel.info , "peer close socket");
 			return false;
 		}
 		else if(ret == -1 && net_error())
@@ -194,6 +202,7 @@ class AsyncTcpBase:Event , Timer
 //			_poll.delTimer(_keepalive);
 //			_keepalive = null;
 //		}
+
 		_poll.delEvent(this , _socket.handle , _curEventType = IOEventType.IO_EVENT_NONE);
 		_socket.close();
 		return true;

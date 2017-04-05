@@ -2,7 +2,7 @@
 import std.socket;
 import std.string;
 import std.conv;
-
+import core.sys.posix.sys.socket;
 import std.stdio;
 
 import std.experimental.logger;
@@ -27,7 +27,10 @@ final package class Acceptor
 		_socket = new Socket(arr[0].family , arr[0].type , arr[0].protocol);
 		uint use = 1;
 		if(breuse)
+		{	
 			_socket.setOption(SocketOptionLevel.SOCKET , SocketOption.REUSEADDR , use);
+			_socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) 15, use);
+		}
 		_socket.bind(arr[0].address);
 		_socket.blocking(false);
 		_socket.listen(back_log);

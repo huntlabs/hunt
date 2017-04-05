@@ -15,7 +15,7 @@ import kiss.time.timer;
 import kiss.time.itimer;
 
 
-//version(linux):
+version(linux):
 extern(C){
 	alias int c_int;
 	alias uint uint32_t;

@@ -6,5 +6,8 @@
         "putao.com dlang team."
     ],
     "license": "Apache-2.0",
-	"versions":["eventMap" ]
+	"dependencies" :{
+		"onyx-log":{ "version" :"~>1.2.1-rc3" }
+	},
+	"versions":["eventMap" , "onyxLog"]
 }
