@@ -12,7 +12,6 @@ import kiss.util.log;
 import std.conv;
 import std.stdio;
 
-import kiss.util.log;
 import object;
 
 
