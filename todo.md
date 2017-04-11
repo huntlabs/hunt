@@ -1,3 +1,2 @@
-1 add mac & win support.<br/>
-2 grouppoll optimize.<br/>
-3 dowrite multithread.<br/>
+1 grouppoll optimize -> listening fd in all thread.<br/>
+2 doWrite optimize -> self or other thread.<br/>
