@@ -33,7 +33,9 @@ class EchoClient : AsyncTcpClient
 	{
 		if(fd == _echo_time)
 		{
-			return doWrite(cast(byte[])"hello world" , null , null);
+			if( doWrite(cast(byte[])"hello world" , null , null) < 0)
+				return false;
+			return true;
 		}
 		else
 		{

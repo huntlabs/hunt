@@ -8,7 +8,7 @@ import std.stdio;
 
 class EchoBase : AsyncTcpBase
 {
-	this(Group poll)
+	this(Poll poll)
 	{
 		readBuff = new byte[1024];
 		super(poll);
@@ -29,9 +29,10 @@ int main()
 	import kiss.aio.AsyncTcpBase;
 	import kiss.aio.AsyncTcpClient;
 	import kiss.aio.AsyncTcpServer;
+	import kiss.aio.AsyncGroupTcpServer;
 
 	auto poll = new GroupPoll!();
-	auto server = new AsyncTcpServer!EchoBase(poll);
+	auto server = new AsyncGroupTcpServer!EchoBase(poll);
 	server.open("0.0.0.0" , 82);
 
 	poll.start();
