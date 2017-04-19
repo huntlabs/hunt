@@ -25,8 +25,7 @@ interface Poll
 
 interface Group
 {
-	Poll work_next();
-	Poll accept_next();
+	Poll[] polls();
 	void start();
 	void stop();	
 	void wait();	

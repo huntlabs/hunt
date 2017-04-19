@@ -59,28 +59,25 @@ final class select : Thread , Poll
 		socket_t s_fd = cast(socket_t)fd;
 	
 		Data data = new Data(s_fd , event , type);
-		synchronized(this)
-		{
-			if(_mapevents.length >= _maxfd )
-			{
-				log_error("too much fd , len :" ~ to!string(_mapevents.length) ~ "max:" ~ to!string(_maxfd));
-					return false;
-			}
 
-			assert(s_fd !in _mapevents);
-			_mapevents[s_fd]  = data;
+		if(_mapevents.length >= _maxfd )
+		{
+			log_error("too much fd , len :" ~ to!string(_mapevents.length) ~ "max:" ~ to!string(_maxfd));
+				return false;
 		}
+
+		assert(s_fd !in _mapevents);
+		_mapevents[s_fd]  = data;
 		return true;
 	}
 
 	bool delEvent(Event event , int fd , IOEventType type)
 	{
 		socket_t s_fd = cast(socket_t)fd;
-		synchronized(this)
-		{
-			assert(s_fd in _mapevents);
-			_mapevents.remove(s_fd);
-		}
+	
+		assert(s_fd in _mapevents);
+		_mapevents.remove(s_fd);
+
 		return true;
 	}
 
@@ -88,11 +85,9 @@ final class select : Thread , Poll
 	{
 		socket_t s_fd = cast(socket_t)fd;
 	
-		synchronized(this)
-		{
-			assert(s_fd in _mapevents);
-			_mapevents[s_fd].type = type;
-		}
+		assert(s_fd in _mapevents);
+		_mapevents[s_fd].type = type;
+
 		return true;
 	}
 
@@ -109,11 +104,11 @@ final class select : Thread , Poll
 	
 		Data[] datas;
 
-		synchronized(this){
-			if(_mapevents.length == 0)
+	
+		if(_mapevents.length == 0)
 				return true;
-			datas = _mapevents.values();
-		}
+		datas = _mapevents.values();
+
 		foreach(v ; datas )
 		{
 			if(v.type & IOEventType.IO_EVENT_READ)

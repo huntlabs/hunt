@@ -5,14 +5,13 @@ import std.conv;
 import std.stdio;
 import std.string;
 import std.conv;
-import std.experimental.logger;
 
 class MyHttpChannel : AsyncTcpBase
 {
-	this(Group poll)
+	this(Poll poll)
 	{
 		//request must small than 2048.
-		readBuff = new byte[2048];
+		readBuff = new byte[1024];
 		super(poll);
 	}
 
@@ -78,11 +77,15 @@ class MyHttpChannel : AsyncTcpBase
 	bool process_request(string url , string strbody)
 	{
 		string http_content = "HTTP/1.0 200 OK\r\nServer: kiss\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\nhelloworld";
-		return doWrite(cast(byte[])http_content , null , 
+		int ret = doWrite(cast(byte[])http_content , null , 
 						delegate void(Object o){
 						close();
-						});
-			
+			});
+
+		if(ret == 1)
+			return false;
+
+		return true;
 	}
 
 
@@ -98,7 +101,7 @@ class MyHttpChannel : AsyncTcpBase
 
 		if(!is_request_finish(finish , strurl , strbody))
 		{
-			log(LogLevel.info  , "parse http request error");
+			//log(LogLevel.info  , "parse http request error");
 			return false;
 		}
 
@@ -109,7 +112,7 @@ class MyHttpChannel : AsyncTcpBase
 		}
 		else if(_index == _readbuffer.length)
 		{
-			log(LogLevel.info , "not a http request or buffer is full");
+			//log(LogLevel.info , "not a http request or buffer is full");
 			return false;
 		}
 
@@ -135,13 +138,11 @@ int main()
 {
 
 	import kiss.event.GroupPoll;
-	import kiss.aio.AsyncTcpBase;
-	import kiss.aio.AsyncTcpClient;
+	import kiss.aio.AsyncGroupTcpServer;
 	import kiss.aio.AsyncTcpServer;
 
-
 	auto poll = new GroupPoll!();
-	auto server = new AsyncTcpServer!MyHttpChannel(poll);
+	auto server = new AsyncGroupTcpServer!MyHttpChannel(poll);
 	server.open("0.0.0.0" , 81);
 
 

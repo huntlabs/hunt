@@ -20,13 +20,14 @@ import kiss.util.log;
 alias TcpWriteFinish = void delegate(Object ob);
 
 
-class AsyncTcpBase:Event , Timer
+class AsyncTcpBase:Event 
 {
 	//public function below
 
-	this(Group poll)
+	this(Poll poll)
 	{
-		_poll = poll.work_next();
+		_poll = poll;
+
 	}
 
 	~this()
@@ -34,7 +35,11 @@ class AsyncTcpBase:Event , Timer
 
 	}
 
-	public bool doWrite(byte[] writebuf , Object ob , TcpWriteFinish finish )
+	// 0  		write_to_buff
+	// 1  		suc
+	// -1		failed
+
+	public int doWrite(byte[] writebuf , Object ob , TcpWriteFinish finish )
 	{
 		synchronized(this){
 
@@ -43,10 +48,7 @@ class AsyncTcpBase:Event , Timer
 				long ret = _socket.send(writebuf);
 				if(ret == writebuf.length)
 				{
-					if(finish !is null)
-					{
-						finish( ob);
-					}
+					return 1;
 				}
 				else if(ret > 0)
 				{
@@ -60,7 +62,7 @@ class AsyncTcpBase:Event , Timer
 					{
 						log(LogLevel.error , "write net error");
 						close();
-						return false;
+						return -1;
 					}
 					//blocking rarely happened.
 					log(LogLevel.warning , "blocking rarely happened");
@@ -76,7 +78,7 @@ class AsyncTcpBase:Event , Timer
 				_writebuffer.insertBack(buffer);
 			}	
 		}
-		return true;
+		return 0;
 	}
 
 	public void close()
@@ -196,13 +198,6 @@ class AsyncTcpBase:Event , Timer
 
 	protected bool onClose()
 	{
-//		log(LogLevel.info , "on close");
-//		if(_keepalive !is null)
-//		{	
-//			_poll.delTimer(_keepalive);
-//			_keepalive = null;
-//		}
-
 		_poll.delEvent(this , _socket.handle , _curEventType = IOEventType.IO_EVENT_NONE);
 		_socket.close();
 		return true;

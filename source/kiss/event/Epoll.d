@@ -122,15 +122,13 @@ final class Epoll :Thread , Poll
 			{
 				if(op == EPOLL_CTL_ADD)
 				{
-					//assert(fd !in _mapEvents);
-				synchronized(this){
-					_mapEvents[fd]  = event;}
+					//assert(fd !in _mapEvents);			
+					_mapEvents[fd]  = event;
 				}
 				else if(op == EPOLL_CTL_DEL)
 				{
-					//assert(fd in _mapEvents);
-				synchronized(this){
-					_mapEvents.remove(fd);}
+					//assert(fd in _mapEvents);			
+					_mapEvents.remove(fd);
 				}
 				else
 				{
@@ -239,10 +237,9 @@ final class Epoll :Thread , Poll
 
 				Event* event = null;
 
-				synchronized(this){
 
-					event = (fd in _mapEvents);
-				}
+				event = (fd in _mapEvents);
+
 
 				if(event == null)
 				{

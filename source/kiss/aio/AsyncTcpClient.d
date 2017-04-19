@@ -10,13 +10,21 @@ import kiss.event.GroupPoll;
 import kiss.event.Event;
 import kiss.event.Poll;
 import std.conv;
+import std.random;
 
-class AsyncTcpClient:AsyncTcpBase
+class AsyncTcpClient:AsyncTcpBase,Timer
 {
 
 	//public function below
 
 	this(Group poll , int reconnecttime = 5 * 1000, int client_keepalivetime = 60 * 1000)
+	{
+		int l = poll.polls().length;
+		int r = uniform(0 , l);
+		this(poll.polls[r] , reconnecttime , client_keepalivetime);
+	}
+
+	this(Poll poll , int reconnecttime = 5 * 1000, int client_keepalivetime = 60 * 1000)
 	{
 		super(poll);
 		_reconnecttime = reconnecttime;
