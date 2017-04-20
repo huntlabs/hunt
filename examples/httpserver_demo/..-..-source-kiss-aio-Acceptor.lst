@@ -1,0 +1,65 @@
+       |﻿module kiss.aio.Acceptor;
+       |import std.socket;
+       |import std.string;
+       |import std.conv;
+       |import core.sys.posix.sys.socket;
+       |import std.stdio;
+       |
+       |import std.experimental.logger;
+       |
+       |final package class Acceptor
+       |{
+0000000|        this()
+       |        {
+       |                // Constructor code
+       |        }
+       |
+       |        bool open(string ipaddr, ushort port ,int back_log ,  bool breuse)
+       |        {
+       |        
+0000000|                string strPort = to!string(port);
+0000000|                AddressInfo[] arr = getAddressInfo(ipaddr , strPort , AddressInfoFlags.PASSIVE);
+0000000|                if(arr.length == 0)
+       |                {
+0000000|                        log(LogLevel.error , "getAddressInfo" ~ ipaddr ~ ":" ~ strPort);
+0000000|                        return false;
+       |                }
+0000000|                _socket = new Socket(arr[0].family , arr[0].type , arr[0].protocol);
+0000000|                uint use = 1;
+0000000|                if(breuse)
+       |                {       
+0000000|                        _socket.setOption(SocketOptionLevel.SOCKET , SocketOption.REUSEADDR , use);
+       |                        version(linux)
+       |                        {
+       |                                //SO_REUSEPORT
+       |                                _socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) 15, use);
+       |                        }
+       |                }
+0000000|                _socket.bind(arr[0].address);
+0000000|                _socket.blocking(false);
+0000000|                _socket.listen(back_log);
+       |
+0000000|                return true;
+       |        }
+       |
+       |        Socket accept()
+       |        {
+0000000|                return _socket.accept();
+       |        }
+       |
+       |        void close()
+       |        {
+0000000|                _socket.close();
+       |        }
+       |
+       |        @property
+       |        int fd() 
+       |        {
+0000000|                return _socket.handle;
+       |        }
+       |
+       |
+       |        private Socket  _socket;
+       |}
+       |
+..\..\source\kiss\aio\Acceptor.d is 0% covered
