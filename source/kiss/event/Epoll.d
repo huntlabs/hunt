@@ -7,8 +7,7 @@ import core.stdc.string;
 import std.stdio;
 import std.string;
 import core.thread;
-import core.stdc.stdlib;
-import core.memory:GC;
+
 
 import kiss.event.Event;
 import kiss.event.Poll;
@@ -249,17 +248,14 @@ final class Epoll :Thread , Poll
 				}
 			}
 			else{
+
 				Event event = cast(Event)_pollEvents[i].data.ptr;
 			}
 
 			if(event.isReadyClose())
 			{	
 				if(event.onClose())
-				{
-					event.release();
-				}
-
-
+					delete event;
 				continue;
 			}
 
@@ -268,9 +264,7 @@ final class Epoll :Thread , Poll
 			if(mask &( EPOLL_EVENTS.EPOLLERR | EPOLL_EVENTS.EPOLLHUP))
 			{
 				if(event.onClose())
-				{
-					event.release();
-				}
+					delete event;
 				continue;
 			}
 
@@ -279,9 +273,7 @@ final class Epoll :Thread , Poll
 				if(!event.onRead())
 				{
 					if(event.onClose())
-					{
-						event.release();
-					}
+						delete event;
 					continue;
 				}
 			}
@@ -291,10 +283,7 @@ final class Epoll :Thread , Poll
 				if(!event.onWrite())
 				{
 					if(event.onClose())
-					{
-						event.release();
-					}
-
+						delete event;
 					continue;
 				}
 			}

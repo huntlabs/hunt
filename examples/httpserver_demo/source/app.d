@@ -93,7 +93,7 @@ class MyHttpChannel : AsyncTcpBase
 	{
 
 		_index += len;
-		bool finish = true;
+		bool finish ;
 		string strurl;
 		string strbody;
 
@@ -103,7 +103,7 @@ class MyHttpChannel : AsyncTcpBase
 		{
 			//log(LogLevel.info  , "parse http request error");
 			return false;
-		} 
+		}
 
 		if(finish)
 		{
@@ -144,6 +144,8 @@ int main()
 	auto poll = new GroupPoll!();
 	auto server = new AsyncGroupTcpServer!MyHttpChannel(poll);
 	server.open("0.0.0.0" , 81);
+
+
 
 
 	poll.start();

@@ -8,8 +8,6 @@ import kiss.event.GroupPoll;
 
 import std.socket;
 import std.stdio;
-import core.memory;
-
 
 final class AsyncTcpServer(T ): Event
 {
@@ -18,26 +16,6 @@ final class AsyncTcpServer(T ): Event
 	{
 		_poll = poll;
 		_acceptor = new Acceptor();
-	}
-
-	public void retain()
-	{
-		version(EPOOL_NOGC)
-		{
-			GC.addRoot(cast(void*)this);
-			GC.setAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
-		}
-	}
-	
-	public void release()
-	{
-		version(EPOOL_NOGC)
-		{
-			GC.removeRoot(cast(void*)this);
-			GC.clrAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
-		}else{
-			delete this;
-		}
 	}
 
 	bool open(string ipaddr, ushort port ,int back_log = 1024 ,  bool breuse = true)
@@ -76,9 +54,6 @@ final class AsyncTcpServer(T ): Event
 		Socket socket = _acceptor.accept();
 		socket.blocking(false);
 		t.setSocket(socket);
-
-		t.retain();
-	
 		return t.open();
 	}
 
