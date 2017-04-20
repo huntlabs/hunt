@@ -1,0 +1,238 @@
+       |﻿module kiss.time.itimer;
+       |
+       |import kiss.time.timer;
+       |import std.experimental.logger;
+       |
+       |import std.exception;
+       |
+       |import std.stdio;
+       |import core.time;
+       |import std.conv;
+       |
+       |
+       |const int               WHEEL_BITS1             =               8;
+       |const int               WHEEL_BITS2             =               6;
+       |const int               WHEEL_SIZE1             =               (1 << WHEEL_BITS1);
+       |const int               WHEEL_SIZE2             =               (1 << WHEEL_BITS2);
+       |const int               WHEEL_MASK1             =               (WHEEL_SIZE1 - 1);
+       |const int               WHEEL_MASK2             =               (WHEEL_SIZE2 - 1);
+       |const int               WHEEL_NUM               =               5;
+       |
+       |alias uint32_t = uint;
+       |alias uint64_t = ulong;
+       |alias int64_t = long;
+       |
+       |
+       |final class stNodeLink
+       |{
+       |        stNodeLink                      _prev;
+       |        stNodeLink                      _next;  
+       |        WheelType                       _type;
+       |        uint64_t                        _interval;
+       |        uint64_t                        _tick;                  
+       |        Timer                           _tm;
+   4096|        this( Timer tm, uint64_t interval ,WheelType type) 
+       |        { 
+   4096|                _tm = tm;
+   4096|                _interval = interval;
+   4096|                _type = type;
+       |
+   4096|                _prev = _next = this;
+       |        }
+       |
+       |};
+       |
+       |
+       |final private class stWheel
+       |{
+       |        stNodeLink[] _spokes;
+       |        uint32_t _spokeindex = 0;
+       |
+       |
+     40|        this(uint32_t n)
+       |        {
+   4136|                while(n--)
+   4096|                        _spokes ~= new stNodeLink(null , 0 , WheelType.WHEEL_ONESHOT);
+       |        }
+       |        ~this()
+       |        {
+     40|                _spokes.destroy();
+       |        }
+       |};
+       |
+       |
+       |
+       |
+       |
+       |final class WheelTimer
+       |{
+       |        stWheel[WHEEL_NUM]              _st;
+       |        static immutable  uint64_t      _tick_per_mill;
+       |        uint64_t                                _checktime;
+       |
+       |        static this()
+       |        {
+      1|                _tick_per_mill= MonoTime.currTime.ticksPerSecond() / 1000;      
+       |        }
+       |
+       |        static uint64_t now()
+       |        {
+      8|                return MonoTime.currTime.ticks() / _tick_per_mill;
+       |        }
+       |
+       |        ~this()
+       |        {
+     96|                for(int i = 0 ; i < WHEEL_NUM ; i++)
+     40|                        _st[i].destroy();
+       |        }
+       |
+      8|        this()
+       |        {
+      8|                _st[0] = new stWheel(WHEEL_SIZE1);
+      8|                _st[1] = new stWheel(WHEEL_SIZE2);
+      8|                _st[2] = new stWheel(WHEEL_SIZE2);
+      8|                _st[3] = new stWheel(WHEEL_SIZE2);
+      8|                _st[4] = new stWheel(WHEEL_SIZE2);
+       |
+      8|                _checktime = now();
+       |        }
+       |
+       |
+       |
+       |        void del(stNodeLink st)
+       |        {
+0000000|                st._prev._next = st._next;
+0000000|                st._next._prev = st._prev;
+0000000|                delete st;
+       |        }
+       |
+       |
+       |
+       |
+       |
+       |        void add(stNodeLink st , bool isCasade = false)
+       |        {
+0000000|                stNodeLink spoke;
+0000000|                uint64_t now = now();
+0000000|                int64_t interval = 0;
+0000000|                if(isCasade == false)
+       |                {       
+0000000|                        st._tick = now + st._interval;
+0000000|                        interval = st._interval;
+       |                }
+       |                else
+       |                {
+0000000|                        interval = st._tick - now;
+       |                }
+       |
+0000000|                uint64_t threshold1 = WHEEL_SIZE1;
+0000000|                uint64_t threshold2 = 1 << (WHEEL_BITS1 + WHEEL_BITS2);
+0000000|                uint64_t threshold3 = 1 << (WHEEL_BITS1 + 2 * WHEEL_BITS2);
+0000000|                uint64_t threshold4 = 1 << (WHEEL_BITS1 + 3 * WHEEL_BITS2);
+0000000|                uint32_t index;
+       |        
+0000000|                if (interval < threshold1) {
+0000000|                        if(interval < 0)
+0000000|                                interval = 0;
+0000000|                        index = (interval + _st[0]._spokeindex) & WHEEL_MASK1;
+0000000|                        spoke = _st[0]._spokes[index];
+       |
+0000000|                } else if (interval < threshold2) {
+0000000|                        index = ((interval - threshold1 + _st[1]._spokeindex * threshold1) >> WHEEL_BITS1) & WHEEL_MASK2;
+0000000|                        spoke = _st[1]._spokes [ index];
+       |
+0000000|                } else if (interval < threshold3) {
+0000000|                        index = ((interval - threshold2 + _st[2]._spokeindex * threshold2) >> (WHEEL_BITS1 + WHEEL_BITS2)) & WHEEL_MASK2;
+0000000|                        spoke = _st[2]._spokes [ index];
+       |
+0000000|                } else if (interval < threshold4) {
+0000000|                        index = ((interval - threshold3 + _st[3]._spokeindex * threshold3) >> (WHEEL_BITS1 + 2 * WHEEL_BITS2)) & WHEEL_MASK2;
+0000000|                        spoke = _st[3]._spokes [ index];
+       |
+       |                } else {
+0000000|                        index = ((interval - threshold4 + _st[4]._spokeindex * threshold4) >> (WHEEL_BITS1 + 3 * WHEEL_BITS2)) & WHEEL_MASK2;
+0000000|                        spoke = _st[4]._spokes [ index];
+       |                
+       |                }
+       |
+0000000|                st._prev = spoke._prev;
+0000000|                spoke._prev._next = st;
+0000000|                st._next = spoke;
+0000000|                spoke._prev = st;       
+       |
+       |        }
+       |        void poll()
+       |        {
+0000000|                uint64_t now = now();
+0000000|                int64_t loopnum = now - _checktime;
+0000000|                stWheel wheel =  _st[0];
+0000000|                for(uint32_t i = 0 ; i < loopnum ; ++i)
+       |                {
+0000000|                        stNodeLink spoke = wheel._spokes [wheel._spokeindex];
+0000000|                        stNodeLink link = spoke._next;
+0000000|                        stNodeLink tmp;
+       |                        //clear all
+0000000|                        spoke._next = spoke._prev = spoke;
+0000000|                        while(link != spoke){
+0000000|                                tmp = link._next;
+0000000|                                link._next = link._prev = link;
+       |                                        
+0000000|                                if(link._tm.onTimer(link ,_checktime) && 
+0000000|                                        link._type == WheelType.WHEEL_PERIODIC)
+       |                                {
+0000000|                                        add(link);
+       |                                }
+0000000|                                link = tmp;
+       |                        }
+0000000|                        if( ++wheel._spokeindex >= wheel._spokes.length)
+       |                        {
+0000000|                                wheel._spokeindex = 0;
+0000000|                                Cascade(1);
+       |                        }
+0000000|                        _checktime++;
+       |                }
+       |        }
+       |
+       |
+       |
+       |        uint32_t Cascade(uint32_t wheelindex)
+       |        {
+0000000|                if (wheelindex < 1 || wheelindex >= WHEEL_NUM) {
+0000000|                        return 0;
+       |                }
+0000000|                stWheel wheel =  _st[wheelindex];
+0000000|                int casnum = 0;
+       |
+0000000|                stNodeLink spoke = wheel._spokes[wheel._spokeindex++];
+0000000|                stNodeLink link = spoke._next;
+0000000|                stNodeLink tmp;
+       |                //clear all
+0000000|                spoke._next = spoke._prev = spoke;
+0000000|                while (link != spoke) {
+0000000|                        tmp = link._next;
+0000000|                        link._next = link._prev = link;
+0000000|                        if (link._tick <= _checktime) {
+0000000|                                if(link._tm.onTimer(link , _checktime) && 
+0000000|                                        link._type == WheelType.WHEEL_PERIODIC)
+       |                                {
+0000000|                                        log(LogLevel.info , "interval:" ~ to!string(link._interval));
+0000000|                                        add(link);
+       |                                }
+       |                        } 
+       |                        else {
+0000000|                                add(link , true);
+0000000|                                ++casnum;
+       |                        }
+0000000|                        link = tmp;
+       |                }
+       |                
+0000000|                if (wheel._spokeindex >= wheel._spokes.length) {
+0000000|                        wheel._spokeindex = 0;
+0000000|                        casnum += Cascade(++wheelindex);
+       |                }
+0000000|                return casnum;
+       |        }
+       |}
+       |
+       |
+..\..\source\kiss\time\itimer.d is 20% covered

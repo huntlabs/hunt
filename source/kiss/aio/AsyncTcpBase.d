@@ -15,6 +15,7 @@ import std.container:DList;
 import core.stdc.time;
 
 import kiss.util.log;
+import core.memory;
 
 
 alias TcpWriteFinish = void delegate(Object ob);
@@ -38,6 +39,29 @@ class AsyncTcpBase:Event
 	// 0  		write_to_buff
 	// 1  		suc
 	// -1		failed
+
+
+	public void retain()
+	{
+		version(EPOOL_NOGC)
+		{
+			GC.addRoot(cast(void*)this);
+			GC.setAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
+		}
+
+	}
+
+	public void release()
+	{
+		version(EPOOL_NOGC)
+		{
+			GC.removeRoot(cast(void*)this);
+			GC.clrAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
+		}else{
+			delete this;
+		}
+	}
+
 
 	public int doWrite(byte[] writebuf , Object ob , TcpWriteFinish finish )
 	{
@@ -200,6 +224,7 @@ class AsyncTcpBase:Event
 	{
 		_poll.delEvent(this , _socket.handle , _curEventType = IOEventType.IO_EVENT_NONE);
 		_socket.close();
+
 		return true;
 	}
 
