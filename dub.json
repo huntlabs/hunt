@@ -9,5 +9,5 @@
 	"dependencies" :{
 		"onyx-log":{ "version" :"~>1.2.1-rc3" }
 	},
-	"versions":["eventMap" , "onyxLog"]
+	"versions":["eventMap" , "onyxLog", "EPOOL_NOGC"]
 }

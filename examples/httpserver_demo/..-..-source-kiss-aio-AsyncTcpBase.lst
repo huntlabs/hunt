@@ -1,0 +1,279 @@
+       |﻿module kiss.aio.AsyncTcpBase;
+       |
+       |import kiss.time.timer;
+       |
+       |import std.string;
+       |import std.socket;
+       |import std.experimental.logger;
+       |import std.conv;
+       |import kiss.event.Event;
+       |import kiss.event.Poll;
+       |import kiss.event.GroupPoll;
+       |import core.stdc.errno;
+       |import core.stdc.string;
+       |import std.container:DList;
+       |import core.stdc.time;
+       |
+       |import kiss.util.log;
+       |
+       |
+       |alias TcpWriteFinish = void delegate(Object ob);
+       |
+       |
+       |class AsyncTcpBase:Event 
+       |{
+       |        //public function below
+       |
+0000000|        this(Poll poll)
+       |        {
+0000000|                _poll = poll;
+       |
+       |        }
+       |
+       |        ~this()
+       |        {
+       |
+       |        }
+       |
+       |        // 0            write_to_buff
+       |        // 1            suc
+       |        // -1           failed
+       |
+       |        public int doWrite(byte[] writebuf , Object ob , TcpWriteFinish finish )
+       |        {
+0000000|                synchronized(this){
+       |
+0000000|                        if(_writebuffer.empty())
+       |                        {
+0000000|                                long ret = _socket.send(writebuf);
+0000000|                                if(ret == writebuf.length)
+       |                                {
+0000000|                                        return 1;
+       |                                }
+0000000|                                else if(ret > 0)
+       |                                {
+0000000|                                        QueueBuffer buffer = {writebuf , ob , cast(int)ret , finish};
+0000000|                                        _writebuffer.insertBack(buffer);
+0000000|                                        schedule_write();
+       |                                }
+       |                                else
+       |                                {
+0000000|                                        if(net_error())
+       |                                        {
+0000000|                                                log(LogLevel.error , "write net error");
+0000000|                                                close();
+0000000|                                                return -1;
+       |                                        }
+       |                                        //blocking rarely happened.
+0000000|                                        log(LogLevel.warning , "blocking rarely happened");
+0000000|                                        QueueBuffer buffer = {writebuf , ob , 0 , finish};
+0000000|                                        _writebuffer.insertBack(buffer);
+0000000|                                        schedule_write();
+       |                                }
+       |                                
+       |                        }
+       |                        else
+       |                        {
+0000000|                                QueueBuffer buffer = {writebuf , ob , 0};
+0000000|                                _writebuffer.insertBack(buffer);
+       |                        }       
+       |                }
+0000000|                return 0;
+       |        }
+       |
+       |        public void close()
+       |        {
+0000000|                _isreadclose = true;
+0000000|                schedule_write();
+       |        }
+       |
+       |        public bool open()
+       |        {
+0000000|                _accepttime = cast(int)time(null);
+0000000|                _remoteipaddr = _socket.remoteAddress.toAddrString();
+0000000|                return onEstablished();
+       |        }
+       |
+       |
+       |        //protected function below
+       |
+       |        protected int getFd()
+       |        {
+0000000|                return _socket.handle;
+       |        }
+       |        
+       |        protected bool isReadyClose()
+       |        {
+0000000|                return _isreadclose;
+       |        }
+       |
+       |        protected bool onTimer(TimerFd fd , ulong ticks)
+       |        {
+0000000|                log(LogLevel.info , "timeout" ~ to!string(ticks));
+0000000|                return true;
+       |        }
+       |
+       |        protected bool onEstablished()
+       |        {
+       |
+       |                //_keepalive = _poll.addTimer(this , _keepalivetime  , WheelType.WHEEL_PERIODIC);
+0000000|                _poll.addEvent(this ,_socket.handle ,  _curEventType = IOEventType.IO_EVENT_READ);
+       |
+0000000|                return true;
+       |        }
+       |
+       |        protected bool onWrite()
+       |        {
+0000000|                synchronized(this){
+       |
+0000000|                        while(!_writebuffer.empty())
+       |                        {
+0000000|                                auto data = _writebuffer.front();
+0000000|                                long ret = _socket.send(data.buffer[data.index .. data.buffer.length]);
+0000000|                                if(ret == data.buffer.length - data.index)
+       |                                {
+0000000|                                        if(data.finish !is null)
+       |                                        {
+0000000|                                                data.finish(data.ob);
+       |                                        }
+0000000|                                        _writebuffer.removeFront();
+       |                                }
+0000000|                                else if(ret > 0)
+       |                                {
+0000000|                                        data.index += ret;
+0000000|                                        return true;
+       |                                }
+0000000|                                else if ( ret <= 0)
+       |                                {
+0000000|                                        if(net_error())
+       |                                        {
+0000000|                                                log(LogLevel.error , "write net error");
+0000000|                                                close();
+0000000|                                                return false;
+       |                                        }
+0000000|                                        return true;
+       |                                }
+       |
+       |                        }
+       |                }
+0000000|                schedule_cancel_write();
+0000000|                return true;
+       |
+       |        }
+       |
+       |        protected bool onRead()
+       |        {
+0000000|                long ret = _socket.receive(_readbuffer);
+0000000|                if(ret > 0)
+       |                {
+0000000|                        return doRead(_readbuffer , cast(int)ret);
+       |                }
+0000000|                if(ret == 0) 
+       |                {       
+       |                        //log(LogLevel.info , "peer close socket");
+0000000|                        return false;
+       |                }
+0000000|                else if(ret == -1 && net_error())
+       |                {
+0000000|                        log(LogLevel.error , "error");
+0000000|                        return false;
+       |                }
+       |                
+0000000|                return true;    
+       |        }
+       |
+       |        protected @property void readBuff(byte []bt)
+       |        {
+0000000|                _readbuffer = bt;
+       |        }
+       |
+       |
+       |        protected bool doRead(byte[] data , int length)
+       |        {
+0000000|                _lastMsgTime = cast(int)time(null);
+0000000|                log(LogLevel.info , to!string(length));
+0000000|                return true;
+       |        }
+       |
+       |
+       |        protected bool onClose()
+       |        {
+0000000|                _poll.delEvent(this , _socket.handle , _curEventType = IOEventType.IO_EVENT_NONE);
+0000000|                _socket.close();
+0000000|                return true;
+       |        }
+       |
+       |        protected @property poll()
+       |        {
+0000000|                return _poll;
+       |        }
+       |
+       |        void setSocket(Socket socket)
+       |        {
+0000000|                _socket = socket;
+       |        }
+       |
+       |        //private member's below
+       |        private void schedule_write()
+       |        {
+0000000|                if(_curEventType & IOEventType.IO_EVENT_WRITE)
+       |                {
+0000000|                        log(LogLevel.error , "already IO_EVENT_WRITE");
+       |                }
+       |                
+0000000|                _curEventType |= IOEventType.IO_EVENT_WRITE;
+0000000|                _poll.modEvent(this , _socket.handle , _curEventType);
+       |        }
+       |        
+       |        private void schedule_cancel_write()
+       |        {
+0000000|                if(! (_curEventType & IOEventType.IO_EVENT_WRITE))
+       |                {
+0000000|                        log(LogLevel.error , "already no IO_EVENT_WRITE");
+       |                }
+       |                
+0000000|                _curEventType &= ~IOEventType.IO_EVENT_WRITE;
+0000000|                _poll.modEvent(this , _socket.handle , _curEventType);
+       |        }
+       |
+       |
+       |        private struct QueueBuffer
+       |        {
+       |                byte[]                  buffer;
+       |                Object                  ob;
+       |                int                             index;
+       |                TcpWriteFinish  finish;
+       |        }
+       |
+       |
+       |        //static function's below
+       |
+       |
+       |
+       |        static package bool net_error()
+       |        {
+0000000|                int err = errno();
+0000000|                if(err == 0 || err == EAGAIN || err == EWOULDBLOCK || err == EINTR || err == EINPROGRESS)
+0000000|                        return false;   
+0000000|                return true;
+       |        }
+       |
+       |        protected DList!QueueBuffer _writebuffer;
+       |        protected byte[]        _readbuffer;
+       |        protected bool          _isreadclose = false;
+       |        protected Socket        _socket;
+       |        protected Poll          _poll;
+       |//      protected TimerFd       _keepalive;
+       |        protected IOEventType   _curEventType = IOEventType.IO_EVENT_NONE;
+       |        
+       |
+       |        protected uint                  _accepttime;
+       |        protected uint                  _lastMsgTime;
+       |        protected string                _remoteipaddr;
+       |
+       |        //protected static int _keepalivetime;
+       |}
+       |
+       |
+       |
+..\..\source\kiss\aio\AsyncTcpBase.d is 0% covered
