@@ -43,22 +43,30 @@ class AsyncTcpBase:Event
 
 	public void retain()
 	{
-		version(EPOOL_NOGC)
+		version(linux)
 		{
-			GC.addRoot(cast(void*)this);
-			GC.setAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
+			version(epoll_nogc)
+			{
+				GC.addRoot(cast(void*)this);
+				GC.setAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
+			}
 		}
-
+		
 	}
 
 	public void release()
 	{
-		version(EPOOL_NOGC)
+		version(linux)
 		{
-			GC.removeRoot(cast(void*)this);
-			GC.clrAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
+			version(epoll_nogc)
+			{
+				GC.removeRoot(cast(void*)this);
+				GC.clrAttr(cast(void*)this, GC.BlkAttr.NO_MOVE);
+			}else{
+				this.destroy();
+			}
 		}else{
-			delete this;
+			this.destroy();
 		}
 	}
 

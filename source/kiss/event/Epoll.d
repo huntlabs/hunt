@@ -118,9 +118,14 @@ final class Epoll :Thread , Poll
 		ev.events = mask;
 
 
-
-			version(eventMap)
+	
+			version(epoll_nogc)
 			{
+				ev.data.ptr = cast(void *)event;
+
+			}else
+			{
+
 				if(op == EPOLL_CTL_ADD)
 				{
 					//assert(fd !in _mapEvents);			
@@ -135,12 +140,8 @@ final class Epoll :Thread , Poll
 				{
 					//assert(fd in _mapEvents);
 				}
-
+				
 				ev.data.fd = fd;
-			}
-			else
-			{
-				ev.data.ptr = cast(void *)event;
 			}
 
 			//log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
@@ -231,25 +232,27 @@ final class Epoll :Thread , Poll
 		for(int i = 0 ; i < result ; i++)
 		{
 		
-			version(eventMap)
+			version(epoll_nogc)
 			{	
+				Event event = cast(Event)_pollEvents[i].data.ptr;
+			}
+			else
+			{
+
 				int fd = _pollEvents[i].data.fd;
-
-
+				
+				
 				Event* event = null;
-
-
+				
+				
 				event = (fd in _mapEvents);
-
-
+				
+				
 				if(event == null)
 				{
 					log(LogLevel.warning , "fd:" ~ to!string(fd) ~ " maybe close by others");
 					continue;
 				}
-			}
-			else{
-				Event event = cast(Event)_pollEvents[i].data.ptr;
 			}
 
 			if(event.isReadyClose())
