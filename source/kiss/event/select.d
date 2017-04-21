@@ -14,7 +14,6 @@ import std.stdio;
 
 import object;
 
-
 final class select : Thread , Poll
 {
 

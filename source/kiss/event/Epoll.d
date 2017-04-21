@@ -7,8 +7,7 @@ import core.stdc.string;
 import std.stdio;
 import std.string;
 import core.thread;
-import core.stdc.stdlib;
-import core.memory:GC;
+
 
 import kiss.event.Event;
 import kiss.event.Poll;
@@ -117,33 +116,24 @@ final class Epoll :Thread , Poll
 
 		ev.events = mask;
 
+		if(op == EPOLL_CTL_ADD)
+		{
+			//assert(fd !in _mapEvents);			
+			_mapEvents[fd]  = event;
+		}
+		else if(op == EPOLL_CTL_DEL)
+		{
+			//assert(fd in _mapEvents);			
+			_mapEvents.remove(fd);
+		}
+		else
+		{
+			//assert(fd in _mapEvents);
+		}
 
+		ev.data.ptr = cast(void *)event;
 
-			version(eventMap)
-			{
-				if(op == EPOLL_CTL_ADD)
-				{
-					//assert(fd !in _mapEvents);			
-					_mapEvents[fd]  = event;
-				}
-				else if(op == EPOLL_CTL_DEL)
-				{
-					//assert(fd in _mapEvents);			
-					_mapEvents.remove(fd);
-				}
-				else
-				{
-					//assert(fd in _mapEvents);
-				}
-
-				ev.data.fd = fd;
-			}
-			else
-			{
-				ev.data.ptr = cast(void *)event;
-			}
-
-			//log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
+		//log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
 
 
 		if(epoll_ctl(_efd , op , fd , &ev) < 0)
@@ -231,35 +221,12 @@ final class Epoll :Thread , Poll
 		for(int i = 0 ; i < result ; i++)
 		{
 		
-			version(eventMap)
-			{	
-				int fd = _pollEvents[i].data.fd;
-
-
-				Event* event = null;
-
-
-				event = (fd in _mapEvents);
-
-
-				if(event == null)
-				{
-					log(LogLevel.warning , "fd:" ~ to!string(fd) ~ " maybe close by others");
-					continue;
-				}
-			}
-			else{
-				Event event = cast(Event)_pollEvents[i].data.ptr;
-			}
+			Event event = cast(Event)_pollEvents[i].data.ptr;
 
 			if(event.isReadyClose())
 			{	
 				if(event.onClose())
-				{
-					event.release();
-				}
-
-
+					delete event;
 				continue;
 			}
 
@@ -268,9 +235,7 @@ final class Epoll :Thread , Poll
 			if(mask &( EPOLL_EVENTS.EPOLLERR | EPOLL_EVENTS.EPOLLHUP))
 			{
 				if(event.onClose())
-				{
-					event.release();
-				}
+					delete event;
 				continue;
 			}
 
@@ -279,9 +244,7 @@ final class Epoll :Thread , Poll
 				if(!event.onRead())
 				{
 					if(event.onClose())
-					{
-						event.release();
-					}
+						delete event;
 					continue;
 				}
 			}
@@ -291,10 +254,7 @@ final class Epoll :Thread , Poll
 				if(!event.onWrite())
 				{
 					if(event.onClose())
-					{
-						event.release();
-					}
-
+						delete event;
 					continue;
 				}
 			}
@@ -302,10 +262,8 @@ final class Epoll :Thread , Poll
 		return true;
 	}
 
-version(eventMap)
-{	
-	private Event[int]  		_mapEvents;
-}
+
+	private Event[int]  		_mapEvents;					//only for save. not gc.
 	private	bool				_flag;
 	private int					_timeout;
 	private int 				_efd;

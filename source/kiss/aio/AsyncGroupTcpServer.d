@@ -1,5 +1,4 @@
-﻿
-module kiss.aio.AsyncGroupTcpServer;
+﻿module kiss.aio.AsyncGroupTcpServer;
 
 import kiss.aio.AsyncTcpServer;
 import kiss.event.Poll;
@@ -38,5 +37,4 @@ class AsyncGroupTcpServer(T)
 
 	AsyncTcpServer!T[] _servers;
 }
-
 

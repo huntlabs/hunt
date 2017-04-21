@@ -21,12 +21,9 @@ enum IOEventType
 
 interface Event
 {
-	 bool onWrite();
-	 bool onRead();
-	 bool onClose();
+	bool onWrite();
+    bool onRead();
+    bool onClose();
 
-	 bool isReadyClose();
-
-	 void retain();
-	 void release();
+	bool isReadyClose();
 }
