@@ -1,20 +1,30 @@
-﻿module kiss.event.select;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.event.Select;
 
 import kiss.event.Poll;
 import kiss.event.Event;
-import kiss.time.timer;
-import kiss.time.itimer;
-
-import core.thread;
+import kiss.time.Timer;
+import kiss.time.Itimer;
+import kiss.util.Log;
 
 import std.socket;
-import kiss.util.log;
 import std.conv;
 import std.stdio;
 
+import core.thread;
+
 import object;
 
-final class select : Thread , Poll
+final class Select : Thread , Poll
 {
 
 	class Data

@@ -1,4 +1,14 @@
-﻿module kiss.aio.AsyncTcpServer;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.aio.AsyncTcpServer;
 
 import kiss.event.Event;
 import kiss.event.Poll;
@@ -7,9 +17,9 @@ import kiss.aio.AsyncTcpBase;
 import kiss.event.GroupPoll;
 
 import std.socket;
-import std.stdio;
 
-final class AsyncTcpServer(T ): Event
+
+final class AsyncTcpServer(T): Event
 {
 
 	this(Poll poll )

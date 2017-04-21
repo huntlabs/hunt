@@ -1,20 +1,29 @@
-﻿module kiss.aio.AsyncTcpBase;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.aio.AsyncTcpBase;
 
-import kiss.time.timer;
+import kiss.event.Event;
+import kiss.event.Poll;
+import kiss.util.Log;
 
 import std.string;
 import std.socket;
-import std.experimental.logger;
 import std.conv;
-import kiss.event.Event;
-import kiss.event.Poll;
-import kiss.event.GroupPoll;
+import std.container:DList;
+
 import core.stdc.errno;
 import core.stdc.string;
-import std.container:DList;
 import core.stdc.time;
 
-import kiss.util.log;
+
 
 
 alias TcpWriteFinish = void delegate(Object ob);
@@ -60,12 +69,12 @@ class AsyncTcpBase:Event
 				{
 					if(net_error())
 					{
-						log(LogLevel.error , "write net error");
+						log_error( "write net error");
 						close();
 						return -1;
 					}
 					//blocking rarely happened.
-					log(LogLevel.warning , "blocking rarely happened");
+					log_warning("blocking rarely happened");
 					QueueBuffer buffer = {writebuf , ob , 0 , finish};
 					_writebuffer.insertBack(buffer);
 					schedule_write();
@@ -107,11 +116,7 @@ class AsyncTcpBase:Event
 		return _isreadclose;
 	}
 
-	protected bool onTimer(TimerFd fd , ulong ticks)
-	{
-		log(LogLevel.info , "timeout" ~ to!string(ticks));
-		return true;
-	}
+
 
 	protected bool onEstablished()
 	{
@@ -147,7 +152,7 @@ class AsyncTcpBase:Event
 				{
 					if(net_error())
 					{
-						log(LogLevel.error , "write net error");
+						log_error( "write net error");
 						close();
 						return false;
 					}
@@ -175,7 +180,7 @@ class AsyncTcpBase:Event
 		}
 		else if(ret == -1 && net_error())
 		{
-			log(LogLevel.error , "error");
+			log_error("error");
 			return false;
 		}
 		
@@ -191,7 +196,7 @@ class AsyncTcpBase:Event
 	protected bool doRead(byte[] data , int length)
 	{
 		_lastMsgTime = cast(int)time(null);
-		log(LogLevel.info , to!string(length));
+		log_info( to!string(length));
 		return true;
 	}
 
@@ -218,7 +223,7 @@ class AsyncTcpBase:Event
 	{
 		if(_curEventType & IOEventType.IO_EVENT_WRITE)
 		{
-			log(LogLevel.error , "already IO_EVENT_WRITE");
+			log_error("already IO_EVENT_WRITE");
 		}
 		
 		_curEventType |= IOEventType.IO_EVENT_WRITE;
@@ -229,7 +234,7 @@ class AsyncTcpBase:Event
 	{
 		if(! (_curEventType & IOEventType.IO_EVENT_WRITE))
 		{
-			log(LogLevel.error , "already no IO_EVENT_WRITE");
+			log_error( "already no IO_EVENT_WRITE");
 		}
 		
 		_curEventType &= ~IOEventType.IO_EVENT_WRITE;

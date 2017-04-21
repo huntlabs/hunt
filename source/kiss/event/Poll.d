@@ -1,8 +1,17 @@
-﻿module kiss.event.Poll;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.event.Poll;
 
 import kiss.event.Event;
-
-import kiss.time.timer;
+import kiss.time.Timer;
 
 
 interface Poll

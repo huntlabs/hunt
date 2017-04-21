@@ -1,11 +1,22 @@
-﻿module kiss.aio.Acceptor;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.aio.Acceptor;
+
+import kiss.util.Log;
+
 import std.socket;
 import std.string;
 import std.conv;
-import core.sys.posix.sys.socket;
-import std.stdio;
 
-import std.experimental.logger;
+import core.sys.posix.sys.socket;
 
 final package class Acceptor
 {
@@ -21,7 +32,7 @@ final package class Acceptor
 		AddressInfo[] arr = getAddressInfo(ipaddr , strPort , AddressInfoFlags.PASSIVE);
 		if(arr.length == 0)
 		{
-			log(LogLevel.error , "getAddressInfo" ~ ipaddr ~ ":" ~ strPort);
+			log_error("getAddressInfo" ~ ipaddr ~ ":" ~ strPort);
 			return false;
 		}
 		_socket = new Socket(arr[0].family , arr[0].type , arr[0].protocol);

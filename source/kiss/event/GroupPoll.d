@@ -1,15 +1,22 @@
-﻿module kiss.event.GroupPoll;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.event.GroupPoll;
 
-import kiss.event.Epoll;
 import kiss.event.Poll;
-import kiss.event.select;
+import kiss.event.Epoll;
+import kiss.event.Select;
 
 import std.random;
 import std.parallelism;
-import core.thread;
 import std.conv;
-
-import kiss.util.log;
 
 version (linux)
 {
@@ -17,7 +24,7 @@ version (linux)
 }
 else
 {
-	alias DefaultPoll = select;
+	alias DefaultPoll = Select;
 }
 
 class GroupPoll(T = DefaultPoll) : Group

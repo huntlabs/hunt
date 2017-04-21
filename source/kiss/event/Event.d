@@ -1,5 +1,5 @@
 /*
- * 
+ * Kiss - A simple base net library
  *
  * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
  *
@@ -8,6 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
+
 module kiss.event.Event;
 
 enum IOEventType

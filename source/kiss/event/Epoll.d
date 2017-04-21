@@ -1,19 +1,29 @@
-﻿module kiss.event.Epoll;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
 
-import std.experimental.logger;
-import std.conv;
-import core.stdc.errno;
-import core.stdc.string;
-import std.stdio;
-import std.string;
-import core.thread;
-
+module kiss.event.Epoll;
 
 import kiss.event.Event;
 import kiss.event.Poll;
-import kiss.time.timer;
-import kiss.time.itimer;
+import kiss.time.Timer;
+import kiss.time.Itimer;
+import kiss.util.Log;
 
+import std.conv;
+import std.stdio;
+import std.string;
+
+import core.thread;
+import core.stdc.errno;
+import core.stdc.string;
 
 version(linux):
 extern(C){
@@ -79,7 +89,8 @@ final class Epoll :Thread , Poll
 		if(_efd == -1)
 		{
 			int err = errno();
-			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			string errstr = cast(string)fromStringz(strerror(err));
+			log_fatal(errstr ~ " errno:" ~ to!string(err));
 		}
 		_timeout = timeout;
 		_wheeltimer = new WheelTimer();
@@ -133,13 +144,14 @@ final class Epoll :Thread , Poll
 
 		ev.data.ptr = cast(void *)event;
 
-		//log(LogLevel.info , to!string(toHash()) ~ "op= " ~ to!string(op) ~ " fd =" ~ to!string(fd));
+	
 
 
 		if(epoll_ctl(_efd , op , fd , &ev) < 0)
 		{
 			int err = errno();
-			log(LogLevel.error , to!string(op) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			string errstr = cast(string)fromStringz(strerror(err));
+			log_fatal( to!string(op) ~ errstr ~ " errno:" ~ to!string(err));
 			return false;
 		}
 		
@@ -166,7 +178,7 @@ final class Epoll :Thread , Poll
 	{
 		if(_flag)
 		{
-			log(LogLevel.warning , "already started");
+			log_warning("already started");
 			return ;
 		}
 		_flag = true;
@@ -203,12 +215,12 @@ final class Epoll :Thread , Poll
 		int result = epoll_wait(_efd , _pollEvents.ptr , _pollEvents.length , milltimeout);
 		if(result < 0)
 		{
-
 			int err = errno();
 			if(err == EINTR)
 				return true;
 
-			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			string errstr = cast(string)fromStringz(strerror(err));
+			log_fatal(errstr ~ " errno:" ~ to!string(err));
 			return false;
 		}
 		else if(result == 0)
@@ -216,7 +228,7 @@ final class Epoll :Thread , Poll
 			return true;
 		}
 
-		//log(LogLevel.info , "result:" ~ to!string(result));
+	
 
 		for(int i = 0 ; i < result ; i++)
 		{

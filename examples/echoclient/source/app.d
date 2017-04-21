@@ -1,12 +1,22 @@
-﻿import kiss.aio.AsyncTcpBase;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+
+import kiss.aio.AsyncTcpBase;
 
 import kiss.event.Poll;
-import std.conv;
-import std.stdio;
-import kiss.time.timer;
+import kiss.time.Timer;
 import kiss.aio.AsyncTcpClient;
+import kiss.util.Log;
+
 import std.string;
-import std.experimental.logger;
 
 class EchoClient : AsyncTcpClient
 {
@@ -18,14 +28,14 @@ class EchoClient : AsyncTcpClient
 
 	override bool onEstablished()
 	{
-		log(LogLevel.info , "onEstablished");
+		log_info( "onEstablished");
 		_echo_time = poll.addTimer(this , 5000 , WheelType.WHEEL_PERIODIC);
 		return super.onEstablished();
 	}
 
 	override protected bool doRead(byte[] buffer , int len)
 	{
-		log(LogLevel.info , "client1 server return back:" ~ cast(string)buffer[0..len]);
+		log_info( "client1 server return back:" ~ cast(string)buffer[0..len]);
 		return true;
 	}
 
@@ -70,7 +80,7 @@ class EchoClient2 : AsyncTcpClient
 
 	override protected bool doRead(byte[] buffer , int len)
 	{
-		log(LogLevel.info , "server return back:" ~ cast(string)buffer[0..len]);
+		log_info("server return back:" ~ cast(string)buffer[0..len]);
 		return true;
 	}
 }

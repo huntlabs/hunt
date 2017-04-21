@@ -1,10 +1,19 @@
-﻿import kiss.aio.AsyncTcpBase;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+import kiss.aio.AsyncTcpBase;
 
 import kiss.event.Poll;
+
 import std.conv;
 import std.stdio;
-
-
 
 class EchoBase : AsyncTcpBase
 {

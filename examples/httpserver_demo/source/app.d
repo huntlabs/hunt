@@ -1,6 +1,17 @@
-﻿import kiss.aio.AsyncTcpBase;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+import kiss.aio.AsyncTcpBase;
 
 import kiss.event.Poll;
+
 import std.conv;
 import std.stdio;
 import std.string;
@@ -10,14 +21,13 @@ class MyHttpChannel : AsyncTcpBase
 {
 	this(Poll poll)
 	{
-		//request must small than 2048.
 		readBuff = new byte[1024];
 		super(poll);
 	}
 
 	override protected bool onEstablished()
 	{
-		//writeln("MyHttpChannel connected");
+	
 		return super.onEstablished();
 	}
 
@@ -47,7 +57,6 @@ class MyHttpChannel : AsyncTcpBase
 			intlength = to!int(strlength);
 		}
 		 
-		//log(LogLevel.info , "length : " ~ to!string(intlength) ~ "header : " ~ to!string(header_pos));
 
 		if(header_pos + 4 + intlength == _index)
 		{
@@ -97,11 +106,9 @@ class MyHttpChannel : AsyncTcpBase
 		string strurl;
 		string strbody;
 
-		//log(LogLevel.info , "index : " ~ to!string(_index));
 
 		if(!is_request_finish(finish , strurl , strbody))
 		{
-			//log(LogLevel.info  , "parse http request error");
 			return false;
 		}
 
@@ -112,7 +119,6 @@ class MyHttpChannel : AsyncTcpBase
 		}
 		else if(_index == _readbuffer.length)
 		{
-			//log(LogLevel.info , "not a http request or buffer is full");
 			return false;
 		}
 
@@ -121,7 +127,6 @@ class MyHttpChannel : AsyncTcpBase
 	}
 	
 	override protected  bool onClose() {
-		//writeln("MyHttpChannel onClose");
 		return super.onClose();
 	}
 
@@ -140,14 +145,11 @@ int main()
 	import kiss.event.GroupPoll;
 	import kiss.aio.AsyncGroupTcpServer;
 	import kiss.aio.AsyncTcpServer;
-	import kiss.event.select;
+	import kiss.event.Select;
 
 	auto poll = new GroupPoll!();
 	auto server = new AsyncGroupTcpServer!MyHttpChannel(poll);
 	server.open("0.0.0.0" , 81);
-
-
-
 
 	poll.start();
 	poll.wait();

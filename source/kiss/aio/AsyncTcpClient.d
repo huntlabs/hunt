@@ -1,14 +1,23 @@
-﻿module kiss.aio.AsyncTcpClient;
+﻿/*
+ * Kiss - A simple base net library
+ *
+ * Copyright (C) 2017 Shanghai Putao Technology Co., Ltd 
+ *
+ * Developer: putao's Dlang team
+ *
+ * Licensed under the Apache-2.0 License.
+ *
+ */
+module kiss.aio.AsyncTcpClient;
 
 import kiss.aio.AsyncTcpBase;
-import kiss.time.timer;
+import kiss.time.Timer;
+import kiss.event.Poll;
+import kiss.event.Event;
+import kiss.util.Log;
 
 import std.string;
 import std.socket;
-import std.experimental.logger;
-import kiss.event.GroupPoll;
-import kiss.event.Event;
-import kiss.event.Poll;
 import std.conv;
 import std.random;
 
@@ -37,7 +46,7 @@ class AsyncTcpClient:AsyncTcpBase,Timer
 		AddressInfo[] arr = getAddressInfo(host , strPort , AddressInfoFlags.CANONNAME);
 		if(arr.length == 0)
 		{
-			log(LogLevel.error , host ~ ":" ~ strPort);
+			log_error(host ~ ":" ~ strPort);
 			return false;
 		}
 		
@@ -57,7 +66,7 @@ class AsyncTcpClient:AsyncTcpBase,Timer
 
 	override protected bool onEstablished()
 	{
-		log(LogLevel.info , "client onOpen");
+		log_info("client onOpen");
 		_client_keepalive = poll.addTimer(this , 60 * 1000 , WheelType.WHEEL_PERIODIC);
 		return poll.modEvent(this ,_socket.handle , _curEventType =  IOEventType.IO_EVENT_READ);
 	}
@@ -66,16 +75,15 @@ class AsyncTcpClient:AsyncTcpBase,Timer
 
 		if(fd == _reconnect)
 		{
-			log(LogLevel.warning , "timer to reconnecting ");
+			log_warning("timer to reconnecting ");
 			open(_host , _port); 
 			return true;
 		}
 		else if(fd == _client_keepalive)
 		{
-
 			return true;
 		}
-		return super.onTimer(fd,ticks);
+		return true;
 	}
 
 
@@ -83,11 +91,11 @@ class AsyncTcpClient:AsyncTcpBase,Timer
 	{
 		if(_status == Connect_Status.CLIENT_CONNECTING)
 		{
-			log(LogLevel.info , "client connected");
+			log_info("client connected");
 			_status = Connect_Status.CLIENT_CONNECTED;
 			return super.open();
 		}
-		log(LogLevel.info , "onWrite");
+		log_info( "onWrite");
 		return super.onWrite();
 	}
 
