@@ -3,11 +3,7 @@
     "description": "An network library written in D.",
     "copyright": "Copyright (C) 2015-2016 Shanghai Putao Technology Co., Ltd",
     "authors": [
-        "putao.com dlang team."
+        "HuntLabs.cn"
     ],
-    "license": "Apache-2.0",
-	"dependencies" :{
-		"onyx-log":{ "version" :"~>1.2.1-rc3" }
-	},
-	"versions":["onyxLog"]
+    "license": "Apache-2.0"
 }
