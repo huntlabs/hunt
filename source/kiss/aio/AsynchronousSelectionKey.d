@@ -22,14 +22,13 @@ import std.experimental.logger;
 import core.stdc.errno;
 
 import std.stdio;
+import core.thread;
 
 
 
 class AsynchronousSelectionKey : Event{
 
 public:
-
-
 
     bool isAccepted() {
     	return (_channel.intrestOps() & AIOEventType.OP_ACCEPTED) != 0;
@@ -49,7 +48,7 @@ public:
     override bool onWrite() {
         if (isConnected())
         {
-            (cast(ConnectCompletionHandle)_handle).completed(_handleAttachment);
+            onCompleted(_handleAttachment);
             return true;
         }
         else if (isWriteed()) 
@@ -57,7 +56,7 @@ public:
             if (_attachment is null)
             {
                 log(LogLevel.warning , "write buffer is null");
-                (cast(WriteCompletionHandle)_handle).failed(_handleAttachment);
+                onFailed(_handleAttachment);
                 return false;
             }
             long n = _attachment.getCurBuffer().length;
@@ -73,7 +72,7 @@ public:
                     if (len == -1 && errno != EAGAIN) 
                     {
                         log(LogLevel.warning , "write failed");
-                        (cast(WriteCompletionHandle)_handle).failed(_handleAttachment);
+                        onFailed(_handleAttachment);
                         return false;
                     }
                     n -= len;
@@ -83,8 +82,7 @@ public:
                 n -= len;
                 _attachment.offsetLimit(len);
             }
-
-            (cast(WriteCompletionHandle)_handle).completed(_attachment.getPosition(), _attachment, _handleAttachment);
+            onCompleted(cast(void*)_attachment.getPosition(), cast(void*)_attachment, cast(void*)_handleAttachment);
             return true;
         }
         return false;
@@ -95,7 +93,7 @@ public:
             AsynchronousSocketChannel client = AsynchronousSocketChannel.open(_channel.getGroup(), _selector);
             client.setOpen(true);
             client.setSocket((cast(AsynchronousServerSocketChannel)_channel).socket().accept());
-            (cast(AcceptCompletionHandle)_handle).completed(client, _handleAttachment);
+            onCompleted(cast(void*)client, _handleAttachment);
             return true;
         }
         else if (isReaded()) 
@@ -103,8 +101,7 @@ public:
             if (_attachment is null)
             {
                 log(LogLevel.warning , "read buffer is null");
-                writeln("read buffer is null");
-                (cast(ReadCompletionHandle)_handle).failed(_handleAttachment);
+                onFailed(_handleAttachment);
                 return false;
             }
             long len;
@@ -117,8 +114,7 @@ public:
             if (len == -1 && EAGAIN != err)
             {
                 log(LogLevel.warning , "read failed");
-                writeln("read failed");
-                (cast(ReadCompletionHandle)_handle).failed(_handleAttachment);
+                onFailed(_handleAttachment);
                 return false;
             }
             // else if( len == 0)
@@ -129,7 +125,7 @@ public:
             // }
             else 
             {
-                (cast(ReadCompletionHandle)_handle).completed(_attachment.getPosition(), _attachment, _handleAttachment);
+                onCompleted(cast(void*)_attachment.getPosition(), cast(void*)_attachment, cast(void*)_handleAttachment);
                 return true;
             }
         }
@@ -169,24 +165,55 @@ public:
     {
         if (isNew)
         {
-            _selector._epoll.addEvent(this,  _channel.getFd(),  ops);
+            _selector._poll.addEvent(this,  _channel.getFd(),  ops);
         }
         else 
         {
-            _selector._epoll.modEvent(this,  _channel.getFd(),  ops);
+            _selector._poll.modEvent(this,  _channel.getFd(),  ops);
         }
 
     }
 
 
+private:
+    void onCompleted(void* param1, void* param2 = null, void* param3 = null)
+    {
+        if (isConnected())
+            (cast(ConnectCompletionHandle)_handle).completed(param1);
+        else if(isWriteed())
+            (cast(WriteCompletionHandle)_handle).completed(cast(size_t)param1, cast(ByteBuffer)param2, param3);
+        else if(isReaded())
+            (cast(ReadCompletionHandle)_handle).completed(cast(size_t)param1, cast(ByteBuffer)param2, param3);
+        else if(isAccepted())
+            (cast(AcceptCompletionHandle)_handle).completed(cast(AsynchronousSocketChannel)param1, param2);    
+    }
+    void onFailed(void* attachment)
+    {
+        if (isConnected())
+            (cast(ConnectCompletionHandle)_handle).failed(attachment);
+        else if(isWriteed())
+            (cast(WriteCompletionHandle)_handle).failed(attachment);
+        else if(isReaded())
+            (cast(ReadCompletionHandle)_handle).failed(attachment);
+        else if(isAccepted())
+            (cast(AcceptCompletionHandle)_handle).failed(attachment);
+    }
+
 
 private:
-
     AsynchronousChannelSelector _selector;
     AsynchronousChannelBase _channel;
     ByteBuffer _attachment;
     void* _handle;
     void* _handleAttachment;
+    //当新连接建立时,绑定一个work线程,并且之后一直在此线程上读写,保证线程安全的.
+    Thread _masterThread;
 
 
 }
+
+
+
+
+
+

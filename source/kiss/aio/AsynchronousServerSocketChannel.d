@@ -26,7 +26,7 @@ class AsynchronousServerSocketChannel : AsynchronousChannelBase{
 public:
     this(AsynchronousChannelThreadGroup group)
     {
-        super(group, group.getIOSelector());
+        super(group, group.getWorkSelector());
     }
 
     static open(AsynchronousChannelThreadGroup group)

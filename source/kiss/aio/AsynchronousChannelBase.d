@@ -90,7 +90,7 @@ class AsynchronousChannelBase
 
 		bool onClose()
 		{
-			_selector._epoll.delEvent(_key , _socket.handle , AIOEventType.OP_NONE);
+			_selector._poll.delEvent(_key , _socket.handle , AIOEventType.OP_NONE);
 			_socket.close();
 
 			return true;

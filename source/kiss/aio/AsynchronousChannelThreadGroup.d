@@ -13,40 +13,17 @@ module kiss.aio.AsynchronousChannelThreadGroup;
 
 import kiss.aio.AsynchronousChannelSelector;
 
-import core.thread;
-
 import std.parallelism;
-import std.stdio;
-import core.sync.mutex; 
-
+import std.experimental.logger.core;
 
 class AsynchronousChannelThreadGroup {
-
-
 public:
-    this (int timeout , int io_numbers, int work_numbers )
-    {   
-
-        lock = new Mutex();
-      
-        _ioThreadNum = io_numbers;
-        _ioThreadIndex = 0;
-
-        _workThreadNum = work_numbers;
-        _workThreadIndex = 0;
-
-
-        _workSelector = new AsynchronousChannelSelector[work_numbers];
-        for(int i = 0; i < work_numbers; i++)
+    this(int timeout, int worker_numbers)
+    {
+        _workerNum = worker_numbers;
+        _workSelector = new AsynchronousChannelSelector[worker_numbers];
+        for(int i = 0; i < worker_numbers; i++)
             _workSelector[i] = new AsynchronousChannelSelector(timeout);
-
-
-        _ioSelector = new AsynchronousChannelSelector[io_numbers];
-        for(int i = 0; i < io_numbers; i++)
-            _ioSelector[i] = new AsynchronousChannelSelector(timeout);
-
-
-
     }
 
     ~this()
@@ -55,22 +32,17 @@ public:
     }
 
 
-    static open(int timeout = 10, int io_numbers = 1, int work_numbers = totalCPUs - 1) 
+    static open(int timeout = 10, int worker_numbers = totalCPUs - 1) 
     {
-        return new AsynchronousChannelThreadGroup(timeout,  io_numbers, work_numbers); 
+        return new AsynchronousChannelThreadGroup(timeout, worker_numbers); 
     }
 
 
     void start()
 	{
-        writeln("AsynchronousChannelThreadGroup start");
-
+        log("AsynchronousChannelThreadGroup start");
 		foreach (ref t; _workSelector)
-			t.start();
-
-        foreach (ref t; _ioSelector)
-			t.start();
-            
+			t.start();    
 	}
 
 	void stop()
@@ -78,54 +50,27 @@ public:
 
 		foreach (ref t; _workSelector)
 			t.stop();
-        foreach (ref t; _ioSelector)
-			t.stop();
 	}
 
 	void wait()
 	{
-
 		foreach (ref t; _workSelector)
-			t.wait();
-        foreach (ref t; _ioSelector)
 			t.wait();
 	}
 
 
  
-    AsynchronousChannelSelector getIOSelector()
-    {
-        long r = _ioThreadIndex % _ioThreadNum;
-        _ioThreadIndex ++ ;
-		return _ioSelector[cast(size_t) r]; 
-    }
-
     AsynchronousChannelSelector getWorkSelector()
     {
-        long r;
-        synchronized(lock){
-            r = _workThreadIndex % _workThreadNum;
-            _workThreadIndex ++ ;
-        }
+        long r = _workIndex % _workerNum;
+        _workIndex ++ ;
 		return _workSelector[cast(size_t) r]; 
     }
-    
+
 
 
 private:
-
-    Mutex lock;
-
-
-    int _workThreadNum;
-    int _workThreadIndex;
-
-
-    int _ioThreadNum ;
-    int _ioThreadIndex ;
-
-
+    int _workIndex;
+    int _workerNum;
     AsynchronousChannelSelector[] _workSelector;
-    AsynchronousChannelSelector[] _ioSelector;
-
 }

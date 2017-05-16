@@ -153,7 +153,7 @@ private:
 void main()
 {
     int threadNum = 4;
-    AsynchronousChannelThreadGroup group = AsynchronousChannelThreadGroup.open(10,threadNum,0);
+    AsynchronousChannelThreadGroup group = AsynchronousChannelThreadGroup.open(10,threadNum);
     for(int i = 0; i < threadNum; i++)
     {
         TcpAccept accept = new TcpAccept("0.0.0.0",20000,group);

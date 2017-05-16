@@ -10,7 +10,10 @@
  */
 
 module kiss.aio.EpollA;
+
 import kiss.aio.Event;
+import kiss.aio.AbstractPoll;
+
 import std.experimental.logger;
 import std.conv;
 import core.stdc.errno;
@@ -18,6 +21,7 @@ import core.stdc.string;
 import std.stdio;
 import std.string;
 import core.thread;
+import core.sys.posix.unistd;
 
 
 
@@ -62,8 +66,7 @@ extern(C){
 		EPOLLPRI = 0x002,
 		EPOLLOUT = 0x004,
 		EPOLLRDNORM = 0x040,
-		EPOLLRDBAND = 0x080,
-		EPOLLWRNORM = 0x100,
+		EPOLLRDBAND = 0x080,EPOLLWRNORM = 0x100,
 		EPOLLWRBAND = 0x200,
 		EPOLLMSG = 0x400,
 		EPOLLERR = 0x008,
@@ -84,7 +87,7 @@ extern(C){
 	import std.experimental.logger.core;
 }
 
-class EpollA {
+class EpollA  : AbstractPoll{
 
     this()
     {
@@ -145,17 +148,17 @@ class EpollA {
 	}
 
 
-    bool addEvent(Event event , int fd ,  int type) 
+    override bool addEvent(Event event , int fd ,  int type) 
 	{
 		return opEvent(event , fd ,  EPOLL_CTL_ADD , type);
 	}
 
-	bool delEvent(Event event , int fd , int type)
+	override bool delEvent(Event event , int fd , int type)
 	{
 		return opEvent(event , fd , EPOLL_CTL_DEL , type);
 	}
 
-	bool modEvent(Event event , int fd , int type)
+	override bool modEvent(Event event , int fd , int type)
 	{
 		return opEvent(event ,fd ,  EPOLL_CTL_MOD , type);
 	}
@@ -163,7 +166,7 @@ class EpollA {
 
 
 
-    int poll(int milltimeout)
+    override int poll(int milltimeout)
 	{
 		int result = epoll_wait(_epollFd , _pollEvents.ptr , _pollEvents.length , milltimeout);
 		if(result < 0)
@@ -243,11 +246,16 @@ class EpollA {
 		return result;
 	}
 
+	override void wakeUp()
+	{
+		ulong ul = 1;
+        core.sys.posix.unistd.write(_epollFd,  & ul, ul.sizeof);
+	}
+
 
 private:
     int _epollFd;
     private epoll_event[256] 	_pollEvents;
-
 	private Event[int]  		_mapEvents;
 
 }
