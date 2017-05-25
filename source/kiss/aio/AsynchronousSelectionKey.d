@@ -133,8 +133,10 @@ public:
     }
 
     override bool onClose() {
+        onFailed(_handleAttachment);
         return _channel.onClose();
     }
+    
 	override bool isReadyClose() {
         return _channel.isReadyClose();
     }
