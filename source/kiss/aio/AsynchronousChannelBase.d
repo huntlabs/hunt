@@ -18,6 +18,7 @@ import kiss.aio.AsynchronousSelectionKey;
 import kiss.aio.ByteBuffer;
 import kiss.aio.CompletionHandle;
 import kiss.aio.Event;
+import kiss.aio.task;
 
 import core.stdc.errno;
 
@@ -100,6 +101,11 @@ class AsynchronousChannelBase
 		{
 			return _isReadyClose;
 		}
+	}
+
+	void addTask(bool MustInQueue = true)(AbstractTask task)
+	{
+		_selector.addTask!(MustInQueue)(task);
 	}
 
 	protected void register(int ops, void* handle, void* attchment, ByteBuffer obj = null)

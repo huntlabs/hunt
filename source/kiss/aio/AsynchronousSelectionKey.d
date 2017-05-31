@@ -46,9 +46,13 @@ public:
     }
 
     override bool onWrite() {
+
         if (isConnected())
         {
-            onCompleted(_handleAttachment);
+            if (errno() == EBADF)
+                onFailed(_handleAttachment);
+            else 
+                onCompleted(_handleAttachment);
             return true;
         }
         else if (isWriteed()) 
@@ -133,7 +137,6 @@ public:
     }
 
     override bool onClose() {
-        onFailed(_handleAttachment);
         return _channel.onClose();
     }
     

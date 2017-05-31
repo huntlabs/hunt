@@ -52,6 +52,7 @@ public:
         while(_isRunning)
         {
             _poll.poll(_timeout);
+            doTaskList();
         }
         _threadID = ThreadID.init;
         _isRunning = false;

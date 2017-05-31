@@ -23,10 +23,9 @@ class WriteHandle : WriteCompletionHandle{
 	//WriteCompletionHandle 
 	void completed(size_t count , ByteBuffer buffer, void* attachment)
 	{
-		// writeln("server write success!",_master._client.getFd());
-        // _master.doWrite(buffer.getCurBuffer());
 
-        _master._client.close();
+        // _master._client.close();
+        _master.doRead();
 
 	}
 	void failed(void* attachment)
@@ -47,6 +46,7 @@ class ReadHandle : ReadCompletionHandle{
 	//ReadCompletionHandle 
 	override void completed(size_t count , ByteBuffer buffer,void* attachment)
 	{
+        writeln("server read ", cast(string)buffer.getCurBuffer());
         string s = "HTTP/1.1 200 OK\r\nServer: kissAIO\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\nhelloworld";
         _master.doWrite(cast(byte[])s);
 
