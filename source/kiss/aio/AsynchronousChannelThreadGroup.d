@@ -16,23 +16,37 @@ import kiss.aio.AsynchronousChannelSelector;
 import std.parallelism;
 import std.experimental.logger.core;
 
+
+// 0 初始化状态 1 已绑定未启动 2 已启动
+int WORK_THREAD_INIT = 0;
+int WORK_THREAD_READY = 1;
+int WORK_THREAD_RUN = 2;
+
+
+struct WORK_THREAD_POOL {
+    AsynchronousChannelSelector worker;
+    int status = 0;   
+}
+
 class AsynchronousChannelThreadGroup {
+
+
 public:
     this(int timeout, int worker_numbers)
     {
         _workerNum = worker_numbers;
-        _workSelector = new AsynchronousChannelSelector[worker_numbers];
+        _workerPool = new WORK_THREAD_POOL[worker_numbers];
         for(int i = 0; i < worker_numbers; i++)
-            _workSelector[i] = new AsynchronousChannelSelector(timeout);
+            _workerPool[i].worker = new AsynchronousChannelSelector(timeout);
     }
 
     ~this()
     {
-		_workSelector.destroy();
+		_workerPool.destroy();
     }
 
 
-    static open(int timeout = 10, int worker_numbers = totalCPUs - 1) 
+    static open(int timeout = 10, int worker_numbers = totalCPUs) 
     {
         return new AsynchronousChannelThreadGroup(timeout, worker_numbers); 
     }
@@ -41,30 +55,59 @@ public:
     void start()
 	{
         log("AsynchronousChannelThreadGroup start");
-		foreach (ref t; _workSelector)
-			t.start();    
+        synchronized(this){
+            foreach (ref t; _workerPool)
+            {
+                if (t.status == WORK_THREAD_READY)
+                {
+                    t.worker.start();   
+                    t.status = WORK_THREAD_RUN;
+                }
+            }	 
+        }
 	}
 
 	void stop()
 	{
-
-		foreach (ref t; _workSelector)
-			t.stop();
+        synchronized(this){
+            foreach (ref t; _workerPool)
+            {
+                if (t.status == WORK_THREAD_RUN)
+                {
+                    t.worker.stop();
+                    t.status = WORK_THREAD_INIT;
+                }
+                else if(t.status == WORK_THREAD_READY)
+                    t.status = WORK_THREAD_INIT;
+            }
+        }
 	}
 
 	void wait()
 	{
-		foreach (ref t; _workSelector)
-			t.wait();
+		synchronized(this){
+            foreach (ref t; _workerPool)
+            {
+                if (t.status == WORK_THREAD_RUN)
+                {
+                    t.worker.wait();
+                    t.status = WORK_THREAD_INIT;
+                }
+            }
+        }
 	}
 
 
  
     AsynchronousChannelSelector getWorkSelector()
     {
-        long r = _workIndex % _workerNum;
-        _workIndex ++ ;
-		return _workSelector[cast(size_t) r]; 
+        synchronized(this){
+            ulong r = cast(ulong)(_workIndex % _workerNum);
+            _workIndex ++ ;
+            if(_workerPool[r].status == WORK_THREAD_INIT)
+                _workerPool[r].status = WORK_THREAD_READY;
+            return _workerPool[r].worker;
+        } 
     }
 
 
@@ -72,5 +115,9 @@ public:
 private:
     int _workIndex;
     int _workerNum;
-    AsynchronousChannelSelector[] _workSelector;
+
+
+    WORK_THREAD_POOL[] _workerPool;
+
+
 }

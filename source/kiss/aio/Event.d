@@ -23,11 +23,11 @@ enum IOEventType
 enum AIOEventType
 {
 	OP_NONE = 0,
-	OP_ACCEPTED = 1 << 1,
-    OP_READED = 1 << 2,
-    OP_WRITEED = 1 << 3,
-    OP_CONNECTED = 1 << 4,
-	OP_ERROR = 1 << 5
+	OP_ACCEPTED = 1 << 0,
+    OP_READED = 1 << 1,
+    OP_WRITEED = 1 << 2,
+    OP_CONNECTED = 1 << 3,
+	OP_ERROR = 1 << 4
 }
 
 

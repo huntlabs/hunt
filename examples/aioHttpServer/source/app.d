@@ -12,7 +12,7 @@ import kiss.aio.ByteBuffer;
 import std.socket;
 import std.stdio;
 import core.thread;
-
+import std.parallelism;
 
 
 class WriteHandle : WriteCompletionHandle{
@@ -21,16 +21,13 @@ class WriteHandle : WriteCompletionHandle{
 		_master = master;
 	}
 	//WriteCompletionHandle 
-	void completed(size_t count , ByteBuffer buffer, void* attachment)
+	void completed(void* attachment, size_t count , ByteBuffer buffer )
 	{
-
-        // _master._client.close();
-        _master.doRead();
-
+        _master._client.close();
 	}
 	void failed(void* attachment)
 	{
-		writeln("server write failed!",_master._client.getFd());
+
 	}
 private:
 	TcpServer _master;
@@ -44,16 +41,15 @@ class ReadHandle : ReadCompletionHandle{
 		_master = master;
 	}
 	//ReadCompletionHandle 
-	override void completed(size_t count , ByteBuffer buffer,void* attachment)
+	override void completed(void* attachment, size_t count , ByteBuffer buffer)
 	{
-        writeln("server read ", cast(string)buffer.getCurBuffer());
         string s = "HTTP/1.1 200 OK\r\nServer: kissAIO\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\nhelloworld";
         _master.doWrite(cast(byte[])s);
 
 	}
 	override void failed(void* attachment)
 	{
-		writeln("server read failed!",_master._client.getFd());
+
 	}
 private:
 	TcpServer _master;
@@ -113,51 +109,36 @@ class TcpAccept : AcceptCompletionHandle{
 public:
     this(string ip, ushort port, AsynchronousChannelThreadGroup group)
     {
-       
-      
-
-        clientCount = 0;
-
+    
         //socket listen 
         AsynchronousServerSocketChannel serverSocket = AsynchronousServerSocketChannel.open(group);
         serverSocket.bind(ip, port);
         serverSocket.accept(null, this);
     }
-    override void completed(AsynchronousSocketChannel result , void* attachment)
+    override void completed(void* attachment, AsynchronousSocketChannel result)
     {
         TcpServer client = new TcpServer(result);
         client.doRead();
-        addClient(client);
-
+        
     }
     override void failed(void* attachment)
     {
         writeln("server accept failed ");
     }
-
-
-    void addClient(TcpServer client)
-    {
-        clientCount ++;
-    }
-   
-
-private:
-
-    int clientCount;
-
 }
+
 
 
 
 void main()
 {
-    int threadNum = 4;
+    int threadNum = totalCPUs;
     AsynchronousChannelThreadGroup group = AsynchronousChannelThreadGroup.open(10,threadNum);
     for(int i = 0; i < threadNum; i++)
     {
-        TcpAccept accept = new TcpAccept("0.0.0.0",20000,group);
+        TcpAccept accept = new TcpAccept("0.0.0.0",20001,group);
     }
+    writeln("please open http://0.0.0.0:20001/ on your browser");
     group.start();
     group.wait();
 }

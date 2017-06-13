@@ -50,46 +50,47 @@ public:
         if (isConnected())
         {
             if (errno() == EBADF)
-                onFailed(_handleAttachment);
+                onFailed(AIOEventType.OP_CONNECTED ,_handleAttachment);
             else 
-                onCompleted(_handleAttachment);
+                onCompleted(AIOEventType.OP_CONNECTED ,_handleAttachment);
+            _channel.unRegisterOp(AIOEventType.OP_CONNECTED);
             return true;
         }
         else if (isWriteed()) 
         {   
-            if (_attachment is null)
+            if (_writeBuffer is null)
             {
                 log(LogLevel.warning , "write buffer is null");
-                onFailed(_handleAttachment);
+                onFailed(AIOEventType.OP_WRITEED ,_handleAttachment);
                 return false;
             }
-            long n = _attachment.getCurBuffer().length;
+            long n = _writeBuffer.getCurBuffer().length;
             long len;
 
             while(n > 0)
             {
                 //TODO 写失败
-                len = _channel.socket().send(_attachment.getCurBuffer());
+                len = _channel.socket().send(_writeBuffer.getCurBuffer());
                 if (len < n) 
                 {
                     int err = errno(); 
                     if (len == -1 && errno != EAGAIN) 
                     {
                         log(LogLevel.warning , "write failed");
-                        onFailed(_handleAttachment);
+                        onFailed(AIOEventType.OP_WRITEED ,_handleAttachment);
                         return false;
                     }
                     n -= len;
-                    _attachment.offsetLimit(len);
+                    _writeBuffer.offsetLimit(len);
                     break;
                 }
                 n -= len;
-                _attachment.offsetLimit(len);
+                _writeBuffer.offsetLimit(len);
             }
-            onCompleted(cast(void*)_attachment.getPosition(), cast(void*)_attachment, cast(void*)_handleAttachment);
+            onCompleted(AIOEventType.OP_WRITEED , cast(void*)_handleAttachment, cast(void*)_writeBuffer.getPosition(), cast(void*)_writeBuffer);
             return true;
         }
-        return false;
+        return true;
     }
     override bool onRead() {
         if (isAccepted())
@@ -97,28 +98,29 @@ public:
             AsynchronousSocketChannel client = AsynchronousSocketChannel.open(_channel.getGroup(), _selector);
             client.setOpen(true);
             client.setSocket((cast(AsynchronousServerSocketChannel)_channel).socket().accept());
-            onCompleted(cast(void*)client, _handleAttachment);
+
+            onCompleted(AIOEventType.OP_ACCEPTED , _handleAttachment ,cast(void*)client);
             return true;
         }
         else if (isReaded()) 
         {
-            if (_attachment is null)
+            if (_readBuffer is null)
             {
                 log(LogLevel.warning , "read buffer is null");
-                onFailed(_handleAttachment);
+                onFailed(AIOEventType.OP_READED ,_handleAttachment);
                 return false;
             }
             long len;
-            while((len = _channel.socket().receive(_attachment.getLeftBuffer())) > 0)
+            while((len = _channel.socket().receive(_readBuffer.getLeftBuffer())) > 0)
             {
-                _attachment.offsetPos(len);
+                _readBuffer.offsetPos(len);
             }
             int err = errno(); 
 
             if (len == -1 && EAGAIN != err)
             {
                 log(LogLevel.warning , "read failed");
-                onFailed(_handleAttachment);
+                onFailed(AIOEventType.OP_READED ,_handleAttachment);
                 return false;
             }
             // else if( len == 0)
@@ -129,11 +131,11 @@ public:
             // }
             else 
             {
-                onCompleted(cast(void*)_attachment.getPosition(), cast(void*)_attachment, cast(void*)_handleAttachment);
+                onCompleted(AIOEventType.OP_READED, cast(void*)_handleAttachment, cast(void*)_readBuffer.getPosition(), cast(void*)_readBuffer);
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
     override bool onClose() {
@@ -150,11 +152,6 @@ public:
 
     @property AsynchronousChannelBase channel(){return _channel;}
     @property void channel(AsynchronousChannelBase ch){_channel = ch;}
-
-
-    @property ByteBuffer attachment(){return _attachment;}
-    @property void attachment(ByteBuffer obj){_attachment = obj;}
-
 
     @property void* handle(){return _handle;}
     @property void handle(void* obj){ _handle = obj; }
@@ -176,43 +173,33 @@ public:
         {
             _selector._poll.modEvent(this,  _channel.getFd(),  ops);
         }
-
     }
+
+public:
+    ByteBuffer _readBuffer;
+    ByteBuffer _writeBuffer;
 
 
 private:
-    void onCompleted(void* param1, void* param2 = null, void* param3 = null)
+    void onCompleted(AIOEventType op, void* attachment, void* param1 = null, void* param2 = null)
     {
-        if (isConnected())
-            (cast(ConnectCompletionHandle)_handle).completed(param1);
-        else if(isWriteed())
-            (cast(WriteCompletionHandle)_handle).completed(cast(size_t)param1, cast(ByteBuffer)param2, param3);
-        else if(isReaded())
-            (cast(ReadCompletionHandle)_handle).completed(cast(size_t)param1, cast(ByteBuffer)param2, param3);
-        else if(isAccepted())
-            (cast(AcceptCompletionHandle)_handle).completed(cast(AsynchronousSocketChannel)param1, param2);    
+        // writeln("onCompleted op=",op,_channel.getFd());
+        (cast(AsynchronousChannelBase)_handle).completed(op, attachment, param1, param2);
     }
-    void onFailed(void* attachment)
+    void onFailed(AIOEventType op, void* attachment)
     {
-        if (isConnected())
-            (cast(ConnectCompletionHandle)_handle).failed(attachment);
-        else if(isWriteed())
-            (cast(WriteCompletionHandle)_handle).failed(attachment);
-        else if(isReaded())
-            (cast(ReadCompletionHandle)_handle).failed(attachment);
-        else if(isAccepted())
-            (cast(AcceptCompletionHandle)_handle).failed(attachment);
+        (cast(AsynchronousChannelBase)_handle).failed(op, attachment);
     }
 
 
 private:
     AsynchronousChannelSelector _selector;
     AsynchronousChannelBase _channel;
-    ByteBuffer _attachment;
+
+
     void* _handle;
     void* _handleAttachment;
-    //当新连接建立时,绑定一个work线程,并且之后一直在此线程上读写,保证线程安全的.
-    Thread _masterThread;
+
 
 
 }

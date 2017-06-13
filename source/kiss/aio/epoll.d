@@ -9,8 +9,11 @@
  *
  */
 
-module kiss.aio.epoll;
-import kiss.aio.SelectionKey;
+module kiss.aio.Epoll;
+
+import kiss.aio.Event;
+import kiss.aio.AbstractPoll;
+
 import std.experimental.logger;
 import std.conv;
 import core.stdc.errno;
@@ -18,6 +21,14 @@ import core.stdc.string;
 import std.stdio;
 import std.string;
 import core.thread;
+import core.sys.posix.unistd;
+
+
+
+import kiss.aio.AsynchronousSocketChannel;
+import kiss.aio.CompletionHandle;
+import kiss.aio.AsynchronousServerSocketChannel;
+
 
 
 
@@ -55,8 +66,7 @@ extern(C){
 		EPOLLPRI = 0x002,
 		EPOLLOUT = 0x004,
 		EPOLLRDNORM = 0x040,
-		EPOLLRDBAND = 0x080,
-		EPOLLWRNORM = 0x100,
+		EPOLLRDBAND = 0x080,EPOLLWRNORM = 0x100,
 		EPOLLWRBAND = 0x200,
 		EPOLLMSG = 0x400,
 		EPOLLERR = 0x008,
@@ -77,12 +87,7 @@ extern(C){
 	import std.experimental.logger.core;
 }
 
-
-
-
-
-
-class Epoll {
+class Epoll  : AbstractPoll{
 
     this()
     {
@@ -93,37 +98,43 @@ class Epoll {
             log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
         }
     }
-
     ~this()
     {
         close(_epollFd);
     }
-    bool opEvent(SelectionKey key  , int fd, int op , int type)
+    bool opEvent(Event event  , int fd, int op , int type)
 	{
 		epoll_event ev;
 		uint mask = 0;
-		if(type & SelectionKey.OP_READ) 
-			mask = EPOLL_EVENTS.EPOLLIN;
-        else if(type & SelectionKey.OP_CONNECT) 
-			mask = EPOLL_EVENTS.EPOLLOUT;
-        else if(type & SelectionKey.OP_ACCEPT) 
-			mask = EPOLL_EVENTS.EPOLLIN;
-		else if(type & SelectionKey.OP_WRITE) 
-			mask = EPOLL_EVENTS.EPOLLOUT;
 
+
+		if(type & AIOEventType.OP_ACCEPTED) 
+			mask = EPOLL_EVENTS.EPOLLIN;
+		else if(type & AIOEventType.OP_READED || type & AIOEventType.OP_WRITEED)
+			mask =  EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLIN | EPOLL_EVENTS.EPOLLOUT;
+		else if(type & AIOEventType.OP_CONNECTED)
+			mask =  EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLOUT;
+		else if(type & AIOEventType.OP_ERROR)
+			mask = EPOLL_EVENTS.EPOLLERR; 
 		
-
-
-
-		ev.events = mask;
-
-        
-        ev.data.ptr = cast(void *)key;
-      
+		// if (op == EPOLL_CTL_MOD) {
+		// 	ev.events |= mask;
+		// }
+		// else 
+		{
+			if (op == EPOLL_CTL_ADD)
+				_mapEvents[fd]  = event;
+			else if (op == EPOLL_CTL_DEL)
+				_mapEvents.remove(fd);
+			ev.events = mask;
+		}
+        ev.data.ptr = cast(void *)event;
+		ev.data.fd = fd;
+	
 
 		if(epoll_ctl(_epollFd , op , fd , &ev) < 0)
 		{
-		import std.conv;
+		    import std.conv;
 			int err = errno();
 			log(LogLevel.error , to!string(op) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 			return false;
@@ -134,47 +145,114 @@ class Epoll {
 	}
 
 
-    bool addEvent(SelectionKey key , int fd ,  int type) 
+    override bool addEvent(Event event , int fd ,  int type) 
 	{
-		return opEvent(key , fd ,  EPOLL_CTL_ADD , type);
+		return opEvent(event , fd ,  EPOLL_CTL_ADD , type);
 	}
 
-	bool delEvent(SelectionKey key , int fd , int type)
+	override bool delEvent(Event event , int fd , int type)
 	{
-		return opEvent(key , fd , EPOLL_CTL_DEL , type);
+		return opEvent(event , fd , EPOLL_CTL_DEL , type);
 	}
 
-	bool modEvent(SelectionKey key , int fd , int type)
+	override bool modEvent(Event event , int fd , int type)
 	{
-		return opEvent(key ,fd ,  EPOLL_CTL_MOD , type);
+		return opEvent(event ,fd ,  EPOLL_CTL_MOD , type);
 	}
 
 
 
-    int poll(int milltimeout)
+
+    override int poll(int milltimeout)
 	{
-        //TODO
-		// scope(exit) _wheeltimer.poll();
 		int result = epoll_wait(_epollFd , _pollEvents.ptr , _pollEvents.length , milltimeout);
 		if(result < 0)
 		{
-
 			int err = errno();
 			if(err == EINTR)
 				return -1;
-
 			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 			return -1;
 		}
+
+        for(int i = 0; i < result; i++)
+        {
+
+			int fd = _pollEvents[i].data.fd;
+			Event* event = null;
+			event = (fd in _mapEvents);
+			if(event == null)
+			{
+				log(LogLevel.warning , "fd:" ~ to!string(fd) ~ " maybe close by others");
+				continue;
+			}
+			
+			
+
+			bool needDel = false;
+			uint mask = _pollEvents[i].events;
+
+
+			if(mask &( EPOLL_EVENTS.EPOLLERR | EPOLL_EVENTS.EPOLLHUP))
+			{
+				if (event.onClose())
+				{
+					delete event;
+					continue;
+				}
+			}
+
+			if(mask & EPOLL_EVENTS.EPOLLIN)
+			{
+				if(!event.onRead())
+				{
+					if (event.onClose())
+					{
+						delete event;
+						continue;
+					}
+				}
+			}
+
+			if(mask & EPOLL_EVENTS.EPOLLOUT)
+			{
+
+				if(!event.onWrite())
+				{
+					if (event.onClose())
+					{
+						delete event;
+						continue;
+					}
+				}
+			}
+			
+			if(event.isReadyClose() )
+			{	
+				if (event.onClose())
+				{
+					delete event;
+					continue;
+				}
+			}
+
+        }
+
 		return result;
 	}
 
-    epoll_event getEpollEvent(int index){ 
-        return _pollEvents[index];
-    }
+	override void wakeUp()
+	{
+		ulong ul = 1;
+        core.sys.posix.unistd.write(_epollFd,  & ul, ul.sizeof);
+	}
+
 
 private:
     int _epollFd;
     private epoll_event[256] 	_pollEvents;
+	private Event[int]  		_mapEvents;
 
 }
+
+

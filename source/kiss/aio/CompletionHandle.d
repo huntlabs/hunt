@@ -12,29 +12,36 @@
 module kiss.aio.CompletionHandle;
 import kiss.aio.AsynchronousSocketChannel;
 import kiss.aio.ByteBuffer;
+import kiss.aio.Event;
 
 
 
 interface AcceptCompletionHandle 
 {
-    void completed(AsynchronousSocketChannel result , void* attachment);
+    void completed(void* attachment, AsynchronousSocketChannel result);
     void failed(void* attachment);
 }
 
 interface ConnectCompletionHandle 
 {
-    void completed( void* attachment);
+    void completed(void* attachment);
     void failed(void* attachment);
 }
 
 interface ReadCompletionHandle 
 {
-    void completed(size_t count , ByteBuffer buffer,void* attachment);
+    void completed(void* attachment, size_t count , ByteBuffer buffer);
     void failed(void* attachment);
 }
 
 interface WriteCompletionHandle 
 {
-    void completed(size_t count , ByteBuffer buffer, void* attachment);
+    void completed(void* attachment, size_t count , ByteBuffer buffer);
     void failed(void* attachment);
+}
+
+
+interface CompletionHandle {
+    void completed(AIOEventType eventType, void* attachment, void* p1 = null, void* p2 = null);
+    void failed(AIOEventType eventType, void* attachment);
 }

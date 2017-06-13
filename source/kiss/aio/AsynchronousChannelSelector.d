@@ -28,8 +28,8 @@ public:
         _isRunning = false;
         version(linux)
         {
-            import kiss.aio.EpollA;
-            _poll = new EpollA();
+            import kiss.aio.Epoll;
+            _poll = new Epoll();
         }
         super(&run);
     }
@@ -51,8 +51,8 @@ public:
         log(LogLevel.info , _threadID.to!string ~ " thread started");
         while(_isRunning)
         {
-            _poll.poll(_timeout);
             doTaskList();
+            _poll.poll(_timeout);
         }
         _threadID = ThreadID.init;
         _isRunning = false;
