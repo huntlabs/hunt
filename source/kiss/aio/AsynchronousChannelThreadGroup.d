@@ -17,7 +17,7 @@ import std.parallelism;
 import std.experimental.logger.core;
 
 
-// 0 初始化状态 1 已绑定未启动 2 已启动
+
 int WORK_THREAD_INIT = 0;
 int WORK_THREAD_READY = 1;
 int WORK_THREAD_RUN = 2;
@@ -102,7 +102,7 @@ public:
     AsynchronousChannelSelector getWorkSelector()
     {
         synchronized(this){
-            ulong r = cast(ulong)(_workIndex % _workerNum);
+            uint r = cast(uint)(_workIndex % _workerNum);
             _workIndex ++ ;
             if(_workerPool[r].status == WORK_THREAD_INIT)
                 _workerPool[r].status = WORK_THREAD_READY;

@@ -69,7 +69,7 @@ public:
 
             while(n > 0)
             {
-                //TODO 写失败
+                //TODO write failed
                 len = _channel.socket().send(_writeBuffer.getCurBuffer());
                 if (len < n) 
                 {
@@ -183,7 +183,6 @@ public:
 private:
     void onCompleted(AIOEventType op, void* attachment, void* param1 = null, void* param2 = null)
     {
-        // writeln("onCompleted op=",op,_channel.getFd());
         (cast(AsynchronousChannelBase)_handle).completed(op, attachment, param1, param2);
     }
     void onFailed(AIOEventType op, void* attachment)

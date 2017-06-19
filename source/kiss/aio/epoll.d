@@ -25,10 +25,6 @@ import core.sys.posix.unistd;
 
 
 
-import kiss.aio.AsynchronousSocketChannel;
-import kiss.aio.CompletionHandle;
-import kiss.aio.AsynchronousServerSocketChannel;
-
 
 
 
@@ -117,17 +113,12 @@ class Epoll  : AbstractPoll{
 		else if(type & AIOEventType.OP_ERROR)
 			mask = EPOLL_EVENTS.EPOLLERR; 
 		
-		// if (op == EPOLL_CTL_MOD) {
-		// 	ev.events |= mask;
-		// }
-		// else 
-		{
-			if (op == EPOLL_CTL_ADD)
-				_mapEvents[fd]  = event;
-			else if (op == EPOLL_CTL_DEL)
-				_mapEvents.remove(fd);
-			ev.events = mask;
-		}
+		if (op == EPOLL_CTL_ADD)
+			_mapEvents[fd]  = event;
+		else if (op == EPOLL_CTL_DEL)
+			_mapEvents.remove(fd);
+		ev.events = mask;
+		
         ev.data.ptr = cast(void *)event;
 		ev.data.fd = fd;
 	
@@ -244,7 +235,7 @@ class Epoll  : AbstractPoll{
 	override void wakeUp()
 	{
 		ulong ul = 1;
-        core.sys.posix.unistd.write(_epollFd,  & ul, ul.sizeof);
+		core.sys.posix.unistd.write(_epollFd,  & ul, ul.sizeof);
 	}
 
 

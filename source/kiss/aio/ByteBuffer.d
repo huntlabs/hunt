@@ -44,7 +44,7 @@ public:
             log(LogLevel.warning,"ByteBuffer cache full!!!");
             return;
         }
-        long limit = data.length + _position;
+        size_t limit = data.length + _position;
         limit = min(limit, _capacity);
         _buffer[_position..limit] = data[0..limit];
 		_position = limit;
@@ -79,7 +79,7 @@ public:
 
     void offsetPos(long add)
     {
-        _position = _position + add;
+        _position = _position + cast(size_t)add;
         _position = min(_position,_capacity);
         _position = max(_position,0);
     }
@@ -91,7 +91,7 @@ public:
 
     void offsetLimit(long add)
     {
-        _limit = _limit + add;
+        _limit = _limit + cast(size_t)add;
         _limit = min(_limit,_position);
         _limit = max(_limit,0);
     }

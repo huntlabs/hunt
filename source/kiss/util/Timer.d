@@ -8,3 +8,19 @@
  * Licensed under the Apache-2.0 License.
  *
  */
+
+module kiss.util.Timer;
+
+import kiss.common.Handler;
+
+class Timer {
+
+    this(long delay, Handler!long handler)
+    {
+
+    }
+
+
+
+
+}

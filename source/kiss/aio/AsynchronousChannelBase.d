@@ -92,9 +92,6 @@ class AsynchronousChannelBase : CompletionHandle
 				if (empty)
 					registerWriteData(data);
 			}
-			
-			// register(cast(int)AIOEventType.OP_WRITEED, cast(void*)handle, attachment, buffer);
-		
 		}
 		
 
@@ -118,12 +115,10 @@ class AsynchronousChannelBase : CompletionHandle
 						registerWriteData(_writeBufferQueue.front());
 					else 
 					{
-						//写入队列为空,注销intrest OP_WRITEED
+						//unRegisterOp OP_WRITEED when writelist is empty
 						unRegisterOp(AIOEventType.OP_WRITEED);
 					}
 				}
-				// _writeHandle.completed(attachment, cast(size_t)p1, cast(ByteBuffer)p2);
-				
 			}
 		}
     	override void failed(AIOEventType eventType, void* attachment)
@@ -148,11 +143,9 @@ class AsynchronousChannelBase : CompletionHandle
 					}
 					else
 					{
-						//写入队列为空,注销intrest OP_WRITEED
+						//unRegisterOp OP_WRITEED when writelist is empty
 						unRegisterOp(AIOEventType.OP_WRITEED);
 					}
-
-					// _writeHandle.failed(attachment);
 				}
 			}
 		}
@@ -250,7 +243,6 @@ class AsynchronousChannelBase : CompletionHandle
 		}
 		else if (ops == AIOEventType.OP_WRITEED)
 		{
-			// _writeHandle = cast(WriteCompletionHandle)handle;
 			_key._writeBuffer = obj;
 		}
 
@@ -295,7 +287,6 @@ class AsynchronousChannelBase : CompletionHandle
 
 	private
 	{
-		// WriteCompletionHandle _writeHandle;
 		AcceptCompletionHandle _acceptHandle;
 		ConnectCompletionHandle _connectHandle;
 		ReadCompletionHandle _readHandle;
