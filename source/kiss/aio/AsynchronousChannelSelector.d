@@ -13,6 +13,7 @@ module kiss.aio.AsynchronousChannelSelector;
 
 import kiss.aio.AbstractPoll;
 import kiss.aio.task;
+import kiss.aio.Event;
 
 import core.thread;
 import std.experimental.logger.core;
@@ -118,6 +119,21 @@ public:
             return true;
         return _threadID == Thread.getThis.id();
     }
+
+    bool addEvent(Event event, int fd, int type)
+    {
+        return _poll.addEvent(event, fd, type);
+    }
+	bool delEvent(Event event, int fd, int type)
+    {
+        return _poll.delEvent(event, fd, type);
+    }
+	bool modEvent(Event event, int fd, int type)
+    {
+        return _poll.modEvent(event, fd, type);
+    }
+
+
 public:
     AbstractPoll _poll;
 private:

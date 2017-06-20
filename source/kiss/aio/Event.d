@@ -11,13 +11,6 @@
 
 module kiss.aio.Event;
 
-enum IOEventType
-{
-	IO_EVENT_NONE = 0,
-	IO_EVENT_READ = 1 << 0,
-	IO_EVENT_WRITE = 1 << 1,
-	IO_EVENT_ERROR = 1 << 2
-}
 
 
 enum AIOEventType
@@ -37,6 +30,5 @@ interface Event
 	bool onWrite();
     bool onRead();
     bool onClose();
-
 	bool isReadyClose();
 }

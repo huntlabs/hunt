@@ -52,6 +52,7 @@ extern(C){
 	
 	
 	import std.conv : octal;
+	import core.sys.posix.time;
 	enum {
 		EPOLL_CLOEXEC = octal!"2000000",
 		EPOLL_NONBLOCK = octal!"4000"
@@ -78,6 +79,14 @@ extern(C){
 		timeout);
 	int close(int fd);
 	
+	int timerfd_create(int clockid, int flags);
+	int timerfd_settime(int fd, int flags, const itimerspec * new_value, itimerspec * old_value);
+	int timerfd_gettime(int fd, itimerspec * curr_value);
+
+	enum TFD_TIMER_ABSTIME = 1 << 0;
+	enum TFD_CLOEXEC = 0x80000;
+	enum TFD_NONBLOCK = 0x800;
+
 	import core.sys.posix.sys.time;
 	import core.stdc.errno;
 	import std.experimental.logger.core;

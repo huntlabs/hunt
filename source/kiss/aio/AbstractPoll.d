@@ -13,12 +13,12 @@
 
  import kiss.aio.Event;
 
- class AbstractPoll {
-    abstract int poll(int milltimeout);
-    abstract void wakeUp();
-    abstract bool addEvent(Event event , int fd ,  int type);
-	abstract bool delEvent(Event event , int fd , int type);
-	abstract bool modEvent(Event event , int fd , int type);
+ interface  AbstractPoll {
+    int poll(int milltimeout);
+    void wakeUp();
+    bool addEvent(Event event , int fd ,  int type);
+	bool delEvent(Event event , int fd , int type);
+	bool modEvent(Event event , int fd , int type);
  }
  
     

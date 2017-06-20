@@ -186,7 +186,7 @@ class AsynchronousChannelBase : CompletionHandle
 
 		bool onClose()
 		{
-			_selector._poll.delEvent(_key , _socket.handle , AIOEventType.OP_NONE);
+			_selector.delEvent(_key , _socket.handle , AIOEventType.OP_NONE);
 			_socket.close();
 			synchronized (this)
 			{

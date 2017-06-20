@@ -167,11 +167,11 @@ public:
     {
         if (isNew)
         {
-            _selector._poll.addEvent(this,  _channel.getFd(),  ops);
+            _selector.addEvent(this,  _channel.getFd(),  ops);
         }
         else 
         {
-            _selector._poll.modEvent(this,  _channel.getFd(),  ops);
+            _selector.modEvent(this,  _channel.getFd(),  ops);
         }
     }
 
