@@ -13,6 +13,7 @@ module kiss.util.Timer;
 
 import kiss.aio.AsynchronousChannelSelector;
 import kiss.aio.Event;
+import kiss.util.Common;
 
 import core.memory;
 import core.sys.posix.time;
@@ -31,8 +32,8 @@ public:
         if (selector is null) {
             Thread thread = Thread.getThis();
             if (typeid(thread) == typeid(AsynchronousChannelSelector))
-                throw new Exception("Timer must create in io thread!!!");
-            return new Timer(cast(AsynchronousChannelSelector)thread);
+                return new Timer(cast(AsynchronousChannelSelector)thread);
+            throw new Exception("Timer must create in io thread!!!");
         }   
         else {
             return new Timer(selector);
@@ -50,7 +51,7 @@ public:
         _handler = handler;
         _loop = loop;
         _readyClose = false;
-        version(linux) {
+        static if (IOMode == IO_MODE.epoll) {
             import kiss.aio.Epoll;
 
             _timerId = cast(int)timerfd_create(CLOCK_REALTIME, TFD_NONBLOCK | TFD_CLOEXEC);
@@ -86,7 +87,7 @@ public:
     }
     override bool onRead()
     {
-        version(linux) {
+        static if (IOMode == IO_MODE.epoll) {
             import core.sys.posix.unistd;
             ulong value;
             read(_timerId, &value, 8);
@@ -96,7 +97,7 @@ public:
     }
     override bool onClose()
     {
-        version(linux)
+        static if (IOMode == IO_MODE.epoll)
         {
             import core.sys.posix.unistd;
             _selector.delEvent(this , _timerId, AIOEventType.OP_NONE);

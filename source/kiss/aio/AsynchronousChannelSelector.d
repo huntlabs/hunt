@@ -14,6 +14,7 @@ module kiss.aio.AsynchronousChannelSelector;
 import kiss.aio.AbstractPoll;
 import kiss.aio.task;
 import kiss.aio.Event;
+import kiss.util.Common;
 
 import core.thread;
 import std.experimental.logger.core;
@@ -27,7 +28,7 @@ public:
     {
         _timeout = timeout;
         _isRunning = false;
-        version(linux)
+        static if (IOMode == IO_MODE.epoll)
         {
             import kiss.aio.Epoll;
             _poll = new Epoll();

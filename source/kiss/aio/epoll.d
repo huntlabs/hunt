@@ -13,6 +13,7 @@ module kiss.aio.Epoll;
 
 import kiss.aio.Event;
 import kiss.aio.AbstractPoll;
+import kiss.util.Common;
 
 import std.experimental.logger;
 import std.conv;
@@ -27,8 +28,9 @@ import core.sys.posix.unistd;
 
 
 
+static if (IOMode == IO_MODE.epoll) {
 
-//version(linux):
+
 extern(C){
 	alias int c_int;
 	alias uint uint32_t;
@@ -92,10 +94,11 @@ extern(C){
 	import std.experimental.logger.core;
 }
 
-class Epoll  : AbstractPoll{
+class Epoll : AbstractPoll{
 
-    this()
+    this(int eventNum = 256)
     {
+		_pollEvents.length = eventNum;
         _epollFd = epoll_create1(0);
         if (_epollFd < 0)
         {
@@ -165,7 +168,7 @@ class Epoll  : AbstractPoll{
 
     override int poll(int milltimeout)
 	{
-		int result = epoll_wait(_epollFd , _pollEvents.ptr , _pollEvents.length , milltimeout);
+		int result = epoll_wait(_epollFd , _pollEvents.ptr , cast(int)_pollEvents.length , milltimeout);
 		if(result < 0)
 		{
 			int err = errno();
@@ -250,9 +253,7 @@ class Epoll  : AbstractPoll{
 
 private:
     int _epollFd;
-    private epoll_event[256] 	_pollEvents;
-	private Event[int]  		_mapEvents;
-
+    private epoll_event[] _pollEvents;
+	private Event[int] _mapEvents;
 }
-
-
+}

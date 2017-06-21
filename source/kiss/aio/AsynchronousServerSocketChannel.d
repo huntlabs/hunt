@@ -17,6 +17,7 @@ import kiss.aio.AsynchronousChannelBase;
 import kiss.aio.ByteBuffer;
 import kiss.aio.AsynchronousChannelThreadGroup;
 import kiss.aio.Event;
+import kiss.util.Common;
 import std.conv;
 import std.socket;
 
@@ -47,7 +48,7 @@ public:
         _socket = new Socket(arr[0].family , arr[0].type , arr[0].protocol);
         
         _socket.setOption(SocketOptionLevel.SOCKET , SocketOption.REUSEADDR , 1);
-        version(linux)
+        static if (IOMode == IO_MODE.epoll)
         {
             //SO_REUSEPORT
             _socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) 15, 1);
