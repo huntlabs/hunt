@@ -100,7 +100,10 @@ class AsynchronousChannelBase : CompletionHandle
 			if (eventType == AIOEventType.OP_ACCEPTED)
 				_acceptHandle.completed(attachment, cast(AsynchronousSocketChannel)p1);
 			else if (eventType == AIOEventType.OP_CONNECTED)
+			{
 				_connectHandle.completed(attachment);
+				unRegisterOp(AIOEventType.OP_CONNECTED);
+			}
 			else if (eventType == AIOEventType.OP_READED)
 				_readHandle.completed(attachment, cast(size_t)p1, cast(ByteBuffer)p2);
 			else if (eventType == AIOEventType.OP_WRITEED)
@@ -126,7 +129,10 @@ class AsynchronousChannelBase : CompletionHandle
 			if (eventType == AIOEventType.OP_ACCEPTED)
 				_acceptHandle.failed(attachment);
 			else if (eventType == AIOEventType.OP_CONNECTED)
+			{
 				_connectHandle.failed(attachment);
+				unRegisterOp(AIOEventType.OP_CONNECTED);
+			}
 			else if (eventType == AIOEventType.OP_READED)
 				_readHandle.failed(attachment);
 			else if (eventType == AIOEventType.OP_WRITEED)
@@ -153,9 +159,7 @@ class AsynchronousChannelBase : CompletionHandle
 
 		public void unRegisterOp(AIOEventType eventType)
 		{
-			int op = intrestOps();
-			op &= ~eventType;
-			intrestOps(op);
+			_intrestOps &= ~eventType;	
 		}
 
 
@@ -178,10 +182,6 @@ class AsynchronousChannelBase : CompletionHandle
 			return _intrestOps;
 		}
 
-		void intrestOps(int op)
-		{
-			_intrestOps = op;
-		}
 
 
 		bool onClose()
@@ -192,7 +192,6 @@ class AsynchronousChannelBase : CompletionHandle
 			{
 				while (!_writeBufferQueue.empty)
 				{
-					writeln("onClose ");
 					WriteBufferData data = _writeBufferQueue.deQueue();
 					(cast(WriteCompletionHandle)(data.handle)).failed(data.attachment);
 				}
@@ -249,7 +248,7 @@ class AsynchronousChannelBase : CompletionHandle
         _key.handle(cast(void*)this);
         _key.handleAttachment(attchment);
         _intrestOps |= ops;
-        _key.interestOps(ops, isNew);
+        _key.interestOps(_intrestOps, isNew);
 
     }
 

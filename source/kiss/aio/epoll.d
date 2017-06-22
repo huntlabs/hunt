@@ -48,10 +48,7 @@ extern(C){
 			epoll_data data;	  /* User data variable */
 	}
 	
-	enum EPOLL_CTL_ADD = 1;
-	enum EPOLL_CTL_DEL = 2;
-	enum EPOLL_CTL_MOD = 3;
-	
+
 	
 	import std.conv : octal;
 	import core.sys.posix.time;
@@ -117,17 +114,18 @@ class Epoll : AbstractPoll{
 
 
 		if(type & AIOEventType.OP_ACCEPTED) 
-			mask = EPOLL_EVENTS.EPOLLIN;
-		else if(type & AIOEventType.OP_READED || type & AIOEventType.OP_WRITEED)
-			mask =  EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLIN | EPOLL_EVENTS.EPOLLOUT;
-		else if(type & AIOEventType.OP_CONNECTED)
-			mask =  EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLOUT;
-		else if(type & AIOEventType.OP_ERROR)
+			mask |= EPOLL_EVENTS.EPOLLIN;
+		if(type & AIOEventType.OP_READED)	
+			mask |= EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLIN;
+		if(type & AIOEventType.OP_WRITEED || type & AIOEventType.OP_CONNECTED)	
+			mask |= EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLOUT;
+		if(type & AIOEventType.OP_ERROR)
 			mask = EPOLL_EVENTS.EPOLLERR; 
 		
-		if (op == EPOLL_CTL_ADD)
+		
+		if (op == EVENT_CTL_ADD)
 			_mapEvents[fd]  = event;
-		else if (op == EPOLL_CTL_DEL)
+		else if (op == EVENT_CTL_DEL)
 			_mapEvents.remove(fd);
 		ev.events = mask;
 		
@@ -150,17 +148,17 @@ class Epoll : AbstractPoll{
 
     override bool addEvent(Event event , int fd ,  int type) 
 	{
-		return opEvent(event , fd ,  EPOLL_CTL_ADD , type);
+		return opEvent(event , fd ,  EVENT_CTL_ADD , type);
 	}
 
 	override bool delEvent(Event event , int fd , int type)
 	{
-		return opEvent(event , fd , EPOLL_CTL_DEL , type);
+		return opEvent(event , fd , EVENT_CTL_DEL , type);
 	}
 
 	override bool modEvent(Event event , int fd , int type)
 	{
-		return opEvent(event ,fd ,  EPOLL_CTL_MOD , type);
+		return opEvent(event ,fd ,  EVENT_CTL_MOD , type);
 	}
 
 
@@ -253,7 +251,7 @@ class Epoll : AbstractPoll{
 
 private:
     int _epollFd;
-    private epoll_event[] _pollEvents;
-	private Event[int] _mapEvents;
+    epoll_event[] _pollEvents;
+	Event[int] _mapEvents;
 }
 }

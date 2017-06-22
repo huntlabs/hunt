@@ -13,6 +13,11 @@ enum IO_MODE
     none
 }
 
+enum EVENT_CTL_ADD = 1;
+enum EVENT_CTL_DEL = 2;
+enum EVENT_CTL_MOD = 3;
+
+
 version (FreeBSD)
 {
     enum IO_MODE IOMode = IO_MODE.kqueue;
