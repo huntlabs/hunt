@@ -43,7 +43,8 @@ class ReadHandle : ReadCompletionHandle{
 	//ReadCompletionHandle 
 	override void completed(void* attachment, size_t count , ByteBuffer buffer)
 	{
-        string s = "HTTP/1.1 200 OK\r\nServer: kissAIO\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\nhelloworld";
+        // string s = "HTTP/1.1 200 OK\r\nServer: kissAIO\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\nhelloworld";
+        string s = "HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\nContent-Type: text/plain; charset=UTF-8\r\nServer: KissAio\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\rHello, World!";
         _master.doWrite(cast(byte[])s);
 
 	}
