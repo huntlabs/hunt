@@ -161,20 +161,6 @@ public:
     @property void handleAttachment(void* obj){ _handleAttachment = obj; }
     
 
-
-
-    void interestOps(int ops, bool isNew)
-    {
-        if (isNew)
-        {
-            _selector.addEvent(this,  _channel.getFd(),  ops);
-        }
-        else 
-        {
-            _selector.modEvent(this,  _channel.getFd(),  ops);
-        }
-    }
-
 public:
     ByteBuffer _readBuffer;
     ByteBuffer _writeBuffer;

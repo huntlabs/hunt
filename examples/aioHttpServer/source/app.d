@@ -13,6 +13,7 @@ import std.socket;
 import std.stdio;
 import core.thread;
 import std.parallelism;
+import std.string;
 
 
 class WriteHandle : WriteCompletionHandle{
@@ -43,10 +44,8 @@ class ReadHandle : ReadCompletionHandle{
 	//ReadCompletionHandle 
 	override void completed(void* attachment, size_t count , ByteBuffer buffer)
 	{
-        // string s = "HTTP/1.1 200 OK\r\nServer: kissAIO\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\nhelloworld";
-        string s = "HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\nContent-Type: text/plain; charset=UTF-8\r\nServer: KissAio\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\rHello, World!";
+        string s = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nconnection: close\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
         _master.doWrite(cast(byte[])s);
-
 	}
 	override void failed(void* attachment)
 	{
@@ -134,7 +133,7 @@ public:
 void main()
 {
     int threadNum = totalCPUs;
-    AsynchronousChannelThreadGroup group = AsynchronousChannelThreadGroup.open(10,threadNum);
+    AsynchronousChannelThreadGroup group = AsynchronousChannelThreadGroup.open(5,threadNum);
     for(int i = 0; i < threadNum; i++)
     {
         TcpAccept accept = new TcpAccept("0.0.0.0",20001,group);

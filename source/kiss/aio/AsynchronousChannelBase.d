@@ -134,24 +134,20 @@ class AsynchronousChannelBase : CompletionHandle
 				unRegisterOp(AIOEventType.OP_CONNECTED);
 			}
 			else if (eventType == AIOEventType.OP_READED)
+			{
 				_readHandle.failed(attachment);
+				unRegisterOp(AIOEventType.OP_READED);
+			}
 			else if (eventType == AIOEventType.OP_WRITEED)
 			{
 				synchronized (this)
 				{
-					WriteBufferData data = _writeBufferQueue.front();
-					(cast(WriteCompletionHandle)data.handle).failed(attachment);
-					if (!_writeBufferQueue.empty())
+					while (!_writeBufferQueue.empty())
 					{
-						_writeBufferQueue.deQueue();
-						registerWriteData(_writeBufferQueue.front());
-
+						WriteBufferData data = _writeBufferQueue.deQueue();
+						(cast(WriteCompletionHandle)(data.handle)).failed(data.attachment);
 					}
-					else
-					{
-						//unRegisterOp OP_WRITEED when writelist is empty
-						unRegisterOp(AIOEventType.OP_WRITEED);
-					}
+					unRegisterOp(AIOEventType.OP_WRITEED);
 				}
 			}
 		}
@@ -190,7 +186,7 @@ class AsynchronousChannelBase : CompletionHandle
 			_socket.close();
 			synchronized (this)
 			{
-				while (!_writeBufferQueue.empty)
+				while (!_writeBufferQueue.empty())
 				{
 					WriteBufferData data = _writeBufferQueue.deQueue();
 					(cast(WriteCompletionHandle)(data.handle)).failed(data.attachment);
@@ -248,7 +244,12 @@ class AsynchronousChannelBase : CompletionHandle
         _key.handle(cast(void*)this);
         _key.handleAttachment(attchment);
         _intrestOps |= ops;
-        _key.interestOps(_intrestOps, isNew);
+		if (isNew) {
+            _selector.addEvent(_key,  _socket.handle,  _intrestOps);
+        }
+        else {
+            _selector.modEvent(_key,  _socket.handle,  _intrestOps);
+        }
 
     }
 
