@@ -129,7 +129,7 @@ class Epoll : AbstractPoll{
 			_mapEvents.remove(fd);
 		ev.events = mask;
 		
-        ev.data.ptr = cast(void *)event;
+        // ev.data.ptr = cast(void *)event;
 		ev.data.fd = fd;
 	
 
@@ -190,7 +190,6 @@ class Epoll : AbstractPoll{
 			
 			
 
-			bool needDel = false;
 			uint mask = _pollEvents[i].events;
 
 

@@ -16,7 +16,7 @@ import std.parallelism;
 import std.string;
 
 
-class WriteHandle : WriteCompletionHandle{
+class WriteHandle : WriteCompletionHandle {
 	this(TcpServer master)
 	{
 		_master = master;
@@ -24,7 +24,8 @@ class WriteHandle : WriteCompletionHandle{
 	//WriteCompletionHandle 
 	void completed(void* attachment, size_t count , ByteBuffer buffer )
 	{
-        _master._client.close();
+        if (_master._needClose)
+            _master._client.close();
 	}
 	void failed(void* attachment)
 	{
@@ -36,7 +37,7 @@ private:
 
 
 
-class ReadHandle : ReadCompletionHandle{
+class ReadHandle : ReadCompletionHandle {
 	this(TcpServer master)
 	{
 		_master = master;
@@ -44,7 +45,13 @@ class ReadHandle : ReadCompletionHandle{
 	//ReadCompletionHandle 
 	override void completed(void* attachment, size_t count , ByteBuffer buffer)
 	{
-        string s = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nconnection: close\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+        string readBufer = cast(string)(buffer.getCurBuffer());
+        if (indexOf(readBufer, "HTTP/1.1") >= 0)
+            _master._needClose = false;
+        else 
+            _master._needClose = true;
+            
+        string s = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
         _master.doWrite(cast(byte[])s);
 	}
 	override void failed(void* attachment)
@@ -71,6 +78,8 @@ public:
         bufferRead = ByteBuffer.allocate(200);
         bufferWrite = ByteBuffer.allocate(200);
 
+        _needClose = false;
+
     }
     ~this()
     {
@@ -96,6 +105,10 @@ public:
 
     AsynchronousSocketChannel _client;
 
+
+public:
+    bool _needClose;
+
 private:
     ReadHandle _readHandle;
 	WriteHandle _writeHandle;
@@ -105,7 +118,7 @@ private:
 
 
 
-class TcpAccept : AcceptCompletionHandle{
+class TcpAccept : AcceptCompletionHandle {
 public:
     this(string ip, ushort port, AsynchronousChannelThreadGroup group)
     {

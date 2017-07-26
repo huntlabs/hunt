@@ -26,7 +26,7 @@ import core.thread;
 
 
 
-class AsynchronousSelectionKey : Event{
+class AsynchronousSelectionKey : Event {
 
 public:
 
@@ -74,9 +74,11 @@ public:
                 if (len < n) 
                 {
                     int err = errno(); 
-                    if (len == -1 && errno != EAGAIN) 
+                    if (len == -1 && err != EAGAIN) 
                     {
-                        log(LogLevel.warning , "write failed");
+                        if (err != ECONNRESET)
+                            log(LogLevel.warning , "write failed", err);
+                            
                         onFailed(AIOEventType.OP_WRITEED ,_handleAttachment);
                         return false;
                     }
