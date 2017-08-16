@@ -45,7 +45,7 @@ public:
     {
         string strPort = to!string(port);
         AddressInfo[] arr = getAddressInfo(ip , strPort , AddressInfoFlags.CANONNAME);
-        _socket = new Socket(arr[0].family , arr[0].type , arr[0].protocol);
+        _socket = new Socket(arr[0].family , SocketType.STREAM , ProtocolType.TCP);
         _socket.blocking(false);
 		_socket.connect(arr[0].address);
         setOpen(true);

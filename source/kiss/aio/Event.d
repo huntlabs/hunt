@@ -20,7 +20,14 @@ enum AIOEventType
     OP_READED = 1 << 1,
     OP_WRITEED = 1 << 2,
     OP_CONNECTED = 1 << 3,
-	OP_ERROR = 1 << 4
+}
+
+
+enum EventType {
+    NONE = 0,
+    READ = 1 << 0,
+    WRITE = 1 << 1,
+    TIMER = 1 << 2
 }
 
 

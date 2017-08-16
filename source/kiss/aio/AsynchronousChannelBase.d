@@ -20,6 +20,7 @@ import kiss.aio.CompletionHandle;
 import kiss.aio.Event;
 import kiss.aio.task;
 import kiss.aio.WriteBufferData;
+import kiss.util.Common;
 
 import core.stdc.errno;
 
@@ -153,9 +154,12 @@ class AsynchronousChannelBase : CompletionHandle
 		}
 
 
-		public void unRegisterOp(AIOEventType eventType)
+		public void unRegisterOp(AIOEventType ops)
 		{
-			_intrestOps &= ~eventType;	
+			int newOps = _intrestOps & ~ops;
+			int newWriteAble = getReadWriteAble(newOps);
+			_selector.modEvent(_key,  _socket.handle,  newWriteAble, getReadWriteAble(_intrestOps));
+			_intrestOps = newOps;	
 		}
 
 
@@ -182,8 +186,9 @@ class AsynchronousChannelBase : CompletionHandle
 
 		bool onClose()
 		{
-			_selector.delEvent(_key , _socket.handle , AIOEventType.OP_NONE);
+			_selector.delEvent(_key , _socket.handle, EventType.NONE);
 			_socket.close();
+			setOpen(false);
 			synchronized (this)
 			{
 				while (!_writeBufferQueue.empty())
@@ -191,7 +196,6 @@ class AsynchronousChannelBase : CompletionHandle
 					WriteBufferData data = _writeBufferQueue.deQueue();
 					(cast(WriteCompletionHandle)(data.handle)).failed(data.attachment);
 				}
-				unRegisterOp(AIOEventType.OP_WRITEED);
 			}
 
 			return true;
@@ -210,14 +214,12 @@ class AsynchronousChannelBase : CompletionHandle
 
 	protected void register(int ops, void* handle, void* attchment, ByteBuffer obj = null)
     {
-
         if (!checkVailid(ops))
 		{
             return ;
 		}
 
         bool isNew = false;
-
 
         if (_intrestOps == 0 && _key is null)
         {
@@ -227,10 +229,12 @@ class AsynchronousChannelBase : CompletionHandle
             isNew = true;
         }
 
-		if (ops == AIOEventType.OP_ACCEPTED)
+		if (ops == AIOEventType.OP_ACCEPTED) {
 			_acceptHandle = cast(AcceptCompletionHandle)handle;
-		else if (ops == AIOEventType.OP_CONNECTED)
+		}
+		else if (ops == AIOEventType.OP_CONNECTED) {
 			_connectHandle = cast(ConnectCompletionHandle)handle;
+		}
 		else if (ops == AIOEventType.OP_READED)
 		{
 			_readHandle = cast(ReadCompletionHandle)handle;
@@ -240,18 +244,34 @@ class AsynchronousChannelBase : CompletionHandle
 		{
 			_key._writeBuffer = obj;
 		}
-
+		
         _key.handle(cast(void*)this);
         _key.handleAttachment(attchment);
-        _intrestOps |= ops;
+
+
+		
 		if (isNew) {
-            _selector.addEvent(_key,  _socket.handle,  _intrestOps);
+            _selector.addEvent(_key,  _socket.handle,  getReadWriteAble(ops));
         }
         else {
-            _selector.modEvent(_key,  _socket.handle,  _intrestOps);
+			if (_intrestOps & ops)
+				return;
+			_selector.modEvent(_key,  _socket.handle,  getReadWriteAble(ops), getReadWriteAble(_intrestOps));
         }
+        _intrestOps |= ops;
 
     }
+
+	private int getReadWriteAble(int ops) {
+		int ret = 0;
+		if (ops & AIOEventType.OP_ACCEPTED || ops & AIOEventType.OP_READED)
+			ret |= EventType.READ;
+		if (ops & AIOEventType.OP_CONNECTED || ops & AIOEventType.OP_WRITEED)
+			ret |= EventType.WRITE;
+		return ret;
+	}
+
+
 
 	private void registerWriteData(WriteBufferData data)
 	{	

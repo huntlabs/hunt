@@ -53,3 +53,33 @@ else
     enum IO_MODE IOMode = IO_MODE.select;
     enum CustomTimer = true;
 }
+
+
+static if (IOMode == IO_MODE.epoll) 
+{
+    version (X86) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (X86_64) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (MIPS32) {
+        enum SO_REUSEPORT = 0x0200;
+    }
+    else version (MIPS64) {
+        enum SO_REUSEPORT = 0x0200;
+    }
+    else version (PPC) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (PPC64) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (ARM) {
+        enum SO_REUSEPORT = 15;
+    }
+}
+else static if (IOMode == IO_MODE.kqueue) 
+{
+    enum SO_REUSEPORT = 0x0200;
+}

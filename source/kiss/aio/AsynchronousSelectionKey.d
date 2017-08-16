@@ -18,11 +18,15 @@ import kiss.aio.AsynchronousServerSocketChannel;
 import kiss.aio.ByteBuffer;
 import kiss.aio.CompletionHandle;
 import kiss.aio.Event;
+import kiss.util.Common;
+import kiss.aio.Kqueue;
+
 import std.experimental.logger;
 import core.stdc.errno;
-
 import std.stdio;
 import core.thread;
+import std.socket;
+import core.sys.posix.sys.socket;
 
 
 
@@ -46,7 +50,6 @@ public:
     }
 
     override bool onWrite() {
-
         if (isConnected())
         {
             if (errno() == EBADF)
@@ -60,25 +63,20 @@ public:
         {   
             if (_writeBuffer is null)
             {
-                log(LogLevel.warning , "write buffer is null");
+                trace("write buffer is null");
                 onFailed(AIOEventType.OP_WRITEED ,_handleAttachment);
                 return false;
             }
             long n = _writeBuffer.getCurBuffer().length;
             long len;
-
             while(n > 0)
             {
-                //TODO write failed
                 len = _channel.socket().send(_writeBuffer.getCurBuffer());
                 if (len < n) 
                 {
-                    int err = errno(); 
-                    if (len == -1 && err != EAGAIN) 
+                    if (len == -1 && errno != EAGAIN && errno != EWOULDBLOCK) 
                     {
-                        if (err != ECONNRESET)
-                            log(LogLevel.warning , "write failed", err);
-                            
+                        trace( "write failed", errno);     
                         onFailed(AIOEventType.OP_WRITEED ,_handleAttachment);
                         return false;
                     }
@@ -94,21 +92,28 @@ public:
         }
         return true;
     }
+
     override bool onRead() {
         if (isAccepted())
-        {
-            AsynchronousSocketChannel client = AsynchronousSocketChannel.open(_channel.getGroup(), _selector);
-            client.setOpen(true);
-            client.setSocket((cast(AsynchronousServerSocketChannel)_channel).socket().accept());
-
-            onCompleted(AIOEventType.OP_ACCEPTED , _handleAttachment ,cast(void*)client);
+        {   
+            while(true) {
+                Socket serverSo = (cast(AsynchronousServerSocketChannel)_channel).socket();
+                socket_t fd = cast(socket_t)(.accept(serverSo.handle, null, null));
+                if (fd == socket_t.init)
+                    break;
+                Socket so = new Socket(fd, serverSo.addressFamily);
+                AsynchronousSocketChannel client = AsynchronousSocketChannel.open(_channel.getGroup(), _selector);
+                client.setOpen(true);
+                client.setSocket(so);
+                onCompleted(AIOEventType.OP_ACCEPTED , _handleAttachment ,cast(void*)client);
+            }
             return true;
         }
         else if (isReaded()) 
         {
             if (_readBuffer is null)
             {
-                log(LogLevel.warning , "read buffer is null");
+                trace( "read buffer is null");
                 onFailed(AIOEventType.OP_READED ,_handleAttachment);
                 return false;
             }
@@ -117,18 +122,14 @@ public:
             {
                 _readBuffer.offsetPos(len);
             }
-            int err = errno(); 
-
-            if (len == -1 && EAGAIN != err)
+            if (len == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
             {
-                log(LogLevel.warning , "read failed");
+                trace( "read failed", errno);
                 onFailed(AIOEventType.OP_READED ,_handleAttachment);
                 return false;
             }
-            // else if( len == 0)
+            // else if (len == 0)
             // {
-            //     writeln("connection was closed!!!");
-            //     (cast(ReadCompletionHandle)_handle).failed(_handleAttachment);
             //     return false;
             // }
             else 
@@ -163,9 +164,6 @@ public:
     @property void handleAttachment(void* obj){ _handleAttachment = obj; }
     
 
-public:
-    ByteBuffer _readBuffer;
-    ByteBuffer _writeBuffer;
 
 
 private:
@@ -179,11 +177,13 @@ private:
     }
 
 
-private:
+public:
     AsynchronousChannelSelector _selector;
     AsynchronousChannelBase _channel;
+    ByteBuffer _readBuffer;
+    ByteBuffer _writeBuffer;
 
-
+private:
     void* _handle;
     void* _handleAttachment;
 

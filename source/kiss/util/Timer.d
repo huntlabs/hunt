@@ -23,7 +23,7 @@ import std.socket;
 
 alias timer_handler = void delegate(int timerId);
 
-class Timer : Event{
+class Timer : Event {
 
 public:
     
@@ -43,18 +43,18 @@ public:
     this(AsynchronousChannelSelector sel)
     {
         _selector = sel;
-        
     }
     
-    int start(long delay, timer_handler handler, bool loop)
+    //loopTimes -1: always loop
+    socket_t start(long delay, timer_handler handler, int loopTimes = 1)
     {
+        _intervalTime = delay;
         _handler = handler;
-        _loop = loop;
+        _loopTimes = loopTimes;
         _readyClose = false;
         static if (IOMode == IO_MODE.epoll) {
             import kiss.aio.Epoll;
-
-            _timerId = cast(int)timerfd_create(CLOCK_REALTIME, TFD_NONBLOCK | TFD_CLOEXEC);
+            _timerId = cast(socket_t)timerfd_create(CLOCK_REALTIME, TFD_NONBLOCK | TFD_CLOEXEC);
             itimerspec its;
             ulong sec, nsec;
             sec = delay / 1000;
@@ -68,11 +68,21 @@ public:
             {
                 import core.sys.posix.unistd;
                 close(cast(int)_timerId);
-                _timerId = -1;
-                return -1;
+                _timerId = cast(socket_t)(-1);
+                return cast(socket_t)(-1);
             }
+            _selector.addEvent(this,  _timerId,  EventType.TIMER);
         }
-        _selector.addEvent(this,  _timerId,  AIOEventType.OP_READED);
+        else if (IOMode == IO_MODE.kqueue) {
+            import core.atomic;
+            static shared int i = int.max;
+            atomicOp!"-="(i, 1);
+            if (i < 655350)
+                i = int.max;
+            _timerId = cast(socket_t) i;
+            _selector.addEvent(this,  _timerId,  EventType.TIMER);
+        }
+
         return _timerId;
     }
 
@@ -93,17 +103,23 @@ public:
             read(_timerId, &value, 8);
         }
         _handler(_timerId);
-        return _loop;
+        if (_loopTimes > 0)
+            _loopTimes --;
+        return _loopTimes != 0;
     }
     override bool onClose()
     {
         static if (IOMode == IO_MODE.epoll)
         {
             import core.sys.posix.unistd;
-            _selector.delEvent(this , _timerId, AIOEventType.OP_NONE);
+            _selector.delEvent(this , _timerId, EventType.TIMER);
             close(_timerId);
-            _timerId = -1;
+            _timerId = cast(socket_t)(-1);
         } 
+        else if(IOMode == IO_MODE.kqueue)
+        {
+            _selector.delEvent(this , _timerId, EventType.TIMER);
+        }
         return true;
     }
 	override bool isReadyClose()
@@ -111,20 +127,28 @@ public:
         return _readyClose;
     }
 
+public:
+    long _intervalTime;
+
+    
 private:
     AsynchronousChannelSelector _selector;
     timer_handler _handler;
-    bool _loop;
-    int _timerId;
+    int _loopTimes;
+    socket_t _timerId;
     bool _readyClose;
 }
 
 unittest {
+
+    import std.stdio;
+
     AsynchronousChannelSelector selector = new AsynchronousChannelSelector(10);
     Timer timer = Timer.create(selector);
-    timer.start(2000, (int timerid) {
+    timer.start(2000, (socket_t timerid) {
         writeln("timer callback~~~~~~");
-    }, true);
+    }, 3);
     selector.start();
     selector.wait();
+
 }

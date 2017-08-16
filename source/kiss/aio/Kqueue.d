@@ -6,16 +6,22 @@ module kiss.aio.Kqueue;
 import kiss.aio.AbstractPoll;
 import kiss.util.Common;
 import kiss.aio.Event;
+import kiss.util.Timer;
+import kiss.aio.AsynchronousChannelBase;
+import kiss.aio.AsynchronousSelectionKey;
+
 
 import std.exception;
+import std.datetime;
+import std.experimental.logger;
 import core.sys.posix.sys.types;
 import core.stdc.stdint;
-import std.experimental.logger;
-import std.datetime;
 import core.sys.posix.signal;
+import core.stdc.errno;
+import core.sys.posix.unistd;
 
 
-static if(IOMode == IO_MODE.kqueue){
+static if(IOMode == IO_MODE.kqueue) {
 
 extern(C)
 {
@@ -78,29 +84,34 @@ extern(C)
 class Kqueue : AbstractPoll{
 
 public:
-    this(int eventNum = 256)
+    this(int eventNum = 128)
     {
         _keventFd = kqueue();
         _kqueueEvents.length = eventNum;
         if (_keventFd < 0)
             throw new Exception("kqueue create failed !!!");
     }
-
     override int poll(int milltimeout)
     {
+
         timespec time = timespec(milltimeout / 1000, (milltimeout % 1000) * 1000000);
         int result = kevent(_keventFd, null, 0, _kqueueEvents.ptr, cast(int)_kqueueEvents.length, &time);
+        
+
+        _index ++;
+
+
         for(int i = 0; i < result; i++)
         {
-			Event* event = null;
-			event = (cast(int)_kqueueEvents[i].ident in _mapEvents);
-			if(event == null)
-			{
-				// log(LogLevel.warning , "fd:" ~ _kqueueEvents[i].ident ~ " maybe close by others");
-				continue;
-			}
-            if (_kqueueEvents[i].filter == EVFILT_READ)
-            {
+            int fd = cast(int)(_kqueueEvents[i].ident);
+            Event event;
+
+            if (_kqueueEvents[i].filter == EVFILT_TIMER) {
+                if ((fd in _mapTimerEvents) == null){
+                    trace("error", fd);
+                    continue;
+                }
+                event = cast(Event)(_mapTimerEvents[fd]); 
                 if(!event.onRead())
 				{
 					if (event.onClose())
@@ -110,75 +121,174 @@ public:
 					}
 				}
             }
-            else if(_kqueueEvents[i].filter == EVFILT_WRITE)
-            {
-                if(!event.onWrite())
-				{
-					if (event.onClose())
-					{
-						delete event;
-						continue;
-					}
-				}
-            }
-            if (event.isReadyClose() )
-			{	
-				if (event.onClose())
-				{
-					delete event;
-					continue;
-				}
-            }
-        }        
+            else {
 
-        
+                if ((fd in _mapEvents) == null){
+                    trace("error", fd);
+                    continue;
+                }
+
+                event = cast(Event)(_mapEvents[fd]); 
+                AsynchronousSelectionKey key = cast(AsynchronousSelectionKey)_mapEvents[fd];
+                
+                if (_kqueueEvents[i].filter == EVFILT_READ)
+                {
+                    if(!event.onRead())
+                    {
+                        if (event.onClose())
+                        {
+                            delete event;
+                            continue;
+                        }
+                    }
+                }
+                
+                if(_kqueueEvents[i].filter == EVFILT_WRITE)
+                {
+                    if(!event.onWrite())
+                    {
+                        if (event.onClose())
+                        {
+                            delete event;
+                            continue;
+                        }
+                    }
+                }
+                if (event.isReadyClose() )
+                {	
+                    if (event.onClose())
+                    {
+                        delete event;
+                        continue;
+                    }
+                }
+            }
+        } 
         return result;
     }
 
-    bool opEvent(Event event, int fd, int op, int type)
-    {
-        
-        kevent_t[2] changes;
-        kevent_t[2] errors;
+    bool opEvent(Event event, int fd, int op, EventType mask)
+    {   
+        kevent_t change;
+        int ev;
 
-        int r = EV_DELETE;
-        int w = EV_DELETE;
-
-        if(type & AIOEventType.OP_ACCEPTED || type & AIOEventType.OP_READED)
-            r = EV_ADD;
-        if(type & AIOEventType.OP_CONNECTED || type & AIOEventType.OP_WRITEED)
-            w = EV_ADD;
-        if (op == EVENT_CTL_ADD)
+        if (op == EVENT_CTL_ADD) {
+            ev = EV_ADD;
             _mapEvents[fd] = event;
-		else if (op == EVENT_CTL_DEL)
-			_mapEvents.remove(fd);
-        
-        EV_SET(&changes[0], cast(ulong)fd, cast(short)EVFILT_READ, cast(ushort)r, cast(uint)0, cast(long)0, null);    
-        EV_SET(&changes[1], cast(ulong)fd, cast(short)EVFILT_WRITE, cast(ushort)w, cast(uint)0, cast(long)0, null);    
+        }
+        else if (op == EVENT_CTL_DEL) {
+            ev = EV_DELETE;
+        }
+        else if (op == EVENT_CTL_MOD) {
+            ev = EV_DELETE;
+            mask = EventType.READ | EventType.WRITE;
+            _mapEvents.remove(fd);
+        }
 
-        kevent(_keventFd, changes.ptr, 2, null, 0, null);
+        if (mask & EventType.READ) {
+            EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_READ, cast(ushort)ev, cast(uint)0, cast(long)0, null);  
+            if ((kevent(_keventFd, &change, 1, null, 0, null) == -1) && op != EVENT_CTL_MOD) {
+                trace("kevent read error ", op);
+            }
+        }
+        if (mask & EventType.WRITE) {
+            EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_WRITE, cast(ushort)ev, cast(uint)0, cast(long)0, null);  
+            if ((kevent(_keventFd, &change, 1, null, 0, null) == -1) && op != EVENT_CTL_MOD) {
+                trace("kevent write error ", op);
+            }
+        }
 
         return true;
     }
     override void wakeUp()
     {
+        byte c = 1;
+        if (1 != core.sys.posix.unistd.write(_keventFd, &c, 1) ) {
+            trace(LogLevel.error, "wakeUp error", errno);
+        }
+    }
+    override bool addEvent(Event event , int fd, int type)
+    {
 
+        kevent_t change;
+        if (type & EventType.TIMER) {
+            log("(cast(Timer)event)._intervalTime = ",(cast(Timer)event)._intervalTime, fd);
+            _mapTimerEvents[fd] = event;
+            EV_SET(&change, cast(ulong)fd, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_CLEAR, 0, (cast(Timer)event)._intervalTime, &event); //单位毫秒
+            kevent(_keventFd, &change, 1, null, 0, null);
+        }   
+        else {
+            _mapEvents[fd] = event;
+            if (type & EventType.READ) {
+                EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_READ, cast(ushort)EV_ADD, cast(uint)0, cast(long)0, null);  
+                if ((kevent(_keventFd, &change, 1, null, 0, null) == -1)) {
+                    trace("kevent read error ", type);
+                    return false;
+                }
+            }
+            if (type & EventType.WRITE) {
+                EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_WRITE, cast(ushort)EV_ADD, cast(uint)0, cast(long)0, null);  
+                if ((kevent(_keventFd, &change, 1, null, 0, null) == -1)) {
+                    trace("kevent write error ", type);
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
-    override bool addEvent(Event event , int fd ,  int type)
+
+	override bool delEvent(Event event , int fd, int type)
     {
-        return opEvent(event, fd, EVENT_CTL_ADD, type);
+        kevent_t change;
+        if (type & EventType.TIMER) {
+            log("remove");
+            _mapTimerEvents.remove(fd);
+            type = EventType.READ;
+            EV_SET(&change, cast(ulong)fd, EVFILT_TIMER, EV_DELETE, 0, 0, &event);
+            kevent(_keventFd, &change, 1, null, 0, null);
+        }   
+        else {
+            _mapEvents.remove(fd);
+            EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_READ, cast(ushort)EV_DELETE, cast(uint)0, cast(long)0, null);  
+            kevent(_keventFd, &change, 1, null, 0, null);
+            EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_WRITE, cast(ushort)EV_DELETE, cast(uint)0, cast(long)0, null);  
+            kevent(_keventFd, &change, 1, null, 0, null);
+        }
+        
+        return true;
     }
-	override bool delEvent(Event event , int fd , int type)
+	override bool modEvent(Event event , int fd , int type, int oldType)
     {
-        return opEvent(event, fd, EVENT_CTL_DEL, type);
+        kevent_t change;
+        int c = oldType ^ type;
+        if (c & EventType.READ) {
+            
+            ushort add = type & EventType.READ ? EV_ADD : EV_DELETE;
+            EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_READ, add, cast(uint)0, cast(long)0, null);  
+            if ((kevent(_keventFd, &change, 1, null, 0, null) == -1)) {
+                trace("kevent read error ", type);
+                return false;
+            }
+        }
+        if (c & EventType.WRITE) {
+            ushort add = type & EventType.WRITE ? EV_ADD : EV_DELETE;
+            EV_SET(&change, cast(ulong)fd, cast(short)EVFILT_WRITE, add, cast(uint)0, cast(long)0, null);  
+            if ((kevent(_keventFd, &change, 1, null, 0, null) == -1)) {
+                trace("kevent write error ", type);
+                return false;
+            }
+        }
+        return true;
     }
-	override bool modEvent(Event event , int fd , int type)
-    {
-        return opEvent(event, fd, EVENT_CTL_MOD, type);
-    }
+
+public:
+    int _index = 0;
+    
 private:
     int _keventFd;
     kevent_t[] _kqueueEvents;
     Event[int] _mapEvents;
+    Event[int] _mapTimerEvents;
 }
 }

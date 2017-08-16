@@ -33,6 +33,11 @@ public:
             import kiss.aio.Epoll;
             _poll = new Epoll();
         }
+        else if (IOMode == IO_MODE.kqueue) 
+        {
+            import kiss.aio.Kqueue;
+            _poll = new Kqueue();
+        }
         super(&run);
     }
 
@@ -129,9 +134,9 @@ public:
     {
         return _poll.delEvent(event, fd, type);
     }
-	bool modEvent(Event event, int fd, int type)
+	bool modEvent(Event event, int fd, int type, int oldType)
     {
-        return _poll.modEvent(event, fd, type);
+        return _poll.modEvent(event, fd, type, oldType);
     }
 
 

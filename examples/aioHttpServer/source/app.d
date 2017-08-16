@@ -14,6 +14,11 @@ import std.stdio;
 import core.thread;
 import std.parallelism;
 import std.string;
+import std.conv;
+
+import std.stdio;
+import std.experimental.logger.core;
+
 
 
 class WriteHandle : WriteCompletionHandle {
@@ -24,8 +29,10 @@ class WriteHandle : WriteCompletionHandle {
 	//WriteCompletionHandle 
 	void completed(void* attachment, size_t count , ByteBuffer buffer )
 	{
-        if (_master._needClose)
+        if (_master._needClose) {
             _master._client.close();
+        }
+        // log("write = ",cast(string)(buffer.getExsitBuffer()));
 	}
 	void failed(void* attachment)
 	{
@@ -46,17 +53,20 @@ class ReadHandle : ReadCompletionHandle {
 	override void completed(void* attachment, size_t count , ByteBuffer buffer)
 	{
         string readBufer = cast(string)(buffer.getCurBuffer());
+        
         if (indexOf(readBufer, "HTTP/1.1") >= 0)
             _master._needClose = false;
-        else 
+        else
             _master._needClose = true;
-            
+        
+        // log("read = ",readBufer);
         string s = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
         _master.doWrite(cast(byte[])s);
+
 	}
 	override void failed(void* attachment)
 	{
-
+        // writeln("read failed");
 	}
 private:
 	TcpServer _master;
@@ -80,17 +90,16 @@ public:
 
         _needClose = false;
 
+        bufferRead.clear();
+        _client.read(bufferRead, _readHandle, null);
+
     }
     ~this()
     {
 
     }
 
-    void doRead()
-    {
-        bufferRead.clear();
-        _client.read(bufferRead, _readHandle, null);
-    }
+   
    void doWrite(byte[] data)
     {
 		bufferWrite.clear();
@@ -131,20 +140,31 @@ public:
     override void completed(void* attachment, AsynchronousSocketChannel result)
     {
         TcpServer client = new TcpServer(result);
-        client.doRead();
+        
         
     }
     override void failed(void* attachment)
     {
         writeln("server accept failed ");
     }
+
 }
 
 
+void testTimer() {
+    import kiss.aio.AsynchronousChannelSelector;
+    import kiss.util.Timer;
 
+    AsynchronousChannelSelector selector = new AsynchronousChannelSelector(10);
+    Timer timer = Timer.create(selector);
+    timer.start(2000, (int timerid) {
+        writeln("timer callback~~~~~~");
+    }, 3);
+    selector.start();
+    selector.wait();
+}
 
-void main()
-{
+void testServer() {
     int threadNum = totalCPUs;
     AsynchronousChannelThreadGroup group = AsynchronousChannelThreadGroup.open(5,threadNum);
     for(int i = 0; i < threadNum; i++)
@@ -154,4 +174,9 @@ void main()
     writeln("please open http://0.0.0.0:20001/ on your browser");
     group.start();
     group.wait();
+}
+
+void main()
+{
+    testServer();
 }

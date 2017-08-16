@@ -24,12 +24,7 @@ import std.string;
 import core.thread;
 import core.sys.posix.unistd;
 
-
-
-
-
 static if (IOMode == IO_MODE.epoll) {
-
 
 extern(C){
 	alias int c_int;
@@ -47,8 +42,6 @@ extern(C){
 	align(1):uint32_t   events;	/* Epoll events */
 			epoll_data data;	  /* User data variable */
 	}
-	
-
 	
 	import std.conv : octal;
 	import core.sys.posix.time;
@@ -107,58 +100,73 @@ class Epoll : AbstractPoll{
     {
         close(_epollFd);
     }
-    bool opEvent(Event event  , int fd, int op , int type)
+   
+    override bool addEvent(Event event , int fd ,  int type) 
 	{
-		epoll_event ev;
-		uint mask = 0;
-
-
-		if(type & AIOEventType.OP_ACCEPTED) 
+		int mask = 0;
+		if (type & EventType.READ || type & EventType.TIMER)
 			mask |= EPOLL_EVENTS.EPOLLIN;
-		if(type & AIOEventType.OP_READED)	
-			mask |= EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLIN;
-		if(type & AIOEventType.OP_WRITEED || type & AIOEventType.OP_CONNECTED)	
-			mask |= EPOLL_EVENTS.EPOLLET | EPOLL_EVENTS.EPOLLOUT;
-		if(type & AIOEventType.OP_ERROR)
-			mask = EPOLL_EVENTS.EPOLLERR; 
-		
-		
-		if (op == EVENT_CTL_ADD)
-			_mapEvents[fd]  = event;
-		else if (op == EVENT_CTL_DEL)
-			_mapEvents.remove(fd);
-		ev.events = mask;
-		
-        // ev.data.ptr = cast(void *)event;
-		ev.data.fd = fd;
-	
+		if (type & EventType.WRITE)
+			mask |= EPOLL_EVENTS.EPOLLOUT;
 
-		if(epoll_ctl(_epollFd , op , fd , &ev) < 0)
+		epoll_event ev;
+		_mapEvents[fd]  = event;
+		ev.events = mask;
+		ev.data.fd = fd;
+		if(epoll_ctl(_epollFd , EVENT_CTL_ADD , fd , &ev) < 0)
 		{
 		    import std.conv;
 			int err = errno();
-			log(LogLevel.error , to!string(op) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
 			return false;
 		}
-		
-		
 		return true;
+
 	}
 
-
-    override bool addEvent(Event event , int fd ,  int type) 
+	override bool delEvent(Event event, int fd, int type)
 	{
-		return opEvent(event , fd ,  EVENT_CTL_ADD , type);
+		int mask = 0;
+		if (type & EventType.READ)
+			mask |= EPOLL_EVENTS.EPOLLIN;
+		if (type & EventType.WRITE)
+			mask |= EPOLL_EVENTS.EPOLLOUT;
+
+		epoll_event ev;
+		_mapEvents.remove(fd);
+		ev.events = mask;
+		ev.data.fd = fd;
+		if(epoll_ctl(_epollFd , EVENT_CTL_DEL , fd , &ev) < 0)
+		{
+		    import std.conv;
+			int err = errno();
+			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			return false;
+		}
+		return true;
+
 	}
 
-	override bool delEvent(Event event , int fd , int type)
+	override bool modEvent(Event event , int fd , int type, int oldType)
 	{
-		return opEvent(event , fd , EVENT_CTL_DEL , type);
-	}
+		int mask = 0;
+		if (type & EventType.READ)
+			mask |= EPOLL_EVENTS.EPOLLIN;
+		if (type & EventType.WRITE)
+			mask |= EPOLL_EVENTS.EPOLLOUT;
 
-	override bool modEvent(Event event , int fd , int type)
-	{
-		return opEvent(event ,fd ,  EVENT_CTL_MOD , type);
+		epoll_event ev;
+		ev.events = mask;
+		ev.data.fd = fd;
+		if(epoll_ctl(_epollFd , EVENT_CTL_MOD , fd , &ev) < 0)
+		{
+		    import std.conv;
+			int err = errno();
+			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			return false;
+		}
+		return true;
+
 	}
 
 

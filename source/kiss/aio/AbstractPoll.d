@@ -16,9 +16,9 @@
  interface  AbstractPoll {
     int poll(int milltimeout);
     void wakeUp();
-    bool addEvent(Event event , int fd ,  int type);
-	bool delEvent(Event event , int fd , int type);
-	bool modEvent(Event event , int fd , int type);
+    bool addEvent(Event event, int fd, int type);
+	bool delEvent(Event event, int fd, int type);
+	bool modEvent(Event event, int fd, int type, int oldType);
  }
  
     

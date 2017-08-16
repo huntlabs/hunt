@@ -20,6 +20,8 @@ import kiss.aio.Event;
 import kiss.util.Common;
 import std.conv;
 import std.socket;
+import std.experimental.logger.core;
+import core.sys.posix.sys.socket;
 
 
 class AsynchronousServerSocketChannel : AsynchronousChannelBase{
@@ -44,27 +46,23 @@ public:
 
     void bind(string ip, ushort port, int backlog = 1024)
     {
-        AddressInfo[] arr = getAddressInfo(ip , to!string(port) , AddressInfoFlags.PASSIVE);
-        _socket = new Socket(arr[0].family , arr[0].type , arr[0].protocol);
-        
-        _socket.setOption(SocketOptionLevel.SOCKET , SocketOption.REUSEADDR , 1);
-        static if (IOMode == IO_MODE.epoll)
-        {
-            //SO_REUSEPORT
-            _socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) 15, 1);
-        }
 
-        _socket.bind(arr[0].address);
+        AddressInfo[] arr = getAddressInfo(ip , to!string(port) , AddressInfoFlags.PASSIVE);
+        _socket = new Socket(arr[0].family , SocketType.STREAM , ProtocolType.TCP);
+        _socket.setOption(SocketOptionLevel.SOCKET , SocketOption.REUSEADDR , true);
+        version (Posix)
+        {
+            _socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption)SO_REUSEPORT, true);
+        }
         _socket.blocking(false);
+        _socket.bind(arr[0].address);
         _socket.listen(backlog);
         setOpen(true);
+
     }
 
     override int validOps(){
         return AIOEventType.OP_ACCEPTED;
     }
-
-
-
 
 }
