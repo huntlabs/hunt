@@ -76,7 +76,8 @@ public:
                 {
                     if (len == -1 && errno != EAGAIN && errno != EWOULDBLOCK) 
                     {
-                        trace( "write failed", errno);     
+                        if (errno != ECONNRESET && errno != EPIPE)
+                            trace( "write failed", errno);     
                         onFailed(AIOEventType.OP_WRITEED ,_handleAttachment);
                         return false;
                     }

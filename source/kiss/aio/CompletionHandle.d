@@ -18,26 +18,26 @@ import kiss.aio.Event;
 
 interface AcceptCompletionHandle 
 {
-    void completed(void* attachment, AsynchronousSocketChannel result);
-    void failed(void* attachment);
+    void acceptCompleted(void* attachment, AsynchronousSocketChannel result);
+    void acceptFailed(void* attachment);
 }
 
 interface ConnectCompletionHandle 
 {
-    void completed(void* attachment);
-    void failed(void* attachment);
+    void connectCompleted(void* attachment);
+    void connectFailed(void* attachment);
 }
 
 interface ReadCompletionHandle 
 {
-    void completed(void* attachment, size_t count , ByteBuffer buffer);
-    void failed(void* attachment);
+    void readCompleted(void* attachment, size_t count , ByteBuffer buffer);
+    void readFailed(void* attachment);
 }
 
 interface WriteCompletionHandle 
 {
-    void completed(void* attachment, size_t count , ByteBuffer buffer);
-    void failed(void* attachment);
+    void writeCompleted(void* attachment, size_t count , ByteBuffer buffer);
+    void writeFailed(void* attachment);
 }
 
 
