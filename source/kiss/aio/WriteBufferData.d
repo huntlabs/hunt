@@ -14,10 +14,16 @@ module kiss.aio.WriteBufferData;
 import kiss.aio.CompletionHandle;
 import kiss.aio.ByteBuffer;
 
+
+class AsynchronousSelectionKey {
+	void* handle;
+	void* attchment;
+	ByteBuffer obj;
+}
+
+
 class WriteBufferData {
-    WriteCompletionHandle handle;
-    void* attachment;
-    ByteBuffer buffer;
+    AsynchronousSelectionKey key;
 	WriteBufferData _next;
 }
 
@@ -35,6 +41,7 @@ class WriteBufferDataQueue
 	in{
 		assert(wsite);
 	}body{
+		_count++;
 		if(_last){
 			_last._next = wsite;
 		} else {
@@ -48,6 +55,7 @@ class WriteBufferDataQueue
 	in{
 		assert(_frist && _last);
 	}body{
+		_count--;
 		WriteBufferData  wsite = _frist;
 		_frist = _frist._next;
 		if(_frist is null)
@@ -55,9 +63,12 @@ class WriteBufferDataQueue
 		return wsite;
 	}
 
+public :
+	long _count = 0;
 private:
 	WriteBufferData  _last = null;
 	WriteBufferData  _frist = null;
+
 }
 
 

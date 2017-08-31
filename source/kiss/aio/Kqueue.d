@@ -242,7 +242,7 @@ public:
     {
         kevent_t change;
         if (type & EventType.TIMER) {
-            log("remove");
+
             _mapTimerEvents.remove(fd);
             type = EventType.READ;
             EV_SET(&change, cast(ulong)fd, EVFILT_TIMER, EV_DELETE, 0, 0, &event);

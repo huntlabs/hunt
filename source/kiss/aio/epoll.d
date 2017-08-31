@@ -92,114 +92,70 @@ class Epoll : AbstractPoll{
         _epollFd = epoll_create1(0);
         if (_epollFd < 0)
         {
-            int err = errno();
-            log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+            log(LogLevel.fatal , fromStringz(strerror(errno)) ~ " errno:" ~ to!string(errno));
         }
     }
     ~this()
     {
         close(_epollFd);
     }
-   
-    override bool addEvent(Event event , int fd ,  int type) 
-	{
+
+	bool addEvent(Event event, int fd, int type) {
+		_mapEvent[fd] = event;
+		return opEvent(event, fd, type, EVENT_CTL_ADD);
+	}
+	bool delEvent(Event event, int fd, int type) {
+		_mapEvent.remove(fd);
+		return opEvent(event, fd, type, EVENT_CTL_DEL);
+	}
+	bool modEvent(Event event, int fd, int type, int oldType) {
+		return opEvent(event, fd, type, EVENT_CTL_MOD);
+	}
+	bool opEvent(Event event, int fd, int type,int op) {
 		int mask = 0;
-		if (type & EventType.READ || type & EventType.TIMER)
+		if (type & EventType.READ || type & EventType.TIMER) 
 			mask |= EPOLL_EVENTS.EPOLLIN;
 		if (type & EventType.WRITE)
 			mask |= EPOLL_EVENTS.EPOLLOUT;
+		if (type & EventType.ETMODE)
+			mask |= EPOLL_EVENTS.EPOLLET;
 
-		epoll_event ev;
-		_mapEvents[fd]  = event;
-		ev.events = mask;
-		ev.data.fd = fd;
-		if(epoll_ctl(_epollFd , EVENT_CTL_ADD , fd , &ev) < 0)
-		{
-		    import std.conv;
-			int err = errno();
-			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
-			return false;
-		}
-		return true;
-
-	}
-
-	override bool delEvent(Event event, int fd, int type)
-	{
-		int mask = 0;
-		if (type & EventType.READ)
-			mask |= EPOLL_EVENTS.EPOLLIN;
-		if (type & EventType.WRITE)
-			mask |= EPOLL_EVENTS.EPOLLOUT;
-
-		epoll_event ev;
-		_mapEvents.remove(fd);
-		ev.events = mask;
-		ev.data.fd = fd;
-		if(epoll_ctl(_epollFd , EVENT_CTL_DEL , fd , &ev) < 0)
-		{
-		    import std.conv;
-			int err = errno();
-			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
-			return false;
-		}
-		return true;
-
-	}
-
-	override bool modEvent(Event event , int fd , int type, int oldType)
-	{
-		int mask = 0;
-		if (type & EventType.READ)
-			mask |= EPOLL_EVENTS.EPOLLIN;
-		if (type & EventType.WRITE)
-			mask |= EPOLL_EVENTS.EPOLLOUT;
-
+		
 		epoll_event ev;
 		ev.events = mask;
 		ev.data.fd = fd;
-		if(epoll_ctl(_epollFd , EVENT_CTL_MOD , fd , &ev) < 0)
+
+		// ev.data.ptr = cast(void *)event;
+		if(epoll_ctl(_epollFd , op , fd , &ev) < 0)
 		{
 		    import std.conv;
-			int err = errno();
-			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			log(LogLevel.error , to!string(type) ~ fromStringz(strerror(errno)) ~ " errno:" ~ to!string(errno));
 			return false;
 		}
 		return true;
-
+		
 	}
-
-
-
 
     override int poll(int milltimeout)
 	{
 		int result = epoll_wait(_epollFd , _pollEvents.ptr , cast(int)_pollEvents.length , milltimeout);
 		if(result < 0)
 		{
-			int err = errno();
-			if(err == EINTR)
+			if(errno == EINTR)
 				return -1;
-			log(LogLevel.fatal , fromStringz(strerror(err)) ~ " errno:" ~ to!string(err));
+			log(LogLevel.fatal , fromStringz(strerror(errno)) ~ " errno:" ~ to!string(errno));
 			return -1;
 		}
 
         for(int i = 0; i < result; i++)
         {
 
+
+			// Event event = cast(Event)_pollEvents[i].data.ptr;
 			int fd = _pollEvents[i].data.fd;
-			Event* event = null;
-			event = (fd in _mapEvents);
-			if(event == null)
-			{
-				log(LogLevel.warning , "fd:" ~ to!string(fd) ~ " maybe close by others");
-				continue;
-			}
+			Event* event = fd in _mapEvent;
 			
-			
-
 			uint mask = _pollEvents[i].events;
-
 
 			if(mask &( EPOLL_EVENTS.EPOLLERR | EPOLL_EVENTS.EPOLLHUP))
 			{
@@ -209,7 +165,6 @@ class Epoll : AbstractPoll{
 					continue;
 				}
 			}
-
 			if(mask & EPOLL_EVENTS.EPOLLIN)
 			{
 				if(!event.onRead())
@@ -221,7 +176,6 @@ class Epoll : AbstractPoll{
 					}
 				}
 			}
-
 			if(mask & EPOLL_EVENTS.EPOLLOUT)
 			{
 
@@ -234,7 +188,7 @@ class Epoll : AbstractPoll{
 					}
 				}
 			}
-			
+
 			if(event.isReadyClose() )
 			{	
 				if (event.onClose())
@@ -243,7 +197,7 @@ class Epoll : AbstractPoll{
 					continue;
 				}
 			}
-
+			
         }
 
 		return result;
@@ -259,6 +213,6 @@ class Epoll : AbstractPoll{
 private:
     int _epollFd;
     epoll_event[] _pollEvents;
-	Event[int] _mapEvents;
+	Event[int] _mapEvent;
 }
 }

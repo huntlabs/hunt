@@ -27,7 +27,8 @@ enum EventType {
     NONE = 0,
     READ = 1 << 0,
     WRITE = 1 << 1,
-    TIMER = 1 << 2
+    TIMER = 1 << 2,
+    ETMODE = 1 << 3
 }
 
 

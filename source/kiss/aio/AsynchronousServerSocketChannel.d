@@ -18,6 +18,8 @@ import kiss.aio.ByteBuffer;
 import kiss.aio.AsynchronousChannelThreadGroup;
 import kiss.aio.Event;
 import kiss.util.Common;
+import kiss.aio.AsynchronousChannelSelector;
+
 import std.conv;
 import std.socket;
 import std.experimental.logger.core;
@@ -27,15 +29,15 @@ import core.sys.posix.sys.socket;
 class AsynchronousServerSocketChannel : AsynchronousChannelBase{
 
 public:
-    this(AsynchronousChannelThreadGroup group)
+    this(AsynchronousChannelSelector sel)
     {
-        super(group, group.getWorkSelector());
+        super(sel);
     }
     
 
-    static open(AsynchronousChannelThreadGroup group)
+    static open(AsynchronousChannelSelector sel)
     {
-        return new AsynchronousServerSocketChannel(group);
+        return new AsynchronousServerSocketChannel(sel);
     }
 
     

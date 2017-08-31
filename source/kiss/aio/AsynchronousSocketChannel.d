@@ -28,14 +28,14 @@ class AsynchronousSocketChannel : AsynchronousChannelBase{
 
 public:
 
-    this(AsynchronousChannelThreadGroup group, AsynchronousChannelSelector sel)
+    this(AsynchronousChannelSelector sel)
     {
-        super(group, sel);
+        super(sel);
     }
 
-    static open(AsynchronousChannelThreadGroup group, AsynchronousChannelSelector sel)
+    static open( AsynchronousChannelSelector sel)
     {
-        return new AsynchronousSocketChannel(group, sel);
+        return new AsynchronousSocketChannel(sel);
     }
 
     

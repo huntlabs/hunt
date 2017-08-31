@@ -9,7 +9,7 @@
  *
  */
 
-module kiss.TcpServer;
+module kiss.net.TcpServer;
 
 import kiss.aio.AsynchronousChannelThreadGroup;
 import kiss.aio.AsynchronousServerSocketChannel;
@@ -21,30 +21,33 @@ import std.socket;
 class TcpServer : WriteCompletionHandle, ReadCompletionHandle {
 
 public:
-    this(AsynchronousSocketChannel client, int readLen, int writeLen)
+    this(AsynchronousSocketChannel client, int readLen)
     {
         _readBuffer = ByteBuffer.allocate(readLen);
-        _writeBuffer = ByteBuffer.allocate(writeLen);
         _server = client;
         _server.read(_readBuffer, this, null);
+        _server.setOnCloseHandle((){
+            onClose();
+        });
     }
     void doWrite(byte[] data)
     {
-		_writeBuffer.clear();
-		_writeBuffer.put(data);
-        _server.write(_writeBuffer, this, null);	
+        _server.write(cast(string)data, this, null);	
     }
+    
 
-    socket_t getFd() { return _server.getFd(); }
+    socket_t fd() { return _server.getFd(); }
 	void close() { _server.close(); }
+    string ip() { return _server.socket().remoteAddress.toAddrString; }
+    string port() { return _server.socket().remoteAddress.toPortString; }
 
-    abstract void writeCompleted(void* attachment, size_t count , ByteBuffer buffer);
-	abstract void writeFailed(void* attachment);
-    abstract void readCompleted(void* attachment, size_t count , ByteBuffer buffer);
-	abstract void readFailed(void* attachment);
+    abstract void onWriteCompleted(void* attachment, size_t count , ByteBuffer buffer);
+	abstract void onWriteFailed(void* attachment);
+    abstract void onReadCompleted(void* attachment, size_t count , ByteBuffer buffer);
+	abstract void onReadFailed(void* attachment);
+    abstract void onClose();
 protected:
     AsynchronousSocketChannel _server;
     ByteBuffer _readBuffer;
-    ByteBuffer _writeBuffer;
 
 }
