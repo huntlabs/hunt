@@ -38,7 +38,6 @@ public:
     void doRead(void* attachment = null) 
     {
         writeln("doread");
-        _readBuffer.clear();
         _client.read(_readBuffer, this, attachment); 
     }
     

@@ -46,7 +46,6 @@ class AsynchronousChannelBase : Event
 			_selector = sel;
 			_writeBufferQueue = new WriteBufferDataQueue();
 
-			readb = ByteBuffer.allocate(1024);
 
 		}
 
@@ -192,6 +191,7 @@ class AsynchronousChannelBase : Event
 		}
 
 		override bool onRead() {
+			//log("isReaded",isReaded());
 			if (isAccepted())
 			{   
 				while(true) {
@@ -208,7 +208,6 @@ class AsynchronousChannelBase : Event
 			}
 			else if (isReaded()) 
 			{
-				readb.clear();
 				long len;
 				while((len = _socket.receive(_readKey.obj.getLeftBuffer())) > 0) {
 					_readKey.obj.offsetPos(len);
@@ -293,7 +292,7 @@ class AsynchronousChannelBase : Event
 			}
 		}
 		else if (ops & AIOEventType.OP_READED) {
-			if (createOrUpdateKey(ops, _readKey, handle, attchment, readb)) {
+			if (createOrUpdateKey(ops, _readKey, handle, attchment, obj)) {
 				if (_isClient) 
 					_selector.modEvent(this,  cast(int)(_socket.handle),  EventType.READ|EventType.ETMODE, getReadWriteAble(_intrestOps));
 				else 
@@ -364,7 +363,6 @@ class AsynchronousChannelBase : Event
 		AsynchronousSelectionKey _connectKey;
 		AsynchronousSelectionKey _readKey;
 
-		ByteBuffer readb;
 
 		OnCloseHandle _onCloseHandle = null;
 

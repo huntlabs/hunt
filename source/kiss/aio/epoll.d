@@ -125,6 +125,12 @@ class Epoll : AbstractPoll{
 		ev.events = mask;
 		ev.data.fd = fd;
 
+		//log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		//log("fd ",fd);
+		//log("op ",op);
+		//log("type ",type);
+		//log("index ",index);
+
 		// ev.data.ptr = cast(void *)event;
 		if(epoll_ctl(_epollFd , op , fd , &ev) < 0)
 		{
@@ -147,6 +153,9 @@ class Epoll : AbstractPoll{
 			return -1;
 		}
 
+		//if (result > 0)
+		//	index++;
+
         for(int i = 0; i < result; i++)
         {
 
@@ -156,6 +165,9 @@ class Epoll : AbstractPoll{
 			Event* event = fd in _mapEvent;
 			
 			uint mask = _pollEvents[i].events;
+
+			//log("mask",mask);
+			
 
 			if(mask &( EPOLL_EVENTS.EPOLLERR | EPOLL_EVENTS.EPOLLHUP))
 			{
@@ -214,5 +226,6 @@ private:
     int _epollFd;
     epoll_event[] _pollEvents;
 	Event[int] _mapEvent;
+	//long index = 0;
 }
 }

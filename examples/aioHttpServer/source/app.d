@@ -53,6 +53,7 @@ public:
 
         string s = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
         doWrite(cast(byte[])s);
+        _readBuffer.clear();
     }
 	override void onReadFailed(void* attachment) {
 
