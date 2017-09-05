@@ -33,10 +33,14 @@ public:
             import kiss.aio.Epoll;
             _poll = new Epoll();
         }
-        else if (IOMode == IO_MODE.kqueue) 
+        else static if (IOMode == IO_MODE.kqueue) 
         {
             import kiss.aio.Kqueue;
             _poll = new Kqueue();
+        }
+        else
+        {
+            static assert(false, "Not supported: IOMode = " ~ to!string(IOMode));
         }
         super(&run);
     }

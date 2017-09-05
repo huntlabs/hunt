@@ -73,7 +73,7 @@ public:
             }
             _selector.addEvent(this,  _timerId,  EventType.TIMER);
         }
-        else if (IOMode == IO_MODE.kqueue) {
+        else static if (IOMode == IO_MODE.kqueue) {
             import core.atomic;
             static shared int i = int.max;
             atomicOp!"-="(i, 1);
@@ -81,6 +81,10 @@ public:
                 i = int.max;
             _timerId = cast(socket_t) i;
             _selector.addEvent(this,  _timerId,  EventType.TIMER);
+        }
+        else
+        {
+            static assert(false, "Not supported: IOMode = " ~ to!string(IOMode));
         }
 
         return _timerId;
@@ -102,7 +106,7 @@ public:
             ulong value;
             read(_timerId, &value, 8);
         }
-        _handler(_timerId);
+        _handler(cast(int)_timerId);
         if (_loopTimes > 0)
             _loopTimes --;
         return _loopTimes != 0;
@@ -116,9 +120,13 @@ public:
             close(_timerId);
             _timerId = cast(socket_t)(-1);
         } 
-        else if(IOMode == IO_MODE.kqueue)
+        else static if(IOMode == IO_MODE.kqueue)
         {
             _selector.delEvent(this , _timerId, EventType.TIMER);
+        }
+        else 
+        {
+             static assert(false, "Not supported: IOMode = " ~ to!string(IOMode));        
         }
         return true;
     }

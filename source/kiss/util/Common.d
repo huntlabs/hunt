@@ -54,6 +54,7 @@ else
     enum CustomTimer = true;
 }
 
+static assert(IOMode == IO_MODE.iocp);
 
 static if (IOMode == IO_MODE.epoll) 
 {
