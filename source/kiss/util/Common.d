@@ -1,6 +1,8 @@
 
 module kiss.util.Common;
 
+import std.conv;
+
 
 enum IO_MODE
 {
@@ -54,8 +56,6 @@ else
     enum CustomTimer = true;
 }
 
-static assert(IOMode == IO_MODE.iocp);
-
 static if (IOMode == IO_MODE.epoll) 
 {
     version (X86) {
@@ -83,4 +83,8 @@ static if (IOMode == IO_MODE.epoll)
 else static if (IOMode == IO_MODE.kqueue) 
 {
     enum SO_REUSEPORT = 0x0200;
+}
+else
+{
+    static assert(false, "Not supported: IOMode = " ~ to!string(IOMode));
 }
