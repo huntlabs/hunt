@@ -166,7 +166,6 @@ class Epoll : AbstractPoll{
 			
 			uint mask = _pollEvents[i].events;
 
-			//log("mask",mask);
 			
 
 			if(mask &( EPOLL_EVENTS.EPOLLERR | EPOLL_EVENTS.EPOLLHUP))

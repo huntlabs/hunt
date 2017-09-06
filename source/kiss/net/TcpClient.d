@@ -23,6 +23,8 @@ class TcpClient : ConnectCompletionHandle, WriteCompletionHandle, ReadCompletion
 public:
     this(string ip, ushort port, AsynchronousChannelSelector sel, int readLen)
     {
+        _ip = ip;
+        _port = port;
         _client = AsynchronousSocketChannel.open(sel);
         _client.connect(ip, port, this, null);
         _client.setOnCloseHandle((){
@@ -37,10 +39,13 @@ public:
 
     void doRead(void* attachment = null) 
     {
-        writeln("doread");
         _client.read(_readBuffer, this, attachment); 
     }
     
+    void reConnect() 
+    {
+        _client.connect(_ip, _port, this, null);
+    }
 
 
 	void close() { _client.close(); }
@@ -59,5 +64,8 @@ public:
 protected:
     AsynchronousSocketChannel _client;
     ByteBuffer _readBuffer;
+private:
+    string _ip;
+    ushort _port;
 
 }

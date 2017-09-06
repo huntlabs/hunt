@@ -143,14 +143,15 @@ class AsynchronousChannelBase : Event
 		
 
 		override bool onWrite() {
-			// log("isWriteed",isWriteed());
-			if (!isWriteed())
-				log("_writeBufferQueue ",_writeBufferQueue._count);
+
 			if (isConnected())
 			{
 				unRegisterOp(AIOEventType.OP_CONNECTED);
-				if (errno == EBADF)
+				if (errno == EBADF) {
 					(cast(ConnectCompletionHandle)(_connectKey.handle)).onConnectFailed(_connectKey.attchment);
+					onClose();
+					_connectKey = AsynchronousSelectionKey.init;
+				}
 				else 
 					(cast(ConnectCompletionHandle)(_connectKey.handle)).onConnectCompleted(_connectKey.attchment);
 				return true;
@@ -191,7 +192,6 @@ class AsynchronousChannelBase : Event
 		}
 
 		override bool onRead() {
-			//log("isReaded",isReaded());
 			if (isAccepted())
 			{   
 				while(true) {
@@ -228,6 +228,7 @@ class AsynchronousChannelBase : Event
 		{
 			_selector.delEvent(this , cast(int)(_socket.handle), EventType.NONE);
 			_socket.close();
+			_intrestOps = 0;
 			setOpen(false);
 			synchronized (this)
 			{
@@ -276,7 +277,7 @@ class AsynchronousChannelBase : Event
 
 	protected void register(int ops, void* handle, void* attchment, ByteBuffer obj = null)
     {
-        if (!checkVailid(ops))
+		if (!checkVailid(ops))
 		{
             return ;
 		}
@@ -310,7 +311,7 @@ class AsynchronousChannelBase : Event
 			}
 			_intrestOps |= ops;
 		}
-
+		
     }
 
 	private int getReadWriteAble(int ops) {
