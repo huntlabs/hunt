@@ -216,6 +216,10 @@ class AsynchronousChannelBase : Event
 					(cast(ReadCompletionHandle)(_readKey.handle)).onReadFailed(_readKey.attchment);
 					return false;
 				}
+				if (len == 0) {
+					(cast(ReadCompletionHandle)(_readKey.handle)).onReadFailed(_readKey.attchment);
+					return false;
+				}
 				(cast(ReadCompletionHandle)(_readKey.handle)).onReadCompleted(_readKey.attchment, cast(size_t)(_readKey.obj.getPosition()), _readKey.obj);
 				return true;
 			}
