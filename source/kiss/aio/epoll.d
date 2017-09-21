@@ -153,8 +153,6 @@ class Epoll : AbstractPoll{
 			return -1;
 		}
 
-		//if (result > 0)
-		//	index++;
 
         for(int i = 0; i < result; i++)
         {

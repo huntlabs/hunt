@@ -41,7 +41,7 @@ public:
         }
     }
 	override void onWriteFailed(void* attachment) {
-
+        
     }
     override void onReadCompleted(void* attachment, size_t count , ByteBuffer buffer) {
         string readBufer = cast(string)(buffer.getCurBuffer());
@@ -53,13 +53,12 @@ public:
 
         string s = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
         doWrite(cast(byte[])s);
-        _readBuffer.clear();
     }
 	override void onReadFailed(void* attachment) {
-
+        
     }
     override void onClose() {
-
+        
     }
 private: 
     bool _needClose;
@@ -143,5 +142,5 @@ void testClient() {
 void main()
 {
     testServer();
-
+    
 }

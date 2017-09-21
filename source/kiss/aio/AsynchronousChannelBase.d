@@ -36,7 +36,6 @@ import core.sys.posix.sys.socket;
 
 
 
-
 class AsynchronousChannelBase : Event
 {
 	public
@@ -45,8 +44,7 @@ class AsynchronousChannelBase : Event
 		{
 			_selector = sel;
 			_writeBufferQueue = new WriteBufferDataQueue();
-
-
+			
 		}
 
 		void setOpen(bool b) {
@@ -65,10 +63,8 @@ class AsynchronousChannelBase : Event
 			_isReadyClose = true;
 		}
 
-		
-
 		void read(ByteBuffer buffer, ReadCompletionHandle handle, void* attachment) {
-			register(AIOEventType.OP_READED,  cast(void*)handle, attachment, buffer);
+			register(AIOEventType.OP_READED,  cast(void*)handle,  attachment, buffer);
 		}
 
 		void write(string buffer, WriteCompletionHandle handle, void* attachment) {
@@ -80,7 +76,22 @@ class AsynchronousChannelBase : Event
 		void write(ByteBuffer buffer, WriteCompletionHandle handle, void* attachment)
 		{	
 			synchronized (this) {
-				bool isEmpty = _writeBufferQueue.empty();
+				if (_writeBufferQueue.empty()) {
+					long len = socket().send(buffer.getCurBuffer());
+					if (buffer.getCurBuffer().length == len){							
+						handle.onWriteCompleted(attachment, cast(size_t)(len), buffer);
+						buffer.destroy();
+						return;
+					}
+					else {
+						if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
+							close();
+							return;
+						}
+						if (len > 0)
+							buffer.offsetLimit(len);
+					}
+				}
 				AsynchronousSelectionKey key = new AsynchronousSelectionKey();
 				key.handle = cast(void*)handle;
 				key.attchment = attachment;
@@ -88,25 +99,9 @@ class AsynchronousChannelBase : Event
 				WriteBufferData data = new WriteBufferData();
 				data.key = key;
 				_writeBufferQueue.enQueue(data);
-				if (isEmpty) {
-					register(cast(int)AIOEventType.OP_WRITEED, cast(void*)this, null, null);
-				}
 			}
 		}
 	
-
-		public void unRegisterOp(AIOEventType ops)
-		{
-			int newOps = _intrestOps & ~ops;
-			int newWriteAble = getReadWriteAble(newOps);
-
-			_selector.modEvent(this,  cast(int)(_socket.handle),  newWriteAble, getReadWriteAble(_intrestOps));
-		
-			_intrestOps = newOps;	
-		}
-
-
-
 		Socket socket()
 		{
 			return _socket;
@@ -140,58 +135,64 @@ class AsynchronousChannelBase : Event
 			return (_intrestOps & AIOEventType.OP_WRITEED) != 0;
 		}
 
-		
+		void onReady() {
+			_selector.addEvent(this,  cast(int)(_socket.handle),  EventType.READ | EventType.WRITE | EventType.ETMODE);
+			_intrestOps |= AIOEventType.OP_WRITEED | AIOEventType.OP_READED;
+		}
 
 		override bool onWrite() {
-
 			if (isConnected())
 			{
-				unRegisterOp(AIOEventType.OP_CONNECTED);
+				_intrestOps = _intrestOps & ~AIOEventType.OP_CONNECTED;
 				if (errno == EBADF) {
 					(cast(ConnectCompletionHandle)(_connectKey.handle)).onConnectFailed(_connectKey.attchment);
 					onClose();
 					_connectKey = AsynchronousSelectionKey.init;
 				}
-				else 
+				else {
 					(cast(ConnectCompletionHandle)(_connectKey.handle)).onConnectCompleted(_connectKey.attchment);
+					_intrestOps |= AIOEventType.OP_WRITEED | AIOEventType.OP_READED;
+				}
 				return true;
 			}
 			else if (isWriteed()) 
 			{   
 				synchronized (this) {
-					while(!_writeBufferQueue.empty())
-					{
+					while(!_writeBufferQueue.empty()) {
 						WriteBufferData data =  _writeBufferQueue.front();
 						ByteBuffer b = data.key.obj;
-						while(true) {
-							long n = b.getCurBuffer().length;
-							long len = socket().send(b.getCurBuffer());
-							if (len == n) {
-								b.offsetLimit(len);
-								(cast(WriteCompletionHandle)(data.key.handle)).onWriteCompleted(data.key.attchment, cast(size_t)(b.getPosition()), b);
-								_writeBufferQueue.deQueue();
-								break;
-							}
-							else if (len < n) {
-								if (len == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-									return false;
-								}
-								b.offsetLimit(len);
-								return true;
-							}
-							else {
-								b.offsetLimit(len);
-							}
+						long len = socket().send(b.getCurBuffer());
+
+						if (b.getCurBuffer().length == 0){
+							_writeBufferQueue.deQueue();								
+							(cast(WriteCompletionHandle)(data.key.handle)).onWriteCompleted(data.key.attchment, cast(size_t)(b.getPosition()), b);
+							b.destroy();
+							continue;
 						}
+						if (len > 0) {
+							if (b.offsetLimit(len)) {
+								_writeBufferQueue.deQueue();					
+								(cast(WriteCompletionHandle)(data.key.handle)).onWriteCompleted(data.key.attchment, cast(size_t)(b.getPosition()), b);
+								b.destroy();
+							}
+							continue;
+						}
+						else {
+							if (errno == EAGAIN || errno == EWOULDBLOCK)
+								return true;
+							else if (errno == EINTR)
+								continue;
+						}
+						log("write error ", errno);
+						return false;
 					}
-					unRegisterOp(AIOEventType.OP_WRITEED);
-					return true;
-				} 
+				}
 			}
 			return true;
 		}
 
 		override bool onRead() {
+			
 			if (isAccepted())
 			{   
 				while(true) {
@@ -202,6 +203,7 @@ class AsynchronousChannelBase : Event
 					AsynchronousSocketChannel client = AsynchronousSocketChannel.open(_selector);
 					client.setOpen(true);
 					client.setSocket(so);
+					client.onReady();
 					(cast(AcceptCompletionHandle)(_acceptKey.handle)).onAcceptCompleted(_acceptKey.attchment, client);
 				}
 				return true;
@@ -209,18 +211,28 @@ class AsynchronousChannelBase : Event
 			else if (isReaded()) 
 			{
 				long len;
-				while((len = _socket.receive(_readKey.obj.getLeftBuffer())) > 0) {
-					_readKey.obj.offsetPos(len);
-				}
-				if(len == -1 && errno != EAGAIN && errno != EWOULDBLOCK){
+				while(isOpen()) {
+					len = _socket.receive(_readKey.obj.getLeftBuffer());
+					if (len > 0) {
+						_readKey.obj.offsetPos(len);
+						(cast(ReadCompletionHandle)(_readKey.handle)).onReadCompleted(_readKey.attchment, cast(size_t)(_readKey.obj.getPosition()), _readKey.obj);
+						_readKey.obj.clear();
+						continue;
+					}
+					else if(len < 0) {
+						if (errno == EAGAIN || errno == EWOULDBLOCK) {
+							return true;
+						} else if (errno == EINTR) {
+							log("Interrupted system call the socket ");
+							continue;
+						}
+						log("read failed !", errno);
+						(cast(ReadCompletionHandle)(_readKey.handle)).onReadFailed(_readKey.attchment);
+						return false;
+					}
 					(cast(ReadCompletionHandle)(_readKey.handle)).onReadFailed(_readKey.attchment);
 					return false;
 				}
-				if (len == 0) {
-					(cast(ReadCompletionHandle)(_readKey.handle)).onReadFailed(_readKey.attchment);
-					return false;
-				}
-				(cast(ReadCompletionHandle)(_readKey.handle)).onReadCompleted(_readKey.attchment, cast(size_t)(_readKey.obj.getPosition()), _readKey.obj);
 				return true;
 			}
 			return true;
@@ -240,6 +252,7 @@ class AsynchronousChannelBase : Event
 				{
 					WriteBufferData data = _writeBufferQueue.deQueue();
 					(cast(WriteCompletionHandle)(data.key.handle)).onWriteFailed(data.key.attchment);
+					data.key.obj.destroy();
 				}
 			}
 
@@ -265,77 +278,39 @@ class AsynchronousChannelBase : Event
 		_selector.addTask!(MustInQueue)(task);
 	}
 
-	private bool createOrUpdateKey(int ops, ref AsynchronousSelectionKey key,  void* handle, void* attchment, ByteBuffer obj) {
+	private bool createOrUpdateKey(ref AsynchronousSelectionKey key,  void* handle, void* attachment, ByteBuffer obj) {
+		bool isNew = false;
 		if (key is AsynchronousSelectionKey.init) {
 			key = new AsynchronousSelectionKey();
+			isNew = true;
 		} 
-		bool isNew = true; 
-		if (getReadWriteAble(ops) & getReadWriteAble(_intrestOps)) {
-			isNew = false;
-		}
 		key.handle = handle;
-		key.attchment = attchment;
+		key.attchment = attachment;
 		key.obj = obj;
 		return isNew;
 	}
 
-	protected void register(int ops, void* handle, void* attchment, ByteBuffer obj = null)
+	protected void register(int ops, void* handle, void* attachment, ByteBuffer obj = null)
     {
 		if (!checkVailid(ops))
 		{
             return ;
 		}
 		if (ops & AIOEventType.OP_ACCEPTED) {
-			if (createOrUpdateKey(ops, _acceptKey, handle, attchment, obj))	{
-				_selector.addEvent(this,  cast(int)(_socket.handle),  getReadWriteAble(ops));
-			}
-		}
-		else if (ops & AIOEventType.OP_CONNECTED) {
-			if (createOrUpdateKey(ops, _connectKey, handle, attchment, obj)) {
-				_selector.addEvent(this,  cast(int)(_socket.handle),  getReadWriteAble(ops));
-				_isClient = true;
-			}
-		}
-		else if (ops & AIOEventType.OP_READED) {
-			if (createOrUpdateKey(ops, _readKey, handle, attchment, obj)) {
-				if (_isClient) 
-					_selector.modEvent(this,  cast(int)(_socket.handle),  EventType.READ|EventType.ETMODE, getReadWriteAble(_intrestOps));
-				else 
-					_selector.addEvent(this,  cast(int)(_socket.handle),  getReadWriteAble(ops));
-			}
-		}
-		else if (ops & AIOEventType.OP_WRITEED) { 
-			_intrestOps |= ops;
-			_selector.modEvent(this,  cast(int)(_socket.handle),  getReadWriteAble(_intrestOps | ops), getReadWriteAble(_intrestOps));
+			if (createOrUpdateKey( _acceptKey, handle, attachment, obj))
+				_selector.addEvent(this,  cast(int)(_socket.handle),  EventType.READ | EventType.WRITE | EventType.ETMODE);
 			
 		}
-		if (!(_intrestOps & ops)) {
-			static if (IOMode != IO_MODE.epoll) {
-				_selector.modEvent(this,  cast(int)(_socket.handle),  getReadWriteAble(ops), getReadWriteAble(_intrestOps));
-			}
-			_intrestOps |= ops;
+		else if (ops & AIOEventType.OP_CONNECTED) {
+			if (createOrUpdateKey( _connectKey, handle, attachment, obj))
+				_selector.addEvent(this,  cast(int)(_socket.handle),  EventType.READ | EventType.WRITE | EventType.ETMODE);
 		}
-		
+		else if (ops & AIOEventType.OP_READED) {
+			createOrUpdateKey(_readKey, handle, attachment, obj);
+		}
+		_intrestOps |= ops;
     }
 
-	private int getReadWriteAble(int ops) {
-		int ret = 0;
-		if (ops & AIOEventType.OP_ACCEPTED || ops & AIOEventType.OP_READED) {
-			ret |= EventType.READ;
-			static if (IOMode == IO_MODE.epoll) {
-				if (ops & AIOEventType.OP_READED) 
-					ret |= EventType.ETMODE;
-			}
-		}
-		if (ops & AIOEventType.OP_CONNECTED || ops & AIOEventType.OP_WRITEED) {
-			ret |= EventType.WRITE;
-			static if (IOMode == IO_MODE.epoll) {
-				if (ops & AIOEventType.OP_WRITEED) 
-					ret |= EventType.ETMODE;
-			}
-		}
-		return ret;
-	}
 
 	private bool checkVailid(int ops)
     {

@@ -89,11 +89,12 @@ public:
         return _position;
     }
 
-    void offsetLimit(long add)
+    bool offsetLimit(long add)
     {
         _limit = _limit + cast(size_t)add;
         _limit = min(_limit,_position);
         _limit = max(_limit,0);
+        return _limit == _position;
     }
 
     void flip()
