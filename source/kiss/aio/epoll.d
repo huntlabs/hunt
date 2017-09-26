@@ -86,7 +86,7 @@ extern(C){
 
 class Epoll : AbstractPoll{
 
-    this(int eventNum = 256)
+    this(int eventNum = 1024)
     {
 		_pollEvents.length = eventNum;
         _epollFd = epoll_create1(0);
@@ -223,6 +223,5 @@ private:
     int _epollFd;
     epoll_event[] _pollEvents;
 	Event[int] _mapEvent;
-	//long index = 0;
 }
 }

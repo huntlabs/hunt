@@ -245,6 +245,7 @@ class AsynchronousChannelBase : Event
 			_selector.delEvent(this , cast(int)(_socket.handle), EventType.NONE);
 			_socket.close();
 			_intrestOps = 0;
+			_connectKey = null;
 			setOpen(false);
 			synchronized (this)
 			{
