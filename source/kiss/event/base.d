@@ -49,18 +49,18 @@ package (kiss):
 
 
 @trusted interface  ReadTransport {
-    void onRead(Watcher watcher);
+    void onRead(Watcher watcher) nothrow;
 
-    void onClose(Watcher watcher);
+    void onClose(Watcher watcher) nothrow;
 }
 
 
 //@Transport 
 
 @trusted interface WriteTransport {
-    void onWrite(Watcher watcher);
+    void onWrite(Watcher watcher) nothrow;
 
-    void onClose(Watcher watcher);
+    void onClose(Watcher watcher) nothrow;
 }
 
 

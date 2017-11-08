@@ -11,11 +11,11 @@ final class Acceptor : ReadTransport
     Address listen(){return null;}
     void bind(){}
 protected:
-    override void onRead(Watcher watcher){
+    override void onRead(Watcher watcher) nothrow{
 
     }
 
-    override void onClose(Watcher watcher){
+    override void onClose(Watcher watcher) nothrow{
 
     }
 

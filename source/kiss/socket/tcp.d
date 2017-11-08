@@ -15,18 +15,28 @@ final class TCPSocket : Transport
     void write(){}
 
 protected:
-    override void onRead(Watcher watcher){
+    override void onRead(Watcher watcher) nothrow{
+        try{
+            _loop.read(watcher,_readCallBack);
+        } catch(Exception e){
 
+        }
     }
 
-    override void onClose(Watcher watcher){
+    override void onClose(Watcher watcher) nothrow{
+        try{
+            _loop.close(watcher);
+        } catch(Exception e){
 
+        }
     }
 
-    override void onWrite(Watcher watcher){
+    override void onWrite(Watcher watcher) nothrow{
 
     }
 
 private:
     TCPSocketWatcher _watcher;
+    ReadCallBack _readCallBack;
+    EventLoop _loop;
 }
