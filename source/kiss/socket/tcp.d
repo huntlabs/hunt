@@ -36,7 +36,7 @@ protected:
     }
 
 private:
-    TCPSocketWatcher _watcher;
+    TcpSocketWatcher _watcher;
     ReadCallBack _readCallBack;
     EventLoop _loop;
 }

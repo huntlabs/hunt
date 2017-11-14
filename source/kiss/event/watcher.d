@@ -32,15 +32,18 @@ private:
     size_t _timeOut;
 }
 
-@trusted abstract class TCPSocketWatcher : TransportWatcher!Transport
+@trusted abstract class TcpSocketWatcher : TransportWatcher!Transport
 {
-    this(AddressFamily family){
+    this(){
         super(WatcherType.TCP);
-        _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
+    }
+
+    final void setFamily(AddressFamily family){
+         _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
         //TODO: set flags to Read Write and ET
     }
 
-    final Socket socket(){return _socket;}
+    final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}
 protected:
     Socket _socket;
 }

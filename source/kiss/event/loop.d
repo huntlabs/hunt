@@ -13,12 +13,12 @@ final class EventLoop {
         this(platformLoop());
     }
 
-    this(LoopBase loop)
+    this(BaseLoop loop)
     {
         _loop = loop;
     }
 
-    static LoopBase  platformLoop(){
+    static BaseLoop  platformLoop(){
         return null;
     }
 
@@ -26,7 +26,12 @@ final class EventLoop {
         return _loop.createWatcher(type);
     }
 
-    void read(Watcher watcher,scope ReadCallBack read){
+    void read(Watcher watcher,scope ReadDataCallBack read){
+        return _loop.read(watcher,read);
+    }
+
+    void read(Watcher watcher,scope ReadObjectCallBack read)
+    {
         return _loop.read(watcher,read);
     }
 
@@ -50,7 +55,7 @@ final class EventLoop {
     // while(true)
     void join(){
         _thread = Thread.getThis();
-        return _loop.join(&wakUp);
+        return _loop.join(&weak);
     }
 
     void stop(){
@@ -58,13 +63,17 @@ final class EventLoop {
         return _loop.stop();
     }
 
+    void weakUp(){
+        _loop.weakUp();
+    }
+
     void postTask(){}
 
 protected:
-    void wakUp() nothrow
+    void weak() nothrow
     {}
 
 private:
     Thread _thread;
-    LoopBase _loop;
+    BaseLoop _loop;
 }

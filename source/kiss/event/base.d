@@ -1,6 +1,10 @@
 module kiss.event.base;
 
-alias ReadCallBack = void delegate(in ubyte[] data) nothrow;
+import std.bitmanip;
+
+
+alias ReadDataCallBack = void delegate(in ubyte[] data) nothrow;
+alias ReadObjectCallBack = void delegate(Object obj) nothrow;
 
 enum WatcherType : ubyte
 {
@@ -12,6 +16,17 @@ enum WatcherType : ubyte
     File,
     None
 }
+
+enum WatchFlag : ubyte
+{
+    None = 0x00,
+    Read,
+    Write,
+
+    TimerOnce = 0x0F,
+    ETMode = 0XFF
+}
+
 // 所有检测的不同都有Watcher区分， 保证上层socket的代码都是公共代码
 @trusted abstract class Watcher {
     this(WatcherType type_){
@@ -27,20 +42,15 @@ enum WatcherType : ubyte
 
     abstract string erroString();
 
-    final ushort flags(){return _flags;} 
+    final bool flag(WatchFlag index){return _flags[index];} 
     final @property type(){return _type;}
 
-    void enableRead(){}
-    void enableWrite(){}
-
-    bool isEnableRead();
-    bool isEnableWrite();
-
 protected:
-    //基于bit 区分标志
-    // bit0: read, bit1: write,  bit8: TimerOnce, bit16:ET mode,
-    ushort _flags;
+    final void setFlag(WatchFlag bit, bool enable){
+        _flags[index] = enable;
+    }
 private:
+    bool[16] _flags;
     WatcherType _type;
 package (kiss):
     Watcher _priv;
@@ -68,10 +78,12 @@ package (kiss):
 }
 
 // 实际处理
-interface LoopBase {
+interface BaseLoop {
     Watcher createWatcher(WatcherType type);
 
-    void read(Watcher watcher,scope ReadCallBack read);
+    void read(Watcher watcher,scope ReadDataCallBack read);
+
+    void read(Watcher watcher,scope ReadObjectCallBack read);
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed);
 
@@ -81,6 +93,8 @@ interface LoopBase {
     bool register(Watcher watcher);
 
     bool unRegister(Watcher watcher);
+
+    bool weakUp();
 
     // while(true)
     void join(scope void delegate()nothrow weak); 
