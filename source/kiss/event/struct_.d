@@ -10,9 +10,9 @@ final class UdpDataObject
 }
 
 
-final class InterObject
+final class BaseTypeObject(T)
 {
-    int data;
+    T data;
 }
 
 

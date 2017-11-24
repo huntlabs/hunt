@@ -26,11 +26,7 @@ final class EventLoop {
         return _loop.createWatcher(type);
     }
 
-    void read(Watcher watcher,scope ReadDataCallBack read){
-        return _loop.read(watcher,read);
-    }
-
-    void read(Watcher watcher,scope ReadObjectCallBack read)
+    void read(Watcher watcher,scope ReadCallBack read)
     {
         return _loop.read(watcher,read);
     }

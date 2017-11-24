@@ -99,14 +99,18 @@ final class EpollLoop : BaseLoop
         return returnValue;
     }
 
-    void read(Watcher watcher,scope ReadDataCallBack read)
+    void read(Watcher watcher,scope ReadCallBack read)
     {
-        
-    }
-
-    void read(Watcher watcher,scope ReadObjectCallBack read)
-    {
-        return _loop.read(watcher,read);
+        switch(watcher.type){
+            case WatcherType.Timer:
+            break;
+            case WatcherType.ACCEPT:
+            break;
+            case WatcherType.Event:
+            break;
+            case WatcherType.TCP:
+            break;
+        }
     }
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed)

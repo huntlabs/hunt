@@ -40,7 +40,6 @@ private:
 
     final void setFamily(AddressFamily family){
          _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
-        //TODO: set flags to Read Write and ET
     }
 
     final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}

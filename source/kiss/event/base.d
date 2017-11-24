@@ -2,9 +2,7 @@ module kiss.event.base;
 
 import std.bitmanip;
 
-
-alias ReadDataCallBack = void delegate(in ubyte[] data) nothrow;
-alias ReadObjectCallBack = void delegate(Object obj) nothrow;
+alias ReadCallBack = void delegate(Object obj) nothrow;
 
 enum WatcherType : ubyte
 {
@@ -81,9 +79,7 @@ package (kiss):
 interface BaseLoop {
     Watcher createWatcher(WatcherType type);
 
-    void read(Watcher watcher,scope ReadDataCallBack read);
-
-    void read(Watcher watcher,scope ReadObjectCallBack read);
+    void read(Watcher watcher,scope ReadCallBack read);
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed);
 
