@@ -1,4 +1,4 @@
-module kiss.socket.acceptor;
+module kiss.socket.udp;
 
 import kiss.event.base;
 import kiss.event.loop;

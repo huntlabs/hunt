@@ -35,13 +35,12 @@ final class EventLoop {
         return _loop.write(watcher,data,writed);
     }
 
-    // 关闭会自动unRegister的
-    bool close(Watcher watcher){
-        return _loop.close(watcher);
-    }
-
     bool register(Watcher watcher){
         return _loop.register(watcher);
+    }
+
+    bool reRegister(Watcher watcher){
+        return _loop.reRegister(watcher);
     }
 
     bool unRegister(Watcher watcher){
@@ -49,7 +48,11 @@ final class EventLoop {
     }
 
     // while(true)
+    // todo: 线程安全！
     void join(){
+        if(isRuning()){
+            throw new LoopException("CURRT EVENT LOOP IS RUNING!");
+        }
         _thread = Thread.getThis();
         return _loop.join(&weak);
     }
@@ -57,6 +60,10 @@ final class EventLoop {
     void stop(){
         _thread = null;
         return _loop.stop();
+    }
+
+    bool isRuning(){
+        return (_thread !is null);
     }
 
     void weakUp(){

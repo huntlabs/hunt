@@ -7,7 +7,7 @@ public import kiss.event.impl.posix_watcher;
 
 import core.sys.posix.unistd;
 
-final class  EpollEventWatch : Watcher 
+final class EpollEventWatcher : Watcher 
 {
     alias UlongObject = BaseTypeObject!ulong;
     this()
@@ -15,11 +15,25 @@ final class  EpollEventWatch : Watcher
         super(WatcherType.Event);
         setFlag(WatchFlag.Read,true);
          _readBuffer = new UlongObject();
+         _eventFD = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    }
+
+    ~this(){
+        close();
+    }
+
+    void call(){
+        ulong value = 1;
+        core.sys.posix.unistd.write(_eventFD,  &value, value.sizeof);
+    }
+
+    override void onRead(){
+        readEvent(this,null);
     }
 
     mixin PosixOverrideErro;
 
-    UintObject _readBuffer;
+    UlongObject _readBuffer;
 
     int _eventFD;
 }
@@ -31,6 +45,11 @@ final class EpollTimerWatcher : TimerWatcher
         super();
         setFlag(WatchFlag.Read,true);
         _readBuffer = new UintObject();
+       _timerFD = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
+    }
+
+    ~this(){
+        close();
     }
 
     mixin PosixOverrideErro;
@@ -43,7 +62,7 @@ final class EpollTimerWatcher : TimerWatcher
 bool readTimer(EpollTimerWatcher watch, scope ReadCallBack read)
 {
     if(watch is null) return false;
-        watch.clearError();
+    watch.clearError();
     ulong value;
     core.sys.posix.unistd.read(watch._timerFD, &value, 8);
     watch._readBuffer.data = value;
@@ -52,7 +71,7 @@ bool readTimer(EpollTimerWatcher watch, scope ReadCallBack read)
     return false;
 }
 
-bool readEvent(EpollEventWatch watch, scope ReadCallBack read)
+bool readEvent(EpollEventWatcher watch, scope ReadCallBack read)
 {
     if(watch is null) return false;
         watch.clearError();

@@ -7,12 +7,12 @@ import kiss.event.struct_;
 import std.socket;
 import std.string;
 
+import core.stdc.errno;
 import core.sys.posix.sys.socket;
-
 
 mixin template PosixOverrideErro()
 {
-     override bool isError(){
+    override bool isError(){
         return _error;
     }
     override string erroString(){
@@ -129,3 +129,23 @@ bool readUdp(PosixUDPWatcher watch, scope ReadCallBack read)
     return false;
 }
 
+
+bool writeTcp(PosixTCPWatcher watch,in ubyte[] data, out size_t writed)
+{
+    bool canWrite = false;
+    if(watch is null || read is null) return canWrite;
+    watch.clearError();
+    const auto len = watch.socket.send(data);
+    if (len > 0) {
+        writed = cast(size_t)len;
+        canWrite = true;
+    } else {
+        if (errno == 4) {
+            canWrite = true;
+        } else if (errno != EAGAIN || errno != EWOULDBLOCK) {
+            watch._error = true;
+            watch.erroString = fromStringz(strerror(errno));
+        }
+    }
+    return canWrite;
+}

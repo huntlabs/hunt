@@ -15,44 +15,78 @@ enum WatcherType : ubyte
     None
 }
 
-enum WatchFlag : ubyte
+enum WatchFlag : ushort
 {
-    None = 0x00,
+    None = 0,
     Read,
     Write,
 
-    TimerOnce = 0x0F,
-    ETMode = 0XFF
+    OneShot = 8,
+    ETMode = 16
 }
 
 // 所有检测的不同都有Watcher区分， 保证上层socket的代码都是公共代码
 @trusted abstract class Watcher {
     this(WatcherType type_){
         _type = type_;
+        _flags = BitArray([false,false,false,false,
+                            false,false,false,false,
+                            false,false,false,false,
+                            false,false,false,false]);
     }
 
     /// Whether the watcher is active.
-    bool active(){
-        return false;
+    final bool active(){
+        return (_inLoop !is null);
     }
 
     abstract bool isError();
-
     abstract string erroString();
+    void onClose(){}
+    void onRead(){}
+    void onWrite(){}
 
     final bool flag(WatchFlag index){return _flags[index];} 
     final @property type(){return _type;}
 
+    final void close(){
+        if(_inLoop is null) return;
+        _inLoop.close(this);
+    }
+
 protected:
-    final void setFlag(WatchFlag bit, bool enable){
+    final void setFlag(WatchFlag index, bool enable){
         _flags[index] = enable;
     }
 private:
-    bool[16] _flags;
+    BitArray _flags;
     WatcherType _type;
-package (kiss):
+    // 注册的eventLoop
+    BaseLoop _inLoop;
+private: // 设置一个双向链表，让GC能扫描，也让自己能处理。
     Watcher _priv;
     Watcher _next;
+
+package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
+    @property BaseLoop currtLoop(){return _inLoop;}
+    @property void currtLoop(BaseLoop loop){_inLoop = loop;}
+
+    void setNext(Watcher next){
+        next._next = _next._next;
+        next._priv = _next;
+        if (_next._next)
+            _next._next._priv = next;
+        _next._next = next;
+    } 
+
+    void clear(){
+        if(_priv)
+            _priv._next = _next;
+        if(_next)
+            _next._priv = _priv;
+        _next = null;
+        _priv = null;
+    }
 }
 
 
@@ -87,6 +121,8 @@ interface BaseLoop {
     bool close(Watcher watcher);
 
     bool register(Watcher watcher);
+
+    bool reRegister(Watcher watcher);
 
     bool unRegister(Watcher watcher);
 

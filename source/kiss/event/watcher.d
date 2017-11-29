@@ -27,10 +27,18 @@ private:
     final @property time(){return _timeOut;}
     final @property time(size_t tm){_timeOut = time;} 
 
-    // onlyOnce
-    void enableWhile(){}
+    final override void onClose()
+    {
+        if(watcher)
+            watcher.onClose(this);
+    }
 
-    bool isEnableWhile();
+    final override void onRead()
+    {
+        if(watcher)
+            watcher.onRead(this);
+    }
+
 private:
     size_t _timeOut;
 }
@@ -49,6 +57,24 @@ private:
          _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
     }
 
+    final override void onClose()
+    {
+        if(watcher)
+            watcher.onClose(this);
+    }
+
+    final override void onRead()
+    {
+        if(watcher)
+            watcher.onRead(this);
+    }
+
+    final override void onWrite()
+    {
+        if(watcher)
+            watcher.onWrite(this);
+    }
+
     final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}
 protected:
     Socket _socket;
@@ -60,6 +86,18 @@ protected:
     this(AddressFamily family){
         super(WatcherType.TCP);
         _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
+    }
+
+    final override void onClose()
+    {
+        if(watcher)
+            watcher.onClose(this);
+    }
+
+    final override void onRead()
+    {
+        if(watcher)
+            watcher.onRead(this);
     }
 
     final @property  Socket socket(){return _socket;}
@@ -75,9 +113,29 @@ protected:
         _readBuffer = new UdpDataObject();
         _readBuffer.data = new ubyte[4096 * 2];
     }
+
+    final override void onClose()
+    {
+        if(watcher)
+            watcher.onClose(this);
+    }
+
+    final override void onRead()
+    {
+        if(watcher)
+            watcher.onRead(this);
+    }
     
     final UdpSocket socket(){return _socket;}
 protected:
     UdpSocket _socket;
     UdpDataObject _readBuffer;
+}
+
+socket_t getSocketFD(T)(Watcher watcher){
+    T watch = cast(T)watcher;
+    if(watch !is null && watch.socket !is null){
+        return watch.socket.handle;
+    }
+    return socket_t.init;
 }
