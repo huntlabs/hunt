@@ -1,6 +1,7 @@
 module kiss.event.watcher;
 
 import kiss.event.base;
+import kiss.event.struct_;
 import std.socket;
 
 @trusted abstract class TransportWatcher(T) : Watcher 
@@ -17,6 +18,8 @@ private:
 
 @trusted abstract class TimerWatcher : TransportWatcher!ReadTransport
 {
+    alias UintObject = BaseTypeObject!uint;
+
     this(){
         super(WatcherType.Timer);
     }
@@ -34,8 +37,12 @@ private:
 
 @trusted abstract class TcpSocketWatcher : TransportWatcher!Transport
 {
+    alias UbyteArrayObject = BaseTypeObject!(ubyte[]);
+
     this(){
         super(WatcherType.TCP);
+        _readBuffer = new UbyteArrayObject();
+        _readBuffer.data = new ubyte[4096 * 2];
     }
 
     final void setFamily(AddressFamily family){
@@ -45,6 +52,7 @@ private:
     final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}
 protected:
     Socket _socket;
+    UbyteArrayObject _readBuffer;
 }
 
 @trusted abstract class AcceptorWatcher : TransportWatcher!ReadTransport
@@ -64,9 +72,12 @@ protected:
     this(AddressFamily family){
         super(WatcherType.UDP);
         _socket = new UdpSocket(family);
+        _readBuffer = new UdpDataObject();
+        _readBuffer.data = new ubyte[4096 * 2];
     }
     
     final UdpSocket socket(){return _socket;}
 protected:
     UdpSocket _socket;
+    UdpDataObject _readBuffer;
 }

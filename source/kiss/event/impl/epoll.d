@@ -2,78 +2,19 @@ module kiss.event.impl.epoll;
 
 import kiss.event.base;
 import kiss.event.watcher;
+import kiss.event.impl.epoll_watcher;
 
-mixin template EpollOverrideErro()
-{
-     override bool isError(){
-        return _error;
-    }
-    override string erroString(){
-        return _erroString;
-    }
+import std.socket;
+import std.string;
 
-    bool _error = false;
-    string _erroString;
-}
+import core.time;
+import core.stdc.string;
+import core.sys.posix.sys.types; // for ssize_t, size_t
+import core.sys.posix.netinet.tcp;
+import core.sys.posix.netinet.in_;
+import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
+import core.sys.posix.unistd;
 
-final class EpollTCPWatcher : TcpSocketWatcher
-{
-    this()
-    {
-        super();
-        setFlag(WatchFlag.Read,true);
-        setFlag(WatchFlag.Write,true);
-        setFlag(WatchFlag.ETMode,true);
-    }
-   
-   mixin EpollOverrideErro;
-}
-
-final class EpollTimerWatcher : TimerWatcher
-{
-    this()
-    {
-        super();
-        setFlag(WatchFlag.Read,true);
-    }
-
-    mixin EpollOverrideErro;
-}
-
-final class EpollUDPWatcher : UDPSocketWatcher
-{
-    this()
-    {
-        super();
-        setFlag(WatchFlag.Read,true);
-        setFlag(WatchFlag.ETMode,true);
-    }
-
-    mixin EpollOverrideErro;
-}
-
-final class EpollAcceptWatcher : AcceptorWatcher
-{
-    this()
-    {
-        super();
-        setFlag(WatchFlag.Read,true);
-    }
-
-    mixin EpollOverrideErro;
-}
-
-final class  EpollEventWatch : Watcher 
-{
-    this()
-    {
-        super(WatcherType.Event);
-        setFlag(WatchFlag.Read,true);
-        setFlag(WatchFlag.ETMode,true);
-    }
-
-    mixin EpollOverrideErro;
-}
 
 final class EpollLoop : BaseLoop
 {
@@ -99,22 +40,34 @@ final class EpollLoop : BaseLoop
         return returnValue;
     }
 
-    void read(Watcher watcher,scope ReadCallBack read)
+    bool read(Watcher watcher,scope ReadCallBack read)
     {
+        bool canRead = false;
         switch(watcher.type){
             case WatcherType.Timer:
+                canRead = readTimer(cast(EpollTimerWatcher)watcher,read);
             break;
             case WatcherType.ACCEPT:
+                canRead = readAccept(cast(PosixAcceptWatcher)watcher, read);
             break;
             case WatcherType.Event:
+                canRead = readEvent(cast(EpollEventWatch)watcher,read);
             break;
             case WatcherType.TCP:
+                canRead = readTcp(cast(PosixTCPWatcher)watcher,read);
+            break;
+            case WatcherType.UDP:
+                canRead = readUdp(cast(PosixUDPWatcher)watcher,read);
+            break;
+            default:
             break;
         }
+        return canRead;
     }
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed)
-    {}
+    {
+    }
 
     // 关闭会自动unRegister的
     bool close(Watcher watcher);
@@ -129,4 +82,5 @@ final class EpollLoop : BaseLoop
     void join(scope void delegate()nothrow weak); 
 
     void stop();
+
 }

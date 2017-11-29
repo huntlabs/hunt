@@ -79,7 +79,7 @@ package (kiss):
 interface BaseLoop {
     Watcher createWatcher(WatcherType type);
 
-    void read(Watcher watcher,scope ReadCallBack read);
+    bool read(Watcher watcher,scope ReadCallBack read);
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed);
 

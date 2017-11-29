@@ -26,7 +26,7 @@ final class EventLoop {
         return _loop.createWatcher(type);
     }
 
-    void read(Watcher watcher,scope ReadCallBack read)
+    bool read(Watcher watcher,scope ReadCallBack read)
     {
         return _loop.read(watcher,read);
     }
