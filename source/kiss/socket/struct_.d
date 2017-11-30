@@ -37,7 +37,7 @@ final class WarpTcpBuffer : TCPWriteBuffer
     {
         return _data[_site .. $];
     }
-    
+
     // add send offiset and return is empty
     override bool popSize(size_t size) nothrow
     {
@@ -62,4 +62,43 @@ private:
     size_t _site = 0;
     const(ubyte)[] _data;
     TCPWriteCallBack _cback;
+}
+
+struct WriteBufferQueue
+{
+	TCPWriteBuffer  front() nothrow{
+		return _frist;
+	}
+
+	bool empty() nothrow{
+		return _frist is null;
+	}
+
+	void enQueue(TCPWriteBuffer wsite) nothrow
+	in{
+		assert(wsite);
+	}body{
+		if(_last){
+			_last._next = wsite;
+		} else {
+			_frist = wsite;
+		}
+		wsite._next = null;
+		_last = wsite;
+	}
+
+	TCPWriteBuffer deQueue() nothrow
+	in{
+		assert(_frist && _last);
+	}body{
+		TCPWriteBuffer  wsite = _frist;
+		_frist = _frist._next;
+		if(_frist is null)
+			_last = null;
+		return wsite;
+	}
+
+private:
+	TCPWriteBuffer  _last = null;
+	TCPWriteBuffer  _frist = null;
 }
