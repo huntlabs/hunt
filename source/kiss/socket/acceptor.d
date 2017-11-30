@@ -1,6 +1,6 @@
 module kiss.socket.acceptor;
 
-
+import kiss.event;
 import std.socket;
 
 final class Acceptor : ReadTransport

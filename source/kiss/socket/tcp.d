@@ -56,7 +56,7 @@ protected:
                 }
             }
         } catch(Exception e){
-            error("the Tcp socket Read is Exception: ", e.toString()); 
+            collectException(()@trusted{error("the Tcp socket Read is Exception: ", e.toString());}()); 
         }
     }
 
@@ -65,7 +65,7 @@ protected:
             //_loop.close(watcher);
             watcher.close();
         } catch(Exception e){
-            error("the Tcp socket Close is Exception: ", e.toString()); 
+            collectException(()@trusted{error("the Tcp socket Close is Exception: ", e.toString());}()); 
         }
     }
 
