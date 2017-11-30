@@ -3,12 +3,13 @@ module kiss.event.loop;
 public import kiss.event.base;
 import kiss.event.struct_;
 import core.thread;
+import kiss.event.task;
 
 // 代理模式去实现loop， eventloop的任务队列在此实现。
 // 全面采用 前摄器 模式
 // 如果加协程，缓存数据放到上层
 
-final class EventLoop {
+final @trusted class EventLoop {
     this()
     {
         this(platformLoop());
@@ -71,13 +72,38 @@ final class EventLoop {
         _loop.weakUp();
     }
 
-    void postTask(){}
+    void postTask(AbstractTask task){
+        synchronized(this){
+                _queue.enQueue(task);
+            }
+    }
+
+    static AbstractTask createTask(alias fun, Args...)(Args args) {
+        return newTask!(fun, Args)(args);
+    }
+
+    static AbstractTask createTask(F, Args...)(F delegateOrFp, Args args) if (is(typeof(delegateOrFp(args)))) {
+        return newTask(F, Args)(delegateOrFp, args);
+    }
 
 protected:
     void weak() nothrow
-    {}
+    {
+        TaskQueue queue;
+        try{
+            synchronized(this){
+                queue = _queue;
+                _queue = TaskQueue();
+            }
+        } catch(Exception){}
+        while(!queue.empty){
+            auto task = queue.deQueue();
+            task.job();
+        }
+    }
 
 private:
     Thread _thread;
     BaseLoop _loop;
+    TaskQueue _queue;
 }

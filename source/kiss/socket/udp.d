@@ -24,7 +24,8 @@ protected:
 
     override void onClose(Watcher watcher)  nothrow{
         try{
-            _loop.close(watcher);
+            //_loop.close(watcher);
+            watcher.close();
         } catch(Exception e){
 
         }
