@@ -54,7 +54,11 @@ private:
     }
 
     final void setFamily(AddressFamily family){
-         _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
+         setSocket(new Socket(family,SocketType.STREAM, ProtocolType.TCP));
+    }
+
+    void setSocket(Socket sock){
+        _socket = sock;
     }
 
     final override void onClose()
@@ -78,7 +82,8 @@ private:
     final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}
 
     UbyteArrayObject _readBuffer;
-protected:
+
+private:
     Socket _socket;
 }
 
@@ -89,7 +94,11 @@ protected:
     }
 
     final void setFamily(AddressFamily family){
-         _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
+        setSocket(new Socket(family,SocketType.STREAM, ProtocolType.TCP));
+    }
+
+    void setSocket(Socket sock){
+        _socket = sock;
     }
 
     final override void onClose()
@@ -105,7 +114,7 @@ protected:
     }
 
     final @property  Socket socket(){return _socket;}
-protected:
+private:
     Socket _socket;
 }
 
@@ -135,7 +144,7 @@ protected:
     
     final UdpSocket socket(){return _socket;}
     UdpDataObject _readBuffer;
-protected:
+private:
     UdpSocket _socket;
 }
 

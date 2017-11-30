@@ -40,6 +40,11 @@ final class PosixTCPWatcher : TcpSocketWatcher
     }
    
    mixin PosixOverrideErro;
+
+    override void setSocket(Socket sock){
+        sock.blocking = false;
+        super.setSocket(sock);
+    }
 }
 
 final class PosixUDPWatcher : UDPSocketWatcher
@@ -63,6 +68,11 @@ final class PosixAcceptWatcher : AcceptorWatcher
     }
 
     mixin PosixOverrideErro;
+
+    override void setSocket(Socket sock){
+        sock.blocking = false;
+        super.setSocket(sock);
+    }
 }
 
 
