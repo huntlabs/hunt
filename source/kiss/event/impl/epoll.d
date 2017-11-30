@@ -13,7 +13,6 @@ import core.stdc.errno;
 import core.sys.posix.sys.types; // for ssize_t, size_t
 import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
-import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
 import core.sys.posix.unistd;
 
 final class EpollLoop : BaseLoop
@@ -66,7 +65,7 @@ final class EpollLoop : BaseLoop
                 canRead = readAccept(cast(PosixAcceptWatcher)watcher, read);
             break;
             case WatcherType.Event:
-                canRead = readEvent(cast(EpollEventWatch)watcher,read);
+                canRead = readEvent(cast(EpollEventWatcher)watcher,read);
             break;
             case WatcherType.TCP:
                 canRead = readTcp(cast(PosixTCPWatcher)watcher,read);
@@ -95,6 +94,7 @@ final class EpollLoop : BaseLoop
         int fd = getFD(watcher);
         if(fd < 0) return false;
         .close(fd);
+        return true;
     }
 
     override bool register(Watcher watcher)
@@ -187,7 +187,7 @@ protected :
     }
     epoll_event buildEpollEvent(Watcher watch){
         epoll_event ev;
-        ev.data.ptr = event;
+        ev.data.ptr = cast(void *)watch;
         ev.events = EPOLLRDHUP | EPOLLERR | EPOLLHUP;
         if (watch.flag(WatchFlag.Read))
             ev.events |= EPOLLIN;
@@ -236,65 +236,4 @@ private:
 }
 
 
-extern (C) : @system : nothrow : enum {
-    EFD_SEMAPHORE = 0x1,
-    EFD_CLOEXEC = 0x80000,
-    EFD_NONBLOCK = 0x800
-};
 
-enum {
-    EPOLL_CLOEXEC = 0x80000,
-    EPOLL_NONBLOCK = 0x800
-}
-
-enum {
-    EPOLLIN = 0x001,
-    EPOLLPRI = 0x002,
-    EPOLLOUT = 0x004,
-    EPOLLRDNORM = 0x040,
-    EPOLLRDBAND = 0x080,
-    EPOLLWRNORM = 0x100,
-    EPOLLWRBAND = 0x200,
-    EPOLLMSG = 0x400,
-    EPOLLERR = 0x008,
-    EPOLLHUP = 0x010,
-    EPOLLRDHUP = 0x2000, // since Linux 2.6.17
-    EPOLLONESHOT = 1u << 30,
-    EPOLLET = 1u << 31
-}
-
-/* Valid opcodes ( "op" parameter ) to issue to epoll_ctl().  */
-enum {
-    EPOLL_CTL_ADD = 1, // Add a file descriptor to the interface.
-    EPOLL_CTL_DEL = 2, // Remove a file descriptor from the interface.
-    EPOLL_CTL_MOD = 3, // Change file descriptor epoll_event structure.
-}
-
-align(1) struct epoll_event {
-    align(1) : uint events;
-    epoll_data_t data;
-}
-
-union epoll_data_t {
-    void * ptr;
-    int fd;
-    uint u32;
-    ulong u64;
-}
-
-int epoll_create(int size);
-int epoll_create1(int flags);
-int epoll_ctl(int epfd, int op, int fd, epoll_event * event);
-int epoll_wait(int epfd, epoll_event * events, int maxevents, int timeout);
-
-int eventfd(uint initval, int flags);
-
-//timerfd
-
-int timerfd_create(int clockid, int flags);
-int timerfd_settime(int fd, int flags, const itimerspec * new_value, itimerspec * old_value);
-int timerfd_gettime(int fd, itimerspec * curr_value);
-
-enum TFD_TIMER_ABSTIME = 1 << 0;
-enum TFD_CLOEXEC = 0x80000;
-enum TFD_NONBLOCK = 0x800;

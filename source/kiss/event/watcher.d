@@ -76,16 +76,20 @@ private:
     }
 
     final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}
+
+    UbyteArrayObject _readBuffer;
 protected:
     Socket _socket;
-    UbyteArrayObject _readBuffer;
 }
 
 @trusted abstract class AcceptorWatcher : TransportWatcher!ReadTransport
 {
-    this(AddressFamily family){
-        super(WatcherType.TCP);
-        _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
+    this(){
+        super(WatcherType.ACCEPT);
+    }
+
+    final void setFamily(AddressFamily family){
+         _socket = new Socket(family,SocketType.STREAM, ProtocolType.TCP);
     }
 
     final override void onClose()
@@ -107,11 +111,14 @@ protected:
 
 @trusted abstract class UDPSocketWatcher : TransportWatcher!Transport
 {
-    this(AddressFamily family){
+    this(){
         super(WatcherType.UDP);
-        _socket = new UdpSocket(family);
         _readBuffer = new UdpDataObject();
         _readBuffer.data = new ubyte[4096 * 2];
+    }
+
+    final void setFamily(AddressFamily family){
+         _socket = new UdpSocket(family);
     }
 
     final override void onClose()
@@ -127,9 +134,9 @@ protected:
     }
     
     final UdpSocket socket(){return _socket;}
+    UdpDataObject _readBuffer;
 protected:
     UdpSocket _socket;
-    UdpDataObject _readBuffer;
 }
 
 socket_t getSocketFD(T)(Watcher watcher){

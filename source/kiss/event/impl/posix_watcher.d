@@ -8,6 +8,7 @@ import std.socket;
 import std.string;
 
 import core.stdc.errno;
+import core.stdc.string;
 import core.sys.posix.sys.socket;
 
 mixin template PosixOverrideErro()
@@ -83,7 +84,7 @@ bool readTcp(PosixTCPWatcher watch, scope ReadCallBack read)
             canRead = true;
         } else if (errno != EAGAIN && errno != EWOULDBLOCK) {
             watch._error = true;
-            watch.erroString = fromStringz(strerror(errno));
+            watch._erroString = fromStringz(strerror(errno)).idup;
         }
     } else {
         read(null);
@@ -120,9 +121,8 @@ bool readUdp(PosixUDPWatcher watch, scope ReadCallBack read)
     watch._readBuffer.addr = createAddress();
     auto data = watch._readBuffer.data;
     scope(exit)watch._readBuffer.data = data;
-    auto len = _socket.receiveFrom(watch._readBuffer.data, watch._readBuffer.addr);
+    auto len = watch.socket.receiveFrom(watch._readBuffer.data, watch._readBuffer.addr);
     if (len > 0){
-        canRead = true;
         watch._readBuffer.data = watch._readBuffer.data[0..len];
         read(watch._readBuffer);
     }
@@ -133,7 +133,7 @@ bool readUdp(PosixUDPWatcher watch, scope ReadCallBack read)
 bool writeTcp(PosixTCPWatcher watch,in ubyte[] data, out size_t writed)
 {
     bool canWrite = false;
-    if(watch is null || read is null) return canWrite;
+    if(watch is null) return canWrite;
     watch.clearError();
     const auto len = watch.socket.send(data);
     if (len > 0) {
@@ -144,7 +144,7 @@ bool writeTcp(PosixTCPWatcher watch,in ubyte[] data, out size_t writed)
             canWrite = true;
         } else if (errno != EAGAIN || errno != EWOULDBLOCK) {
             watch._error = true;
-            watch.erroString = fromStringz(strerror(errno));
+            watch._erroString = fromStringz(strerror(errno)).idup;
         }
     }
     return canWrite;

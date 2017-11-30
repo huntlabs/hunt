@@ -1,6 +1,7 @@
 module kiss.event.loop;
 
 public import kiss.event.base;
+import kiss.event.struct_;
 import core.thread;
 
 // 代理模式去实现loop， eventloop的任务队列在此实现。
