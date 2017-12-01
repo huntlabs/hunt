@@ -128,6 +128,7 @@ private:
 
     final void setFamily(AddressFamily family){
          _socket = new UdpSocket(family);
+         _socket.blocking = false;
     }
 
     final override void onClose()

@@ -11,7 +11,7 @@ alias AcceptCallBack = void delegate(Socket socket) @trusted nothrow;
 alias TCPWriteCallBack = void delegate(in ubyte[] data, size_t size) @trusted nothrow;
 
 
-abstract class TCPWriteBuffer
+@trusted abstract class TCPWriteBuffer
 {
     // todo Send Data;
     const(ubyte)[] sendData() nothrow;
@@ -66,15 +66,15 @@ private:
 
 struct WriteBufferQueue
 {
-	TCPWriteBuffer  front() nothrow{
+	@safe TCPWriteBuffer  front() nothrow{
 		return _frist;
 	}
 
-	bool empty() nothrow{
+	@safe bool empty() nothrow{
 		return _frist is null;
 	}
 
-	void enQueue(TCPWriteBuffer wsite) nothrow
+	@safe void enQueue(TCPWriteBuffer wsite) nothrow
 	in{
 		assert(wsite);
 	}body{
@@ -87,7 +87,7 @@ struct WriteBufferQueue
 		_last = wsite;
 	}
 
-	TCPWriteBuffer deQueue() nothrow
+	@safe TCPWriteBuffer deQueue() nothrow
 	in{
 		assert(_frist && _last);
 	}body{

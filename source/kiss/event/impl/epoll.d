@@ -91,6 +91,11 @@ final class EpollLoop : BaseLoop
     override bool close(Watcher watcher)
     {
         unRegister(watcher);
+        // TODO: change close;
+        // Linger optLinger;
+        //     optLinger.on = 1;
+        //     optLinger.time = 0;
+        //     _socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
         int fd = getFD(watcher);
         if(fd < 0) return false;
         .close(fd);

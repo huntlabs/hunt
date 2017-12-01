@@ -31,7 +31,27 @@ final class TCPSocket : Transport
         _readBack = cback;
     }
 
-    void write(){}
+    override bool watched(){
+        return _watcher.active;
+    }
+
+    override bool watch() {
+        return _loop.register(_watcher);
+    }
+
+    override void close(){
+        onClose(_watcher);
+    }
+
+    void write(TCPWriteBuffer data){
+        if(_watcher.active){
+            _writeQueue.enQueue(data);
+            onWrite(_watcher);
+        } else {
+            warning("tcp socket is not is eventLoop!");
+            data.doFinish();
+        }
+    }
 
     final EventLoop eventLoop(){return _loop;}
 protected:
@@ -62,15 +82,43 @@ protected:
 
     override void onClose(Watcher watcher) nothrow{
         try{
-            //_loop.close(watcher);
             watcher.close();
+            while(!_writeQueue.empty){
+                TCPWriteBuffer buffer = _writeQueue.deQueue();
+                buffer.doFinish();
+            }
+            if(_closeBack)
+                _closeBack();
         } catch(Exception e){
             collectException(()@trusted{error("the Tcp socket Close is Exception: ", e.toString());}()); 
         }
     }
 
     override void onWrite(Watcher watcher) nothrow{
-
+        try{
+            bool canWrite = true;
+            while(canWrite && watcher.active && !_writeQueue.empty){
+                TCPWriteBuffer buffer = _writeQueue.front();
+                const(ubyte[]) data = buffer.sendData();
+                if(data.length == 0){
+                    buffer.doFinish();
+                    continue;
+                }
+                size_t writedSize;
+                canWrite = _loop.write(_watcher,data,writedSize);
+                if(buffer.popSize(writedSize)){
+                    buffer.doFinish();
+                    _writeQueue.deQueue();
+                }
+                if(watcher.isError){
+                    canWrite = false;
+                    watcher.close();
+                    error("the Tcp socket Read is error: ", watcher.erroString); 
+                }
+            }
+        } catch(Exception e){
+            collectException(()@trusted{error("the Tcp socket Close is Exception: ", e.toString());}()); 
+        }
     }
 
 protected:
@@ -78,6 +126,7 @@ protected:
 
     CloseCallBack _closeBack;
     TcpReadCallBack _readBack;
+    WriteBufferQueue _writeQueue;
 private:
     EventLoop _loop;
 }

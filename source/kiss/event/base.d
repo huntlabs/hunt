@@ -91,6 +91,13 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
 
 
 @trusted interface  ReadTransport {
+
+    void close();
+
+    bool watched();
+
+    bool watch();
+
     void onRead(Watcher watcher) nothrow;
 
     void onClose(Watcher watcher) nothrow;
@@ -100,6 +107,10 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
 //@Transport 
 
 @trusted interface WriteTransport {
+    bool watched();
+
+    bool watch();
+    
     void onWrite(Watcher watcher) nothrow;
 
     void onClose(Watcher watcher) nothrow;
