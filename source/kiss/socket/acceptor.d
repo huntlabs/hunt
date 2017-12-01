@@ -12,14 +12,14 @@ final class Acceptor : ReadTransport
     this(EventLoop loop,AddressFamily amily)
     {
         _loop = loop;
-        _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.TCP);
+        _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.ACCEPT);
         _watcher.setFamily(amily);
     }
 
     this(EventLoop loop,Socket sock)
     {
         _loop = loop;
-        _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.TCP);
+        _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.ACCEPT);
         _watcher.setSocket(sock);
     }
 

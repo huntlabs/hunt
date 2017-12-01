@@ -6,6 +6,8 @@ alias CloseCallBack = void delegate() @trusted nothrow;
 
 alias TcpReadCallBack = void delegate(in ubyte[] data) @trusted nothrow;
 
+alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr) @trusted nothrow;
+
 alias AcceptCallBack = void delegate(Socket socket) @trusted nothrow;
 
 alias TCPWriteCallBack = void delegate(in ubyte[] data, size_t size) @trusted nothrow;

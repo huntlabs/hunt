@@ -1,8 +1,7 @@
 module kiss.socket.udp;
 
-import kiss.event.base;
-import kiss.event.loop;
-import kiss.event.watcher;
+import kiss.event;
+import kiss.socket.struct_;
 
 import std.socket;
 import std.exception;
@@ -11,14 +10,39 @@ import std.experimental.logger;
 final class UDPSocket : Transport
 {
     
-    void setClose(){}
-    void setData(){}
+    this(EventLoop loop,AddressFamily amily)
+    {
+        _loop = loop;
+        _watcher = cast(UDPSocketWatcher)loop.createWatcher(WatcherType.UDP);
+        _watcher.setFamily(amily);
+    }
 
-    void write(){}
-    
-    override void close(){}
+    void setReadData(UDPReadCallBack cback){
+        _readBack = cback;
+    }
 
-        override bool watched(){
+
+    ptrdiff_t sendTo(const(void)[] buf, Address to){
+        return _watcher.socket.sendTo(buf,to);
+    }
+
+    ptrdiff_t sendTo(const(void)[] buf){
+        return _watcher.socket.sendTo(buf);
+    }
+
+    ptrdiff_t sendTo(const(void)[] buf, SocketFlags flags, Address to){
+        return _watcher.socket.sendTo(buf,flags,to);
+    }
+
+    void bind(Address addr){
+        _watcher.bind(addr);
+    }
+
+    void connect(Address addr){
+        _watcher.socket.connect(addr);
+    }
+
+    override bool watched(){
         return _watcher.active;
     }
 
@@ -36,12 +60,10 @@ protected:
             while(canRead && watcher.active){
                 canRead = _loop.read(watcher,(Object obj) nothrow {
                     collectException((){
-                        // auto buffer = cast(TcpSocketWatcher.UbyteArrayObject)obj;
-                        // if(buffer is null){
-                        //     watcher.close(); 
-                        //     return;
-                        // }
-                        // _readBack(buffer.data);
+                        UdpDataObject data = cast(UdpDataObject)obj;
+                        if(data !is null){
+                            _readBack(data.data,data.addr);
+                        }
                     }());
                 });
                 if(watcher.isError){
@@ -69,6 +91,6 @@ protected:
 
 private:
     UDPSocketWatcher _watcher;
-    ReadCallBack _readCallBack;
+    UDPReadCallBack _readBack;
     EventLoop _loop;
 }

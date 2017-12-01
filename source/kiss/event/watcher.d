@@ -131,8 +131,16 @@ private:
          _socket.blocking = false;
     }
 
+    final void bind(Address addr){
+        socket.bind(addr);
+        _binded = true;
+    }
+
+    final bool isBind(){return _binded;}
+
     final override void onClose()
     {
+        _binded = false;
         if(watcher)
             watcher.onClose(this);
     }
@@ -146,6 +154,7 @@ private:
     final UdpSocket socket(){return _socket;}
     UdpDataObject _readBuffer;
 private:
+    bool _binded = false;
     UdpSocket _socket;
 }
 

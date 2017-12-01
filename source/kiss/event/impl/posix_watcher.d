@@ -130,7 +130,7 @@ bool readUdp(PosixUDPWatcher watch, scope ReadCallBack read)
     }
     watch._readBuffer.addr = createAddress();
     auto data = watch._readBuffer.data;
-    scope(exit)watch._readBuffer.data = data;
+    scope(exit) watch._readBuffer.data = data;
     auto len = watch.socket.receiveFrom(watch._readBuffer.data, watch._readBuffer.addr);
     if (len > 0){
         watch._readBuffer.data = watch._readBuffer.data[0..len];
