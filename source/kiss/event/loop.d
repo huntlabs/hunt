@@ -4,6 +4,7 @@ public import kiss.event.base;
 import kiss.event.struct_;
 import core.thread;
 import kiss.event.task;
+public import kiss.core.exception;
 
 // 代理模式去实现loop， eventloop的任务队列在此实现。
 // 全面采用 前摄器 模式
@@ -97,12 +98,12 @@ protected:
     void weak() nothrow
     {
         TaskQueue queue;
-        try{
+        catchException((){
             synchronized(this){
                 queue = _queue;
                 _queue = TaskQueue();
             }
-        } catch(Exception){}
+        }());
         while(!queue.empty){
             auto task = queue.deQueue();
             task.job();

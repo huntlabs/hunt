@@ -63,7 +63,7 @@ final class Acceptor : ReadTransport
     }
 protected:
     override void onRead(Watcher watcher) nothrow{
-        try{
+        catchException((){
             bool canRead =  true;
             while(canRead && watcher.active){
                 canRead = _loop.read(watcher,(Object obj) nothrow {
@@ -80,17 +80,13 @@ protected:
                     error("the Tcp socket Read is error: ", watcher.erroString); 
                 }
             }
-        } catch(Exception e){
-            collectException(()@trusted{error("the Tcp socket Read is Exception: ", e.toString());}()); 
-        }
+        }());
     }
 
     override void onClose(Watcher watcher) nothrow{
-        try{
+        catchException((){
             _watcher.close();
-        } catch(Exception e){
-            collectException(()@trusted{error("the Tcp socket Read is Exception: ", e.toString());}()); 
-        }
+        }());
     }
 
 protected:

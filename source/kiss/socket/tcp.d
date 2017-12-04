@@ -61,7 +61,7 @@ final class TCPSocket : Transport
     final EventLoop eventLoop(){return _loop;}
 protected:
     override void onRead(Watcher watcher) nothrow{
-        try{
+        catchException((){
             bool canRead =  true;
             while(canRead && watcher.active){
                 canRead = _loop.read(watcher,(Object obj) nothrow {
@@ -80,13 +80,11 @@ protected:
                     error("the Tcp socket Read is error: ", watcher.erroString); 
                 }
             }
-        } catch(Exception e){
-            collectException(()@trusted{error("the Tcp socket Read is Exception: ", e.toString());}()); 
-        }
+        }());
     }
 
     override void onClose(Watcher watcher) nothrow{
-        try{
+        catchException((){
             watcher.close();
             while(!_writeQueue.empty){
                 TCPWriteBuffer buffer = _writeQueue.deQueue();
@@ -94,13 +92,11 @@ protected:
             }
             if(_closeBack)
                 _closeBack();
-        } catch(Exception e){
-            collectException(()@trusted{error("the Tcp socket Close is Exception: ", e.toString());}()); 
-        }
+        }());
     }
 
     override void onWrite(Watcher watcher) nothrow{
-        try{
+        catchException((){
             bool canWrite = true;
             while(canWrite && watcher.active && !_writeQueue.empty){
                 TCPWriteBuffer buffer = _writeQueue.front();
@@ -121,9 +117,7 @@ protected:
                     error("the Tcp socket Read is error: ", watcher.erroString); 
                 }
             }
-        } catch(Exception e){
-            collectException(()@trusted{error("the Tcp socket Close is Exception: ", e.toString());}()); 
-        }
+        }());
     }
 
 protected:

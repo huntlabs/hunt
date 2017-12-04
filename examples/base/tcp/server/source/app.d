@@ -8,15 +8,6 @@ import std.socket;
 import std.functional;
 import std.exception;
 
-void catchException(E)(lazy E runer) @trusted nothrow
-{
-	try{
-		runer();
-	} catch (Exception e){
-		collectException(writeln(e.toString));
-	}
-}
-
 void main()
 {
 	writeln("Listen Port: 8081");
