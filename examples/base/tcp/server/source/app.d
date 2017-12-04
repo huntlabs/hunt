@@ -19,7 +19,7 @@ void catchException(E)(lazy E runer) @trusted nothrow
 
 void main()
 {
-	writeln("Edit source/app.d to start your project.");
+	writeln("Listen Port: 8081");
 	EventLoop loop = new EventLoop();
 
 	Acceptor acceptor = new Acceptor(loop, AddressFamily.INET);
