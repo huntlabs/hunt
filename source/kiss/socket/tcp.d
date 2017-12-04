@@ -15,6 +15,7 @@ final class TCPSocket : Transport
         _loop = loop;
         _watcher = cast(TcpSocketWatcher)loop.createWatcher(WatcherType.TCP);
         _watcher.setFamily(amily);
+        _watcher.watcher(this);
     }
 
     this(EventLoop loop,Socket sock)
@@ -22,6 +23,7 @@ final class TCPSocket : Transport
         _loop = loop;
         _watcher = cast(TcpSocketWatcher)loop.createWatcher(WatcherType.TCP);
         _watcher.setSocket(sock);
+        _watcher.watcher(this);
     }
 
     void setClose(CloseCallBack cback){

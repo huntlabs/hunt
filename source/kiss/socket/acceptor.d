@@ -14,6 +14,7 @@ final class Acceptor : ReadTransport
         _loop = loop;
         _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.ACCEPT);
         _watcher.setFamily(amily);
+        _watcher.watcher(this);
     }
 
     this(EventLoop loop,Socket sock)
@@ -21,6 +22,7 @@ final class Acceptor : ReadTransport
         _loop = loop;
         _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.ACCEPT);
         _watcher.setSocket(sock);
+        _watcher.watcher(this);
     }
 
     void setClose(CloseCallBack cback){

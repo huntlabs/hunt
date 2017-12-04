@@ -15,6 +15,7 @@ final class UDPSocket : Transport
         _loop = loop;
         _watcher = cast(UDPSocketWatcher)loop.createWatcher(WatcherType.UDP);
         _watcher.setFamily(amily);
+        _watcher.watcher(this);
     }
 
     void setReadData(UDPReadCallBack cback){
@@ -86,7 +87,7 @@ protected:
     }
 
     override void onWrite(Watcher watcher) nothrow{
-
+        
     }
 
 private:
