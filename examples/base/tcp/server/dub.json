@@ -1,0 +1,14 @@
+{
+	"name": "server",
+	"authors": [
+		"渡世白玉"
+	],
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2017, 渡世白玉",
+	"license": "proprietary",
+	"dependencies": {
+		"kiss" : {
+			"path" : "../../../../"
+		}
+	}
+}
