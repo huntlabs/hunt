@@ -25,22 +25,27 @@ final class Acceptor : ReadTransport
         _watcher.watcher(this);
     }
 
-    void setClose(CloseCallBack cback){
+    Acceptor setClose(CloseCallBack cback){
         _closeBack = cback;
+        return this;
     }
-    void setReadData(AcceptCallBack cback){
+    Acceptor setReadData(AcceptCallBack cback){
         _readBack = cback;
+        return this;
     }
 
-    void bind(Address addr){
+    Acceptor bind(Address addr){
         _watcher.socket.bind(addr);
+        return this;
     }
+
     Address bind(){
         return _watcher.socket.localAddress();
     }
 
-    void listen(int backlog){
+    Acceptor listen(int backlog){
         _watcher.socket.listen(backlog);
+        return this;
     }
 
     EventLoop eventLoop(){return _loop;}

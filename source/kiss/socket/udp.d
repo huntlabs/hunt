@@ -18,8 +18,9 @@ final class UDPSocket : Transport
         _watcher.watcher(this);
     }
 
-    void setReadData(UDPReadCallBack cback){
+    UDPSocket setReadData(UDPReadCallBack cback){
         _readBack = cback;
+        return this;
     }
 
 
@@ -35,12 +36,14 @@ final class UDPSocket : Transport
         return _watcher.socket.sendTo(buf,flags,to);
     }
 
-    void bind(Address addr){
+    UDPSocket bind(Address addr){
         _watcher.bind(addr);
+        return this;
     }
 
-    void connect(Address addr){
+    UDPSocket connect(Address addr){
         _watcher.socket.connect(addr);
+        return this;
     }
 
     EventLoop eventLoop(){return _loop;}

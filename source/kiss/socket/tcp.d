@@ -26,11 +26,13 @@ final class TCPSocket : Transport
         _watcher.watcher(this);
     }
 
-    void setClose(CloseCallBack cback){
+    TCPSocket setClose(CloseCallBack cback){
         _closeBack = cback;
+        return this;
     }
-    void setReadData(TcpReadCallBack cback){
+    TCPSocket setReadData(TcpReadCallBack cback){
         _readBack = cback;
+        return this;
     }
 
     override bool watched(){
@@ -45,7 +47,7 @@ final class TCPSocket : Transport
         onClose(_watcher);
     }
 
-    void write(TCPWriteBuffer data){
+    TCPSocket write(TCPWriteBuffer data){
         if(_watcher.active){
             _writeQueue.enQueue(data);
             onWrite(_watcher);
@@ -53,6 +55,7 @@ final class TCPSocket : Transport
             warning("tcp socket is not is eventLoop!");
             data.doFinish();
         }
+        return this;
     }
 
     final EventLoop eventLoop(){return _loop;}
