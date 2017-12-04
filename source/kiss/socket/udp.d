@@ -43,6 +43,8 @@ final class UDPSocket : Transport
         _watcher.socket.connect(addr);
     }
 
+    EventLoop eventLoop(){return _loop;}
+
     override bool watched(){
         return _watcher.active;
     }
