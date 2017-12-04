@@ -2,7 +2,7 @@ module kiss.socket.tcp;
 
 import kiss.event;
 
-import kiss.socket.struct_;
+public import kiss.socket.struct_;
 
 import std.experimental.logger;
 import std.exception;

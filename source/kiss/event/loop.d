@@ -21,7 +21,12 @@ final @trusted class EventLoop {
     }
 
     static BaseLoop  platformLoop(){
-        return null;
+        version(linux){
+            import kiss.event.impl.epoll;
+            return new EpollLoop();
+        } else {
+            return null;
+        }
     }
 
     Watcher createWatcher(WatcherType type){

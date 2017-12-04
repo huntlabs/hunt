@@ -1,7 +1,7 @@
 module kiss.socket.udp;
 
 import kiss.event;
-import kiss.socket.struct_;
+public import kiss.socket.struct_;
 
 import std.socket;
 import std.exception;

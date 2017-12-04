@@ -72,11 +72,12 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
     @property void currtLoop(BaseLoop loop){_inLoop = loop;}
 
     void setNext(Watcher next){
-        next._next = _next._next;
-        next._priv = _next;
-        if (_next._next)
-            _next._next._priv = next;
-        _next._next = next;
+        if(next is this) return;
+        next._next = _next;
+        next._priv = this;
+        if (_next)
+            _next._priv = next;
+        this._next = next;
     } 
 
     void clear(){
