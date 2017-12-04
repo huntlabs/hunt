@@ -16,21 +16,21 @@ void main()
 	Acceptor acceptor = new Acceptor(loop, AddressFamily.INET);
 
 	acceptor.bind(parseAddress("0.0.0.0",8081)).listen(1024).setReadData((EventLoop loop, Socket socket) @trusted nothrow {
-				catchException((){
+				catchAndLogException((){
 					TCPSocket sock = new TCPSocket(loop, socket);
 
 					sock.setReadData((in ubyte[] data)@trusted nothrow {
-						catchException((){
+						catchAndLogException((){
 							writeln("read Data: ", cast(string)data);
 
 							sock.write(new WarpTcpBuffer(data.dup,(in ubyte[] wdata, size_t size) @trusted nothrow{
-									catchException((){
+									catchAndLogException((){
 										writeln("Writed Suessed Size : ", size, "  Data : ", cast(string)wdata);
 									}());
 								}));
 						}());
 					}).setClose(()@trusted nothrow {
-						catchException((){
+						catchAndLogException((){
 							writeln("The Socket is Cloesed!");
 						}());
 					}).watch;

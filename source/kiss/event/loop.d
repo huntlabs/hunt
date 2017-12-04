@@ -98,7 +98,7 @@ protected:
     void weak() nothrow
     {
         TaskQueue queue;
-        catchException((){
+        catchAndLogException((){
             synchronized(this){
                 queue = _queue;
                 _queue = TaskQueue();

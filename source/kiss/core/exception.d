@@ -6,7 +6,7 @@ import std.experimental.logger;
 import core.stdc.stdlib;
 import core.runtime;
 
-void catchException(E)(lazy E runer) @trusted nothrow
+void catchAndLogException(E)(lazy E runer) @trusted nothrow
 {
 	try{
 		runer();

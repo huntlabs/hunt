@@ -61,7 +61,7 @@ final class TCPSocket : Transport
     final EventLoop eventLoop(){return _loop;}
 protected:
     override void onRead(Watcher watcher) nothrow{
-        catchException((){
+        catchAndLogException((){
             bool canRead =  true;
             while(canRead && watcher.active){
                 canRead = _loop.read(watcher,(Object obj) nothrow {
@@ -84,7 +84,7 @@ protected:
     }
 
     override void onClose(Watcher watcher) nothrow{
-        catchException((){
+        catchAndLogException((){
             watcher.close();
             while(!_writeQueue.empty){
                 TCPWriteBuffer buffer = _writeQueue.deQueue();
@@ -96,7 +96,7 @@ protected:
     }
 
     override void onWrite(Watcher watcher) nothrow{
-        catchException((){
+        catchAndLogException((){
             bool canWrite = true;
             while(canWrite && watcher.active && !_writeQueue.empty){
                 TCPWriteBuffer buffer = _writeQueue.front();

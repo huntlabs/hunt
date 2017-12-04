@@ -61,7 +61,7 @@ final class UDPSocket : Transport
     }
 protected:
     override void onRead(Watcher watcher) nothrow{
-         catchException((){
+         catchAndLogException((){
             bool canRead =  true;
             while(canRead && watcher.active){
                 canRead = _loop.read(watcher,(Object obj) nothrow {
@@ -82,7 +82,7 @@ protected:
     }
 
     override void onClose(Watcher watcher)  nothrow{
-        catchException((){
+        catchAndLogException((){
             _watcher.close();
         }());
     }
