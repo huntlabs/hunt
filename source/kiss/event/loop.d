@@ -73,14 +73,16 @@ final @trusted class EventLoop {
         return (_thread !is null);
     }
 
-    void weakUp(){
+    EventLoop weakUp(){
         _loop.weakUp();
+        return this;
     }
 
-    void postTask(AbstractTask task){
+    EventLoop postTask(AbstractTask task){
         synchronized(this){
-                _queue.enQueue(task);
-            }
+            _queue.enQueue(task);
+        }
+        return this;
     }
 
     static AbstractTask createTask(alias fun, Args...)(Args args) {
