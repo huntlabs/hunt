@@ -47,12 +47,12 @@ final @trusted class EventLoop {
         return _loop.register(watcher);
     }
 
-    bool reRegister(Watcher watcher){
-        return _loop.reRegister(watcher);
+    bool reregister(Watcher watcher){
+        return _loop.reregister(watcher);
     }
 
-    bool unRegister(Watcher watcher){
-        return _loop.unRegister(watcher);
+    bool deregister(Watcher watcher){
+        return _loop.deregister(watcher);
     }
 
     // while(true)

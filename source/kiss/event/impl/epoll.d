@@ -24,7 +24,7 @@ final class EpollLoop : BaseLoop
     }
 
     ~this(){
-        //unRegister(_event);
+        //deregister(_event);
         .close(_epollFD);
     }
 
@@ -90,7 +90,7 @@ final class EpollLoop : BaseLoop
 
     override bool close(Watcher watcher)
     {
-        unRegister(watcher);
+        deregister(watcher);
         // TODO: change close;
         // Linger optLinger;
         //     optLinger.on = 1;
@@ -105,7 +105,15 @@ final class EpollLoop : BaseLoop
     override bool register(Watcher watcher)
     {
         if(watcher is null || watcher.active) return false;
-        int fd = getFD(watcher);
+        int fd = -1;
+        if(watcher.type == WatcherType.Timer){
+            auto wt = cast(EpollTimerWatcher)watcher;
+            if(wt !is null && wt.setTimer()){
+                fd = wt._timerFD;
+            }
+        } else {
+            fd = getFD(watcher);
+        }
         if(fd < 0) return false;
         auto ev = buildEpollEvent(watcher);
         if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd,  & ev)) != 0) {
@@ -117,7 +125,7 @@ final class EpollLoop : BaseLoop
         return true;
     }
 
-    override bool reRegister(Watcher watcher)
+    override bool reregister(Watcher watcher)
     {
         if(watcher is null || watcher.currtLoop !is this) return false;
         const int fd = getFD(watcher);
@@ -129,7 +137,7 @@ final class EpollLoop : BaseLoop
         return true;
     }
 
-    override bool unRegister(Watcher watcher)
+    override bool deregister(Watcher watcher)
     {
         if(watcher is null || watcher.currtLoop !is this) return false;
         const int fd = getFD(watcher);
@@ -160,7 +168,6 @@ final class EpollLoop : BaseLoop
             if(len < 1) continue;
             foreach(i;0..len){
                 Watcher watch = cast(Watcher)(events[i].data.ptr);
-
                 if (isErro(events[i].events)) {
                     watch.onClose();
                     continue;
@@ -209,13 +216,13 @@ protected :
         int fd = -1;
         switch(watch.type){
         case WatcherType.TCP:
-            fd = getSocketFD!TcpSocketWatcher(watch);
+            fd = getSocketFD!TcpStreamWatcher(watch);
             break;
         case WatcherType.UDP:
-            fd = getSocketFD!UDPSocketWatcher(watch);
+            fd = getSocketFD!UdpStreamWatcher(watch);
             break;
         case WatcherType.ACCEPT:
-            fd = getSocketFD!AcceptorWatcher(watch);
+            fd = getSocketFD!TcpListenerWatcher(watch);
             break;
         case WatcherType.Event:
         {

@@ -25,7 +25,7 @@ private:
     }
 
     final @property time(){return _timeOut;}
-    final @property time(size_t tm){_timeOut = time;} 
+    final @property time(size_t tm){_timeOut = tm;} 
 
     final override void onClose()
     {
@@ -43,7 +43,7 @@ private:
     size_t _timeOut;
 }
 
-@trusted abstract class TcpSocketWatcher : TransportWatcher!Transport
+@trusted abstract class TcpStreamWatcher : TransportWatcher!Transport
 {
     alias UbyteArrayObject = BaseTypeObject!(ubyte[]);
 
@@ -87,7 +87,7 @@ private:
     Socket _socket;
 }
 
-@trusted abstract class AcceptorWatcher : TransportWatcher!ReadTransport
+@trusted abstract class TcpListenerWatcher : TransportWatcher!ReadTransport
 {
     this(){
         super(WatcherType.ACCEPT);
@@ -118,7 +118,7 @@ private:
     Socket _socket;
 }
 
-@trusted abstract class UDPSocketWatcher : TransportWatcher!Transport
+@trusted abstract class UdpStreamWatcher : TransportWatcher!Transport
 {
     this(){
         super(WatcherType.UDP);

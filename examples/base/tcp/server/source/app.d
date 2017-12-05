@@ -1,8 +1,9 @@
 import std.stdio;
 
 import kiss.event;
-import kiss.socket.acceptor;
-import kiss.socket.tcp;
+import kiss.net.TcpListener;
+import kiss.net.TcpStream;
+import kiss.net.Timer;
 
 import std.socket;
 import std.functional;
@@ -10,26 +11,25 @@ import std.exception;
 
 void main()
 {
-	writeln("Listen Port: 8081");
 	EventLoop loop = new EventLoop();
 
-	Acceptor acceptor = new Acceptor(loop, AddressFamily.INET);
+	TcpListener listener = new TcpListener(loop, AddressFamily.INET);
 
-	acceptor.bind(parseAddress("0.0.0.0",8081)).listen(1024).setReadData((EventLoop loop, Socket socket) @trusted nothrow {
+	listener.bind(0).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow {
 				catchAndLogException((){
-					TCPSocket sock = new TCPSocket(loop, socket);
+					TcpStream sock = new TcpStream(loop, socket);
 
-					sock.setReadData((in ubyte[] data)@trusted nothrow {
+					sock.setReadHandle((in ubyte[] data)@trusted nothrow {
 						catchAndLogException((){
 							writeln("read Data: ", cast(string)data);
 
-							sock.write(new WarpTcpBuffer(data.dup,(in ubyte[] wdata, size_t size) @trusted nothrow{
+							sock.write(new WarpStreamBuffer(data.dup,(in ubyte[] wdata, size_t size) @trusted nothrow{
 									catchAndLogException((){
 										writeln("Writed Suessed Size : ", size, "  Data : ", cast(string)wdata);
 									}());
 								}));
 						}());
-					}).setClose(()@trusted nothrow {
+					}).setCloseHandle(()@trusted nothrow {
 						catchAndLogException((){
 							writeln("The Socket is Cloesed!");
 						}());
@@ -37,5 +37,13 @@ void main()
 			}());
 		}).watch;
 
+	Timer timer = new Timer(loop);
+	bool tm = timer.setTimerHandle(()@trusted nothrow {
+			catchAndLogException((){
+				import std.datetime;
+				writeln("The Time is : ", Clock.currTime.toString);
+			}());
+		}).start(5000);
+	writeln("Listen :", listener.bind.toString, "  ", tm);
 	loop.join;
 }

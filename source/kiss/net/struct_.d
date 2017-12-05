@@ -1,4 +1,4 @@
-module kiss.socket.struct_;
+module kiss.net.struct_;
 
 public import std.socket;
 import kiss.event.loop;
@@ -14,9 +14,9 @@ alias AcceptCallBack = void delegate(EventLoop loop, Socket socket) @trusted not
 alias TCPWriteCallBack = void delegate(in ubyte[] data, size_t size) @trusted nothrow;
 
 
-@trusted abstract class TCPWriteBuffer
+@trusted abstract class StreamWriteBuffer
 {
-    // todo Send Data;
+    // todo Write Data;
     const(ubyte)[] sendData() nothrow;
     // add send offiset and return is empty
     bool popSize(size_t size) nothrow;
@@ -24,10 +24,10 @@ alias TCPWriteCallBack = void delegate(in ubyte[] data, size_t size) @trusted no
     void doFinish() nothrow;
 
 private:
-    TCPWriteBuffer _next;
+    StreamWriteBuffer _next;
 }
 
-final class WarpTcpBuffer : TCPWriteBuffer
+final class WarpStreamBuffer : StreamWriteBuffer
 {
     this(const(ubyte)[] data, TCPWriteCallBack cback = null)
     {
@@ -69,7 +69,7 @@ private:
 
 struct WriteBufferQueue
 {
-	@safe TCPWriteBuffer  front() nothrow{
+	@safe StreamWriteBuffer  front() nothrow{
 		return _frist;
 	}
 
@@ -77,7 +77,7 @@ struct WriteBufferQueue
 		return _frist is null;
 	}
 
-	@safe void enQueue(TCPWriteBuffer wsite) nothrow
+	@safe void enQueue(StreamWriteBuffer wsite) nothrow
 	in{
 		assert(wsite);
 	}body{
@@ -90,11 +90,11 @@ struct WriteBufferQueue
 		_last = wsite;
 	}
 
-	@safe TCPWriteBuffer deQueue() nothrow
+	@safe StreamWriteBuffer deQueue() nothrow
 	in{
 		assert(_frist && _last);
 	}body{
-		TCPWriteBuffer  wsite = _frist;
+		StreamWriteBuffer  wsite = _frist;
 		_frist = _frist._next;
 		if(_frist is null)
 			_last = null;
@@ -102,6 +102,6 @@ struct WriteBufferQueue
 	}
 
 private:
-	TCPWriteBuffer  _last = null;
-	TCPWriteBuffer  _frist = null;
+	StreamWriteBuffer  _last = null;
+	StreamWriteBuffer  _frist = null;
 }

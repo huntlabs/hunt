@@ -52,6 +52,22 @@ final class EpollTimerWatcher : TimerWatcher
     ~this(){
         close();
     }
+    
+    bool setTimer(){
+        itimerspec its;
+        ulong sec, nsec;
+        sec = time / 1000;
+        nsec = (time % 1000) * 1_000_000;
+        its.it_value.tv_sec = cast(typeof(its.it_value.tv_sec)) sec;
+        its.it_value.tv_nsec = cast(typeof(its.it_value.tv_nsec)) nsec;
+        its.it_interval.tv_sec = its.it_value.tv_sec;
+        its.it_interval.tv_nsec = its.it_value.tv_nsec;
+        const int err = timerfd_settime(_timerFD, 0, &its, null);
+        if (err == -1) {
+            return false;
+        }
+        return true;
+    }
 
     mixin PosixOverrideErro;
 

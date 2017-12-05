@@ -29,7 +29,7 @@ mixin template PosixOverrideErro()
     string _erroString;
 }
 
-final class PosixTCPWatcher : TcpSocketWatcher
+final class PosixTCPWatcher : TcpStreamWatcher
 {
     this()
     {
@@ -47,7 +47,7 @@ final class PosixTCPWatcher : TcpSocketWatcher
     }
 }
 
-final class PosixUDPWatcher : UDPSocketWatcher
+final class PosixUDPWatcher : UdpStreamWatcher
 {
     this()
     {
@@ -59,7 +59,7 @@ final class PosixUDPWatcher : UDPSocketWatcher
     mixin PosixOverrideErro;
 }
 
-final class PosixAcceptWatcher : AcceptorWatcher
+final class PosixAcceptWatcher : TcpListenerWatcher
 {
     this()
     {

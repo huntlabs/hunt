@@ -129,14 +129,14 @@ interface BaseLoop {
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed);
 
-    // 关闭会自动unRegister的
+    // 关闭会自动deregister的
     bool close(Watcher watcher);
 
     bool register(Watcher watcher);
 
-    bool reRegister(Watcher watcher);
+    bool reregister(Watcher watcher);
 
-    bool unRegister(Watcher watcher);
+    bool deregister(Watcher watcher);
 
     bool weakUp();
 

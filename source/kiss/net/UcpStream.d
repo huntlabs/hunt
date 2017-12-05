@@ -1,24 +1,24 @@
-module kiss.socket.udp;
+module kiss.net.UdpStream;
 
 import kiss.event;
-public import kiss.socket.struct_;
+public import kiss.net.struct_;
 
 import std.socket;
 import std.exception;
 import std.experimental.logger;
 
-final class UDPSocket : Transport
+final class UdpStream : Transport
 {
     
     this(EventLoop loop,AddressFamily amily)
     {
         _loop = loop;
-        _watcher = cast(UDPSocketWatcher)loop.createWatcher(WatcherType.UDP);
+        _watcher = cast(UdpStreamWatcher)loop.createWatcher(WatcherType.UDP);
         _watcher.setFamily(amily);
         _watcher.watcher(this);
     }
 
-    UDPSocket setReadData(UDPReadCallBack cback){
+    UdpStream setReadData(UDPReadCallBack cback){
         _readBack = cback;
         return this;
     }
@@ -36,12 +36,12 @@ final class UDPSocket : Transport
         return _watcher.socket.sendTo(buf,flags,to);
     }
 
-    UDPSocket bind(Address addr){
+    UdpStream bind(Address addr){
         _watcher.bind(addr);
         return this;
     }
 
-    UDPSocket connect(Address addr){
+    UdpStream connect(Address addr){
         _watcher.socket.connect(addr);
         return this;
     }
@@ -92,7 +92,7 @@ protected:
     }
 
 private:
-    UDPSocketWatcher _watcher;
+    UdpStreamWatcher _watcher;
     UDPReadCallBack _readBack;
     EventLoop _loop;
 }

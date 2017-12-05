@@ -1,19 +1,19 @@
-module kiss.socket.tcp;
+module kiss.net.TcpStream;
 
 import kiss.event;
 
-public import kiss.socket.struct_;
+public import kiss.net.struct_;
 
 import std.experimental.logger;
 import std.exception;
 
 //No-Thread-safe
-final class TCPSocket : Transport
+final class TcpStream : Transport
 {
     this(EventLoop loop,AddressFamily amily)
     {
         _loop = loop;
-        _watcher = cast(TcpSocketWatcher)loop.createWatcher(WatcherType.TCP);
+        _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
         _watcher.setFamily(amily);
         _watcher.watcher(this);
     }
@@ -21,16 +21,16 @@ final class TCPSocket : Transport
     this(EventLoop loop,Socket sock)
     {
         _loop = loop;
-        _watcher = cast(TcpSocketWatcher)loop.createWatcher(WatcherType.TCP);
+        _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
         _watcher.setSocket(sock);
         _watcher.watcher(this);
     }
 
-    TCPSocket setClose(CloseCallBack cback){
+    TcpStream setCloseHandle(CloseCallBack cback){
         _closeBack = cback;
         return this;
     }
-    TCPSocket setReadData(TcpReadCallBack cback){
+    TcpStream setReadHandle(TcpReadCallBack cback){
         _readBack = cback;
         return this;
     }
@@ -47,7 +47,7 @@ final class TCPSocket : Transport
         onClose(_watcher);
     }
 
-    TCPSocket write(TCPWriteBuffer data){
+    TcpStream write(StreamWriteBuffer data){
         if(_watcher.active){
             _writeQueue.enQueue(data);
             onWrite(_watcher);
@@ -66,7 +66,7 @@ protected:
             while(canRead && watcher.active){
                 canRead = _loop.read(watcher,(Object obj) nothrow {
                     collectException((){
-                        auto buffer = cast(TcpSocketWatcher.UbyteArrayObject)obj;
+                        auto buffer = cast(TcpStreamWatcher.UbyteArrayObject)obj;
                         if(buffer is null){
                             watcher.close(); 
                             return;
@@ -87,7 +87,7 @@ protected:
         catchAndLogException((){
             watcher.close();
             while(!_writeQueue.empty){
-                TCPWriteBuffer buffer = _writeQueue.deQueue();
+                StreamWriteBuffer buffer = _writeQueue.deQueue();
                 buffer.doFinish();
             }
             if(_closeBack)
@@ -99,7 +99,7 @@ protected:
         catchAndLogException((){
             bool canWrite = true;
             while(canWrite && watcher.active && !_writeQueue.empty){
-                TCPWriteBuffer buffer = _writeQueue.front();
+                StreamWriteBuffer buffer = _writeQueue.front();
                 const(ubyte[]) data = buffer.sendData();
                 if(data.length == 0){
                     buffer.doFinish();
@@ -121,7 +121,7 @@ protected:
     }
 
 protected:
-    TcpSocketWatcher _watcher;
+    TcpStreamWatcher _watcher;
 
     CloseCallBack _closeBack;
     TcpReadCallBack _readBack;

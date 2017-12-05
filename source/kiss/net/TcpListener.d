@@ -1,18 +1,18 @@
-module kiss.socket.acceptor;
+module kiss.net.TcpListener;
 
 import kiss.event;
-public import kiss.socket.struct_;
+public import kiss.net.struct_;
 
 import std.socket;
 import std.exception;
 import std.experimental.logger;
 
-final class Acceptor : ReadTransport
+final class TcpListener : ReadTransport
 {
     this(EventLoop loop,AddressFamily amily)
     {
         _loop = loop;
-        _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.ACCEPT);
+        _watcher = cast(TcpListenerWatcher)loop.createWatcher(WatcherType.ACCEPT);
         _watcher.setFamily(amily);
         _watcher.watcher(this);
     }
@@ -20,21 +20,26 @@ final class Acceptor : ReadTransport
     this(EventLoop loop,Socket sock)
     {
         _loop = loop;
-        _watcher = cast(AcceptorWatcher)loop.createWatcher(WatcherType.ACCEPT);
+        _watcher = cast(TcpListenerWatcher)loop.createWatcher(WatcherType.ACCEPT);
         _watcher.setSocket(sock);
         _watcher.watcher(this);
     }
 
-    Acceptor setClose(CloseCallBack cback){
+    TcpListener setCloseHandle(CloseCallBack cback){
         _closeBack = cback;
         return this;
     }
-    Acceptor setReadData(AcceptCallBack cback){
+    TcpListener setReadHandle(AcceptCallBack cback){
         _readBack = cback;
         return this;
     }
 
-    Acceptor bind(Address addr){
+    TcpListener bind(ushort port, string ip = "0.0.0.0"){
+        _watcher.socket.bind(parseAddress(ip,port));
+        return this;
+    }
+
+    TcpListener bind(Address addr){
         _watcher.socket.bind(addr);
         return this;
     }
@@ -43,7 +48,7 @@ final class Acceptor : ReadTransport
         return _watcher.socket.localAddress();
     }
 
-    Acceptor listen(int backlog){
+    TcpListener listen(int backlog){
         _watcher.socket.listen(backlog);
         return this;
     }
@@ -90,11 +95,10 @@ protected:
     }
 
 protected:
-    AcceptorWatcher _watcher;
+    TcpListenerWatcher _watcher;
 
     CloseCallBack _closeBack;
     AcceptCallBack _readBack;
-    WriteBufferQueue _writeQueue;
 private:
     EventLoop _loop;
 }
