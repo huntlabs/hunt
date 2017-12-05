@@ -50,10 +50,8 @@ protected:
 
     override void onRead(Watcher watcher) nothrow{
         catchAndLogException((){
-            import std.stdio;
             bool canRead =  true;
             while(canRead && watcher.active){
-                writeln("read Timer !!!");
                 canRead = _loop.read(watcher,(Object obj) nothrow {
                     BaseTypeObject!uint tm = cast(BaseTypeObject!uint)obj;
                     if(tm is null) return;
