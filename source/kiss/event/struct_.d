@@ -20,3 +20,4 @@ class LoopException : Exception
 {
     mixin basicExceptionCtors;
 }
+

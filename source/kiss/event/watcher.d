@@ -158,6 +158,14 @@ private:
     UdpSocket _socket;
 }
 
+@trusted abstract class EventWatcher : TransportWatcher!Transport
+{
+    this(){
+        super(WatcherType.Event);
+    }
+    void call();
+}
+
 socket_t getSocketFD(T)(Watcher watcher){
     T watch = cast(T)watcher;
     if(watch !is null && watch.socket !is null){

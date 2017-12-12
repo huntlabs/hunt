@@ -2,6 +2,7 @@ module kiss.event.impl.epoll;
 
 import kiss.event.base;
 import kiss.event.watcher;
+version(linux):
 import kiss.event.impl.epoll_watcher;
 
 import std.socket;
@@ -91,12 +92,16 @@ final class EpollLoop : BaseLoop
     override bool close(Watcher watcher)
     {
         deregister(watcher);
-        // TODO: change close;
-        // Linger optLinger;
-        //     optLinger.on = 1;
-        //     optLinger.time = 0;
-        //     _socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
-        int fd = getFD(watcher);
+        int fd = -1;
+        if(watcher.type == WatcherType.TCP){
+            TcpStreamWatcher wt = cast(TcpStreamWatcher)watcher;
+            Linger optLinger;
+            optLinger.on = 1;
+            optLinger.time = 0;
+            wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
+        } else {
+            fd = getFD(watcher);
+        }
         if(fd < 0) return false;
         .close(fd);
         return true;

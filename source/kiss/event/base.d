@@ -146,3 +146,19 @@ interface BaseLoop {
     void stop();
 }
 
+version (FreeBSD)
+{
+    version = Kqueue;
+}
+version (OpenBSD)
+{
+    version = Kqueue;
+}
+version (NetBSD)
+{
+    version = Kqueue;
+}
+version (OSX)
+{
+    version = Kqueue;
+}
