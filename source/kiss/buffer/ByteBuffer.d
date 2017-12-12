@@ -1,3 +1,5 @@
 module kiss.buffer.ByteBuffer;
 
-// impl interface Buffer
+import kiss.buffer;
+
+

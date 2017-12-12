@@ -6,7 +6,7 @@ import kiss.event.struct_;
 
 import std.socket;
 import std.string;
-
+version(Posix):
 import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket;

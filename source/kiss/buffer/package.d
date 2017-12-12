@@ -1,6 +1,6 @@
 module kiss.buffer;
 
-interface  IWriteBuffer 
+interface  WriteBuffer 
 {
 	size_t write(in ubyte[] data);
 
@@ -9,7 +9,7 @@ interface  IWriteBuffer
 	@property size_t length() const;
 }
 
-interface  IReadBuffer 
+interface  ReadBuffer 
 {
 	@property bool eof() const;
 
@@ -22,7 +22,7 @@ interface  IReadBuffer
 	@property size_t length() const;
 }
 
-interface IBuffer : IWriteBuffer, IReadBuffer
+interface Buffer : WriteBuffer, ReadBuffer
 {
 	size_t readLine(scope void delegate(in ubyte[]) cback); //回调模式，数据不copy
 	

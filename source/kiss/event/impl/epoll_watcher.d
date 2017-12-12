@@ -4,16 +4,15 @@ import kiss.event.base;
 import kiss.event.watcher;
 import kiss.event.struct_;
 public import kiss.event.impl.posix_watcher;
-
+version(linux):
 import core.sys.posix.unistd;
 import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
 
-final class EpollEventWatcher : Watcher 
+final class EpollEventWatcher : EventWatcher 
 {
     alias UlongObject = BaseTypeObject!ulong;
     this()
     {
-        super(WatcherType.Event);
         setFlag(WatchFlag.Read,true);
          _readBuffer = new UlongObject();
          _eventFD = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -23,13 +22,17 @@ final class EpollEventWatcher : Watcher
         close();
     }
 
-    void call(){
+    override void call(){
         ulong value = 1;
-        core.sys.posix.unistd.write(_eventFD,  &value, value.sizeof);
+        ()@trusted{core.sys.posix.unistd.write(_eventFD,  &value, value.sizeof);}();
     }
 
     override void onRead(){
-        ()@trusted{readEvent(this,(Object obj){});}();
+        ()@trusted{
+            readEvent(this,(Object obj){});
+            if(watcher)
+                watcher.onRead(this);
+        }();
     }
 
     mixin PosixOverrideErro;
