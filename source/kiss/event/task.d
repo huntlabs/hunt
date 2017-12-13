@@ -171,14 +171,14 @@ unittest {
 
     void finish(AbstractTask task) nothrow @trusted
     {
-        import yu.exception;
-        showException(yuCathException((){
+        import kiss.exception;
+        catchAndLogException((){
                     import std.stdio;
                     int a = task.returnValue.get!int();
                     assert(task.status == TaskStatus.Finsh);
                     assert(a == 10);
                     writeln("-------------task call finish!!");
-                }()));
+                }());
     }
 
     AbstractTask test = newTask(&tfun);
