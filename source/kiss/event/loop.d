@@ -4,7 +4,7 @@ public import kiss.event.base;
 import kiss.event.struct_;
 import core.thread;
 import kiss.event.task;
-public import kiss.core.exception;
+public import kiss.exception;
 
 // 代理模式去实现loop， eventloop的任务队列在此实现。
 // 全面采用 前摄器 模式

@@ -1,4 +1,4 @@
-module kiss.core.exception;
+module kiss.exception;
 
 import std.exception;
 import std.experimental.logger;
