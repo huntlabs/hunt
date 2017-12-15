@@ -89,7 +89,6 @@ final class KqueueLoop : BaseLoop
     override bool close(Watcher watcher)
     {
         deregister(watcher);
-         deregister(watcher);
         int fd = -1;
         if(watcher.type == WatcherType.TCP){
             TcpStreamWatcher wt = cast(TcpStreamWatcher)watcher;

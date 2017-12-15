@@ -27,13 +27,13 @@ private:
     final @property time(){return _timeOut;}
     final @property time(size_t tm){_timeOut = tm;} 
 
-    final override void onClose()
+    override void onClose()
     {
         if(watcher)
             watcher.onClose(this);
     }
 
-    final override void onRead()
+    override void onRead()
     {
         if(watcher)
             watcher.onRead(this);
@@ -61,19 +61,19 @@ private:
         _socket = sock;
     }
 
-    final override void onClose()
+    override void onClose()
     {
         if(watcher)
             watcher.onClose(this);
     }
 
-    final override void onRead()
+    override void onRead()
     {
         if(watcher)
             watcher.onRead(this);
     }
 
-    final override void onWrite()
+    override void onWrite()
     {
         if(watcher)
             watcher.onWrite(this);
@@ -101,13 +101,13 @@ private:
         _socket = sock;
     }
 
-    final override void onClose()
+    override void onClose()
     {
         if(watcher)
             watcher.onClose(this);
     }
 
-    final override void onRead()
+    override void onRead()
     {
         if(watcher)
             watcher.onRead(this);
@@ -138,14 +138,14 @@ private:
 
     final bool isBind(){return _binded;}
 
-    final override void onClose()
+    override void onClose()
     {
         _binded = false;
         if(watcher)
             watcher.onClose(this);
     }
 
-    final override void onRead()
+    override void onRead()
     {
         if(watcher)
             watcher.onRead(this);
@@ -164,6 +164,24 @@ private:
         super(WatcherType.Event);
     }
     void call();
+}
+
+mixin template OverrideErro()
+{
+    override bool isError(){
+        return _error;
+    }
+    override string erroString(){
+        return _erroString;
+    }
+
+    void clearError(){
+        _error = false;
+        _erroString = "";
+    }
+
+    bool _error = false;
+    string _erroString;
 }
 
 socket_t getSocketFD(T)(Watcher watcher){

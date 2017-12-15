@@ -53,7 +53,7 @@ final class KqueueEventWatcher : EventWatcher
         }();
     }
 
-    mixin PosixOverrideErro;
+    mixin OverrideErro;
 
 
     Socket[2] _pair;
@@ -76,7 +76,7 @@ final class KqueueTimerWatcher : TimerWatcher
     int fd(){return _sock.handle;}
 
 
-    mixin PosixOverrideErro;
+    mixin OverrideErro;
 
     UintObject _readBuffer;
     Socket _sock;

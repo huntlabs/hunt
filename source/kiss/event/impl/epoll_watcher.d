@@ -35,7 +35,7 @@ final class EpollEventWatcher : EventWatcher
         }();
     }
 
-    mixin PosixOverrideErro;
+    mixin OverrideErro;
 
     UlongObject _readBuffer;
 
@@ -72,7 +72,7 @@ final class EpollTimerWatcher : TimerWatcher
         return true;
     }
 
-    mixin PosixOverrideErro;
+    mixin OverrideErro;
 
     UintObject _readBuffer;
 

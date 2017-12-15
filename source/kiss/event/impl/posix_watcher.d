@@ -11,24 +11,6 @@ import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket;
 
-mixin template PosixOverrideErro()
-{
-    override bool isError(){
-        return _error;
-    }
-    override string erroString(){
-        return _erroString;
-    }
-
-    void clearError(){
-        _error = false;
-        _erroString = "";
-    }
-
-    bool _error = false;
-    string _erroString;
-}
-
 final class PosixTCPWatcher : TcpStreamWatcher
 {
     this()
@@ -39,7 +21,7 @@ final class PosixTCPWatcher : TcpStreamWatcher
         setFlag(WatchFlag.ETMode,true);
     }
    
-   mixin PosixOverrideErro;
+   mixin OverrideErro;
 
     override void setSocket(Socket sock){
         sock.blocking = false;
@@ -56,7 +38,7 @@ final class PosixUDPWatcher : UdpStreamWatcher
         setFlag(WatchFlag.ETMode,false);
     }
 
-    mixin PosixOverrideErro;
+    mixin OverrideErro;
 }
 
 final class PosixAcceptWatcher : TcpListenerWatcher
@@ -67,7 +49,7 @@ final class PosixAcceptWatcher : TcpListenerWatcher
         setFlag(WatchFlag.Read,true);
     }
 
-    mixin PosixOverrideErro;
+    mixin OverrideErro;
 
     override void setSocket(Socket sock){
         sock.blocking = false;
