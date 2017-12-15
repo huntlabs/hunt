@@ -34,8 +34,13 @@ final class TcpListener : ReadTransport
         return this;
     }
 
-    TcpListener bind(ushort port, string ip = "0.0.0.0"){
+    TcpListener bind(string ip,ushort port){
         _watcher.socket.bind(parseAddress(ip,port));
+        return this;
+    }
+
+    TcpListener bind(ushort port){
+        _watcher.socket.bind(createAddress(_watcher.socket,port));
         return this;
     }
 

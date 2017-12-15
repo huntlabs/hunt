@@ -25,6 +25,12 @@ final @trusted class EventLoop {
         version(linux){
             import kiss.event.impl.epoll;
             return new EpollLoop();
+        } else version(Kqueue){
+            import kiss.event.impl.kqueue;
+            return new KqueueLoop();
+        } else version(Windows){
+            import kiss.event.impl.iocp;
+            return new IOCPLoop();
         } else {
             return null;
         }
