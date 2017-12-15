@@ -42,7 +42,6 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
         super();
         setFlag(WatchFlag.Read,true);
         setFlag(WatchFlag.Write,true);
-        _writeBuffer = new ubyte[4096];
     }
    
     mixin OverrideErro;
@@ -73,9 +72,9 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
     }
 
     size_t setWriteBuffer(in ubyte[] data) {
-        if(data.length = writeLen)
+        if(data.length == writeLen)
             return 0;
-        ubyte[] writeData = data[writeLen..$];
+        auto writeData = data[writeLen..$];
         _iocpWBuf.buf = cast(char *)writeData.ptr;
         _iocpWBuf.len = cast(uint)writeData.length;
         return writeData.length;
@@ -101,8 +100,6 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
     {
         writeLen = bytes;
     }
-
-    void setWrite(size_t bytes);
 
     IOCP_DATA _iocpread;
     IOCP_DATA _iocpwrite;
@@ -139,7 +136,7 @@ final class IOCPUDPWatcher : UdpStreamWatcher,IOCPStream
         DWORD dwReceived = 0;
         DWORD dwFlags = 0;
 
-        int nRet = WSARecvFrom(cast(SOCKET) _socket.handle, &_iocpBuffer,
+        int nRet = WSARecvFrom(cast(SOCKET) socket().handle, &_iocpBuffer,
             cast(uint) 1, &dwReceived, &dwFlags,
             cast(SOCKADDR*)&remoteAddr, &remoteAddrLen, &_iocpread.ol,
             cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
@@ -147,15 +144,15 @@ final class IOCPUDPWatcher : UdpStreamWatcher,IOCPStream
     }
 
     Address buildAddress(){
-        Address addr;
+        Address tmpaddr;
         if (remoteAddrLen == 32) {
             sockaddr_in* addr = cast(sockaddr_in*)(&remoteAddr);
-            addr = new InternetAddress(*addr);
+            tmpaddr = new InternetAddress(*addr);
         } else {
             sockaddr_in6* addr = cast(sockaddr_in6*)(&remoteAddr);
-            addr = new Internet6Address(*addr);
+            tmpaddr = new Internet6Address(*addr);
         }
-        return addr;
+        return tmpaddr;
     }
 
     IOCP_DATA _iocpread;
@@ -234,7 +231,7 @@ final class IOCPEventWatcher : EventWatcher
         if(active){
             _data.watcher = this;
             _data.operationType = IOCP_OP_TYPE.event;
-            PostQueuedCompletionStatus(_iocp, 0, 0, cast(LPOVERLAPPED)( &_data));
+            ()@trusted{PostQueuedCompletionStatus(_iocp, 0, 0, &_data.ol);}();
         }
     }
 
