@@ -82,10 +82,10 @@ class IOCPLoop : BaseLoop
         deregister(watcher);
         if(watcher.type == WatcherType.TCP){
             TcpStreamWatcher wt = cast(TcpStreamWatcher)watcher;
-            Linger optLinger;
-            optLinger.on = 1;
-            optLinger.time = 0;
-            wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
+            // Linger optLinger;
+            // optLinger.on = 1;
+            // optLinger.time = 0;
+            // wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
             wt.socket.close();
         } else if(watcher.type == WatcherType.ACCEPT){
             IOCPAcceptWatcher wt = cast(IOCPAcceptWatcher)watcher;
@@ -143,7 +143,6 @@ class IOCPLoop : BaseLoop
     override void join(scope void delegate()nothrow weak)
     {
         _runing = true;
-        auto tspec = timespec(1,  1000 * 1000);
         _timer.init();
         do{
             weak();
@@ -151,7 +150,7 @@ class IOCPLoop : BaseLoop
             OVERLAPPED * overlapped;
             ULONG_PTR key = 0;
             DWORD bytes = 0;
-            const int ret = GetQueuedCompletionStatus(_iocp,  & bytes,  & key,  & overlapped,timeout);
+            const int ret = GetQueuedCompletionStatus(_IOCPFD,  & bytes,  & key,  &overlapped,timeout);
             if(overlapped !is null) continue;
             if(ret == 0){
                 const auto erro = GetLastError();
@@ -159,28 +158,28 @@ class IOCPLoop : BaseLoop
                     continue;
                 }
                 auto ev = cast(IOCP_DATA * ) overlapped;
-                if (ev && ev.watch) {
-                    ev.watch.onClose();
+                if (ev && ev.watcher) {
+                    ev.watcher.onClose();
                 }
                 continue;
             }
             auto ev = cast(IOCP_DATA * ) overlapped;
-            if(ev is null || ev.watch is null) continue;
+            if(ev is null || ev.watcher is null) continue;
             final switch (ev.operationType) {
             case IOCP_OP_TYPE.accept : 
-                    ev.watch.onRead();
+                    ev.watcher.onRead();
                 break;
             case IOCP_OP_TYPE.connect : 
-                 setStreamRead(ev.watch,0);
+                 setStreamRead(ev.watcher,0);
                 break;
             case IOCP_OP_TYPE.read : 
-                    setStreamRead(ev.watch,bytes);
+                    setStreamRead(ev.watcher,bytes);
                 break;
             case IOCP_OP_TYPE.write : 
-                    setStreamWrite(ev.watch,bytes);
+                    setStreamWrite(ev.watcher,bytes);
                 break;
             case IOCP_OP_TYPE.event : 
-                    ev.watch.onRead();
+                    ev.watcher.onRead();
                 break;
             }
             
@@ -213,7 +212,7 @@ class IOCPLoop : BaseLoop
 
 private:
     bool _runing;
-    int _IOCPFD;
+    HANDLE _IOCPFD;
     IOCPEventWatcher _event;
     CustomTimer _timer;
 }
