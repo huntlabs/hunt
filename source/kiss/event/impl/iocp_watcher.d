@@ -252,6 +252,7 @@ final class IOCPTimerWatcher : TimerWatcher
         super();
         setFlag(WatchFlag.Read,true);
         _timer = new CWheelTimer(this);
+        _readBuffer = new UintObject();
     }
 
     ~this(){

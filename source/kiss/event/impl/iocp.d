@@ -108,6 +108,11 @@ class IOCPLoop : BaseLoop
             IOCPEventWatcher wt = cast(IOCPEventWatcher)watcher;
             if(wt is  null) return false;
             wt._iocp = this._IOCPFD;
+        } else if(watcher.type == WatcherType.UDP){
+            IOCPUDPWatcher wt = cast(IOCPUDPWatcher)watcher;
+            if(wt is  null) return false;
+            if(!wt.isBind)
+                wt.bind(createAddress(wt.socket,0));
         }
         watcher.currtLoop = this;
         _event.setNext(watcher);
