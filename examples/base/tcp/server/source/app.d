@@ -8,12 +8,16 @@ import kiss.net.Timer;
 import std.socket;
 import std.functional;
 import std.exception;
+import std.experimental.logger;
+import std.experimental.logger.filelogger;
 
 void main()
 {
 	EventLoop loop = new EventLoop();
 
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET);
+
+	sharedLog = new FileLogger("log.txt");
 
 	listener.bind(0).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow {
 				catchAndLogException((){

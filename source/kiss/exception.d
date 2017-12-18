@@ -15,7 +15,6 @@ void catchAndLogException(E)(lazy E runer) @trusted nothrow
 	} catch(Error e){
         collectException((){
             critical(e.toString);
-            fatal(e.toString);
             rt_term();
         }());
         exit(-1);
