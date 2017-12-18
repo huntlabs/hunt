@@ -3,6 +3,22 @@ module kiss.event.impl.kqueue;
 import kiss.event.base;
 import kiss.event.watcher;
 import kiss.event.struct_;
+version (FreeBSD)
+{
+    version = Kqueue;
+}
+version (OpenBSD)
+{
+    version = Kqueue;
+}
+version (NetBSD)
+{
+    version = Kqueue;
+}
+version (OSX)
+{
+    version = Kqueue;
+}
 version(Kqueue):
 
 import kiss.event.impl.kqueue_watcher;
@@ -13,6 +29,7 @@ import core.time;
 import core.stdc.string;
 import core.stdc.errno;
 import core.sys.posix.sys.types; // for ssize_t, size_t
+import core.sys.posix.signal;
 import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;

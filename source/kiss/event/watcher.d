@@ -164,6 +164,11 @@ private:
         super(WatcherType.Event);
     }
     void call();
+    override void onRead()
+    {
+        if(watcher)
+            watcher.onRead(this);
+    }
 }
 
 mixin template OverrideErro()
