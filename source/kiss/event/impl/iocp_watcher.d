@@ -235,10 +235,6 @@ final class IOCPEventWatcher : EventWatcher
         }
     }
 
-    override void onRead(){
-        
-    }
-
     mixin OverrideErro;
 
     IOCP_DATA _data;

@@ -1,6 +1,23 @@
 module kiss.event.impl.kqueue_watcher;
 
 import kiss.event.base;
+
+version (FreeBSD)
+{
+    version = Kqueue;
+}
+version (OpenBSD)
+{
+    version = Kqueue;
+}
+version (NetBSD)
+{
+    version = Kqueue;
+}
+version (OSX)
+{
+    version = Kqueue;
+}
 version(Kqueue):
 
 import kiss.event.watcher;
@@ -48,9 +65,8 @@ final class KqueueEventWatcher : EventWatcher
                         return;
                 }());
             }
-            if(watcher)
-                watcher.onRead(this);
         }();
+        super.onRead();        
     }
 
     mixin OverrideErro;
@@ -65,7 +81,7 @@ final class KqueueTimerWatcher : TimerWatcher
     {
         super();
         setFlag(WatchFlag.Read,true);
-        _sock = new Socket(AddressFamily.UNIX,SocketType.RAW);
+        _sock = new Socket(AddressFamily.UNIX,SocketType.STREAM);
         _readBuffer = new UintObject();
     }
 
