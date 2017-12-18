@@ -6,6 +6,23 @@ import core.thread;
 import kiss.event.task;
 public import kiss.exception;
 
+version (FreeBSD)
+{
+    version = Kqueue;
+}
+version (OpenBSD)
+{
+    version = Kqueue;
+}
+version (NetBSD)
+{
+    version = Kqueue;
+}
+version (OSX)
+{
+    version = Kqueue;
+}
+
 // 代理模式去实现loop， eventloop的任务队列在此实现。
 // 全面采用 前摄器 模式
 // 如果加协程，缓存数据放到上层
