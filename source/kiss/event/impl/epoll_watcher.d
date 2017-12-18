@@ -30,9 +30,8 @@ final class EpollEventWatcher : EventWatcher
     override void onRead(){
         ()@trusted{
             readEvent(this,(Object obj){});
-            if(watcher)
-                watcher.onRead(this);
         }();
+        super.onRead();
     }
 
     mixin OverrideErro;
