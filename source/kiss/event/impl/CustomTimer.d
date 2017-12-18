@@ -5,7 +5,7 @@ import kiss.timingwheel;
 import kiss.exception;
 import std.datetime;
 
-enum CustomTimerMinTimeOut = 20; // 单位 毫秒（ms）
+enum CustomTimerMinTimeOut = 50; // 单位 毫秒（ms）
 enum CustomTimerWheelSize = 500;
 enum CustomTimer_Next_TimeOut = cast(long)(CustomTimerMinTimeOut * (2.0 / 3.0));
 

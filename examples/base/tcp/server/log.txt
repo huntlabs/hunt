@@ -1,0 +1,39 @@
+2017-12-18T16:12:16.686:..\..\..\..\source\kiss\exception.d:__lambda4:17 object.Error@(0): Access Violation
+----------------
+0x0046EF65 in write
+0x00469941 in fflush
+0x004051A2 in @safe void std.stdio.File.LockingTextWriter.put!(char).put(char) at C:\D\dmd2\windows\bin\..\..\src\phobos\std\stdio.d(2805)
+0x0040517B in @safe void std.range.primitives.doPut!(std.stdio.File.LockingTextWriter, char).doPut(ref std.stdio.File.LockingTextWriter, ref char) at C:\D\dmd2\windows\bin\..\..\src\phobos\std\range\primitives.d(287)
+0x0040515E in @safe void std.range.primitives.put!(std.stdio.File.LockingTextWriter, char).put(ref std.stdio.File.LockingTextWriter, char) at C:\D\dmd2\windows\bin\..\..\src\phobos\std\range\primitives.d(407)
+0x004044C4 in @safe void std.stdio.File.write!(immutable(char)[], immutable(char)[], char).write(immutable(char)[], immutable(char)[], char) at C:\D\dmd2\windows\bin\..\..\src\phobos\std\stdio.d(1425)
+0x00404418 in @safe void std.stdio.writeln!(immutable(char)[], immutable(char)[]).writeln(immutable(char)[], immutable(char)[]) at C:\D\dmd2\windows\bin\..\..\src\phobos\std\stdio.d(3604)
+0x00402695 in @safe void app.main().__lambda2().__lambda1() at E:\code\dlang\github\kiss\examples\base\tcp\server\source\app.d(49)
+0x00402658 in pure @nogc @safe void app.main().__lambda2().__dgliteral2() at E:\code\dlang\github\kiss\examples\base\tcp\server\source\app.d(49)
+0x0040562C in nothrow @trusted void kiss.exception.catchAndLogException!(void).catchAndLogException(lazy void) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\exception.d(12)
+0x0040264A in nothrow @trusted void app.main().__lambda2() at E:\code\dlang\github\kiss\examples\base\tcp\server\source\app.d(50)
+0x0040E2B3 in nothrow @safe void kiss.net.Timer.Timer.onRead(kiss.event.base.Watcher).__lambda2().__lambda1(Object) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\net\Timer.d(60)
+0x004104C5 in bool kiss.event.impl.iocp_reader.readTimer(kiss.event.impl.iocp_watcher.IOCPTimerWatcher, void delegate(Object) nothrow) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\impl\iocp_reader.d(46)
+0x0040EBCD in bool kiss.event.impl.iocp.IOCPLoop.read(kiss.event.base.Watcher, void delegate(Object) nothrow) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\impl\iocp.d(63)
+0x0040DA6F in @trusted bool kiss.event.loop.EventLoop.read(kiss.event.base.Watcher, void delegate(Object) nothrow) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\loop.d(63)
+0x0040E23B in @safe void kiss.net.Timer.Timer.onRead(kiss.event.base.Watcher).__lambda2() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\net\Timer.d(55)
+0x0040E1F3 in pure @nogc @safe void kiss.net.Timer.Timer.onRead(kiss.event.base.Watcher).__dgliteral3() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\net\Timer.d(52)
+0x0040562C in nothrow @trusted void kiss.exception.catchAndLogException!(void).catchAndLogException(lazy void) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\exception.d(12)
+0x0040E1DE in nothrow @safe void kiss.net.Timer.Timer.onRead(kiss.event.base.Watcher) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\net\Timer.d(70)
+0x0040F956 in @trusted void kiss.event.watcher.TimerWatcher.onRead() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\watcher.d(40)
+0x00410A48 in pure @nogc @safe void kiss.event.impl.CustomTimer.CWheelTimer.onTimeOut().__dgliteral1() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\impl\CustomTimer.d(41)
+0x0040562C in nothrow @trusted void kiss.exception.catchAndLogException!(void).catchAndLogException(lazy void) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\exception.d(12)
+0x00410A2D in nothrow @trusted void kiss.event.impl.CustomTimer.CWheelTimer.onTimeOut() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\impl\CustomTimer.d(43)
+0x00411C53 in nothrow @safe void kiss.timingwheel.NullWheelTimer.onTimeOut() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\timingwheel.d(182)
+0x00410D52 in nothrow @safe void kiss.timingwheel.TimingWheel.prevWheel(uint) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\timingwheel.d(61)
+0x00410AFE in int kiss.event.impl.CustomTimer.CustomTimer.doWheel() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\impl\CustomTimer.d(72)
+0x0040EF5B in void kiss.event.impl.iocp.IOCPLoop.join(scope void delegate() nothrow) at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\impl\iocp.d(154)
+0x0040DB9B in @trusted void kiss.event.loop.EventLoop.join() at E:\code\dlang\github\kiss\examples\base\tcp\server\..\..\..\..\source\kiss\event\loop.d(89)
+0x004023FB in _Dmain at E:\code\dlang\github\kiss\examples\base\tcp\server\source\app.d(52)
+0x00412993 in void rt.dmain2._d_run_main(int, char**, extern (C) int function(char[][])*).runAll().__lambda1()
+0x00412957 in void rt.dmain2._d_run_main(int, char**, extern (C) int function(char[][])*).runAll()
+0x00412858 in _d_run_main
+0x0040D9D0 in main at E:\code\dlang\github\kiss\examples\base\tcp\server\source\app.d(7)
+0x00469145 in mainCRTStartup
+0x74BE8654 in BaseThreadInitThunk
+0x77E24A47 in RtlGetAppContainerNamedObjectPath
+0x77E24A17 in RtlGetAppContainerNamedObjectPath
