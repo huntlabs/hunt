@@ -21,7 +21,16 @@ final class TcpStreamClient : TcpStream
         return this;
     }
 
-    bool isConnected(){return _isConnected;}
+    bool connect(Address addr)
+    {
+        bool watch_ = watch();
+        if(watch_){
+            watch_ = watch_ && eventLoop.connect(_watcher,addr);
+        }
+        return watch_;
+    }
+
+    bool isConnected() nothrow {return _isConnected;}
 
     override TcpStream write(StreamWriteBuffer data){
         if(!_isConnected)
