@@ -94,6 +94,14 @@ final class KqueueLoop : BaseLoop
         return canRead;
     }
 
+    override bool connect(Watcher watcher,Address addr)
+    {
+        if(watcher.type == WatcherType.TCP){
+            return connectTCP(cast(PosixTCPWatcher)watcher,addr);
+        }
+        return false;
+    }
+
     override bool write(Watcher watcher,in ubyte[] data, out size_t writed)
     {
         if(watcher.type == WatcherType.TCP){

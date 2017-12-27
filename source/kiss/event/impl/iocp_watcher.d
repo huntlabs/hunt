@@ -71,6 +71,14 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
         checkErro(nRet, SOCKET_ERROR);
     }
 
+    void doConnect(Address addr){
+        _iocpwrite.watcher = this;
+        _iocpwrite.operationType = IOCP_OP_TYPE.connect;
+        int nRet = ConnectEx(cast(SOCKET)this.socket.handle(),
+            cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null, &_iocpwrite.ol);
+        checkErro(nRet, ERROR_IO_PENDING);
+    }
+
     size_t setWriteBuffer(in ubyte[] data) {
         if(data.length == writeLen)
             return 0;
@@ -84,7 +92,7 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
         _inWrite = true;
         DWORD dwFlags = 0;
         DWORD dwSent = 0;
-        _iocpread.watcher = this;
+        _iocpwrite.watcher = this;
         _iocpwrite.operationType = IOCP_OP_TYPE.write;
         int nRet = WSASend(cast(SOCKET)this.socket.handle(), &_iocpWBuf, 1,
                 &dwSent, dwFlags, &_iocpwrite.ol, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);

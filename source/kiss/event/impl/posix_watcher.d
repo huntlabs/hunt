@@ -57,6 +57,11 @@ final class PosixAcceptWatcher : TcpListenerWatcher
     }
 }
 
+bool connectTCP(PosixTCPWatcher watch, Address addr){
+    if(watch is null || addr is null) return false;
+    watch.socket.connect(addr);
+    return true;
+}
 
 
 bool readTcp(PosixTCPWatcher watch, scope ReadCallBack read)
