@@ -123,9 +123,12 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
 
 // 实际处理
 interface BaseLoop {
+    import std.socket : Address;
     Watcher createWatcher(WatcherType type);
 
     bool read(Watcher watcher,scope ReadCallBack read);
+
+    bool connect(Watcher watcher,Address addr);
 
     bool write(Watcher watcher,in ubyte[] data, out size_t writed);
 

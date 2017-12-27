@@ -28,6 +28,8 @@ version (OSX)
 // 如果加协程，缓存数据放到上层
 
 final @trusted class EventLoop {
+    import std.socket : Address;
+    
     this()
     {
         this(platformLoop());
@@ -55,6 +57,11 @@ final @trusted class EventLoop {
 
     Watcher createWatcher(WatcherType type){
         return _loop.createWatcher(type);
+    }
+
+    bool connect(Watcher watcher,Address addr)
+    {
+        return _loop.connect(watcher,addr);
     }
 
     bool read(Watcher watcher,scope ReadCallBack read)

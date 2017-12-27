@@ -48,7 +48,7 @@ bool readTimer(IOCPTimerWatcher watch, scope ReadCallBack read)
 
 bool readUdp(IOCPUDPWatcher watch, scope ReadCallBack read)
 {
-     if(watch is null || read is null) return false;
+    if(watch is null || read is null) return false;
     watch.clearError();
     if(watch.readLen == 0) {
         read(null);
@@ -77,4 +77,13 @@ bool writeTcp(IOCPTCPWatcher watch,in ubyte[] data, out size_t writed)
         return true;
     watch.doWrite();
     return false;
+}
+
+bool connectTCP(IOCPTCPWatcher watch, Address addr){
+    if(watch is null || addr is null) return false;
+    import kiss.exception;
+    Address binded = createAddress(watch.socket);
+    catchAndLogException(watch.socket.bind(binded));
+    watch.doConnect(addr);
+    return true;
 }

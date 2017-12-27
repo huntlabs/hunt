@@ -8,7 +8,7 @@ import std.experimental.logger;
 import std.exception;
 
 //No-Thread-safe
-final class TcpStream : Transport
+@trusted class TcpStream : Transport
 {
     this(EventLoop loop,AddressFamily amily)
     {
