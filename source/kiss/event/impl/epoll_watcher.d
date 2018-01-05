@@ -165,3 +165,20 @@ int timerfd_gettime(int fd, itimerspec * curr_value);
 enum TFD_TIMER_ABSTIME = 1 << 0;
 enum TFD_CLOEXEC = 0x80000;
 enum TFD_NONBLOCK = 0x800;
+
+version (X86) {
+    enum SO_REUSEPORT = 15;
+} else version (X86_64) {
+    enum SO_REUSEPORT = 15;
+} else version (MIPS32) {
+    enum SO_REUSEPORT = 0x0200;
+
+} else version (MIPS64) {
+    enum SO_REUSEPORT = 0x0200;
+} else version (PPC) {
+    enum SO_REUSEPORT = 15;
+} else version (PPC64) {
+    enum SO_REUSEPORT = 15;
+} else version (ARM) {
+    enum SO_REUSEPORT = 15;
+}
