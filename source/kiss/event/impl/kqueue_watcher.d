@@ -222,3 +222,4 @@ int kqueue();
 int kevent(int kq, const kevent_t* changelist, int nchanges, kevent_t* eventlist,
     int nevents, const timespec* timeout);
 
+enum SO_REUSEPORT = 0x0200;
