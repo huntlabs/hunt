@@ -26,6 +26,8 @@ import std.exception;
         _watcher.watcher(this);
     }
 
+    mixin TransportSocketOption;
+
     TcpStream setCloseHandle(CloseCallBack cback){
         _closeBack = cback;
         return this;

@@ -24,6 +24,8 @@ final class TcpListener : ReadTransport
         _watcher.setSocket(sock);
         _watcher.watcher(this);
     }
+    
+    mixin TransportSocketOption;
 
     TcpListener setCloseHandle(CloseCallBack cback){
         _closeBack = cback;
