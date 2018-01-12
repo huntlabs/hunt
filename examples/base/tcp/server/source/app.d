@@ -19,7 +19,7 @@ void main()
 
 	sharedLog = new FileLogger("log.txt");
 
-	listener.bind(0).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow {
+	listener.bind(8096).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow {
 				catchAndLogException((){
 					TcpStream sock = new TcpStream(loop, socket);
 
