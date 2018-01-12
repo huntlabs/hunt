@@ -18,6 +18,8 @@ final class UdpStream : Transport
         _watcher.watcher(this);
     }
 
+    mixin TransportSocketOption;
+
     UdpStream setReadData(UDPReadCallBack cback){
         _readBack = cback;
         return this;
