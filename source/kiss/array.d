@@ -36,13 +36,13 @@ E[] removeSite(E)(ref E[] _array,size_t site)
     in {
         assert(site < _array.length);
     } body{
-        const size_t len = ary.length - 1;
+        const size_t len = _array.length - 1;
         doInitVaule(_array[site]);
         for (size_t i = site; i < len; ++i) {
-            memcpy(&(_array[i]), &(_array[i + 1]), T.sizeof);
+            memcpy(&(_array[i]), &(_array[i + 1]), E.sizeof);
         }
         E v = E.init;
-        memcpy(&(_array[len]), &v, T.sizeof);
+        memcpy(&(_array[len]), &v, E.sizeof);
         _array = _array[0..len];
         return _array;
     }
@@ -51,7 +51,7 @@ void doInitVaule(E)(ref E v){
     static if(is(E == struct) && hasElaborateDestructor!E) {
         destroy(v);
     }
-    memcpy(&v,&tv,E.sizeof);
+    memcpy(&v,&v,E.sizeof);
 }
 
 //from std.experimental.allocator.package;
