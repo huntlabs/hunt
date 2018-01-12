@@ -6,18 +6,21 @@ import core.stdc.string : memcpy;
  * return： 移除的个数
  * 注： 对数组的长度不做处理
 */
-size_t arrayRemove(E)(ref E[] ary, auto ref E e) {
+size_t arrayRemove(E)(ref E[] ary, auto ref E e, bool one = false) {
     E tv = E.init;
     size_t rm = 0;
     size_t site = 0;
+    bool unRemove = false;
     for (size_t j = site; j < ary.length; ++j) {
-        if (ary[j] != e) {
+        if (ary[j] != e || unRemove) {
             if(site != j) 
                 memcpy(&ary[site], &ary[j], E.sizeof);
             site++;
         } else {
             doInitVaule(ary[j]);
             rm++;
+            if(one) 
+                unRemove = true;
         }
     }
     if(rm > 0) {
