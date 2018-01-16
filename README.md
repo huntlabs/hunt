@@ -3,7 +3,7 @@ A refined core library for D programming language.
 
 # Modules
  * event
- * net
+ * net / tcpstream
  * serialize
  * radix-tree
  * timer
