@@ -85,6 +85,7 @@ final @trusted class EventLoop {
         return _loop.deregister(watcher);
     }
 
+    alias run = join;
     // while(true)
     // todo: 线程安全！
     void join(){
@@ -102,6 +103,10 @@ final @trusted class EventLoop {
 
     bool isRuning(){
         return (_thread !is null);
+    }
+
+    bool isInLoopThread(){
+        return isRuning() && _thread is Thread.getThis();
     }
 
     EventLoop weakUp(){

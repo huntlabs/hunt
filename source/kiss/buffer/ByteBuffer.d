@@ -3,10 +3,10 @@ module kiss.buffer.ByteBuffer;
 import kiss.buffer;
 
 
-final class Buffer(Alloc) : Buffer
+final class ByteBuffer(Alloc) : Buffer
 {
     import kiss.bytes;
-    import kiss.container.vector;
+    import kiss.container.Vector;
     import std.experimental.allocator.common;
 
     alias BufferStore = Vector!(ubyte,Alloc); 
