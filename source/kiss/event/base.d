@@ -90,14 +90,17 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
     }
 }
 
-
-@trusted interface  ReadTransport {
-
-    void close();
+@trusted interface BaseTransport{
 
     bool watched();
 
     bool watch();
+}
+
+
+@trusted interface  ReadTransport : BaseTransport {
+
+    void close();
 
     void onRead(Watcher watcher) nothrow;
 
@@ -107,10 +110,7 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
 
 //@Transport 
 
-@trusted interface WriteTransport {
-    bool watched();
-
-    bool watch();
+@trusted interface WriteTransport : BaseTransport {
     
     void onWrite(Watcher watcher) nothrow;
 
