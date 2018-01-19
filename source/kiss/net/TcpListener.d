@@ -57,11 +57,12 @@ final class TcpListener : ReadTransport
 
     @property reusePort(bool use) {
         _watcher.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
-        version (Posix)
+        version (Posix){
             import kiss.event.impl.epoll_watcher;
             import kiss.event.impl.kqueue_watcher;
             _watcher.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT,
                 use);
+        }
         version (windows) {
             if (!use) {
                 import core.sys.windows.winsock2;

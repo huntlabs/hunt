@@ -82,7 +82,7 @@ bool writeTcp(IOCPTCPWatcher watch,in ubyte[] data, out size_t writed)
 bool connectTCP(IOCPTCPWatcher watch, Address addr){
     if(watch is null || addr is null) return false;
     import kiss.exception;
-    Address binded = createAddress(watch.socket);
+    Address binded = createAddress(watch.socket,0);
     catchAndLogException(watch.socket.bind(binded));
     watch.doConnect(addr);
     return true;
