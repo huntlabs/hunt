@@ -12,9 +12,9 @@ public import core.sys.windows.winsock2;
 public import core.sys.windows.mswsock;
 
 import std.conv;
-import std.socket;
-import std.exception;
-import std.experimental.logger;
+public import std.socket;
+public import std.exception;
+public import std.experimental.logger;
 
 mixin template CheckIocpError()
 {
