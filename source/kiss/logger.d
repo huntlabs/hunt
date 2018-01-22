@@ -1,4 +1,4 @@
-module kiss.Logger;
+module kiss.logger;
 
 /*
 How to add logger for kiss?
