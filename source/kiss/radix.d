@@ -165,7 +165,7 @@ pragma(inline, true):
 		if(hasdata)
 			nodesize += (void*).sizeof;
 
-		raxNode *n = cast(raxNode*)malloc(nodesize);
+		raxNode *n = cast(raxNode*)malloc(cast(size_t)nodesize);
 		if( n == null) return null;
 
 		n.iskey = false;
@@ -183,7 +183,7 @@ pragma(inline, true):
 		if(hasdata)
 			nodesize += (void *).sizeof;
 
-		raxNode *n = cast(raxNode*)malloc(nodesize);
+		raxNode *n = cast(raxNode*)malloc(cast(size_t)nodesize);
 		if( n == null) return null;
 
 		n.iskey = false;
@@ -204,7 +204,7 @@ pragma(inline, true):
 			nodesize += (void *).sizeof;
 
 
-		auto node = cast(raxNode*)realloc(n , nodesize);
+		auto node = cast(raxNode*)realloc(n ,cast(size_t) nodesize);
 		if(node == null) return null;
 		node.iscompr = false;
 		return node;
@@ -218,7 +218,7 @@ pragma(inline, true):
 		if(hasdata)
 			nodesize += (void *).sizeof;
 	
-		auto node = cast(raxNode*) realloc(n , nodesize);
+		auto node = cast(raxNode*) realloc(n , cast(size_t)nodesize);
 		if( node == null) return null;
 		node.iscompr = true;
 		return node;
