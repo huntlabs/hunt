@@ -1,0 +1,11 @@
+language: d
+sudo: false
+os:
+ - linux
+ - osx
+ - windows
+
+d:
+  - dmd
+  - ldc
+  
