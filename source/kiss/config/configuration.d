@@ -120,7 +120,6 @@ unittest
 	assert(confdev.http.listen.value.as!long() == 100);
 	writeln("----------" ,confdev.app.test.value());
 	string tvstr = cast(string)confdev.app.test.value;
-	auto tvstrw = cast(wstring)confdev.app.test.value;
     
 	assert(tvstr == "dev");
 	assert(confdev.app.test.value() == "dev");
