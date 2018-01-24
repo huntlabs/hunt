@@ -5,4 +5,4 @@ os:
  - osx
 d:
   - dmd
-  - ldc-1.7.0
+  - ldc
