@@ -3,9 +3,6 @@ sudo: false
 os:
  - linux
  - osx
- - windows
-
 d:
-  - dmd
-  - ldc
-  
+  - dmd-2.78.1
+  - ldc-1.7.0
