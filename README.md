@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/huntlabs/kiss.svg?branch=master)](https://travis-ci.org/huntlabs/kiss)
+
 # Kiss library
 A refined core library for D programming language.
 
