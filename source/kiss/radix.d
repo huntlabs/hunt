@@ -157,6 +157,7 @@ pragma(inline, true):
 
 
 
+pragma(inline, false):
 	//alloc non-compr node
 	static raxNode* New(uint children , bool hasdata)
 	{
@@ -232,7 +233,7 @@ pragma(inline, true):
 
 
 
-};
+}
 
 struct raxItem
 {
