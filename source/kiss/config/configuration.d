@@ -42,6 +42,9 @@ class Configuration : BaseConfig
 		return _value.value(name);
 	}
 	
+	override @property BaseConfigValue topValue(){
+		return _value;
+	}
 	auto opDispatch(string s)()
 	{
 		return _value.opDispatch!(s)();
@@ -104,12 +107,41 @@ private:
 	ConfigurationValue _value;
 }
 
+version(unittest){
+	import kiss.config.read;
+
+	@ConfigItem("app")
+	class TestConfig
+	{
+		@ConfigItem()
+		string test;
+		@ConfigItem()
+		double time;
+
+		@ConfigItem("http")
+		TestHttpConfig listen;
+
+		mixin ReadConfig!TestConfig;
+	}
+
+	@ConfigItem("HTTP")
+	struct TestHttpConfig
+	{
+		@ConfigItem("listen")
+		int value;
+
+		mixin ReadConfig!TestHttpConfig;
+	}
+
+
+}
+
 
 unittest
 {
 	import std.stdio;
 	import FE = std.file;
-	FE.write("test.config","http.listen = 100 \napp.test =  \n# this is  \n ; start dev\n [dev]\napp.test = dev");
+	FE.write("test.config","app.http.listen = 100 \nhttp.listen = 100 \napp.test = \napp.time = 0.25 \n# this is  \n ; start dev\n [dev]\napp.test = dev");
 	auto conf = new Configuration("test.config");
 	assert(conf.http.listen.value.as!long() == 100);
 	assert(conf.app.test.value() == "");
@@ -129,4 +161,9 @@ unittest
 	string str;
 	auto e = collectException!NoValueHasException(confdev.app.host.value(), str);
 	assert(e && e.msg == " host is not in config! ");
+
+	TestConfig test = TestConfig.readConfig(confdev);
+	assert(test.test == "dev");
+	assert(test.time == 0.25);
+	assert(test.listen.value == 100);
 }
