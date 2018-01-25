@@ -22,6 +22,7 @@ interface  BaseConfigValue {
 
 interface  BaseConfig {
     BaseConfigValue value(string key);
+    @property BaseConfigValue topValue();
     //BaseConfigValue opDispatch(string s)();
 }
 
