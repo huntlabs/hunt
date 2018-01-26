@@ -1,4 +1,4 @@
-module kiss.config;
+module kiss.configuration;
 
 import std.exception;
 import std.traits;
