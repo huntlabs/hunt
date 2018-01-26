@@ -1,10 +1,19 @@
-module kiss.config.read;
+module kiss.configuration.read;
 
-import kiss.config;
+import kiss.configuration;
 
 struct ConfigItem
 {
+    this(bool opt){
+        optional = opt;
+    }
+    this(string str, bool opt = false){
+        name = str;
+        optional = opt;
+    }
+
     string name;
+    bool optional = false;
 }
 
 mixin template ReadConfig(T) 
@@ -30,6 +39,7 @@ mixin template ReadConfig(T)
     {
         import std.traits;
         import kiss.traits;
+        import std.exception;
 
         T creatT(T)()
         {
@@ -65,15 +75,25 @@ mixin template ReadConfig(T)
             static if(__traits(compiles,__traits(getMember,T, memberName)) && 
                                 hasUDA!(__traits(getMember,T, memberName),ConfigItem))
             {
-                string name = getUDAs!((__traits(getMember,T, memberName)), ConfigItem)[0].name;
-                name = tColumnName(name, memberName);
+                auto item = getUDAs!((__traits(getMember,T, memberName)), ConfigItem)[0];
+                string name = tColumnName(item.name, memberName);
                 static if(is(typeof( __traits(getMember,T, memberName) ) == struct) || 
                                 is(typeof( __traits(getMember,T, memberName) ) == class)){
-                    str ~= "rv." ~ memberName ~ " = " ~ typeof( __traits(getMember,T, memberName) ).stringof 
-                            ~ ".redConfigVale(value.value(\"" ~ name ~ "\"));\n";
+                    if(item.optional){
+                        str ~= "collectException("~ typeof( __traits(getMember,T, memberName) ).stringof 
+                                ~ ".redConfigVale(value.value(\"" ~ name ~ "\")),rv. "  ~ memberName ~ ");\n"; 
+                    } else {
+                        str ~= "rv." ~ memberName ~ " = " ~ typeof( __traits(getMember,T, memberName) ).stringof 
+                                ~ ".redConfigVale(value.value(\"" ~ name ~ "\"));\n";
+                    }
                 } else {
-                    str ~= "rv." ~ memberName ~ " = value.value(\"" ~ name ~ "\").value().as!" 
-                            ~ typeof( __traits(getMember,T, memberName) ).stringof ~ "();\n";
+                    if(item.optional){
+                        str ~= "collectException(value.value(\""~ name ~ "\").value().as!" 
+                                ~ typeof( __traits(getMember,T, memberName) ).stringof ~ "(),rv. "  ~ memberName ~ ");\n"; 
+                    } else {
+                        str ~= "rv." ~ memberName ~ " = value.value(\"" ~ name ~ "\").value().as!" 
+                                ~ typeof( __traits(getMember,T, memberName) ).stringof ~ "();\n";
+                    }
                 }
             }
         }

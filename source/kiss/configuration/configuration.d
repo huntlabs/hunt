@@ -1,4 +1,4 @@
-module model.config.configuration;
+module model.configuration.configuration;
 
 import std.conv;
 import std.exception;
@@ -6,7 +6,7 @@ import std.array;
 import std.stdio;
 import std.string;
 import std.experimental.logger;
-import kiss.config;
+import kiss.configuration;
 
 class ConfigurationValue : BaseConfigValue
 {
@@ -108,7 +108,7 @@ private:
 }
 
 version(unittest){
-	import kiss.config.read;
+	import kiss.configuration.read;
 
 	@ConfigItem("app")
 	class TestConfig
@@ -120,6 +120,12 @@ version(unittest){
 
 		@ConfigItem("http")
 		TestHttpConfig listen;
+
+		@ConfigItem("optial",true)
+		int optial = 500;
+
+		@ConfigItem(true)
+		int optial2 = 500;
 
 		mixin ReadConfig!TestConfig;
 	}
@@ -166,4 +172,6 @@ unittest
 	assert(test.test == "dev");
 	assert(test.time == 0.25);
 	assert(test.listen.value == 100);
+	assert(test.optial == 500);
+	assert(test.optial2 == 500);
 }
