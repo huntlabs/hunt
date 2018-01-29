@@ -177,7 +177,7 @@ final class EpollLoop : BaseLoop
         do{
             weak();
             epoll_event[64] events;
-            const auto len = epoll_wait(_epollFD, events.ptr, 64, 1000);
+            const auto len = epoll_wait(_epollFD, events.ptr, 64, 10);
             if(len < 1) continue;
             foreach(i;0..len){
                 Watcher watch = cast(Watcher)(events[i].data.ptr);
