@@ -1,4 +1,4 @@
-module model.config.configuration;
+module model.configuration.configuration;
 
 import std.conv;
 import std.exception;
@@ -6,7 +6,7 @@ import std.array;
 import std.stdio;
 import std.string;
 import std.experimental.logger;
-import kiss.config;
+import kiss.configuration;
 
 class ConfigurationValue : BaseConfigValue
 {
@@ -42,6 +42,9 @@ class Configuration : BaseConfig
 		return _value.value(name);
 	}
 	
+	override @property BaseConfigValue topValue(){
+		return _value;
+	}
 	auto opDispatch(string s)()
 	{
 		return _value.opDispatch!(s)();
@@ -104,12 +107,47 @@ private:
 	ConfigurationValue _value;
 }
 
+version(unittest){
+	import kiss.configuration.read;
+
+	@ConfigItem("app")
+	class TestConfig
+	{
+		@ConfigItem()
+		string test;
+		@ConfigItem()
+		double time;
+
+		@ConfigItem("http")
+		TestHttpConfig listen;
+
+		@ConfigItem("optial",true)
+		int optial = 500;
+
+		@ConfigItem(true)
+		int optial2 = 500;
+
+		mixin ReadConfig!TestConfig;
+	}
+
+	@ConfigItem("HTTP")
+	struct TestHttpConfig
+	{
+		@ConfigItem("listen")
+		int value;
+
+		mixin ReadConfig!TestHttpConfig;
+	}
+
+
+}
+
 
 unittest
 {
 	import std.stdio;
 	import FE = std.file;
-	FE.write("test.config","http.listen = 100 \napp.test =  \n# this is  \n ; start dev\n [dev]\napp.test = dev");
+	FE.write("test.config","app.http.listen = 100 \nhttp.listen = 100 \napp.test = \napp.time = 0.25 \n# this is  \n ; start dev\n [dev]\napp.test = dev");
 	auto conf = new Configuration("test.config");
 	assert(conf.http.listen.value.as!long() == 100);
 	assert(conf.app.test.value() == "");
@@ -120,7 +158,6 @@ unittest
 	assert(confdev.http.listen.value.as!long() == 100);
 	writeln("----------" ,confdev.app.test.value());
 	string tvstr = cast(string)confdev.app.test.value;
-	auto tvstrw = cast(wstring)confdev.app.test.value;
     
 	assert(tvstr == "dev");
 	assert(confdev.app.test.value() == "dev");
@@ -130,4 +167,11 @@ unittest
 	string str;
 	auto e = collectException!NoValueHasException(confdev.app.host.value(), str);
 	assert(e && e.msg == " host is not in config! ");
+
+	TestConfig test = TestConfig.readConfig(confdev);
+	assert(test.test == "dev");
+	assert(test.time == 0.25);
+	assert(test.listen.value == 100);
+	assert(test.optial == 500);
+	assert(test.optial2 == 500);
 }
