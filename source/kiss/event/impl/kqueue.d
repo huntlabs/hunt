@@ -219,7 +219,7 @@ final class KqueueLoop : BaseLoop
     override void join(scope void delegate()nothrow weak)
     {
         _runing = true;
-        auto tspec = timespec(1,  1000 * 1000);
+        auto tspec = timespec(1,  1000 * 10);
         do{
             weak();
             kevent_t[64] events;
