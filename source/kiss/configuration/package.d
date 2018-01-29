@@ -1,4 +1,4 @@
-module kiss.config;
+module kiss.configuration;
 
 import std.exception;
 import std.traits;
@@ -22,6 +22,7 @@ interface  BaseConfigValue {
 
 interface  BaseConfig {
     BaseConfigValue value(string key);
+    @property BaseConfigValue topValue();
     //BaseConfigValue opDispatch(string s)();
 }
 
