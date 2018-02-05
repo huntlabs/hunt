@@ -107,9 +107,9 @@ final class EpollLoop : BaseLoop
             optLinger.on = 1;
             optLinger.time = 0;
             wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
-        } else {
-            fd = getFD(watcher);
         }
+        fd = getFD(watcher);
+        
         if(fd < 0) return false;
         .close(fd);
         return true;
