@@ -110,8 +110,8 @@ protected:
                 size_t writedSize;
                 canWrite = _loop.write(_watcher,data,writedSize);
                 if(buffer.popSize(writedSize)){
-                    buffer.doFinish();
                     _writeQueue.deQueue();
+                    buffer.doFinish();
                 }
                 if(watcher.isError){
                     canWrite = false;

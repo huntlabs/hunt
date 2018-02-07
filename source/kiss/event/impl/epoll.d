@@ -106,7 +106,7 @@ final class EpollLoop : BaseLoop
             Linger optLinger;
             optLinger.on = 1;
             optLinger.time = 0;
-            wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
+            // wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
         }
         fd = getFD(watcher);
         
@@ -201,7 +201,7 @@ final class EpollLoop : BaseLoop
     }
 
 protected : 
-    pragma(inline, true) bool isErro(uint events)  nothrow {
+    pragma(inline, true) bool isErro(uint events)  nothrow {    
         return (events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP)) != 0;
     }
     pragma(inline, true) bool isRead(uint events)  nothrow {
