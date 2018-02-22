@@ -106,12 +106,12 @@ final class EpollLoop : BaseLoop
             Linger optLinger;
             optLinger.on = 1;
             optLinger.time = 0;
-            // wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
+            wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
         }
         fd = getFD(watcher);
         
         if(fd < 0) return false;
-        .close(fd);
+        // .close(fd); // need more tests to fix this bug
         return true;
     }
 
