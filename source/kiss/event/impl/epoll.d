@@ -99,19 +99,14 @@ final class EpollLoop : BaseLoop
 
     override bool close(Watcher watcher)
     {
-        deregister(watcher);
-        int fd = -1;
+        if(!deregister(watcher)) 
+            return false;
+
         if(watcher.type == WatcherType.TCP){
             TcpStreamWatcher wt = cast(TcpStreamWatcher)watcher;
-            Linger optLinger;
-            optLinger.on = 1;
-            optLinger.time = 0;
-            wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
+            wt.socket.close();
         }
-        fd = getFD(watcher);
         
-        if(fd < 0) return false;
-        // .close(fd); // need more tests to fix this bug
         return true;
     }
 
@@ -177,7 +172,7 @@ final class EpollLoop : BaseLoop
         do{
             weak();
             epoll_event[64] events;
-            const auto len = epoll_wait(_epollFD, events.ptr, 64, 10);
+            const auto len = epoll_wait(_epollFD, events.ptr, events.length, 10);
             if(len < 1) continue;
             foreach(i;0..len){
                 Watcher watch = cast(Watcher)(events[i].data.ptr);
