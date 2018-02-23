@@ -46,7 +46,10 @@ import std.exception;
     }
 
     override void close(){
-        onClose(_watcher);
+        if(_watcher.active)
+            onClose(_watcher);
+        else
+            warning("The watcher has been closed already");
     }
 
     TcpStream write(StreamWriteBuffer data){
@@ -111,7 +114,8 @@ protected:
                 canWrite = _loop.write(_watcher,data,writedSize);
                 if(buffer.popSize(writedSize)){
                     _writeQueue.deQueue();
-                    buffer.doFinish();
+                    if(watcher.active)
+                        buffer.doFinish();
                 }
                 if(watcher.isError){
                     canWrite = false;
