@@ -58,6 +58,7 @@ private:
     }
 
     void setSocket(Socket sock){
+        this.fd = sock.handle();
         _socket = sock;
     }
 
@@ -79,7 +80,10 @@ private:
             watcher.onWrite(this);
     }
 
-    final Socket socket(){if(_socket is null) setFamily(AddressFamily.INET); return _socket;}
+    final Socket socket(){
+        // if(_socket is null) setFamily(AddressFamily.INET); 
+        return _socket;
+    }
 
     UbyteArrayObject _readBuffer;
 
@@ -98,6 +102,7 @@ private:
     }
 
     void setSocket(Socket sock){
+        this.fd = sock.handle();
         _socket = sock;
     }
 

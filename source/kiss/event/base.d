@@ -27,6 +27,9 @@ enum WatchFlag : ushort
 
 // 所有检测的不同都有Watcher区分， 保证上层socket的代码都是公共代码
 @trusted abstract class Watcher {
+    debug int number;
+    int fd = -1;
+
     this(WatcherType type_){
         _type = type_;
         _flags = BitArray([false,false,false,false,
@@ -50,7 +53,7 @@ enum WatchFlag : ushort
     final @property type(){return _type;}
 
     final void close(){
-        if(_inLoop is null) return;
+        // if(_inLoop is null) return;
         _inLoop.close(this);
     }
 
@@ -121,7 +124,7 @@ package (kiss.event): // 给 eventloop的，好操作一些信息，做处理。
 @trusted interface Transport  : ReadTransport, WriteTransport {
 }
 
-// 实际处理
+
 interface BaseLoop {
     import std.socket : Address;
     Watcher createWatcher(WatcherType type);
@@ -143,10 +146,11 @@ interface BaseLoop {
 
     bool weakUp();
 
-    // while(true)
     void join(scope void delegate()nothrow weak); 
 
     void stop();
+
+    // void dispose();
 }
 
 

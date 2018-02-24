@@ -1,16 +1,21 @@
 module kiss.event.impl.posix_watcher;
 
+version(Posix):
+
 import kiss.event.base;
 import kiss.event.watcher;
 import kiss.event.struct_;
 
 import std.socket;
 import std.string;
-version(Posix):
+import std.experimental.logger;
+
 import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket;
 
+/**
+*/
 final class PosixTCPWatcher : TcpStreamWatcher
 {
     this()
@@ -96,6 +101,9 @@ bool readAccept(PosixAcceptWatcher watch, scope ReadCallBack read)
     socket_t fd = cast(socket_t)(.accept(watch.socket.handle, null, null));
     if (fd == socket_t.init)
         return false;
+
+    debug infof("readAccept server fd=%d, remote fd=%d", watch.socket.handle, fd);
+
     Socket sock = new Socket(fd, watch.socket.addressFamily);
     read(sock);
     return true;
@@ -129,9 +137,10 @@ bool readUdp(PosixUDPWatcher watch, scope ReadCallBack read)
 
 bool writeTcp(PosixTCPWatcher watch,in ubyte[] data, out size_t writed)
 {
+    if(watch is null) return false;
     bool canWrite = false;
-    if(watch is null) return canWrite;
     watch.clearError();
+
     const auto len = watch.socket.send(data);
     if (len > 0) {
         writed = cast(size_t)len;
@@ -139,7 +148,7 @@ bool writeTcp(PosixTCPWatcher watch,in ubyte[] data, out size_t writed)
     } else {
         if (errno == 4) {
             canWrite = true;
-        } else if (errno != EAGAIN || errno != EWOULDBLOCK) {
+        } else if (errno != EAGAIN && errno != EWOULDBLOCK) {
             watch._error = true;
             watch._erroString = fromStringz(strerror(errno)).idup;
         }

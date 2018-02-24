@@ -1,12 +1,14 @@
 module kiss.event.impl.epoll;
 
+version(linux):
+
 import kiss.event.base;
 import kiss.event.watcher;
-version(linux):
 import kiss.event.impl.epoll_watcher;
 
 import std.socket;
 import std.string;
+import std.experimental.logger;
 
 import core.time;
 import core.stdc.string;
@@ -16,6 +18,9 @@ import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
 
+
+/**
+*/
 final class EpollLoop : BaseLoop
 {
     this(){
@@ -24,9 +29,9 @@ final class EpollLoop : BaseLoop
         register(_event);
     }
 
-    ~this(){
-        //deregister(_event);
-        .close(_epollFD);
+    void dispose(){
+        deregister(_event);
+        core.sys.posix.unistd.close(_epollFD);
     }
 
     override Watcher createWatcher(WatcherType type)
@@ -96,15 +101,22 @@ final class EpollLoop : BaseLoop
         writed = 0;
         return false;
     }
-
+    
     override bool close(Watcher watcher)
     {
+        debug infof("close, watcher(fd=%d)", watcher.fd);
+
         if(!deregister(watcher)) 
             return false;
 
         if(watcher.type == WatcherType.TCP){
             TcpStreamWatcher wt = cast(TcpStreamWatcher)watcher;
             wt.socket.close();
+        }
+        else
+        {
+            assert(watcher.fd >= 0);
+            core.sys.posix.unistd.close(watcher.fd);
         }
         
         return true;
@@ -113,17 +125,25 @@ final class EpollLoop : BaseLoop
     override bool register(Watcher watcher)
     {
         if(watcher is null || watcher.active) return false;
-        int fd = -1;
-        if(watcher.type == WatcherType.Timer){
-            auto wt = cast(EpollTimerWatcher)watcher;
-            if(wt !is null && wt.setTimer()){
-                fd = wt._timerFD;
-            }
-        } else {
-            fd = getFD(watcher);
-        }
+        int fd = watcher.fd;
+        // if(watcher.type == WatcherType.Timer){
+        //     auto wt = cast(EpollTimerWatcher)watcher;
+        //     if(wt !is null && wt.setTimer()){
+        //         fd = wt._timerFD;
+        //     }
+        // } else {
+        //     fd = getFD(watcher);  // todo:
+        // }
+
+        // debug infof("register, watcher[%d].fd=%d, actual fd=%d", watcher.number, watcher.fd, fd);
+        // if(watcher.fd != fd)
+        //     watcher.fd = fd;
+
+        debug infof("register, watcher(fd=%d)", watcher.fd);
+        assert(fd>=0, "The watcher.fd is not initilized!");
+
         if(fd < 0) return false;
-        auto ev = buildEpollEvent(watcher);
+        epoll_event ev = buildEpollEvent(watcher);
         if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd,  & ev)) != 0) {
             if (errno != EEXIST)
                 return false;
@@ -147,12 +167,14 @@ final class EpollLoop : BaseLoop
 
     override bool deregister(Watcher watcher)
     {
+        debug infof("unregister watcher(fd=%d)", watcher.fd);
+
         if(watcher is null || watcher.currtLoop !is this) return false;
-        const int fd = getFD(watcher);
+        const int fd = watcher.fd;
         if(fd < 0) return false;
-        epoll_event ev;
-        if ((epoll_ctl(_epollFD, EPOLL_CTL_DEL, fd,  &ev)) != 0) {
-            //yuCathException(error("EPOLL_CTL_DEL erro! ", event.fd));
+
+        if ((epoll_ctl(_epollFD, EPOLL_CTL_DEL, fd,  null)) != 0) {
+            errorf("unregister failed, watcher.fd=%d", watcher.fd);
             return false;
         }
         watcher.currtLoop = null;
@@ -165,28 +187,37 @@ final class EpollLoop : BaseLoop
         return true;
     }
 
-    // while(true)
     override void join(scope void delegate()nothrow weak)
     {
         _runing = true;
         do{
             weak();
-            epoll_event[64] events;
-            const auto len = epoll_wait(_epollFD, events.ptr, events.length, 10);
-            if(len < 1) continue;
-            foreach(i;0..len){
-                Watcher watch = cast(Watcher)(events[i].data.ptr);
-                if (isErro(events[i].events)) {
-                    watch.onClose();
-                    continue;
-                }
-                if (isWrite(events[i].events) && watch.active ) 
-                    watch.onWrite();
-
-                if (isRead(events[i].events) && watch.active ) 
-                    watch.onRead();
-            }
+            handleEpollEvent();
         } while(_runing);
+    }
+
+    private void handleEpollEvent()
+    {
+        epoll_event[64] events;
+        const int len = epoll_wait(_epollFD, events.ptr, events.length, 10);
+        foreach(i;0..len){
+            Watcher watch = cast(Watcher)(events[i].data.ptr);
+            if(watch is null)
+            {
+                warningf("watcher(fd=%d) is null", watch.fd);
+                continue;
+            }
+
+            if (isErro(events[i].events)) {
+                watch.onClose();
+                continue;
+            }
+            if (watch.active && isRead(events[i].events)) 
+                watch.onRead();
+
+            if (watch.active && isWrite(events[i].events)) 
+                watch.onWrite();
+        }
     }
 
     override void stop()
@@ -205,7 +236,7 @@ protected :
     pragma(inline, true) bool isWrite(uint events)  nothrow  {
         return (events & EPOLLOUT) != 0;
     }
-    epoll_event buildEpollEvent(Watcher watch){
+    static epoll_event buildEpollEvent(Watcher watch){
         epoll_event ev;
         ev.data.ptr = cast(void *)watch;
         ev.events = EPOLLRDHUP | EPOLLERR | EPOLLHUP;
@@ -220,7 +251,7 @@ protected :
         return ev;
     }
 
-    int getFD(Watcher watch){
+    static int getFD(Watcher watch){
         int fd = -1;
         switch(watch.type){
         case WatcherType.TCP:
@@ -247,6 +278,7 @@ protected :
         default:
             break;
         }
+        
         return fd;
     }
 private:
