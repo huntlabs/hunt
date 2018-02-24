@@ -55,7 +55,7 @@ final class TcpListener : ReadTransport
         return _watcher.socket.localAddress();
     }
 
-    @property reusePort(bool use) {
+    TcpListener reusePort(bool use) {
         _watcher.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
         version (Posix){
             import kiss.event.impl.epoll_watcher;
@@ -70,6 +70,8 @@ final class TcpListener : ReadTransport
                     cast(SocketOption) SO_EXCLUSIVEADDRUSE, true);
             }
         }
+
+        return this;
     }
 
     TcpListener listen(int backlog){
@@ -90,6 +92,7 @@ final class TcpListener : ReadTransport
     override void close(){
         onClose(_watcher);
     }
+
 protected:
     override void onRead(Watcher watcher) nothrow{
         catchAndLogException((){
@@ -99,14 +102,17 @@ protected:
                     collectException((){
                         auto socket = cast(Socket)obj;
                         if(socket !is null){
+                            debug infof("new connection from %s, fd=%d", 
+                                socket.remoteAddress.toString(), socket.handle());
                             _readBack(_loop,socket);
                         }
                     }());
                 });
+
                 if(watcher.isError){
                     canRead = false;
                     watcher.close();
-                    error("the Tcp socket Read is error: ", watcher.erroString); 
+                    error("The socket for tcp listener has an error: ", watcher.erroString); 
                 }
             }
         }());

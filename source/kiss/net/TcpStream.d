@@ -7,23 +7,34 @@ public import kiss.net.struct_;
 import std.experimental.logger;
 import std.exception;
 
+debug __gshared int streamCounter = 0;
+
 //No-Thread-safe
 @trusted class TcpStream : Transport
 {
+    private Socket m_socket;
     this(EventLoop loop,AddressFamily amily)
     {
         _loop = loop;
         _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
         _watcher.setFamily(amily);
         _watcher.watcher(this);
+        m_socket = _watcher.socket;
     }
 
-    this(EventLoop loop,Socket sock)
+    this(EventLoop loop,Socket socket)
     {
         _loop = loop;
         _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
-        _watcher.setSocket(sock);
+        _watcher.setSocket(socket);
         _watcher.watcher(this);
+        m_socket = socket;
+
+        debug synchronized{
+        streamCounter++;
+        _watcher.number = streamCounter;
+        }
+
     }
 
     mixin TransportSocketOption;
@@ -49,7 +60,7 @@ import std.exception;
         if(_watcher.active)
             onClose(_watcher);
         else
-            warning("The watcher has been closed already");
+            warningf("The watcher(fd=%d) has already been closed", _watcher.fd);
     }
 
     TcpStream write(StreamWriteBuffer data){
@@ -57,14 +68,21 @@ import std.exception;
             _writeQueue.enQueue(data);
             onWrite(_watcher);
         } else {
-            warning("tcp socket is not is eventLoop!");
+            warningf("The watcher(fd=%d) is down!", _watcher.fd);
             data.doFinish();
         }
         return this;
     }
 
     final EventLoop eventLoop(){return _loop;}
+
 protected:
+
+    TcpStreamWatcher _watcher;
+    CloseCallBack _closeBack;
+    TcpReadCallBack _readBack;
+    WriteBufferQueue _writeQueue;
+
     override void onRead(Watcher watcher) nothrow{
         catchAndLogException((){
             bool canRead =  true;
@@ -73,16 +91,18 @@ protected:
                     collectException((){
                         auto buffer = cast(TcpStreamWatcher.UbyteArrayObject)obj;
                         if(buffer is null){
+                            error("buffer is null. The watcher will be closed.");
                             watcher.close(); 
                             return;
                         }
                         _readBack(buffer.data);
                     }());
                 });
+
                 if(watcher.isError){
+                    errorf("Socket error on read: fd=%d, message=%s", watcher.fd, watcher.erroString); 
                     canRead = false;
                     watcher.close();
-                    error("the Tcp socket Read is error: ", watcher.erroString); 
                 }
             }
         }());
@@ -90,11 +110,15 @@ protected:
 
     override void onClose(Watcher watcher) nothrow{
         catchAndLogException((){
+            // debug infof("onClose=>watcher[%d].fd=%d, active=%s", watcher.number, 
+            //     watcher.fd, watcher.active);
+
             watcher.close();
             while(!_writeQueue.empty){
                 StreamWriteBuffer buffer = _writeQueue.deQueue();
                 buffer.doFinish();
             }
+
             if(_closeBack)
                 _closeBack();
         }());
@@ -110,28 +134,27 @@ protected:
                     buffer.doFinish();
                     continue;
                 }
+
+                // debug infof("onWrite=>streamCounter[%d]=%d, data length=%d", 
+                //     watcher.number,  readCounter, data.length );
+            
                 size_t writedSize;
                 canWrite = _loop.write(_watcher,data,writedSize);
                 if(buffer.popSize(writedSize)){
-                    _writeQueue.deQueue();
+                    buffer.doFinish();
                     if(watcher.active)
-                        buffer.doFinish();
+                    _writeQueue.deQueue();
                 }
+
                 if(watcher.isError){
+                    errorf("Socket error on write: fd=%d, message=%s", watcher.fd, watcher.erroString); 
                     canWrite = false;
                     watcher.close();
-                    error("the Tcp socket Read is error: ", watcher.erroString); 
                 }
             }
         }());
     }
 
-protected:
-    TcpStreamWatcher _watcher;
-
-    CloseCallBack _closeBack;
-    TcpReadCallBack _readBack;
-    WriteBufferQueue _writeQueue;
 private:
     EventLoop _loop;
 }

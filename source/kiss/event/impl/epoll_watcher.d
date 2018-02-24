@@ -16,6 +16,7 @@ final class EpollEventWatcher : EventWatcher
         setFlag(WatchFlag.Read,true);
          _readBuffer = new UlongObject();
          _eventFD = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+         this.fd = _eventFD;
     }
 
     ~this(){
@@ -49,6 +50,7 @@ final class EpollTimerWatcher : TimerWatcher
         setFlag(WatchFlag.Read,true);
         _readBuffer = new UintObject();
        _timerFD = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
+       this.fd = _timerFD;
     }
 
     ~this(){

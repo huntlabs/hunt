@@ -13,7 +13,7 @@ alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr) @trusted no
 
 alias AcceptCallBack = void delegate(EventLoop loop, Socket socket) @trusted nothrow;
 
-alias TCPWriteCallBack = void delegate(ubyte[] data, size_t size) @trusted nothrow;
+alias TCPWriteCallBack = void delegate(in ubyte[] data, size_t size) @trusted nothrow;
 
 
 @trusted abstract class StreamWriteBuffer

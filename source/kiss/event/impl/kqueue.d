@@ -223,7 +223,7 @@ final class KqueueLoop : BaseLoop
         do{
             weak();
             kevent_t[64] events;
-            auto len = kevent(_kqueueFD, null, 0, events.ptr, 64, &tspec);
+            auto len = kevent(_kqueueFD, null, 0, events.ptr, events.length, &tspec);
             if(len < 1) continue;
             foreach(i;0..len){
                 Watcher watch = cast(Watcher)(events[i].udata);
