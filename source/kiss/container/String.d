@@ -15,7 +15,7 @@ alias String    = IString!(Mallocator);
 alias WString   = IWString!(Mallocator);
 alias DString   = IDString!(Mallocator);
 
-// The Cow String
+deprecated("Unsupported no more!")
 @trusted struct StringImpl(Char, Allocator) 
                 if(is(Char == Unqual!Char) && isSomeChar!Char)
 {
