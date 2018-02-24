@@ -11,41 +11,50 @@ import std.exception;
 import std.experimental.logger;
 import std.experimental.logger.filelogger;
 
+
+__gshared int acceptCounter = 0;
+
 void main()
 {
 	EventLoop loop = new EventLoop();
 
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET);
 
-	sharedLog = new FileLogger("log.txt");
+	// sharedLog = new FileLogger("log.txt");
 
 	listener.bind(8096).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow {
 				catchAndLogException((){
+					 synchronized{
+        acceptCounter++;
+        warningf("xxx=>setReadHandle=%d", acceptCounter );
+    }
+
 					TcpStream sock = new TcpStream(loop, socket);
 
 					sock.setReadHandle((in ubyte[] data)@trusted nothrow {
 						catchAndLogException((){
-							writeln("read Data: ", cast(string)data);
+							// writeln("read Data: ", cast(string)data);
 
 							sock.write(new WarpStreamBuffer(data.dup,(in ubyte[] wdata, size_t size) @trusted nothrow{
 									catchAndLogException((){
-										writeln("Writed Suessed Size : ", size, "  Data : ", cast(string)wdata);
+
+										// writeln("Writed Suessed Size : ", size, "  Data : ", cast(string)wdata);
 									}());
 								}));
 						}());
 					}).setCloseHandle(()@trusted nothrow {
 						catchAndLogException((){
-							writeln("The Socket is Cloesed!");
+							// writeln("The Socket is Cloesed!");
 						}());
 					}).watch;
 			}());
-		}).watch;
+		}).reusePort(true).watch;
 
 	Timer timer = new Timer(loop);
 	bool tm = timer.setTimerHandle(()@trusted nothrow {
 			catchAndLogException((){
 				import std.datetime;
-				writeln("The Time is : ", Clock.currTime.toString);
+				// writeln("The Time is : ", Clock.currTime.toString);
 			}());
 		}).start(5000);
 	writeln("Listen :", listener.bind.toString, "  ", tm);

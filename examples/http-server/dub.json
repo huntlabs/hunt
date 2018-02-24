@@ -3,9 +3,9 @@
 	"authors": [
 		"渡世白玉"
 	],
-	"description": "A minimal D application.",
-	"copyright": "Copyright © 2017, 渡世白玉",
-	"license": "proprietary",
+	"description": "A simple http server example.",
+	"copyright": "Copyright © 2017-2018, 渡世白玉",
+	"license": "public domain",
 	"dependencies": {
 		"kiss" : {
 			"path" : "../../"

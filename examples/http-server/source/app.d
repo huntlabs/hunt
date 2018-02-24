@@ -25,12 +25,12 @@ void main()
 
 			sock.setReadHandle((in ubyte[] data) @trusted nothrow{
 				catchAndLogException(() {
-					// writeln("read Data: ", cast(string)data);
+					writeln("read data: ", cast(string) data);
 					string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 					sock.write(new WarpStreamBuffer(cast(ubyte[]) writeData,
 					(in ubyte[] wdata, size_t size) @trusted nothrow{
 						catchAndLogException(() {
-							// writeln("Writed Suessed Size : ", size, "  Data : ", cast(string)wdata);
+							writeln("written size: ", size, "  Data: ", cast(string) wdata);
 							sock.close();
 						}());
 					}));
