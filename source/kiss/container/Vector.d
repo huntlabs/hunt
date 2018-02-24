@@ -10,6 +10,7 @@ import core.stdc.string : memcpy, memset;
 import kiss.container.common;
 import kiss.array;
 
+deprecated("Unsupported no more!")
 @trusted struct Vector(T, Allocator = Mallocator, bool addInGC = true) if(is(T == Unqual!T))
 {
     enum addToGC = addInGC && hasIndirections!T && !is(Unqual!Allocator == GCAllocator);

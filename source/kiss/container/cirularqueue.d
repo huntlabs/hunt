@@ -7,7 +7,7 @@ import std.traits;
 import kiss.container.common;
 
 /**
- * 循环队列
+ * 
     Queue Struct Template.
     Params:
         T         = the element type;
@@ -16,6 +16,7 @@ import kiss.container.common;
         Allocator = which type Allocator will used
 */
 
+deprecated("Unsupported no more!")
 @trusted struct CirularQueue(T, Allocator = GCAllocator, bool autoExten = false, bool addInGC = true)  if(is(T == Unqual!T)) {
     enum TSize = T.sizeof;
     enum addToGC = addInGC && hasIndirections!T && !is(Unqual!Allocator == GCAllocator);
