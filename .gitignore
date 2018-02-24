@@ -25,3 +25,4 @@ __dummy.html
 *.zip
 *-test-*
 __test__*__
+examples/*/log.txt
