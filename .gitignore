@@ -26,3 +26,4 @@ __dummy.html
 *-test-*
 __test__*__
 examples/*/log.txt
+examples/timer/timer
