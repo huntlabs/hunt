@@ -27,7 +27,7 @@ enum WatchFlag : ushort
 
 // 所有检测的不同都有Watcher区分， 保证上层socket的代码都是公共代码
 @trusted abstract class Watcher {
-    debug int number;
+    debug int number;  // for debug
     int fd = -1;
 
     this(WatcherType type_){
