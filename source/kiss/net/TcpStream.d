@@ -13,15 +13,21 @@ debug __gshared int streamCounter = 0;
 @trusted class TcpStream : Transport
 {
     private Socket m_socket;
-    this(EventLoop loop,AddressFamily amily)
+
+	//for client side
+	this(EventLoop loop,AddressFamily amily = AddressFamily.INET)
     {
         _loop = loop;
         _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
         _watcher.setFamily(amily);
         _watcher.watcher(this);
         m_socket = _watcher.socket;
-    }
 
+		_isClientSide = true;
+		_isConnected = false;
+	}
+
+	//for server side
     this(EventLoop loop,Socket socket)
     {
         _loop = loop;
@@ -30,12 +36,25 @@ debug __gshared int streamCounter = 0;
         _watcher.watcher(this);
         m_socket = socket;
 
+		_isClientSide = false;
+		_isConnected = true;
+
+
         debug synchronized{
         streamCounter++;
         _watcher.number = streamCounter;
         }
 
     }
+
+	bool connect(Address addr)
+	{
+		bool watch_ = watch();
+		if(watch_){
+			watch_ = watch_ && eventLoop.connect(_watcher,addr);
+		}
+		return watch_;
+	}
 
     mixin TransportSocketOption;
 
@@ -47,6 +66,13 @@ debug __gshared int streamCounter = 0;
         _readBack = cback;
         return this;
     }
+
+	TcpStream setConnectHandle(TcpConnectCallBack cback){
+		_connectBack = cback;
+		return this;
+	}
+
+	bool isConnected() nothrow {return _isConnected;}
 
     override bool watched(){
         return _watcher.active;
@@ -64,6 +90,10 @@ debug __gshared int streamCounter = 0;
     }
 
     TcpStream write(StreamWriteBuffer data){
+		if(!_isConnected)
+			throw new Exception("The Client is not connect!");
+
+
         if(_watcher.active){
             _writeQueue.enQueue(data);
             onWrite(_watcher);
@@ -77,7 +107,9 @@ debug __gshared int streamCounter = 0;
     final EventLoop eventLoop(){return _loop;}
 
 protected:
-
+	bool			_isClientSide ;
+	bool			_isConnected;		//if server side always true.
+	TcpConnectCallBack _connectBack;
     TcpStreamWatcher _watcher;
     CloseCallBack _closeBack;
     TcpReadCallBack _readBack;
@@ -109,6 +141,15 @@ protected:
     }
 
     override void onClose(Watcher watcher) nothrow{
+
+		if(!_isConnected){
+			collectExceptionMsg(eventLoop.deregister(watcher));
+			if(_connectBack)
+				_connectBack(false);
+			return;
+		}
+		_isConnected = false;
+
         catchAndLogException((){
             // debug infof("onClose=>watcher[%d].fd=%d, active=%s", watcher.number, 
             //     watcher.fd, watcher.active);
@@ -125,6 +166,14 @@ protected:
     }
 
     override void onWrite(Watcher watcher) nothrow{
+
+		if(!_isConnected){
+			_isConnected = true;
+			if(_connectBack)
+				_connectBack(true);
+			return;
+		}
+
         catchAndLogException((){
             bool canWrite = true;
             while(canWrite && watcher.active && !_writeQueue.empty){
