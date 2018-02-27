@@ -126,14 +126,12 @@ final class EpollLoop : BaseLoop
     {
         if(watcher is null || watcher.active) return false;
         int fd = watcher.fd;
-        // if(watcher.type == WatcherType.Timer){
-        //     auto wt = cast(EpollTimerWatcher)watcher;
-        //     if(wt !is null && wt.setTimer()){
-        //         fd = wt._timerFD;
-        //     }
-        // } else {
-        //     fd = getFD(watcher);  // todo:
-        // }
+        if(watcher.type == WatcherType.Timer){
+            auto wt = cast(EpollTimerWatcher)watcher;
+            if(wt !is null ){
+                wt.setTimer();
+            }
+        }
 
         // debug infof("register, watcher[%d].fd=%d, actual fd=%d", watcher.number, watcher.fd, fd);
         // if(watcher.fd != fd)
