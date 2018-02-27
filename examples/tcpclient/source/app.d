@@ -1,14 +1,14 @@
 import std.stdio;
 
 import kiss.event;
-import kiss.net.TcpStreamClient;
+import kiss.net.TcpStream;
 import kiss.exception;
 
 void main()
 {
 	writeln("Edit source/app.d to start your project.");
 	EventLoop loop = new EventLoop();
-	TcpStreamClient client = new TcpStreamClient(loop);
+	TcpStream client = new TcpStream(loop);
 	client.setConnectHandle((bool connect)nothrow @trusted{
 		catchAndLogException((){
 			if(connect){
