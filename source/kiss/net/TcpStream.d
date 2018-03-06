@@ -1,13 +1,18 @@
 module kiss.net.TcpStream;
 
 import kiss.event;
-
 public import kiss.net.struct_;
 
 import std.experimental.logger;
 import std.exception;
 
 debug __gshared int streamCounter = 0;
+
+deprecated("Using TcpStream instead.")
+{
+    alias TCPSocket = TcpStream;
+    alias TcpStreamClient = TcpStream;
+}
 
 //No-Thread-safe
 @trusted class TcpStream : Transport
