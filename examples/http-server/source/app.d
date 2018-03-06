@@ -7,20 +7,29 @@ import kiss.net.Timer;
 
 import std.socket;
 import std.functional;
+import std.getopt;
 import std.exception;
 import std.experimental.logger;
 import std.experimental.logger.filelogger;
 
-void main()
+void main(string[] args)
 {
 	globalLogLevel(LogLevel.warning);
-	EventLoop loop = new EventLoop();
+	
+	ushort port = 8080;
+	GetoptResult o = getopt(args,"port|p","端口(默认8080)",&port);
+	if (o.helpWanted){
+		defaultGetoptPrinter("A simple demo for http server!",
+			o.options);
+		return;
+	}
 
+	EventLoop loop = new EventLoop();
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET);
 
 	// sharedLog = new FileLogger("log.txt");
 	listener.reusePort(true);
-	listener.bind(8080).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow{
+	listener.bind(port).listen(1024).setReadHandle((EventLoop loop, Socket socket) @trusted nothrow{
 		catchAndLogException(() {
 			TcpStream sock = new TcpStream(loop, socket);
 
@@ -42,6 +51,6 @@ void main()
 		}());
 	}).watch;
 
-	writeln("The server is listening on 8080.");
+	writefln("The server is listening on %s.", listener.localAddress.toString());
 	loop.join;
 }
