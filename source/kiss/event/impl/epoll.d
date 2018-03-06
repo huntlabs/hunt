@@ -104,7 +104,7 @@ final class EpollLoop : BaseLoop
     
     override bool close(Watcher watcher)
     {
-        debug infof("close, watcher(fd=%d)", watcher.fd);
+        // debug infof("close, watcher(fd=%d)", watcher.fd);
 
         if(!deregister(watcher)) 
             return false;
@@ -137,7 +137,7 @@ final class EpollLoop : BaseLoop
         // if(watcher.fd != fd)
         //     watcher.fd = fd;
 
-        debug infof("register, watcher(fd=%d)", watcher.fd);
+        // debug infof("register, watcher(fd=%d)", watcher.fd);
         assert(fd>=0, "The watcher.fd is not initilized!");
 
         if(fd < 0) return false;
@@ -165,7 +165,7 @@ final class EpollLoop : BaseLoop
 
     override bool deregister(Watcher watcher)
     {
-        debug infof("unregister watcher(fd=%d)", watcher.fd);
+        // debug infof("unregister watcher(fd=%d)", watcher.fd);
 
         if(watcher is null || watcher.currtLoop !is this) return false;
         const int fd = watcher.fd;

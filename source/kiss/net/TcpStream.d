@@ -25,6 +25,7 @@ debug __gshared int streamCounter = 0;
 
 		_isClientSide = true;
 		_isConnected = false;
+        _family = amily;
 	}
 
 	//for server side
@@ -55,6 +56,15 @@ debug __gshared int streamCounter = 0;
 		}
 		return watch_;
 	}
+    
+    bool reconnect(Address addr) {
+        _watcher = null;
+        _watcher = cast(TcpStreamWatcher)_loop.createWatcher(WatcherType.TCP);
+        _watcher.setFamily(_family);
+        _watcher.watcher(this);
+        m_socket = _watcher.socket;
+        return connect(addr);
+    }
 
     mixin TransportSocketOption;
 
@@ -91,7 +101,7 @@ debug __gshared int streamCounter = 0;
 
     TcpStream write(StreamWriteBuffer data){
 		if(!_isConnected)
-			throw new Exception("The Client is not connect!");
+			throw new Exception("The Client is not connect!");  
 
 
         if(_watcher.active){
@@ -153,7 +163,6 @@ protected:
         catchAndLogException((){
             // debug infof("onClose=>watcher[%d].fd=%d, active=%s", watcher.number, 
             //     watcher.fd, watcher.active);
-
             watcher.close();
             while(!_writeQueue.empty){
                 StreamWriteBuffer buffer = _writeQueue.deQueue();
@@ -206,4 +215,5 @@ protected:
 
 private:
     EventLoop _loop;
+    AddressFamily _family;
 }
