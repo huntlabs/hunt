@@ -96,7 +96,9 @@ debug __gshared int streamCounter = 0;
         if(_watcher.active)
             onClose(_watcher);
         else
-            warningf("The watcher(fd=%d) has already been closed", _watcher.fd);
+        {
+            debug warningf("The watcher(fd=%d) has already been closed", _watcher.fd);
+        }
     }
 
     TcpStream write(StreamWriteBuffer data){

@@ -27,3 +27,4 @@ __dummy.html
 __test__*__
 examples/*/log.txt
 examples/timer/timer
+examples/http-server/http-server
