@@ -11,6 +11,7 @@ public import core.sys.windows.windows;
 public import core.sys.windows.winsock2;
 public import core.sys.windows.mswsock;
 
+import std.format;
 import std.conv;
 public import std.socket;
 public import std.exception;
@@ -19,12 +20,13 @@ public import std.experimental.logger;
 mixin template CheckIocpError()
 {
     void checkErro(int ret, int erro = 0){
-        import std.format;
-        if (ret != 0) return; 
         DWORD dwLastError = GetLastError();
+        debug tracef("erro=%d, dwLastError=%d",erro, dwLastError);
+        if (ret != 0) return; 
+
         if (ERROR_IO_PENDING != dwLastError) {
             this._error = true;
-            this._erroString = format("AcceptEx failed with error: %s", dwLastError);
+            this._erroString = format("AcceptEx failed with error: code=%s", dwLastError);
         }
     }
 }
@@ -48,6 +50,7 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
     mixin CheckIocpError;
 
     override void onRead(){
+        debug trace("ready to read");
         _inRead = false;
         super.onRead();
     }
@@ -65,9 +68,13 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
         _iocpread.operationType = IOCP_OP_TYPE.read;
         DWORD dwReceived = 0;
         DWORD dwFlags = 0;
+
+        debug trace("receive socket handle=>", this.socket.handle, ", buffer size=", _iocpBuffer.len);
+
         int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_iocpBuffer,
-                cast(uint) 1, &dwReceived, &dwFlags, &_iocpread.ol,
+                1u, &dwReceived, &dwFlags, &_iocpread.ol,
                 cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+
         checkErro(nRet, SOCKET_ERROR);
     }
 
@@ -88,15 +95,20 @@ final class IOCPTCPWatcher : TcpStreamWatcher,IOCPStream
         return writeData.length;
     }
 
-    void doWrite(){
+    uint doWrite(){
         _inWrite = true;
         DWORD dwFlags = 0;
         DWORD dwSent = 0;
         _iocpwrite.watcher = this;
         _iocpwrite.operationType = IOCP_OP_TYPE.write;
+        debug trace("writing...fd=", this.socket.handle());
         int nRet = WSASend(cast(SOCKET)this.socket.handle(), &_iocpWBuf, 1,
                 &dwSent, dwFlags, &_iocpwrite.ol, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-        checkErro(nRet, SOCKET_ERROR);
+        
+        debug trace("dwSent=", dwSent);
+        // checkErro(nRet, SOCKET_ERROR); // bug:
+
+        return dwSent;
     }
 
     override void setRead(size_t bytes)
@@ -207,10 +219,15 @@ final class IOCPAcceptWatcher : TcpListenerWatcher
         _inSocket = new Socket(this.socket.addressFamily,
                         SocketType.STREAM, ProtocolType.TCP);
         DWORD dwBytesReceived = 0;
+
+        debug tracef("client socket:accept=%s  inner socket=%s", this.socket.handle, _inSocket.handle());
+        debug trace("AcceptEx is :  ", AcceptEx);
         int nRet = AcceptEx(this.socket.handle,
                     cast(SOCKET) _inSocket.handle, _buffer.ptr, 0,
                     sockaddr_in.sizeof + 16, sockaddr_in.sizeof + 16,
                     &dwBytesReceived, &_iocp.ol);
+
+        debug trace("do AcceptEx : the return is : ", nRet);
         checkErro(nRet);
     }
 
@@ -282,7 +299,7 @@ alias  LPWSAOVERLAPPED = OVERLAPPED *;
 struct IOCP_DATA {
     OVERLAPPED ol;
     IOCP_OP_TYPE operationType;
-    Watcher watcher;
+    Watcher watcher = null;
 }
 
 __gshared static LPFN_ACCEPTEX AcceptEx;

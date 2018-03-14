@@ -6,6 +6,8 @@ public import kiss.net.struct_;
 import std.socket;
 import std.exception;
 import std.experimental.logger;
+import core.thread;
+import core.time;
 
 final class TcpListener : ReadTransport
 {
@@ -97,10 +99,14 @@ protected:
     override void onRead(Watcher watcher) nothrow{
         catchAndLogException((){
             bool canRead =  true;
-            while(canRead && watcher.active){
+            debug trace("start to listen");
+            // while(canRead && watcher.active) // why??
+            {
+                debug trace("listening...");
                 canRead = _loop.read(watcher,(Object obj) nothrow {
                     collectException((){
                         auto socket = cast(Socket)obj;
+                        
                         if(socket !is null){
                             debug infof("new connection from %s, fd=%d", 
                                 socket.remoteAddress.toString(), socket.handle());

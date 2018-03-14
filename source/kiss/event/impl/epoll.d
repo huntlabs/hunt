@@ -140,7 +140,7 @@ final class EpollLoop : BaseLoop
         // debug infof("register, watcher(fd=%d)", watcher.fd);
         assert(fd>=0, "The watcher.fd is not initilized!");
 
-        if(fd < 0) return false;
+        // if(fd < 0) return false;
         epoll_event ev = buildEpollEvent(watcher);
         if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd,  & ev)) != 0) {
             if (errno != EEXIST)
