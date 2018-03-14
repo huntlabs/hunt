@@ -3,10 +3,12 @@ module kiss.event.impl.epoll_watcher;
 import kiss.event.base;
 import kiss.event.watcher;
 import kiss.event.struct_;
+import std.socket;
 public import kiss.event.impl.posix_watcher;
 version(linux):
 import core.sys.posix.unistd;
 import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
+
 
 final class EpollEventWatcher : EventWatcher 
 {
@@ -39,7 +41,7 @@ final class EpollEventWatcher : EventWatcher
 
     UlongObject _readBuffer;
 
-    int _eventFD;
+    socket_t _eventFD;
 }
 
 final class EpollTimerWatcher : TimerWatcher
@@ -77,7 +79,7 @@ final class EpollTimerWatcher : TimerWatcher
 
     UintObject _readBuffer;
 
-    int _timerFD;
+    socket_t _timerFD;
 }
 
 bool readTimer(EpollTimerWatcher watch, scope ReadCallBack read)
@@ -156,11 +158,11 @@ int epoll_create1(int flags);
 int epoll_ctl(int epfd, int op, int fd, epoll_event * event);
 int epoll_wait(int epfd, epoll_event * events, int maxevents, int timeout);
 
-int eventfd(uint initval, int flags);
+socket_t eventfd(uint initval, int flags);
 
 //timerfd
 
-int timerfd_create(int clockid, int flags);
+socket_t timerfd_create(int clockid, int flags);
 int timerfd_settime(int fd, int flags, const itimerspec * new_value, itimerspec * old_value);
 int timerfd_gettime(int fd, itimerspec * curr_value);
 

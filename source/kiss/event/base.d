@@ -1,6 +1,8 @@
 module kiss.event.base;
 
 import std.bitmanip;
+import std.socket;
+import std.experimental.logger;
 
 alias ReadCallBack = void delegate(Object obj) nothrow;
 
@@ -28,7 +30,7 @@ enum WatchFlag : ushort
 // 所有检测的不同都有Watcher区分， 保证上层socket的代码都是公共代码
 @trusted abstract class Watcher {
     debug int number;  // for debug
-    int fd = -1;
+    socket_t fd = socket_t.init;
 
     this(WatcherType type_){
         _type = type_;
@@ -53,7 +55,8 @@ enum WatchFlag : ushort
     final @property type(){return _type;}
 
     final void close(){
-        // if(_inLoop is null) return;
+        debug trace("closing...");
+        if(_inLoop is null) return;
         _inLoop.close(this);
     }
 

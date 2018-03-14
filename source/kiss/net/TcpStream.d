@@ -8,6 +8,7 @@ import std.exception;
 
 debug __gshared int streamCounter = 0;
 
+
 deprecated("Using TcpStream instead.")
 {
     alias TCPSocket = TcpStream;
@@ -94,6 +95,7 @@ deprecated("Using TcpStream instead.")
     }
 
     override bool watch() {
+        debug trace("watcher fd=", typeid(_watcher));
         return _loop.register(_watcher);
     }
 
@@ -109,7 +111,6 @@ deprecated("Using TcpStream instead.")
     TcpStream write(StreamWriteBuffer data){
 		if(!_isConnected)
 			throw new Exception("The Client is not connect!");  
-
 
         if(_watcher.active){
             _writeQueue.enQueue(data);
@@ -135,12 +136,16 @@ protected:
     override void onRead(Watcher watcher) nothrow{
         catchAndLogException((){
             bool canRead =  true;
-            while(canRead && watcher.active){
+            debug trace("start to read");
+            while(canRead && watcher.active)
+            {
+                debug trace("reading...");
+
                 canRead = _loop.read(watcher,(Object obj) nothrow {
                     collectException((){
                         auto buffer = cast(TcpStreamWatcher.UbyteArrayObject)obj;
                         if(buffer is null){
-                            error("buffer is null. The watcher will be closed.");
+                            warning("buffer is null. The watcher will be closed.");
                             watcher.close(); 
                             return;
                         }
@@ -149,7 +154,7 @@ protected:
                 });
 
                 if(watcher.isError){
-                    errorf("Socket error on read: fd=%d, message=%s", watcher.fd, watcher.erroString); 
+                    errorf("Socket error on read: fd=%d, message: %s", watcher.fd, watcher.erroString); 
                     canRead = false;
                     watcher.close();
                 }
@@ -168,8 +173,8 @@ protected:
 		_isConnected = false;
 
         catchAndLogException((){
-            // debug infof("onClose=>watcher[%d].fd=%d, active=%s", watcher.number, 
-            //     watcher.fd, watcher.active);
+            debug infof("onClose=>watcher[%d].fd=%d, active=%s", watcher.number, 
+                watcher.fd, watcher.active);
             watcher.close();
             while(!_writeQueue.empty){
                 StreamWriteBuffer buffer = _writeQueue.deQueue();
@@ -192,7 +197,13 @@ protected:
 
         catchAndLogException((){
             bool canWrite = true;
-            while(canWrite && watcher.active && !_writeQueue.empty){
+
+            debug trace("start to write");
+
+            while(canWrite && watcher.active && !_writeQueue.empty) //  && !_writeQueue.empty
+            {
+                debug trace("writting...");
+
                 StreamWriteBuffer buffer = _writeQueue.front();
                 const(ubyte[]) data = buffer.sendData();
                 if(data.length == 0){
@@ -200,11 +211,18 @@ protected:
                     continue;
                 }
 
-                // debug infof("onWrite=>streamCounter[%d]=%d, data length=%d", 
-                //     watcher.number,  readCounter, data.length );
-            
+                debug infof("onWrite=>streamCounter[%d], data length=%d", 
+                    watcher.number,  data.length );
+                
                 size_t writedSize;
                 canWrite = _loop.write(_watcher,data,writedSize);
+                debug trace("writedSize=", writedSize);
+                if(writedSize == 0 && data.length>0)
+                {
+                    warning("No data written!");
+                    break;
+                }
+
                 if(buffer.popSize(writedSize)){
                     buffer.doFinish();
                     if(watcher.active)

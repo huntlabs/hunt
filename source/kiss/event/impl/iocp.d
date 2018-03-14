@@ -10,7 +10,7 @@ version(Windows):
 class IOCPLoop : BaseLoop
 {
     this(){
-        _IOCPFD = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 1);
+        _IOCPFD = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 0);
         _event = new IOCPEventWatcher();
         register(_event);
         _timer.init();
@@ -48,6 +48,8 @@ class IOCPLoop : BaseLoop
 
     override bool read(Watcher watcher,scope ReadCallBack read)
     {
+        debug trace("watcher.type = ", watcher.type);
+
         bool canRead ;
         switch(watcher.type){
             case WatcherType.ACCEPT:
@@ -65,6 +67,8 @@ class IOCPLoop : BaseLoop
             default:
             break;
         }
+
+        // trace("canRead=", canRead, " watcher.type=", watcher.type);
         return canRead;
     }
 
@@ -107,6 +111,7 @@ class IOCPLoop : BaseLoop
 
     override bool register(Watcher watcher)
     {
+        debug infof("register, xxxxx =>%s", watcher.type);
          if(watcher is null || watcher.active) return false;
         if (watcher.type == WatcherType.Timer) {
             IOCPTimerWatcher wt = cast(IOCPTimerWatcher)watcher;
@@ -116,12 +121,34 @@ class IOCPLoop : BaseLoop
             IOCPEventWatcher wt = cast(IOCPEventWatcher)watcher;
             if(wt is  null) return false;
             wt._iocp = this._IOCPFD;
+            
         } else if(watcher.type == WatcherType.UDP){
             IOCPUDPWatcher wt = cast(IOCPUDPWatcher)watcher;
             if(wt is  null) return false;
             if(!wt.isBind)
                 wt.bind(createAddress(wt.socket,0));
+        }else if(watcher.type == WatcherType.ACCEPT){
+            IOCPAcceptWatcher wt = cast(IOCPAcceptWatcher)watcher;
+            debug  trace("CreateIoCompletionPort, on socket(ACCEPT): ",  wt.socket.handle);
+            CreateIoCompletionPort(cast(HANDLE) wt.socket.handle,
+                                       _IOCPFD,
+                                       cast(size_t) (cast(void*) wt),
+                                       0);
+            wt.doAccept();
+
+        }else if(watcher.type == WatcherType.TCP)
+        {
+            IOCPTCPWatcher wt = cast(IOCPTCPWatcher)watcher;
+            debug trace("CreateIoCompletionPort, on socket(TCP): ",  wt.socket.handle);
+            CreateIoCompletionPort(cast(HANDLE) wt.socket.handle,
+                                       _IOCPFD,
+                                       cast(size_t) (cast(void*) wt),
+                                       0);
+
+            wt.doRead();
         }
+
+        debug infof("register, watcher(fd=%d, type=%s)" , watcher.fd, watcher.type);
         watcher.currtLoop = this;
         _event.setNext(watcher);
         return true;
@@ -130,7 +157,6 @@ class IOCPLoop : BaseLoop
     override bool reregister(Watcher watcher)
     {
         throw new LoopException("The IOCP does not support reregister!");
-        //return false;
     }
 
     override bool deregister(Watcher watcher)
@@ -159,25 +185,38 @@ class IOCPLoop : BaseLoop
         _timer.init();
         do{
             weak();
-            auto timeout = _timer.doWheel();
+            auto timeout = _timer.doWheel() * 100;
             OVERLAPPED * overlapped;
             ULONG_PTR key = 0;
             DWORD bytes = 0;
-            const int ret = GetQueuedCompletionStatus(_IOCPFD,  & bytes,  & key,  &overlapped,timeout);
-            if(overlapped !is null) continue;
+
+            const int ret = GetQueuedCompletionStatus(_IOCPFD,  & bytes,  & key,  &overlapped, INFINITE); 
+            // const int ret = GetQueuedCompletionStatus(_IOCPFD,  & bytes,  & key,  &overlapped, timeout); 
+            debug tracef("GetQueuedCompletionStatus, ret=%d", ret);
+
             if(ret == 0){
                 const auto erro = GetLastError();
                 if (erro == WAIT_TIMEOUT){
                     continue;
                 }
+                error("error occurred, code=",  erro);
+
                 auto ev = cast(IOCP_DATA * ) overlapped;
                 if (ev && ev.watcher) {
                     ev.watcher.onClose();
                 }
                 continue;
             }
+
             auto ev = cast(IOCP_DATA * ) overlapped;
-            if(ev is null || ev.watcher is null) continue;
+            if(ev is null || ev.watcher is null) 
+            {
+                warning("ev is null: ", ev is null);
+                continue;
+            }
+
+            debug trace("ev.operationType: ", ev.operationType);            
+
             final switch (ev.operationType) {
             case IOCP_OP_TYPE.accept : 
                     ev.watcher.onRead();
@@ -186,10 +225,10 @@ class IOCPLoop : BaseLoop
                  setStreamRead(ev.watcher,0);
                 break;
             case IOCP_OP_TYPE.read : 
-                    setStreamRead(ev.watcher,bytes);
+                setStreamRead(ev.watcher,bytes);
                 break;
             case IOCP_OP_TYPE.write : 
-                    setStreamWrite(ev.watcher,bytes);
+                // setStreamWrite(ev.watcher,bytes); // bug
                 break;
             case IOCP_OP_TYPE.event : 
                     ev.watcher.onRead();
@@ -210,17 +249,23 @@ class IOCPLoop : BaseLoop
     }
 
     void setStreamRead(Watcher wt, size_t len){
-        auto io = cast(IOCPStream)wt;
-        if(io is null) return;
+        IOCPStream io = cast(IOCPStream)wt;
+        // if(io is null) return;
+        assert(io !is null);
         io.setRead(len);
         wt.onRead();
     }
 
     void setStreamWrite(Watcher wt, size_t len){
         auto io = cast(IOCPStream)wt;
-        if(io is null) return;
-        io.setWrite(len);
-        wt.onWrite();
+        // if(io is null) return;
+        assert(io !is null);
+        trace("len=",len);
+        if(len>0)
+        {
+            io.setWrite(len);
+            wt.onWrite();
+        }
     }
 
 private:

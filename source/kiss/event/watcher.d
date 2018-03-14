@@ -4,6 +4,8 @@ import kiss.event.base;
 import kiss.event.struct_;
 import std.socket;
 
+import std.experimental.logger;
+
 @trusted abstract class TransportWatcher(T) : Watcher 
 {
     this(WatcherType type){
@@ -103,6 +105,7 @@ private:
 
     void setSocket(Socket sock){
         this.fd = sock.handle();
+        debug trace("socket fd=", this.fd);
         _socket = sock;
     }
 
@@ -115,7 +118,11 @@ private:
     override void onRead()
     {
         if(watcher)
+        {
+            auto w = watcher;
+            // trace(typeid(w));
             watcher.onRead(this);
+        }
     }
 
     final @property  Socket socket(){return _socket;}

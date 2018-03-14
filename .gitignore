@@ -28,3 +28,4 @@ __test__*__
 examples/*/log.txt
 examples/timer/timer
 examples/http-server/http-server
+examples/tcpclient/client
