@@ -137,7 +137,7 @@ private:
     T[] _data = null;
     uint _size;
 }
-
+/*
 unittest {
     import std.stdio;
 
@@ -171,3 +171,4 @@ unittest {
     writeln("size  = ", myq.length);
     writeln("front is = ", myq.front());
 }
+*/
