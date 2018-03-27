@@ -397,8 +397,8 @@ private:
     Data* _data;
     T[] _array;
 }
-
-unittest {
+/*
+unittest{
     import std.stdio;
     import std.experimental.allocator.mallocator;
     import std.experimental.allocator;
@@ -466,3 +466,4 @@ unittest {
     assert(dt.length == vec22.length);
     //Vector!(shared int) vec2;
 }
+*/

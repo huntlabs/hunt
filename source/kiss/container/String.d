@@ -312,7 +312,7 @@ private:
     Char[] _str;
 }
 
-
+/*
 version(unittest) :
 
 void testFunc(T,size_t Buf)() {
@@ -436,4 +436,4 @@ void testFunc(T,size_t Buf)() {
 
 unittest {
 	testFunc!(char,3)();
-}
+}*/
