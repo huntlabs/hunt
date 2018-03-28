@@ -10,10 +10,16 @@ import std.math;
 
 private:
 
-enum bool isSignedType(T) = is(T == byte) || is (T == short) || is(T == int) || is( T== long);
-enum bool isUnsignedType(T) = is(T == ubyte) ||  is(T == ushort) || is(T == uint) || is (T == ulong);
-enum bool isBigSignedType(T) = is(T == int) || is( T== long);
-enum bool isBigUnsignedType(T) = is(T == uint) || is (T == ulong);
+
+
+enum bool isType(T1 , T2) = is(T1 == T2) || is(T1 == ImmutableOf!T2) || is(T1 == ConstOf!T2) || is(T1 == InoutOf!T2) || is(T1 == SharedOf!T2 ) || is(T1 == SharedConstOf!T2) || is(T1 == SharedInoutOf!T2);
+
+enum bool isSignedType(T) = isType!(T , byte) || isType!(T , short) || isType!(T , int) || isType!(T , long);
+enum bool isUnsignedType(T) = isType!(T , ubyte) ||  isType!(T , ushort) || isType!(T , uint) || isType!(T , ulong);
+enum bool isBigSignedType(T) = isType!(T , int) || isType!(T, long);
+enum bool isBigUnsignedType(T) = isType!(T , uint) || isType!(T , ulong);
+
+
 
 //unsigned
 ulong[] byte_dots = [ 1 << 7,
@@ -77,8 +83,9 @@ byte[] toVariant(T)(T t) if (isSignedType!T)
 		symbol = true;
 	ubyte multiple = 1;
 	
-	T val = abs(t);
-	ubyte num = getbytenums(cast(ulong)val);
+	ulong val = cast(ulong)abs(t);
+
+	ubyte num = getbytenums(val);
 	ubyte[] var;
 	for(long i = num  ; i > 1 ; i--)
 	{
@@ -86,7 +93,7 @@ byte[] toVariant(T)(T t) if (isSignedType!T)
 		if(symbol && multiple == 1)
 			n = n | 0x40;
 		var ~= cast(ubyte)n;
-		val = cast(T)(val % (byte_dots_s[i - 2] * multiple));
+		val = (val % (byte_dots_s[i - 2] * multiple));
 		multiple = 2;
 	}
 	
@@ -335,7 +342,7 @@ size_t getsize(T)(T t) if(isBigUnsignedType!T)
 // [uint] variant 
 //  data
 
-byte[] serialize(string str)
+byte[] serialize(T)(T str) if(is(T  == string))
 {
 	byte[] data;
 	uint len = cast(uint)str.length;
