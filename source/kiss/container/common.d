@@ -53,8 +53,13 @@ mixin template Refcount()
         return alloc.make!(typeof(this))();
     }
 
-    static void deallocate(ALLOC)(auto ref ALLOC alloc, typeof(this) * dd){   
-        alloc.dispose(dd);
+    static void deallocate(ALLOC)(auto ref ALLOC alloc, typeof(this) * dd) nothrow {  
+        try
+        {
+            alloc.dispose(dd);
+        } 
+        catch(Exception)
+        {}
     }
 
     static void inf(typeof(this) * dd)
@@ -63,7 +68,7 @@ mixin template Refcount()
         dd._count.refCnt();
     }
 
-    static typeof(this) * deInf(ALLOC)(auto ref ALLOC alloc, typeof(this) * dd)
+    static typeof(this) * deInf(ALLOC)(auto ref ALLOC alloc, typeof(this) * dd) nothrow
     {
         if(dd is null) return dd;
         if(dd._count.derefCnt() == 0){

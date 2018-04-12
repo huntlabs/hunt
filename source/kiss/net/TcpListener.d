@@ -100,7 +100,7 @@ protected:
         catchAndLogException((){
             bool canRead =  true;
             debug trace("start to listen");
-            // while(canRead && watcher.active) // why??
+            while(canRead && watcher.active) // why??
             {
                 debug trace("listening...");
                 canRead = _loop.read(watcher,(Object obj) nothrow {
