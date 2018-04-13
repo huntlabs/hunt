@@ -87,7 +87,7 @@ byte[] toVariant(T)(T t) if (isSignedType!T)
 
 	ubyte num = getbytenums(val);
 	ubyte[] var;
-	for(long i = num  ; i > 1 ; i--)
+	for(size_t i = num  ; i > 1 ; i--)
 	{
 		auto n = val / (byte_dots_s[i - 2] * multiple);
 		if(symbol && multiple == 1)
@@ -368,7 +368,7 @@ string unserialize(T)(const byte[] data , out long parse_index) if(is(T == strin
 	long index;
 	uint len = toT!uint(data[1 .. $] , index);
 	parse_index += 1 + index + len;
-	return cast(T)(data[1 + index .. parse_index].dup);
+	return cast(T)(data[cast(size_t)(1 + index) .. cast(size_t)parse_index].dup);
 }
 
 size_t getsize(string str ) 
@@ -466,7 +466,7 @@ T unserialize(T)(const byte[] data , out long parse_index) if(isStaticArray!T)
 	long index2;
 	uSize = toT!uint(data[1 .. $] , index1);
 	
-	len = toT!uint(data[index1 + 1 .. $] , index2);
+	len = toT!uint(data[cast(size_t)(index1 + 1) .. $] , index2);
 	parse_index += 1 + index1 + index2;
 	
 	long index = parse_index;
@@ -474,7 +474,7 @@ T unserialize(T)(const byte[] data , out long parse_index) if(isStaticArray!T)
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
 		parse = 0;
-		value[i] = unserialize!(typeof(value[0]))(data[index .. data.length] , parse);
+		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse);
 		index += parse;
 	}
 	
@@ -545,7 +545,7 @@ T unserialize(T)(const byte[] data , out long parse_index)  if(isDynamicArray!T 
 	long index1;
 	long index2;
 	uSize = toT!uint(data[1 .. $]  , index1);
-	len = toT!uint(data[1 + index1 .. $] , index2);
+	len = toT!uint(data[cast(size_t)(1 + index1) .. $] , index2);
 	
 	parse_index += 1 + index1 + index2;
 	value.length = uSize;
@@ -553,7 +553,7 @@ T unserialize(T)(const byte[] data , out long parse_index)  if(isDynamicArray!T 
 	long parse = 0;
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
-		value[i] = unserialize!(typeof(value[0]))(data[index .. data.length] , parse);
+		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse);
 		index += parse;
 	}
 	parse_index += len;
