@@ -15,7 +15,7 @@ import std.path;
 import std.typecons;
 import std.file;
 import std.algorithm.iteration;
-
+import core.thread;
 
 private:
 
@@ -494,15 +494,7 @@ version(Posix)
 	static string PRINT_COLOR_YELLOW = "\033[1;33m";
 }
 
-version(Windows)
-{
-	import core.sys.windows.wincon;
-	import core.sys.windows.winbase;
-	import core.sys.windows.windef;
-	
 
-	
-}
 
 
 
@@ -534,11 +526,17 @@ version(Windows)
 		{
 			version(Windows)
 			{
-				__gshared Handle g_hout;
-				if(hout !is null)
+
+				import core.sys.windows.wincon;
+				import core.sys.windows.winbase;
+				import core.sys.windows.windef;
+
+				
+				__gshared HANDLE g_hout;
+				if(g_hout !is null)
 					g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
 			}
-			uint color ;
+			ushort color ;
 			switch(level) with(LogLevel)
 			{
 				case LOG_ERROR:
@@ -552,7 +550,7 @@ version(Windows)
 					color = FOREGROUND_GREEN;
 					break;
 				default:
-					prior_color = FOREGROUND_GREEN|FOREGROUND_RED|FOREGROUND_BLUE;
+					color = FOREGROUND_GREEN|FOREGROUND_RED|FOREGROUND_BLUE;
 			}
 
 			SetConsoleTextAttribute(g_hout ,color);

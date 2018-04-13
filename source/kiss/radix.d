@@ -1494,7 +1494,7 @@ unittest{
 			string key;
 			for(uint i = 0 ; i < len ; i++)
 			{
-				ulong index = uniform(0 , origin.length);
+				size_t index = uniform(0 , origin.length);
 				key ~= origin[index];
 			}
 			keys ~= key;
