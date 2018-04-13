@@ -235,16 +235,26 @@ class SizeBaseRollover
 
 __gshared KissLogger g_logger = null;
 
+
 version(Posix){
-version(X86_64) // X86_64
-{
-	enum __NR_gettid = 186;
-	
+
+version(linux){
+	version(X86_64) // X86_64
+	{
+		enum __NR_gettid = 186;
+		
+	}
+	else
+	{
+		enum __NR_gettid = 224;
+	}
 }
-else
+
+version(OSX)
 {
-	enum __NR_gettid = 224;
+		enum __NR_gettid = 372;
 }
+
 
 import core.sys.posix.sys.types : pid_t;
 extern (C) nothrow @nogc pid_t syscall(int d);
