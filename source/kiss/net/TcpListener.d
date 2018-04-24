@@ -1,7 +1,7 @@
 module kiss.net.TcpListener;
 
 import kiss.event;
-public import kiss.net.struct_;
+public import kiss.net.core;
 
 import std.socket;
 import std.exception;
@@ -9,132 +9,188 @@ import std.experimental.logger;
 import core.thread;
 import core.time;
 
-final class TcpListener : ReadTransport
+import kiss.core;
+import kiss.net.TcpStream;
+
+alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
+
+// dfmt off
+deprecated("Using TcpListener instead.") 
+alias Acceptor = TcpListener;
+
+
+// dfmt on
+
+/**
+*/
+class TcpListener : AbstractListener
 {
-    this(EventLoop loop,AddressFamily amily)
+    this(EventLoop loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4 * 1024)
     {
-        _loop = loop;
-        _watcher = cast(TcpListenerWatcher)loop.createWatcher(WatcherType.ACCEPT);
-        _watcher.setFamily(amily);
-        _watcher.watcher(this);
+        version (Windows)
+            super(loop, family, bufferSize);
+        else
+            super(loop, family);
     }
 
-    this(EventLoop loop,Socket sock)
-    {
-        _loop = loop;
-        _watcher = cast(TcpListenerWatcher)loop.createWatcher(WatcherType.ACCEPT);
-        _watcher.setSocket(sock);
-        _watcher.watcher(this);
-    }
-    
-    mixin TransportSocketOption;
+    // this(EventLoop loop, Socket sock)
+    // {
+    //     assert(sock !is null);
+    //     super(loop);
+    //     this.socket = sock;
+    // }
 
-    TcpListener setCloseHandle(CloseCallBack cback){
-        _closeBack = cback;
-        return this;
-    }
-    TcpListener setReadHandle(AcceptCallBack cback){
+    // dfmt off
+    // deprecated("Using onConnectionAccepted instead.")
+    TcpListener setReadHandle(AcceptCallBack cback)
+    {
         _readBack = cback;
         return this;
+        // assert(false, "Using onConnectionAccepted instead.");
     }
 
-    TcpListener bind(string ip,ushort port){
-        _watcher.socket.bind(parseAddress(ip,port));
+    deprecated("Using onShutdown instead.")
+    TcpListener setCloseHandle(CloseCallBack cback)
+    {
+        _closedHandler = cback;
+        return this;
+    }
+    
+    deprecated("Using bindingAddress instead!") 
+    Address bind()
+    {
+        return _localAddress;
+    }
+
+    deprecated("Using start instead.")
+    bool watch()
+    {
+        start();
+        return true;
+    }
+    // dfmt on
+
+    TcpListener onConnectionAccepted(AcceptEventHandler handler)
+    {
+        _acceptHandler = handler;
         return this;
     }
 
-    TcpListener bind(ushort port){
-        _watcher.socket.bind(createAddress(_watcher.socket,port));
+    TcpListener onShutdown(EventHandler handler)
+    {
+        _shutdownHandler = handler;
         return this;
     }
 
-    TcpListener bind(Address addr){
-        _watcher.socket.bind(addr);
+    TcpListener bind(string ip, ushort port)
+    {
+        bind(parseAddress(ip, port));
         return this;
     }
 
-    Address bind(){
-        return _watcher.socket.localAddress();
+    TcpListener bind(ushort port)
+    {
+        bind(createAddress(this.socket, port));
+        return this;
     }
 
-    TcpListener reusePort(bool use) {
-        _watcher.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
-        version (Posix){
-            import kiss.event.impl.epoll_watcher;
-            import kiss.event.impl.kqueue_watcher;
-            _watcher.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT,
-                use);
+    TcpListener bind(Address addr)
+    {
+        this.socket.bind(addr);
+        _localAddress = _socket.localAddress();
+        return this;
+    }
+
+    Address bindingAddress()
+    {
+        return _localAddress; // this.socket.localAddress();
+    }
+
+    TcpListener reusePort(bool use)
+    {
+        this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
+
+        version (Posix)
+        {
+            this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, use);
         }
-        version (windows) {
-            if (!use) {
-                import core.sys.windows.winsock2;
-                _watcher.socket.setOption(SocketOptionLevel.SOCKET,
-                    cast(SocketOption) SO_EXCLUSIVEADDRUSE, true);
-            }
-        }
 
-        return this;
-    }
-
-    TcpListener listen(int backlog){
-        _watcher.socket.listen(backlog);
-        return this;
-    }
-
-    EventLoop eventLoop(){return _loop;}
-
-    override bool watched(){
-        return _watcher.active;
-    }
-
-    override bool watch() {
-        return _loop.register(_watcher);
-    }
-
-    override void close(){
-        onClose(_watcher);
-    }
-
-protected:
-    override void onRead(Watcher watcher) nothrow{
-        catchAndLogException((){
-            bool canRead =  true;
-            debug trace("start to listen");
-            while(canRead && watcher.active) // why??
+        version (windows)
+        {
+            if (!use)
             {
-                debug trace("listening...");
-                canRead = _loop.read(watcher,(Object obj) nothrow {
-                    collectException((){
-                        auto socket = cast(Socket)obj;
-                        
-                        if(socket !is null){
-                            debug infof("new connection from %s, fd=%d", 
-                                socket.remoteAddress.toString(), socket.handle());
-                            _readBack(_loop,socket);
-                        }
-                    }());
-                });
+                import core.sys.windows.winsock2;
 
-                if(watcher.isError){
-                    canRead = false;
-                    watcher.close();
-                    error("The socket for tcp listener has an error: ", watcher.erroString); 
-                }
+                this.socket.setOption(SocketOptionLevel.SOCKET,
+                        cast(SocketOption) SO_EXCLUSIVEADDRUSE, true);
             }
-        }());
+        }
+
+        return this;
     }
 
-    override void onClose(Watcher watcher) nothrow{
-        catchAndLogException((){
-            _watcher.close();
-        }());
+    TcpListener listen(int backlog)
+    {
+        this.socket.listen(backlog);
+        return this;
+    }
+
+    override void start()
+    {
+        _inLoop.register(this);
+        _isRegistered = true;
+        version (Windows)
+            this.doAccept();
+    }
+
+    override void close()
+    {
+        if (_closedHandler !is null)
+            _closedHandler();
+        else if (_shutdownHandler !is null)
+            _shutdownHandler(this, null);
+        this.onClose();
+    }
+
+    override void onRead()
+    {
+        bool canRead = true;
+        version (KissDebugMode)
+            trace("start to listen");
+        // while(canRead && this.active) // why??
+        {
+            version (KissDebugMode)
+                trace("listening...");
+            canRead = onAccept((Socket socket) {
+
+                version (KissDebugMode)
+                    infof("new connection from %s, fd=%d",
+                        socket.remoteAddress.toString(), socket.handle());
+
+                if (_acceptHandler !is null)
+                {
+                    TcpStream stream = new TcpStream(_inLoop, socket);
+                    _acceptHandler(this, stream);
+                    stream.start();
+                }
+                if(_readBack !is null)
+                    _readBack(_inLoop, socket);
+            });
+
+            if (this.isError)
+            {
+                canRead = false;
+                error("listener error: ", this.erroString);
+                this.close();
+            }
+        }
     }
 
 protected:
-    TcpListenerWatcher _watcher;
-
-    CloseCallBack _closeBack;
+    SimpleEventHandler _closedHandler;
     AcceptCallBack _readBack;
-private:
-    EventLoop _loop;
+
+    EventHandler _shutdownHandler;
+    AcceptEventHandler _acceptHandler;
+
 }
