@@ -3,7 +3,7 @@
 # Kiss library
 A refined core library for D programming language.
 
-# Modules
+## Modules
  * event
  * net / tcpstream
  * serialize
@@ -13,3 +13,8 @@ A refined core library for D programming language.
  * memory
  * buffer
  
+
+## TODO
+- [ ] Performance improvement
+- [ ] More stable APIs
+- [ ] Improving supports on Mac OS

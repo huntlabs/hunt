@@ -26,7 +26,9 @@ __dummy.html
 *-test-*
 __test__*__
 examples/*/log.txt
-examples/timer/timer
-examples/http-server/http-server
-examples/tcpclient/client
-examples/c/client
+examples/TcpClient/tcp-client
+examples/Timer/timer
+examples/UdpDemo/udp-demo
+examples/HttpServer/http-server
+examples/TcpServer/tcp-server
+

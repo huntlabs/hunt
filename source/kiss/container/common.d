@@ -49,17 +49,16 @@ private:
 
 mixin template Refcount()
 {
+    import std.exception;
+    
     static typeof(this) * allocate(ALLOC)(auto ref ALLOC alloc){
         return alloc.make!(typeof(this))();
     }
 
-    static void deallocate(ALLOC)(auto ref ALLOC alloc, typeof(this) * dd) nothrow {  
-        try
-        {
+    static void deallocate(ALLOC)(auto ref ALLOC alloc, typeof(this) * dd) nothrow {   
+        collectException({
             alloc.dispose(dd);
-        } 
-        catch(Exception)
-        {}
+        }());
     }
 
     static void inf(typeof(this) * dd)
@@ -88,7 +87,7 @@ struct ArrayCOWData(T, Allocator,bool inGC = false)  if(is(T == Unqual!T))
     import core.memory : GC;
     import std.exception : enforce;
     import core.stdc.string : memcpy;
-    import kiss.array : fillWithMemcpy;
+    import kiss.util.array : fillWithMemcpy;
 
     ~this()
     {

@@ -5,12 +5,12 @@ import std.exception;
 import std.experimental.allocator;
 import std.experimental.allocator.mallocator;
 import std.experimental.allocator.gc_allocator;
-import kiss.traits;
+import kiss.util.traits;
 import core.stdc.string : memcpy, memset;
 import kiss.container.common;
-import kiss.array;
+import kiss.util.array;
 
-deprecated("Unsupported no more!")
+// deprecated("Unsupported no more!")
 @trusted struct Vector(T, Allocator = Mallocator, bool addInGC = true) if(is(T == Unqual!T))
 {
     enum addToGC = addInGC && hasIndirections!T && !is(Unqual!Allocator == GCAllocator);
@@ -397,8 +397,8 @@ private:
     Data* _data;
     T[] _array;
 }
-/*
-unittest{
+
+unittest {
     import std.stdio;
     import std.experimental.allocator.mallocator;
     import std.experimental.allocator;
@@ -466,4 +466,3 @@ unittest{
     assert(dt.length == vec22.length);
     //Vector!(shared int) vec2;
 }
-*/
