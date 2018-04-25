@@ -1,7 +1,7 @@
 module kiss.net.TcpListener;
 
 import kiss.event;
-public import kiss.net.core;
+import kiss.net.core;
 
 import std.socket;
 import std.exception;
@@ -112,6 +112,7 @@ class TcpListener : AbstractListener
 
         version (Posix)
         {
+            import core.sys.posix.sys.socket;
             this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, use);
         }
 
