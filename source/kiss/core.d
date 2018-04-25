@@ -66,3 +66,12 @@ interface ITimer {
 	void reset(Duration duration);
 }
 
+bool isCompilerVersionAbove(int ver)
+{
+    return __VERSION__ >= ver;
+}
+
+bool isCompilerVersionBelow(int ver)
+{
+    return __VERSION__ <= ver;
+}

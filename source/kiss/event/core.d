@@ -9,7 +9,6 @@ import std.experimental.logger;
 
 alias ReadCallBack = void delegate(Object obj);
 
-
 alias DataReceivedHandler = void delegate(in ubyte[] data);
 alias DataWrittenHandler = void delegate(in ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
@@ -44,17 +43,16 @@ alias BaseTransport = Channel;
 
 // dfmt on
 
-
 interface StreamWriteBuffer
 {
-	// todo Write Data;
-	const(ubyte)[] sendData();
+    // todo Write Data;
+    const(ubyte)[] sendData();
 
-	// add send offiset and return is empty
-	bool popSize(size_t size);
+    // add send offiset and return is empty
+    bool popSize(size_t size);
 
-	// do send finish
-	void doFinish();
+    // do send finish
+    void doFinish();
 
     StreamWriteBuffer next();
     void next(StreamWriteBuffer);
@@ -68,7 +66,6 @@ interface Channel
 {
 
 }
-
 
 /**
 */
@@ -89,11 +86,10 @@ interface Selector
 */
 abstract class AbstractChannel : Channel
 {
-    version(KissDebugMode) int number; 
+    version (KissDebugMode) int number;
     socket_t handle = socket_t.init;
 
     ErrorEventHandler errorHandler;
-
 
     this(Selector loop, WatcherType type)
     {
@@ -105,30 +101,39 @@ abstract class AbstractChannel : Channel
 
     /**
     */
-    bool isRegistered() { return _isRegistered; }
+    bool isRegistered()
+    {
+        return _isRegistered;
+    }
+
     protected bool _isRegistered = false;
 
-    
-    deprecated("Using isRegistered instead.")
-    bool watched() { return _isRegistered; }
+    deprecated("Using isRegistered instead.") bool watched()
+    {
+        return _isRegistered;
+    }
 
     /**
     */
-    bool isClosed() { return _isClosed;}
+    bool isClosed()
+    {
+        return _isClosed;
+    }
+
     protected bool _isClosed = false;
 
     protected void onClose()
     {
-         _inLoop.deregister(this);
+        _inLoop.deregister(this);
         //  _inLoop = null;
         _isRegistered = false;
         _isClosed = true;
-         clear();
+        clear();
     }
 
     protected void errorOccurred(string msg)
     {
-        if(errorHandler !is null)
+        if (errorHandler !is null)
             errorHandler(msg);
     }
 
@@ -152,22 +157,26 @@ abstract class AbstractChannel : Channel
         return _type;
     }
 
-    @property Selector eventLoop (){ return _inLoop; }
+    @property Selector eventLoop()
+    {
+        return _inLoop;
+    }
 
     void close()
     {
         if (!_isClosed)
         {
-            version(KissDebugMode) trace("channel closing...");
+            version (KissDebugMode)
+                trace("channel closing...");
             onClose();
-            version(KissDebugMode) trace("channel closed...");
+            version (KissDebugMode)
+                trace("channel closed...");
         }
         else
         {
             debug warningf("The watcher(fd=%d) has already been closed", this.handle);
         }
     }
-
 
     void setNext(AbstractChannel next)
     {
@@ -212,24 +221,31 @@ private:
 */
 class EventChannel : AbstractChannel
 {
-    this(Selector loop){
+    this(Selector loop)
+    {
         super(loop, WatcherType.Event);
     }
 
-    void call() { assert(false); }
+    void call()
+    {
+        assert(false);
+    }
 }
-
 
 mixin template OverrideErro()
 {
-    bool isError(){
+    bool isError()
+    {
         return _error;
     }
-    string erroString(){
+
+    string erroString()
+    {
         return _erroString;
     }
 
-    void clearError(){
+    void clearError()
+    {
         _error = false;
         _erroString = "";
     }
@@ -237,7 +253,6 @@ mixin template OverrideErro()
     bool _error = false;
     string _erroString;
 }
-
 
 enum WatcherType : ubyte
 {
@@ -289,32 +304,34 @@ Address createAddress(Socket socket, ushort port)
 // dfmt off
 version(linux):
 // dfmt on
-
-version (X86)
+static if (isCompilerVersionBelow(2078))
 {
-    enum SO_REUSEPORT = 15;
-}
-else version (X86_64)
-{
-    enum SO_REUSEPORT = 15;
-}
-else version (MIPS32)
-{
-    enum SO_REUSEPORT = 0x0200;
-}
-else version (MIPS64)
-{
-    enum SO_REUSEPORT = 0x0200;
-}
-else version (PPC)
-{
-    enum SO_REUSEPORT = 15;
-}
-else version (PPC64)
-{
-    enum SO_REUSEPORT = 15;
-}
-else version (ARM)
-{
-    enum SO_REUSEPORT = 15;
+    version (X86)
+    {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (X86_64)
+    {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (MIPS32)
+    {
+        enum SO_REUSEPORT = 0x0200;
+    }
+    else version (MIPS64)
+    {
+        enum SO_REUSEPORT = 0x0200;
+    }
+    else version (PPC)
+    {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (PPC64)
+    {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (ARM)
+    {
+        enum SO_REUSEPORT = 15;
+    }
 }
