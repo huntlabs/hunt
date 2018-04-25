@@ -448,21 +448,21 @@ unittest {
     assert(cast(string) vec2[0] == "hahaha");
     assert(cast(string) vec2[1] == "huhuhu");
 
-    Vector!(int, IAllocator) vec22 = Vector!(int, IAllocator)(allocatorObject(Mallocator.instance));
-    int[] aa22 = [0, 1, 2, 3, 4, 5, 6, 7];
-    vec22.insertBack(aa22);
-    assert(vec22.length == 8);
+    // Vector!(int, IAllocator) vec22 = Vector!(int, IAllocator)(allocatorObject(Mallocator.instance));
+    // int[] aa22 = [0, 1, 2, 3, 4, 5, 6, 7];
+    // vec22.insertBack(aa22);
+    // assert(vec22.length == 8);
 
-    vec22.insertBack(10);
-    assert(vec22.length == 9);
+    // vec22.insertBack(10);
+    // assert(vec22.length == 9);
 
-    vec22.insertBack(aa22);
-    vec22.insertBack([0, 1, 2, 1, 212, 1215, 1545, 1212, 154, 51515, 1545,
-        1545, 1241, 51, 45, 1215, 12415, 12415, 1545, 12415, 1545, 152415,
-        1541515, 15415, 1545, 1545, 1545, 1545, 15454, 0, 54154]);
+    // vec22.insertBack(aa22);
+    // vec22.insertBack([0, 1, 2, 1, 212, 1215, 1545, 1212, 154, 51515, 1545,
+    //     1545, 1241, 51, 45, 1215, 12415, 12415, 1545, 12415, 1545, 152415,
+    //     1541515, 15415, 1545, 1545, 1545, 1545, 15454, 0, 54154]);
 
-    vec22 ~=  [0, 1, 2, 1, 212];
-    immutable(int)[] dt = cast(immutable(int)[])vec22;
-    assert(dt.length == vec22.length);
+    // vec22 ~=  [0, 1, 2, 1, 212];
+    // immutable(int)[] dt = cast(immutable(int)[])vec22;
+    // assert(dt.length == vec22.length);
     //Vector!(shared int) vec2;
 }
