@@ -42,7 +42,7 @@ auto as(T)(string value, T iv = T.init)
         else
             return true;
     }
-    else static if (isNumeric!(T))
+    else static if (std.traits.isNumeric!(T))
     {
         if (value.length == 0)
             return iv;
@@ -176,7 +176,7 @@ private:
 
 version (unittest)
 {
-    import kiss.configuration.read;
+    import kiss.util.configuration;
 
     @ConfigItem("app")
     class TestConfig
