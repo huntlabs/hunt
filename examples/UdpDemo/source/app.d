@@ -16,19 +16,27 @@ void main()
 	// UDP Server
 	KissUdpSocket udpSocket = new KissUdpSocket(loop);
 
-	udpSocket.bind("0.0.0.0", 8096).setReadData((in ubyte[] data, Address addr) {
-		debug writefln("Server=> client: %s, received: %s", addr, cast(string) data);
-		udpSocket.sendTo(data, addr);
-	}).watch();
+	udpSocket.bind("0.0.0.0", 8090).setReadData((in ubyte[] data, Address addr) {
+		debug writefln("Server => client: %s, received: %s", addr, cast(string) data);
+		if(data == "bye!")
+		{
+			udpSocket.close();
+			// FIXME: Needing refactor or cleanup -@zxp at 4/25/2018, 10:17:32 AM
+			// The evenloop should be stopped nicely.
+			// loop.stop(); 
+		}
+		else
+			udpSocket.sendTo(data, addr);
+	}).start();
 
-	writeln("Listening at (UDP): ", udpSocket.bindAddr.toString());
+	writeln("Listening on (UDP): ", udpSocket.bindAddr.toString());
 
 	// UDP Client
 	KissUdpSocket udpClient = new KissUdpSocket(loop);
 
 	int count = 3;
 	udpClient.setReadData((in ubyte[] data, Address addr) {
-		debug writefln("Client=> count=%d, server: %s, received: %s", count, addr, cast(string) data);
+		debug writefln("Client => count=%d, server: %s, received: %s", count, addr, cast(string) data);
 		if(--count >0)
 		{
 			udpClient.sendTo(data, addr);
@@ -39,11 +47,11 @@ void main()
 			udpClient.close();
 			// loop.stop();
 		}
-	}).watch();
+	}).start();
 
 	// FIXME: noticed by Administrator @ 2018-3-29 16:13:54
-	// udpClient.sendTo(cast(const(void)[]) "Hello world!", parseAddress("255.255.255.255", 8096));
-	udpClient.sendTo(cast(const(void)[]) "Hello world!", parseAddress("127.0.0.1", 8096));
+	// udpClient.sendTo(cast(const(void)[]) "Hello world!", parseAddress("255.255.255.255", 8090));
+	udpClient.sendTo(cast(const(void)[]) "Hello world!", parseAddress("127.0.0.1", 8090));
 
 	loop.join();
 }
