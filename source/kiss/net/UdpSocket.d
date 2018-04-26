@@ -2,6 +2,7 @@ module kiss.net.UdpSocket;
 
 import kiss.event;
 import kiss.net.core;
+import kiss.exception;
 
 import std.socket;
 import std.exception;
@@ -94,7 +95,7 @@ protected:
             while (canRead && _isRegistered)
             {
                 version(KissDebugMode) trace("reading data...");
-                canRead = readUdp((Object obj) nothrow{
+                canRead = tryRead((Object obj) nothrow{
                     collectException(() {
                         UdpDataObject data = cast(UdpDataObject) obj;
                         if (data !is null)

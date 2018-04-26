@@ -1,7 +1,7 @@
 module kiss.net.TcpStream;
 
 import kiss.event;
-public import kiss.net.core;
+import kiss.net.core;
 
 import std.format;
 import std.socket;
@@ -281,8 +281,8 @@ protected:
             version (KissDebugMode)
                 infof("onWrite=>streamCounter[%d], data length=%d", this.number, data.length);
 
-            size_t writedSize;
-            canWrite = tryWrite(data, writedSize);
+            size_t nBytes;
+            canWrite = tryWrite(data, nBytes);
 
             if (!canWrite)
             {
@@ -291,8 +291,12 @@ protected:
                 break;
             }
 
-            if (writeBuffer.popSize(writedSize))
+            if (writeBuffer.popSize(nBytes))
+            {
+                version (KissDebugMode)
+                    trace("finishing data writing...nBytes", nBytes);
                 _writeQueue.deQueue().doFinish();
+            }
 
             if (this.isError)
             {

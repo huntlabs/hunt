@@ -139,12 +139,12 @@ abstract class AbstractChannel : Channel
 
     void onRead()
     {
-        assert(false, "");
+        assert(false, "not implemented");
     }
 
     void onWrite()
     {
-        assert(false, "");
+        assert(false, "not implemented");
     }
 
     final bool flag(WatchFlag index)

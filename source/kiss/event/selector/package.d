@@ -1,7 +1,9 @@
 module kiss.event.selector;
 
+import kiss.core;
 import kiss.event.core;
 import std.conv;
+
 
 version (linux)
 {
@@ -12,37 +14,11 @@ version (linux)
 }
 else version (Kqueue)
 {
-    import kiss.event.impl.kqueue;
 
     // alias KissSelector = KqueueLoop;
 
-    public import kiss.event.impl.kqueue_watcher;
+    public import kiss.event.selector.kqueue;
 
-    // override Watcher createWatcher(WatcherType type)
-    // {
-    //     Watcher returnValue;
-    //     switch (type) with (WatcherType)
-    //     {
-    //     case TCP:
-    //         returnValue = new PosixTCPWatcher();
-    //         break;
-    //     case UDP:
-    //         returnValue = new PosixUDPWatcher();
-    //         break;
-    //     case ACCEPT:
-    //         returnValue = new PosixAcceptWatcher();
-    //         break;
-    //     case Event:
-    //         returnValue = new KqueueEventWatcher();
-    //         break;
-    //     case Timer:
-    //         returnValue = new KqueueTimerWatcher();
-    //         break;
-    //     default:
-    //         break;
-    //     }
-    //     return returnValue;
-    // }
 }
 else version (Windows)
 {

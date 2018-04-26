@@ -219,6 +219,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             this.doRead();
             if (dataReceivedHandler !is null)
                 dataReceivedHandler(this._readBuffer[0 .. readLen]);
+            version (KissDebugMode)
+                tracef("done with data reading...%d nbytes", this.readLen);
         }
         // return false;
     }
@@ -235,6 +237,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             warning("Busy in writting on thread: ", thisThreadID());
             return false;
         }
+        version (KissDebugMode)
+            trace("start to write");
         _isWritting = true;
 
         clearError();
@@ -254,6 +258,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
         if (_writeQueue.empty)
             return;
+
+        version (KissDebugMode)
+            trace("start to write");
         _isWritting = true;
 
         clearError();
@@ -278,7 +285,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     */
     void onWriteDone(size_t nBytes)
     {
-        // warningf("data written done, thread: %d,  nbytes: %d) ", thisThreadID(),nBytes);
+        version (KissDebugMode)
+            tracef("finishing data writing, thread: %d,  nbytes: %d) ", thisThreadID(), nBytes);
         if (isWriteCancelling)
         {
             _isWritting = false;
@@ -294,11 +302,16 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
             writeBuffer.doFinish();
             _isWritting = false;
+
+            version (KissDebugMode)
+                tracef("done with data writing, thread: %d,  nbytes: %d) ", thisThreadID(), nBytes);
+
             tryWrite();
         }
-        else // if (sendDataBuffer.length > nBytes) // TODO: try to send again
+        else // if (sendDataBuffer.length > nBytes) 
         {
-            warning("remaining nbytes: ", sendDataBuffer.length - nBytes);
+            version (KissDebugMode)
+                tracef("remaining nbytes: ", sendDataBuffer.length - nBytes);
             setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
             nBytes = doWrite();
         }
@@ -434,7 +447,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
             return tmpaddr;
         }
 
-        bool readUdp(scope ReadCallBack read)
+        bool tryRead(scope ReadCallBack read)
         {
             this.clearError();
             if (this.readLen == 0)

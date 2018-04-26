@@ -20,8 +20,6 @@ import std.socket;
 */
 abstract class AbstractTimer : TimerChannelBase
 {
-
-
     this(Selector loop)
     {
         super(loop);

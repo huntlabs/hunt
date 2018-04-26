@@ -4,7 +4,7 @@
 	"copyright": "Copyright (C) 2015-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
 	"authors": [
-		"Bitworld"
+		"BitWorld"
 	],
 	"dependencies": {
 		"kiss" : {

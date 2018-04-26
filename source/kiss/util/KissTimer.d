@@ -202,7 +202,7 @@ class KissNativeTimer : AbstractNativeTimer
     /// once: true to call timed event only once
     override void start(bool immediately = false, bool once = false)
     {
-        // trace("main thread id: ", thisThreadID());
+        version(KissDebugMode) trace("main thread id: ", thisThreadID());
         if (_isActive)
             return;
         BOOL r = CreateTimerQueueTimer(&_handle, null, &timerProc,
@@ -233,7 +233,7 @@ class KissNativeTimer : AbstractNativeTimer
     /// https://msdn.microsoft.com/en-us/library/ms687066(v=vs.85)
     extern (Windows) static private void timerProc(PVOID param, bool timerCalled)
     {
-        // trace("handler thread id: ", thisThreadID());
+        version(KissDebugMode) trace("handler thread id: ", thisThreadID());
         AbstractNativeTimer timer = cast(AbstractNativeTimer)(param);
         assert(timer !is null);
         timer.onTick();
