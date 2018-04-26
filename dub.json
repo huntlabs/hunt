@@ -18,5 +18,17 @@
                 "KissDebugMode"
             ]
         }
+    ],
+    "versions-osx": [
+        "Kqueue"
+    ],
+    "versions-freebsd": [
+        "Kqueue"
+    ],
+    "versions-openbsd": [
+        "Kqueue"
+    ],
+    "versions-netbsd": [
+        "Kqueue"
     ]
 }
