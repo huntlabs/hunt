@@ -1,34 +1,16 @@
 module kiss.core;
 import core.time;
 
-version (FreeBSD)
-{
-    version = Kqueue;
-}
-version (OpenBSD)
-{
-    version = Kqueue;
-}
-version (NetBSD)
-{
-    version = Kqueue;
-}
-version (OSX)
-{
-    version = Kqueue;
-}
-
 /**
 */
 class EventArgs
 {
 
 }
+
 alias EventHandler = void delegate(Object sender, EventArgs args);
 alias SimpleEventHandler = void delegate();
 alias ErrorEventHandler = void delegate(string message);
-
-
 alias TickedEventHandler = void delegate(Object sender);
 
 

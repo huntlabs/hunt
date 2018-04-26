@@ -8,8 +8,7 @@ version (Kqueue) :
 
 import kiss.event.core;
 import kiss.event.timer.common;
-import kiss.timingwheel;
-import kiss.event.watcher;
+import kiss.event.socket;
 
 import core.stdc.errno;
 import core.sys.posix.sys.types; // for ssize_t, size_t
@@ -23,28 +22,28 @@ import std.socket;
 
 /**
 */
-class KqueueTimer : TimerChannelBase
+class AbstractTimer : TimerChannelBase
 {
-   this()
+    this(Selector loop)
     {
-        super();
-        setFlag(WatchFlag.Read,true);
-        _sock = new Socket(AddressFamily.UNIX,SocketType.STREAM);
+        super(loop);
+        setFlag(WatchFlag.Read, true);
+        _sock = new Socket(AddressFamily.UNIX, SocketType.STREAM);
         this.handle = _sock.handle;
         _readBuffer = new UintObject();
     }
 
-    ~this(){
+    ~this()
+    {
         close();
     }
 
-    // int fd(){return _sock.handle;}
 
     bool readTimer(scope ReadCallBack read)
     {
         this.clearError();
         this._readBuffer.data = 1;
-        if(read)
+        if (read)
             read(this._readBuffer);
         return false;
     }

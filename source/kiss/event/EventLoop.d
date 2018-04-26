@@ -4,7 +4,7 @@ import kiss.event.core;
 import kiss.event.selector;
 import core.thread;
 import kiss.event.task;
-public import kiss.exception;
+import kiss.exception;
 
 /**
 

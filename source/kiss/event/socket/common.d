@@ -185,6 +185,11 @@ abstract class AbstractSocketChannel : AbstractChannel
 
     void start();
 
+    void onWriteDone() 
+    {
+        assert(false, "not implemented");
+    }
+
 protected:
     Socket _socket;
 }

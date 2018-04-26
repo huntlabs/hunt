@@ -36,14 +36,21 @@ class AbstractSelector : Selector
         _event = new EpollEventChannel(this);
         register(_event);
     }
-
-    override void dispose() nothrow
+    
+    ~this()
     {
-        collectException({
-            deregister(_event);
-            core.sys.posix.unistd.close(_epollFD);
-        }());
+        dispose();
     }
+
+    void dispose()
+    {
+        if(isDisposed)
+            return;
+        isDisposed = true;
+        deregister(_event);
+        core.sys.posix.unistd.close(_epollFD);
+    }
+    private bool isDisposed = false;
 
 
     override bool register(AbstractChannel watcher)
@@ -75,25 +82,19 @@ class AbstractSelector : Selector
 
     override bool reregister(AbstractChannel watcher)
     {
-        // if (watcher is null || watcher.currtLoop !is this)
-        //     return false;
-        const int fd = watcher.handle; //getFD(watcher);
+        assert(watcher !is null);
+        const int fd = watcher.handle; 
         if (fd < 0)
             return false;
         auto ev = buildEpollEvent(watcher);
-        if ((epoll_ctl(_epollFD, EPOLL_CTL_MOD, fd, &ev)) != 0)
-        {
-            return false;
-        }
-        return true;
+       return epoll_ctl(_epollFD, EPOLL_CTL_MOD, fd, &ev) == 0;
     }
 
     override bool deregister(AbstractChannel watcher)
     {
+        assert(watcher !is null);
         // version(KissDebugMode) infof("unregister watcher(fd=%d)", watcher.handle);
 
-        // if (watcher is null || watcher.currtLoop !is this)
-        //     return false;
         const int fd = watcher.handle;
         if (fd < 0)
             return false;
@@ -144,7 +145,12 @@ class AbstractSelector : Selector
                 watch.onRead();
 
             if (watch.isRegistered && isWrite(events[i].events))
-                watch.onWrite();
+            {
+                AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
+                    assert(wt !is null);
+                    wt.onWriteDone();
+                // watch.onWrite();
+            }
         }
     }
 

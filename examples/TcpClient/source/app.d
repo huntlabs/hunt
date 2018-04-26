@@ -26,7 +26,7 @@ void main()
 		else
 		{
 			writeln("The connection failed!");
-			loop.stop;
+			loop.stop();
 		}
 	}).onDataReceived((in ubyte[] data) {
 		writeln("received data: ", cast(string) data);
@@ -36,13 +36,10 @@ void main()
 		// client.write(new SocketStreamBuffer(data.dup, (in ubyte[] wdata, size_t size) {
 		// 		debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 		// 	}));
-	}).onClosed(() { 
-		writeln("The connection is closed!"); 
-		loop.stop();
-	}).connect("10.1.222.120", 8090);
-
-	// connect("127.0.0.1", 8090);
-	// connect("10.1.222.120", 8090);
+	}).onClosed(() {
+		writeln("The connection is closed!");
+		loop.stop(); // 
+	}).connect("127.0.0.1", 8090);
 
 	loop.run();
 }

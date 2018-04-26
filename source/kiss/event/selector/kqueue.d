@@ -1,35 +1,23 @@
 module kiss.event.selector.kqueue;
 
+import kiss.core;
 import kiss.event.core;
-
-// version (FreeBSD)
-// {
-//     version = Kqueue;
-// }
-// version (OpenBSD)
-// {
-//     version = Kqueue;
-// }
-// version (NetBSD)
-// {
-//     version = Kqueue;
-// }
-// version (OSX)
-// {
-//     version = Kqueue;
-// }
 
 // dfmt off
 version(Kqueue):
 
-deprecated("Using KqueueSelector instead!")
-alias KqueueLoop = KqueueSelector;
+deprecated("Using AbstractSelector instead!")
+alias KqueueLoop = AbstractSelector;
 // dfmt on
 
 import kiss.event.core;
+import kiss.event.socket.common;
+// import kiss.event.socket.posix;
+import kiss.event.timer.kqueue;
 
 import std.exception;
 import std.socket;
+
 import std.string;
 
 import core.time;
@@ -44,126 +32,49 @@ import core.sys.posix.time;
 
 /**
 */
-final class AbstractSelector : Selector
+class AbstractSelector : Selector
 {
     this()
     {
         _kqueueFD = kqueue();
-        _event = new KqueueEventWatcher();
+        _event = new KqueueEventChannel(this);
         register(_event);
     }
 
     ~this()
     {
-        .close(_kqueueFD);
+        dispose();
     }
 
-    override bool read(Watcher watcher, scope ReadCallBack read)
+    void dispose()
     {
-        bool canRead;
-        switch (watcher.type)
-        {
-        case WatcherType.Accept:
-            canRead = (cast(PosixAcceptor) watcher).readAccept(read);
-            break;
-        case WatcherType.TCP:
-            canRead = (cast(PosixStream) watcher).tryRead(read);
-            break;
-        case WatcherType.UDP:
-            canRead = (cast(PosixDatagram) watcher).readUdp(read);
-            break;
-
-        case WatcherType.Timer:
-            canRead = (cast(KqueueTimer) watcher).readTimer(read);
-            break;
-        case WatcherType.Event:
-            canRead = (cast(KqueueEventChannel) watcher).readEvent(read);
-            break;
-        default:
-            break;
-        }
-        return canRead;
+        if(isDisposed)
+            return;
+        isDisposed = true;
+        deregister(_event);
+        core.sys.posix.unistd.close(_kqueueFD);
     }
+    private bool isDisposed = false;
 
-    override bool connect(Watcher watcher, Address addr)
+    override bool register(AbstractChannel watcher)
     {
-        if (watcher.type == WatcherType.TCP)
-        {
-            (cast(AbstractSocketChannel) watcher).socket.connect(addr);
-            return true;
-        }
-        return false;
-    }
+        assert(watcher !is null);
 
-    override bool write(Watcher watcher, in ubyte[] data, out size_t writed)
-    {
-        if (watcher.type == WatcherType.TCP)
-        {
-            return (cast(EpollStream) watcher).tryWrite(data, writed);
-        }
-        writed = 0;
-        return false;
-    }
-
-    override bool close(Watcher watcher)
-    {
-        deregister(watcher);
-        if (watcher.type == WatcherType.TCP)
-        {
-            // TcpStreamWatcher wt = cast(TcpStreamWatcher) watcher;
-            // wt.socket.close();
-            watcher.close();
-        }
-        else
-        {
-            assert(watcher.handle >= 0);
-            core.sys.posix.unistd.close(watcher.handle);
-        }
-
-        // int fd = -1;
-        // if (watcher.type == WatcherType.TCP)
-        // {
-        //     TcpStreamWatcher wt = cast(TcpStreamWatcher) watcher;
-        //     Linger optLinger;
-        //     optLinger.on = 1;
-        //     optLinger.time = 0;
-        //     wt.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.LINGER, optLinger);
-        // }
-        // else if (watcher.type == WatcherType.Event)
-        // {
-        //     KqueueEventWatcher wt = cast(KqueueEventWatcher) watcher;
-        //     wt._pair[0].close;
-        //     wt._pair[1].close;
-        // }
-        // else
-        // {
-        //     fd = getFD(watcher);
-        // }
-        // if (fd < 0)
-        //     return false;
-        // .close(fd);
-        return true;
-    }
-
-    override bool register(Watcher watcher)
-    {
-        if (watcher is null || watcher.active)
-            return false;
         int err = -1;
         if (watcher.type == WatcherType.Timer)
         {
             kevent_t ev;
-            KqueueTimerWatcher watch = cast(KqueueTimerWatcher) watcher;
+            AbstractTimer watch = cast(AbstractTimer) watcher;
             if (watch is null)
                 return false;
-            size_t time = watch.time < 20 ? 20 : watch.time;
-            EV_SET(&ev, watch.fd(), EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_CLEAR,
-                    0, time, cast(void*) watcher); //单位毫秒
+            size_t time = watch.time < 20 ? 20 : watch.time; // in millisecond
+            EV_SET(&ev, watch.handle, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_CLEAR,
+                    0, time, cast(void*) watcher);
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else
         {
-            const int fd = getFD(watcher);
+            const int fd = watcher.handle;
             if (fd < 0)
                 return false;
             kevent_t[2] ev = void;
@@ -187,36 +98,36 @@ final class AbstractSelector : Selector
         {
             return false;
         }
-        watcher.currtLoop = this;
+        // watcher.currtLoop = this;
         _event.setNext(watcher);
         return true;
     }
 
-    override bool reregister(Watcher watcher)
+    override bool reregister(AbstractChannel watcher)
     {
         throw new LoopException("The Kqueue does not support reregister!");
         //return false;
     }
 
-    override bool deregister(Watcher watcher)
+    override bool deregister(AbstractChannel watcher)
     {
-        if (watcher is null || watcher.currtLoop !is this)
-            return false;
+        assert(watcher !is null);
+            const fd = watcher.handle;
+            if (fd < 0)
+                return false;
+
         int err = -1;
         if (watcher.type == WatcherType.Timer)
         {
             kevent_t ev;
-            KqueueTimerWatcher watch = cast(KqueueTimerWatcher) watcher;
+            AbstractTimer watch = cast(AbstractTimer) watcher;
             if (watch is null)
                 return false;
-            EV_SET(&ev, watch.fd(), EVFILT_TIMER, EV_DELETE, 0, 0, cast(void*) watcher); //单位毫秒
+            EV_SET(&ev, fd, EVFILT_TIMER, EV_DELETE, 0, 0, cast(void*) watcher); 
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else
         {
-            const int fd = getFD(watcher);
-            if (fd < 0)
-                return false;
             kevent_t[2] ev = void;
             EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) watcher);
             EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) watcher);
@@ -231,19 +142,19 @@ final class AbstractSelector : Selector
         {
             return false;
         }
-        watcher.currtLoop = null;
+        // watcher.currtLoop = null;
         watcher.clear();
         return true;
     }
 
-    override bool weakUp()
-    {
-        _event.call();
-        return true;
-    }
+    // override bool weakUp()
+    // {
+    //     _event.call();
+    //     return true;
+    // }
 
     // while(true)
-    override void join(scope void delegate() nothrow weak)
+    void onLoop(scope void delegate() weak)
     {
         _runing = true;
         auto tspec = timespec(1, 1000 * 10);
@@ -256,10 +167,10 @@ final class AbstractSelector : Selector
                 continue;
             foreach (i; 0 .. len)
             {
-                Watcher watch = cast(Watcher)(events[i].udata);
+                AbstractChannel watch = cast(AbstractChannel)(events[i].udata);
                 if ((events[i].flags & EV_EOF) || (events[i].flags & EV_ERROR))
                 {
-                    watch.onClose();
+                    watch.close();
                     continue;
                 }
                 if (watch.type == WatcherType.Timer)
@@ -267,10 +178,16 @@ final class AbstractSelector : Selector
                     watch.onRead();
                     continue;
                 }
-                if ((events[i].filter & EVFILT_WRITE) && watch.active)
-                    watch.onWrite();
+                if ((events[i].filter & EVFILT_WRITE) && watch.isRegistered)
+                {
+                    // import std.experimental.logger;
+                    // version(KissDebugMode) trace("The channel socket is: ", typeid(watch));
+                    AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
+                    assert(wt !is null);
+                    wt.onWriteDone();
+                }
 
-                if ((events[i].filter & EVFILT_READ) && watch.active)
+                if ((events[i].filter & EVFILT_READ) && watch.isRegistered)
                     watch.onRead();
             }
         }
@@ -280,56 +197,21 @@ final class AbstractSelector : Selector
     override void stop()
     {
         _runing = false;
-        weakUp();
-    }
-
-protected:
-    int getFD(Watcher watch)
-    {
-        int fd = -1;
-        switch (watch.type)
-        {
-        case WatcherType.TCP:
-            fd = getSocketFD!TcpStreamWatcher(watch);
-            break;
-        case WatcherType.UDP:
-            fd = getSocketFD!UdpStreamWatcher(watch);
-            break;
-        case WatcherType.ACCEPT:
-            fd = getSocketFD!TcpListenerWatcher(watch);
-            break;
-        case WatcherType.Event:
-            {
-                auto wt = cast(KqueueEventWatcher) watch;
-                if (wt !is null)
-                    fd = wt.fd();
-            }
-            break;
-        case WatcherType.Timer:
-            {
-                auto wt = cast(KqueueTimerWatcher) watch;
-                if (wt !is null)
-                    fd = wt.fd();
-            }
-            break;
-        default:
-            break;
-        }
-        return fd;
     }
 
 private:
     bool _runing;
     int _kqueueFD;
-    KqueueEventWatcher _event;
+    EventChannel _event;
 }
 
 /**
 */
 class KqueueEventChannel : EventChannel
 {
-    this()
+    this(Selector loop)
     {
+        super(loop);
         setFlag(WatchFlag.Read, true);
         _pair = socketPair();
         _pair[0].blocking = false;
@@ -342,8 +224,6 @@ class KqueueEventChannel : EventChannel
         close();
     }
 
-    // int fd(){return _pair[1].handle;}
-
     override void call()
     {
         _pair[0].send("call");
@@ -354,10 +234,8 @@ class KqueueEventChannel : EventChannel
         ubyte[128] data;
         while (true)
         {
-            collectException(() {
-                if (_pair[1].receive(data) <= 0)
-                    return;
-            }());
+            if (_pair[1].receive(data) <= 0)
+                break;
         }
 
         super.onRead();

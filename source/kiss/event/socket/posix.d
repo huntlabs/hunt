@@ -12,6 +12,7 @@ import kiss.core;
 import std.conv;
 import std.exception;
 import std.format;
+import std.process;
 import std.socket;
 import std.string;
 import std.experimental.logger;
@@ -49,11 +50,10 @@ abstract class AbstractListener : AbstractSocketChannel
         return true;
     }
 
-    // override void onClose()
-    // {
-    //     assert(false, "");
-    //     // TODO: created by Administrator @ 2018-3-27 15:51:52
-    // }
+    override void onWriteDone()
+    {
+        version(KissDebugMode) tracef("a new connection created, thread: %s", thisThreadID());
+    }
 }
 
 /**
@@ -110,7 +110,6 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         else
         {
             // read(null);
-
             version (KissDebugMode)
                 warningf("connection broken: %s", _remoteAddress.toString());
             onDisconnected();
@@ -169,6 +168,13 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         isWriteCancelling = true;
     }
 
+
+    override void onWriteDone()
+    {
+        // notified by kqueue selector when data writing done
+        version(KissDebugMode) tracef("done with data writing, thread: %s", thisThreadID());
+    }
+
     // protected UbyteArrayObject _readBuffer;
     private const(ubyte)[] _readBuffer;
     protected WriteBufferQueue _writeQueue;
@@ -225,7 +231,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
     protected bool _binded = false;
     protected Address _bindAddress;
 
-    bool readUdp(scope ReadCallBack read)
+    protected bool tryRead(scope ReadCallBack read)
     {
         scope Address createAddress()
         {
@@ -250,5 +256,11 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
             read(this._readBuffer);
         }
         return false;
+    }
+
+    override void onWriteDone()
+    {
+        // notified by kqueue selector when data writing done
+        version(KissDebugMode) tracef("done with data writing, thread: %s", thisThreadID());
     }
 }
