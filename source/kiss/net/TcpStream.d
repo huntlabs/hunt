@@ -26,6 +26,8 @@ deprecated("Using TcpStream instead.")
 */
 class TcpStream : AbstractStream
 {
+    SimpleEventHandler closeHandler;
+
     //for client side
     this(Selector loop, AddressFamily family = AddressFamily.INET)
     {
@@ -142,7 +144,7 @@ class TcpStream : AbstractStream
 
     TcpStream onClosed(SimpleEventHandler handler)
     {
-        _closedHandler = handler;
+        closeHandler = handler;
         return this;
     }
 
@@ -202,7 +204,6 @@ class TcpStream : AbstractStream
 protected:
     bool _isClientSide;
     ConnectionHandler _connectionHandler;
-    SimpleEventHandler _closedHandler;
 
     override void onRead()
     {
@@ -245,8 +246,8 @@ protected:
         this.socket.shutdown(SocketShutdown.BOTH);
         version(Posix)  this.socket.close();
 
-        if (_closedHandler)
-            _closedHandler();
+        if (closeHandler)
+            closeHandler();
     }
 
     override void onWrite()

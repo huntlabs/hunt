@@ -421,7 +421,7 @@ abstract class TimerChannelBase : AbstractChannel, ITimer
 
     protected void onTick()
     {
-        // trace("tick thread id: ", thisThreadID());
+        // trace("tick thread id: ", getTid());
         if (ticked !is null)
             ticked(this);
     }

@@ -31,6 +31,7 @@ class TcpListener : AbstractListener
             super(loop, family, bufferSize);
         else
             super(loop, family);
+        // reusePort(true);
     }
 
     // this(EventLoop loop, Socket sock)
@@ -52,7 +53,7 @@ class TcpListener : AbstractListener
     deprecated("Using onShutdown instead.")
     TcpListener setCloseHandle(CloseCallBack cback)
     {
-        _closedHandler = cback;
+        closeHandler = cback;
         return this;
     }
     
@@ -72,7 +73,7 @@ class TcpListener : AbstractListener
 
     TcpListener onConnectionAccepted(AcceptEventHandler handler)
     {
-        _acceptHandler = handler;
+        acceptHandler = handler;
         return this;
     }
 
@@ -146,8 +147,8 @@ class TcpListener : AbstractListener
 
     override void close()
     {
-        if (_closedHandler !is null)
-            _closedHandler();
+        if (closeHandler !is null)
+            closeHandler();
         else if (_shutdownHandler !is null)
             _shutdownHandler(this, null);
         this.onClose();
@@ -168,10 +169,10 @@ class TcpListener : AbstractListener
                     infof("new connection from %s, fd=%d",
                         socket.remoteAddress.toString(), socket.handle());
 
-                if (_acceptHandler !is null)
+                if (acceptHandler !is null)
                 {
                     TcpStream stream = new TcpStream(_inLoop, socket);
-                    _acceptHandler(this, stream);
+                    acceptHandler(this, stream);
                     stream.start();
                 }
                 if(_readBack !is null)
@@ -187,11 +188,12 @@ class TcpListener : AbstractListener
         }
     }
 
-protected:
-    SimpleEventHandler _closedHandler;
-    AcceptCallBack _readBack;
+    
+    AcceptEventHandler acceptHandler;
+    SimpleEventHandler closeHandler;
 
+protected:
+    AcceptCallBack _readBack;
     EventHandler _shutdownHandler;
-    AcceptEventHandler _acceptHandler;
 
 }

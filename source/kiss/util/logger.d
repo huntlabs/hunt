@@ -17,6 +17,8 @@ import std.file;
 import std.algorithm.iteration;
 import core.thread;
 
+import kiss.util.thread;
+
 private:
 
 enum LogLevel
@@ -226,35 +228,10 @@ class SizeBaseRollover
 
 __gshared KissLogger g_logger = null;
 
-version (Posix)
-{
 
-	version (linux)
-	{
-		version (X86_64) // X86_64
-		{
-			enum __NR_gettid = 186;
 
-		}
-		else
-		{
-			enum __NR_gettid = 224;
-		}
-	}
-
-	version (OSX)
-	{
-		enum __NR_gettid = 372;
-	}
-
-	import core.sys.posix.sys.types : pid_t;
-
-	extern (C) nothrow @nogc pid_t syscall(int d);
-	int getTid()
-	{
-		return syscall(__NR_gettid);
-	}
-}
+/**
+*/
 class KissLogger
 {
 	/*void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
@@ -436,16 +413,7 @@ protected:
 	{
 		string time_prior = format("%-27s", Clock.currTime.toISOExtString());
 
-		version (Posix)
-		{
-
-			string tid = to!string(getTid());
-
-		}
-		else
-		{
-			string tid = to!string(Thread.getThis.id);
-		}
+		string tid = to!string(getTid());
 
 		string[] funcs = func.split(".");
 		string myFunc;

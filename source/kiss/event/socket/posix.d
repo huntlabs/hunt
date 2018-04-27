@@ -8,6 +8,7 @@ version(Posix):
 import kiss.event.socket.common;
 import kiss.event.core;
 import kiss.core;
+import kiss.util.thread;
 
 import std.conv;
 import std.exception;
@@ -52,7 +53,7 @@ abstract class AbstractListener : AbstractSocketChannel
 
     override void onWriteDone()
     {
-        version(KissDebugMode) tracef("a new connection created, thread: %s", thisThreadID());
+        version(KissDebugMode) tracef("a new connection created, thread: %s", getTid());
     }
 }
 
@@ -172,7 +173,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     override void onWriteDone()
     {
         // notified by kqueue selector when data writing done
-        version(KissDebugMode) tracef("done with data writing, thread: %s", thisThreadID());
+        version(KissDebugMode) tracef("done with data writing, thread: %s", getTid());
     }
 
     // protected UbyteArrayObject _readBuffer;
@@ -261,6 +262,6 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
     override void onWriteDone()
     {
         // notified by kqueue selector when data writing done
-        version(KissDebugMode) tracef("done with data writing, thread: %s", thisThreadID());
+        version(KissDebugMode) tracef("done with data writing, thread: %s", getTid());
     }
 }

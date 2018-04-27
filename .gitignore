@@ -31,3 +31,4 @@ examples/Timer/timer
 examples/UdpDemo/udp-demo
 examples/HttpServer/http-server
 examples/TcpServer/tcp-server
+examples/EventGroupDemo/http-server-powered
