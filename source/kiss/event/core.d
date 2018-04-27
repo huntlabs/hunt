@@ -291,15 +291,6 @@ class LoopException : Exception
     mixin basicExceptionCtors;
 }
 
-Address createAddress(Socket socket, ushort port)
-{
-    Address addr;
-    if (socket.addressFamily == AddressFamily.INET6)
-        addr = new Internet6Address(port);
-    else
-        addr = new InternetAddress(port);
-    return addr;
-}
 
 // dfmt off
 version(linux):

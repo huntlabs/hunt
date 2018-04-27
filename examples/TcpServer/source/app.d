@@ -17,7 +17,7 @@ void main()
 
 	globalLogLevel(LogLevel.warning);
 
-	debug writefln("Main thread: %s", thisThreadID());
+	debug writefln("Main thread: %s", getTid());
 
 	EventLoop loop = new EventLoop();
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET);
@@ -28,7 +28,7 @@ void main()
 			debug writeln("received: ", cast(string) data);
 			client.write(data, (in ubyte[] wdata, size_t nBytes) {
 				debug writefln("thread: %s, sent bytes: %d, content: %s",
-				thisThreadID(), nBytes, cast(string) data[0 .. nBytes]);
+				getTid(), nBytes, cast(string) data[0 .. nBytes]);
 
 				if (data.length > nBytes)
 					writefln("remaining bytes: ", data.length - nBytes);

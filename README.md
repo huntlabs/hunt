@@ -31,5 +31,6 @@ A refined core library for D programming language.
 
 ## TODO
 - [ ] Performance improvement
-- [ ] More stable APIs
-- [ ] Improving supports on OSX
+- [ ] Stablize APIs
+- [ ] More friendly APIs
+- [x] Improving supports on Mac OS
