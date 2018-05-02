@@ -11,6 +11,7 @@ __dummy.html
 .idea
 .dub
 *.a
+*.tar.gz
 *.dll
 *.exe
 *.kdev4
@@ -32,3 +33,4 @@ examples/UdpDemo/udp-demo
 examples/HttpServer/http-server
 examples/TcpServer/tcp-server
 examples/EventGroupDemo/http-server-powered
+test.config

@@ -24,7 +24,7 @@ version (Posix)
 	import core.sys.posix.sys.types : pid_t;
 
 	extern (C) nothrow @nogc pid_t syscall(int d);
-	ThreadID getTid()
+	pid_t getTid()
 	{
 		return syscall(__NR_gettid);
 	}
