@@ -95,26 +95,4 @@ private:
 
     Thread[EventLoop] _loops;
 
-    // class GroupMember
-    // {
-    //     this(EventLoop loop)
-    //     {
-    //         _loop = loop;
-    //     }
-
-    //     void start()
-    //     {
-    //         _loop.join();
-    //     }
-
-    //     alias eventLoop this;
-
-    //     @property EventLoop eventLoop()
-    //     {
-    //         return _loop;
-    //     }
-
-    // private:
-    //     EventLoop _loop;
-    // }
 }
