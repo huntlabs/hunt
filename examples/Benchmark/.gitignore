@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+docs/
+kiss-benchmark.so
+kiss-benchmark.dylib
+kiss-benchmark.dll
+kiss-benchmark.a
+kiss-benchmark.lib
+kiss-benchmark-test-*
+*.exe
+*.o
+*.obj
+*.lst

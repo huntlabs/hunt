@@ -1,0 +1,146 @@
+﻿➜  benchmark ./bench.sh Collie plaintext 10.1.223.120 8085
+Usage: ./bench.sh Kiss plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://10.1.223.120:8085/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://10.1.223.120:8085/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    39.90ms    3.60ms  44.45ms   93.50%
+    Req/Sec    24.97      5.01    30.00     50.25%
+  Latency Distribution
+     50%   40.00ms
+     75%   40.06ms
+     90%   40.20ms
+     99%   44.15ms
+  1000 requests in 5.01s, 152.48KB read
+Requests/sec:    199.41
+Transfer/sec:     30.41KB
+
+---------------------------------------------------------
+ Running Warmup Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8085/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8085/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    41.92ms    3.30ms  90.36ms   85.38%
+    Req/Sec     5.99k   438.27     6.91k    78.52%
+  Latency Distribution
+     50%   41.06ms
+     75%   43.16ms
+     90%   45.51ms
+     99%   52.95ms
+  178488 requests in 15.02s, 26.45MB read
+Requests/sec:  11885.86
+Transfer/sec:      1.76MB
+
+---------------------------------------------------------
+ Concurrency: 512 for Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8085/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8085/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    41.88ms    3.42ms  77.24ms   86.25%
+    Req/Sec     5.99k   388.27     6.90k    74.16%
+  Latency Distribution
+     50%   41.13ms
+     75%   43.22ms
+     90%   45.54ms
+     99%   52.79ms
+  178417 requests in 15.01s, 26.43MB read
+Requests/sec:  11883.03
+Transfer/sec:      1.76MB
+STARTTIME 1525343602
+ENDTIME 1525343617
+
+---------------------------------------------------------
+ Concurrency: 512 for Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8085/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8085/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    42.04ms    3.56ms  76.20ms   85.81%
+    Req/Sec     5.97k   454.61     7.02k    72.48%
+  Latency Distribution
+     50%   40.93ms
+     75%   43.30ms
+     90%   46.03ms
+     99%   56.15ms
+  178036 requests in 15.02s, 26.38MB read
+Requests/sec:  11857.11
+Transfer/sec:      1.76MB
+STARTTIME 1525343619
+ENDTIME 1525343634
+
+---------------------------------------------------------
+ Concurrency: 512 for Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8085/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8085/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    41.87ms    3.07ms  66.30ms   82.80%
+    Req/Sec     6.03k   395.39     7.17k    69.00%
+  Latency Distribution
+     50%   40.75ms
+     75%   43.34ms
+     90%   45.69ms
+     99%   52.95ms
+  180763 requests in 15.09s, 26.78MB read
+Requests/sec:  11980.11
+Transfer/sec:      1.78MB
+STARTTIME 1525343636
+ENDTIME 1525343651
+
+---------------------------------------------------------
+ Concurrency: 512 for Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8085/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8085/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    41.77ms    2.99ms  75.98ms   83.32%
+    Req/Sec     6.04k   395.52     7.17k    73.67%
+  Latency Distribution
+     50%   40.83ms
+     75%   43.28ms
+     90%   45.26ms
+     99%   51.56ms
+  180892 requests in 15.08s, 26.80MB read
+Requests/sec:  11991.80
+Transfer/sec:      1.78MB
+STARTTIME 1525343653
+ENDTIME 1525343668
+
+---------------------------------------------------------
+ Concurrency: 512 for Collie
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8085/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8085/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    41.98ms    3.11ms  63.92ms   81.40%
+    Req/Sec     5.97k   404.85     6.88k    73.67%
+  Latency Distribution
+     50%   41.12ms
+     75%   43.30ms
+     90%   45.83ms
+     99%   53.27ms
+  178906 requests in 15.09s, 26.51MB read
+Requests/sec:  11859.15
+Transfer/sec:      1.76MB
+STARTTIME 1525343670
+ENDTIME 1525343685
+➜  benchmark

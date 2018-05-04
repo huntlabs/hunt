@@ -27,6 +27,7 @@ __dummy.html
 *-test-*
 __test__*__
 examples/*/log.txt
+examples/Benchmark/kiss-benchmark
 examples/TcpClient/tcp-client
 examples/Timer/timer
 examples/UdpDemo/udp-demo
