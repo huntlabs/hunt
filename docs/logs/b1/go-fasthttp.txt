@@ -1,0 +1,146 @@
+﻿➜  benchmark ./bench.sh FastHttp plaintext 10.1.223.120 8080
+Usage: ./bench.sh Name plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://10.1.223.120:8080/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://10.1.223.120:8080/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   551.18us  266.21us  11.40ms   92.98%
+    Req/Sec     1.78k   264.50     2.53k    75.62%
+  Latency Distribution
+     50%  507.00us
+     75%  600.00us
+     90%  743.00us
+     99%    1.44ms
+  72007 requests in 5.10s, 8.72MB read
+Requests/sec:  14119.16
+Transfer/sec:      1.71MB
+
+---------------------------------------------------------
+ Running Warmup FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     7.52ms    9.89ms 266.11ms   97.13%
+    Req/Sec    19.85k     9.27k   51.12k    80.34%
+  Latency Distribution
+     50%    6.03ms
+     75%    8.45ms
+     90%   12.09ms
+     99%   25.23ms
+  588834 requests in 15.02s, 71.32MB read
+Requests/sec:  39201.30
+Transfer/sec:      4.75MB
+
+---------------------------------------------------------
+ Concurrency: 512 for FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.91ms    8.32ms 240.12ms   94.57%
+    Req/Sec    22.52k    12.96k   67.99k    75.17%
+  Latency Distribution
+     50%    5.07ms
+     75%    7.93ms
+     90%   11.79ms
+     99%   35.23ms
+  664856 requests in 15.08s, 80.53MB read
+Requests/sec:  44090.91
+Transfer/sec:      5.34MB
+STARTTIME 1525415836
+ENDTIME 1525415851
+
+---------------------------------------------------------
+ Concurrency: 512 for FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.63ms    4.03ms  75.28ms   82.27%
+    Req/Sec    26.25k    14.84k   65.94k    70.55%
+  Latency Distribution
+     50%    4.53ms
+     75%    6.76ms
+     90%   10.64ms
+     99%   20.72ms
+  777719 requests in 15.07s, 94.19MB read
+Requests/sec:  51605.72
+Transfer/sec:      6.25MB
+STARTTIME 1525415853
+ENDTIME 1525415868
+
+---------------------------------------------------------
+ Concurrency: 512 for FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.64ms    4.58ms  79.66ms   88.29%
+    Req/Sec    26.79k    15.03k   65.39k    60.62%
+  Latency Distribution
+     50%    4.43ms
+     75%    6.58ms
+     90%   11.05ms
+     99%   24.12ms
+  794948 requests in 15.08s, 96.28MB read
+Requests/sec:  52705.84
+Transfer/sec:      6.38MB
+STARTTIME 1525415870
+ENDTIME 1525415885
+
+---------------------------------------------------------
+ Concurrency: 512 for FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.79ms    4.43ms  66.82ms   88.29%
+    Req/Sec    26.18k    13.37k   66.09k    64.04%
+  Latency Distribution
+     50%    4.74ms
+     75%    6.61ms
+     90%   10.61ms
+     99%   24.18ms
+  775372 requests in 15.08s, 93.91MB read
+Requests/sec:  51423.11
+Transfer/sec:      6.23MB
+STARTTIME 1525415887
+ENDTIME 1525415903
+
+---------------------------------------------------------
+ Concurrency: 512 for FastHttp
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.76ms    4.98ms  77.55ms   86.34%
+    Req/Sec    21.68k    12.79k   63.59k    73.01%
+  Latency Distribution
+     50%    5.45ms
+     75%    8.41ms
+     90%   12.15ms
+     99%   26.11ms
+  639833 requests in 15.05s, 77.49MB read
+Requests/sec:  42527.86
+Transfer/sec:      5.15MB
+STARTTIME 1525415905
+ENDTIME 1525415920
+➜  benchmark
