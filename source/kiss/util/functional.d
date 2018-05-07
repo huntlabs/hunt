@@ -1,13 +1,14 @@
 /*
- * Collie - An asynchronous event-driven network framework using Dlang development
+ * Kiss - A refined core library for D programming language.
  *
- * Copyright (C) 2015-2017  Shanghai Putao Technology Co., Ltd 
+ * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
- * Developer: putao's Dlang team
+ * Developer: HuntLabs.cn
  *
  * Licensed under the Apache-2.0 License.
  *
  */
+ 
 module kiss.util.functional;
 
 public import std.functional;
