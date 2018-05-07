@@ -29,9 +29,9 @@ class TcpStream : AbstractStream
     SimpleEventHandler closeHandler;
 
     //for client side
-    this(Selector loop, AddressFamily family = AddressFamily.INET)
+    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
     {
-        super(loop);
+        super(loop, family, bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         // _localAddress = socket.localAddress();// TODO:
@@ -41,9 +41,9 @@ class TcpStream : AbstractStream
     }
 
     //for server side
-    this(Selector loop, Socket socket)
+    this(Selector loop, Socket socket, int bufferSize = 4096 * 2)
     {
-        super(loop);
+        super(loop, socket.addressFamily, bufferSize);
         this.socket = socket;
         _remoteAddress = socket.remoteAddress();
         _localAddress = socket.localAddress();

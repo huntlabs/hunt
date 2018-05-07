@@ -25,14 +25,18 @@ alias Acceptor = TcpListener;
 */
 class TcpListener : AbstractListener
 {
+    private int _bufferSize = 4 * 1024;
+
     this(EventLoop loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4 * 1024)
     {
+        _bufferSize = bufferSize;
         version (Windows)
             super(loop, family, bufferSize);
         else
             super(loop, family);
         // reusePort(true);
     }
+    
 
     // this(EventLoop loop, Socket sock)
     // {
@@ -159,7 +163,7 @@ class TcpListener : AbstractListener
         bool canRead = true;
         version (KissDebugMode)
             trace("start to listen");
-        // while(canRead && this.active) // why??
+        // while(canRead && this.isRegistered) // why??
         {
             version (KissDebugMode)
                 trace("listening...");
@@ -171,7 +175,7 @@ class TcpListener : AbstractListener
 
                 if (acceptHandler !is null)
                 {
-                    TcpStream stream = new TcpStream(_inLoop, socket);
+                    TcpStream stream = new TcpStream(_inLoop, socket, _bufferSize);
                     acceptHandler(this, stream);
                     stream.start();
                 }

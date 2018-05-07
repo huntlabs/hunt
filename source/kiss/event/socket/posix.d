@@ -53,7 +53,8 @@ abstract class AbstractListener : AbstractSocketChannel
 
     override void onWriteDone()
     {
-        version(KissDebugMode) tracef("a new connection created, thread: %s", getTid());
+        version (KissDebugMode)
+            tracef("a new connection created, thread: %s", getTid());
     }
 }
 
@@ -71,6 +72,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
     {
         // _readBuffer = new UbyteArrayObject();
+        version (KissDebugMode)
+            trace("Buffer size for read: ", bufferSize);
         _readBuffer = new ubyte[bufferSize];
         super(loop, WatcherType.TCP);
         setFlag(WatchFlag.Read, true);
@@ -81,20 +84,22 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected bool tryRead()
     {
         bool canRead = false;
-
         this.clearError();
-        // auto data = this._readBuffer.data;
-        // scope (exit)
-        //     this._readBuffer.data = data;
-        auto len = this.socket.receive(cast(void[]) this._readBuffer);
+
+        ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
+
+        version (KissDebugMode)
+            trace("read nbytes...", len);
+
         if (len > 0)
         {
             canRead = true;
-            // this._readBuffer.data = this._readBuffer.data[0 .. len];
-            // read(this._readBuffer);
-
             if (dataReceivedHandler !is null)
                 dataReceivedHandler(this._readBuffer[0 .. len]);
+
+            version (KissDebugMode)
+                trace("continue reading...");
+            tryRead();
         }
         else if (len < 0)
         {
@@ -110,11 +115,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            // read(null);
             version (KissDebugMode)
                 warningf("connection broken: %s", _remoteAddress.toString());
             onDisconnected();
-            if(_isClosed)
+            if (_isClosed)
                 this.socket.close(); // release the sources
             else
                 this.close();
@@ -169,11 +173,11 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         isWriteCancelling = true;
     }
 
-
     override void onWriteDone()
     {
         // notified by kqueue selector when data writing done
-        version(KissDebugMode) tracef("done with data writing, thread: %s", getTid());
+        version (KissDebugMode)
+            tracef("done with data writing, thread: %s", getTid());
     }
 
     // protected UbyteArrayObject _readBuffer;
@@ -181,6 +185,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected WriteBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
 
+    /**
+    * Warning: The received data is stored a inner buffer. For a data safe, 
+    * you would make a copy of it. 
+    */
     DataReceivedHandler dataReceivedHandler;
 
 }
@@ -262,6 +270,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
     override void onWriteDone()
     {
         // notified by kqueue selector when data writing done
-        version(KissDebugMode) tracef("done with data writing, thread: %s", getTid());
+        version (KissDebugMode)
+            tracef("done with data writing, thread: %s", getTid());
     }
 }

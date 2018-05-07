@@ -141,8 +141,11 @@ class AbstractSelector : Selector
                 watch.close();
                 continue;
             }
+
             if (watch.isRegistered && isRead(events[i].events))
+            {
                 watch.onRead();
+            }
 
             if (watch.isRegistered && isWrite(events[i].events))
             {
