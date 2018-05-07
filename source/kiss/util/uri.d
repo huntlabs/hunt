@@ -56,10 +56,10 @@ class Uri
         this._fragment = m.captures[8];
 
         this._valid = true;
-        
+
         return true;
     }
-
+    
     bool valid()
     {
         return this._valid;
