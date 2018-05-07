@@ -1,0 +1,18 @@
+{
+	"name": "http-server-powered",
+	"targetType": "executable",
+	"authors": [
+		"Putao"
+	],
+	"description": "A simple http server powered by a group of event loops.",
+	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"kiss" : {
+			"path" : "../../"
+		}
+	},
+	"subConfigurations": {
+		"kiss" : "debug-mode"
+	}
+}

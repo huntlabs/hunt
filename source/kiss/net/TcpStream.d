@@ -1,12 +1,20 @@
 module kiss.net.TcpStream;
 
 import kiss.event;
-public import kiss.net.struct_;
+import kiss.net.core;
 
-import std.experimental.logger;
+import std.format;
+import std.socket;
 import std.exception;
+import std.experimental.logger;
+import std.socket;
+import core.thread;
+import core.time;
 
-debug __gshared int streamCounter = 0;
+import kiss.container.ByteBuffer;
+import kiss.core;
+
+version (KissDebugMode) __gshared int streamCounter = 0;
 
 deprecated("Using TcpStream instead.")
 {
@@ -14,213 +22,291 @@ deprecated("Using TcpStream instead.")
     alias TcpStreamClient = TcpStream;
 }
 
-//No-Thread-safe
-@trusted class TcpStream : Transport
+/**
+*/
+class TcpStream : AbstractStream
 {
-    private Socket m_socket;
+    SimpleEventHandler closeHandler;
 
-	//for client side
-	this(EventLoop loop,AddressFamily amily = AddressFamily.INET)
+    //for client side
+    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
     {
-        _loop = loop;
-        _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
-        _watcher.setFamily(amily);
-        _watcher.watcher(this);
-        m_socket = _watcher.socket;
+        super(loop, family, bufferSize);
+        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
-		_isClientSide = true;
-		_isConnected = false;
-        _family = amily;
-	}
+        // _localAddress = socket.localAddress();// TODO:
 
-	//for server side
-    this(EventLoop loop,Socket socket)
+        _isClientSide = false;
+        _isConnected = false;
+    }
+
+    //for server side
+    this(Selector loop, Socket socket, int bufferSize = 4096 * 2)
     {
-        _loop = loop;
-        _watcher = cast(TcpStreamWatcher)loop.createWatcher(WatcherType.TCP);
-        _watcher.setSocket(socket);
-        _watcher.watcher(this);
-        m_socket = socket;
+        super(loop, socket.addressFamily, bufferSize);
+        this.socket = socket;
+        _remoteAddress = socket.remoteAddress();
+        _localAddress = socket.localAddress();
 
-		_isClientSide = false;
-		_isConnected = true;
+        _isClientSide = false;
+        _isConnected = true;
 
+        version (KissDebugMode)
+            debug synchronized
+        {
+            streamCounter++;
+            this.number = streamCounter;
+        }
+    }
 
-        debug synchronized{
-        streamCounter++;
-        _watcher.number = streamCounter;
+    void connect(string ip, ushort port)
+    {
+        connect(parseAddress(ip, port));
+    }
+
+    void connect(Address addr)
+    {
+        if (_isConnected)
+            return;
+
+        try
+        {
+            Address binded = createAddress(this.socket, 0);
+            this.socket.bind(binded);
+            this.doConnect(addr);
+            _isConnected = true;
+            start();
+        }
+        catch (Exception ex)
+        {
+            error(ex.message);
         }
 
+        if (_connectionHandler !is null)
+            _connectionHandler(_isConnected);
     }
 
-	bool connect(Address addr)
-	{
-		bool watch_ = watch();
-		if(watch_){
-			watch_ = watch_ && eventLoop.connect(_watcher,addr);
-		}
-		return watch_;
-	}
-    
-    bool reconnect(Address addr) {
-        _watcher = null;
-        _watcher = cast(TcpStreamWatcher)_loop.createWatcher(WatcherType.TCP);
-        _watcher.setFamily(_family);
-        _watcher.watcher(this);
-        m_socket = _watcher.socket;
-        return connect(addr);
+    void reconnect(Address addr)
+    {
+        _isConnected = false;
+        AddressFamily family = AddressFamily.INET;
+        if (this.socket !is null)
+            family = this.socket.addressFamily;
+
+        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
+        connect(addr);
     }
 
-    mixin TransportSocketOption;
+    // dfmt off
+    deprecated("Using onClosed instead.") 
+    TcpStream setCloseHandle(CloseCallBack cback)
+    {
+        return onClosed(cback);
+    }
 
-    TcpStream setCloseHandle(CloseCallBack cback){
-        _closeBack = cback;
+    deprecated("Using onDataReceived instead.") 
+    TcpStream setReadHandle(DataReceivedHandler cback)
+    {
+        return onDataReceived(cback);
+    }
+
+    deprecated("Using onConnected instead.") 
+    TcpStream setConnectHandle(TcpConnectCallBack cback)
+    {
+        return onConnected(cback);
+    }
+
+    deprecated("Using start instead!") 
+   bool watch()
+    {
+        start();
+        return true;
+    }
+    // dfmt on
+
+    TcpStream onConnected(ConnectionHandler cback)
+    {
+        _connectionHandler = cback;
         return this;
     }
-    TcpStream setReadHandle(TcpReadCallBack cback){
-        _readBack = cback;
+
+    TcpStream onDataReceived(DataReceivedHandler handler)
+    {
+        dataReceivedHandler = handler;
         return this;
     }
 
-	TcpStream setConnectHandle(TcpConnectCallBack cback){
-		_connectBack = cback;
-		return this;
-	}
+    // TcpStream onDataWritten(DataWrittenHandler handler)
+    // {
+    //     sentHandler = handler;
+    //     return this;
+    // }
 
-	bool isConnected() nothrow {return _isConnected;}
-
-    override bool watched(){
-        return _watcher.active;
+    TcpStream onClosed(SimpleEventHandler handler)
+    {
+        closeHandler = handler;
+        return this;
     }
 
-    override bool watch() {
-        return _loop.register(_watcher);
+    TcpStream onDisconnected(SimpleEventHandler handler)
+    {
+        disconnectionHandler = handler;
+        return this;
     }
 
-    override void close(){
-        if(_watcher.active)
-            onClose(_watcher);
+    TcpStream onError(ErrorEventHandler handler)
+    {
+        errorHandler = handler;
+        return this;
+    }
+
+    bool isConnected() nothrow
+    {
+        return _isConnected;
+    }
+
+    override void start()
+    {
+        if (_isRegistered)
+            return;
+        _inLoop.register(this);
+        _isRegistered = true;
+        version (Windows)
+            this.doRead();
+    }
+
+    void write(StreamWriteBuffer buffer)
+    {
+        assert(buffer !is null);
+
+        if (!_isConnected)
+            return;
+
+        _writeQueue.enQueue(buffer);
+
+        version (Windows)
+            tryWrite();
         else
         {
-            debug warningf("The watcher(fd=%d) has already been closed", _watcher.fd);
+            onWrite();
         }
     }
 
-    TcpStream write(StreamWriteBuffer data){
-		if(!_isConnected)
-			throw new Exception("The Client is not connect!");  
+    /// safe for big data sending
+    void write(in ubyte[] data, DataWrittenHandler handler = null)
+    {
+        if (data.length == 0)
+            return;
 
-
-        if(_watcher.active){
-            _writeQueue.enQueue(data);
-            onWrite(_watcher);
-        } else {
-            warningf("The watcher(fd=%d) is down!", _watcher.fd);
-            data.doFinish();
-        }
-        return this;
+        write(new SocketStreamBuffer(data, handler));
     }
-
-    final EventLoop eventLoop(){return _loop;}
 
 protected:
-	bool			_isClientSide ;
-	bool			_isConnected;		//if server side always true.
-	TcpConnectCallBack _connectBack;
-    TcpStreamWatcher _watcher;
-    CloseCallBack _closeBack;
-    TcpReadCallBack _readBack;
-    WriteBufferQueue _writeQueue;
+    bool _isClientSide;
+    ConnectionHandler _connectionHandler;
 
-    override void onRead(Watcher watcher) nothrow{
-        catchAndLogException((){
-            bool canRead =  true;
-            while(canRead && watcher.active){
-                canRead = _loop.read(watcher,(Object obj) nothrow {
-                    collectException((){
-                        auto buffer = cast(TcpStreamWatcher.UbyteArrayObject)obj;
-                        if(buffer is null){
-                            error("buffer is null. The watcher will be closed.");
-                            watcher.close(); 
-                            return;
-                        }
-                        _readBack(buffer.data);
-                    }());
-                });
+    override void onRead()
+    {
+        version (KissDebugMode)
+            trace("start to read");
 
-                if(watcher.isError){
-                    errorf("Socket error on read: fd=%d, message=%s", watcher.fd, watcher.erroString); 
-                    canRead = false;
-                    watcher.close();
-                }
-            }
-        }());
+        tryRead();
+
+        if (this.isError)
+        {
+            string msg = format("Socket error on read: fd=%d, message: %s",
+                    this.handle, this.erroString);
+            errorf(msg);
+            errorOccurred(msg);
+        }
     }
 
-    override void onClose(Watcher watcher) nothrow{
+    override void onClose()
+    {
+        // if (!_isConnected)
+        // {
+        //     // if (_connectionHandler)
+        //     //     _connectionHandler(false);
+        //     return;
+        // }
 
-		if(!_isConnected){
-			collectExceptionMsg(eventLoop.deregister(watcher));
-			if(_connectBack)
-				_connectBack(false);
-			return;
-		}
-		_isConnected = false;
-
-        catchAndLogException((){
-            // debug infof("onClose=>watcher[%d].fd=%d, active=%s", watcher.number, 
-            //     watcher.fd, watcher.active);
-            watcher.close();
-            while(!_writeQueue.empty){
-                StreamWriteBuffer buffer = _writeQueue.deQueue();
-                buffer.doFinish();
+        version (KissDebugMode)
+        {
+            infof("onClose=>watcher[%d].fd=%d, active=%s", this.number,
+                    this.handle, _isRegistered);
+            if (!_writeQueue.empty)
+            {
+                warning("Some data has not been sent yet.");
             }
+        }
 
-            if(_closeBack)
-                _closeBack();
-        }());
+        _writeQueue.clear();
+        super.onClose();
+        _isConnected = false;
+        this.socket.shutdown(SocketShutdown.BOTH);
+        version(Posix)  this.socket.close();
+
+        if (closeHandler)
+            closeHandler();
     }
 
-    override void onWrite(Watcher watcher) nothrow{
+    override void onWrite()
+    {
+        if (!_isConnected)
+        {
+            _isConnected = true;
+            _remoteAddress = socket.remoteAddress();
 
-		if(!_isConnected){
-			_isConnected = true;
-			if(_connectBack)
-				_connectBack(true);
-			return;
-		}
+            if (_connectionHandler)
+                _connectionHandler(true);
+            return;
+        }
 
-        catchAndLogException((){
-            bool canWrite = true;
-            while(canWrite && watcher.active && !_writeQueue.empty){
-                StreamWriteBuffer buffer = _writeQueue.front();
-                const(ubyte[]) data = buffer.sendData();
-                if(data.length == 0){
-                    buffer.doFinish();
-                    continue;
-                }
+        bool canWrite = true;
+        version (KissDebugMode)
+            trace("start to write");
 
-                // debug infof("onWrite=>streamCounter[%d]=%d, data length=%d", 
-                //     watcher.number,  readCounter, data.length );
-            
-                size_t writedSize;
-                canWrite = _loop.write(_watcher,data,writedSize);
-                if(buffer.popSize(writedSize)){
-                    buffer.doFinish();
-                    if(watcher.active)
-                    _writeQueue.deQueue();
-                }
+        while (canWrite && _isRegistered && !isWriteCancelling && !_writeQueue.empty)
+        {
+            version (KissDebugMode)
+                trace("writting...");
 
-                if(watcher.isError){
-                    errorf("Socket error on write: fd=%d, message=%s", watcher.fd, watcher.erroString); 
-                    canWrite = false;
-                    watcher.close();
-                }
+            StreamWriteBuffer writeBuffer = _writeQueue.front();
+            const(ubyte[]) data = writeBuffer.sendData();
+            if (data.length == 0)
+            {
+                _writeQueue.deQueue().doFinish();
+                continue;
             }
-        }());
-    }
 
-private:
-    EventLoop _loop;
-    AddressFamily _family;
+            version (KissDebugMode)
+                infof("onWrite=>streamCounter[%d], data length=%d", this.number, data.length);
+
+            size_t nBytes;
+            canWrite = tryWrite(data, nBytes);
+
+            if (!canWrite)
+            {
+                version (KissDebugMode)
+                    warning("No data written!");
+                break;
+            }
+
+            if (writeBuffer.popSize(nBytes))
+            {
+                version (KissDebugMode)
+                    trace("finishing data writing...nBytes", nBytes);
+                _writeQueue.deQueue().doFinish();
+            }
+
+            if (this.isError)
+            {
+                string msg = format("Socket error on write: fd=%d, message=%s",
+                        this.handle, this.erroString);
+                errorOccurred(msg);
+                errorf(msg);
+                break;
+            }
+        }
+    }
 }

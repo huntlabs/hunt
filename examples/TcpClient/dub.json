@@ -1,0 +1,17 @@
+{
+	"name": "tcp-client",
+	"authors": [
+		"渡世白玉"
+	],
+	"description": "A demo for TCP client.",
+	"copyright": "Copyright © 2018, 渡世白玉",
+	"license": "proprietary",
+	"dependencies": {
+		"kiss" : {
+			"path" : "../../"
+		}
+	},
+	"subConfigurations": {
+		"kiss" : "debug-mode"
+	}
+}

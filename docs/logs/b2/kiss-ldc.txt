@@ -1,0 +1,145 @@
+﻿➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/plaintext
+Running 15s test @ http://10.1.11.114:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.14ms    7.74ms 268.26ms   94.45%
+    Req/Sec    30.70k    16.72k   67.27k    51.03%
+  Latency Distribution
+     50%    3.74ms
+     75%    5.30ms
+     90%    9.63ms
+     99%   24.34ms
+  906880 requests in 15.09s, 135.78MB read
+Requests/sec:  60090.27
+Transfer/sec:      9.00MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/plaintext
+Running 15s test @ http://10.1.11.114:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     4.68ms    3.56ms  57.71ms   89.10%
+    Req/Sec    31.73k    15.51k   68.48k    53.74%
+  Latency Distribution
+     50%    3.87ms
+     75%    5.21ms
+     90%    8.56ms
+     99%   19.32ms
+  942641 requests in 15.10s, 141.14MB read
+Requests/sec:  62418.61
+Transfer/sec:      9.35MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/plaintext
+Running 15s test @ http://10.1.11.114:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.08ms    5.50ms 113.52ms   90.99%
+    Req/Sec    31.05k    17.14k   57.91k    45.52%
+  Latency Distribution
+     50%    3.51ms
+     75%    4.99ms
+     90%    9.98ms
+     99%   29.78ms
+  911028 requests in 15.10s, 136.41MB read
+Requests/sec:  60321.03
+Transfer/sec:      9.03MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/plaintext
+Running 15s test @ http://10.1.11.114:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     4.34ms    3.02ms  64.18ms   88.23%
+    Req/Sec    34.10k    16.18k   71.45k    64.97%
+  Latency Distribution
+     50%    3.71ms
+     75%    5.20ms
+     90%    7.69ms
+     99%   16.18ms
+  1011984 requests in 15.06s, 151.52MB read
+Requests/sec:  67181.14
+Transfer/sec:     10.06MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/plaintext
+Running 15s test @ http://10.1.11.114:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     4.07ms    2.96ms  59.43ms   89.90%
+    Req/Sec    35.54k    14.94k   61.07k    56.80%
+  Latency Distribution
+     50%    3.03ms
+     75%    4.75ms
+     90%    7.04ms
+     99%   16.13ms
+  1054534 requests in 15.09s, 157.89MB read
+Requests/sec:  69881.73
+Transfer/sec:     10.46MB
+➜  ~
+
+
+
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/json
+Running 15s test @ http://10.1.11.114:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.92ms   12.94ms 304.81ms   97.31%
+    Req/Sec    28.75k    14.70k   57.29k    57.34%
+  Latency Distribution
+     50%    4.80ms
+     75%    7.55ms
+     90%   11.59ms
+     99%   32.79ms
+  850602 requests in 15.08s, 143.58MB read
+Requests/sec:  56419.41
+Transfer/sec:      9.52MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/json
+Running 15s test @ http://10.1.11.114:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.20ms    3.77ms  60.33ms   78.01%
+    Req/Sec    27.60k    12.76k   63.92k    60.41%
+  Latency Distribution
+     50%    5.19ms
+     75%    7.79ms
+     90%   10.91ms
+     99%   19.59ms
+  817820 requests in 15.07s, 138.05MB read
+Requests/sec:  54268.34
+Transfer/sec:      9.16MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/json
+Running 15s test @ http://10.1.11.114:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.85ms    5.12ms 208.86ms   90.76%
+    Req/Sec    30.09k    14.31k   57.26k    54.95%
+  Latency Distribution
+     50%    4.80ms
+     75%    7.14ms
+     90%   10.66ms
+     99%   22.54ms
+  889474 requests in 15.06s, 150.14MB read
+Requests/sec:  59060.91
+Transfer/sec:      9.97MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/json
+Running 15s test @ http://10.1.11.114:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.94ms    4.61ms  85.95ms   87.33%
+    Req/Sec    28.40k    15.05k   53.13k    50.34%
+  Latency Distribution
+     50%    4.80ms
+     75%    7.37ms
+     90%   11.23ms
+     99%   22.94ms
+  837980 requests in 15.05s, 141.45MB read
+Requests/sec:  55689.18
+Transfer/sec:      9.40MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8090/json
+Running 15s test @ http://10.1.11.114:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.78ms    4.26ms  98.11ms   87.54%
+    Req/Sec    31.80k    12.68k   57.77k    68.14%
+  Latency Distribution
+     50%    4.83ms
+     75%    7.06ms
+     90%   10.18ms
+     99%   21.15ms
+  944365 requests in 15.06s, 159.41MB read
+Requests/sec:  62694.32
+Transfer/sec:     10.58MB
+➜  ~

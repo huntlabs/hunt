@@ -1,0 +1,297 @@
+﻿➜  benchmark ./bench.sh Kiss plaintext 10.1.223.120 8090
+Usage: ./bench.sh Kiss plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://10.1.223.120:8090/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://10.1.223.120:8090/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   554.03us  241.84us   5.93ms   91.76%
+    Req/Sec     1.77k   297.47     2.49k    72.30%
+  Latency Distribution
+     50%  511.00us
+     75%  605.00us
+     90%  745.00us
+     99%    1.50ms
+  71935 requests in 5.10s, 10.77MB read
+Requests/sec:  14104.66
+Transfer/sec:      2.11MB
+
+---------------------------------------------------------
+ Running Warmup Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.03ms    4.35ms  98.37ms   90.70%
+    Req/Sec    31.22k    16.13k   65.50k    60.75%
+  Latency Distribution
+     50%    4.01ms
+     75%    5.45ms
+     90%    9.09ms
+     99%   23.67ms
+  924380 requests in 15.08s, 138.40MB read
+Requests/sec:  61290.00
+Transfer/sec:      9.18MB
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.76ms    6.79ms 219.33ms   93.86%
+    Req/Sec    28.85k    15.92k   65.24k    60.82%
+  Latency Distribution
+     50%    4.51ms
+     75%    6.11ms
+     90%   10.01ms
+     99%   26.77ms
+  849364 requests in 15.08s, 127.17MB read
+Requests/sec:  56321.49
+Transfer/sec:      8.43MB
+STARTTIME 1525341702
+ENDTIME 1525341717
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.18ms    4.17ms 222.43ms   89.63%
+    Req/Sec    29.82k    15.85k   70.27k    69.39%
+  Latency Distribution
+     50%    4.14ms
+     75%    5.79ms
+     90%    9.44ms
+     99%   21.17ms
+  885198 requests in 15.08s, 132.54MB read
+Requests/sec:  58700.00
+Transfer/sec:      8.79MB
+STARTTIME 1525341719
+ENDTIME 1525341734
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.18ms    8.73ms 427.07ms   98.33%
+    Req/Sec    30.05k    12.59k   65.49k    67.01%
+  Latency Distribution
+     50%    4.27ms
+     75%    5.73ms
+     90%    8.44ms
+     99%   16.65ms
+  893420 requests in 15.04s, 133.77MB read
+Requests/sec:  59396.54
+Transfer/sec:      8.89MB
+STARTTIME 1525341736
+ENDTIME 1525341751
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     4.68ms    5.19ms 435.05ms   94.70%
+    Req/Sec    34.22k    16.76k   71.66k    60.54%
+  Latency Distribution
+     50%    3.93ms
+     75%    5.36ms
+     90%    8.07ms
+     99%   16.11ms
+  1014326 requests in 15.05s, 151.87MB read
+Requests/sec:  67414.59
+Transfer/sec:     10.09MB
+STARTTIME 1525341753
+ENDTIME 1525341769
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.49ms    5.19ms  85.67ms   88.22%
+    Req/Sec    22.08k    13.26k   55.90k    75.09%
+  Latency Distribution
+     50%    4.93ms
+     75%    8.03ms
+     90%   12.27ms
+     99%   26.62ms
+  652225 requests in 15.06s, 97.66MB read
+Requests/sec:  43308.02
+Transfer/sec:      6.48MB
+STARTTIME 1525341771
+ENDTIME 1525341786
+➜  benchmark
+
+
+
+
+➜  benchmark ./bench.sh Kiss json 10.1.223.120 8090
+Usage: ./bench.sh Kiss plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://10.1.223.120:8090/json
+---------------------------------------------------------
+
+Running 5s test @ http://10.1.223.120:8090/json
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   593.64us  429.40us  15.90ms   95.92%
+    Req/Sec     1.67k   265.70     2.54k    79.80%
+  Latency Distribution
+     50%  535.00us
+     75%  632.00us
+     90%  789.00us
+     99%    1.63ms
+  67592 requests in 5.10s, 11.41MB read
+Requests/sec:  13253.16
+Transfer/sec:      2.24MB
+
+---------------------------------------------------------
+ Running Warmup Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/json"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.23ms    5.03ms 129.56ms   92.00%
+    Req/Sec    33.93k    16.73k   73.36k    59.86%
+  Latency Distribution
+     50%    4.07ms
+     75%    5.91ms
+     90%    9.44ms
+     99%   25.44ms
+  1003864 requests in 15.06s, 169.45MB read
+Requests/sec:  66638.22
+Transfer/sec:     11.25MB
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/json"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.83ms   12.68ms 347.98ms   96.56%
+    Req/Sec    24.84k    13.51k   54.70k    64.36%
+  Latency Distribution
+     50%    4.76ms
+     75%    6.84ms
+     90%   11.40ms
+     99%   35.76ms
+  729765 requests in 15.07s, 123.18MB read
+Requests/sec:  48419.00
+Transfer/sec:      8.17MB
+STARTTIME 1525341897
+ENDTIME 1525341912
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/json"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.90ms    6.36ms 238.87ms   94.83%
+    Req/Sec    28.91k    15.01k   65.79k    61.90%
+  Latency Distribution
+     50%    4.82ms
+     75%    6.77ms
+     90%   10.18ms
+     99%   21.25ms
+  857955 requests in 15.10s, 144.82MB read
+Requests/sec:  56828.73
+Transfer/sec:      9.59MB
+STARTTIME 1525341914
+ENDTIME 1525341929
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/json"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.74ms    4.30ms 105.43ms   86.10%
+    Req/Sec    27.37k    16.07k   64.57k    65.53%
+  Latency Distribution
+     50%    4.74ms
+     75%    6.83ms
+     90%   10.59ms
+     99%   21.75ms
+  812254 requests in 15.10s, 137.11MB read
+Requests/sec:  53799.78
+Transfer/sec:      9.08MB
+STARTTIME 1525341931
+ENDTIME 1525341947
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/json"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.21ms    3.66ms  54.08ms   85.06%
+    Req/Sec    30.99k    15.31k   63.74k    53.06%
+  Latency Distribution
+     50%    4.33ms
+     75%    6.28ms
+     90%    9.75ms
+     99%   18.90ms
+  919396 requests in 15.08s, 155.19MB read
+Requests/sec:  60949.81
+Transfer/sec:     10.29MB
+STARTTIME 1525341949
+ENDTIME 1525341964
+
+---------------------------------------------------------
+ Concurrency: 512 for Kiss
+ wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8090/json"
+---------------------------------------------------------
+
+Running 15s test @ http://10.1.223.120:8090/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     6.39ms    6.16ms  84.50ms   89.33%
+    Req/Sec    24.91k    16.53k   54.76k    58.54%
+  Latency Distribution
+     50%    4.52ms
+     75%    7.45ms
+     90%   12.98ms
+     99%   32.27ms
+  727272 requests in 15.05s, 122.76MB read
+Requests/sec:  48338.91
+Transfer/sec:      8.16MB
+STARTTIME 1525341966
+ENDTIME 1525341981
+➜  benchmark
+

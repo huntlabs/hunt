@@ -1,7 +1,7 @@
 module kiss.event;
 
-public import kiss.event.base;
-public import kiss.event.loop;
-public import kiss.event.watcher;
-//public import kiss.event.task;
-public import kiss.event.struct_;
+public import kiss.event.EventLoop;
+public import kiss.event.EventLoopGroup;
+public import kiss.event.core;
+public import kiss.event.selector;
+public import kiss.event.socket;

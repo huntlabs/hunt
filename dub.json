@@ -3,9 +3,32 @@
     "description": "A refined core library for D programming language. Include event / net / tcpstream serialize / radix-tree / timer / container / memory / buffer.",
     "copyright": "Copyright (C) 2015-2018, HuntLabs.cn",
     "authors": [
-        "maozihua",
+        "zhangxueping",
         "zhangyuchun",
         "zoujiaqing"
     ],
-    "license": "Apache-2.0"
+    "license": "Apache-2.0",
+    "configurations":[
+        {
+            "name": "default"
+        },
+        {
+            "name": "debug-mode",
+            "versions": [
+                "KissDebugMode"
+            ]
+        }
+    ],
+    "versions-osx": [
+        "Kqueue"
+    ],
+    "versions-freebsd": [
+        "Kqueue"
+    ],
+    "versions-openbsd": [
+        "Kqueue"
+    ],
+    "versions-netbsd": [
+        "Kqueue"
+    ]
 }

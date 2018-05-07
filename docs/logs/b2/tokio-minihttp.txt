@@ -1,0 +1,174 @@
+﻿➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    18.48ms    6.32ms  81.04ms   76.42%
+    Req/Sec    13.04k     2.47k   22.39k    79.87%
+  Latency Distribution
+     50%   16.64ms
+     75%   21.97ms
+     90%   27.30ms
+     99%   40.03ms
+  389785 requests in 15.09s, 47.95MB read
+Requests/sec:  25829.58
+Transfer/sec:      3.18MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    17.81ms    5.63ms  71.56ms   75.27%
+    Req/Sec    13.08k     2.64k   22.33k    77.03%
+  Latency Distribution
+     50%   18.12ms
+     75%   21.36ms
+     90%   23.46ms
+     99%   35.38ms
+  390234 requests in 15.10s, 48.01MB read
+Requests/sec:  25839.51
+Transfer/sec:      3.18MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    17.59ms    5.44ms  68.26ms   74.71%
+    Req/Sec    13.40k     2.09k   21.09k    76.85%
+  Latency Distribution
+     50%   16.69ms
+     75%   21.21ms
+     90%   24.03ms
+     99%   33.01ms
+  400399 requests in 15.06s, 49.26MB read
+Requests/sec:  26584.12
+Transfer/sec:      3.27MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    17.60ms    4.94ms  68.66ms   76.79%
+    Req/Sec    13.35k     2.33k   24.20k    80.81%
+  Latency Distribution
+     50%   17.43ms
+     75%   20.21ms
+     90%   22.45ms
+     99%   32.04ms
+  398681 requests in 15.08s, 49.05MB read
+Requests/sec:  26440.68
+Transfer/sec:      3.25MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    19.31ms    4.49ms  65.55ms   78.59%
+    Req/Sec    12.66k     1.99k   22.01k    85.23%
+  Latency Distribution
+     50%   19.87ms
+     75%   22.32ms
+     90%   23.55ms
+     99%   30.21ms
+  377746 requests in 15.07s, 46.47MB read
+Requests/sec:  25064.89
+Transfer/sec:      3.08MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    17.89ms    4.63ms  60.67ms   77.04%
+    Req/Sec    13.49k     1.97k   21.52k    83.56%
+  Latency Distribution
+     50%   16.81ms
+     75%   21.30ms
+     90%   22.57ms
+     99%   31.38ms
+  402735 requests in 15.05s, 49.55MB read
+Requests/sec:  26762.92
+Transfer/sec:      3.29MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/plaintext
+Running 15s test @ http://10.1.11.114:8080/plaintext
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    19.12ms    5.63ms  70.06ms   76.65%
+    Req/Sec    12.80k     1.67k   21.51k    78.19%
+  Latency Distribution
+     50%   17.27ms
+     75%   22.65ms
+     90%   27.44ms
+     99%   33.44ms
+  382114 requests in 15.04s, 47.01MB read
+Requests/sec:  25413.19
+Transfer/sec:      3.13MB
+➜  ~
+
+
+
+
+➜  ~wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/json
+Running 15s test @ http://10.1.11.114:8080/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    21.40ms    7.12ms 275.72ms   90.23%
+    Req/Sec    11.60k     1.50k   17.37k    81.61%
+  Latency Distribution
+     50%   20.62ms
+     75%   23.89ms
+     90%   25.41ms
+     99%   33.83ms
+  347074 requests in 15.10s, 49.32MB read
+Requests/sec:  22990.08
+Transfer/sec:      3.27MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/json
+Running 15s test @ http://10.1.11.114:8080/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    20.98ms    6.26ms 222.68ms   76.82%
+    Req/Sec    11.35k     1.80k   19.03k    78.52%
+  Latency Distribution
+     50%   19.94ms
+     75%   25.01ms
+     90%   27.73ms
+     99%   36.15ms
+  339632 requests in 15.09s, 48.26MB read
+Requests/sec:  22503.95
+Transfer/sec:      3.20MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/json
+Running 15s test @ http://10.1.11.114:8080/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    20.55ms    4.50ms  56.53ms   74.95%
+    Req/Sec    11.79k     1.23k   17.25k    79.53%
+  Latency Distribution
+     50%   20.48ms
+     75%   23.04ms
+     90%   26.03ms
+     99%   32.46ms
+  351867 requests in 15.03s, 50.00MB read
+Requests/sec:  23410.29
+Transfer/sec:      3.33MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/json
+Running 15s test @ http://10.1.11.114:8080/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    20.60ms    5.33ms  83.87ms   75.57%
+    Req/Sec    11.75k     1.65k   19.44k    82.55%
+  Latency Distribution
+     50%   19.51ms
+     75%   24.36ms
+     90%   26.42ms
+     99%   35.51ms
+  351350 requests in 15.10s, 49.93MB read
+Requests/sec:  23271.06
+Transfer/sec:      3.31MB
+➜  ~ wrk -H 'Host: 10.1.11.114' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 http://10.1.11.114:8080/json
+Running 15s test @ http://10.1.11.114:8080/json
+  2 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    21.01ms    4.84ms  50.55ms   71.40%
+    Req/Sec    11.66k     1.11k   17.58k    79.53%
+  Latency Distribution
+     50%   20.50ms
+     75%   24.68ms
+     90%   27.10ms
+     99%   32.80ms
+  347961 requests in 15.02s, 49.44MB read
+Requests/sec:  23163.48
+Transfer/sec:      3.29MB
+➜  ~

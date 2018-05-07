@@ -1,0 +1,17 @@
+{
+	"name": "udp-demo",
+	"description": "A demo for UDP server and client.",
+	"copyright": "Copyright (C) 2015-2018, HuntLabs.cn",
+	"license": "Apache-2.0",
+	"authors": [
+		"BitWorld"
+	],
+	"dependencies": {
+		"kiss" : {
+			"path" : "../../"
+		}
+	},
+	"subConfigurations": {
+		"kiss" : "debug-mode"
+	}
+}
