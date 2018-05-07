@@ -4,6 +4,7 @@ import kiss.event;
 import kiss.net.TcpListener;
 import kiss.net.TcpStream;
 import kiss.util.KissTimer;
+import kiss.util.thread;
 
 import std.socket;
 import std.functional;
@@ -14,36 +15,40 @@ import std.process;
 
 void main()
 {
-
+	debug writefln("Main thread: %s", getTid());
 	globalLogLevel(LogLevel.warning);
 
-	debug writefln("Main thread: %s", getTid());
+	// to test big block data sending
+	int bufferSize = 8192 * 2 + 1;
+	ubyte[] bigData = new ubyte[bufferSize];
+	bigData[0] = 1;
+	bigData[$ - 1] = 2;
 
 	EventLoop loop = new EventLoop();
-	TcpListener listener = new TcpListener(loop, AddressFamily.INET);
+	TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
 
 	listener.bind(8090).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {
 		debug writefln("new connection from: %s", client.remoteAddress.toString());
 		client.onDataReceived((in ubyte[] data) {
-			debug writeln("received: ", cast(string) data);
-			client.write(data, (in ubyte[] wdata, size_t nBytes) {
-				debug writefln("thread: %s, sent bytes: %d, content: %s",
-				getTid(), nBytes, cast(string) data[0 .. nBytes]);
+			debug writeln("received bytes: ", data.length);
+			// debug writefln("received: %(%02X %)", data);
+			// const(ubyte)[] sentData = bigData;	// big data test
+			const(ubyte)[] sentData = data; // echo test
+			client.write(sentData, (in ubyte[] wdata, size_t nBytes) {
+				debug writefln("thread: %s, sent bytes: %d", getTid(), nBytes);
 
-				if (data.length > nBytes)
-					writefln("remaining bytes: ", data.length - nBytes);
+				if (sentData.length > nBytes)
+					writefln("remaining bytes: ", sentData.length - nBytes);
 			});
 
 			// client.write(new SocketStreamBuffer(data, (in ubyte[] wdata, size_t size) {
 			// 	debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			// }));
-		}).onDisconnected((){
-			debug writefln("client disconnected: %s",
-			client.remoteAddress.toString());
+		}).onDisconnected(() {
+			debug writefln("client disconnected: %s", client.remoteAddress.toString());
 		}).onClosed(() {
 			debug writefln("connection closed, local: %s, remote: %s",
-			client.localAddress.toString(),
-			client.remoteAddress.toString());
+			client.localAddress.toString(), client.remoteAddress.toString());
 		});
 	}).start();
 

@@ -119,7 +119,10 @@ class HttpServer : AbstractTcpServer
 
 	private void respondPlaintext(TcpStream client, bool keepAlive)
 	{
-		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+		// string currentTime = Clock.currTime.toString();
+		string currentTime = "Wed, 17 Apr 2013 12:00:00 GMT";
+		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss/0.3\r\nDate: " ~ currentTime ~ "\r\n\r\nHello, World!";
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
 			if (!keepAlive)
@@ -176,15 +179,15 @@ void main(string[] args)
 {
 	// globalLogLevel(LogLevel.warning);
 
-	ushort port = 8090;
-	GetoptResult o = getopt(args, "port|p", "Port (default 8090)", &port);
+	ushort port = 8080;
+	GetoptResult o = getopt(args, "port|p", "Port (default 8080)", &port);
 	if (o.helpWanted)
 	{
 		defaultGetoptPrinter("A simple http server powered by KISS!", o.options);
 		return;
 	}
 
-	HttpServer httpServer = new HttpServer("0.0.0.0", 8090, totalCPUs);
+	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs);
 	writefln("listening on %s", httpServer.bindingAddress.toString());
 	httpServer.start();
 }

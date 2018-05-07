@@ -22,13 +22,13 @@
 
 ![Benchmark](images/benchmark-1.png)
 
-[All the logs](logs/b1/)
+[The logs](logs/b1/)
 
 #### Server 2
 
 ![Benchmark](images/benchmark-2.png)
 
-[All the logs](logs/b2/)
+[The logs](logs/b2/)
 
 ### Benchmarking (json)
 
@@ -36,13 +36,13 @@
 
 ![Benchmark](images/benchmark-3.png)
 
-[All the logs](logs/b1/)
+[The logs](logs/b1/)
 
 #### Server 2
 
 ![Benchmark](images/benchmark-4.png)
 
-[All the logs](logs/b2/)
+[The logs](logs/b2/)
 
 
 ### See also

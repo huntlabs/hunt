@@ -111,6 +111,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         super(loop, WatcherType.TCP);
         setFlag(WatchFlag.Read, true);
         setFlag(WatchFlag.Write, true);
+        
+        version (KissDebugMode) trace("Buffer size for read: ", bufferSize);
         // _readBuffer = new UbyteArrayObject();
         _readBuffer = new ubyte[bufferSize];
 
