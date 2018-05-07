@@ -11,6 +11,9 @@
 
 module kiss.util.uri;
 
+import std.regex;
+import std.conv : to;
+
 class Uri
 {
     private
@@ -33,13 +36,15 @@ class Uri
         this._uriString = uriString;
     }
 
-    bool parse(string uriString)
+    bool parse()
     {
-        import std.regex;
-        import std.conv : to;
+        if (this._uriString)
+        {
+            return false;
+        }
 
         auto uriReg = regex(r"/^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$/i");
-        auto m = match(uriString, uriReg);
+        auto m = match(this._uriString, uriReg);
         if (!m)
         {
             this._valid = false;
@@ -59,7 +64,7 @@ class Uri
 
         return true;
     }
-    
+
     bool valid()
     {
         return this._valid;
