@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.event.socket.posix;
 
 // dfmt off
@@ -92,37 +92,36 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         setFlag(WatchFlag.ETMode, true);
     }
 
+    /**
+    */
     protected bool tryRead()
     {
-        bool canRead = false;
+        bool isDone = true;
         this.clearError();
-
         ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
-
         version (KissDebugMode)
             trace("read nbytes...", len);
 
         if (len > 0)
         {
-            canRead = true;
             if (dataReceivedHandler !is null)
                 dataReceivedHandler(this._readBuffer[0 .. len]);
 
-            version (KissDebugMode)
-                trace("continue reading...");
-            tryRead();
+            // It's prossible that more data are wainting for read in inner buffer.
+            if (len == _readBuffer.length)
+                isDone = false;
         }
         else if (len < 0)
         {
-            if (errno == 4)
-            {
-                canRead = true;
-            }
-            else if (errno != EAGAIN && errno != EWOULDBLOCK)
+            // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
+            // check more error status
+            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
             {
                 this._error = true;
                 this._erroString = fromStringz(strerror(errno)).idup;
             }
+            else
+                isDone = false;
         }
         else
         {
@@ -134,7 +133,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             else
                 this.close();
         }
-        return canRead;
+
+        return isDone;
     }
 
     protected void onDisconnected()
@@ -145,33 +145,107 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             disconnectionHandler();
     }
 
-    protected bool tryWrite(in ubyte[] data, out size_t writed)
-    {
-        bool canWrite = false;
-        this.clearError();
+    protected bool canWriteAgain = true;
+    int writeRetryLimit = 5;
+    private int writeRetries = 0;
 
+    /**
+    Warning: It will try the best to write all the data.   
+    // TODO: create a examlple for test
+    */
+    protected void tryWriteAll(in ubyte[] data)
+    {
         const nBytes = this.socket.send(data);
+        // version (KissDebugMode)
+        tracef("actually sent bytes: %d / %d", nBytes, data.length);
+
         if (nBytes > 0)
         {
-            writed = cast(size_t) nBytes;
-            canWrite = true;
+            if (canWriteAgain && nBytes < data.length) //  && writeRetries < writeRetryLimit
+            {
+                // version (KissDebugMode)
+                writeRetries++;
+                tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
+                        writeRetries, nBytes, data.length - nBytes, data.length);
+                if (writeRetries > writeRetryLimit)
+                    warning("You are writting a Big block of data!!!");
 
-            // if (sentHandler !is null)
-            //     sentHandler(nBytes);
+                tryWriteAll(data[nBytes .. $]);
+            }
+            else
+                writeRetries = 0;
+
+        }
+        else if (nBytes == Socket.ERROR)
+        {
+            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
+            {
+                string msg = lastSocketError();
+                warningf("errno=%d, message: %s", errno, msg);
+                this._error = true;
+                this._erroString = msg;
+
+                errorOccurred(msg);
+            }
+            else
+            {
+                // version (KissDebugMode)
+                warningf("errno=%d, message: %s", errno, lastSocketError());
+                if (canWriteAgain)
+                {
+                    import core.thread;
+                    import core.time;
+
+                    writeRetries++;
+                    tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
+                            writeRetries, nBytes, data.length - nBytes, data.length);
+                    if (writeRetries > writeRetryLimit)
+                        warning("You are writting a Big block of data!!!");
+                    warning("Wait for a 100 msecs to try again");
+                    Thread.sleep(100.msecs);
+                    tryWriteAll(data);
+                }
+            }
         }
         else
         {
-            if (errno == 4)
-            {
-                canWrite = true;
-            }
-            else if (errno != EAGAIN && errno != EWOULDBLOCK)
+            warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
+            assert(false, "not handled");
+        }
+    }
+
+    /**
+    Try to write a block of data.
+    */
+    protected size_t tryWrite(in ubyte[] data)
+    {
+        const nBytes = this.socket.send(data);
+        version (KissDebugMode)
+            tracef("actually sent bytes: %d / %d", nBytes, data.length);
+
+        if (nBytes > 0)
+        {
+            return nBytes;
+        }
+        else if (nBytes == Socket.ERROR)
+        {
+            version (KissDebugMode)
+                warningf("errno=%d, message: %s", errno, lastSocketError());
+
+            // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
+            // check more error status
+            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
             {
                 this._error = true;
-                this._erroString = fromStringz(strerror(errno)).idup;
+                this._erroString = lastSocketError();
             }
         }
-        return canWrite;
+        else
+        {
+            warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
+            assert(false, "not handled");
+        }
+        return 0;
     }
 
     protected void doConnect(Address addr)
