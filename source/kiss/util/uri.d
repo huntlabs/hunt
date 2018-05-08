@@ -14,6 +14,8 @@ module kiss.util.uri;
 import std.regex;
 import std.conv : to;
 
+/**
+*/
 class Uri
 {
     private
@@ -31,9 +33,9 @@ class Uri
         bool _valid = false;
     }
 
-    this(uriString)
+    this(string uri)
     {
-        this._uriString = uriString;
+        this._uriString = uri;
     }
 
     bool parse()
@@ -70,7 +72,7 @@ class Uri
         return this._valid;
     }
 
-    @property void scheme(string scheme)
+    @property Uri scheme(string scheme)
     {
         this._scheme = scheme;
 
@@ -82,7 +84,7 @@ class Uri
         return this._scheme;
     }
 
-    @property void username(string username)
+    @property Uri username(string username)
     {
         this._username = username;
 
@@ -94,7 +96,7 @@ class Uri
         return this._username;
     }
 
-    @property void password(string password)
+    @property Uri password(string password)
     {
         this._password = password;
 
@@ -106,7 +108,7 @@ class Uri
         return this._password;
     }
 
-    @property void host(string host)
+    @property Uri host(string host)
     {
         this._host = host;
 
@@ -118,7 +120,7 @@ class Uri
         return this._host;
     }
 
-    @property void path(string path)
+    @property Uri path(string path)
     {
         this._path = path;
 
@@ -130,7 +132,7 @@ class Uri
         return this._path;
     }
 
-    @property void query(string query)
+    @property Uri query(string query)
     {
         this._query = query;
 
@@ -142,7 +144,7 @@ class Uri
         return this._query;
     }
 
-    @property void fragment(string fragment)
+    @property Uri fragment(string fragment)
     {
         this._fragment = fragment;
 
@@ -154,7 +156,7 @@ class Uri
         return this._fragment;
     }
 
-    string toString()
+    override string toString()
     {
         return this._uriString;
     }
