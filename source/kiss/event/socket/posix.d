@@ -150,11 +150,15 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            if (errno == 4)
+            if (errno == EINTR)
             {
                 canWrite = true;
             }
-            else if (errno != EAGAIN && errno != EWOULDBLOCK)
+            else if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
+            {
+                canWrite = true;
+            }
+            else
             {
                 this._error = true;
                 this._erroString = fromStringz(strerror(errno)).idup;
