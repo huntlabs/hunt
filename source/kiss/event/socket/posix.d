@@ -21,6 +21,7 @@ import std.experimental.logger;
 import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
+import core.thread;
 
 /**
 TCP Server
@@ -103,11 +104,16 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else if (len < 0)
         {
-            if (errno == 4)
+            if (errno == 4) //EINTR
             {
                 canRead = true;
             }
-            else if (errno != EAGAIN && errno != EWOULDBLOCK)
+            else if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
+            {
+                canRead = true;
+                Thread.sleep(50.msecs);
+            }
+            else
             {
                 this._error = true;
                 this._erroString = fromStringz(strerror(errno)).idup;
@@ -150,14 +156,13 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            if (errno == EINTR)
+            if (errno == 4) //EINTR
             {
                 canWrite = true;
             }
             else if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
             {
                 canWrite = true;
-                import core.thread;
                 Thread.sleep(50.msecs);
             }
             else
