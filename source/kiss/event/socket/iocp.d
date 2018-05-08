@@ -242,8 +242,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     /// 
     // TODO: created by Administrator @ 2018-4-18 10:15:20
-    // Send big block data
-    protected bool tryWrite(in ubyte[] data, out size_t nBytes)
+    // Send a big block of data
+    protected size_t tryWrite(in ubyte[] data)
     {
         if (_isWritting)
         {
@@ -256,9 +256,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
         clearError();
         setWriteBuffer(data);
-        nBytes = doWrite();
+        size_t nBytes = doWrite();
 
-        return true;
+        return nBytes;
     }
 
     protected void tryWrite()

@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.net.TcpStream;
 
 import kiss.event;
@@ -221,7 +221,20 @@ protected:
         version (KissDebugMode)
             trace("start to read");
 
-        tryRead();
+        version (Posix)
+        {
+            while (_isRegistered && !tryRead())
+            {
+                version (KissDebugMode)
+                {
+                    trace("continue reading...");
+                }
+            }
+        }
+        else
+        {
+            tryRead();
+        }
 
         if (this.isError)
         {
@@ -255,7 +268,8 @@ protected:
         super.onClose();
         _isConnected = false;
         this.socket.shutdown(SocketShutdown.BOTH);
-        version(Posix)  this.socket.close();
+        version (Posix)
+            this.socket.close();
 
         if (closeHandler)
             closeHandler();
@@ -273,11 +287,11 @@ protected:
             return;
         }
 
-        bool canWrite = true;
+        // bool canWrite = true;
         version (KissDebugMode)
             trace("start to write");
 
-        while (canWrite && _isRegistered && !isWriteCancelling && !_writeQueue.empty)
+        while (_isRegistered && !isWriteCancelling && !_writeQueue.empty)
         {
             version (KissDebugMode)
                 trace("writting...");
@@ -293,17 +307,9 @@ protected:
             version (KissDebugMode)
                 infof("onWrite=>streamCounter[%d], data length=%d", this.number, data.length);
 
-            size_t nBytes;
-            canWrite = tryWrite(data, nBytes);
-
-            if (!canWrite)
-            {
-                version (KissDebugMode)
-                    warning("No data written!");
-                break;
-            }
-
-            if (writeBuffer.popSize(nBytes))
+            this.clearError();
+            size_t nBytes = tryWrite(data);
+            if (nBytes > 0 && writeBuffer.popSize(nBytes))
             {
                 version (KissDebugMode)
                     trace("finishing data writing...nBytes", nBytes);
