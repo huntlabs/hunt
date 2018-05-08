@@ -157,6 +157,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             else if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
             {
                 canWrite = true;
+                import core.thread;
+                Thread.sleep(50.msecs);
             }
             else
             {
