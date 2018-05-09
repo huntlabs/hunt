@@ -9,7 +9,7 @@
  *
  */
  
-deprecated("Using kiss.util.radix instead.") 
+deprecated("Using kiss.container.radix instead.") 
 module kiss.radix;
 
-public import kiss.util.radix;
+public import kiss.container.radix;

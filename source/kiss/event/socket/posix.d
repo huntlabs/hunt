@@ -80,7 +80,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected bool _isConnected; //if server side always true.
     // alias UbyteArrayObject = BaseTypeObject!(ubyte[]);
 
-    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2)
     {
         // _readBuffer = new UbyteArrayObject();
         version (KissDebugMode)
@@ -209,8 +209,16 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
-            assert(false, "not handled");
+            version (KissDebugMode)
+            {
+                warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
+                assert(false, "Undefined behavior!");
+            }
+            else
+            {
+                this._error = true;
+                this._erroString = lastSocketError();
+            }
         }
     }
 
@@ -242,8 +250,16 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
-            assert(false, "not handled");
+            version (KissDebugMode)
+            {
+                warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
+                assert(false, "Undefined behavior!");
+            }
+            else
+            {
+                this._error = true;
+                this._erroString = lastSocketError();
+            }
         }
         return 0;
     }

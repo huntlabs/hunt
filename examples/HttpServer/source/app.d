@@ -14,7 +14,7 @@ import std.stdio;
 import kiss.event;
 import kiss.net.TcpListener;
 import kiss.net.TcpStream;
-import kiss.util.KissTimer;
+import kiss.util.timer;
 
 import std.socket;
 import std.functional;

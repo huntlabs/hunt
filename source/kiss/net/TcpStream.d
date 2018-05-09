@@ -46,13 +46,12 @@ class TcpStream : AbstractStream
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         // _localAddress = socket.localAddress();// TODO:
-
         _isClientSide = false;
         _isConnected = false;
     }
 
     //for server side
-    this(Selector loop, Socket socket, int bufferSize = 4096 * 2)
+    this(Selector loop, Socket socket, size_t bufferSize = 4096 * 2)
     {
         super(loop, socket.addressFamily, bufferSize);
         this.socket = socket;
@@ -63,10 +62,12 @@ class TcpStream : AbstractStream
         _isConnected = true;
 
         version (KissDebugMode)
-            debug synchronized
         {
-            streamCounter++;
-            this.number = streamCounter;
+            synchronized
+            {
+                streamCounter++;
+                this.number = streamCounter;
+            }
         }
     }
 
@@ -183,7 +184,7 @@ class TcpStream : AbstractStream
         _inLoop.register(this);
         _isRegistered = true;
         version (Windows)
-            this.doRead();
+            this.beginRead();
     }
 
     void write(StreamWriteBuffer buffer)
@@ -233,7 +234,7 @@ protected:
         }
         else
         {
-            tryRead();
+            doRead();
         }
 
         if (this.isError)

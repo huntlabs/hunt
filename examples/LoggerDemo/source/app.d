@@ -10,7 +10,7 @@
  */
  
 import std.stdio;
-import kiss.util.logger;
+import kiss.logger;
 
 void main()
 {

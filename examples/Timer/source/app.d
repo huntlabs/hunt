@@ -16,7 +16,7 @@ import kiss.core;
 import std.experimental.logger;
 import core.thread;
 import core.time;
-import kiss.util.KissTimer;
+import kiss.util.timer;
 
 version (NativeTimer)
 {

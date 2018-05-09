@@ -13,7 +13,7 @@ import std.stdio;
 
 import kiss.event;
 import kiss.net;
-import kiss.util.KissTimer;
+import kiss.util.timer;
 import kiss.util.thread;
 
 import std.conv;

@@ -36,9 +36,9 @@ alias Acceptor = TcpListener;
 */
 class TcpListener : AbstractListener
 {
-    private int _bufferSize = 4 * 1024;
+    private size_t _bufferSize = 4 * 1024;
 
-    this(EventLoop loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4 * 1024)
+    this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
     {
         _bufferSize = bufferSize;
         version (Windows)

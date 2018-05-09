@@ -18,7 +18,7 @@ import std.experimental.logger;
 import std.datetime;
 import std.exception;
 
-import kiss.util.KissTimer;
+import kiss.util.timer;
 
 enum CustomTimerMinTimeOut = 50; // in ms
 enum CustomTimerWheelSize = 500;
