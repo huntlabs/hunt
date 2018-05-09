@@ -9,7 +9,7 @@
  *
  */
  
-module kiss.util.array;
+module kiss.container.array;
 
 import core.stdc.string : memcpy;
 /**

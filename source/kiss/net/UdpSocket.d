@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.net.UdpSocket;
 
 import kiss.event;
@@ -20,14 +20,15 @@ import std.exception;
 import std.experimental.logger;
 
 // dfmt off
-deprecated("Using KissUdpSocket instead.")
+deprecated("Using UdpSocket instead.")
 alias UdpStream = KissUdpSocket;
+deprecated("Using UdpSocket instead.")
+alias KissUdpSocket = UdpSocket;
 // dfmt on
-
 
 /**
 */
-class KissUdpSocket : AbstractDatagramSocket
+class UdpSocket : AbstractDatagramSocket
 {
 
     this(EventLoop loop, AddressFamily amily = AddressFamily.INET)
@@ -35,7 +36,7 @@ class KissUdpSocket : AbstractDatagramSocket
         super(loop, amily);
     }
 
-    KissUdpSocket setReadData(UDPReadCallBack cback)
+    UdpSocket setReadData(UDPReadCallBack cback)
     {
         _readBack = cback;
         return this;
@@ -56,30 +57,25 @@ class KissUdpSocket : AbstractDatagramSocket
         return this.socket.sendTo(buf, flags, to);
     }
 
-    KissUdpSocket bind(string ip, ushort port)
+    UdpSocket bind(string ip, ushort port)
     {
         super.bind(parseAddress(ip, port));
         return this;
     }
 
-    KissUdpSocket connect(Address addr)
+    UdpSocket connect(Address addr)
     {
         this.socket.connect(addr);
         return this;
     }
 
-    // bool watched()
-    // {
-    //     return this.active;
-    // }
-
-    deprecated("Using start instead!") 
-   bool watch()
+    deprecated("Using start instead!")
+    bool watch()
     {
         start();
         return true;
     }
-    
+
     override void start()
     {
         if (!_binded)
@@ -90,7 +86,8 @@ class KissUdpSocket : AbstractDatagramSocket
 
         _inLoop.register(this);
         _isRegistered = true;
-        version(Windows) doRead();
+        version (Windows)
+            doRead();
     }
 
     // override void close()
@@ -105,7 +102,8 @@ protected:
             bool canRead = true;
             while (canRead && _isRegistered)
             {
-                version(KissDebugMode) trace("reading data...");
+                version (KissDebugMode)
+                    trace("reading data...");
                 canRead = tryRead((Object obj) nothrow{
                     collectException(() {
                         UdpDataObject data = cast(UdpDataObject) obj;
@@ -115,7 +113,7 @@ protected:
                         }
                     }());
                 });
-                
+
                 if (this.isError)
                 {
                     canRead = false;
@@ -125,7 +123,6 @@ protected:
             }
         }());
     }
-
 
 private:
     UDPReadCallBack _readBack;

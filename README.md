@@ -35,6 +35,7 @@ A refined core library for D programming language.
 The details are [here](docs/benchmark.md).
 
 ## TODO
+- [ ] Clean up all the deprecated code after version 0.4 published
 - [ ] Performance improvement
 - [ ] Stablize APIs
 - [ ] More friendly APIs

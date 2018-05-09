@@ -9,7 +9,7 @@
  *
  */
  
-module kiss.util.radix;
+module kiss.container.radix;
 
 import std.stdio;
 import core.memory;

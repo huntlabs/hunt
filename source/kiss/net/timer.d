@@ -9,9 +9,9 @@
  *
  */
  
-deprecated("Using kiss.util.KissTimer instead.")
+deprecated("Using kiss.util.timer instead.")
 module kiss.net.timer;
 
-public import kiss.util.KissTimer;
+public import kiss.util.timer;
 
 

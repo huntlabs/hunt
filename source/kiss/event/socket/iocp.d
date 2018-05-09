@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.event.socket.iocp;
 
 // dfmt off
@@ -21,6 +21,7 @@ import kiss.container.ByteBuffer;
 import kiss.core;
 import kiss.event.socket.common;
 import kiss.event.core;
+import kiss.util.thread;
 
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
@@ -41,7 +42,7 @@ TCP Server
 */
 abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
 {
-    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4 * 1024)
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
     {
         super(loop, WatcherType.Accept);
         setFlag(WatchFlag.Read, true);
@@ -114,19 +115,18 @@ TCP Client
 */
 abstract class AbstractStream : AbstractSocketChannel, Stream
 {
+    DataReceivedHandler dataReceivedHandler;
     DataWrittenHandler sentHandler;
-    alias UbyteArrayObject = BaseTypeObject!(ubyte[]);
 
-    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2)
     {
         super(loop, WatcherType.TCP);
         setFlag(WatchFlag.Read, true);
         setFlag(WatchFlag.Write, true);
-        
-        version (KissDebugMode) trace("Buffer size for read: ", bufferSize);
-        // _readBuffer = new UbyteArrayObject();
-        _readBuffer = new ubyte[bufferSize];
 
+        version (KissDebugMode)
+            trace("Buffer size for read: ", bufferSize);
+        _readBuffer = new ubyte[bufferSize];
         this.socket = new TcpSocket(family);
     }
 
@@ -146,7 +146,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         super.onWrite();
     }
 
-    protected void doRead()
+    protected void beginRead()
     {
         _inRead = true;
         _dataReadBuffer.len = cast(uint) _readBuffer.length;
@@ -157,8 +157,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         DWORD dwFlags = 0;
 
         version (KissDebugMode)
-            trace("receive socket handle=>", this.socket.handle,
-                    ", buffer size=", _dataReadBuffer.len);
+            tracef("receiving on thread(%d), handle=%d ", getTid(), this.socket.handle);
 
         int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
                 &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
@@ -184,15 +183,17 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         _iocpwrite.watcher = this;
         _iocpwrite.operation = IocpOperation.write;
         version (KissDebugMode)
-            trace("writing...fd=", this.socket.handle());
+            trace("writing...handle=", this.socket.handle());
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
                 dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
-        // version (KissDebugMode)
+        version (KissDebugMode)
         {
             if (dwSent != _dataWriteBuffer.len)
                 warningf("dwSent=%d, BufferLength=%d", dwSent, _dataWriteBuffer.len);
         }
+        // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-9 16:28:55
+        // The buffer may be full, so what can do here?
         // checkErro(nRet, SOCKET_ERROR); // bug:
 
         if (this.isError)
@@ -204,15 +205,26 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         return dwSent;
     }
 
-    DataReceivedHandler dataReceivedHandler;
-
-    protected void tryRead()
+    protected void doRead()
     {
         this.clearError();
         version (KissDebugMode)
             tracef("data reading...%d nbytes", this.readLen);
 
-        if (readLen == 0)
+        if (readLen > 0)
+        {
+            // import std.stdio;
+            // writefln("length=%d, data: %(%02X %)", readLen, _readBuffer[0 .. readLen]);
+
+            if (dataReceivedHandler !is null)
+                dataReceivedHandler(this._readBuffer[0 .. readLen]);
+            version (KissDebugMode)
+                tracef("done with data reading...%d nbytes", this.readLen);
+
+            // continue reading
+            this.beginRead();
+        }
+        else if (readLen == 0)
         {
             version (KissDebugMode)
                 warningf("connection broken: %s", _remoteAddress.toString());
@@ -224,18 +236,16 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            // ubyte[] data = this._readBuffer.data;
-            // this._readBuffer.data = data[0 .. this.readLen];
-            // handler(this._readBuffer);
-            // this._readBuffer.data = data;
-            // if (this.isRegistered)
-            this.doRead();
-            if (dataReceivedHandler !is null)
-                dataReceivedHandler(this._readBuffer[0 .. readLen]);
             version (KissDebugMode)
-                tracef("done with data reading...%d nbytes", this.readLen);
+            {
+                warningf("undefined behavior on thread %d", getTid());
+            }
+            else
+            {
+                this._error = true;
+                this._erroString = "undefined behavior on thread";
+            }
         }
-        // return false;
     }
 
     // private ThreadID lastThreadID;

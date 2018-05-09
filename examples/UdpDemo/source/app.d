@@ -8,11 +8,11 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 import std.stdio;
 
 import kiss.event;
-import kiss.net.UdpSocket;
+import kiss.net.UdpSocket : UdpSocket;
 
 import std.socket;
 import std.functional;
@@ -25,11 +25,11 @@ void main()
 	EventLoop loop = new EventLoop();
 
 	// UDP Server
-	KissUdpSocket udpSocket = new KissUdpSocket(loop);
+	UdpSocket udpSocket = new UdpSocket(loop);
 
 	udpSocket.bind("0.0.0.0", 8090).setReadData((in ubyte[] data, Address addr) {
 		debug writefln("Server => client: %s, received: %s", addr, cast(string) data);
-		if(data == "bye!")
+		if (data == "bye!")
 		{
 			udpSocket.close();
 			// FIXME: Needing refactor or cleanup -@zxp at 4/25/2018, 10:17:32 AM
@@ -43,18 +43,19 @@ void main()
 	writeln("Listening on (UDP): ", udpSocket.bindAddr.toString());
 
 	// UDP Client
-	KissUdpSocket udpClient = new KissUdpSocket(loop);
+	UdpSocket udpClient = new UdpSocket(loop);
 
 	int count = 3;
 	udpClient.setReadData((in ubyte[] data, Address addr) {
-		debug writefln("Client => count=%d, server: %s, received: %s", count, addr, cast(string) data);
-		if(--count >0)
+		debug writefln("Client => count=%d, server: %s, received: %s", count,
+			addr, cast(string) data);
+		if (--count > 0)
 		{
 			udpClient.sendTo(data, addr);
 		}
 		else
 		{
-			udpClient.sendTo(cast(const(void)[])"bye!", addr);
+			udpClient.sendTo(cast(const(void)[]) "bye!", addr);
 			udpClient.close();
 			// loop.stop();
 		}

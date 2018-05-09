@@ -9,7 +9,7 @@
  *
  */
  
-deprecated("Using kiss.util.array instead.") 
+deprecated("Using kiss.container.array instead.") 
 module kiss.array;
 
-public import kiss.util.array;
+public import kiss.container.array;

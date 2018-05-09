@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.container.cirularqueue;
 
 import core.memory;
@@ -27,20 +27,22 @@ import kiss.container.common;
         Allocator = which type Allocator will used
 */
 
-deprecated("Unsupported no more!")
-@trusted struct CirularQueue(T, Allocator = GCAllocator, bool autoExten = false, bool addInGC = true)  if(is(T == Unqual!T)) {
+@trusted struct CirularQueue(T, Allocator = GCAllocator, bool autoExten = false, bool addInGC = true)
+        if (is(T == Unqual!T))
+{
     enum TSize = T.sizeof;
     enum addToGC = addInGC && hasIndirections!T && !is(Unqual!Allocator == GCAllocator);
     static if (hasIndirections!T)
         alias InsertT = T;
     else
         alias InsertT = const T;
-    
+
     /**
         Params:
             size        =  the queue init size. 
     */
-    this(uint size) {
+    this(uint size)
+    {
         assert(size > 3);
         _size = size;
         _data = cast(T[]) _alloc.allocate(TSize * size);
@@ -48,56 +50,71 @@ deprecated("Unsupported no more!")
             GC.addRange(_data.ptr, len);
     }
 
-    static if (!StaticAlloc!Allocator) {
-        this(uint size, Allocator alloc) {
+    static if (!StaticAlloc!Allocator)
+    {
+        this(uint size, Allocator alloc)
+        {
             this._alloc = alloc;
             this(size);
         }
     }
-    ~this() {
-        if (_data.ptr) {
+    ~this()
+    {
+        if (_data.ptr)
+        {
             static if (addToGC)
                 GC.removeRange(_data.ptr);
             _alloc.deallocate(_data);
         }
     }
 
-    pragma(inline, true) void clear() {
+    pragma(inline, true) void clear()
+    {
 
         _data[] = T.init;
         _front = _rear = 0;
     }
 
-    pragma(inline, true) @property bool empty() const nothrow {
+    pragma(inline, true) @property bool empty() const nothrow
+    {
         return (_rear == _front);
     }
 
-    pragma(inline) @property bool full() const {
+    pragma(inline) @property bool full() const
+    {
         if ((_rear + 1) % _size == _front)
             return true; //队满
         else
             return false;
     }
 
-    pragma(inline, true) @property T front() {
+    pragma(inline, true) @property T front()
+    {
         assert(!empty());
         return _data[_front];
     }
 
-    pragma(inline, true) @property uint length() {
+    pragma(inline, true) @property uint length()
+    {
         return (_rear - _front + _size) % _size;
     }
 
-    pragma(inline, true) @property uint maxLength() nothrow {
-        static if (autoExten) {
+    pragma(inline, true) @property uint maxLength() nothrow
+    {
+        static if (autoExten)
+        {
             return uint.max;
-        } else {
+        }
+        else
+        {
             return _size - 1;
         }
     }
 
-    bool enQueue(InsertT x) {
-        if (full()) { //队满
+    bool enQueue(InsertT x)
+    {
+        if (full())
+        { //队满
             static if (autoExten)
                 exten();
             else
@@ -108,7 +125,8 @@ deprecated("Unsupported no more!")
         return true;
     }
 
-    pragma(inline, true) T deQueue(T v = T.init) nothrow {
+    pragma(inline, true) T deQueue(T v = T.init) nothrow
+    {
         assert(!empty());
         auto x = _data[_front];
         _data[_front] = v;
@@ -116,16 +134,19 @@ deprecated("Unsupported no more!")
         return x;
     }
 
-    static if (autoExten) {
+    static if (autoExten)
+    {
     protected:
-        void exten() {
+        void exten()
+        {
             auto size = _size > 128 ? _size + ((_size / 3) * 2) : _size * 2;
             auto len = TSize * size;
             auto data = cast(T[]) _alloc.allocate(TSize * size);
             static if (addToGC)
                 GC.addRange(data.ptr, len);
             uint i = 0;
-            while (!empty) {
+            while (!empty)
+            {
                 data[i] = deQueue();
                 ++i;
             }
@@ -149,19 +170,22 @@ private:
     uint _size;
 }
 
-unittest {
+unittest
+{
     import std.stdio;
 
     auto myq = CirularQueue!(int)(5);
     writeln("init is empty = ", myq.empty);
-    foreach (i; 0 .. 13) {
+    foreach (i; 0 .. 13)
+    {
         writeln("enQueue i =  ", i, "  en value = ", myq.enQueue(i));
     }
     writeln("end is empty = ", myq.empty);
     writeln("end is full = ", myq.full);
     writeln("size  = ", myq.length);
     int i = 0;
-    while (!myq.empty) {
+    while (!myq.empty)
+    {
         writeln("\n");
         writeln("\tstart while! i = ", i);
         writeln("\tfront is = ", myq.front());

@@ -1,0 +1,15 @@
+{
+	"name": "performance",
+	"targetType": "executable",
+	"authors": [
+		"Putao"
+	],
+	"description": "A performance tester for KISS.",
+	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"kiss" : {
+			"path" : "../../"
+		}
+	}
+}

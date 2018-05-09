@@ -135,7 +135,7 @@ void main(string[] args)
 		return;
 	}
 
-	HttpServer httpServer = new HttpServer("0.0.0.0", 8090, totalCPUs);
+	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs);
 	writefln("All the servers is listening on %s.", httpServer.bindingAddress.toString());
 	httpServer.start();
 }

@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.exception;
 
 import std.exception;
@@ -19,15 +19,17 @@ import core.runtime;
 
 void catchAndLogException(E)(lazy E runer) @trusted nothrow
 {
-	try{
-		runer();
-	} catch (Exception e){
-		collectException(error(e.toString));
-	} catch(Error e){
-        collectException((){
-            critical(e.toString);
-            rt_term();
-        }());
+    try
+    {
+        runer();
+    }
+    catch (Exception e)
+    {
+        collectException(error(e.toString));
+    }
+    catch (Error e)
+    {
+        collectException(() { critical(e.toString); rt_term(); }());
         exit(-1);
     }
 }

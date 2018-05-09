@@ -1,5 +1,4 @@
 ﻿
-deprecated("Using kiss.util.logger instead.") 
 /*
  * Kiss - A refined core library for D programming language.
  *
@@ -11,6 +10,7 @@ deprecated("Using kiss.util.logger instead.")
  *
  */
  
+deprecated("Using kiss.logger instead.") 
 module kiss.log;
 
-public import kiss.util.logger;
+public import kiss.logger;

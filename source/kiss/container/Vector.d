@@ -19,7 +19,7 @@ import std.experimental.allocator.gc_allocator;
 import kiss.util.traits;
 import core.stdc.string : memcpy, memset;
 import kiss.container.common;
-import kiss.util.array;
+import kiss.container.array;
 
 // deprecated("Unsupported no more!")
 @trusted struct Vector(T, Allocator = Mallocator, bool addInGC = true) if(is(T == Unqual!T))
