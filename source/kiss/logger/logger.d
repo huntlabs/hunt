@@ -557,6 +557,7 @@ mixin(code!("logErrorf", LogLevel.LOG_ERROR, true));
 mixin(code!("logFatal", LogLevel.LOG_FATAL));
 mixin(code!("logFatalf", LogLevel.LOG_FATAL, true));
 
+
 unittest
 {
 	LogConf conf;

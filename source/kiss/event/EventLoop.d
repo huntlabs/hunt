@@ -28,12 +28,6 @@ final class EventLoop : AbstractSelector
         super();
     }
 
-    // deprecated("Using run instead!")
-    void join()
-    {
-        run();
-    }
-
     void run()
     {
         if (isRuning())

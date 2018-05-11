@@ -16,9 +16,6 @@ import kiss.event.core;
 
 // dfmt off
 version(Kqueue):
-
-deprecated("Using AbstractSelector instead!")
-alias KqueueLoop = AbstractSelector;
 // dfmt on
 
 import kiss.event.core;

@@ -24,22 +24,8 @@ import std.experimental.logger;
 alias ConnectionHandler = void delegate(bool isSucceeded);
 
 // dfmt off
-deprecated("Using SimpleEventHandler instead.") 
-alias CloseCallBack = void delegate() @trusted nothrow;
-
-deprecated("Using DataReceivedHandler instead.") 
-alias TcpReadCallBack = void delegate(in ubyte[] data) @trusted nothrow;
-
-deprecated("Using ConnectionHandler instead.") 
-alias TcpConnectCallBack = void delegate(bool connected) @trusted nothrow;
-
 alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr);
-
 alias AcceptCallBack = void delegate(Selector loop, Socket socket) ;
-
-deprecated("Using DataWrittenHandler instead.") 
-alias TCPWriteCallBack = void delegate(in ubyte[] data, size_t size) @trusted nothrow;
-
 // dfmt on
 
 alias SocketChannelBase = AbstractSocketChannel;
@@ -155,14 +141,6 @@ abstract class AbstractSocketChannel : AbstractChannel
     {
         super(loop, type);
     }
-
-    // dfmt off
-    deprecated("Using socket property instead.") 
-    protected void setSocket(Socket socket)
-    {
-        this.socket = socket;
-    }
-    // dfmt on
 
     protected @property void socket(Socket s)
     {

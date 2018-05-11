@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.event.core;
 
 import kiss.core;
@@ -24,14 +24,8 @@ alias DataReceivedHandler = void delegate(in ubyte[] data);
 alias DataWrittenHandler = void delegate(in ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
 
-// dfmt off
-deprecated("Using AbstractChannel instead.") 
-alias Watcher = AbstractChannel;
-
-deprecated("Using Channel instead.") 
-alias BaseTransport = Channel;
-
-@trusted interface  ReadTransport : Channel {
+@trusted interface ReadTransport : Channel
+{
 
     void close();
 
@@ -40,16 +34,16 @@ alias BaseTransport = Channel;
     void onClose(AbstractChannel watcher) nothrow;
 }
 
+@trusted interface WriteTransport : Channel
+{
 
-@trusted interface WriteTransport : Channel {
-    
     void onWrite(AbstractChannel watcher) nothrow;
 
     void onClose(AbstractChannel watcher) nothrow;
 }
 
-
-@trusted interface Transport  : ReadTransport, WriteTransport {
+@trusted interface Transport : ReadTransport, WriteTransport
+{
 }
 
 // dfmt on
@@ -97,10 +91,10 @@ interface Selector
 */
 abstract class AbstractChannel : Channel
 {
-    version (KissDebugMode) int number;
     socket_t handle = socket_t.init;
-
     ErrorEventHandler errorHandler;
+
+    protected bool _isRegistered = false;
 
     this(Selector loop, WatcherType type)
     {
@@ -113,13 +107,6 @@ abstract class AbstractChannel : Channel
     /**
     */
     bool isRegistered()
-    {
-        return _isRegistered;
-    }
-
-    protected bool _isRegistered = false;
-
-    deprecated("Using isRegistered instead.") bool watched()
     {
         return _isRegistered;
     }
@@ -301,7 +288,6 @@ class LoopException : Exception
 {
     mixin basicExceptionCtors;
 }
-
 
 // dfmt off
 version(linux):

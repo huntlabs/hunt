@@ -25,13 +25,6 @@ import core.time;
 import kiss.container.ByteBuffer;
 import kiss.core;
 
-version (KissDebugMode) __gshared int streamCounter = 0;
-
-deprecated("Using TcpStream instead.")
-{
-    alias TCPSocket = TcpStream;
-    alias TcpStreamClient = TcpStream;
-}
 
 /**
 */
@@ -60,15 +53,6 @@ class TcpStream : AbstractStream
 
         _isClientSide = false;
         _isConnected = true;
-
-        version (KissDebugMode)
-        {
-            synchronized
-            {
-                streamCounter++;
-                this.number = streamCounter;
-            }
-        }
     }
 
     void connect(string ip, ushort port)
@@ -108,33 +92,6 @@ class TcpStream : AbstractStream
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
         connect(addr);
     }
-
-    // dfmt off
-    deprecated("Using onClosed instead.") 
-    TcpStream setCloseHandle(CloseCallBack cback)
-    {
-        return onClosed(cback);
-    }
-
-    deprecated("Using onDataReceived instead.") 
-    TcpStream setReadHandle(DataReceivedHandler cback)
-    {
-        return onDataReceived(cback);
-    }
-
-    deprecated("Using onConnected instead.") 
-    TcpStream setConnectHandle(TcpConnectCallBack cback)
-    {
-        return onConnected(cback);
-    }
-
-    deprecated("Using start instead!") 
-   bool watch()
-    {
-        start();
-        return true;
-    }
-    // dfmt on
 
     TcpStream onConnected(ConnectionHandler cback)
     {
@@ -248,17 +205,8 @@ protected:
 
     override void onClose()
     {
-        // if (!_isConnected)
-        // {
-        //     // if (_connectionHandler)
-        //     //     _connectionHandler(false);
-        //     return;
-        // }
-
         version (KissDebugMode)
         {
-            infof("onClose=>watcher[%d].fd=%d, active=%s", this.number,
-                    this.handle, _isRegistered);
             if (!_writeQueue.empty)
             {
                 warning("Some data has not been sent yet.");
@@ -304,9 +252,6 @@ protected:
                 _writeQueue.deQueue().doFinish();
                 continue;
             }
-
-            version (KissDebugMode)
-                infof("onWrite=>streamCounter[%d], data length=%d", this.number, data.length);
 
             this.clearError();
             size_t nBytes = tryWrite(data);

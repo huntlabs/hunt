@@ -25,13 +25,6 @@ import kiss.net.TcpStream;
 
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
 
-// dfmt off
-deprecated("Using TcpListener instead.") 
-alias Acceptor = TcpListener;
-
-
-// dfmt on
-
 /**
 */
 class TcpListener : AbstractListener
@@ -47,42 +40,14 @@ class TcpListener : AbstractListener
             super(loop, family);
         // reusePort(true);
     }
-    
 
-    // this(EventLoop loop, Socket sock)
-    // {
-    //     assert(sock !is null);
-    //     super(loop);
-    //     this.socket = sock;
-    // }
 
     // dfmt off
-    // deprecated("Using onConnectionAccepted instead.")
+    deprecated("Using onConnectionAccepted instead.")
     TcpListener setReadHandle(AcceptCallBack cback)
     {
         _readBack = cback;
         return this;
-        // assert(false, "Using onConnectionAccepted instead.");
-    }
-
-    deprecated("Using onShutdown instead.")
-    TcpListener setCloseHandle(CloseCallBack cback)
-    {
-        closeHandler = cback;
-        return this;
-    }
-    
-    deprecated("Using bindingAddress instead!") 
-    Address bind()
-    {
-        return _localAddress;
-    }
-
-    deprecated("Using start instead.")
-    bool watch()
-    {
-        start();
-        return true;
     }
     // dfmt on
 
@@ -119,7 +84,7 @@ class TcpListener : AbstractListener
 
     Address bindingAddress()
     {
-        return _localAddress; // this.socket.localAddress();
+        return _localAddress; 
     }
 
     TcpListener reusePort(bool use)

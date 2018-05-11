@@ -355,10 +355,6 @@ abstract class TimerChannelBase : AbstractChannel, ITimer
         return this;
     }
 
-    deprecated("Using onTick instead.") ITimer setTimerHandle(TickedEventHandler cback)
-    {
-        return onTick(cback);
-    }
 
     /// The handler will be handled in another thread.
     ITimer onTick(TickedEventHandler handler)
@@ -377,22 +373,11 @@ abstract class TimerChannelBase : AbstractChannel, ITimer
         return _interval;
     }
 
-    // final @property time(size_t tm)
-    // {
-    //     _timeOut = tm;
-    // }
-
     void start(bool immediately = false, bool once = false)
     {
         _inLoop.register(this);
         _isRegistered = true;
         _isActive = true;
-    }
-
-    deprecated("To be removed") void start(uint mses)
-    {
-        this.interval = mses;
-        start();
     }
 
     void stop()
