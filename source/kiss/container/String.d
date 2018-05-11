@@ -25,7 +25,6 @@ alias String = IString!(Mallocator);
 alias WString = IWString!(Mallocator);
 alias DString = IDString!(Mallocator);
 
-// deprecated("Unsupported no more!")
 @trusted struct StringImpl(Char, Allocator)
         if (is(Char == Unqual!Char) && isSomeChar!Char)
 {

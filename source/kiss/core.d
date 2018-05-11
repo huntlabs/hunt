@@ -48,8 +48,6 @@ interface ITimer {
 	/// once: true to call timed event only once
 	void start(bool immediately = false, bool once = false);
 	
-	void start(uint interval);
-
 	void stop();
 
 	void reset(bool immediately = false, bool once = false);

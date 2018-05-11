@@ -14,8 +14,6 @@ module kiss.event.selector.epoll;
 // dfmt off
 version(linux):
 
-deprecated("Using AbstractSelector instead!")
-alias EpollLoop = AbstractSelector;
 // dfmt on
 
 import std.exception;

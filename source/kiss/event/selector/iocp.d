@@ -13,10 +13,6 @@ module kiss.event.selector.iocp;
 
 // dfmt off
 version (Windows) : 
-
-deprecated("Using AbstractSelector instead!")
-alias IOCPLoop = AbstractSelector;
-
 // dfmt on
 
 import kiss.event.socket;

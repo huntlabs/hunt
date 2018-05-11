@@ -19,13 +19,6 @@ import std.socket;
 import std.exception;
 import std.experimental.logger;
 
-// dfmt off
-deprecated("Using UdpSocket instead.")
-alias UdpStream = KissUdpSocket;
-deprecated("Using UdpSocket instead.")
-alias KissUdpSocket = UdpSocket;
-// dfmt on
-
 /**
 */
 class UdpSocket : AbstractDatagramSocket
@@ -69,13 +62,6 @@ class UdpSocket : AbstractDatagramSocket
         return this;
     }
 
-    deprecated("Using start instead!")
-    bool watch()
-    {
-        start();
-        return true;
-    }
-
     override void start()
     {
         if (!_binded)
@@ -89,11 +75,6 @@ class UdpSocket : AbstractDatagramSocket
         version (Windows)
             doRead();
     }
-
-    // override void close()
-    // {
-    //     onClose();
-    // }
 
 protected:
     override void onRead() nothrow
