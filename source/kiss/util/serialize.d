@@ -18,6 +18,7 @@ import core.stdc.string;
 import std.stdio;
 import std.bitmanip;
 import std.math;
+import std.json;
 
 private:
 
@@ -699,6 +700,160 @@ size_t getsize(T)(T t) if(is(T == class))
 }
 
 
+
+//////////////////////////////////////////////////////////////////json///////////////////////////
+
+enum bool isFloatType(T) = isType!(T , float) || isType!(T , double) ;
+
+JSONValue toJSON(T)(T t) 
+	if(isSignedType!T || isUnsignedType!T ||
+		is(T == string) || is(T == bool) || 
+		isFloatType!T)
+{
+	return JSONValue(t);
+}
+
+// uinteger
+T toOBJ(T)(JSONValue v) if( isUnsignedType!T )
+{
+	assert(v.type() == JSON_TYPE.UINTEGER);
+	return cast(T)v.uinteger;
+}
+
+// integer
+T toOBJ(T)(JSONValue v) if( isSignedType!T)
+{
+	assert(v.type() == JSON_TYPE.INTEGER);
+	return cast(T)v.integer;
+}
+
+// string
+T toOBJ(T)(JSONValue v) if(is( T == string))
+{
+	assert(v.type() == JSON_TYPE.STRING);
+	return v.str;
+}
+
+// bool
+T toOBJ(T)(JSONValue v) if(is( T == bool))
+{
+	assert(v.type() == JSON_TYPE.TRUE ||
+		v.type() == JSON_TYPE.FALSE);
+	return v.type() == JSON_TYPE.TRUE;
+}
+
+// floating
+T toOBJ(T)(JSONValue v) if(isFloatType!T)
+{
+	assert(v.type() == JSON_TYPE.FLOAT);
+	return cast(T)v.floating;
+}
+
+
+
+// array
+JSONValue toJSON(T)(T t) if(isStaticArray!T || (isDynamicArray!T && !is(T == string)))
+{
+	JSONValue[] j;
+	foreach(e ; t)
+	{
+		j ~= toJSON(e);
+	}
+	
+	return JSONValue(j);
+}
+
+
+T toOBJ(T)(JSONValue v) if( isStaticArray!T)
+{
+	T t;
+	assert(v.type() == JSON_TYPE.ARRAY);
+	for(size_t i = 0 ; i < t.length ; i++)
+	{
+		t[i] = toOBJ!(typeof(t[i]))(v.array[i]);
+	}
+	return t;
+}
+
+T toOBJ(T)(JSONValue v) if( isDynamicArray!T  && !is(T == string))
+{
+	T t;
+	assert(v.type() == JSON_TYPE.ARRAY);
+	t.length = v.array.length;
+	for(size_t i = 0 ; i < t.length ; i++)
+	{
+		t[i] = toOBJ!(typeof(t[i]))(v.array[i]);
+	}
+	return t;
+}
+
+// struct & class
+
+string toJSONMembers(T)() 
+{
+	string str;
+	foreach(m ; FieldNameTuple!T)
+	{
+		str ~= "j[\""~m~"\"] = toJSON(t." ~ m ~");";
+	}
+	return str;
+}
+
+string toOBJMembers(T)()
+{
+	string str;
+	foreach(m ; FieldNameTuple!T)
+	{
+		str ~= " if ( \"" ~ m ~ "\"  in j )";
+		str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\""~m~"\"]);";
+		
+	}
+	return str;
+}
+
+JSONValue toJSON(T)(T t) if(is(T == struct))
+{
+	JSONValue j;
+	import std.stdio;
+	mixin(toJSONMembers!T);
+	return j;
+}
+
+T toOBJ(T)(JSONValue j) if(is(T == struct))
+{
+	T t;
+	assert(j.type() == JSON_TYPE.OBJECT);
+	mixin(toOBJMembers!T);
+	return t;
+}
+
+
+JSONValue toJSON(T)(T t) if(is(T == class))
+{
+	if(t is null)
+	{
+		return JSONValue(JSON_TYPE.NULL);
+	}
+	
+	
+	JSONValue j;
+	mixin(toJSONMembers!T);
+	return j;
+}
+
+T toOBJ(T)(JSONValue j) if(is(T == class))
+{
+	if(j.type() == JSON_TYPE.NULL)
+		return null;
+	assert(j.type() == JSON_TYPE.OBJECT);
+	T t = new T;
+	mixin(toOBJMembers!T);
+	return t;
+}
+
+
+
+
 // only for , nested , new T
 version(unittest)
 {
@@ -707,6 +862,8 @@ version(unittest)
 	void test1(T)(T t)
 	{
 		assert(unserialize!T(serialize(t)) == t);
+
+		assert(toOBJ!T(toJSON(t)) == t);
 	}
 	
 	struct T1
@@ -835,7 +992,9 @@ unittest{
 		byte[] bs = toVariant(v);
 		long length = bs.length;
 		bs ~= [ 'x' ,'y' ];
-		return assert(toT!T(bs, index) == v && index == length);
+		assert(toT!T(bs, index) == v && index == length);
+
+		assert(toOBJ!T(toJSON(v)) == v);
 	}
 	
 	
