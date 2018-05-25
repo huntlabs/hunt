@@ -275,7 +275,7 @@ mixin template ReadConfig(T)
     static T readConfig(BaseConfig config)
     {
         import std.traits;
-        import kiss.traits;
+        import kiss.util.traits;
 
         static if (hasUDA!(T, ConfigItem))
         {
@@ -298,7 +298,7 @@ mixin template ReadConfig(T)
     static T redConfigVale(BaseConfigValue value)
     {
         import std.traits;
-        import kiss.traits;
+        import kiss.util.traits;
         import std.exception;
 
         T creatT(T)()
@@ -321,7 +321,7 @@ mixin template ReadConfig(T)
     static string buildSetFunction(T)()
     {
         import std.traits;
-        import kiss.traits;
+        import kiss.util.traits;
 
         string tColumnName(string column, string name)
         {
