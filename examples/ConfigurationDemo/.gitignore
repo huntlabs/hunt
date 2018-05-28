@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+docs/
+configurationdemo.so
+configurationdemo.dylib
+configurationdemo.dll
+configurationdemo.a
+configurationdemo.lib
+configurationdemo-test-*
+*.exe
+*.o
+*.obj
+*.lst
