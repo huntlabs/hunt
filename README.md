@@ -32,15 +32,15 @@ A refined core library for D programming language.
 ## Benchmarks
 ![Benchmark](docs/images/benchmark-2.png)
 
-The details are [here](docs/benchmark.md).
+For details, see [here](docs/benchmark.md).
 
 ## TODO
 - [ ] Publish v0.4
+- [x] Clean up all the deprecated code
 - [ ] Performance improvement
 - [ ] Stablize APIs
 - [ ] More friendly APIs
 - [ ] More examples
-- [ ] Use kiss.logger for inner debugging
-- [x] Clean up all the deprecated code
+- [x] Use kiss.logger for inner debugging
 - [x] Benchmark test
 - [x] Improving supports on Mac OS

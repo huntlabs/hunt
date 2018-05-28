@@ -54,7 +54,7 @@ final class EventLoop : AbstractSelector
 
     EventLoop postTask(AbstractTask task)
     {
-        import std.experimental.logger;
+        import kiss.logger;
 
         synchronized (this)
         {

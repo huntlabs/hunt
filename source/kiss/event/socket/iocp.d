@@ -31,7 +31,7 @@ import std.format;
 import std.conv;
 import std.socket;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 
 import std.process;
 
