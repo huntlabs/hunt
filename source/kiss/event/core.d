@@ -16,7 +16,7 @@ import kiss.core;
 import std.socket;
 import std.exception;
 import std.bitmanip;
-import std.experimental.logger;
+import kiss.logger;
 
 alias ReadCallBack = void delegate(Object obj);
 

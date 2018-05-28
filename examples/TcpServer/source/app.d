@@ -21,7 +21,7 @@ import std.socket;
 import std.functional;
 import std.exception;
 import std.datetime;
-import std.experimental.logger;
+import kiss.logger;
 import std.process;
 
 void main()

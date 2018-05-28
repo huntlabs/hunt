@@ -22,7 +22,7 @@ import kiss.event.timer.common;
 import core.time;
 import std.datetime;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 
 
 /**

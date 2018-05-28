@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.util.configuration;
 
 import std.conv;
@@ -18,14 +18,16 @@ import std.stdio;
 import std.string;
 import std.traits;
 
-import std.experimental.logger;
+import kiss.logger;
+import kiss.util.traits;
 
-class ConfFormatException : Exception
+
+class BadFormatException : Exception
 {
     mixin basicExceptionCtors;
 }
 
-class NoValueHasException : Exception
+class EmptyValueException : Exception
 {
     mixin basicExceptionCtors;
 }
@@ -44,6 +46,8 @@ interface BaseConfig
     //BaseConfigValue opDispatch(string s)();
 }
 
+/**
+*/
 auto as(T)(string value, T iv = T.init)
 {
     static if (is(T == bool))
@@ -69,12 +73,29 @@ auto as(T)(string value, T iv = T.init)
     }
 }
 
+import std.array;
+
+/**
+*/
 class ConfigurationValue : BaseConfigValue
 {
+    this(string name, string parentPath = "")
+    {
+        _name = name;
+    }
+
     override @property BaseConfigValue value(string name)
     {
         auto v = _map.get(name, null);
-        enforce!NoValueHasException(v, format(" %s is not in config! ", name));
+        if (v is null)
+        {
+            string path = this.fullPath();
+            if (path.empty)
+                path = name;
+            else
+                path = path ~ "." ~ name;
+            throw new EmptyValueException(format("The item of '%s' is not set! ", path));
+        }
         return v;
     }
 
@@ -88,15 +109,79 @@ class ConfigurationValue : BaseConfigValue
         return cast(ConfigurationValue)(value(s));
     }
 
+    T as(T = string)(T iv = T.init)
+    {
+        static if (is(T == bool))
+        {
+            if (_value.length == 0 || _value == "false" || _value == "0")
+                return false;
+            else
+                return true;
+        }
+        else static if (std.traits.isNumeric!(T))
+        {
+            if (_value.length == 0)
+                return iv;
+            else
+                return to!T(_value);
+        }
+        else
+        {
+            if (_value.length == 0)
+                return iv;
+            else
+                return cast(T) _value;
+        }
+    }
+
+    void apppendChildNode(string key, ConfigurationValue subNode)
+    {
+        subNode.parent = this;
+        _map[key] = subNode;
+    }
+
+    // string buildFullPath()
+    // {
+    //     string r = name;
+    //     ConfigurationValue cur = parent;
+    //     while (cur !is null && !cur.name.empty)
+    //     {
+    //         r = cur.name ~ "." ~ r;
+    //         cur = cur.parent;
+    //     }
+    //     return r;
+    // }
+
+    ConfigurationValue parent;
+
+    string nodeName()
+    {
+        return _name;
+    }
+
+    string fullPath()
+    {
+        return _fullPath;
+    }
+
 private:
     string _value;
+    string _name;
+    string _fullPath;
     ConfigurationValue[string] _map;
 }
 
+import std.path;
+import std.file;
+
+/**
+*/
 class Configuration : BaseConfig
 {
     this(string filename, string section = "")
     {
+        if (!exists(filename) || isDir(filename))
+            throw new Exception("The config file does not exist: " ~ filename);
         _section = section;
         loadConfig(filename);
     }
@@ -119,7 +204,7 @@ class Configuration : BaseConfig
 private:
     void loadConfig(string filename)
     {
-        _value = new ConfigurationValue();
+        _value = new ConfigurationValue("");
 
         import std.file;
 
@@ -151,36 +236,49 @@ private:
                 continue;
             }
             if (section != _section && section != "")
-                continue; // 不是自己要读取的分段，就跳过
+                continue;
+
             auto site = str.indexOf("=");
-            enforce!ConfFormatException((site > 0),
+            enforce!BadFormatException((site > 0),
                     format("the format is erro in file %s, in line %d", filename, line));
             string key = str[0 .. site].strip;
-            setValue(split(key, '.'), str[site + 1 .. $].strip);
+            setValue(key, str[site + 1 .. $].strip);
         }
     }
 
-    void setValue(string[] list, string value)
+    void setValue(string key, string value)
     {
+        string currentPath;
+        string[] list = split(key, '.');
         auto cvalue = _value;
-        foreach (ref str; list)
+        foreach (str; list)
         {
             if (str.length == 0)
                 continue;
+
+            if (currentPath.empty)
+                currentPath = str;
+            else
+                currentPath = currentPath ~ "." ~ str;
+
+            version (KissDebugMode)
+                tracef("checking node: path=%s", currentPath);
             auto tvalue = cvalue._map.get(str, null);
             if (tvalue is null)
-            { // 不存在就追加一个
-                tvalue = new ConfigurationValue();
-                cvalue._map[str] = tvalue;
+            {
+                tvalue = new ConfigurationValue(str);
+                tvalue._fullPath = currentPath;
+                cvalue.apppendChildNode(str, tvalue);
+                version (KissDebugMode)
+                    tracef("new node: parent=%s, node=%s, value=%s", cvalue.fullPath, str, value);
             }
             cvalue = tvalue;
         }
-        if (cvalue is _value)
-            return;
-        cvalue._value = value;
+
+        if (cvalue !is _value)
+            cvalue._value = value;
     }
 
-private:
     string _section;
     ConfigurationValue _value;
 }
@@ -224,7 +322,15 @@ unittest
     import std.stdio;
     import FE = std.file;
 
-    FE.write("test.config", "app.http.listen = 100 \nhttp.listen = 100 \napp.test = \napp.time = 0.25 \n# this is  \n ; start dev\n [dev]\napp.test = dev");
+    FE.write("test.config", `app.http.listen = 100
+    http.listen = 100
+    app.test = 
+    app.time = 0.25 
+    # this is  
+     ; start dev
+    [dev]
+    app.test = dev`);
+
     auto conf = new Configuration("test.config");
     assert(conf.http.listen.value.as!long() == 100);
     assert(conf.app.test.value() == "");
@@ -242,7 +348,7 @@ unittest
     assert(tvBool);
 
     string str;
-    auto e = collectException!NoValueHasException(confdev.app.host.value(), str);
+    auto e = collectException!EmptyValueException(confdev.app.host.value(), str);
     assert(e && e.msg == " host is not in config! ");
 
     TestConfig test = TestConfig.readConfig(confdev);
@@ -274,9 +380,6 @@ mixin template ReadConfig(T)
 {
     static T readConfig(BaseConfig config)
     {
-        import std.traits;
-        import kiss.util.traits;
-
         static if (hasUDA!(T, ConfigItem))
         {
             enum name = getUDAs!(T, ConfigItem)[0].name;
@@ -291,16 +394,12 @@ mixin template ReadConfig(T)
         }
         else
         {
-            static assert(0, "the Type is not a config type!");
+            static assert(0, "The Type is not a config type!");
         }
     }
 
     static T redConfigVale(BaseConfigValue value)
     {
-        import std.traits;
-        import kiss.util.traits;
-        import std.exception;
-
         T creatT(T)()
         {
             static if (is(T == struct))
@@ -320,12 +419,8 @@ mixin template ReadConfig(T)
 
     static string buildSetFunction(T)()
     {
-        import std.traits;
-        import kiss.util.traits;
-
         string tColumnName(string column, string name)
         {
-            // string column = getUDAs!(U, Column)[0].name;
             if (column.length == 0)
                 return name;
             else

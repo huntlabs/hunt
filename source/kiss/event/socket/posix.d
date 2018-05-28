@@ -27,7 +27,7 @@ import std.format;
 import std.process;
 import std.socket;
 import std.string;
-import std.experimental.logger;
+import kiss.logger;
 
 import core.stdc.errno;
 import core.stdc.string;

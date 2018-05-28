@@ -17,7 +17,7 @@ import kiss.exception;
 
 import std.socket;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 
 /**
 */
