@@ -18,7 +18,7 @@ import kiss.event.timer;
 
 import core.time;
 import std.datetime;
-import std.experimental.logger;
+import kiss.logger;
 
 alias  KissTimer = Timer; 
 
@@ -83,7 +83,7 @@ import std.datetime;
 import std.exception;
 import std.process;
 
-import std.experimental.logger;
+import kiss.logger;
 import core.sys.windows.windows;
 import core.thread;
 import core.time;

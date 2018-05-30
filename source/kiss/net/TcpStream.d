@@ -17,7 +17,7 @@ import kiss.net.core;
 import std.format;
 import std.socket;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 import std.socket;
 import core.thread;
 import core.time;

@@ -21,7 +21,7 @@ import std.json;
 import std.functional;
 import std.getopt;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 import std.datetime;
 import std.parallelism;
 import std.socket;

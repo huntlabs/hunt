@@ -188,7 +188,7 @@ class AbstractSelector : Selector
                 }
                 if ((events[i].filter & EVFILT_WRITE) && watch.isRegistered)
                 {
-                    // import std.experimental.logger;
+                    // import kiss.logger;
                     // version(KissDebugMode) trace("The channel socket is: ", typeid(watch));
                     AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
                     assert(wt !is null);

@@ -1,10 +1,10 @@
 {
-	"name": "http-server-powered",
+	"name": "configuration",
 	"targetType": "executable",
 	"authors": [
 		"Putao"
 	],
-	"description": "A simple http server powered by a group of event loops.",
+	"description": "A simple demo for kiss.util.configuration",
 	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
 	"dependencies": {

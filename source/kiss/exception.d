@@ -12,7 +12,7 @@
 module kiss.exception;
 
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 
 import core.stdc.stdlib;
 import core.runtime;

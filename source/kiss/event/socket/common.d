@@ -18,7 +18,7 @@ import kiss.exception;
 import kiss.container.ByteBuffer;
 
 import std.socket;
-import std.experimental.logger;
+import kiss.logger;
 
 
 alias ConnectionHandler = void delegate(bool isSucceeded);

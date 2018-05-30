@@ -23,7 +23,7 @@ import kiss.event.timer;
 
 import core.sys.windows.windows;
 import std.conv;
-import std.experimental.logger;
+import kiss.logger;
 
 /**
 */

@@ -557,6 +557,16 @@ mixin(code!("logErrorf", LogLevel.LOG_ERROR, true));
 mixin(code!("logFatal", LogLevel.LOG_FATAL));
 mixin(code!("logFatalf", LogLevel.LOG_FATAL, true));
 
+alias trace = logDebug;
+alias tracef = logDebugf;
+alias info = logInfo;
+alias infof = logInfof;
+alias warning = logWarning;
+alias warningf = logWarningf;
+alias error = logError;
+alias errorf = logErrorf;
+alias critical = logFatal;
+alias criticalf = logFatalf;
 
 unittest
 {
