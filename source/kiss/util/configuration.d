@@ -317,7 +317,7 @@ class ConfigBuilder
                             rv.%3$s = redConfigVale!(%4$s)(value.subItem("%2$s"));
                         }
                         else {
-                            logWarningf("Undefined item: %%s.%2$s" , value.fullPath);
+                            version (KissDebugMode) warningf("Undefined item: %%s.%2$s" , value.fullPath);
                         }
                     }.format(memberModuleName,
                             settingItemName, memberName, fullTypeName);
@@ -339,7 +339,7 @@ class ConfigBuilder
                                 rv.%2$s(value.subItem("%1$s").as!(%3$s)());
                             }
                             else {
-                                warningf("Undefined item: %%s.%1$s" , value.fullPath);
+                                version (KissDebugMode) warningf("Undefined item: %%s.%1$s" , value.fullPath);
                             }
                         }.format(settingItemName,
                                 memberName, paraType.stringof);
@@ -353,7 +353,7 @@ class ConfigBuilder
                             rv.%2$s = value.subItem("%1$s").as!(%3$s)();
                         }
                         else {
-                            warningf("Undefined item: %%s.%1$s" , value.fullPath);
+                            version (KissDebugMode) warningf("Undefined item: %%s.%1$s" , value.fullPath);
                         }
                     }.format(settingItemName,
                             memberName, memberTypeString);
