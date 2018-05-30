@@ -11,16 +11,48 @@
 
 module kiss.util.configuration;
 
+import std.array;
 import std.conv;
 import std.exception;
-import std.array;
+import std.file;
+import std.format;
+import std.path;
 import std.stdio;
 import std.string;
 import std.traits;
 
 import kiss.logger;
-import kiss.util.traits;
 
+/**
+*/
+struct Configuration
+{
+    string name;
+
+    this(string str)
+    {
+        name = str;
+    }
+}
+
+/**
+*/
+struct Value
+{
+    this(bool opt)
+    {
+        optional = opt;
+    }
+
+    this(string str, bool opt = false)
+    {
+        name = str;
+        optional = opt;
+    }
+
+    string name;
+    bool optional = false;
+}
 
 class BadFormatException : Exception
 {
@@ -32,23 +64,9 @@ class EmptyValueException : Exception
     mixin basicExceptionCtors;
 }
 
-interface BaseConfigValue
-{
-    @property string value();
-    @property BaseConfigValue value(string key);
-    //BaseConfigValue opDispatch(string s)();
-}
-
-interface BaseConfig
-{
-    BaseConfigValue value(string key);
-    @property BaseConfigValue topValue();
-    //BaseConfigValue opDispatch(string s)();
-}
-
 /**
 */
-auto as(T)(string value, T iv = T.init)
+T as(T)(string value, T iv = T.init)
 {
     static if (is(T == bool))
     {
@@ -73,18 +91,18 @@ auto as(T)(string value, T iv = T.init)
     }
 }
 
-import std.array;
-
 /**
 */
-class ConfigurationValue : BaseConfigValue
+class ConfigurationItem
 {
+    ConfigurationItem parent;
+
     this(string name, string parentPath = "")
     {
         _name = name;
     }
 
-    override @property BaseConfigValue value(string name)
+    @property ConfigurationItem subItem(string name)
     {
         auto v = _map.get(name, null);
         if (v is null)
@@ -94,19 +112,35 @@ class ConfigurationValue : BaseConfigValue
                 path = name;
             else
                 path = path ~ "." ~ name;
-            throw new EmptyValueException(format("The item of '%s' is not set! ", path));
+            throw new EmptyValueException(format("The item of '%s' is not defined! ", path));
         }
         return v;
     }
 
-    override @property string value()
+    @property bool exists(string name)
+    {
+        auto v = _map.get(name, null);
+        return (v !is null);
+    }
+
+    string currentName()
+    {
+        return _name;
+    }
+
+    string fullPath()
+    {
+        return _fullPath;
+    }
+
+    @property string value()
     {
         return _value;
     }
 
-    auto opDispatch(string s)()
+    ConfigurationItem opDispatch(string s)()
     {
-        return cast(ConfigurationValue)(value(s));
+        return subItem(s);
     }
 
     T as(T = string)(T iv = T.init)
@@ -134,16 +168,16 @@ class ConfigurationValue : BaseConfigValue
         }
     }
 
-    void apppendChildNode(string key, ConfigurationValue subNode)
+    void apppendChildNode(string key, ConfigurationItem subItem)
     {
-        subNode.parent = this;
-        _map[key] = subNode;
+        subItem.parent = this;
+        _map[key] = subItem;
     }
 
     // string buildFullPath()
     // {
     //     string r = name;
-    //     ConfigurationValue cur = parent;
+    //     ConfigurationItem cur = parent;
     //     while (cur !is null && !cur.name.empty)
     //     {
     //         r = cur.name ~ "." ~ r;
@@ -152,31 +186,16 @@ class ConfigurationValue : BaseConfigValue
     //     return r;
     // }
 
-    ConfigurationValue parent;
-
-    string nodeName()
-    {
-        return _name;
-    }
-
-    string fullPath()
-    {
-        return _fullPath;
-    }
-
 private:
     string _value;
     string _name;
     string _fullPath;
-    ConfigurationValue[string] _map;
+    ConfigurationItem[string] _map;
 }
-
-import std.path;
-import std.file;
 
 /**
 */
-class Configuration : BaseConfig
+class ConfigBuilder
 {
     this(string filename, string section = "")
     {
@@ -186,12 +205,12 @@ class Configuration : BaseConfig
         loadConfig(filename);
     }
 
-    override BaseConfigValue value(string name)
+    ConfigurationItem subItem(string name)
     {
-        return _value.value(name);
+        return _value.subItem(name);
     }
 
-    override @property BaseConfigValue topValue()
+    @property ConfigurationItem currentItem()
     {
         return _value;
     }
@@ -201,16 +220,156 @@ class Configuration : BaseConfig
         return _value.opDispatch!(s)();
     }
 
+    T build(T, string nodeName = "")()
+    {
+        static if (!nodeName.empty)
+        {
+            pragma(msg, "node name: " ~ nodeName);
+            return redConfigVale!(T)(this.subItem(nodeName));
+        }
+        else static if (hasUDA!(T, Configuration))
+        {
+            enum name = getUDAs!(T, Configuration)[0].name;
+            // pragma(msg,  "node name: " ~ name);
+            static if (name.length > 0)
+            {
+                return redConfigVale!(T)(this.subItem(name));
+            }
+            else
+            {
+                return redConfigVale!(T)(this.currentItem);
+            }
+        }
+        else
+        {
+            return redConfigVale!(T)(this.currentItem);
+            // static assert(0, "The Type is not a config type!");
+        }
+    }
+
+    static private T redConfigVale(T)(ConfigurationItem value)
+    {
+        T creatT(T)()
+        {
+            static if (is(T == struct))
+            {
+                return T();
+            }
+            else static if (is(T == class))
+            {
+                return new T();
+            }
+            else
+            {
+                static assert(false, T.stringof ~ " is not supported!");
+            }
+        }
+
+        auto rv = creatT!T();
+        enum generatedCode = buildSetFunction!T();
+        // trace("generated code:\n", generatedCode);
+        mixin(generatedCode);
+        return rv;
+    }
+
+    static private string buildSetFunction(T)()
+    {
+        import std.format;
+
+        string str = "import kiss.logger;";
+        // foreach (memberName; __traits(allMembers, T)) // TODO:
+        foreach (memberName; __traits(derivedMembers, T))
+        {
+            // version (KissDebugMode) pragma(msg, "current member: " ~ memberName);
+            static if (isType!(__traits(getMember, T, memberName)))
+            {
+                version (KissDebugMode) pragma(msg, "A type member: " ~ memberName);
+            }
+            else
+            {
+                alias memberType = typeof(__traits(getMember, T, memberName));
+                enum memberTypeString = memberType.stringof;
+
+                static if (hasUDA!(__traits(getMember, T, memberName), Value))
+                {
+                    enum item = getUDAs!((__traits(getMember, T, memberName)), Value)[0];
+                    enum settingItemName = item.name.empty ? memberName : item.name;
+                }
+                else
+                {
+                    enum settingItemName = memberName;
+                }
+
+                version (KissDebugMode) pragma(msg,
+                        "setting " ~ memberName ~ " with " ~ settingItemName);
+
+                // 
+                static if (is(memberType == struct) || is(memberType == class))
+                {
+                    enum fullTypeName = fullyQualifiedName!(memberType);
+                    enum memberModuleName = moduleName!(memberType);
+                    version (KissDebugMode) pragma(msg, "module name: " ~ memberModuleName);
+                    version (KissDebugMode) pragma(msg, "full type name: " ~ fullTypeName);
+
+                    str ~= q{
+                        import %1$s;
+                        if(value.exists("%2$s")) {
+                            rv.%3$s = redConfigVale!(%4$s)(value.subItem("%2$s"));
+                        }
+                        else {
+                            logWarningf("Undefined item: %%s.%2$s" , value.fullPath);
+                        }
+                    }.format(memberModuleName,
+                            settingItemName, memberName, fullTypeName);
+                }
+                else static if (is(memberType == interface))
+                {
+                    pragma(msg, "interface (unsupported): " ~ memberName);
+                }
+                else static if (isFunction!(memberType))
+                {
+                    version (KissDebugMode) pragma(msg, "method: " ~ memberName);
+                    alias memeberParameters = Parameters!(memberType);
+                    static if (memeberParameters.length == 1)
+                    {
+                        alias paraType = memeberParameters[0];
+                        str ~= q{
+                            // tracef("rv.%2$s=%%s", rv.%2$s);
+                            if(value.exists("%1$s")) {
+                                rv.%2$s(value.subItem("%1$s").as!(%3$s)());
+                            }
+                            else {
+                                warningf("Undefined item: %%s.%1$s" , value.fullPath);
+                            }
+                        }.format(settingItemName,
+                                memberName, paraType.stringof);
+                    }
+                }
+                else
+                {
+                    str ~= q{
+                        // tracef("rv.%2$s=%%s", rv.%2$s);
+                        if(value.exists("%1$s")) {
+                            rv.%2$s = value.subItem("%1$s").as!(%3$s)();
+                        }
+                        else {
+                            warningf("Undefined item: %%s.%1$s" , value.fullPath);
+                        }
+                    }.format(settingItemName,
+                            memberName, memberTypeString);
+                }
+            }
+        }
+        return str;
+    }
+
 private:
     void loadConfig(string filename)
     {
-        _value = new ConfigurationValue("");
-
-        import std.file;
+        _value = new ConfigurationItem("");
 
         if (!exists(filename))
             return;
-        import std.format;
 
         auto f = File(filename, "r");
         if (!f.isOpen())
@@ -261,16 +420,16 @@ private:
             else
                 currentPath = currentPath ~ "." ~ str;
 
-            version (KissDebugMode)
-                tracef("checking node: path=%s", currentPath);
+            // version (KissDebugMode)
+            //     tracef("checking node: path=%s", currentPath);
             auto tvalue = cvalue._map.get(str, null);
             if (tvalue is null)
             {
-                tvalue = new ConfigurationValue(str);
+                tvalue = new ConfigurationItem(str);
                 tvalue._fullPath = currentPath;
                 cvalue.apppendChildNode(str, tvalue);
-                version (KissDebugMode)
-                    tracef("new node: parent=%s, node=%s, value=%s", cvalue.fullPath, str, value);
+                // version (KissDebugMode)
+                //     tracef("new node: parent=%s, node=%s, value=%s", cvalue.fullPath, str, value);
             }
             cvalue = tvalue;
         }
@@ -280,40 +439,38 @@ private:
     }
 
     string _section;
-    ConfigurationValue _value;
+    ConfigurationItem _value;
 }
 
 version (unittest)
 {
     import kiss.util.configuration;
 
-    @ConfigItem("app")
+    @Configuration("app")
     class TestConfig
     {
-        @ConfigItem()
         string test;
-        @ConfigItem()
         double time;
 
-        @ConfigItem("http")
-        TestHttpConfig listen;
+        TestHttpConfig http;
 
-        @ConfigItem("optial", true)
+        @Value("optial", true)
         int optial = 500;
 
-        @ConfigItem(true)
+        @Value(true)
         int optial2 = 500;
 
-        mixin ReadConfig!TestConfig;
+        // mixin ReadConfig!TestConfig;
     }
 
-    @ConfigItem("HTTP")
+    @Configuration("http")
     struct TestHttpConfig
     {
-        @ConfigItem("listen")
+        @Value("listen")
         int value;
+        string addr;
 
-        mixin ReadConfig!TestHttpConfig;
+        // mixin ReadConfig!TestHttpConfig;
     }
 }
 
@@ -331,11 +488,11 @@ unittest
     [dev]
     app.test = dev`);
 
-    auto conf = new Configuration("test.config");
+    auto conf = new ConfigBuilder("test.config");
     assert(conf.http.listen.value.as!long() == 100);
     assert(conf.app.test.value() == "");
 
-    auto confdev = new Configuration("test.config", "dev");
+    auto confdev = new ConfigBuilder("test.config", "dev");
     long tv = confdev.http.listen.value.as!long;
     assert(tv == 100);
     assert(confdev.http.listen.value.as!long() == 100);
@@ -347,126 +504,12 @@ unittest
     bool tvBool = confdev.app.test.value.as!bool;
     assert(tvBool);
 
-    string str;
-    auto e = collectException!EmptyValueException(confdev.app.host.value(), str);
-    assert(e && e.msg == " host is not in config! ");
+    assertThrown!(EmptyValueException)(confdev.app.host.value());
 
-    TestConfig test = TestConfig.readConfig(confdev);
+    TestConfig test = confdev.build!(TestConfig)();
     assert(test.test == "dev");
     assert(test.time == 0.25);
-    assert(test.listen.value == 100);
+    assert(test.http.value == 100);
     assert(test.optial == 500);
     assert(test.optial2 == 500);
-}
-
-struct ConfigItem
-{
-    this(bool opt)
-    {
-        optional = opt;
-    }
-
-    this(string str, bool opt = false)
-    {
-        name = str;
-        optional = opt;
-    }
-
-    string name;
-    bool optional = false;
-}
-
-mixin template ReadConfig(T)
-{
-    static T readConfig(BaseConfig config)
-    {
-        static if (hasUDA!(T, ConfigItem))
-        {
-            enum name = getUDAs!(T, ConfigItem)[0].name;
-            static if (name.length > 0)
-            {
-                return redConfigVale(config.value(name));
-            }
-            else
-            {
-                return redConfigVale(config.topValue);
-            }
-        }
-        else
-        {
-            static assert(0, "The Type is not a config type!");
-        }
-    }
-
-    static T redConfigVale(BaseConfigValue value)
-    {
-        T creatT(T)()
-        {
-            static if (is(T == struct))
-            {
-                return T();
-            }
-            else
-            {
-                return new T();
-            }
-        }
-
-        auto rv = creatT!T();
-        mixin(buildSetFunction!T());
-        return rv;
-    }
-
-    static string buildSetFunction(T)()
-    {
-        string tColumnName(string column, string name)
-        {
-            if (column.length == 0)
-                return name;
-            else
-                return column;
-        }
-
-        string str;
-        foreach (memberName; __traits(allMembers, T))
-        {
-            //alias CurrtType = typeof( __traits(getMember,T, memberName) );
-            static if (__traits(compiles, __traits(getMember, T, memberName))
-                    && hasUDA!(__traits(getMember, T, memberName), ConfigItem))
-            {
-                auto item = getUDAs!((__traits(getMember, T, memberName)), ConfigItem)[0];
-                string name = tColumnName(item.name, memberName);
-                static if (is(typeof(__traits(getMember, T, memberName)) == struct)
-                        || is(typeof(__traits(getMember, T, memberName)) == class))
-                {
-                    if (item.optional)
-                    {
-                        str ~= "collectException(" ~ typeof(__traits(getMember, T, memberName))
-                            .stringof ~ ".redConfigVale(value.value(\"" ~ name
-                            ~ "\")),rv. " ~ memberName ~ ");\n";
-                    }
-                    else
-                    {
-                        str ~= "rv." ~ memberName ~ " = " ~ typeof(__traits(getMember, T, memberName))
-                            .stringof ~ ".redConfigVale(value.value(\"" ~ name ~ "\"));\n";
-                    }
-                }
-                else
-                {
-                    if (item.optional)
-                    {
-                        str ~= "collectException(value.value(\"" ~ name ~ "\").value().as!" ~ typeof(__traits(getMember,
-                                T, memberName)).stringof ~ "(),rv. " ~ memberName ~ ");\n";
-                    }
-                    else
-                    {
-                        str ~= "rv." ~ memberName ~ " = value.value(\"" ~ name ~ "\").value().as!" ~ typeof(
-                                __traits(getMember, T, memberName)).stringof ~ "();\n";
-                    }
-                }
-            }
-        }
-        return str;
-    }
-
 }
