@@ -36,3 +36,4 @@ examples/TcpServer/tcp-server
 examples/EventGroupDemo/http-server-powered
 test.config
 examples/PerformanceTest/performance
+examples/ConfigurationDemo/configuration

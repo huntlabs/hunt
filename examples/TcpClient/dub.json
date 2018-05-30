@@ -12,6 +12,6 @@
 		}
 	},
 	"subConfigurations": {
-		"kiss" : "debug-mode"
+		"kiss" : "debug"
 	}
 }
