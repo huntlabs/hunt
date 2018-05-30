@@ -18,7 +18,7 @@ import core.stdc.string;
 import std.stdio;
 import std.bitmanip;
 import std.math;
-import std.json;
+public import std.json;
 
 private:
 
@@ -851,7 +851,8 @@ T toOBJ(T)(JSONValue j) if(is(T == class))
 	return t;
 }
 
-
+alias toJson = toJSON;
+alias toObject = toOBJ;
 
 
 // only for , nested , new T
@@ -863,7 +864,7 @@ version(unittest)
 	{
 		assert(unserialize!T(serialize(t)) == t);
 
-		assert(toOBJ!T(toJSON(t)) == t);
+		assert(toObject!T(toJson(t)) == t);
 	}
 	
 	struct T1
