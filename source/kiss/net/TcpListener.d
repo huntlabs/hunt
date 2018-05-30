@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module kiss.net.TcpListener;
 
 import kiss.event;
@@ -16,7 +16,7 @@ import kiss.net.core;
 
 import std.socket;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 import core.thread;
 import core.time;
 
@@ -24,12 +24,20 @@ import kiss.core;
 import kiss.net.TcpStream;
 
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
+alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, size_t bufferSize);
 
 /**
 */
 class TcpListener : AbstractListener
 {
+    private bool isSslEnabled = false;
     private size_t _bufferSize = 4 * 1024;
+    protected EventHandler _shutdownHandler;
+
+    /// event handlers
+    AcceptEventHandler acceptHandler;
+    SimpleEventHandler closeHandler;
+    PeerCreateHandler peerCreateHandler;
 
     this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
     {
@@ -38,22 +46,17 @@ class TcpListener : AbstractListener
             super(loop, family, bufferSize);
         else
             super(loop, family);
-        // reusePort(true);
     }
-
-
-    // dfmt off
-    deprecated("Using onConnectionAccepted instead.")
-    TcpListener setReadHandle(AcceptCallBack cback)
-    {
-        _readBack = cback;
-        return this;
-    }
-    // dfmt on
 
     TcpListener onConnectionAccepted(AcceptEventHandler handler)
     {
         acceptHandler = handler;
+        return this;
+    }
+
+    TcpListener onPeerCreating(PeerCreateHandler handler)
+    {
+        peerCreateHandler = handler;
         return this;
     }
 
@@ -84,7 +87,7 @@ class TcpListener : AbstractListener
 
     Address bindingAddress()
     {
-        return _localAddress; 
+        return _localAddress;
     }
 
     TcpListener reusePort(bool use)
@@ -94,18 +97,16 @@ class TcpListener : AbstractListener
         version (Posix)
         {
             import core.sys.posix.sys.socket;
+
             this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, use);
         }
-
-        version (windows)
+        else version (windows)
         {
-            if (!use)
-            {
-                import core.sys.windows.winsock2;
+            import core.sys.windows.winsock2;
 
+            if (!use)
                 this.socket.setOption(SocketOptionLevel.SOCKET,
                         cast(SocketOption) SO_EXCLUSIVEADDRUSE, true);
-            }
         }
 
         return this;
@@ -134,7 +135,7 @@ class TcpListener : AbstractListener
         this.onClose();
     }
 
-    override void onRead()
+    protected override void onRead()
     {
         bool canRead = true;
         version (KissDebugMode)
@@ -151,12 +152,15 @@ class TcpListener : AbstractListener
 
                 if (acceptHandler !is null)
                 {
-                    TcpStream stream = new TcpStream(_inLoop, socket, _bufferSize);
+                    TcpStream stream;
+                    if (peerCreateHandler is null)
+                        stream = new TcpStream(_inLoop, socket, _bufferSize);
+                    else
+                        stream = peerCreateHandler(this, socket, _bufferSize);
+
                     acceptHandler(this, stream);
                     stream.start();
                 }
-                if(_readBack !is null)
-                    _readBack(_inLoop, socket);
             });
 
             if (this.isError)
@@ -167,13 +171,4 @@ class TcpListener : AbstractListener
             }
         }
     }
-
-    
-    AcceptEventHandler acceptHandler;
-    SimpleEventHandler closeHandler;
-
-protected:
-    AcceptCallBack _readBack;
-    EventHandler _shutdownHandler;
-
 }

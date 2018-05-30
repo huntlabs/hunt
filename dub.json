@@ -13,7 +13,7 @@
             "name": "default"
         },
         {
-            "name": "debug-mode",
+            "name": "debug",
             "versions": [
                 "KissDebugMode"
             ]

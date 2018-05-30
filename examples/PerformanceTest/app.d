@@ -9,7 +9,7 @@ import kiss.core;
 
 import std.getopt;
 import std.exception;
-import std.experimental.logger;
+import kiss.logger;
 import std.datetime;
 import std.parallelism;
 

@@ -14,7 +14,7 @@ module kiss.event.timer.common;
 import kiss.core;
 import kiss.event.core;
 
-import std.experimental.logger;
+import kiss.logger;
 import std.datetime;
 import std.exception;
 

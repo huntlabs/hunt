@@ -19,7 +19,7 @@ version(linux):
 import std.exception;
 import std.socket;
 import std.string;
-import std.experimental.logger;
+import kiss.logger;
 
 import core.time;
 import core.stdc.string;

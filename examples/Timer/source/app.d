@@ -13,7 +13,7 @@ import std.stdio;
 
 import kiss.core;
 
-import std.experimental.logger;
+import kiss.logger;
 import core.thread;
 import core.time;
 import kiss.util.timer;

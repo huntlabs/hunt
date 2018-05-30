@@ -9,9 +9,10 @@
 	"dependencies": {
 		"kiss" : {
 			"path" : "../../"
-		}
+		},
+		"datefmt": "~>1.0.2"
 	},
 	"subConfigurations": {
-		"kiss" : "debug-mode"
+		"kiss" : "debug"
 	}
 }
