@@ -618,8 +618,10 @@ byte[] serialize(T)(T t) if(is(T == class))
 	header[0] = 11;
 	byte[] 	data;
 	byte[] dh = cast(byte[])header;
-	mixin(serializeMembers!T());
-	
+	if( t !is null)
+	{
+		mixin(serializeMembers!T());
+	}
 	uint len = cast(uint)data.length;
 	dh ~= toVariant(len);
 	return dh ~ data;
@@ -630,10 +632,14 @@ T unserialize(T)(const byte[] data , out long parse_index)if(is(T == class))
 {
 	assert(data[0] == 11);
 	
-	T t = new T;
+
 	long index1;
 	uint len = toT!uint(data[1 .. $] , index1);
-	
+
+	if( len == 0)
+		return null;
+
+	T t = new T;
 	parse_index = index1 + 1 + len;
 	long index = index1 + 1;
 	mixin(unserializeMembers!T());
@@ -862,7 +868,7 @@ JSONValue toJSON(T)(T t) if(is(T == class))
 {
 	if(t is null)
 	{
-		return JSONValue(JSON_TYPE.NULL);
+		return JSONValue(null);
 	}
 	
 	
@@ -1036,6 +1042,9 @@ version(unittest)
 		
 		test1(c2);
 
+		C2 c3 = null;
+
+		test1(c3);
 
 		string[string] 	map1 = ["1":"1","2":"2"];
 		string[int]		map2 = [1:"1",2:"2"];
@@ -1252,6 +1261,9 @@ unittest{
 		sa ~= "test4";
 		
 		test1(sa);
+
+		string[] sa2;
+		test1(sa2);
 	}
 	
 	//test struct \ class \ associative array
