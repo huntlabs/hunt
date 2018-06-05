@@ -20,6 +20,13 @@ struct ServerSettings
     ushort port = 8080;
 }
 
+
+@Configuration("package")
+class PackageSettings
+{
+    string name;
+}
+
 @Configuration("app")
 class TestConfig
 {
@@ -27,6 +34,11 @@ class TestConfig
 
     @Value("time")
     double time;
+    
+    PackageSettings package1;
+
+    @Value("pkg")
+    PackageSettings package2;
 
     ServerSettings server1;
 
@@ -43,16 +55,15 @@ class TestConfig
 
     @property void description(string d)
     {
-        // _desc = d;
+        _desc = d;
     }
 
     @property string description()
     {
-        return "TODO:";
-        // return _desc;
+        return _desc;
     }
 
-    // private string _desc = "Puto Inc.";
+    private string _desc = "Putao Ltd.";
 
 }
 
@@ -79,13 +90,14 @@ class BuilderTest1Config
 
 }
 
-// TODO: Tasks pending completion -@Administrator at 2018-5-29 17:40:49
-// 
+
 class TestConfigEx : TestConfig
 {
     string fullName = "Putao";
 }
 
+
+@Configuration("hunt")
 class AppConfig
 {
     struct ApplicationConf
@@ -231,9 +243,9 @@ class AppConfig
         ServiceConf service;
     }
 
-    struct Templates
+    struct Views
     {
-        string path = "./views/";
+        string path = "views/";
         string ext = ".dhtml";
     }
 
@@ -253,5 +265,5 @@ class AppConfig
     DateConf date;
     MailConf mail;
     RpcConf rpc;
-    Templates templates;
+    Views view;
 }

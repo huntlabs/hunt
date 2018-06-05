@@ -11,6 +11,7 @@
 
 module kiss.util.configuration;
 
+import std.algorithm;
 import std.array;
 import std.conv;
 import std.exception;
@@ -143,6 +144,11 @@ class ConfigurationItem
         return subItem(s);
     }
 
+    ConfigurationItem opIndex(string s)
+    {
+        return subItem(s);
+    }
+
     T as(T = string)(T iv = T.init)
     {
         static if (is(T == bool))
@@ -174,6 +180,11 @@ class ConfigurationItem
         _map[key] = subItem;
     }
 
+    override string toString()
+    {
+        return _fullPath;
+    }
+
     // string buildFullPath()
     // {
     //     string r = name;
@@ -193,6 +204,26 @@ private:
     ConfigurationItem[string] _map;
 }
 
+// dfmt off
+__gshared const string[] reservedWords = [
+    "abstract", "alias", "align", "asm", "assert", "auto", "body", "bool",
+    "break", "byte", "case", "cast", "catch", "cdouble", "cent", "cfloat", 
+    "char", "class","const", "continue", "creal", "dchar", "debug", "default", 
+    "delegate", "delete", "deprecated", "do", "double", "else", "enum", "export", 
+    "extern", "false", "final", "finally", "float", "for", "foreach", "foreach_reverse",
+    "function", "goto", "idouble", "if", "ifloat", "immutable", "import", "in", "inout", 
+    "int", "interface", "invariant", "ireal", "is", "lazy", "long",
+    "macro", "mixin", "module", "new", "nothrow", "null", "out", "override", "package",
+    "pragma", "private", "protected", "public", "pure", "real", "ref", "return", "scope", 
+    "shared", "short", "static", "struct", "super", "switch", "synchronized", "template", 
+    "this", "throw", "true", "try", "typedef", "typeid", "typeof", "ubyte", "ucent", 
+    "uint", "ulong", "union", "unittest", "ushort", "version", "void", "volatile", "wchar",
+    "while", "with", "__FILE__", "__FILE_FULL_PATH__", "__MODULE__", "__LINE__", 
+    "__FUNCTION__", "__PRETTY_FUNCTION__", "__gshared", "__traits", "__vector", "__parameters",
+    "subItem", "rootItem"
+];
+// dfmt on
+
 /**
 */
 class ConfigBuilder
@@ -210,14 +241,19 @@ class ConfigBuilder
         return _value.subItem(name);
     }
 
-    @property ConfigurationItem currentItem()
+    @property ConfigurationItem rootItem()
     {
         return _value;
     }
 
-    auto opDispatch(string s)()
+    ConfigurationItem opDispatch(string s)()
     {
         return _value.opDispatch!(s)();
+    }
+
+    ConfigurationItem opIndex(string s)
+    {
+        return _value.subItem(s);
     }
 
     T build(T, string nodeName = "")()
@@ -225,7 +261,7 @@ class ConfigBuilder
         static if (!nodeName.empty)
         {
             pragma(msg, "node name: " ~ nodeName);
-            return redConfigVale!(T)(this.subItem(nodeName));
+            return buildItem!(T)(this.subItem(nodeName));
         }
         else static if (hasUDA!(T, Configuration))
         {
@@ -233,21 +269,20 @@ class ConfigBuilder
             // pragma(msg,  "node name: " ~ name);
             static if (name.length > 0)
             {
-                return redConfigVale!(T)(this.subItem(name));
+                return buildItem!(T)(this.subItem(name));
             }
             else
             {
-                return redConfigVale!(T)(this.currentItem);
+                return buildItem!(T)(this.rootItem);
             }
         }
         else
         {
-            return redConfigVale!(T)(this.currentItem);
-            // static assert(0, "The Type is not a config type!");
+            return buildItem!(T)(this.rootItem);
         }
     }
 
-    static private T redConfigVale(T)(ConfigurationItem value)
+    static private T buildItem(T)(ConfigurationItem item)
     {
         T creatT(T)()
         {
@@ -265,25 +300,33 @@ class ConfigBuilder
             }
         }
 
-        auto rv = creatT!T();
-        enum generatedCode = buildSetFunction!T();
-        // trace("generated code:\n", generatedCode);
+        auto r = creatT!T();
+        enum generatedCode = buildSetFunction!(T, r.stringof, item.stringof)();
+        // pragma(msg, generatedCode);
         mixin(generatedCode);
-        return rv;
+        return r;
     }
 
-    static private string buildSetFunction(T)()
+    static private string buildSetFunction(T, string returnParameter, string incomingParameter)()
     {
         import std.format;
 
         string str = "import kiss.logger;";
-        // foreach (memberName; __traits(allMembers, T)) // TODO:
-        foreach (memberName; __traits(derivedMembers, T))
+        foreach (memberName; __traits(allMembers, T)) // TODO: // foreach (memberName; __traits(derivedMembers, T))
         {
-            // version (KissDebugMode) pragma(msg, "current member: " ~ memberName);
-            static if (isType!(__traits(getMember, T, memberName)))
+            enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
+            static if (memberProtection == "private"
+                    || memberProtection == "protected" || memberProtection == "export")
             {
-                version (KissDebugMode) pragma(msg, "A type member: " ~ memberName);
+                version (KissDebugMode) pragma(msg, "skip private member: " ~ memberName);
+            }
+            else static if (isType!(__traits(getMember, T, memberName)))
+            {
+                version (KissDebugMode) pragma(msg, "skip inner type member: " ~ memberName);
+            }
+            else static if (__traits(isStaticFunction, __traits(getMember, T, memberName)))
+            {
+                version (KissDebugMode) pragma(msg, "skip static member: " ~ memberName);
             }
             else
             {
@@ -300,67 +343,119 @@ class ConfigBuilder
                     enum settingItemName = memberName;
                 }
 
-                version (KissDebugMode) pragma(msg,
-                        "setting " ~ memberName ~ " with " ~ settingItemName);
-
                 // 
-                static if (is(memberType == struct) || is(memberType == class))
-                {
-                    enum fullTypeName = fullyQualifiedName!(memberType);
-                    enum memberModuleName = moduleName!(memberType);
-                    version (KissDebugMode) pragma(msg, "module name: " ~ memberModuleName);
-                    version (KissDebugMode) pragma(msg, "full type name: " ~ fullTypeName);
-
-                    str ~= q{
-                        import %1$s;
-                        if(value.exists("%2$s")) {
-                            rv.%3$s = redConfigVale!(%4$s)(value.subItem("%2$s"));
-                        }
-                        else {
-                            version (KissDebugMode) warningf("Undefined item: %%s.%2$s" , value.fullPath);
-                        }
-                    }.format(memberModuleName,
-                            settingItemName, memberName, fullTypeName);
-                }
-                else static if (is(memberType == interface))
+                static if (is(memberType == interface))
                 {
                     pragma(msg, "interface (unsupported): " ~ memberName);
                 }
+                else static if (is(memberType == struct) || is(memberType == class))
+                {
+                    str ~= setClassMemeber!(memberType, settingItemName,
+                            memberName, returnParameter, incomingParameter)();
+                }
                 else static if (isFunction!(memberType))
                 {
-                    version (KissDebugMode) pragma(msg, "method: " ~ memberName);
-                    alias memeberParameters = Parameters!(memberType);
-                    static if (memeberParameters.length == 1)
-                    {
-                        alias paraType = memeberParameters[0];
-                        str ~= q{
-                            // tracef("rv.%2$s=%%s", rv.%2$s);
-                            if(value.exists("%1$s")) {
-                                rv.%2$s(value.subItem("%1$s").as!(%3$s)());
-                            }
-                            else {
-                                version (KissDebugMode) warningf("Undefined item: %%s.%1$s" , value.fullPath);
-                            }
-                        }.format(settingItemName,
-                                memberName, paraType.stringof);
-                    }
+                    enum r = setFunctionMemeber!(memberType, settingItemName,
+                                memberName, returnParameter, incomingParameter)();
+                    if (!r.empty)
+                        str ~= r;
                 }
                 else
                 {
+                    version (KissDebugMode) pragma(msg,
+                            "setting " ~ memberName ~ " with item " ~ settingItemName);
                     str ~= q{
-                        // tracef("rv.%2$s=%%s", rv.%2$s);
-                        if(value.exists("%1$s")) {
-                            rv.%2$s = value.subItem("%1$s").as!(%3$s)();
+                        if(%5$s.exists("%1$s")) {
+                            %4$s.%2$s = %5$s.subItem("%1$s").as!(%3$s)();
                         }
                         else {
-                            version (KissDebugMode) warningf("Undefined item: %%s.%1$s" , value.fullPath);
+                            version (KissDebugMode) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                         }
-                    }.format(settingItemName,
-                            memberName, memberTypeString);
+                        
+                        version (KissDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                    }.format(settingItemName, memberName,
+                            memberTypeString, returnParameter, incomingParameter);
                 }
             }
         }
         return str;
+    }
+
+    private static string setFunctionMemeber(memberType, string settingItemName,
+            string memberName, string returnParameter, string incomingParameter)()
+    {
+        string r = "";
+        alias memeberParameters = Parameters!(memberType);
+        static if (memeberParameters.length == 1)
+        {
+            alias parameterType = memeberParameters[0];
+
+            static if (is(parameterType == struct) || is(parameterType == class)
+                    || is(parameterType == interface))
+            {
+                version (KissDebugMode) pragma(msg, "skip method with class: " ~ memberName);
+            }
+            else
+            {
+                version (KissDebugMode) pragma(msg, "method: " ~ memberName);
+
+                r = q{
+                            if(%5$s.exists("%1$s")) {
+                                %4$s.%2$s(%5$s.subItem("%1$s").as!(%3$s)());
+                            }
+                            else {
+                                version (KissDebugMode) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
+                            }
+                            
+                            version (KissDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                            }.format(settingItemName, memberName,
+                        parameterType.stringof, returnParameter, incomingParameter);
+            }
+        }
+        else
+        {
+            pragma(msg, "skip method: " ~ memberName);
+        }
+
+        return r;
+    }
+
+    private static setClassMemeber(memberType, string settingItemName,
+            string memberName, string returnParameter, string incomingParameter)()
+    {
+        enum fullTypeName = fullyQualifiedName!(memberType);
+        enum memberModuleName = moduleName!(memberType);
+
+        static if (settingItemName == memberName && hasUDA!(memberType, Configuration))
+        {
+            // try to get the ItemName from the UDA Configuration in a class or struct
+            enum newSettingItemName = getUDAs!(memberType, Configuration)[0].name;
+        }
+        else
+        {
+            enum newSettingItemName = settingItemName;
+        }
+
+        version (KissDebugMode)
+        {
+            pragma(msg, "module name: " ~ memberModuleName);
+            pragma(msg, "full type name: " ~ fullTypeName);
+            pragma(msg, "setting " ~ memberName ~ " with item " ~ newSettingItemName);
+        }
+
+        string r = q{
+            import %1$s;
+            
+            tracef("%5$s.%3$s is a class/struct.");
+            if(%6$s.exists("%2$s")) {
+                %5$s.%3$s = buildItem!(%4$s)(%6$s.subItem("%2$s"));
+            }
+            else {
+                version (KissDebugMode) warningf("Undefined item: %%s.%2$s" , %6$s.fullPath);
+            }
+        }.format(memberModuleName, newSettingItemName,
+                memberName, fullTypeName, returnParameter, incomingParameter);
+        return r;
     }
 
 private:
@@ -397,12 +492,23 @@ private:
             if (section != _section && section != "")
                 continue;
 
+            str = stripInlineComment(str);
             auto site = str.indexOf("=");
             enforce!BadFormatException((site > 0),
-                    format("the format is erro in file %s, in line %d", filename, line));
+                    format("Bad format in file %s, at line %d", filename, line));
             string key = str[0 .. site].strip;
             setValue(key, str[site + 1 .. $].strip);
         }
+    }
+
+    string stripInlineComment(string line)
+    {
+        ptrdiff_t index = indexOf(line, "# ");
+
+        if (index == -1)
+            return line;
+        else
+            return line[0 .. index];
     }
 
     void setValue(string key, string value)
@@ -414,6 +520,11 @@ private:
         {
             if (str.length == 0)
                 continue;
+
+            if (canFind(reservedWords, str))
+            {
+                warningf("Found a reserved word: %s. It may cause some errors to use it.", str);
+            }
 
             if (currentPath.empty)
                 currentPath = str;
