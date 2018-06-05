@@ -20,7 +20,7 @@ class EventLoopGroup
 {
     this(uint size = (totalCPUs - 1))
     {
-		assert(size <= totalCPUs && size > 0);
+		assert(size <= totalCPUs && size >= 0);
 
         size = size > 0 ? size : 1;
         foreach (i; 0 .. size)
