@@ -281,12 +281,6 @@ byte[] serialize(T)(T t) if(isScalarType!T && ! isBigSignedType!T && ! isBigUnsi
 }
 
 
-T unserialize(T )(const byte[] data ) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
-{
-	long parse_index;
-	return unserialize!T(data , parse_index);
-}
-
 T unserialize(T )(const byte[] data , out long parse_index) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
 {
 	assert( cast(byte)T.sizeof == getbasicsize(data[0]));
@@ -321,11 +315,6 @@ byte[] serialize(T)(T t)  if( isBigSignedType!T || isBigUnsignedType!T)
 	return h ~ data;
 }
 
-T unserialize(T )(const byte[] data )  if( isBigSignedType!T || isBigUnsignedType!T)
-{
-	long parse_index;
-	return unserialize!T(data , parse_index);
-}
 
 T unserialize(T )(const byte[] data , out long parse_index) if( isBigSignedType!T || isBigUnsignedType!T)
 {
@@ -367,12 +356,6 @@ byte[] serialize(T)(T str) if(is(T  == string))
 	return data;
 }
 
-
-string unserialize(T)(const byte[] data ) if(is(T == string))
-{
-	long parse_index;
-	return unserialize!T(data , parse_index);
-}
 
 string unserialize(T)(const byte[] data , out long parse_index) if(is(T == string))
 {
@@ -461,12 +444,6 @@ byte[] serialize(T)( T t) if(isStaticArray!T)
 	return dh ~ data;
 }
 
-T unserialize(T)(const byte[] data ) if(isStaticArray!T)
-{
-	long parse_index;
-	
-	return unserialize!T(data , parse_index);
-}
 
 T unserialize(T)(const byte[] data , out long parse_index) if(isStaticArray!T)
 {
@@ -540,13 +517,6 @@ byte[] serialize(T)( T t) if(isDynamicArray!T && !is(T == string))
 }
 
 
-T unserialize(T)(const byte[] data )  if(isDynamicArray!T && !is(T == string))
-{
-	assert(data[0] == 9); 	
-	long parse_index;
-	return unserialize!T(data , parse_index);
-}
-
 T unserialize(T)(const byte[] data , out long parse_index)  if(isDynamicArray!T && !is(T == string))
 {
 	assert(data[0] == 9);
@@ -598,7 +568,7 @@ size_t getsize(T)( T t) if(isDynamicArray!T && !is(T == string))
 byte[] serialize(T)(T t) if(is(T == struct))
 {
 	byte[1] header;
-	header[0] = 6;
+	header[0] = 10;
 	byte[] 	data;
 	
 	mixin(serializeMembers!T());
@@ -611,7 +581,7 @@ byte[] serialize(T)(T t) if(is(T == struct))
 
 T unserialize(T)(const byte[] data , out long parse_index) if(is(T == struct))
 {
-	assert(data[0] == 6);
+	assert(data[0] == 10);
 	
 	T t;
 	long index1;
@@ -624,16 +594,7 @@ T unserialize(T)(const byte[] data , out long parse_index) if(is(T == struct))
 	return t;
 }
 
-T unserialize(T)(const byte[] data ) if(is(T == struct))
-{
-	assert(data[0] == 6);
-	
-	long parse_index;
-	
-	return unserialize!T(data , parse_index);
-	
-	
-}
+
 
 size_t getsize(T)(T t) if(is(T == struct))
 {
@@ -654,7 +615,7 @@ size_t getsize(T)(T t) if(is(T == struct))
 byte[] serialize(T)(T t) if(is(T == class))
 {
 	byte[1] header;
-	header[0] = 7;
+	header[0] = 11;
 	byte[] 	data;
 	byte[] dh = cast(byte[])header;
 	mixin(serializeMembers!T());
@@ -667,7 +628,7 @@ byte[] serialize(T)(T t) if(is(T == class))
 
 T unserialize(T)(const byte[] data , out long parse_index)if(is(T == class))
 {
-	assert(data[0] == 7);
+	assert(data[0] == 11);
 	
 	T t = new T;
 	long index1;
@@ -679,25 +640,94 @@ T unserialize(T)(const byte[] data , out long parse_index)if(is(T == class))
 	return t;
 }
 
-T unserialize(T)(const byte[] data )if(is(T == class))
-{
-	assert(data[0] == 7);
-	
-	long parse_index;
-	
-	return unserialize!T(data , parse_index);
-}
-
 size_t getsize(T)(T t) if(is(T == class))
 {
 	long total = 1;
 	
 	mixin(getsizeMembers!T());
 	
-	total += getbytenum(total);
+	total += getbytenum(total - 1);
 	
 	return total;
 }
+
+// AssociativeArray
+// 1 type 12
+// [uint] len variant
+// (k,v)
+
+byte[] serialize(T)(T t) if( isAssociativeArray!T )
+{
+	byte[1] header;
+	header[0] = 12;
+	byte[] dh;
+	dh ~=  cast(byte[])header;
+	byte[] 	data;
+	foreach( k , v ; t)
+	{	
+		data ~= serialize(k);
+		data ~= serialize(v);
+	}
+	uint len = cast(uint)data.length;
+	dh ~= toVariant(len);
+	return dh ~ data;
+}
+
+T unserialize(T)(const byte[] data , out long parse_index)if( isAssociativeArray!T )
+{
+	assert(data[0] == 12);
+	
+	T t;
+	long index1;
+	uint len = toT!uint(data[1 .. $] , index1);
+	
+	parse_index = index1 + 1 + len;
+	long index = index1 + 1;
+	while(index < parse_index)
+	{
+		long out_len;
+		auto k = unserialize!(KeyType!T)(data[index..$] ,out_len);
+		index += out_len;
+		out_len = 0;
+		auto v = unserialize!(ValueType!T)(data[index .. $] , out_len);
+		index += out_len;
+		t[k] = v;
+	}
+	return t;
+}
+
+
+size_t getsize(T)(T t) if( isAssociativeArray!T )
+{
+	long total = 1;
+	foreach( k , v ; t)
+	{	
+		total += serialize(k).length;
+		total += serialize(v).length;
+	}
+	total += getbytenum(total - 1);
+	return total;
+}
+
+
+
+T unserialize(T)(const byte[] data ) 
+{
+	long parse_index;
+	
+	return unserialize!T(data , parse_index);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -851,6 +881,31 @@ T toOBJ(T)(JSONValue j) if(is(T == class))
 	return t;
 }
 
+//AssociativeArray
+JSONValue toJSON(T)(T t) if(isAssociativeArray!T)
+{
+	JSONValue j;
+	import std.conv;
+	foreach( k , v ; t)
+		j[to!string(k)] = toJSON(v);
+	return j;
+}
+
+T toOBJ(T)(JSONValue j) if(isAssociativeArray!T)
+{
+	import std.conv;
+	T t;
+	foreach( k , v ; j.object)
+	{
+		t[to!(KeyType!T)(k)] = toOBJ!(ValueType!T)(v);
+	}
+	return t;
+}
+
+
+
+
+
 alias toJson = toJSON;
 alias toObject = toOBJ;
 
@@ -864,7 +919,7 @@ version(unittest)
 	{
 		assert(unserialize!T(serialize(t)) == t);
 
-		assert(toObject!T(toJson(t)) == t);
+		assert(toOBJ!T(toJSON(t)) == t);
 	}
 	
 	struct T1
@@ -931,8 +986,10 @@ version(unittest)
 			return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
 		}
 	}
+
+
 	
-	void test_struct_class()
+	void test_struct_class_array()
 	{
 		T1 t;
 		t.b = true;
@@ -978,6 +1035,20 @@ version(unittest)
 		c2.t1 = t;
 		
 		test1(c2);
+
+
+		string[string] 	map1 = ["1":"1","2":"2"];
+		string[int]		map2 = [1:"1",2:"2"];
+		T1[string]		map3 ;
+		T1 a1;
+		a1.ib = 1;
+		T1 a2;
+		a2.ib = 2;
+		map3["1"] = a1;
+		map3["2"] = a2;
+		test1(map1);
+		test1(map2);
+		test1(map3);
 	}
 }
 
@@ -996,7 +1067,10 @@ unittest{
 		assert(toT!T(bs, index) == v && index == length);
 
 		assert(toOBJ!T(toJSON(v)) == v);
+
 	}
+
+
 	
 	
 	
@@ -1180,6 +1254,6 @@ unittest{
 		test1(sa);
 	}
 	
-	//test struct and class
-	test_struct_class();
+	//test struct \ class \ associative array
+	test_struct_class_array();
 }
