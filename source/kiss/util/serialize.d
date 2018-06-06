@@ -23,6 +23,13 @@ public import std.json;
 private:
 
 
+class RefClass{
+	size_t[size_t] 	map;
+	void*[]			arr;
+	uint 			level;
+}
+
+enum MAGIC_KEY = "o0o0o";
 
 enum bool isType(T1 , T2) = is(T1 == T2) || is(T1 == ImmutableOf!T2) || is(T1 == ConstOf!T2) || is(T1 == InoutOf!T2) || is(T1 == SharedOf!T2 ) || is(T1 == SharedConstOf!T2) || is(T1 == SharedInoutOf!T2);
 
@@ -227,7 +234,7 @@ string serializeMembers(T)()
 	string str;
 	foreach(m ; FieldNameTuple!T)
 	{
-		str ~= "data ~= serialize(t." ~ m ~");";
+		str ~= "data ~= serialize(t." ~ m ~" , stack , level + 1);";
 	}
 	return str;
 }
@@ -240,7 +247,7 @@ string unserializeMembers(T)()
 	{
 		str ~=" if ( index < parse_index)"; 
 		str ~= "{";
-		str ~= "t." ~ m ~ " = unserialize!(typeof(t." ~ m ~ "))(data[cast(uint)index .. data.length] , parse); ";
+		str ~= "t." ~ m ~ " = unserialize!(typeof(t." ~ m ~ "))(data[cast(uint)index .. data.length] , parse , stack); ";
 		str ~= "index += parse; }";
 		
 	}
@@ -252,14 +259,14 @@ string getsizeMembers(T)()
 	string str;
 	foreach(m ; FieldNameTuple!T)
 	{
-		str ~= "total += getsize(t."  ~  m ~ ");";
+		str ~= "total += getsize(t."  ~  m ~ " , stack , level + 1);";
 	}
 	return str;
 }
 
 
 
-public:
+
 
 ///////////////////////////////////////////////////////////
 // basic
@@ -271,7 +278,7 @@ public:
 //	data
 ///////////////////////////////////////////////////////////
 ///
-byte[] serialize(T)(T t) if(isScalarType!T && ! isBigSignedType!T && ! isBigUnsignedType!T)
+byte[] serialize(T)(T t , RefClass stack , uint level) if(isScalarType!T && ! isBigSignedType!T && ! isBigUnsignedType!T)
 {
 	byte[] data;
 	data.length = T.sizeof + 1;
@@ -281,7 +288,7 @@ byte[] serialize(T)(T t) if(isScalarType!T && ! isBigSignedType!T && ! isBigUnsi
 }
 
 
-T unserialize(T )(const byte[] data , out long parse_index) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+T unserialize(T )(const byte[] data , out long parse_index , RefClass stack) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
 {
 	assert( cast(byte)T.sizeof == getbasicsize(data[0]));
 	
@@ -292,7 +299,7 @@ T unserialize(T )(const byte[] data , out long parse_index) if(isScalarType!T &&
 	return value;
 }
 
-size_t getsize(T)(T t) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+size_t getsize(T)(T t , RefClass stack , uint level) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
 {
 	return T.sizeof + 1;
 }
@@ -306,7 +313,7 @@ size_t getsize(T)(T t) if(isScalarType!T && !isBigSignedType!T && !isBigUnsigned
 //  6 (8)	 -
 //	data
 ///////////////////////////////////////////////////////////
-byte[] serialize(T)(T t)  if( isBigSignedType!T || isBigUnsignedType!T)
+byte[] serialize(T )(T t, RefClass stack , uint level)  if( isBigSignedType!T || isBigUnsignedType!T)
 {
 	byte[] data = toVariant!T(t);
 	long index;
@@ -316,7 +323,7 @@ byte[] serialize(T)(T t)  if( isBigSignedType!T || isBigUnsignedType!T)
 }
 
 
-T unserialize(T )(const byte[] data , out long parse_index) if( isBigSignedType!T || isBigUnsignedType!T)
+T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if( isBigSignedType!T || isBigUnsignedType!T)
 {
 	assert( (T.sizeof == 4 ? 5 : 8 ) == data[0]);
 	long index;
@@ -325,13 +332,13 @@ T unserialize(T )(const byte[] data , out long parse_index) if( isBigSignedType!
 	return t;
 }
 
-size_t getsize(T)(T t) if(isBigSignedType!T) 
+size_t getsize(T)(T t , RefClass stack , uint level) if(isBigSignedType!T) 
 {
 	return getbytenums(abs(t)) + 1;
 }
 
 
-size_t getsize(T)(T t) if(isBigUnsignedType!T) 
+size_t getsize(T)(T t , RefClass stack , uint level) if(isBigUnsignedType!T) 
 {
 	return getbytenum(abs(t)) + 1;
 }
@@ -343,7 +350,7 @@ size_t getsize(T)(T t) if(isBigUnsignedType!T)
 // [uint] variant 
 //  data
 
-byte[] serialize(T)(T str) if(is(T  == string))
+byte[] serialize(T )(T str, RefClass stack , uint level) if(is(T  == string))
 {
 	byte[] data;
 	uint len = cast(uint)str.length;
@@ -357,7 +364,7 @@ byte[] serialize(T)(T str) if(is(T  == string))
 }
 
 
-string unserialize(T)(const byte[] data , out long parse_index) if(is(T == string))
+string unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(is(T == string))
 {
 	assert(data[0] == 7);
 	long index;
@@ -366,7 +373,7 @@ string unserialize(T)(const byte[] data , out long parse_index) if(is(T == strin
 	return cast(T)(data[cast(size_t)(1 + index) .. cast(size_t)parse_index].dup);
 }
 
-size_t getsize(string str ) 
+size_t getsize(T)(T str ,RefClass stack , uint level) if(is(T == string))
 {
 	uint len = cast(uint)str.length;
 	return cast(size_t)(1 + toVariant(len).length + str.length);
@@ -426,7 +433,7 @@ size_t getsize(T)(T t) if(is(T == union))
 // len[uint] variant
 // data
 
-byte[] serialize(T)( T t) if(isStaticArray!T)
+byte[] serialize(T)( T t , RefClass stack , uint level) if(isStaticArray!T)
 {
 	byte[1] header;
 	header[0] = 8;
@@ -437,7 +444,7 @@ byte[] serialize(T)( T t) if(isStaticArray!T)
 	byte[] data;
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
-		data ~= serialize(t[i]);
+		data ~= serialize(t[i], stack, level + 1);
 	}
 	uint len = cast(uint)data.length;
 	dh ~= toVariant(len);
@@ -445,7 +452,7 @@ byte[] serialize(T)( T t) if(isStaticArray!T)
 }
 
 
-T unserialize(T)(const byte[] data , out long parse_index) if(isStaticArray!T)
+T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(isStaticArray!T)
 {
 	assert(data[0] == 8);
 	T value;
@@ -463,7 +470,7 @@ T unserialize(T)(const byte[] data , out long parse_index) if(isStaticArray!T)
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
 		parse = 0;
-		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse);
+		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse , stack );
 		index += parse;
 	}
 	
@@ -472,13 +479,14 @@ T unserialize(T)(const byte[] data , out long parse_index) if(isStaticArray!T)
 	return value;
 }
 
-size_t getsize(T)( T t) if(isStaticArray!T)
+size_t getsize(T)( T t , RefClass stack , uint level) if(isStaticArray!T)
 {
 	long total = 1;
 	total += getbytenum(t.length);
+	uint uSize = cast(uint)t.length;
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
-		total += getsize(t[i]);
+		total += getsize(t[i] , stack , level + 1);
 	}
 	total += getbytenum(total);
 	return total;
@@ -495,7 +503,7 @@ size_t getsize(T)( T t) if(isStaticArray!T)
 // length[uint]	variant
 // data
 
-byte[] serialize(T)( T t) if(isDynamicArray!T && !is(T == string))
+byte[] serialize(T)( T t , RefClass stack , uint level) if(isDynamicArray!T && !is(T == string))
 {
 	byte[1] header;
 	header[0] = 9;
@@ -508,7 +516,7 @@ byte[] serialize(T)( T t) if(isDynamicArray!T && !is(T == string))
 	byte[] data;
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
-		data ~= serialize(t[i]);
+		data ~= serialize(t[i] , stack , level + 1);
 	}
 	uint len = cast(uint)data.length;
 	dh ~= toVariant(len);
@@ -517,7 +525,7 @@ byte[] serialize(T)( T t) if(isDynamicArray!T && !is(T == string))
 }
 
 
-T unserialize(T)(const byte[] data , out long parse_index)  if(isDynamicArray!T && !is(T == string))
+T unserialize(T)(const byte[] data , out long parse_index , RefClass stack)  if(isDynamicArray!T && !is(T == string))
 {
 	assert(data[0] == 9);
 	
@@ -535,7 +543,7 @@ T unserialize(T)(const byte[] data , out long parse_index)  if(isDynamicArray!T 
 	long parse = 0;
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
-		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse);
+		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse , stack);
 		index += parse;
 	}
 	parse_index += len;
@@ -544,13 +552,14 @@ T unserialize(T)(const byte[] data , out long parse_index)  if(isDynamicArray!T 
 }
 
 
-size_t getsize(T)( T t) if(isDynamicArray!T && !is(T == string))
+size_t getsize(T)( T t , RefClass stack , uint level) if(isDynamicArray!T && !is(T == string))
 {
 	long total = 1;
 	total += getbytenum(t.length);
+	uint uSize = cast(uint)t.length;
 	for(size_t i = 0 ; i < uSize ; i++)
 	{
-		total += getsize(t[i]);
+		total += getsize(t[i] , stack , level + 1);
 	}
 	total += getbytenum(total);
 	return total;
@@ -565,7 +574,7 @@ size_t getsize(T)( T t) if(isDynamicArray!T && !is(T == string))
 // [uint] variant
 // data
 
-byte[] serialize(T)(T t) if(is(T == struct))
+byte[] serialize(T)(T t , RefClass stack , uint level) if(is(T == struct))
 {
 	byte[1] header;
 	header[0] = 10;
@@ -579,7 +588,7 @@ byte[] serialize(T)(T t) if(is(T == struct))
 }
 
 
-T unserialize(T)(const byte[] data , out long parse_index) if(is(T == struct))
+T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(is(T == struct))
 {
 	assert(data[0] == 10);
 	
@@ -596,7 +605,7 @@ T unserialize(T)(const byte[] data , out long parse_index) if(is(T == struct))
 
 
 
-size_t getsize(T)(T t) if(is(T == struct))
+size_t getsize(T)(T t , RefClass stack , uint level) if(is(T == struct))
 {
 	long total = 1;
 	
@@ -607,81 +616,136 @@ size_t getsize(T)(T t) if(is(T == struct))
 }
 
 
-// TClass
+// TClass 
 // 1 type 11
 // [uint] len variant
 //	data
 
-byte[] serialize(T)(T t) if(is(T == class))
+// TClass ref
+// 1 type 12
+// id variant
+
+byte[] serialize(T)(T t , RefClass stack , uint level) if(is(T == class))
 {
 	byte[1] header;
-	header[0] = 11;
-	byte[] 	data;
-	byte[] dh = cast(byte[])header;
-	if( t !is null)
+	size_t *id = null;
+
+	if(t !is null)
 	{
-		mixin(serializeMembers!T());
+		id =  t.toHash() in stack.map;
 	}
-	uint len = cast(uint)data.length;
-	dh ~= toVariant(len);
-	return dh ~ data;
+
+	if(id == null)
+	{
+		header[0] = 11;	
+		byte[] 	data;
+		byte[] dh = cast(byte[])header;
+		if( t !is null)
+		{
+			stack.map[t.toHash()] = stack.map.length;
+			mixin(serializeMembers!T());
+		}
+		uint len = cast(uint)data.length;
+		dh ~= toVariant(len);
+
+		return dh ~ data;
+	}
+	else
+	{
+		header[0] = 12;
+		byte[] dh = cast(byte[])header;
+		dh ~= toVariant(*id);
+		return dh;
+	}
+
+
 }
 
 
-T unserialize(T)(const byte[] data , out long parse_index)if(is(T == class))
+T unserialize(T)(const byte[] data , out long parse_index , RefClass stack )if(is(T == class))
 {
-	assert(data[0] == 11);
-	
+	assert(data[0] == 11 || data[0] == 12);
 
-	long index1;
-	uint len = toT!uint(data[1 .. $] , index1);
+	if(data[0] == 11)
+	{
+		long index1;
+		uint len = toT!uint(data[1 .. $] , index1);
+		if( len == 0)
+			return null;
+		T t = new T;
+		parse_index = index1 + 1 + len;
+		long index = index1 + 1;
+		stack.arr ~= cast(void*)t;
+		mixin(unserializeMembers!T());
+		return t;
+	}
+	else
+	{
+		long index1;
+		size_t id = toT!size_t(data[1 .. $] , index1);
+		parse_index += index1 + 1;
+		return cast(T)stack.arr[id];
+	}
 
-	if( len == 0)
-		return null;
-
-	T t = new T;
-	parse_index = index1 + 1 + len;
-	long index = index1 + 1;
-	mixin(unserializeMembers!T());
-	return t;
 }
 
-size_t getsize(T)(T t) if(is(T == class))
+size_t getsize(T)(T t , RefClass stack , uint level) if(is(T == class))
 {
 	long total = 1;
+
+
+	size_t *id = null;
 	
-	mixin(getsizeMembers!T());
+	if(t !is null)
+	{
+		id =  t.toHash() in stack.map;
+	}
 	
-	total += getbytenum(total - 1);
+	if(id == null)
+	{
+		if( t !is null)
+		{
+			stack.map[t.toHash()] = stack.map.length;
+			mixin(getsizeMembers!T());
+		}
+
+		total += getbytenum(total - 1);	
+		return total;
+	}
+	else
+	{
+		return getbytenum(*id) + 1;
+	}
+
 	
-	return total;
+
 }
 
 // AssociativeArray
-// 1 type 12
+// 1 type 13
 // [uint] len variant
 // (k,v)
 
-byte[] serialize(T)(T t) if( isAssociativeArray!T )
+byte[] serialize(T)(T t ,  RefClass stack , uint level) if( isAssociativeArray!T )
 {
 	byte[1] header;
-	header[0] = 12;
+	header[0] = 13;
 	byte[] dh;
 	dh ~=  cast(byte[])header;
 	byte[] 	data;
 	foreach( k , v ; t)
 	{	
-		data ~= serialize(k);
-		data ~= serialize(v);
+		data ~= serialize(k , stack , level + 1);
+		data ~= serialize(v , stack , level + 1);
 	}
 	uint len = cast(uint)data.length;
 	dh ~= toVariant(len);
 	return dh ~ data;
 }
 
-T unserialize(T)(const byte[] data , out long parse_index)if( isAssociativeArray!T )
+T unserialize(T)(const byte[] data , out long parse_index , RefClass stack)if( isAssociativeArray!T )
 {
-	assert(data[0] == 12);
+	assert(data[0] == 13);
 	
 	T t;
 	long index1;
@@ -692,10 +756,10 @@ T unserialize(T)(const byte[] data , out long parse_index)if( isAssociativeArray
 	while(index < parse_index)
 	{
 		long out_len;
-		auto k = unserialize!(KeyType!T)(data[index..$] ,out_len);
+		auto k = unserialize!(KeyType!T)(data[index..$] ,out_len , stack);
 		index += out_len;
 		out_len = 0;
-		auto v = unserialize!(ValueType!T)(data[index .. $] , out_len);
+		auto v = unserialize!(ValueType!T)(data[index .. $] , out_len , stack);
 		index += out_len;
 		t[k] = v;
 	}
@@ -703,7 +767,7 @@ T unserialize(T)(const byte[] data , out long parse_index)if( isAssociativeArray
 }
 
 
-size_t getsize(T)(T t) if( isAssociativeArray!T )
+size_t getsize(T)(T t , RefClass stack , uint level) if( isAssociativeArray!T )
 {
 	long total = 1;
 	foreach( k , v ; t)
@@ -715,18 +779,27 @@ size_t getsize(T)(T t) if( isAssociativeArray!T )
 	return total;
 }
 
-
+public:
 
 T unserialize(T)(const byte[] data ) 
 {
 	long parse_index;
-	
-	return unserialize!T(data , parse_index);
+	RefClass stack = new RefClass();
+	return unserialize!T(data , parse_index , stack);
+}
+
+byte[] serialize(T)(T t)
+{
+	RefClass stack = new RefClass();
+	return serialize!T(t , stack , 0);
 }
 
 
-
-
+size_t getsize(T)(T t) 
+{
+	RefClass stack = new RefClass();
+	return getsize!T(t , stack , 0);
+}
 
 
 
@@ -738,10 +811,10 @@ T unserialize(T)(const byte[] data )
 
 
 //////////////////////////////////////////////////////////////////json///////////////////////////
-
+private:
 enum bool isFloatType(T) = isType!(T , float) || isType!(T , double) ;
 
-JSONValue toJSON(T)(T t) 
+JSONValue toJSON(T)(T t , RefClass stack , uint level) 
 	if(isSignedType!T || isUnsignedType!T ||
 		is(T == string) || is(T == bool) || 
 		isFloatType!T)
@@ -750,28 +823,28 @@ JSONValue toJSON(T)(T t)
 }
 
 // uinteger
-T toOBJ(T)(JSONValue v) if( isUnsignedType!T )
+T toOBJ(T)(JSONValue v , RefClass stack ) if( isUnsignedType!T )
 {
 	assert(v.type() == JSON_TYPE.UINTEGER);
 	return cast(T)v.uinteger;
 }
 
 // integer
-T toOBJ(T)(JSONValue v) if( isSignedType!T)
+T toOBJ(T)(JSONValue v , RefClass stack ) if( isSignedType!T)
 {
 	assert(v.type() == JSON_TYPE.INTEGER);
 	return cast(T)v.integer;
 }
 
 // string
-T toOBJ(T)(JSONValue v) if(is( T == string))
+T toOBJ(T)(JSONValue v , RefClass stack) if(is( T == string))
 {
 	assert(v.type() == JSON_TYPE.STRING);
 	return v.str;
 }
 
 // bool
-T toOBJ(T)(JSONValue v) if(is( T == bool))
+T toOBJ(T)(JSONValue v , RefClass stack) if(is( T == bool))
 {
 	assert(v.type() == JSON_TYPE.TRUE ||
 		v.type() == JSON_TYPE.FALSE);
@@ -779,7 +852,7 @@ T toOBJ(T)(JSONValue v) if(is( T == bool))
 }
 
 // floating
-T toOBJ(T)(JSONValue v) if(isFloatType!T)
+T toOBJ(T)(JSONValue v , RefClass stack) if(isFloatType!T)
 {
 	assert(v.type() == JSON_TYPE.FLOAT);
 	return cast(T)v.floating;
@@ -788,37 +861,37 @@ T toOBJ(T)(JSONValue v) if(isFloatType!T)
 
 
 // array
-JSONValue toJSON(T)(T t) if(isStaticArray!T || (isDynamicArray!T && !is(T == string)))
+JSONValue toJSON(T)(T t , RefClass stack , uint level) if(isStaticArray!T || (isDynamicArray!T && !is(T == string)))
 {
 	JSONValue[] j;
 	foreach(e ; t)
 	{
-		j ~= toJSON(e);
+		j ~= toJSON(e , stack , level);
 	}
 	
 	return JSONValue(j);
 }
 
 
-T toOBJ(T)(JSONValue v) if( isStaticArray!T)
+T toOBJ(T)(JSONValue v , RefClass stack) if( isStaticArray!T)
 {
 	T t;
 	assert(v.type() == JSON_TYPE.ARRAY);
 	for(size_t i = 0 ; i < t.length ; i++)
 	{
-		t[i] = toOBJ!(typeof(t[i]))(v.array[i]);
+		t[i] = toOBJ!(typeof(t[i]))(v.array[i] , stack);
 	}
 	return t;
 }
 
-T toOBJ(T)(JSONValue v) if( isDynamicArray!T  && !is(T == string))
+T toOBJ(T)(JSONValue v , RefClass stack) if( isDynamicArray!T  && !is(T == string))
 {
 	T t;
 	assert(v.type() == JSON_TYPE.ARRAY);
 	t.length = v.array.length;
 	for(size_t i = 0 ; i < t.length ; i++)
 	{
-		t[i] = toOBJ!(typeof(t[i]))(v.array[i]);
+		t[i] = toOBJ!(typeof(t[i]))(v.array[i] , stack);
 	}
 	return t;
 }
@@ -830,7 +903,7 @@ string toJSONMembers(T)()
 	string str;
 	foreach(m ; FieldNameTuple!T)
 	{
-		str ~= "j[\""~m~"\"] = toJSON(t." ~ m ~");";
+		str ~= "j[\""~m~"\"] = toJSON(t." ~ m ~" , stack , level + 1);";
 	}
 	return str;
 }
@@ -841,13 +914,13 @@ string toOBJMembers(T)()
 	foreach(m ; FieldNameTuple!T)
 	{
 		str ~= " if ( \"" ~ m ~ "\"  in j )";
-		str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\""~m~"\"]);";
+		str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\""~m~"\"] , stack);";
 		
 	}
 	return str;
 }
 
-JSONValue toJSON(T)(T t) if(is(T == struct))
+JSONValue toJSON(T)(T t ,  RefClass stack , uint level) if(is(T == struct))
 {
 	JSONValue j;
 	import std.stdio;
@@ -855,7 +928,7 @@ JSONValue toJSON(T)(T t) if(is(T == struct))
 	return j;
 }
 
-T toOBJ(T)(JSONValue j) if(is(T == struct))
+T toOBJ(T)(JSONValue j , RefClass stack) if(is(T == struct))
 {
 	T t;
 	assert(j.type() == JSON_TYPE.OBJECT);
@@ -864,52 +937,83 @@ T toOBJ(T)(JSONValue j) if(is(T == struct))
 }
 
 
-JSONValue toJSON(T)(T t) if(is(T == class))
+JSONValue toJSON(T)(T t , RefClass stack  ,uint level) if(is(T == class))
 {
-	if(t is null)
+	if(t is null || level >= stack.level)
 	{
 		return JSONValue(null);
 	}
-	
-	
-	JSONValue j;
-	mixin(toJSONMembers!T);
-	return j;
+
+	auto id = t.toHash() in stack.map;
+	if( id == null)
+	{
+		stack.map[t.toHash()] = stack.map.length;
+		JSONValue j;
+		mixin(toJSONMembers!T);
+		return j;
+	}
+	else
+	{
+		JSONValue j;
+		j[MAGIC_KEY] = *id;
+		return j;
+	}
 }
 
-T toOBJ(T)(JSONValue j) if(is(T == class))
+T toOBJ(T)(JSONValue j , RefClass stack) if(is(T == class))
 {
 	if(j.type() == JSON_TYPE.NULL)
 		return null;
 	assert(j.type() == JSON_TYPE.OBJECT);
-	T t = new T;
-	mixin(toOBJMembers!T);
-	return t;
+
+	if( MAGIC_KEY in j)
+	{
+		return cast(T)stack.arr[j[MAGIC_KEY].uinteger];
+	}
+	else
+	{
+		T t = new T;
+		stack.arr ~= cast(void *)t;
+		mixin(toOBJMembers!T);
+		return t;
+	}
 }
 
 //AssociativeArray
-JSONValue toJSON(T)(T t) if(isAssociativeArray!T)
+JSONValue toJSON(T)(T t, RefClass stack , uint level) if(isAssociativeArray!T)
 {
 	JSONValue j;
 	import std.conv;
 	foreach( k , v ; t)
-		j[to!string(k)] = toJSON(v);
+		j[to!string(k)] = toJSON(v , stack , level);
 	return j;
 }
 
-T toOBJ(T)(JSONValue j) if(isAssociativeArray!T)
+T toOBJ(T)(JSONValue j , RefClass stack) if(isAssociativeArray!T)
 {
 	import std.conv;
 	T t;
 	foreach( k , v ; j.object)
 	{
-		t[to!(KeyType!T)(k)] = toOBJ!(ValueType!T)(v);
+		t[to!(KeyType!T)(k)] = toOBJ!(ValueType!T)(v ,stack);
 	}
 	return t;
 }
 
+public:
 
+JSONValue toJSON(T)(T t , uint level = uint.max)
+{
+	RefClass stack = new RefClass();
+	stack.level = level;
+	return toJSON!T(t,  stack , 0);
+}
 
+T toOBJ(T)(JSONValue j ) 
+{
+	RefClass stack = new RefClass();
+	return toOBJ!T(j , stack);
+}
 
 
 alias toJson = toJSON;
@@ -924,6 +1028,8 @@ version(unittest)
 	void test1(T)(T t)
 	{
 		assert(unserialize!T(serialize(t)) == t);
+
+		assert(serialize(t).length == getsize(t));
 
 		assert(toOBJ!T(toJSON(t)) == t);
 	}
@@ -994,7 +1100,52 @@ version(unittest)
 	}
 
 
-	
+	//ref test
+	class School
+	{
+		string name;
+		User[] users;
+		override bool opEquals(Object c) {
+			auto school = cast(School)c;
+			return school.name == this.name;
+		}
+	}
+
+	class User
+	{
+		int age;
+		string name;
+		School school;
+		override bool opEquals(Object c) {
+			auto user = cast(User)c;
+			return user.age == this.age && user.name == this.name && user.school == this.school;
+		}
+	}
+
+	void test_ref_class()
+	{
+		School school = new School();
+
+
+		User user1 = new User();
+		user1.age = 30;
+		user1.name = "zhangyuchun";
+		user1.school = school;
+
+		User user2 = new User();
+		user2.age = 31;
+		user2.name = "wulishan";
+		user2.school = school;
+
+		school.name = "putao";
+		school.users ~= user1;
+		school.users ~= user2;
+
+		test1(user1);
+		test1(user2);
+	}
+
+
 	void test_struct_class_array()
 	{
 		T1 t;
@@ -1268,4 +1419,5 @@ unittest{
 	
 	//test struct \ class \ associative array
 	test_struct_class_array();
+	test_ref_class();
 }
