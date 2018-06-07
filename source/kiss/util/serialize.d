@@ -788,6 +788,12 @@ T unserialize(T)(const byte[] data )
 	return unserialize!T(data , parse_index , stack);
 }
 
+T unserialize(T)(const byte[] data , out long parse_index) 
+{
+	RefClass stack = new RefClass();
+	return unserialize!T(data , parse_index , stack);
+}
+
 byte[] serialize(T)(T t)
 {
 	RefClass stack = new RefClass();
