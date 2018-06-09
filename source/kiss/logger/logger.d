@@ -30,17 +30,9 @@ import core.thread;
 
 import kiss.util.thread;
 
+
+
 private:
-
-enum LogLevel
-{
-	LOG_DEBUG,
-	LOG_INFO,
-	LOG_WARNING,
-	LOG_ERROR,
-	LOG_FATAL
-};
-
 class SizeBaseRollover
 {
 
@@ -238,7 +230,7 @@ class SizeBaseRollover
 }
 
 __gshared KissLogger g_logger = null;
-
+__gshared LogLevel g_logLevel = LogLevel.LOG_DEBUG;
 
 
 /**
@@ -280,8 +272,11 @@ class KissLogger
 		_conf = conf;
 		string fileName = conf.fileName;
 
-		if (!fileName.empty && !isDir(fileName))
+		if (!fileName.empty)
 		{
+			if(exists(fileName) && isDir(fileName))
+				throw new Exception("A direction has existed with the same name.");
+			
 			createPath(conf.fileName);
 			_file = File(conf.fileName, "a");
 			_rollover = new SizeBaseRollover(conf.fileName, _conf.maxSize, _conf.maxNum);
@@ -453,6 +448,9 @@ protected:
 
 	static void writeFormatColor(LogLevel level, string msg)
 	{
+		if(level < g_logLevel)
+			return;
+
 		version (Posix)
 		{
 			string prior_color;
@@ -532,9 +530,24 @@ string code(string func, LogLevel level, bool f = false)()
 
 public:
 
+
+void setLoggingLevel(LogLevel level)
+{
+	g_logLevel = level;
+}
+
+enum LogLevel
+{
+	LOG_DEBUG = 0,
+	LOG_INFO = 1,	
+	LOG_WARNING = 2,
+	LOG_ERROR = 3,
+	LOG_FATAL = 4
+};
+
 struct LogConf
 {
-	int level; // 0 debug 1 info 2 warning 3 error 4 fatal
+	LogLevel level; // 0 debug 1 info 2 warning 3 error 4 fatal
 	bool disableConsole;
 	string fileName = "";
 	string maxSize = "2MB";
@@ -543,7 +556,7 @@ struct LogConf
 
 void logLoadConf(LogConf conf)
 {
-	g_logger = new KissLogger(conf);
+	g_logger = new KissLogger(conf);	
 }
 
 mixin(code!("logDebug", LogLevel.LOG_DEBUG));
