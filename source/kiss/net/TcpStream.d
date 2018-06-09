@@ -25,25 +25,25 @@ import core.time;
 import kiss.container.ByteBuffer;
 import kiss.core;
 
-
 /**
 */
 class TcpStream : AbstractStream
 {
     SimpleEventHandler closeHandler;
 
-    //for client side
+    // for client side
     this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
     {
         super(loop, family, bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         // _localAddress = socket.localAddress();// TODO:
+
         _isClientSide = false;
         _isConnected = false;
     }
 
-    //for server side
+    // for server side
     this(Selector loop, Socket socket, size_t bufferSize = 4096 * 2)
     {
         super(loop, socket.addressFamily, bufferSize);
@@ -70,8 +70,10 @@ class TcpStream : AbstractStream
             Address binded = createAddress(this.socket, 0);
             this.socket.bind(binded);
             this.doConnect(addr);
-            _isConnected = true;
             start();
+            _isConnected = true;
+            _remoteAddress = addr;
+            _localAddress = binded;
         }
         catch (Exception ex)
         {
@@ -84,6 +86,8 @@ class TcpStream : AbstractStream
 
     void reconnect(Address addr)
     {
+        if (_isConnected)
+            this.close();
         _isConnected = false;
         AddressFamily family = AddressFamily.INET;
         if (this.socket !is null)
@@ -149,7 +153,10 @@ class TcpStream : AbstractStream
         assert(buffer !is null);
 
         if (!_isConnected)
+        {
+            warning("The connection has been closed!");
             return;
+        }
 
         _writeQueue.enQueue(buffer);
 

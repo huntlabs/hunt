@@ -98,7 +98,7 @@ abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
 
     override void onClose()
     {
-        assert(false, "");
+        // assert(false, "");
         // TODO: created by Administrator @ 2018-3-27 15:51:52
     }
 
@@ -227,7 +227,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         else if (readLen == 0)
         {
             version (KissDebugMode)
-                warningf("connection broken: %s", _remoteAddress.toString());
+            {
+                if (_remoteAddress !is null)
+                    warningf("connection broken: %s", _remoteAddress.toString());
+            }
             onDisconnected();
             if (_isClosed)
                 this.socket.close(); // release the sources
@@ -258,7 +261,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         if (_isWritting)
         {
             warning("Busy in writting on thread: ", thisThreadID());
-            return false;
+            return 0;
         }
         version (KissDebugMode)
             trace("start to write");
@@ -273,10 +276,11 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     protected void tryWrite()
     {
-        debug
+        if (_isWritting)
         {
-            if (_isWritting)
+            version (KissDebugMode)
                 warning("Busy in writting on thread: ", thisThreadID());
+            return;
         }
 
         if (_writeQueue.empty)
@@ -297,6 +301,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     private void setWriteBuffer(in ubyte[] data)
     {
+        version (KissDebugMode)
+        trace("buffer content length: ", data.length);
+            // trace(cast(string) data);
+
         sendDataBuffer = data; //data[writeLen .. $]; // TODO: need more tests
         _dataWriteBuffer.buf = cast(char*) sendDataBuffer.ptr;
         _dataWriteBuffer.len = cast(uint) sendDataBuffer.length;

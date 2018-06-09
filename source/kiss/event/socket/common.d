@@ -111,9 +111,7 @@ mixin template ChannelSocketOption() {
         return  this.socket.setOption(forward!(level, option, value));
     }
 
-    // you should be yDel the Address
     final @property @trusted Address remoteAddress() {
-        // return this.socket.remoteAddress();
         return _remoteAddress;
     }
     protected Address _remoteAddress;
@@ -122,9 +120,7 @@ mixin template ChannelSocketOption() {
         return this.socket;
     }
 
-    // you should be yDel the Address
     final @property @trusted Address localAddress() {
-        // return this.socket.localAddress();
         return _localAddress;
     }
     protected Address _localAddress;
