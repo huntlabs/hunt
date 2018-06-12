@@ -363,6 +363,9 @@ protected:
 		case LOG_FATAL:
 			l = "fatal";
 			break;
+		case LOG_Off:
+			l = "off";
+			break;
 		}
 		return l;
 	}
@@ -542,7 +545,8 @@ enum LogLevel
 	LOG_INFO = 1,	
 	LOG_WARNING = 2,
 	LOG_ERROR = 3,
-	LOG_FATAL = 4
+	LOG_FATAL = 4,
+	LOG_Off = 5
 };
 
 struct LogConf
