@@ -11,22 +11,26 @@
 
 module kiss.datetime.format;
 
-import std.datetime.SysTime;
-import std.datetime.DateTime;
+import std.datetime : SysTime;
+import std.datetime : DateTime;
 
 // return unix timestamp
 long time()
 {
-    return core.stdc.time.time(null);
+    import core.stdc.time : time;
+
+    return time(null);
 }
 
 // return formated time string from timestamp
-string date(string format, long timestamp)
+string date(string format, long timestamp = 0)
 {
-    long timestamp = timestamp > 0 ? timestamp : time();
+    long newTimestamp = timestamp > 0 ? timestamp : time();
 
     ubyte[] timeString;
-    DateTime dt = cast(DateTime)(SysTime.fromUnixTime(timestamp));
+    DateTime dt = cast(DateTime)(SysTime.fromUnixTime(newTimestamp));
+
+    import std.conv : to;
 
     // format to ubyte
     foreach(c; format)
@@ -35,21 +39,22 @@ string date(string format, long timestamp)
         switch(c)
         {
         case 'Y':
-            s = dt.year;
+            s = dt.year().to!ubyte;
             break;
         case 'm':
-            s = dt.month;
+            s = dt.month().to!ubyte;
             break;
         case 'd':
-            s = dt.day;
+            s = dt.day().to!ubyte;
+            break;
         case 'H':
-            s = dt.houer;
+            s = dt.hour().to!ubyte;
             break;
-        case 'm':
-            s = dt.minute;
+        case 'i':
+            s = dt.minute().to!ubyte;
             break;
-        case 'd':
-            s = dt.second;
+        case 's':
+            s = dt.second().to!ubyte;
             break;
         default:
             s = c;
