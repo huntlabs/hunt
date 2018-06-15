@@ -11,9 +11,6 @@
 
 module kiss.datetime.format;
 
-import std.datetime : SysTime;
-import std.datetime : DateTime;
-
 // return unix timestamp
 long time()
 {
@@ -25,44 +22,46 @@ long time()
 // return formated time string from timestamp
 string date(string format, long timestamp = 0)
 {
+    import std.datetime : SysTime;
+    import std.conv : to;
+
     long newTimestamp = timestamp > 0 ? timestamp : time();
 
-    ubyte[] timeString;
-    DateTime dt = cast(DateTime)(SysTime.fromUnixTime(newTimestamp));
+    string timeString;
 
-    import std.conv : to;
+    SysTime st = SysTime.fromUnixTime(newTimestamp);
 
     // format to ubyte
     foreach(c; format)
     {
-        ubyte s;
         switch(c)
         {
         case 'Y':
-            s = dt.year().to!ubyte;
+            timeString ~= st.year.to!string;
+            break;
+        case 'y':
+            timeString ~= (st.year.to!string)[2..$];
             break;
         case 'm':
-            s = dt.month().to!ubyte;
+            timeString ~= st.month.to!string;
             break;
         case 'd':
-            s = dt.day().to!ubyte;
+            timeString ~= st.day < 10 ? "0" ~ st.day.to!string : st.day.to!string;
             break;
         case 'H':
-            s = dt.hour().to!ubyte;
+            timeString ~= st.hour < 10 ? "0" ~ st.hour.to!string : st.hour.to!string;
             break;
         case 'i':
-            s = dt.minute().to!ubyte;
+            timeString ~= st.minute < 10 ? "0" ~ st.minute.to!string : st.minute.to!string;
             break;
         case 's':
-            s = dt.second().to!ubyte;
+            timeString ~= st.second < 10 ? "0" ~ st.second.to!string : st.second.to!string;
             break;
         default:
-            s = c;
+            timeString ~= c;
             break;
         }
-
-        timeString ~= s;
     }
 
-    return cast(string)timeString;
+    return timeString;
 }
