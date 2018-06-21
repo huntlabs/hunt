@@ -414,14 +414,13 @@ class ConfigBuilder
         }
         else
         {
-            pragma(msg, "skip method: " ~ memberName);
+            version (KissDebugMode) pragma(msg, "skip method: " ~ memberName);
         }
 
         return r;
     }
 
-    private static setClassMemeber(memberType, string settingItemName,
-            string memberName, string returnParameter, string incomingParameter)()
+    private static setClassMemeber(memberType, string settingItemName, string memberName, string returnParameter, string incomingParameter)()
     {
         enum fullTypeName = fullyQualifiedName!(memberType);
         enum memberModuleName = moduleName!(memberType);
