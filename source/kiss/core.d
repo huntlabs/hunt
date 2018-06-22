@@ -10,7 +10,13 @@
  */
  
 module kiss.core;
+
 import core.time;
+
+// define kiss versions
+enum KISS_MAJOR_VERSION = 0;
+enum KISS_MINOR_VERSION = 4;
+enum KISS_PATCH_VERSION = 4;
 
 /**
 */
@@ -23,7 +29,6 @@ alias EventHandler = void delegate(Object sender, EventArgs args);
 alias SimpleEventHandler = void delegate();
 alias ErrorEventHandler = void delegate(string message);
 alias TickedEventHandler = void delegate(Object sender);
-
 
 /**
 */
