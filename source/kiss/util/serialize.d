@@ -8,9 +8,8 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
-module kiss.util.serialize;
 
+module kiss.util.serialize;
 
 import std.traits;
 import std.string;
@@ -22,54 +21,40 @@ public import std.json;
 
 private:
 
-
-class RefClass{
-	size_t[size_t] 	map;
-	void*[]			arr;
-	uint 			level;
+class RefClass
+{
+	size_t[size_t] map;
+	void*[] arr;
+	uint level;
 }
 
 enum MAGIC_KEY = "o0o0o";
 
-enum bool isType(T1 , T2) = is(T1 == T2) || is(T1 == ImmutableOf!T2) || is(T1 == ConstOf!T2) || is(T1 == InoutOf!T2) || is(T1 == SharedOf!T2 ) || is(T1 == SharedConstOf!T2) || is(T1 == SharedInoutOf!T2);
+enum bool isType(T1, T2) = is(T1 == T2) || is(T1 == ImmutableOf!T2)
+		|| is(T1 == ConstOf!T2) || is(T1 == InoutOf!T2)
+		|| is(T1 == SharedOf!T2) || is(T1 == SharedConstOf!T2) || is(T1 == SharedInoutOf!T2);
 
-enum bool isSignedType(T) = isType!(T , byte) || isType!(T , short) || isType!(T , int) || isType!(T , long);
-enum bool isUnsignedType(T) = isType!(T , ubyte) ||  isType!(T , ushort) || isType!(T , uint) || isType!(T , ulong);
-enum bool isBigSignedType(T) = isType!(T , int) || isType!(T, long);
-enum bool isBigUnsignedType(T) = isType!(T , uint) || isType!(T , ulong);
-
-
+enum bool isSignedType(T) = isType!(T, byte) || isType!(T, short) || isType!(T,
+			int) || isType!(T, long);
+enum bool isUnsignedType(T) = isType!(T, ubyte) || isType!(T, ushort)
+		|| isType!(T, uint) || isType!(T, ulong);
+enum bool isBigSignedType(T) = isType!(T, int) || isType!(T, long);
+enum bool isBigUnsignedType(T) = isType!(T, uint) || isType!(T, ulong);
 
 //unsigned
-ulong[] byte_dots = [ 1 << 7,
-	1 << 14,
-	1 << 21,
-	1 << 28,
-	cast(ulong)1 << 35,
-	cast(ulong)1 << 42,
-	cast(ulong)1 << 49,
-	cast(ulong)1 << 56,
-	cast(ulong)1 << 63,
-];
+ulong[] byte_dots = [1 << 7, 1 << 14, 1 << 21, 1 << 28, cast(ulong) 1 << 35,
+	cast(ulong) 1 << 42, cast(ulong) 1 << 49, cast(ulong) 1 << 56, cast(ulong) 1 << 63,];
 
 //signed
-ulong[] byte_dots_s = [ 1 << 6,
-	1 << 13,
-	1 << 20,
-	1 << 27,
-	cast(ulong)1 << 34,
-	cast(ulong)1 << 41,
-	cast(ulong)1 << 48,
-	cast(ulong)1 << 55,
-	cast(ulong)1 << 62,
-];
+ulong[] byte_dots_s = [1 << 6, 1 << 13, 1 << 20, 1 << 27, cast(ulong) 1 << 34,
+	cast(ulong) 1 << 41, cast(ulong) 1 << 48, cast(ulong) 1 << 55, cast(ulong) 1 << 62,];
 
 ubyte getbytenum(ulong v)
 {
 	ubyte i = 0;
-	for( ; i < byte_dots.length ; i++)
+	for (; i < byte_dots.length; i++)
 	{
-		if( v <= byte_dots[i])
+		if (v <= byte_dots[i])
 		{
 			break;
 		}
@@ -80,150 +65,135 @@ ubyte getbytenum(ulong v)
 ubyte getbytenums(ulong v)
 {
 	ubyte i = 0;
-	for( ; i < byte_dots_s.length ; i++)
+	for (; i < byte_dots_s.length; i++)
 	{
-		if( v <= byte_dots_s[i])
+		if (v <= byte_dots_s[i])
 		{
 			break;
 		}
 	}
-	
-	
+
 	return cast(ubyte)(i + 1);
 }
-
-
 
 //signed
 byte[] toVariant(T)(T t) if (isSignedType!T)
 {
 	bool symbol = false;
-	if( t < 0)
+	if (t < 0)
 		symbol = true;
 	ubyte multiple = 1;
-	
-	ulong val = cast(ulong)abs(t);
+
+	ulong val = cast(ulong) abs(t);
 
 	ubyte num = getbytenums(val);
 	ubyte[] var;
-	for(size_t i = num  ; i > 1 ; i--)
+	for (size_t i = num; i > 1; i--)
 	{
 		auto n = val / (byte_dots_s[i - 2] * multiple);
-		if(symbol && multiple == 1)
+		if (symbol && multiple == 1)
 			n = n | 0x40;
-		var ~= cast(ubyte)n;
+		var ~= cast(ubyte) n;
 		val = (val % (byte_dots_s[i - 2] * multiple));
 		multiple = 2;
 	}
-	
-	if( num == 1 && symbol)
+
+	if (num == 1 && symbol)
 		val = val | 0x40;
-	
+
 	var ~= cast(ubyte)(val | 0x80);
-	
-	return cast(byte[])var;
+
+	return cast(byte[]) var;
 }
 
-T	toT(T)(const byte[] b , out long index) if(isSignedType!T)
+T toT(T)(const byte[] b, out long index) if (isSignedType!T)
 {
 	T val = 0;
-	ubyte i = 0;	
+	ubyte i = 0;
 	bool symbol = false;
-	for(i = 0 ; i < b.length ; i++)
+	for (i = 0; i < b.length; i++)
 	{
-		if( i == 0)
+		if (i == 0)
 		{
 			val = (b[i] & 0x3F);
-			if( b[i] & 0x40)
+			if (b[i] & 0x40)
 				symbol = true;
 		}
-		else if( i == 1)
+		else if (i == 1)
 		{
 			val = cast(T)((val << 6) + (b[i] & 0x7F));
 		}
 		else
-		{	
+		{
 			val = cast(T)((val << 7) + (b[i] & 0x7F));
 		}
-		
-		if(b[i] & 0x80)
+
+		if (b[i] & 0x80)
 			break;
 	}
 	index = i + 1;
-	
-	if(symbol)
+
+	if (symbol)
 		return cast(T)(val * -1);
 	else
 		return val;
 }
 
-
-
 //unsigned
-byte[] toVariant(T)(T t) if(isUnsignedType!T) 
+byte[] toVariant(T)(T t) if (isUnsignedType!T)
 {
-	ubyte num = getbytenum(cast(ulong)t);
+	ubyte num = getbytenum(cast(ulong) t);
 	T val = t;
 	ubyte[] var;
-	for(size_t i = num  ; i > 1 ; i--)
+	for (size_t i = num; i > 1; i--)
 	{
 		auto n = val / (byte_dots[i - 2]);
-		var ~= cast(ubyte)n;
+		var ~= cast(ubyte) n;
 		val = val % (byte_dots[i - 2]);
 	}
 	var ~= cast(ubyte)(val | 0x80);
-	return cast(byte[])var;
+	return cast(byte[]) var;
 }
 
 //unsigned
-T	toT(T)(const byte[] b , out long index) if(isUnsignedType!T)
+T toT(T)(const byte[] b, out long index) if (isUnsignedType!T)
 {
 	T val = 0;
-	ubyte i = 0;	
-	for(i = 0 ; i < b.length ; i++)
+	ubyte i = 0;
+	for (i = 0; i < b.length; i++)
 	{
-		
+
 		val = cast(T)((val << 7) + (b[i] & 0x7F));
-		if(b[i] & 0x80)
+		if (b[i] & 0x80)
 			break;
 	}
 	index = i + 1;
 	return val;
 }
 
-
-
-
-
-
-
-
-
-
-
 byte getbasictype(long size)
 {
-	if(size == 1)
+	if (size == 1)
 		return 0;
-	else if(size == 2)
+	else if (size == 2)
 		return 1;
-	else if(size == 4)
+	else if (size == 4)
 		return 2;
-	else if(size == 8)
+	else if (size == 8)
 		return 3;
-	else 
+	else
 		assert(0);
 }
 
 byte getbasicsize(byte type)
 {
-	if(type == 0)
+	if (type == 0)
 		return 1;
-	else if(type == 1)
+	else if (type == 1)
 		return 2;
-	else if(type ==2)
+	else if (type == 2)
 		return 4;
-	else if(type == 3)
+	else if (type == 3)
 		return 8;
 	else
 		assert(0);
@@ -232,9 +202,12 @@ byte getbasicsize(byte type)
 string serializeMembers(T)()
 {
 	string str;
-	foreach(m ; FieldNameTuple!T)
+	foreach (m; FieldNameTuple!T)
 	{
-		str ~= "data ~= serialize(t." ~ m ~" , stack , level + 1);";
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		{
+			str ~= "data ~= serialize(t." ~ m ~ " , stack , level + 1);";
+		}
 	}
 	return str;
 }
@@ -243,13 +216,17 @@ string unserializeMembers(T)()
 {
 	string str;
 	str ~= "long parse = 0; ";
-	foreach(m ; FieldNameTuple!T)
+	foreach (m; FieldNameTuple!T)
 	{
-		str ~=" if ( index < parse_index)"; 
-		str ~= "{";
-		str ~= "t." ~ m ~ " = unserialize!(typeof(t." ~ m ~ "))(data[cast(uint)index .. data.length] , parse , stack); ";
-		str ~= "index += parse; }";
-		
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		{
+			str ~= " if ( index < parse_index)";
+			str ~= "{";
+			str ~= "t." ~ m ~ " = unserialize!(typeof(t." ~ m
+				~ "))(data[cast(uint)index .. data.length] , parse , stack); ";
+			str ~= "index += parse; }";
+		}
+
 	}
 	return str;
 }
@@ -257,16 +234,15 @@ string unserializeMembers(T)()
 string getsizeMembers(T)()
 {
 	string str;
-	foreach(m ; FieldNameTuple!T)
+	foreach (m; FieldNameTuple!T)
 	{
-		str ~= "total += getsize(t."  ~  m ~ " , stack , level + 1);";
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		{
+		str ~= "total += getsize(t." ~ m ~ " , stack , level + 1);";
+		}		
 	}
 	return str;
 }
-
-
-
-
 
 ///////////////////////////////////////////////////////////
 // basic
@@ -278,33 +254,33 @@ string getsizeMembers(T)()
 //	data
 ///////////////////////////////////////////////////////////
 ///
-byte[] serialize(T)(T t , RefClass stack , uint level) if(isScalarType!T && ! isBigSignedType!T && ! isBigUnsignedType!T)
+byte[] serialize(T)(T t, RefClass stack, uint level)
+		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
 {
 	byte[] data;
 	data.length = T.sizeof + 1;
 	data[0] = getbasictype(T.sizeof);
-	memcpy(data.ptr + 1 , &t , T.sizeof);
+	memcpy(data.ptr + 1, &t, T.sizeof);
 	return data;
 }
 
-
-T unserialize(T )(const byte[] data , out long parse_index , RefClass stack) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
 {
-	assert( cast(byte)T.sizeof == getbasicsize(data[0]));
-	
+	assert(cast(byte) T.sizeof == getbasicsize(data[0]));
+
 	T value;
-	memcpy(&value , data.ptr + 1 , T.sizeof);
-	
+	memcpy(&value, data.ptr + 1, T.sizeof);
+
 	parse_index = T.sizeof + 1;
 	return value;
 }
 
-size_t getsize(T)(T t , RefClass stack , uint level) if(isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+size_t getsize(T)(T t, RefClass stack, uint level)
+		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
 {
 	return T.sizeof + 1;
 }
-
-
 
 ///////////////////////////////////////////////////////////
 // variant
@@ -313,7 +289,8 @@ size_t getsize(T)(T t , RefClass stack , uint level) if(isScalarType!T && !isBig
 //  6 (8)	 -
 //	data
 ///////////////////////////////////////////////////////////
-byte[] serialize(T )(T t, RefClass stack , uint level)  if( isBigSignedType!T || isBigUnsignedType!T)
+byte[] serialize(T)(T t, RefClass stack, uint level)
+		if (isBigSignedType!T || isBigUnsignedType!T)
 {
 	byte[] data = toVariant!T(t);
 	long index;
@@ -322,69 +299,64 @@ byte[] serialize(T )(T t, RefClass stack , uint level)  if( isBigSignedType!T ||
 	return h ~ data;
 }
 
-
-T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if( isBigSignedType!T || isBigUnsignedType!T)
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (isBigSignedType!T || isBigUnsignedType!T)
 {
-	assert( (T.sizeof == 4 ? 5 : 8 ) == data[0]);
+	assert((T.sizeof == 4 ? 5 : 8) == data[0]);
 	long index;
-	T t = toT!T(data[1 .. $] , index);
+	T t = toT!T(data[1 .. $], index);
 	parse_index = index + 1;
 	return t;
 }
 
-size_t getsize(T)(T t , RefClass stack , uint level) if(isBigSignedType!T) 
+size_t getsize(T)(T t, RefClass stack, uint level) if (isBigSignedType!T)
 {
 	return getbytenums(abs(t)) + 1;
 }
 
-
-size_t getsize(T)(T t , RefClass stack , uint level) if(isBigUnsignedType!T) 
+size_t getsize(T)(T t, RefClass stack, uint level) if (isBigUnsignedType!T)
 {
 	return getbytenum(abs(t)) + 1;
 }
-
-
 
 // TString
 // 1 type 7
 // [uint] variant 
 //  data
 
-byte[] serialize(T )(T str, RefClass stack , uint level) if(is(T  == string))
+byte[] serialize(T)(T str, RefClass stack, uint level) if (is(T == string))
 {
 	byte[] data;
-	uint len = cast(uint)str.length;
+	uint len = cast(uint) str.length;
 	byte[] dlen = toVariant(len);
 	data.length = 1 + dlen.length + len;
-	
+
 	data[0] = 7;
-	memcpy(data.ptr + 1 , dlen.ptr , dlen.length);
-	memcpy(data.ptr + 1 + dlen.length , str.ptr, len);
+	memcpy(data.ptr + 1, dlen.ptr, dlen.length);
+	memcpy(data.ptr + 1 + dlen.length, str.ptr, len);
 	return data;
 }
 
-
-string unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(is(T == string))
+string unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (is(T == string))
 {
 	assert(data[0] == 7);
 	long index;
-	uint len = toT!uint(data[1 .. $] , index);
+	uint len = toT!uint(data[1 .. $], index);
 	parse_index += 1 + index + len;
-	return cast(T)(data[cast(size_t)(1 + index) .. cast(size_t)parse_index].dup);
+	return cast(T)(data[cast(size_t)(1 + index) .. cast(size_t) parse_index].dup);
 }
 
-size_t getsize(T)(T str ,RefClass stack , uint level) if(is(T == string))
+size_t getsize(T)(T str, RefClass stack, uint level) if (is(T == string))
 {
-	uint len = cast(uint)str.length;
+	uint len = cast(uint) str.length;
 	return cast(size_t)(1 + toVariant(len).length + str.length);
 }
-
 
 // TUnion			don't support TUnion
 // 1 type 6
 // 1 len 
 // 	 data
-
 
 /*
 byte[] serialize(T)(T t) if(is(T == union))
@@ -422,37 +394,32 @@ size_t getsize(T)(T t) if(is(T == union))
 
 */
 
-
-
-
-
-
 // TSArray
 // 1 type 8
 // size[uint] variant
 // len[uint] variant
 // data
 
-byte[] serialize(T)( T t , RefClass stack , uint level) if(isStaticArray!T)
+byte[] serialize(T)(T t, RefClass stack, uint level) if (isStaticArray!T)
 {
 	byte[1] header;
 	header[0] = 8;
-	uint uSize = cast(uint)t.length;
-	byte[] dh = cast(byte[])header;
+	uint uSize = cast(uint) t.length;
+	byte[] dh = cast(byte[]) header;
 	dh ~= toVariant(uSize);
-	
+
 	byte[] data;
-	for(size_t i = 0 ; i < uSize ; i++)
+	for (size_t i = 0; i < uSize; i++)
 	{
 		data ~= serialize(t[i], stack, level + 1);
 	}
-	uint len = cast(uint)data.length;
+	uint len = cast(uint) data.length;
 	dh ~= toVariant(len);
 	return dh ~ data;
 }
 
-
-T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(isStaticArray!T)
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (isStaticArray!T)
 {
 	assert(data[0] == 8);
 	T value;
@@ -460,42 +427,38 @@ T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(i
 	uint len;
 	long index1;
 	long index2;
-	uSize = toT!uint(data[1 .. $] , index1);
-	
-	len = toT!uint(data[cast(size_t)(index1 + 1) .. $] , index2);
+	uSize = toT!uint(data[1 .. $], index1);
+
+	len = toT!uint(data[cast(size_t)(index1 + 1) .. $], index2);
 	parse_index += 1 + index1 + index2;
-	
+
 	long index = parse_index;
 	long parse = 0;
-	for(size_t i = 0 ; i < uSize ; i++)
+	for (size_t i = 0; i < uSize; i++)
 	{
 		parse = 0;
-		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse , stack );
+		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t) index .. data.length],
+				parse, stack);
 		index += parse;
 	}
-	
+
 	parse_index += len;
-	
+
 	return value;
 }
 
-size_t getsize(T)( T t , RefClass stack , uint level) if(isStaticArray!T)
+size_t getsize(T)(T t, RefClass stack, uint level) if (isStaticArray!T)
 {
 	long total = 1;
 	total += getbytenum(t.length);
-	uint uSize = cast(uint)t.length;
-	for(size_t i = 0 ; i < uSize ; i++)
+	uint uSize = cast(uint) t.length;
+	for (size_t i = 0; i < uSize; i++)
 	{
-		total += getsize(t[i] , stack , level + 1);
+		total += getsize(t[i], stack, level + 1);
 	}
 	total += getbytenum(total);
 	return total;
 }
-
-
-
-
-
 
 //  TDArray
 // 1  type 9
@@ -503,118 +466,112 @@ size_t getsize(T)( T t , RefClass stack , uint level) if(isStaticArray!T)
 // length[uint]	variant
 // data
 
-byte[] serialize(T)( T t , RefClass stack , uint level) if(isDynamicArray!T && !is(T == string))
+byte[] serialize(T)(T t, RefClass stack, uint level)
+		if (isDynamicArray!T && !is(T == string))
 {
 	byte[1] header;
 	header[0] = 9;
-	
-	
-	uint uSize = cast(uint)t.length;
-	byte[] dh = cast(byte[])header;
+
+	uint uSize = cast(uint) t.length;
+	byte[] dh = cast(byte[]) header;
 	dh ~= toVariant(uSize);
-	
+
 	byte[] data;
-	for(size_t i = 0 ; i < uSize ; i++)
+	for (size_t i = 0; i < uSize; i++)
 	{
-		data ~= serialize(t[i] , stack , level + 1);
+		data ~= serialize(t[i], stack, level + 1);
 	}
-	uint len = cast(uint)data.length;
+	uint len = cast(uint) data.length;
 	dh ~= toVariant(len);
-	
+
 	return dh ~ data;
 }
 
-
-T unserialize(T)(const byte[] data , out long parse_index , RefClass stack)  if(isDynamicArray!T && !is(T == string))
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (isDynamicArray!T && !is(T == string))
 {
 	assert(data[0] == 9);
-	
+
 	T value;
 	uint uSize;
 	uint len;
 	long index1;
 	long index2;
-	uSize = toT!uint(data[1 .. $]  , index1);
-	len = toT!uint(data[cast(size_t)(1 + index1) .. $] , index2);
-	
+	uSize = toT!uint(data[1 .. $], index1);
+	len = toT!uint(data[cast(size_t)(1 + index1) .. $], index2);
+
 	parse_index += 1 + index1 + index2;
 	value.length = uSize;
 	ulong index = parse_index;
 	long parse = 0;
-	for(size_t i = 0 ; i < uSize ; i++)
+	for (size_t i = 0; i < uSize; i++)
 	{
-		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t)index .. data.length] , parse , stack);
+		value[i] = unserialize!(typeof(value[0]))(data[cast(size_t) index .. data.length],
+				parse, stack);
 		index += parse;
 	}
 	parse_index += len;
-	
+
 	return value;
 }
 
-
-size_t getsize(T)( T t , RefClass stack , uint level) if(isDynamicArray!T && !is(T == string))
+size_t getsize(T)(T t, RefClass stack, uint level)
+		if (isDynamicArray!T && !is(T == string))
 {
 	long total = 1;
 	total += getbytenum(t.length);
-	uint uSize = cast(uint)t.length;
-	for(size_t i = 0 ; i < uSize ; i++)
+	uint uSize = cast(uint) t.length;
+	for (size_t i = 0; i < uSize; i++)
 	{
-		total += getsize(t[i] , stack , level + 1);
+		total += getsize(t[i], stack, level + 1);
 	}
 	total += getbytenum(total);
 	return total;
 }
-
-
-
-
 
 // TStruct
 // 1 type 10
 // [uint] variant
 // data
 
-byte[] serialize(T)(T t , RefClass stack , uint level) if(is(T == struct))
+byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == struct))
 {
 	byte[1] header;
 	header[0] = 10;
-	byte[] 	data;
-	
+	byte[] data;
+
 	mixin(serializeMembers!T());
-	byte [] dh = cast(byte[])header;
-	uint len = cast(uint)data.length;
+	byte[] dh = cast(byte[]) header;
+	uint len = cast(uint) data.length;
 	dh ~= toVariant(len);
 	return dh ~ data;
 }
 
-
-T unserialize(T)(const byte[] data , out long parse_index , RefClass stack) if(is(T == struct))
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (is(T == struct))
 {
 	assert(data[0] == 10);
-	
+
 	T t;
 	long index1;
-	uint len = toT!uint(data[1 .. $] , index1);
-	
+	uint len = toT!uint(data[1 .. $], index1);
+
 	parse_index = 1 + index1 + len;
 	long index = 1 + index1;
 	mixin(unserializeMembers!T());
-	
+
 	return t;
 }
 
-
-
-size_t getsize(T)(T t , RefClass stack , uint level) if(is(T == struct))
+size_t getsize(T)(T t, RefClass stack, uint level) if (is(T == struct))
 {
 	long total = 1;
-	
-	mixin(getsizeMembers!T());
-	
-	total += getbytenum(total);
-	return cast(uint)total;
-}
 
+	mixin(getsizeMembers!T());
+
+	total += getbytenum(total);
+	return cast(uint) total;
+}
 
 // TClass 
 // 1 type 11
@@ -625,27 +582,27 @@ size_t getsize(T)(T t , RefClass stack , uint level) if(is(T == struct))
 // 1 type 12
 // id variant
 
-byte[] serialize(T)(T t , RefClass stack , uint level) if(is(T == class))
+byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == class))
 {
 	byte[1] header;
-	size_t *id = null;
+	size_t* id = null;
 
-	if(t !is null)
+	if (t !is null)
 	{
-		id =  t.toHash() in stack.map;
+		id = t.toHash() in stack.map;
 	}
 
-	if(id == null)
+	if (id == null)
 	{
-		header[0] = 11;	
-		byte[] 	data;
-		byte[] dh = cast(byte[])header;
-		if( t !is null)
+		header[0] = 11;
+		byte[] data;
+		byte[] dh = cast(byte[]) header;
+		if (t !is null)
 		{
 			stack.map[t.toHash()] = stack.map.length;
 			mixin(serializeMembers!T());
 		}
-		uint len = cast(uint)data.length;
+		uint len = cast(uint) data.length;
 		dh ~= toVariant(len);
 
 		return dh ~ data;
@@ -653,71 +610,67 @@ byte[] serialize(T)(T t , RefClass stack , uint level) if(is(T == class))
 	else
 	{
 		header[0] = 12;
-		byte[] dh = cast(byte[])header;
+		byte[] dh = cast(byte[]) header;
 		dh ~= toVariant(*id);
 		return dh;
 	}
 
-
 }
 
-
-T unserialize(T)(const byte[] data , out long parse_index , RefClass stack )if(is(T == class))
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (is(T == class))
 {
 	assert(data[0] == 11 || data[0] == 12);
 
-	if(data[0] == 11)
+	if (data[0] == 11)
 	{
 		long index1;
-		uint len = toT!uint(data[1 .. $] , index1);
-		if( len == 0)
+		uint len = toT!uint(data[1 .. $], index1);
+		if (len == 0)
 			return null;
 		T t = new T;
 		parse_index = index1 + 1 + len;
 		long index = index1 + 1;
-		stack.arr ~= cast(void*)t;
+		stack.arr ~= cast(void*) t;
 		mixin(unserializeMembers!T());
 		return t;
 	}
 	else
 	{
 		long index1;
-		size_t id = toT!size_t(data[1 .. $] , index1);
+		size_t id = toT!size_t(data[1 .. $], index1);
 		parse_index += index1 + 1;
-		return cast(T)stack.arr[id];
+		return cast(T) stack.arr[id];
 	}
 
 }
 
-size_t getsize(T)(T t , RefClass stack , uint level) if(is(T == class))
+size_t getsize(T)(T t, RefClass stack, uint level) if (is(T == class))
 {
 	long total = 1;
 
+	size_t* id = null;
 
-	size_t *id = null;
-	
-	if(t !is null)
+	if (t !is null)
 	{
-		id =  t.toHash() in stack.map;
+		id = t.toHash() in stack.map;
 	}
-	
-	if(id == null)
+
+	if (id == null)
 	{
-		if( t !is null)
+		if (t !is null)
 		{
 			stack.map[t.toHash()] = stack.map.length;
 			mixin(getsizeMembers!T());
 		}
 
-		total += getbytenum(total - 1);	
+		total += getbytenum(total - 1);
 		return total;
 	}
 	else
 	{
 		return getbytenum(*id) + 1;
 	}
-
-	
 
 }
 
@@ -726,52 +679,52 @@ size_t getsize(T)(T t , RefClass stack , uint level) if(is(T == class))
 // [uint] len variant
 // (k,v)
 
-byte[] serialize(T)(T t ,  RefClass stack , uint level) if( isAssociativeArray!T )
+byte[] serialize(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 {
 	byte[1] header;
 	header[0] = 13;
 	byte[] dh;
-	dh ~=  cast(byte[])header;
-	byte[] 	data;
-	foreach( k , v ; t)
-	{	
-		data ~= serialize(k , stack , level + 1);
-		data ~= serialize(v , stack , level + 1);
+	dh ~= cast(byte[]) header;
+	byte[] data;
+	foreach (k, v; t)
+	{
+		data ~= serialize(k, stack, level + 1);
+		data ~= serialize(v, stack, level + 1);
 	}
-	uint len = cast(uint)data.length;
+	uint len = cast(uint) data.length;
 	dh ~= toVariant(len);
 	return dh ~ data;
 }
 
-T unserialize(T)(const byte[] data , out long parse_index , RefClass stack)if( isAssociativeArray!T )
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (isAssociativeArray!T)
 {
 	assert(data[0] == 13);
-	
+
 	T t;
 	long index1;
-	uint len = toT!uint(data[1 .. $] , index1);
-	
+	uint len = toT!uint(data[1 .. $], index1);
+
 	parse_index = index1 + 1 + len;
 	long index = index1 + 1;
-	while(index < parse_index)
+	while (index < parse_index)
 	{
 		long out_len;
-		auto k = unserialize!(KeyType!T)(data[index..$] ,out_len , stack);
+		auto k = unserialize!(KeyType!T)(data[index .. $], out_len, stack);
 		index += out_len;
 		out_len = 0;
-		auto v = unserialize!(ValueType!T)(data[index .. $] , out_len , stack);
+		auto v = unserialize!(ValueType!T)(data[index .. $], out_len, stack);
 		index += out_len;
 		t[k] = v;
 	}
 	return t;
 }
 
-
-size_t getsize(T)(T t , RefClass stack , uint level) if( isAssociativeArray!T )
+size_t getsize(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 {
 	long total = 1;
-	foreach( k , v ; t)
-	{	
+	foreach (k, v; t)
+	{
 		total += serialize(k).length;
 		total += serialize(v).length;
 	}
@@ -781,135 +734,124 @@ size_t getsize(T)(T t , RefClass stack , uint level) if( isAssociativeArray!T )
 
 public:
 
-T unserialize(T)(const byte[] data ) 
+T unserialize(T)(const byte[] data)
 {
 	long parse_index;
 	RefClass stack = new RefClass();
-	return unserialize!T(data , parse_index , stack);
+	return unserialize!T(data, parse_index, stack);
 }
 
-T unserialize(T)(const byte[] data , out long parse_index) 
+T unserialize(T)(const byte[] data, out long parse_index)
 {
 	RefClass stack = new RefClass();
-	return unserialize!T(data , parse_index , stack);
+	return unserialize!T(data, parse_index, stack);
 }
 
 byte[] serialize(T)(T t)
 {
 	RefClass stack = new RefClass();
-	return serialize!T(t , stack , 0);
+	return serialize!T(t, stack, 0);
 }
 
-
-size_t getsize(T)(T t) 
+size_t getsize(T)(T t)
 {
 	RefClass stack = new RefClass();
-	return getsize!T(t , stack , 0);
+	return getsize!T(t, stack, 0);
 }
-
-
-
-
-
-
-
-
-
 
 //////////////////////////////////////////////////////////////////json///////////////////////////
 private:
-enum bool isFloatType(T) = isType!(T , float) || isType!(T , double) ;
+enum bool isFloatType(T) = isType!(T, float) || isType!(T, double);
 
-JSONValue toJSON(T)(T t , RefClass stack , uint level) 
-	if(isSignedType!T || isUnsignedType!T ||
-		is(T == string) || is(T == bool) || 
-		isFloatType!T)
+JSONValue toJSON(T)(T t, RefClass stack, uint level)
+		if (isSignedType!T || isUnsignedType!T || is(T == string) || is(T == bool) || isFloatType!T)
 {
 	return JSONValue(t);
 }
 
 // uinteger
-T toOBJ(T)(JSONValue v , RefClass stack ) if( isUnsignedType!T )
+T toOBJ(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 {
 	assert(v.type() == JSON_TYPE.UINTEGER);
-	return cast(T)v.uinteger;
+	return cast(T) v.uinteger;
 }
 
 // integer
-T toOBJ(T)(JSONValue v , RefClass stack ) if( isSignedType!T)
+T toOBJ(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 {
 	assert(v.type() == JSON_TYPE.INTEGER);
-	return cast(T)v.integer;
+	return cast(T) v.integer;
 }
 
 // string
-T toOBJ(T)(JSONValue v , RefClass stack) if(is( T == string))
+T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == string))
 {
 	assert(v.type() == JSON_TYPE.STRING);
 	return v.str;
 }
 
 // bool
-T toOBJ(T)(JSONValue v , RefClass stack) if(is( T == bool))
+T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == bool))
 {
-	assert(v.type() == JSON_TYPE.TRUE ||
-		v.type() == JSON_TYPE.FALSE);
+	assert(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE);
 	return v.type() == JSON_TYPE.TRUE;
 }
 
 // floating
-T toOBJ(T)(JSONValue v , RefClass stack) if(isFloatType!T)
+T toOBJ(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 {
 	assert(v.type() == JSON_TYPE.FLOAT);
-	return cast(T)v.floating;
+	return cast(T) v.floating;
 }
 
-
-
 // array
-JSONValue toJSON(T)(T t , RefClass stack , uint level) if(isStaticArray!T || (isDynamicArray!T && !is(T == string)))
+JSONValue toJSON(T)(T t, RefClass stack, uint level)
+		if (isStaticArray!T || (isDynamicArray!T && !is(T == string)))
 {
 	JSONValue[] j;
-	foreach(e ; t)
+	foreach (e; t)
 	{
-		j ~= toJSON(e , stack , level);
+		j ~= toJSON(e, stack, level);
 	}
-	
+
 	return JSONValue(j);
 }
 
-
-T toOBJ(T)(JSONValue v , RefClass stack) if( isStaticArray!T)
+T toOBJ(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 {
 	T t;
 	assert(v.type() == JSON_TYPE.ARRAY);
-	for(size_t i = 0 ; i < t.length ; i++)
+	for (size_t i = 0; i < t.length; i++)
 	{
-		t[i] = toOBJ!(typeof(t[i]))(v.array[i] , stack);
+		t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
 	}
 	return t;
 }
 
-T toOBJ(T)(JSONValue v , RefClass stack) if( isDynamicArray!T  && !is(T == string))
+T toOBJ(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
 {
 	T t;
 	assert(v.type() == JSON_TYPE.ARRAY);
 	t.length = v.array.length;
-	for(size_t i = 0 ; i < t.length ; i++)
+	for (size_t i = 0; i < t.length; i++)
 	{
-		t[i] = toOBJ!(typeof(t[i]))(v.array[i] , stack);
+		t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
 	}
 	return t;
 }
 
 // struct & class
 
-string toJSONMembers(T)() 
+string toJSONMembers(T)()
 {
 	string str;
-	foreach(m ; FieldNameTuple!T)
+	foreach (m; FieldNameTuple!T)
 	{
-		str ~= "j[\""~m~"\"] = toJSON(t." ~ m ~" , stack , level + 1);";
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		{
+			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
+
+		}
 	}
 	return str;
 }
@@ -917,24 +859,25 @@ string toJSONMembers(T)()
 string toOBJMembers(T)()
 {
 	string str;
-	foreach(m ; FieldNameTuple!T)
+	foreach (m; FieldNameTuple!T)
 	{
 		str ~= " if ( \"" ~ m ~ "\"  in j )";
-		str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\""~m~"\"] , stack);";
-		
+		str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);";
+
 	}
 	return str;
 }
 
-JSONValue toJSON(T)(T t ,  RefClass stack , uint level) if(is(T == struct))
+JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 {
 	JSONValue j;
 	import std.stdio;
+
 	mixin(toJSONMembers!T);
 	return j;
 }
 
-T toOBJ(T)(JSONValue j , RefClass stack) if(is(T == struct))
+T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == struct))
 {
 	T t;
 	assert(j.type() == JSON_TYPE.OBJECT);
@@ -942,16 +885,15 @@ T toOBJ(T)(JSONValue j , RefClass stack) if(is(T == struct))
 	return t;
 }
 
-
-JSONValue toJSON(T)(T t , RefClass stack  ,uint level) if(is(T == class))
+JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 {
-	if(t is null || level >= stack.level)
+	if (t is null || level >= stack.level)
 	{
 		return JSONValue(null);
 	}
 
 	auto id = t.toHash() in stack.map;
-	if( id == null)
+	if (id == null)
 	{
 		stack.map[t.toHash()] = stack.map.length;
 		JSONValue j;
@@ -966,71 +908,71 @@ JSONValue toJSON(T)(T t , RefClass stack  ,uint level) if(is(T == class))
 	}
 }
 
-T toOBJ(T)(JSONValue j , RefClass stack) if(is(T == class))
+T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == class))
 {
-	if(j.type() == JSON_TYPE.NULL)
+	if (j.type() == JSON_TYPE.NULL)
 		return null;
 	assert(j.type() == JSON_TYPE.OBJECT);
 
-	if( MAGIC_KEY in j)
+	if (MAGIC_KEY in j)
 	{
-		return cast(T)stack.arr[j[MAGIC_KEY].uinteger];
+		return cast(T) stack.arr[j[MAGIC_KEY].uinteger];
 	}
 	else
 	{
 		T t = new T;
-		stack.arr ~= cast(void *)t;
+		stack.arr ~= cast(void*) t;
 		mixin(toOBJMembers!T);
 		return t;
 	}
 }
 
 //AssociativeArray
-JSONValue toJSON(T)(T t, RefClass stack , uint level) if(isAssociativeArray!T)
+JSONValue toJSON(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 {
 	JSONValue j;
 	import std.conv;
-	foreach( k , v ; t)
-		j[to!string(k)] = toJSON(v , stack , level);
+
+	foreach (k, v; t)
+		j[to!string(k)] = toJSON(v, stack, level);
 	return j;
 }
 
-T toOBJ(T)(JSONValue j , RefClass stack) if(isAssociativeArray!T)
+T toOBJ(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 {
 	import std.conv;
+
 	T t;
-	foreach( k , v ; j.object)
+	foreach (k, v; j.object)
 	{
-		t[to!(KeyType!T)(k)] = toOBJ!(ValueType!T)(v ,stack);
+		t[to!(KeyType!T)(k)] = toOBJ!(ValueType!T)(v, stack);
 	}
 	return t;
 }
 
 public:
 
-JSONValue toJSON(T)(T t , uint level = uint.max)
+JSONValue toJSON(T)(T t, uint level = uint.max)
 {
 	RefClass stack = new RefClass();
 	stack.level = level;
-	return toJSON!T(t,  stack , 0);
+	return toJSON!T(t, stack, 0);
 }
 
-T toOBJ(T)(JSONValue j ) 
+T toOBJ(T)(JSONValue j)
 {
 	RefClass stack = new RefClass();
-	return toOBJ!T(j , stack);
+	return toOBJ!T(j, stack);
 }
-
 
 alias toJson = toJSON;
 alias toObject = toOBJ;
 
-
 // only for , nested , new T
-version(unittest)
+version (unittest)
 {
 	//test struct
-	
+
 	void test1(T)(T t)
 	{
 		assert(unserialize!T(serialize(t)) == t);
@@ -1039,47 +981,48 @@ version(unittest)
 
 		assert(toOBJ!T(toJSON(t)) == t);
 	}
-	
+
 	struct T1
 	{
-		bool  		b;
-		byte  		ib;
-		ubyte 		ub;
-		short 		ish;
-		ushort 		ush;
-		int			ii;
-		uint		ui;
-		long		il;
-		ulong		ul;
-		string		s;
-		uint[10]	sa;
-		long[]		sb;
+		bool b;
+		byte ib;
+		ubyte ub;
+		short ish;
+		ushort ush;
+		int ii;
+		uint ui;
+		long il;
+		ulong ul;
+		string s;
+		uint[10] sa;
+		long[] sb;
 	}
-	
+
 	struct T2
 	{
-		string	n;
-		T1[] 	t;
+		string n;
+		T1[] t;
 	}
-	
+
 	struct T3
 	{
 		T1 t1;
 		T2 t2;
 		string[] name;
 	}
-	
+
 	//test class
 	class C
 	{
 		int age;
 		string name;
-		T3	t3;
-		override bool opEquals(Object c) {
-			auto c1 = cast(C)c;
+		T3 t3;
+		override bool opEquals(Object c)
+		{
+			auto c1 = cast(C) c;
 			return age == c1.age && name == c1.name && t3 == c1.t3;
 		}
-		
+
 		C clone()
 		{
 			auto c = new C();
@@ -1088,31 +1031,30 @@ version(unittest)
 			c.t3 = t3;
 			return c;
 		}
-		
+
 	}
-	
-	
+
 	class C2
 	{
 		C[] c;
-		C 	c1;
-		T1 	t1;
-		
-		
-		override bool opEquals(Object c) {
-			auto c2 = cast(C2)c;
+		C c1;
+		T1 t1;
+
+		override bool opEquals(Object c)
+		{
+			auto c2 = cast(C2) c;
 			return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
 		}
 	}
-
 
 	//ref test
 	class School
 	{
 		string name;
 		User[] users;
-		override bool opEquals(Object c) {
-			auto school = cast(School)c;
+		override bool opEquals(Object c)
+		{
+			auto school = cast(School) c;
 			return school.name == this.name;
 		}
 	}
@@ -1122,8 +1064,9 @@ version(unittest)
 		int age;
 		string name;
 		School school;
-		override bool opEquals(Object c) {
-			auto user = cast(User)c;
+		override bool opEquals(Object c)
+		{
+			auto user = cast(User) c;
 			return user.age == this.age && user.name == this.name && user.school == this.school;
 		}
 	}
@@ -1131,7 +1074,6 @@ version(unittest)
 	void test_ref_class()
 	{
 		School school = new School();
-
 
 		User user1 = new User();
 		user1.age = 30;
@@ -1151,61 +1093,60 @@ version(unittest)
 		test1(user2);
 	}
 
-
 	void test_struct_class_array()
 	{
 		T1 t;
 		t.b = true;
 		t.ib = -11;
 		t.ub = 128 + 50;
-		t.ish = - 50;
+		t.ish = -50;
 		t.ush = (1 << 15) + 50;
-		t.ii = - 50;
-		t.ui =  (1 << 31) + 50;
-		t.il = (cast(long)1 << 63) - 50;
-		t.ul = (cast(long)1 << 63) + 50;
+		t.ii = -50;
+		t.ui = (1 << 31) + 50;
+		t.il = (cast(long) 1 << 63) - 50;
+		t.ul = (cast(long) 1 << 63) + 50;
 		t.s = "test";
 		t.sa[0] = 10;
 		t.sa[1] = 100;
 		t.sb ~= 10;
 		t.sb ~= 100;
 		test1(t);
-		
+
 		T2 t2;
 		t2.t ~= t;
 		t2.t ~= t;
 		t2.n = "testt2";
 		test1(t2);
-		
+
 		T3 t3;
 		t3.t1 = t;
 		t3.t2 = t2;
 		t3.name ~= "123";
 		t3.name ~= "456";
 		test1(t3);
-		
+
 		C c1 = new C();
 		c1.age = 100;
 		c1.name = "test";
 		c1.t3 = t3;
-		
+
 		test1(c1);
-		
+
 		C2 c2 = new C2();
 		c2.c ~= c1;
 		c2.c ~= c1.clone();
 		c2.c1 = c1.clone();
 		c2.t1 = t;
-		
+
 		test1(c2);
 
 		C2 c3 = null;
 
 		test1(c3);
 
-		string[string] 	map1 = ["1":"1","2":"2"];
-		string[int]		map2 = [1:"1",2:"2"];
-		T1[string]		map3 ;
+		string[string] map1 = ["1" : "1", "2" : "2"];
+		string[int] map2 = [1 : "1", 2 : "2"];
+		T1[string] map3;
 		T1 a1;
 		a1.ib = 1;
 		T1 a2;
@@ -1218,50 +1159,45 @@ version(unittest)
 	}
 }
 
-unittest{
+unittest
+{
 	import std.stdio;
+
 	long index;
-	
-	
-	
+
 	void test(T)(T v)
 	{
 		long index;
 		byte[] bs = toVariant(v);
 		long length = bs.length;
-		bs ~= [ 'x' ,'y' ];
+		bs ~= ['x', 'y'];
 		assert(toT!T(bs, index) == v && index == length);
 
 		assert(toOBJ!T(toJSON(v)) == v);
 
 	}
 
-
-	
-	
-	
 	//test variant
-	
+
 	//unsigned
 	{
 		ubyte j0 = 0;
 		ubyte j1 = 50;
 		ubyte j2 = (1 << 7) + 50;
 		ubyte j3 = 0xFF;
-		
+
 		ushort j4 = (1 << 14) + 50;
 		ushort j5 = 0xFFFF;
-		
-		
+
 		uint j6 = (1 << 21) + 50;
 		uint j7 = (1 << 28) + 50;
 		uint j8 = j6 + j7;
 		uint j9 = 0xFFFFFFFF;
-		
-		ulong j10 = (cast(ulong)1 << 35) + 50;
-		ulong j11 = (cast(ulong)1 << 42) + 50;
-		ulong j12 = (cast(ulong)1 << 49) + 50;
-		ulong j13 = (cast(ulong)1 << 56) + 50;
+
+		ulong j10 = (cast(ulong) 1 << 35) + 50;
+		ulong j11 = (cast(ulong) 1 << 42) + 50;
+		ulong j12 = (cast(ulong) 1 << 49) + 50;
+		ulong j13 = (cast(ulong) 1 << 56) + 50;
 		ulong j14 = j9 + j10 + j11 + j12;
 		ulong j15 = 0xFFFFFFFFFFFFFFFF;
 		test(j0);
@@ -1281,32 +1217,31 @@ unittest{
 		test(j14);
 		test(j15);
 	}
-	
+
 	//signed
 	{
 		byte i0 = 0;
-		byte i1 = (1 << 6) + 50 ;
-		byte i2 = (1 << 7) -1;
+		byte i1 = (1 << 6) + 50;
+		byte i2 = (1 << 7) - 1;
 		byte i3 = -i2;
 		byte i4 = -i1;
-		
+
 		test(i0);
 		test(i1);
 		test(i2);
 		test(i3);
 		test(i4);
-		
+
 		short i5 = (1 << 7) + 50;
 		short i6 = (1 << 14) + 50;
 		short i7 = -i5;
 		short i8 = -i6;
-		
-		
+
 		test(i5);
 		test(i6);
 		test(i7);
 		test(i8);
-		
+
 		int i9 = (1 << 16) + 50;
 		int i10 = (1 << 25) + 50;
 		int i11 = (1 << 30) + 50;
@@ -1315,7 +1250,7 @@ unittest{
 		int i14 = -i11;
 		int i15 = i9 + i10 + i11;
 		int i16 = -i15;
-		
+
 		test(i9);
 		test(i10);
 		test(i11);
@@ -1324,70 +1259,68 @@ unittest{
 		test(i14);
 		test(i15);
 		test(i16);
-		
-		long i17 = (cast(long)1 << 32) + 50;
-		long i18 = (cast(long)1 << 48) + 50;
-		long i19 = (cast(long)1 << 63) + 50;
+
+		long i17 = (cast(long) 1 << 32) + 50;
+		long i18 = (cast(long) 1 << 48) + 50;
+		long i19 = (cast(long) 1 << 63) + 50;
 		long i20 = i17 + i18 + i19;
 		long i21 = -i17;
 		long i22 = -i20;
-		
+
 		test(i17);
 		test(i18);
 		test(i19);
 		test(i20);
 		test(i21);
 		test(i22);
-		
+
 		int i23 = -11;
 		test(i23);
 	}
-	
+
 	//test serialize
-	
-	
+
 	//basic: byte ubyte short ushort int uint long ulong
 	{
 		byte b1 = 123;
 		byte b2 = -11;
 		ubyte b3 = 233;
-		
-		
+
 		short s1 = -11;
 		short s2 = (1 << 8) + 50;
 		short s3 = (1 << 15) - 50;
 		ushort s4 = (1 << 16) - 50;
-		
+
 		int i1 = -11;
 		int i2 = (1 << 16) + 50;
 		int i3 = (1 << 31) - 50;
 		uint i4 = (1 << 31) + 50;
-		
+
 		long l1 = -11;
-		long l2 = (cast(long)1 << 32) + 50;
-		long l3 = (cast(long)1 << 63) - 50;
-		ulong l4 = (cast(long)1 << 63) + 50;
-		
+		long l2 = (cast(long) 1 << 32) + 50;
+		long l3 = (cast(long) 1 << 63) - 50;
+		ulong l4 = (cast(long) 1 << 63) + 50;
+
 		test1(b1);
 		test1(b2);
 		test1(b3);
-		
+
 		test1(s1);
 		test1(s2);
 		test1(s3);
 		test1(s4);
-		
+
 		test1(i1);
 		test1(i2);
 		test1(i3);
 		test1(i4);
-		
+
 		test1(l1);
 		test1(l2);
 		test1(l3);
 		test1(l4);
 	}
-	
+
 	//test string
 	{
 		string s1 = "";
@@ -1397,7 +1330,7 @@ unittest{
 		test1(s2);
 		test1(s3);
 	}
-	
+
 	//test static arrary
 	{
 		string[5] sa;
@@ -1408,7 +1341,7 @@ unittest{
 		sa[4] = "test4";
 		test1(sa);
 	}
-	
+
 	//test dynamic arrary
 	{
 		string[] sa;
@@ -1416,13 +1349,13 @@ unittest{
 		sa ~= "test2";
 		sa ~= "test3";
 		sa ~= "test4";
-		
+
 		test1(sa);
 
 		string[] sa2;
 		test1(sa2);
 	}
-	
+
 	//test struct \ class \ associative array
 	test_struct_class_array();
 	test_ref_class();
