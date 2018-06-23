@@ -16,7 +16,7 @@ import core.time;
 // define kiss versions
 enum KISS_MAJOR_VERSION = 0;
 enum KISS_MINOR_VERSION = 4;
-enum KISS_PATCH_VERSION = 4;
+enum KISS_PATCH_VERSION = 5;
 
 /**
 */
