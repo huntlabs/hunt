@@ -14,11 +14,11 @@ module kiss.datetime.format;
 import std.datetime : Month;
 
 // return unix timestamp
-long time()
+int time()
 {
     import core.stdc.time : time;
 
-    return time(null);
+    return cast(int)time(null);
 }
 
 short monthToShort(Month month)
