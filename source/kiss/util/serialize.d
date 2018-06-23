@@ -19,6 +19,26 @@ import std.bitmanip;
 import std.math;
 public import std.json;
 
+public:
+enum IGNORE = 1024;
+
+class UnIgnoreArray{
+	
+	void setUnIgnore(T)()
+	{
+		_unIgnore[T.stringof] = true;
+	}
+
+	bool ignore(T)()
+	{
+		return T.stringof !in _unIgnore;
+	}
+
+private:
+	bool[string] _unIgnore;
+}
+
+
 private:
 
 class RefClass
@@ -26,6 +46,8 @@ class RefClass
 	size_t[size_t] map;
 	void*[] arr;
 	uint level;
+	bool ignore;	 				///  all class or struct ignore or not. 
+	UnIgnoreArray unIgnore;			///  part class unignore. 
 }
 
 enum MAGIC_KEY = "o0o0o";
@@ -734,26 +756,25 @@ size_t getsize(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 
 public:
 
-T unserialize(T)(const byte[] data)
+T unserialize(T)(const byte[] data )
 {
 	long parse_index;
-	RefClass stack = new RefClass();
-	return unserialize!T(data, parse_index, stack);
+	return unserialize!T(data, parse_index);
 }
 
-T unserialize(T)(const byte[] data, out long parse_index)
+T unserialize(T)(const byte[] data, out long parse_index )
 {
 	RefClass stack = new RefClass();
 	return unserialize!T(data, parse_index, stack);
 }
 
-byte[] serialize(T)(T t)
+byte[] serialize(T)(T t )
 {
 	RefClass stack = new RefClass();
 	return serialize!T(t, stack, 0);
 }
 
-size_t getsize(T)(T t)
+size_t getsize(T)(T t )
 {
 	RefClass stack = new RefClass();
 	return getsize!T(t, stack, 0);
@@ -772,36 +793,46 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level)
 // uinteger
 T toOBJ(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 {
-	assert(v.type() == JSON_TYPE.UINTEGER);
-	return cast(T) v.uinteger;
+	if(v.type() == JSON_TYPE.UINTEGER)
+		return cast(T) v.uinteger;
+	else
+		return T.init;
 }
 
 // integer
 T toOBJ(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 {
-	assert(v.type() == JSON_TYPE.INTEGER);
-	return cast(T) v.integer;
+	if(v.type() == JSON_TYPE.INTEGER)
+		return cast(T) v.integer;
+	else
+		return T.init;
 }
 
 // string
 T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == string))
 {
-	assert(v.type() == JSON_TYPE.STRING);
-	return v.str;
+	if(v.type() == JSON_TYPE.STRING)
+		return v.str;
+	else
+		return T.init;
 }
 
 // bool
 T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == bool))
 {
-	assert(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE);
-	return v.type() == JSON_TYPE.TRUE;
+	if(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE)
+		return v.type() == JSON_TYPE.TRUE;
+	else
+		return T.init;
 }
 
 // floating
 T toOBJ(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 {
-	assert(v.type() == JSON_TYPE.FLOAT);
-	return cast(T) v.floating;
+	if(v.type() == JSON_TYPE.FLOAT)
+		return cast(T) v.floating;
+	else
+		return  T.init;
 }
 
 // array
@@ -820,49 +851,74 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level)
 T toOBJ(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 {
 	T t;
-	assert(v.type() == JSON_TYPE.ARRAY);
-	for (size_t i = 0; i < t.length; i++)
+	if(v.type() == JSON_TYPE.ARRAY)
 	{
-		t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
+		for (size_t i = 0; i < t.length; i++)
+		{
+			t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
+		}
 	}
 	return t;
+	
 }
 
 T toOBJ(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
 {
 	T t;
-	assert(v.type() == JSON_TYPE.ARRAY);
-	t.length = v.array.length;
-	for (size_t i = 0; i < t.length; i++)
+	if(v.type() == JSON_TYPE.ARRAY)
 	{
-		t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
+		t.length = v.array.length;
+		for (size_t i = 0; i < t.length; i++)
+		{
+			t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
+		}
 	}
 	return t;
 }
 
 // struct & class
 
-string toJSONMembers(T)()
+string toJSONMembers(T , bool ignore)()
 {
 	string str;
 	foreach (m; FieldNameTuple!T)
 	{
-		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{
-			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
-
+			if(!ignore || !hasUDA!(__traits(getMember , T , m) ,IGNORE ))
+			{
+				str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
+			}	
 		}
 	}
 	return str;
 }
+
+string toJSONMembersAll(T)()
+{
+	string str;
+	foreach (m; FieldNameTuple!T)
+	{
+		if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		{		
+			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
+		}
+	}
+	return str;
+}
+
+
 
 string toOBJMembers(T)()
 {
 	string str;
 	foreach (m; FieldNameTuple!T)
 	{
-		str ~= " if ( \"" ~ m ~ "\"  in j )";
-		str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);";
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		{
+			str ~= " if ( \"" ~ m ~ "\"  in j )";
+			str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);";
+		}
 
 	}
 	return str;
@@ -873,15 +929,28 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 	JSONValue j;
 	import std.stdio;
 
-	mixin(toJSONMembers!T);
+
+	bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
+
+	if(ignore)
+		mixin(toJSONMembers!(T,true));
+	else
+		mixin(toJSONMembers!(T,true));
+
+
+
+
+	
 	return j;
 }
 
 T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == struct))
 {
 	T t;
-	assert(j.type() == JSON_TYPE.OBJECT);
-	mixin(toOBJMembers!T);
+	if(j.type() == JSON_TYPE.OBJECT)
+	{
+		mixin(toOBJMembers!T);
+	}
 	return t;
 }
 
@@ -897,7 +966,12 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 	{
 		stack.map[t.toHash()] = stack.map.length;
 		JSONValue j;
-		mixin(toJSONMembers!T);
+		bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
+
+		if(ignore)
+			mixin(toJSONMembers!(T,true));
+		else
+			mixin(toJSONMembers!(T,true));
 		return j;
 	}
 	else
@@ -910,8 +984,8 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 
 T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == class))
 {
-	if (j.type() == JSON_TYPE.NULL)
-		return null;
+	if ( j.type() != JSON_TYPE.OBJECT)
+		return T.init;
 	assert(j.type() == JSON_TYPE.OBJECT);
 
 	if (MAGIC_KEY in j)
@@ -941,7 +1015,8 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 T toOBJ(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 {
 	import std.conv;
-
+	if ( j.type() != JSON_TYPE.OBJECT)
+		return T.init;
 	T t;
 	foreach (k, v; j.object)
 	{
@@ -952,12 +1027,23 @@ T toOBJ(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 
 public:
 
-JSONValue toJSON(T)(T t, uint level = uint.max)
+JSONValue toJSON(T)(T t , uint level = uint.max , bool ignore = true)
 {
 	RefClass stack = new RefClass();
 	stack.level = level;
+	stack.ignore = ignore;
 	return toJSON!T(t, stack, 0);
 }
+
+JSONValue toJSON(T)(T t   , UnIgnoreArray array  ,  uint level = uint.max)
+{
+	RefClass stack = new RefClass();
+	stack.level = level;
+	stack.unIgnore = array;
+	return toJSON!T(t, stack, 0);
+}
+
+
 
 T toOBJ(T)(JSONValue j)
 {
@@ -969,194 +1055,196 @@ alias toJson = toJSON;
 alias toObject = toOBJ;
 
 // only for , nested , new T
+/*
 version (unittest)
 {
 	//test struct
 
-	void test1(T)(T t)
-	{
-		assert(unserialize!T(serialize(t)) == t);
-
-		assert(serialize(t).length == getsize(t));
-
-		assert(toOBJ!T(toJSON(t)) == t);
-	}
-
-	struct T1
-	{
-		bool b;
-		byte ib;
-		ubyte ub;
-		short ish;
-		ushort ush;
-		int ii;
-		uint ui;
-		long il;
-		ulong ul;
-		string s;
-		uint[10] sa;
-		long[] sb;
-	}
-
-	struct T2
-	{
-		string n;
-		T1[] t;
-	}
-
-	struct T3
-	{
-		T1 t1;
-		T2 t2;
-		string[] name;
-	}
-
-	//test class
-	class C
-	{
-		int age;
-		string name;
-		T3 t3;
-		override bool opEquals(Object c)
+		void test1(T)(T t)
 		{
-			auto c1 = cast(C) c;
-			return age == c1.age && name == c1.name && t3 == c1.t3;
+			assert(unserialize!T(serialize(t)) == t);
+
+			assert(serialize(t).length == getsize(t));
+
+			assert(toOBJ!T(toJSON(t)) == t);
 		}
 
-		C clone()
+		struct T1
 		{
-			auto c = new C();
-			c.age = age;
-			c.name = name;
-			c.t3 = t3;
-			return c;
+			bool b;
+			byte ib;
+			ubyte ub;
+			short ish;
+			ushort ush;
+			int ii;
+			uint ui;
+			long il;
+			ulong ul;
+			string s;
+			uint[10] sa;
+			long[] sb;
 		}
 
-	}
-
-	class C2
-	{
-		C[] c;
-		C c1;
-		T1 t1;
-
-		override bool opEquals(Object c)
+		struct T2
 		{
-			auto c2 = cast(C2) c;
-			return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
+			string n;
+			T1[] t;
 		}
-	}
 
-	//ref test
-	class School
-	{
-		string name;
-		User[] users;
-		override bool opEquals(Object c)
+		struct T3
 		{
-			auto school = cast(School) c;
-			return school.name == this.name;
+			T1 t1;
+			T2 t2;
+			string[] name;
 		}
-	}
 
-	class User
-	{
-		int age;
-		string name;
-		School school;
-		override bool opEquals(Object c)
+		//test class
+		class C
 		{
-			auto user = cast(User) c;
-			return user.age == this.age && user.name == this.name && user.school == this.school;
+			int age;
+			string name;
+			T3 t3;
+			override bool opEquals(Object c)
+			{
+				auto c1 = cast(C) c;
+				return age == c1.age && name == c1.name && t3 == c1.t3;
+			}
+
+			C clone()
+			{
+				auto c = new C();
+				c.age = age;
+				c.name = name;
+				c.t3 = t3;
+				return c;
+			}
+
 		}
-	}
 
-	void test_ref_class()
-	{
-		School school = new School();
+		class C2
+		{
+			C[] c;
+			C c1;
+			T1 t1;
 
-		User user1 = new User();
-		user1.age = 30;
-		user1.name = "zhangyuchun";
-		user1.school = school;
+			override bool opEquals(Object c)
+			{
+				auto c2 = cast(C2) c;
+				return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
+			}
+		}
 
-		User user2 = new User();
-		user2.age = 31;
-		user2.name = "wulishan";
-		user2.school = school;
+		//ref test
+		class School
+		{
+			string name;
+			User[] users;
+			override bool opEquals(Object c)
+			{
+				auto school = cast(School) c;
+				return school.name == this.name;
+			}
+		}
 
-		school.name = "putao";
-		school.users ~= user1;
-		school.users ~= user2;
+		class User
+		{
+			int age;
+			string name;
+			School school;
+			override bool opEquals(Object c)
+			{
+				auto user = cast(User) c;
+				return user.age == this.age && user.name == this.name && user.school == this.school;
+			}
+		}
 
-		test1(user1);
-		test1(user2);
-	}
+		void test_ref_class()
+		{
+			School school = new School();
 
-	void test_struct_class_array()
-	{
-		T1 t;
-		t.b = true;
-		t.ib = -11;
-		t.ub = 128 + 50;
-		t.ish = -50;
-		t.ush = (1 << 15) + 50;
-		t.ii = -50;
-		t.ui = (1 << 31) + 50;
-		t.il = (cast(long) 1 << 63) - 50;
-		t.ul = (cast(long) 1 << 63) + 50;
-		t.s = "test";
-		t.sa[0] = 10;
-		t.sa[1] = 100;
-		t.sb ~= 10;
-		t.sb ~= 100;
-		test1(t);
+			User user1 = new User();
+			user1.age = 30;
+			user1.name = "zhangyuchun";
+			user1.school = school;
 
-		T2 t2;
-		t2.t ~= t;
-		t2.t ~= t;
-		t2.n = "testt2";
-		test1(t2);
+			User user2 = new User();
+			user2.age = 31;
+			user2.name = "wulishan";
+			user2.school = school;
 
-		T3 t3;
-		t3.t1 = t;
-		t3.t2 = t2;
-		t3.name ~= "123";
-		t3.name ~= "456";
-		test1(t3);
+			school.name = "putao";
+			school.users ~= user1;
+			school.users ~= user2;
 
-		C c1 = new C();
-		c1.age = 100;
-		c1.name = "test";
-		c1.t3 = t3;
+			test1(user1);
+			test1(user2);
+		}
 
-		test1(c1);
+		void test_struct_class_array()
+		{
+			T1 t;
+			t.b = true;
+			t.ib = -11;
+			t.ub = 128 + 50;
+			t.ish = -50;
+			t.ush = (1 << 15) + 50;
+			t.ii = -50;
+			t.ui = (1 << 31) + 50;
+			t.il = (cast(long) 1 << 63) - 50;
+			t.ul = (cast(long) 1 << 63) + 50;
+			t.s = "test";
+			t.sa[0] = 10;
+			t.sa[1] = 100;
+			t.sb ~= 10;
+			t.sb ~= 100;
+			test1(t);
 
-		C2 c2 = new C2();
-		c2.c ~= c1;
-		c2.c ~= c1.clone();
-		c2.c1 = c1.clone();
-		c2.t1 = t;
+			T2 t2;
+			t2.t ~= t;
+			t2.t ~= t;
+			t2.n = "testt2";
+			test1(t2);
 
-		test1(c2);
+			T3 t3;
+			t3.t1 = t;
+			t3.t2 = t2;
+			t3.name ~= "123";
+			t3.name ~= "456";
+			test1(t3);
 
-		C2 c3 = null;
+			C c1 = new C();
+			c1.age = 100;
+			c1.name = "test";
+			c1.t3 = t3;
 
-		test1(c3);
+			test1(c1);
 
-		string[string] map1 = ["1" : "1", "2" : "2"];
-		string[int] map2 = [1 : "1", 2 : "2"];
-		T1[string] map3;
-		T1 a1;
-		a1.ib = 1;
-		T1 a2;
-		a2.ib = 2;
-		map3["1"] = a1;
-		map3["2"] = a2;
-		test1(map1);
-		test1(map2);
-		test1(map3);
-	}
+			C2 c2 = new C2();
+			c2.c ~= c1;
+			c2.c ~= c1.clone();
+			c2.c1 = c1.clone();
+			c2.t1 = t;
+
+			test1(c2);
+
+			C2 c3 = null;
+
+			test1(c3);
+
+			string[string] map1 = ["1" : "1", "2" : "2"];
+			string[int] map2 = [1 : "1", 2 : "2"];
+			T1[string] map3;
+			T1 a1;
+			a1.ib = 1;
+			T1 a2;
+			a2.ib = 2;
+			map3["1"] = a1;
+			map3["2"] = a2;
+			test1(map1);
+			test1(map2);
+			test1(map3);
+		}
+	
 }
 
 unittest
@@ -1359,4 +1447,4 @@ unittest
 	//test struct \ class \ associative array
 	test_struct_class_array();
 	test_ref_class();
-}
+}*/
