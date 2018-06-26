@@ -935,7 +935,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 	if(ignore)
 		mixin(toJSONMembers!(T,true));
 	else
-		mixin(toJSONMembers!(T,true));
+		mixin(toJSONMembers!(T,false));
 
 
 
@@ -971,7 +971,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 		if(ignore)
 			mixin(toJSONMembers!(T,true));
 		else
-			mixin(toJSONMembers!(T,true));
+			mixin(toJSONMembers!(T,false));
 		return j;
 	}
 	else
