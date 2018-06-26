@@ -883,7 +883,7 @@ string toJSONMembers(T , bool ignore)()
 	string str;
 	foreach (m; FieldNameTuple!T)
 	{
-		if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{
 			if(!ignore || !hasUDA!(__traits(getMember , T , m) ,IGNORE ))
 			{
@@ -899,7 +899,7 @@ string toJSONMembersAll(T)()
 	string str;
 	foreach (m; FieldNameTuple!T)
 	{
-		if (__traits(getProtection, __traits(getMember, T, m)) == "public")
+		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{		
 			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
 		}
