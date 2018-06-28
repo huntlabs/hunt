@@ -835,6 +835,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 		return  T.init;
 }
 
+
 // array
 JSONValue toJSON(T)(T t, RefClass stack, uint level)
 		if (isStaticArray!T || (isDynamicArray!T && !is(T == string)))
@@ -927,31 +928,42 @@ string toOBJMembers(T)()
 JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 {
 	JSONValue j;
-	import std.stdio;
+
+	static if (is(T == JSONValue))
+	{
+		return t;
+	}
+	else{
+		bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
+
+		if(ignore)
+			mixin(toJSONMembers!(T,true));
+		else
+			mixin(toJSONMembers!(T,false));
 
 
-	bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
-
-	if(ignore)
-		mixin(toJSONMembers!(T,true));
-	else
-		mixin(toJSONMembers!(T,false));
 
 
-
-
-	
-	return j;
+		
+		return j;
+	}
 }
 
 T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == struct))
 {
-	T t;
-	if(j.type() == JSON_TYPE.OBJECT)
+	static if (is(T == JSONValue))
 	{
-		mixin(toOBJMembers!T);
+		return j;
 	}
-	return t;
+	else
+	{
+		T t;
+		if(j.type() == JSON_TYPE.OBJECT)
+		{
+			mixin(toOBJMembers!T);
+		}
+		return t;
+	}
 }
 
 JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
@@ -1156,6 +1168,22 @@ version (unittest)
 				auto user = cast(User) c;
 				return user.age == this.age && user.name == this.name && user.school == this.school;
 			}
+		}
+
+		struct J{
+			string data;
+			JSONValue val;
+		
+		}
+
+		void test_json_ser()
+		{
+			J j;
+			j.data = "test";
+			j.val = "FUC";
+
+			toObject!J(toJson(j));
+
 		}
 
 		void test_ref_class()
@@ -1447,4 +1475,6 @@ unittest
 	//test struct \ class \ associative array
 	test_struct_class_array();
 	test_ref_class();
+	test_json_ser();
 }*/
+
