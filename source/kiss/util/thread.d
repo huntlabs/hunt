@@ -25,6 +25,10 @@ version (Posix)
 			enum __NR_gettid = 224;
 		}
 	}
+    else version (FreeBSD)
+	{
+		enum __NR_gettid = 224;
+	}
     else version (OSX)
 	{
 		enum __NR_gettid = 372;
