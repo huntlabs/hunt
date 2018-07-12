@@ -1,6 +1,6 @@
 module kiss.sys.syscall.os.osx;
 
-version(osx):
+version(OSX):
 
 enum SYS_syscall = 0;
 enum SYS_exit = 1;
