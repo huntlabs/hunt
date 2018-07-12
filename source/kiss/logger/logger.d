@@ -420,7 +420,8 @@ protected:
 
 	static string toFormat(string func, string msg, string file, size_t line, LogLevel level)
 	{
-		string time_prior = format("%-27s", Clock.currTime.toISOExtString());
+		import kiss.datetime;
+		string time_prior = date("Y-m-d H:i:s");
 
 		string tid = to!string(getTid());
 
