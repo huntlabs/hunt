@@ -32,7 +32,7 @@ version (Posix)
         }
         else version(OSX)
         {
-            return cast(pid_t)syscall(SYS_thread_selfid);
+            return cast(pid_t)syscall(SYS_gettid);
         }
         else version(linux)
         {
