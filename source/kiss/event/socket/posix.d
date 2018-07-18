@@ -237,8 +237,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else if (nBytes == Socket.ERROR)
         {
-            version (KissDebugMode)
-                warningf("errno=%d, message: %s", errno, lastSocketError());
+            // version (KissDebugMode)
+            //     warningf("errno=%d, message: %s", errno, lastSocketError());
 
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
@@ -246,6 +246,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             {
                 this._error = true;
                 this._erroString = lastSocketError();
+                warningf("errno=%d, message: %s", errno, this._erroString);
             }
         }
         else

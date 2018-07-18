@@ -183,7 +183,13 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         _iocpwrite.watcher = this;
         _iocpwrite.operation = IocpOperation.write;
         version (KissDebugMode)
+        {
             trace("writing...handle=", this.socket.handle());
+            trace("buffer content length: ", sendDataBuffer.length);
+            // trace(cast(string) data);
+            tracef("%(%02X %)", sendDataBuffer);
+        }
+
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
                 dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
@@ -293,8 +299,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         clearError();
 
         writeBuffer = _writeQueue.front();
-        setWriteBuffer(writeBuffer.sendData());
+        const(ubyte)[] data = writeBuffer.sendData();
+        setWriteBuffer(data);
         size_t nBytes = doWrite();
+
+        if(nBytes < data.length) // to fix the corrupted data 
+            sendDataBuffer = data.dup;
     }
 
     private bool _isWritting = false;
@@ -303,7 +313,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     {
         version (KissDebugMode)
         trace("buffer content length: ", data.length);
-            // trace(cast(string) data);
+        // trace(cast(string) data);
+        // tracef("%(%02X %)", data);
 
         sendDataBuffer = data; //data[writeLen .. $]; // TODO: need more tests
         _dataWriteBuffer.buf = cast(char*) sendDataBuffer.ptr;
@@ -342,7 +353,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         else // if (sendDataBuffer.length > nBytes) 
         {
             version (KissDebugMode)
-                tracef("remaining nbytes: ", sendDataBuffer.length - nBytes);
+                tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
+            // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
+            // sendDataBuffer corrupted
+            // const(ubyte)[] data = writeBuffer.sendData();
+            // tracef("%(%02X %)", data);
+            // tracef("%(%02X %)", sendDataBuffer);
             setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
             nBytes = doWrite();
         }
