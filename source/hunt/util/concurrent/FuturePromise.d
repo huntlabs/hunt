@@ -21,7 +21,9 @@ class FuturePromise(C) : Future!C, Promise!C
 
     this()
     {
-        
+		// FIXME: Needing refactor or cleanup -@zxp at 7/18/2018, 5:43:37 PM
+		// 
+        // _cause = COMPLETED;
     }
     
 	void succeeded(C result) {
@@ -73,6 +75,9 @@ class FuturePromise(C) : Future!C, Promise!C
 
     C get(){
 		// _latch.await();
+		if(!_done)
+			throw new ExecutionException("Not done yet.");
+			
 		if (_cause is COMPLETED)
 			return _result;
 		if (typeid(_cause) == typeid(CancellationException))
@@ -85,6 +90,8 @@ class FuturePromise(C) : Future!C, Promise!C
     {
 		// if (!_latch.await(timeout, unit))
 		// 	throw new TimeoutException();
+		if(!_done)
+			throw new ExecutionException("Not done yet.");
 
 		if (_cause == COMPLETED)
 			return _result;

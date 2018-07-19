@@ -80,6 +80,8 @@ class TcpStream : AbstractStream
             error(ex.message);
         }
 
+        // FIXME: Needing refactor or cleanup -@zxp at 7/19/2018, 10:19:03 AM
+        // handle failed connection
         if (_connectionHandler !is null)
             _connectionHandler(_isConnected);
     }
