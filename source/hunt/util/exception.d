@@ -4,6 +4,7 @@ import std.exception;
 import core.exception;
 
 import std.stdio;
+import kiss.logger;
 
 void implementationMissing(string file = __FILE__, int line = __LINE__ )(bool canThrow=true)
 {
@@ -11,7 +12,8 @@ void implementationMissing(string file = __FILE__, int line = __LINE__ )(bool ca
         throw new core.exception.AssertError("Implementation missing", file, line);
     else
     {
-        writefln("Implementation missing, in %s:%d", file, line);
+        // writefln("Implementation missing, in %s:%d", file, line);
+        warningf("Implementation missing, in %s:%d", file, line);
     }
 }
 
