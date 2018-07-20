@@ -835,11 +835,11 @@ class BufferUtils {
 
 
     
-    // /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert Buffer to string ID independent of content
-    //  */
+    /**
+     * Convert Buffer to string ID independent of content
+     */
     private static void idString(ByteBuffer buffer, StringBuilder ot) {
         ot.append(typeof(buffer).stringof);
         ot.append("@");
@@ -875,12 +875,12 @@ class BufferUtils {
     
     // /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert Buffer to a detail debug string of pointers and content
-    //  *
-    //  * @param buffer the buffer to generate a detail string from
-    //  * @return A string showing the pointers and content of the buffer
-    //  */
+    /**
+     * Convert Buffer to a detail debug string of pointers and content
+     *
+     * @param buffer the buffer to generate a detail string from
+     * @return A string showing the pointers and content of the buffer
+     */
     static string toDetailString(ByteBuffer buffer) {
         if (buffer is null)
             return "null";
