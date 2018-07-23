@@ -143,8 +143,8 @@ abstract class AbstractSocketChannel : AbstractChannel
         this.handle = s.handle();
         this._family = s.addressFamily;
         // _localAddress = s.localAddress();
-        version (Posix)
-            s.blocking = false;
+        // version (Posix)
+        //     s.blocking = false;
         _socket = s;
         version (KissDebugMode)
             trace("new socket fd: ", this.handle);

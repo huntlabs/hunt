@@ -146,7 +146,7 @@ class AbstractSelector : Selector
 
             if (isErro(events[i].events))
             {
-                version(KissDebugMode) warning("close event: ", watch.handle);
+                version(KissDebugMode) info("close event: ", watch.handle);
                 watch.close();
                 continue;
             }

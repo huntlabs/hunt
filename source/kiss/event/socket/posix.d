@@ -84,7 +84,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     {
         // _readBuffer = new UbyteArrayObject();
         version (KissDebugMode)
-            trace("Buffer size for read: ", bufferSize);
+            tracef("The size of buffer for read is: %d bytes", bufferSize);
         _readBuffer = new ubyte[bufferSize];
         super(loop, WatcherType.TCP);
         setFlag(WatchFlag.Read, true);
@@ -268,6 +268,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected void doConnect(Address addr)
     {
         this.socket.connect(addr);
+        this.socket.blocking = false;        
     }
 
     void cancelWrite()

@@ -81,6 +81,7 @@ class TcpListener : AbstractListener
     TcpListener bind(Address addr)
     {
         this.socket.bind(addr);
+        this.socket.blocking = false;
         _localAddress = _socket.localAddress();
         return this;
     }
