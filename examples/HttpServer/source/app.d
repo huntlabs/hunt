@@ -64,7 +64,7 @@ void main(string[] args)
 		});
 	}).start();
 
-	writefln("The server is listening on %s.", listener.bindingAddress.toString());
+	writefln("The server is listening on http://%s.", listener.bindingAddress.toString());
 	loop.run();
 }
 
