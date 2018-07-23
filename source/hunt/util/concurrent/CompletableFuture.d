@@ -3,6 +3,7 @@ module hunt.util.concurrent.CompletableFuture;
 import hunt.util.concurrent.Future;
 import hunt.util.concurrent.Promise;
 
+import hunt.util.functional;
 import hunt.util.exception;
 
 /**
@@ -29,7 +30,7 @@ class Completable(S) : CompletableFuture!S , Promise!S {
 class CompletableFuture(T)
 {
 
-        /**
+    /**
      * If not already completed, sets the value returned by {@link
      * #get()} and related methods to the given value.
      *
@@ -112,8 +113,31 @@ class CompletableFuture(T)
         * pushing others to avoid unbounded recursion.
         */
         // debug writeln("postComplete in thread ", Thread.getThis().id);
-        m_isDone = true;
+        // m_isDone = true;
+        foreach(Consumer!T a;  acceptList)
+        {
+            a(result);
+        }
     }
+
+    CompletableFuture!T thenAccept(Consumer!T action)
+    {
+        // CompletableFuture!void d = new CompletableFuture!void();
+        if(m_isDone)
+        {
+            // d.completeValue(result);
+            action(result);
+        }
+        else
+        {
+            acceptList ~= action;
+        }
+
+        return this;
+    }
+
+    private Consumer!T[] acceptList;
+    // private CompletableFuture!void[] acceptList;
 
   /* ------------- Encoding and decoding outcomes -------------- */
 

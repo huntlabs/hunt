@@ -4,6 +4,7 @@ module hunt.util.io;
 import hunt.util.common;
 import hunt.util.exception;
 
+import kiss.logger;
 
 /**
  * This abstract class is the superclass of all classes representing
@@ -179,9 +180,11 @@ class BufferedNetOutputStream : OutputStream {
         if (length > buf.length - count) {
             flush();
         }
-        // System.arraycopy(array, offset, buf, count, length);
-        buf[count .. count+length] == array[offset .. offset+length];
+        buf[count .. count+length] = array[offset .. offset+length];
         count += length;
+
+        // version(HuntDebugMode)
+        //     tracef("%(%02X %)", buf[0 .. count]);
     }
 
     override
