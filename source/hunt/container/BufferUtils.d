@@ -806,34 +806,6 @@ class BufferUtils {
     //     }
     // }
 
-    // static string toSummaryString(ByteBuffer buffer) {
-    //     if (buffer == null)
-    //         return "null";
-    //     StringBuilder buf = new StringBuilder();
-    //     buf.append("[p=");
-    //     buf.append(buffer.position());
-    //     buf.append(",l=");
-    //     buf.append(buffer.limit());
-    //     buf.append(",c=");
-    //     buf.append(buffer.capacity());
-    //     buf.append(",r=");
-    //     buf.append(buffer.remaining());
-    //     buf.append("]");
-    //     return buf.toString();
-    // }
-
-    static string toDetailString(ByteBuffer[] buffer) {
-        StringBuilder builder = new StringBuilder();
-        builder.append('[');
-        for (int i = 0; i < buffer.length; i++) {
-            if (i > 0) builder.append(',');
-            builder.append(toDetailString(buffer[i]));
-        }
-        builder.append(']');
-        return builder.toString();
-    }
-
-
     
     /* ------------------------------------------------------------ */
 
@@ -858,22 +830,49 @@ class BufferUtils {
         }
     }
     
-    // /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert Buffer to string ID independent of content
-    //  *
-    //  * @param buffer the buffet to generate a string ID from
-    //  * @return A string showing the buffer ID
-    //  */
-    // static string toIDString(ByteBuffer buffer) {
-    //     StringBuilder buf = new StringBuilder();
-    //     idString(buffer, buf);
-    //     return buf.toString();
-    // }
+    /**
+     * Convert Buffer to string ID independent of content
+     *
+     * @param buffer the buffet to generate a string ID from
+     * @return A string showing the buffer ID
+     */
+    static string toIDString(ByteBuffer buffer) {
+        StringBuilder buf = new StringBuilder();
+        idString(buffer, buf);
+        return buf.toString();
+    }
     
     
-    // /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    
+    static string toSummaryString(ByteBuffer buffer) {
+        if (buffer is null)
+            return "null";
+        StringBuilder buf = new StringBuilder();
+        buf.append("[p=");
+        buf.append(buffer.position());
+        buf.append(",l=");
+        buf.append(buffer.limit());
+        buf.append(",c=");
+        buf.append(buffer.capacity());
+        buf.append(",r=");
+        buf.append(buffer.remaining());
+        buf.append("]");
+        return buf.toString();
+    }
+
+    static string toDetailString(ByteBuffer[] buffer) {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        for (int i = 0; i < buffer.length; i++) {
+            if (i > 0) builder.append(',');
+            builder.append(toDetailString(buffer[i]));
+        }
+        builder.append(']');
+        return builder.toString();
+    }
 
     /**
      * Convert Buffer to a detail debug string of pointers and content
@@ -932,7 +931,7 @@ class BufferUtils {
                 }
             }
             buffer.limit(limit);
-        } catch (Throwable x) {
+        } catch (Exception x) {
             buf.append("!!concurrent mod!!");
         }
     }
@@ -952,43 +951,43 @@ class BufferUtils {
             buf.append("\\x").append(TypeUtils.toHexString(b));
     }
     
-    // /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert buffer to a Hex Summary string.
-    //  *
-    //  * @param buffer the buffer to generate a hex byte summary from
-    //  * @return A string showing a summary of the content in hex
-    //  */
-    // static string toHexSummary(ByteBuffer buffer) {
-    //     if (buffer == null)
-    //         return "null";
-    //     StringBuilder buf = new StringBuilder();
+    /**
+     * Convert buffer to a Hex Summary string.
+     *
+     * @param buffer the buffer to generate a hex byte summary from
+     * @return A string showing a summary of the content in hex
+     */
+    static string toHexSummary(ByteBuffer buffer) {
+        if (buffer is null)
+            return "null";
+        StringBuilder buf = new StringBuilder();
 
-    //     buf.append("b[").append(buffer.remaining()).append("]=");
-    //     for (int i = buffer.position(); i < buffer.limit(); i++) {
-    //         TypeUtils.toHex(buffer.get(i), buf);
-    //         if (i == buffer.position() + 24 && buffer.limit() > buffer.position() + 32) {
-    //             buf.append("...");
-    //             i = buffer.limit() - 8;
-    //         }
-    //     }
-    //     return buf.toString();
-    // }
+        buf.append("b[").append(buffer.remaining()).append("]=");
+        for (int i = buffer.position(); i < buffer.limit(); i++) {
+            TypeUtils.toHex(buffer.get(i), buf);
+            if (i == buffer.position() + 24 && buffer.limit() > buffer.position() + 32) {
+                buf.append("...");
+                i = buffer.limit() - 8;
+            }
+        }
+        return buf.toString();
+    }
 
-    // /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert buffer to a Hex string.
-    //  *
-    //  * @param buffer the buffer to generate a hex byte summary from
-    //  * @return A hex string
-    //  */
-    // static string toHexString(ByteBuffer buffer) {
-    //     if (buffer == null)
-    //         return "null";
-    //     return TypeUtils.toHexString(toArray(buffer));
-    // }
+    /**
+     * Convert buffer to a Hex string.
+     *
+     * @param buffer the buffer to generate a hex byte summary from
+     * @return A hex string
+     */
+    static string toHexString(ByteBuffer buffer) {
+        if (buffer is null)
+            return "null";
+        return TypeUtils.toHexString(toArray(buffer));
+    }
 
 
     private enum int[] decDivisors =[1000000000, 100000000, 10000000, 1000000, 100000, 10000, 1000, 100, 10, 1];
