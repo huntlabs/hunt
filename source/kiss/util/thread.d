@@ -22,17 +22,14 @@ version (Posix)
     {
         version(FreeBSD)
         {
-            /*
             long tid;
             syscall(SYS_thr_self, &tid);
 
             return cast(pid_t)tid;
-	    */
-            return cast(pid_t)syscall(SYS_thr_self);
         }
         else version(OSX)
         {
-            return cast(pid_t)syscall(SYS_gettid);
+            return cast(pid_t)syscall(SYS_thread_selfid);
         }
         else version(linux)
         {
