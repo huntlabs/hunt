@@ -30,6 +30,11 @@ interface Cloneable {
 }
 
 
+interface Comparable(T) {
+    int compareTo(T o);
+}
+
+
 
 interface Runnable {
     /**

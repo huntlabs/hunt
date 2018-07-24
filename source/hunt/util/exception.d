@@ -199,3 +199,15 @@ class CancellationException : IllegalStateException
 }
 
 
+class OutOfMemoryError : Error
+{
+    this()
+    {
+        super("");
+    }
+
+    this(string msg, Throwable nextInChain = null)
+    {
+        super(msg, nextInChain);
+    }
+}
