@@ -20,6 +20,8 @@ public import hunt.container.List;
 public import hunt.container.LinkedList;
 public import hunt.container.Map;
 public import hunt.container.MultiMap;
+public import hunt.container.NavigableSet;
 public import hunt.container.Queue;
 public import hunt.container.Set;
+public import hunt.container.SortedSet;
 public import hunt.container.StringBuffer;

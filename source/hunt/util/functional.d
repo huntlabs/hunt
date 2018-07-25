@@ -1,6 +1,10 @@
 module hunt.util.functional;
 
 /**
+*/
+alias Function(T, U) = U delegate(T);
+
+/**
  * A one-argument action.
  */
 template Action1(T)

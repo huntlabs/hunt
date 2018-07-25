@@ -4,6 +4,7 @@ import hunt.container.Collection;
 import hunt.container.Iterable;
 import hunt.container.Set;
 
+import hunt.util.functional;
 
 /**
 */
@@ -414,14 +415,10 @@ interface Map(K,V) : Iterable!(K,V){
      * @since 1.8
      */
     final V putIfAbsent(K key, V value) {
-        // V v = get(key);
         V v = V.init;
 
         if(!containsKey(key))
-        // if (v is null) 
-        {
             v = put(key, value);
-        }
 
         return v;
     }
@@ -625,20 +622,32 @@ interface Map(K,V) : Iterable!(K,V){
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    // final V computeIfAbsent(K key,
-    //         Function<? super K, ? extends V> mappingFunction) {
-    //     Objects.requireNonNull(mappingFunction);
-    //     V v;
-    //     if ((v = get(key)) == null) {
-    //         V newValue;
-    //         if ((newValue = mappingFunction.apply(key)) != null) {
-    //             put(key, newValue);
-    //             return newValue;
-    //         }
-    //     }
 
-    //     return v;
-    // }
+    final V computeIfAbsent(K key, Function!(K, V) mappingFunction) {
+        assert(mappingFunction !is null);
+        
+        if (containsKey(key)) {
+            return get(key);
+        }
+        else {
+            V newValue = mappingFunction(key);
+            static if(is(V == class))
+            {
+                if (newValue !is null) {
+                    put(key, newValue);
+                    return newValue;
+                }
+                else
+                    return V.init;
+            }
+            else
+            {
+                put(key, newValue);
+                return newValue;
+            }
+        }
+    }
+
 
     /**
      * If the value for the specified key is present and non-null, attempts to

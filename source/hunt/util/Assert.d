@@ -1022,8 +1022,8 @@ class Assert {
      * @see org.hamcrest.CoreMatchers
      * @see org.hamcrest.MatcherAssert
      */
-    static void assertThat(T)(T actual, T matcher) {
-        assertThat("", actual, matcher);
+    static void assertThat(T, size_t line = __LINE__ , string file = __FILE__ )(T actual, T matcher) {
+        assertThat!(T, line, file)("", actual, matcher);
     }
 
     /**
@@ -1054,11 +1054,15 @@ class Assert {
      * @see org.hamcrest.CoreMatchers
      * @see org.hamcrest.MatcherAssert
      */
-    static void assertThat(T)(string reason, T actual,
+    static void assertThat(T, size_t line = __LINE__ , string file = __FILE__ )(string message, T actual,
             T matcher) {
                 // trace("actual=>", actual);
                 // trace("matcher=>", matcher);
-        assert(actual == matcher, reason);
+        if(message.empty)
+            message = std.format.format("raised in %s:%s", file, line);
+        else
+            message = std.format.format("raised in %s:%s, reason: %s", file, line,  message);
+        assert(actual == matcher, message);
     }
 
     static void assertContain(T)(T source, T substring )
