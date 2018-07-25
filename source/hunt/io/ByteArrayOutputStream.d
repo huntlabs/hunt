@@ -169,7 +169,9 @@ class ByteArrayOutputStream : OutputStream {
      * @see     java.io.ByteArrayOutputStream#size()
      */
     byte[] toByteArray() {
-        return buf[0 .. count].dup; // Arrays.copyOf(buf, count);
+        // FIXME: Needing refactor or cleanup -@zxp at 7/25/2018, 10:02:15 AM
+        // 
+        return buf[0 .. count]; // .dup; // Arrays.copyOf(buf, count);
     }
 
     /**

@@ -104,6 +104,11 @@ class ByteArrayInputStream : InputStream {
         this._mark = offset;
     }
 
+    byte[] getRawBuffer()
+    {
+        return buf;
+    }
+
     /**
      * Reads the next byte of data from this input stream. The value
      * byte is returned as an <code>int</code> in the range
