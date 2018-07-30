@@ -58,20 +58,20 @@ module hunt.container.ArrayDeque;
 //      * other.  We also guarantee that all array cells not holding
 //      * deque elements are always null.
 //      */
-//     transient Object[] elements; // non-private to simplify nested class access
+//     Object[] elements; // non-private to simplify nested class access
 
 //     /**
 //      * The index of the element at the head of the deque (which is the
 //      * element that would be removed by remove() or pop()); or an
 //      * arbitrary number equal to tail if the deque is empty.
 //      */
-//     transient int head;
+//     int head;
 
 //     /**
 //      * The index at which the next element would be added to the tail
 //      * of the deque (via addLast(E), add(E), or push(E)).
 //      */
-//     transient int tail;
+//     int tail;
 
 //     /**
 //      * The minimum capacity that we'll use for a newly created deque.

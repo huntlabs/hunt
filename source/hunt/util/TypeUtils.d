@@ -6,6 +6,25 @@ import hunt.util.string.common;
 
 import std.conv;
 
+import std.typecons;
+
+
+alias Pair(F, S) = Tuple!(F, "first", S, "second");
+Pair!(F, S) makePair(F, S)(F first, S second) 
+{
+    return tuple!("first", "second")(first, second);
+}
+
+unittest
+{
+    Pair!(string, int) p  = makePair("age", 20);
+
+	assert(p.first == "age");
+	assert(p.second == 20);
+}
+
+/**
+*/
 class TypeUtils
 {
     /**

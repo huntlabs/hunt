@@ -21,15 +21,15 @@ import std.datetime;
  * <b>Sample Usage</b> (Note that the following classes are all
  * made-up.)
  * <pre> {@code
- * interface ArchiveSearcher { String search(String target); }
+ * interface ArchiveSearcher { string search(string target); }
  * class App {
  *   ExecutorService executor = ...
  *   ArchiveSearcher searcher = ...
- *   void showSearch(final String target)
+ *   void showSearch(final string target)
  *       throws InterruptedException {
- *     Future<String> future
- *       = executor.submit(new Callable<String>() {
- *         String call() {
+ *     Future<string> future
+ *       = executor.submit(new Callable<string>() {
+ *         string call() {
  *             return searcher.search(target);
  *         }});
  *     displayOtherThings(); // do other things while searching
@@ -43,9 +43,9 @@ import std.datetime;
  * implements {@code Runnable}, and so may be executed by an {@code Executor}.
  * For example, the above construction with {@code submit} could be replaced by:
  *  <pre> {@code
- * FutureTask<String> future =
- *   new FutureTask<String>(new Callable<String>() {
- *     String call() {
+ * FutureTask<string> future =
+ *   new FutureTask<string>(new Callable<string>() {
+ *     string call() {
  *       return searcher.search(target);
  *   }});
  * executor.execute(future);}</pre>

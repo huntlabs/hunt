@@ -64,7 +64,7 @@ class Collections {
      *
      * !(p)This example illustrates the type-safe way to obtain an empty map:
      * !(pre)
-     *     Map&lt;String, Date&gt; s = Collections.emptyMap();
+     *     Map&lt;string, Date&gt; s = Collections.emptyMap();
      * !(/pre)
      * @implNote Implementations of this method need not create a separate
      * {@code Map} object for each call.  Using this method is likely to have

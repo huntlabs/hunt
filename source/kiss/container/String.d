@@ -9,7 +9,7 @@
  *
  */
 
-module kiss.container.String;
+module kiss.container.string;
 
 import kiss.container.common;
 import core.stdc.string : memcpy;
@@ -21,7 +21,7 @@ import Range = std.range.primitives;
 alias IString(Alloc) = StringImpl!(char, Alloc);
 alias IWString(Alloc) = StringImpl!(wchar, Alloc);
 alias IDString(Alloc) = StringImpl!(dchar, Alloc);
-alias String = IString!(Mallocator);
+alias string = IString!(Mallocator);
 alias WString = IWString!(Mallocator);
 alias DString = IDString!(Mallocator);
 
@@ -403,7 +403,7 @@ version (unittest)  : void testFunc(T, size_t Buf)()
     foreach (strL; strs)
     {
         auto str = to!(immutable(T)[])(strL);
-        auto s = String(str);
+        auto s = string(str);
 
         assert(s.length == str.length);
         assert(s.empty == str.empty);
@@ -415,7 +415,7 @@ version (unittest)  : void testFunc(T, size_t Buf)()
         foreach (it; strs)
         {
             auto cmpS = to!(immutable(T)[])(it);
-            auto itStr = String(cmpS);
+            auto itStr = string(cmpS);
 
             if (cmpS == str)
             {
@@ -461,7 +461,7 @@ version (unittest)  : void testFunc(T, size_t Buf)()
             }
         }
 
-        String t;
+        string t;
         assert(t.empty);
 
         t = str;
@@ -485,10 +485,10 @@ version (unittest)  : void testFunc(T, size_t Buf)()
         foreach (it; strs)
         {
             auto joinStr = to!(immutable(T)[])(it);
-            auto itStr = String(joinStr);
+            auto itStr = string(joinStr);
             auto compareStr = str ~ joinStr;
-            String tdup22 = tdup;
-            String tdup23 = tdup;
+            string tdup22 = tdup;
+            string tdup23 = tdup;
             tdup22 ~= (joinStr);
             tdup23 ~= itStr;
 

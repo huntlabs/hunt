@@ -191,8 +191,8 @@ interface NavigableSet(E) : SortedSet!(E) {
      *         has a restricted range, and {@code fromElement} or
      *         {@code toElement} lies outside the bounds of the range.
      */
-    NavigableSet!(E) subSet(E fromElement, boolean fromInclusive,
-                           E toElement,   boolean toInclusive);
+    NavigableSet!(E) subSet(E fromElement, bool fromInclusive,
+                           E toElement,   bool toInclusive);
 
     /**
      * Returns a view of the portion of this set whose elements are less than
@@ -221,7 +221,7 @@ interface NavigableSet(E) : SortedSet!(E) {
      *         restricted range, and {@code toElement} lies outside the
      *         bounds of the range
      */
-    NavigableSet!(E) headSet(E toElement, boolean inclusive);
+    NavigableSet!(E) headSet(E toElement, bool inclusive);
 
     /**
      * Returns a view of the portion of this set whose elements are greater
@@ -250,7 +250,7 @@ interface NavigableSet(E) : SortedSet!(E) {
      *         restricted range, and {@code fromElement} lies outside the
      *         bounds of the range
      */
-    NavigableSet!(E) tailSet(E fromElement, boolean inclusive);
+    NavigableSet!(E) tailSet(E fromElement, bool inclusive);
 
     /**
      * {@inheritDoc}
