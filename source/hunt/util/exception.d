@@ -133,7 +133,6 @@ class UnsupportedOperationException : RuntimeException
 }
 
 
-
 class NoSuchElementException : RuntimeException
 {
     // this()
@@ -211,3 +210,16 @@ class OutOfMemoryError : Error
         super(msg, nextInChain);
     }
 }
+
+
+class GeneralSecurityException: Exception
+{
+    mixin basicExceptionCtors;
+}
+
+class NoSuchAlgorithmException: GeneralSecurityException
+{
+    mixin basicExceptionCtors;
+}
+
+

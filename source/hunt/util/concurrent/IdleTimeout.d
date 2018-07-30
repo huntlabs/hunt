@@ -13,8 +13,8 @@ module hunt.util.concurrent.IdleTimeout;
 // abstract class IdleTimeout {
 //     private final Scheduler scheduler;
 //     private final AtomicReference<Scheduler.Future> timeout = new AtomicReference<>();
-//     private volatile long idleTimeout;
-//     private volatile long idleTimestamp = Millisecond100Clock.currentTimeMillis();
+//     private long idleTimeout;
+//     private long idleTimestamp = Millisecond100Clock.currentTimeMillis();
 
 //     private final Runnable idleTask = new Runnable() {
 //         @Override
@@ -145,5 +145,5 @@ module hunt.util.concurrent.IdleTimeout;
 //      * @return True if the entity monitored should still be checked for idle
 //      * timeouts
 //      */
-//     abstract boolean isOpen();
+//     abstract bool isOpen();
 // }

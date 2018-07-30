@@ -1,7 +1,10 @@
 module hunt.io.common;
 
+import hunt.util.concurrent.CountingCallback;
 import hunt.util.common;
 import hunt.util.exception;
+
+import hunt.container.ByteBuffer;
 
 import kiss.logger;
 import std.algorithm;
@@ -505,3 +508,7 @@ class IO {
 	}
 }
 
+
+interface BufferReaderHandler {
+	void readBuffer(ByteBuffer buf, CountingCallback countingCallback, long count);
+}
