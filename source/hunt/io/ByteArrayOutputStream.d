@@ -106,6 +106,8 @@ class ByteArrayOutputStream : OutputStream {
             MAX_ARRAY_SIZE;
     }
 
+    alias write = OutputStream.write;
+
     /**
      * Writes the specified byte to this byte array output stream.
      *

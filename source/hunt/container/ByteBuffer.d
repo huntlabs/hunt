@@ -973,7 +973,7 @@ class HeapByteBuffer : ByteBuffer
  *
  * <p> Mapped byte buffers are created via the {@link
  * java.nio.channels.FileChannel#map FileChannel.map} method.  This class
- * extends the {@link ByteBuffer} class with operations that are specific to
+ * : the {@link ByteBuffer} class with operations that are specific to
  * memory-mapped file regions.
  *
  * <p> A mapped byte buffer and the file mapping that it represents remain
