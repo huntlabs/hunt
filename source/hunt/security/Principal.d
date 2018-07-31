@@ -21,7 +21,7 @@ interface Principal {
      * @return true if the principal passed in is the same as that
      * encapsulated by this principal, and false otherwise.
      */
-    bool equals(Object another);
+    bool opEquals(Object another);
 
     /**
      * Returns a string representation of this principal.
@@ -35,7 +35,8 @@ interface Principal {
      *
      * @return a hashcode for this principal.
      */
-    int toHash();
+    // int toHash();
+    size_t toHash() @trusted nothrow;
 
     /**
      * Returns the name of this principal.
@@ -59,7 +60,7 @@ interface Principal {
      *              implied by this principal, or false otherwise.
      * @since 1.8
      */
-    bool implies(Subject subject);
+    // bool implies(Subject subject);
     // {
     //     if (subject == null)
     //         return false;
