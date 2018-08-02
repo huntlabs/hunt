@@ -104,27 +104,29 @@ byte[] toVariant(T)(T t) if (isSignedType!T)
 	bool symbol = false;
 	if (t < 0)
 		symbol = true;
-	ubyte multiple = 1;
 
 	ulong val = cast(ulong) abs(t);
 
 	ubyte num = getbytenums(val);
+
 	ubyte[] var;
-	for (size_t i = num; i > 1; i--)
+	if(num == 1)
 	{
-		auto n = val / (byte_dots_s[i - 2] * multiple);
-		if (symbol && multiple == 1)
-			n = n | 0x40;
-		var ~= cast(ubyte) n;
-		val = (val % (byte_dots_s[i - 2] * multiple));
-		multiple = 2;
+		if (symbol)
+			val = val | 0x40;
+	}
+	else{
+		for (size_t i = num; i > 1; i--)
+		{
+			auto n = val / (byte_dots_s[i - 2] * 2);
+			if (symbol && i == num)
+				n = n | 0x40;
+			var ~= cast(ubyte) n;
+			val = (val % (byte_dots_s[i - 2] * 2));
+		}
 	}
 
-	if (num == 1 && symbol)
-		val = val | 0x40;
-
 	var ~= cast(ubyte)(val | 0x80);
-
 	return cast(byte[]) var;
 }
 
@@ -133,28 +135,34 @@ T toT(T)(const byte[] b, out long index) if (isSignedType!T)
 	T val = 0;
 	ubyte i = 0;
 	bool symbol = false;
-	for (i = 0; i < b.length; i++)
+
+	if(b.length == 1)
 	{
-		if (i == 0)
-		{
-			val = (b[i] & 0x3F);
-			if (b[i] & 0x40)
-				symbol = true;
-		}
-		else if (i == 1)
-		{
-			val = cast(T)((val << 6) + (b[i] & 0x7F));
-		}
-		else
-		{
-			val = cast(T)((val << 7) + (b[i] & 0x7F));
-		}
-
-		if (b[i] & 0x80)
-			break;
+		val = (b[i] & 0x3F);
+		if (b[i] & 0x40)
+			symbol = true;
 	}
-	index = i + 1;
+	else
+	{
+		for (i = 0; i < b.length; i++)
+		{
+			if (i == 0)
+			{
+				val = (b[i] & 0x3F);
+				if (b[i] & 0x40)
+					symbol = true;			
+			}
+			else
+			{
+				val = cast(T)((val << 7) + (b[i] & 0x7F));
+			}
+		
+			if (b[i] & 0x80)
+				break;
+		}
+	}
 
+	index = i + 1;
 	if (symbol)
 		return cast(T)(val * -1);
 	else
