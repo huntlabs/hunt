@@ -21,6 +21,6 @@ class DateTimeHelper
 {
     static long currentTimeMillis()
     {
-        convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
+        return convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
     }
 }
