@@ -1,5 +1,7 @@
 module hunt.util.datetime;
 
+import std.datetime;
+
 class TimeUnits
 {
     enum  Year =  "years";
@@ -12,4 +14,13 @@ class TimeUnits
     enum  Microsecond =  "usecs";
     enum  HectoNanosecond =  "hnsecs";
     enum  Nanosecond =  "nsecs";
+
+}
+
+class DateTimeHelper
+{
+    static long currentTimeMillis()
+    {
+        convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
+    }
 }

@@ -274,7 +274,12 @@ class Collections {
 
         override int size() {return 1;}
 
-        override bool contains(E obj) {return eq(cast(Object)obj, cast(Object)element);}
+        override bool contains(E obj) {
+            static if(is(E == class))
+                return eq(cast(Object)obj, cast(Object)element);
+            else
+                return element == obj;
+            }
 
         override E get(int index) {
             if (index != 0)
