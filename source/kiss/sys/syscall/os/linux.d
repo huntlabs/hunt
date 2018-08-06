@@ -2,6 +2,35 @@ module kiss.sys.syscall.os.linux;
 
 version(linux):
 
+// Workaround for __traits(allMembers, ...) not including public imports:
+
+version (X86) import unistd = mir.linux.arch.x86.uapi._asm.unistd;
+else version (X86_64) import unistd = mir.linux.arch.x86_64.uapi._asm.unistd;
+else version (ARM) import unistd = mir.linux.arch.arm.uapi._asm.unistd;
+else version (AArch64) import unistd = mir.linux.arch.aarch64.uapi._asm.unistd;
+else version (SPARC) import unistd = mir.linux.arch.sparc.uapi._asm.unistd;
+else version (SPARC64) import unistd = mir.linux.arch.sparc64.uapi._asm.unistd;
+else version (Alpha) import unistd = mir.linux.arch.alpha.uapi._asm.unistd;
+else version (IA64) import unistd = mir.linux.arch.ia64.uapi._asm.unistd;
+else version (PPC) import unistd = mir.linux.arch.ppc.uapi._asm.unistd;
+else version (PPC64) import unistd = mir.linux.arch.ppc64.uapi._asm.unistd;
+else version (SH) import unistd = mir.linux.arch.sh.uapi._asm.unistd;
+else version (S390) import unistd = mir.linux.arch.s390.uapi._asm.unistd;
+else version (SystemZ) import unistd = mir.linux.arch.systemz.uapi._asm.unistd;
+else version (HPPA) import unistd = mir.linux.arch.hppa.uapi._asm.unistd;
+else version (HPPA64) import unistd = mir.linux.arch.hppa64.uapi._asm.unistd;
+else version (MIPS_O32) import unistd = mir.linux.arch.mips_o32.uapi._asm.unistd;
+else version (MIPS_N32) import unistd = mir.linux.arch.mips_n32.uapi._asm.unistd;
+else version (MIPS64) import unistd = mir.linux.arch.mips64.uapi._asm.unistd;
+else static assert(0, "syscall() is not supported for linux on your architecture.");
+
+version(X86_64) {} else
+    static foreach (member; __traits(allMembers, unistd))
+        static if (member.length >= 3 && member[0 .. 3] == "NR_")
+            mixin("enum __" ~ member ~ " = unistd." ~ member ~ ";");
+
+version(X86_64):
+
 enum __NR_read = 0;
 enum __NR_write = 1;
 enum __NR_open = 2;

@@ -19,6 +19,9 @@
             ]
         }
     ],
+    "dependencies-linux": {
+        "mir-linux-kernel": "~>1.0.0"
+    },
     "versions-osx": [
         "Kqueue"
     ],
