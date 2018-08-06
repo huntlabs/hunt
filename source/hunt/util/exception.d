@@ -100,6 +100,10 @@ class MalformedURLException : IOException
     mixin basicExceptionCtors;
 }
 
+class InterruptedIOException : IOException
+{
+    mixin basicExceptionCtors;
+}
 
 class CommonRuntimeException : RuntimeException
 {
@@ -212,7 +216,13 @@ class OutOfMemoryError : Error
 }
 
 
-class GeneralSecurityException: Exception
+class GeneralSecurityException : Exception
+{
+    mixin basicExceptionCtors;
+}
+
+
+class CertificateException : GeneralSecurityException
 {
     mixin basicExceptionCtors;
 }
