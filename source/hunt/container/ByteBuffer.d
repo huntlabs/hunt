@@ -161,12 +161,12 @@ abstract class ByteBuffer : Buffer
      */
     abstract ByteBuffer slice();
 
-    void clear()
-    {
-        hb = null;
-        position = 0;
-        limit = 0;
-    }
+    // void clear()
+    // {
+    //     hb = null;
+    //     position = 0;
+    //     limit = 0;
+    // }
 
     /**
      * Creates a new byte buffer that shares this buffer's content.
