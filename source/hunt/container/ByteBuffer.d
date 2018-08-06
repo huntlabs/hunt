@@ -4,6 +4,8 @@ import std.container.array;
 
 import hunt.container.Buffer;
 import hunt.container.StringBuffer;
+
+import hunt.util.common;
 import hunt.util.string;
 import hunt.util.exception;
 
@@ -14,6 +16,44 @@ abstract class ByteBuffer : Buffer
     protected byte[] hb; // Non-null only for heap buffers
     
     protected int offset;
+
+
+    bool bigEndian                                   // package-private
+        = true;
+    // boolean nativeByteOrder                             // package-private
+    //     = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
+
+    /**
+     * Retrieves this buffer's byte order.
+     *
+     * <p> The byte order is used when reading or writing multibyte values, and
+     * when creating buffers that are views of this byte buffer.  The order of
+     * a newly-created byte buffer is always {@link ByteOrder#BIG_ENDIAN
+     * BIG_ENDIAN}.  </p>
+     *
+     * @return  This buffer's byte order
+     */
+    final ByteOrder order() {
+        return bigEndian ? ByteOrder.BitEndian : ByteOrder.LittleEndian;
+    }
+
+    /**
+     * Modifies this buffer's byte order.
+     *
+     * @param  bo
+     *         The new byte order,
+     *         either {@link ByteOrder#BIG_ENDIAN BIG_ENDIAN}
+     *         or {@link ByteOrder#LITTLE_ENDIAN LITTLE_ENDIAN}
+     *
+     * @return  This buffer
+     */
+    final ByteBuffer order(ByteOrder bo) {
+        bigEndian = (bo == ByteOrder.BitEndian);
+        // nativeByteOrder =
+        //     (bigEndian == (Bits.byteOrder() == ByteOrder.BitEndian));
+        return this;
+    }
+
 
     // Creates a new buffer with the given mark, position, limit, capacity,
     // backing array, and array offset
@@ -512,6 +552,87 @@ abstract class ByteBuffer : Buffer
         return put(cast(byte[])src, 0, cast(int)src.length);
     }
 
+    /**
+     * Relative <i>get</i> method for reading a short value.
+     *
+     * <p> Reads the next two bytes at this buffer's current position,
+     * composing them into a short value according to the current byte order,
+     * and then increments the position by two.  </p>
+     *
+     * @return  The short value at the buffer's current position
+     *
+     * @throws  BufferUnderflowException
+     *          If there are fewer than two bytes
+     *          remaining in this buffer
+     */
+    abstract short getShort();
+
+    /**
+     * Relative <i>put</i> method for writing a short
+     * value&nbsp;&nbsp;<i>(optional operation)</i>.
+     *
+     * <p> Writes two bytes containing the given short value, in the
+     * current byte order, into this buffer at the current position, and then
+     * increments the position by two.  </p>
+     *
+     * @param  value
+     *         The short value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     *          If there are fewer than two bytes
+     *          remaining in this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     *          If this buffer is read-only
+     */
+    abstract ByteBuffer putShort(short value);
+
+    /**
+     * Absolute <i>get</i> method for reading a short value.
+     *
+     * <p> Reads two bytes at the given index, composing them into a
+     * short value according to the current byte order.  </p>
+     *
+     * @param  index
+     *         The index from which the bytes will be read
+     *
+     * @return  The short value at the given index
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If <tt>index</tt> is negative
+     *          or not smaller than the buffer's limit,
+     *          minus one
+     */
+    abstract short getShort(int index);
+
+    /**
+     * Absolute <i>put</i> method for writing a short
+     * value&nbsp;&nbsp;<i>(optional operation)</i>.
+     *
+     * <p> Writes two bytes containing the given short value, in the
+     * current byte order, into this buffer at the given index.  </p>
+     *
+     * @param  index
+     *         The index at which the bytes will be written
+     *
+     * @param  value
+     *         The short value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If <tt>index</tt> is negative
+     *          or not smaller than the buffer's limit,
+     *          minus one
+     *
+     * @throws  ReadOnlyBufferException
+     *          If this buffer is read-only
+     */
+    abstract ByteBuffer putShort(int index, short value);
+
+
     // -- Other stuff --
 
     /**
@@ -950,6 +1071,66 @@ class HeapByteBuffer : ByteBuffer
         return this;
 
     }
+
+    // short
+
+    private static short makeShort(byte b1, byte b0) {
+        return cast(short)((b1 << 8) | (b0 & 0xff));
+    }
+    private static byte short1(short x) { return cast(byte)(x >> 8); }
+    private static byte short0(short x) { return cast(byte)(x     ); }
+
+    override short getShort() {
+        int index = ix(nextGetIndex(2));
+        // short r = 0;
+        // short* ptr = &r;
+        // ptr[0]=hb[index+1]; // bigEndian
+        // ptr[1]=hb[index]; 
+        if(bigEndian)
+            return makeShort(hb[index], hb[index+1]);
+        else
+            return makeShort(hb[index+1], hb[index]);
+    }
+
+    override short getShort(int i) {
+        int index = ix(checkIndex(i, 2));
+        if(bigEndian)
+            return makeShort(hb[index], hb[index+1]);
+        else
+            return makeShort(hb[index+1], hb[index]);
+    }
+
+    override ByteBuffer putShort(short x) {
+        int index = ix(nextPutIndex(2));
+        if(bigEndian)
+        {
+            hb[index] = short1(x);
+            hb[index+1] = short0(x);
+        }
+        else
+        {
+            hb[index] = short0(x);
+            hb[index+1] = short1(x);
+        }
+
+        return this;
+    }
+
+    override ByteBuffer putShort(int i, short x) {
+        int index = ix(checkIndex(i, 2));
+        if(bigEndian)
+        {
+            hb[index] = short1(x);
+            hb[index+1] = short0(x);
+        }
+        else
+        {
+            hb[index] = short0(x);
+            hb[index+1] = short1(x);
+        }
+        return this;
+    }
+
 
     override ByteBuffer compact()
     {

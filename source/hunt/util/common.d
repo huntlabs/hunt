@@ -193,3 +193,9 @@ class EventObject {
         return typeid(this).name ~ "[source=" ~ source.toString() ~ "]";
     }
 }
+
+enum ByteOrder
+{
+    BitEndian,
+    LittleEndian
+}
