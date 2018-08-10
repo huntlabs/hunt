@@ -63,7 +63,7 @@ class SecureRandom  { // : java.util.Random
 
     // private static final Debug pdebug =
     //                     Debug.getInstance("provider", "Provider");
-    // private static final boolean skipDebug =
+    // private static final bool skipDebug =
     //     Debug.isOn("engine=") && !Debug.isOn("securerandom");
 
     // /**
@@ -88,7 +88,7 @@ class SecureRandom  { // : java.util.Random
     //  * @serial
     //  * @since 1.5
     //  */
-    // private String algorithm;
+    // private string algorithm;
 
     // // Seed Generator
     // private static volatile SecureRandom seedGenerator = null;
@@ -158,9 +158,9 @@ class SecureRandom  { // : java.util.Random
         // getDefaultPRNG(true, seed);
     }
 
-    // private void getDefaultPRNG(boolean setSeed, byte[] seed) {
-    //     String prng = getPrngAlgorithm();
-    //     if (prng == null) {
+    // private void getDefaultPRNG(bool setSeed, byte[] seed) {
+    //     string prng = getPrngAlgorithm();
+    //     if (prng is null) {
     //         // bummer, get the SUN implementation
     //         prng = "SHA1PRNG";
     //         this.secureRandomSpi = new sun.security.provider.SecureRandom();
@@ -203,15 +203,15 @@ class SecureRandom  { // : java.util.Random
     // }
 
     // private SecureRandom(SecureRandomSpi secureRandomSpi, Provider provider,
-    //         String algorithm) {
+    //         string algorithm) {
     //     super(0);
     //     this.secureRandomSpi = secureRandomSpi;
     //     this.provider = provider;
     //     this.algorithm = algorithm;
 
     //     if (!skipDebug && pdebug != null) {
-    //         pdebug.println("SecureRandom." + algorithm +
-    //             " algorithm from: " + this.provider.getName());
+    //         pdebug.println("SecureRandom." ~ algorithm +
+    //             " algorithm from: " ~ this.provider.getName());
     //     }
     // }
 
@@ -251,7 +251,7 @@ class SecureRandom  { // : java.util.Random
     //  *
     //  * @since 1.2
     //  */
-    // static SecureRandom getInstance(String algorithm)
+    // static SecureRandom getInstance(string algorithm)
     //         throws NoSuchAlgorithmException {
     //     Instance instance = GetInstance.getInstance("SecureRandom",
     //         SecureRandomSpi.class, algorithm);
@@ -302,7 +302,7 @@ class SecureRandom  { // : java.util.Random
     //  *
     //  * @since 1.2
     //  */
-    // static SecureRandom getInstance(String algorithm, String provider)
+    // static SecureRandom getInstance(string algorithm, string provider)
     //         throws NoSuchAlgorithmException, NoSuchProviderException {
     //     Instance instance = GetInstance.getInstance("SecureRandom",
     //         SecureRandomSpi.class, algorithm, provider);
@@ -346,7 +346,7 @@ class SecureRandom  { // : java.util.Random
     //  *
     //  * @since 1.4
     //  */
-    // static SecureRandom getInstance(String algorithm,
+    // static SecureRandom getInstance(string algorithm,
     //         Provider provider) throws NoSuchAlgorithmException {
     //     Instance instance = GetInstance.getInstance("SecureRandom",
     //         SecureRandomSpi.class, algorithm, provider);
@@ -378,7 +378,7 @@ class SecureRandom  { // : java.util.Random
     //  *          if the algorithm name cannot be determined.
     //  * @since 1.5
     //  */
-    // String getAlgorithm() {
+    // string getAlgorithm() {
     //     return (algorithm != null) ? algorithm : "unknown";
     // }
 
@@ -408,7 +408,7 @@ class SecureRandom  { // : java.util.Random
     //  *
     //  * @see #getSeed
     //  */
-    // @Override
+    // override
     // void setSeed(long seed) {
     //     /*
     //      * Ignore call from super constructor (as well as any other calls
@@ -431,7 +431,7 @@ class SecureRandom  { // : java.util.Random
     //  *
     //  * @param bytes the array to be filled in with random bytes.
     //  */
-    // @Override
+    // override
     // void nextBytes(byte[] bytes) {
     //     secureRandomSpi.engineNextBytes(bytes);
     // }
@@ -450,7 +450,7 @@ class SecureRandom  { // : java.util.Random
     //  * @return an {@code int} containing the user-specified number
     //  * of pseudo-random bits (right justified, with leading zeros).
     //  */
-    // @Override
+    // override
     // final protected int next(int numBits) {
     //     int numBytes = (numBits+7)/8;
     //     byte b[] = new byte[numBytes];
@@ -482,7 +482,7 @@ class SecureRandom  { // : java.util.Random
     //  * @see #setSeed
     //  */
     // static byte[] getSeed(int numBytes) {
-    //     if (seedGenerator == null) {
+    //     if (seedGenerator is null) {
     //         seedGenerator = new SecureRandom();
     //     }
     //     return seedGenerator.generateSeed(numBytes);
@@ -522,7 +522,7 @@ class SecureRandom  { // : java.util.Random
     //  * has registered a SecureRandom implementation, or null if none of the
     //  * registered providers supplies a SecureRandom implementation.
     //  */
-    // private static String getPrngAlgorithm() {
+    // private static string getPrngAlgorithm() {
     //     for (Provider p : Providers.getProviderList().providers()) {
     //         for (Service s : p.getServices()) {
     //             if (s.getType().equals("SecureRandom")) {
@@ -575,38 +575,38 @@ class SecureRandom  { // : java.util.Random
     //  *
     //  * @throws NoSuchAlgorithmException if no algorithm is available
     //  *
-    //  * @see Security#getProperty(String)
+    //  * @see Security#getProperty(string)
     //  *
     //  * @since 1.8
     //  */
     // static SecureRandom getInstanceStrong()
     //         throws NoSuchAlgorithmException {
 
-    //     String property = AccessController.doPrivileged(
-    //         new PrivilegedAction<String>() {
-    //             @Override
-    //             String run() {
+    //     string property = AccessController.doPrivileged(
+    //         new PrivilegedAction<string>() {
+    //             override
+    //             string run() {
     //                 return Security.getProperty(
     //                     "securerandom.strongAlgorithms");
     //             }
     //         });
 
-    //     if ((property == null) || (property.length() == 0)) {
+    //     if ((property is null) || (property.length() == 0)) {
     //         throw new NoSuchAlgorithmException(
     //             "Null/empty securerandom.strongAlgorithms Security Property");
     //     }
 
-    //     String remainder = property;
+    //     string remainder = property;
     //     while (remainder != null) {
     //         Matcher m;
     //         if ((m = StrongPatternHolder.pattern.matcher(
     //                 remainder)).matches()) {
 
-    //             String alg = m.group(1);
-    //             String prov = m.group(3);
+    //             string alg = m.group(1);
+    //             string prov = m.group(3);
 
     //             try {
-    //                 if (prov == null) {
+    //                 if (prov is null) {
     //                     return SecureRandom.getInstance(alg);
     //                 } else {
     //                     return SecureRandom.getInstance(alg, prov);
@@ -621,7 +621,7 @@ class SecureRandom  { // : java.util.Random
     //     }
 
     //     throw new NoSuchAlgorithmException(
-    //         "No strong SecureRandom impls available: " + property);
+    //         "No strong SecureRandom impls available: " ~ property);
     // }
 
     // // Declare serialVersionUID to be compatible with JDK1.1

@@ -9,7 +9,7 @@ import kiss.logger;
 void implementationMissing(string file = __FILE__, int line = __LINE__ )(bool canThrow=true)
 {
     if(canThrow)
-        throw new core.exception.AssertError("Implementation missing", file, line);
+        throw new Exception("Implementation missing", file, line);
     else
     {
         // writefln("Implementation missing, in %s:%d", file, line);

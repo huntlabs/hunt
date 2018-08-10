@@ -460,7 +460,7 @@ class DerValue {
     // }
 
     private byte[] append(byte[] a, byte[] b) {
-        if (a == null)
+        if (a is null)
             return b;
 
         // byte[] ret = new byte[a.length + b.length];

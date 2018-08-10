@@ -163,13 +163,13 @@ class Subject {
     //  *          {@code principals}, {@code pubCredentials},
     //  *          or {@code privCredentials} are {@code null}.
     //  */
-    // this(bool readOnly, Set<? extends Principal> principals,
+    // this(bool readOnly, Set<? : Principal> principals,
     //                Set<?> pubCredentials, Set<?> privCredentials)
     // {
 
-    //     if (principals == null ||
-    //         pubCredentials == null ||
-    //         privCredentials == null)
+    //     if (principals is null ||
+    //         pubCredentials is null ||
+    //         privCredentials is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.input.s."));
 
@@ -254,7 +254,7 @@ class Subject {
     //         sm.checkPermission(AuthPermissionHolder.GET_SUBJECT_PERMISSION);
     //     }
 
-    //     if (acc == null) {
+    //     if (acc is null) {
     //         throw new NullPointerException(ResourcesMgr.getString
     //             ("invalid.null.AccessControlContext.provided"));
     //     }
@@ -314,7 +314,7 @@ class Subject {
     //     if (sm !is null) {
     //         sm.checkPermission(AuthPermissionHolder.DO_AS_PERMISSION);
     //     }
-    //     if (action == null)
+    //     if (action is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.action.provided"));
 
@@ -377,7 +377,7 @@ class Subject {
     //         sm.checkPermission(AuthPermissionHolder.DO_AS_PERMISSION);
     //     }
 
-    //     if (action == null)
+    //     if (action is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.action.provided"));
 
@@ -434,14 +434,14 @@ class Subject {
     //         sm.checkPermission(AuthPermissionHolder.DO_AS_PRIVILEGED_PERMISSION);
     //     }
 
-    //     if (action == null)
+    //     if (action is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.action.provided"));
 
     //     // set up the new Subject-based AccessControlContext
     //     // for doPrivileged
     //     AccessControlContext callerAcc =
-    //             (acc == null ?
+    //             (acc is null ?
     //             new AccessControlContext(NULL_PD_ARRAY) :
     //             acc);
 
@@ -501,13 +501,13 @@ class Subject {
     // //         sm.checkPermission(AuthPermissionHolder.DO_AS_PRIVILEGED_PERMISSION);
     // //     }
 
-    // //     if (action == null)
+    // //     if (action is null)
     // //         throw new NullPointerException
     // //             (ResourcesMgr.getString("invalid.null.action.provided"));
 
     // //     // set up the new Subject-based AccessControlContext for doPrivileged
     // //     AccessControlContext callerAcc =
-    // //             (acc == null ?
+    // //             (acc is null ?
     // //             new AccessControlContext(NULL_PD_ARRAY) :
     // //             acc);
 
@@ -524,7 +524,7 @@ class Subject {
     // //     return java.security.AccessController.doPrivileged
     // //         (new java.security.PrivilegedAction<AccessControlContext>() {
     // //         AccessControlContext run() {
-    // //             if (subject == null)
+    // //             if (subject is null)
     // //                 return new AccessControlContext(acc, null);
     // //             else
     // //                 return new AccessControlContext
@@ -580,9 +580,9 @@ class Subject {
     //  * @exception NullPointerException if the specified {@code Class}
     //  *                  is {@code null}.
     //  */
-    // <T extends Principal> Set<T> getPrincipals(Class<T> c) {
+    // <T : Principal> Set<T> getPrincipals(Class<T> c) {
 
-    //     if (c == null)
+    //     if (c is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.Class.provided"));
 
@@ -678,7 +678,7 @@ class Subject {
     //  */
     // <T> Set<T> getPublicCredentials(Class<T> c) {
 
-    //     if (c == null)
+    //     if (c is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.Class.provided"));
 
@@ -725,7 +725,7 @@ class Subject {
     //     // would do is protect the set operations themselves
     //     // (like size()), which don't seem security-sensitive.
 
-    //     if (c == null)
+    //     if (c is null)
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.Class.provided"));
 
@@ -757,7 +757,7 @@ class Subject {
     //  */
     // bool equals(Object o) {
 
-    //     if (o == null)
+    //     if (o is null)
     //         return false;
 
     //     if (this == o)
@@ -937,7 +937,7 @@ class Subject {
     //     Set!Principal inputPrincs = (Set!Principal)gf.get("principals", null);
 
     //     // Rewrap the principals into a SecureSet
-    //     if (inputPrincs == null) {
+    //     if (inputPrincs is null) {
     //         throw new NullPointerException
     //             (ResourcesMgr.getString("invalid.null.input.s."));
     //     }
@@ -1118,8 +1118,8 @@ class Subject {
     //                 });
     //             }
 
-    //             if (next == null) {
-    //                 if (o == null) {
+    //             if (next is null) {
+    //                 if (o is null) {
     //                     e.remove();
     //                     return true;
     //                 }
@@ -1159,8 +1159,8 @@ class Subject {
     //                 });
     //             }
 
-    //             if (next == null) {
-    //                 if (o == null) {
+    //             if (next is null) {
+    //                 if (o is null) {
     //                     return true;
     //                 }
     //             } else if (next.equals(o)) {
@@ -1190,8 +1190,8 @@ class Subject {
     //             Iterator<?> ce = c.iterator();
     //             while (ce.hasNext()) {
     //                 Object o = ce.next();
-    //                 if (next == null) {
-    //                     if (o == null) {
+    //                 if (next is null) {
+    //                     if (o is null) {
     //                         e.remove();
     //                         modified = true;
     //                         break;
@@ -1228,8 +1228,8 @@ class Subject {
     //             Iterator<?> ce = c.iterator();
     //             while (ce.hasNext()) {
     //                 Object o = ce.next();
-    //                 if (next == null) {
-    //                     if (o == null) {
+    //                 if (next is null) {
+    //                     if (o is null) {
     //                         retain = true;
     //                         break;
     //                     }
@@ -1313,7 +1313,7 @@ class Subject {
     //  * This class implements a {@code Set} which returns only
     //  * members that are an instance of a specified Class.
     //  */
-    // private class ClassSet<T> extends AbstractSet<T> {
+    // private class ClassSet<T> : AbstractSet<T> {
 
     //     private int which;
     //     private Class<T> c;

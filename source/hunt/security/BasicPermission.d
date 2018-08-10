@@ -11,7 +11,7 @@ import hunt.util.string;
 import std.algorithm;
 
 /**
- * The BasicPermission class extends the Permission class, and
+ * The BasicPermission class : the Permission class, and
  * can be used as the base class for permissions that want to
  * follow the same naming convention as BasicPermission.
  * <P>
@@ -343,7 +343,7 @@ final class BasicPermissionCollection : PermissionCollection
         // //     permClass = bp.getClass();
         // // } else {
         // //     if (bp.getClass() != permClass)
-        // //         throw new IllegalArgumentException("invalid permission: " +
+        // //         throw new IllegalArgumentException("invalid permission: " ~
         // //                                         permission);
         // }
 
