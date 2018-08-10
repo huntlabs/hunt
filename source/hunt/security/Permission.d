@@ -202,7 +202,7 @@ abstract class Permission : Guard {
     override
     string toString() {
         string actions = getActions();
-        if ((actions == null) || (actions.length == 0)) { // OPTIONAL
+        if ((actions is null) || (actions.length == 0)) { // OPTIONAL
             return "(\"" ~ typeid(this).name ~ "\" \"" ~ name ~ "\")";
         } else {
             return "(\"" ~ typeid(this).name ~ "\" \"" ~ name ~

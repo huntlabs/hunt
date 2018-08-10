@@ -62,7 +62,7 @@ interface Principal {
      */
     // bool implies(Subject subject);
     // {
-    //     if (subject == null)
+    //     if (subject is null)
     //         return false;
     //     return subject.getPrincipals().contains(this);
     // }

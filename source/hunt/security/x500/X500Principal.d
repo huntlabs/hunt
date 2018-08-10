@@ -1,4 +1,4 @@
-module hunt.security.X500Principal;
+module hunt.security.x500.X500Principal;
 
 import hunt.security.x509.X500Name;
 import hunt.security.Principal;
