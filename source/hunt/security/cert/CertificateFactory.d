@@ -1,4 +1,4 @@
-module hunt.security.cert.CertificateFactorySpi;
+module hunt.security.cert.CertificateFactory;
 
 import hunt.security.cert.Certificate;
 import hunt.security.cert.CertificateFactorySpi;
