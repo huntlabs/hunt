@@ -227,10 +227,12 @@ class CancellationException : IllegalStateException
 
 class OutOfMemoryError : Error
 {
-    this(string msg, Throwable nextInChain = null)
-    {
-        super(msg, nextInChain);
-    }
+    // this(string msg, Throwable nextInChain = null)
+    // {
+    //     super(msg, nextInChain);
+    // }
+    
+    mixin BasicExceptionCtors;
 }
 
 
@@ -249,5 +251,18 @@ class NoSuchAlgorithmException: GeneralSecurityException
 {
     mixin BasicExceptionCtors;
 }
+
+
+class ConcurrentModificationException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+
+class InternalError : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
 
 

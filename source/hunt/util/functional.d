@@ -106,10 +106,7 @@ template Func6(T1, T2, T3, T4, T5, T6, R)
  * time the supplier is invoked.
  *
  */
-template Supplier(T)
-{
-    alias Supplier = T delegate();
-}
+alias Supplier(T) = T delegate();
 
 /**
  * Represents an operation that accepts a single input argument and returns no
@@ -117,16 +114,9 @@ template Supplier(T)
  * to operate via side-effects.
  *
  */
-template Consumer(T)
-{
-    alias Consumer = void delegate(T t);
-}
+alias Consumer(T) = void delegate(T t);
 
-
-template Predicate(T)
-{
-    alias Predicate = bool delegate(T t);
-}
+alias Predicate(T) = bool delegate(T t);
 
   
 /**
