@@ -150,6 +150,16 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         throw new UnsupportedOperationException();
     }
 
+    V putIfAbsent(K key, V value) {
+        V v = V.init;
+
+        if(!containsKey(key))
+            v = put(key, value);
+
+        return v;
+    }
+
+
     /**
      * {@inheritDoc}
      *
@@ -183,6 +193,14 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         //     _dict.remove(key);
         // }
         // return oldValue;
+    }
+
+    bool remove(K key, V value){
+        V curValue = get(key);
+        if(curValue !is value || !containsKey(key))
+            return false;
+        remove(key);
+        return true;
     }
 
 
@@ -225,6 +243,23 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      */
     void clear() {
         throw new NotImplementedException("");
+    }
+
+    bool replace(K key, V oldValue, V newValue) {
+        V curValue = get(key);
+         if(curValue != oldValue || !containsKey(key)){
+            return false;
+        }
+        put(key, newValue);
+        return true;
+    }
+
+    V replace(K key, V value) {
+        V curValue = V.init;
+        if (containsKey(key)) {
+            curValue = put(key, value);
+        }
+        return curValue;
     }
 
     int opApply(scope int delegate(ref K, ref V) dg)  {
@@ -291,8 +326,6 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same set.
      */
     K[] keySet() {
-        // return _dict.keys;
-        
         throw new UnsupportedOperationException();
     }
 
@@ -313,8 +346,6 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same collection.
      */
     V[] values() {
-        // return _dict.values;
-        
         throw new UnsupportedOperationException();
     }
 
@@ -596,136 +627,150 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //     }
 
     // }
+}
 
-    // /**
-    //  * An Entry maintaining an immutable key and value.  This class
-    //  * does not support method <tt>setValue</tt>.  This class may be
-    //  * convenient in methods that return thread-safe snapshots of
-    //  * key-value mappings.
-    //  *
-    //  * @since 1.6
-    //  */
-    // static class SimpleImmutableEntry!(K,V)
-    //     : Entry!(K,V) // , java.io.Serializable
-    // {
-    //     private static final long serialVersionUID = 7138329143949025153L;
 
-    //     private final K key;
-    //     private final V value;
+/**
+* An Entry maintaining an immutable key and value.  This class
+* does not support method <tt>setValue</tt>.  This class may be
+* convenient in methods that return thread-safe snapshots of
+* key-value mappings.
+*
+* @since 1.6
+*/
+static class SimpleImmutableEntry(K,V) : MapEntry!(K,V) // , java.io.Serializable
+{
+    // private static final long serialVersionUID = 7138329143949025153L;
 
-    //     /**
-    //      * Creates an entry representing a mapping from the specified
-    //      * key to the specified value.
-    //      *
-    //      * @param key the key represented by this entry
-    //      * @param value the value represented by this entry
-    //      */
-    //     SimpleImmutableEntry(K key, V value) {
-    //         this.key   = key;
-    //         this.value = value;
-    //     }
+    private K key;
+    private V value;
 
-    //     /**
-    //      * Creates an entry representing the same mapping as the
-    //      * specified entry.
-    //      *
-    //      * @param entry the entry to copy
-    //      */
-    //     SimpleImmutableEntry(Entry!(K, V) entry) {
-    //         this.key   = entry.getKey();
-    //         this.value = entry.getValue();
-    //     }
+    /**
+        * Creates an entry representing a mapping from the specified
+        * key to the specified value.
+        *
+        * @param key the key represented by this entry
+        * @param value the value represented by this entry
+        */
+    this(K key, V value) {
+        this.key   = key;
+        this.value = value;
+    }
 
-    //     /**
-    //      * Returns the key corresponding to this entry.
-    //      *
-    //      * @return the key corresponding to this entry
-    //      */
-    //     K getKey() {
-    //         return key;
-    //     }
+    /**
+        * Creates an entry representing the same mapping as the
+        * specified entry.
+        *
+        * @param entry the entry to copy
+        */
+    this(MapEntry!(K, V) entry) {
+        this.key   = entry.getKey();
+        this.value = entry.getValue();
+    }
 
-    //     /**
-    //      * Returns the value corresponding to this entry.
-    //      *
-    //      * @return the value corresponding to this entry
-    //      */
-    //     V getValue() {
-    //         return value;
-    //     }
+    /**
+        * Returns the key corresponding to this entry.
+        *
+        * @return the key corresponding to this entry
+        */
+    K getKey() {
+        return key;
+    }
 
-    //     /**
-    //      * Replaces the value corresponding to this entry with the specified
-    //      * value (optional operation).  This implementation simply throws
-    //      * <tt>UnsupportedOperationException</tt>, as this class implements
-    //      * an <i>immutable</i> map entry.
-    //      *
-    //      * @param value new value to be stored in this entry
-    //      * @return (Does not return)
-    //      * @throws UnsupportedOperationException always
-    //      */
-    //     V setValue(V value) {
-    //         throw new UnsupportedOperationException();
-    //     }
+    /**
+        * Returns the value corresponding to this entry.
+        *
+        * @return the value corresponding to this entry
+        */
+    V getValue() {
+        return value;
+    }
 
-    //     /**
-    //      * Compares the specified object with this entry for equality.
-    //      * Returns {@code true} if the given object is also a map entry and
-    //      * the two entries represent the same mapping.  More formally, two
-    //      * entries {@code e1} and {@code e2} represent the same mapping
-    //      * if<pre>
-    //      *   (e1.getKey()==null ?
-    //      *    e2.getKey()==null :
-    //      *    e1.getKey().equals(e2.getKey()))
-    //      *   &amp;&amp;
-    //      *   (e1.getValue()==null ?
-    //      *    e2.getValue()==null :
-    //      *    e1.getValue().equals(e2.getValue()))</pre>
-    //      * This ensures that the {@code equals} method works properly across
-    //      * different implementations of the {@code MapEntry} interface.
-    //      *
-    //      * @param o object to be compared for equality with this map entry
-    //      * @return {@code true} if the specified object is equal to this map
-    //      *         entry
-    //      * @see    #toHash
-    //      */
-    //     bool equals(Object o) {
-    //         if (!(o instanceof MapEntry))
-    //             return false;
-    //         MapEntry<?,?> e = (MapEntry<?,?>)o;
-    //         return eq(key, e.getKey()) && eq(value, e.getValue());
-    //     }
+    /**
+        * Replaces the value corresponding to this entry with the specified
+        * value (optional operation).  This implementation simply throws
+        * <tt>UnsupportedOperationException</tt>, as this class implements
+        * an <i>immutable</i> map entry.
+        *
+        * @param value new value to be stored in this entry
+        * @return (Does not return)
+        * @throws UnsupportedOperationException always
+        */
+    V setValue(V value) {
+        throw new UnsupportedOperationException();
+    }
 
-    //     /**
-    //      * Returns the hash code value for this map entry.  The hash code
-    //      * of a map entry {@code e} is defined to be: <pre>
-    //      *   (e.getKey()==null   ? 0 : e.getKey().toHash()) ^
-    //      *   (e.getValue()==null ? 0 : e.getValue().toHash())</pre>
-    //      * This ensures that {@code e1.equals(e2)} implies that
-    //      * {@code e1.toHash()==e2.toHash()} for any two Entries
-    //      * {@code e1} and {@code e2}, as required by the general
-    //      * contract of {@link Object#toHash}.
-    //      *
-    //      * @return the hash code value for this map entry
-    //      * @see    #equals
-    //      */
-    //     size_t toHash() @trusted nothrow {
-    //         return (key   == null ? 0 :   key.toHash()) ^
-    //                (value == null ? 0 : value.toHash());
-    //     }
+    /**
+        * Compares the specified object with this entry for equality.
+        * Returns {@code true} if the given object is also a map entry and
+        * the two entries represent the same mapping.  More formally, two
+        * entries {@code e1} and {@code e2} represent the same mapping
+        * if<pre>
+        *   (e1.getKey()==null ?
+        *    e2.getKey()==null :
+        *    e1.getKey().equals(e2.getKey()))
+        *   &amp;&amp;
+        *   (e1.getValue()==null ?
+        *    e2.getValue()==null :
+        *    e1.getValue().equals(e2.getValue()))</pre>
+        * This ensures that the {@code equals} method works properly across
+        * different implementations of the {@code MapEntry} interface.
+        *
+        * @param o object to be compared for equality with this map entry
+        * @return {@code true} if the specified object is equal to this map
+        *         entry
+        * @see    #toHash
+        */
+    override bool opEquals(Object o) {
+        MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
+        if(e is null)
+            return false;
+        return key == e.getKey() && value == e.getValue();
+    }
 
-    //     /**
-    //      * Returns a string representation of this map entry.  This
-    //      * implementation returns the string representation of this
-    //      * entry's key followed by the equals character ("<tt>=</tt>")
-    //      * followed by the string representation of this entry's value.
-    //      *
-    //      * @return a string representation of this map entry
-    //      */
-    //     string toString() {
-    //         return key + "=" + value;
-    //     }
+    /**
+        * Returns the hash code value for this map entry.  The hash code
+        * of a map entry {@code e} is defined to be: <pre>
+        *   (e.getKey()==null   ? 0 : e.getKey().toHash()) ^
+        *   (e.getValue()==null ? 0 : e.getValue().toHash())</pre>
+        * This ensures that {@code e1.equals(e2)} implies that
+        * {@code e1.toHash()==e2.toHash()} for any two Entries
+        * {@code e1} and {@code e2}, as required by the general
+        * contract of {@link Object#toHash}.
+        *
+        * @return the hash code value for this map entry
+        * @see    #equals
+        */
+    override size_t toHash() @trusted nothrow {
+        static if(is(K == class)) {
+            size_t kHash = 0;
+            if(key !is null) kHash = key.toHash();
+        }
+        else {
+            size_t kHash = hashOf(key);
+        }
+        
+        static if(is(V == class)) {
+            size_t vHash = 0;
+            if(value !is null) vHash = value.toHash();
+        }
+        else {
+            size_t vHash = hashOf(value);
+        }
 
-    // }
+        return kHash ^ vHash;
+    }
+
+    /**
+        * Returns a string representation of this map entry.  This
+        * implementation returns the string representation of this
+        * entry's key followed by the equals character ("<tt>=</tt>")
+        * followed by the string representation of this entry's value.
+        *
+        * @return a string representation of this map entry
+        */
+    override string toString() {
+        return key.to!string() ~ "=" ~ value.to!string();
+    }
 
 }

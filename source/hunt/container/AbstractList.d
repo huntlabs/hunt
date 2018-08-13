@@ -77,7 +77,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws IllegalArgumentException if some property of this element
      *         prevents it from being added to this list
      */
-    bool add(E e) { throw new UnsupportedOperationException(""); }
+    // bool add(E e) { throw new UnsupportedOperationException(""); }
 
     /**
      * {@inheritDoc}
@@ -162,7 +162,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
 
     // Bulk Operations
 
-    int opApply(scope int delegate(ref E) dg) { throw new UnsupportedOperationException(""); }
+    // int opApply(scope int delegate(ref E) dg) { throw new UnsupportedOperationException(""); }
 
     /**
      * Removes all of the elements from this list (optional operation).
@@ -178,7 +178,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws UnsupportedOperationException if the {@code clear} operation
      *         is not supported by this list
      */
-    void clear() { throw new UnsupportedOperationException(""); }
+    // void clear() { throw new UnsupportedOperationException(""); }
 
     /**
      * {@inheritDoc}

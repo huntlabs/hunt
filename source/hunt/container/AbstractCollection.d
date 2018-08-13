@@ -47,9 +47,14 @@ abstract class AbstractCollection(E) : Collection!E {
         // }
         // return false;
 
-        throw new NotImplementedException("");
+        throw new NotImplementedException();
     }
 
+    bool add(E e) {
+        throw new NotImplementedException();
+    }
+
+    // E get(int index) { throw new UnsupportedOperationException(); }
 
     /**
      * {@inheritDoc}
@@ -76,6 +81,16 @@ abstract class AbstractCollection(E) : Collection!E {
                 modified = true;
         return modified;
     }
+
+    void clear() { throw new UnsupportedOperationException(""); }
+
+    int opApply(scope int delegate(ref E) dg)  {
+        throw new NotImplementedException();
+    }
+    
+    // int opApply(scope int delegate(MapEntry!(E) entry) dg) {
+    //     throw new NotImplementedException();
+    // }
 
     /**
      * {@inheritDoc}

@@ -1,5 +1,8 @@
 module hunt.container.SortedMap;
 
+import hunt.container.Collection;
+import hunt.container.Map;
+import hunt.container.Set;
 import hunt.util.Comparator;
 
 import hunt.util.common;
@@ -219,7 +222,7 @@ interface SortedMap(K,V) : Map!(K,V) {
      * @return a set view of the keys contained in this map, sorted in
      *         ascending order
      */
-    Set!K keySet();
+    K[] keySet();
 
     /**
      * Returns a {@link Collection} view of the values contained in this map.
@@ -239,7 +242,7 @@ interface SortedMap(K,V) : Map!(K,V) {
      * @return a collection view of the values contained in this map,
      *         sorted in ascending key order
      */
-    Collection!V values();
+    V[] values();
 
     /**
      * Returns a {@link Set} view of the mappings contained in this map.

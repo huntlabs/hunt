@@ -772,7 +772,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             }
 
             if(modCount != mc)
-                throw new ConcurrentModificationException("");
+                throw new ConcurrentModificationException();
         }
 
         return result;

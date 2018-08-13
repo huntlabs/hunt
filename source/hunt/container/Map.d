@@ -417,14 +417,7 @@ interface Map(K,V) : Iterable!(K,V){
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    final V putIfAbsent(K key, V value) {
-        V v = V.init;
-
-        if(!containsKey(key))
-            v = put(key, value);
-
-        return v;
-    }
+    V putIfAbsent(K key, V value);
 
     /**
      * Removes the entry for the specified key only if it is currently
@@ -460,13 +453,7 @@ interface Map(K,V) : Iterable!(K,V){
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    final bool remove(K key, V value){
-        V curValue = get(key);
-        if(curValue !is value || !containsKey(key))
-            return false;
-        remove(key);
-        return true;
-    }
+    bool remove(K key, V value);
 
 
     /**
@@ -511,14 +498,7 @@ interface Map(K,V) : Iterable!(K,V){
      *         or value prevents it from being stored in this map
      * @since 1.8
      */
-    final bool replace(K key, V oldValue, V newValue) {
-        V curValue = get(key);
-         if(curValue != oldValue || !containsKey(key)){
-            return false;
-        }
-        put(key, newValue);
-        return true;
-    }
+    bool replace(K key, V oldValue, V newValue);
 
     /**
      * Replaces the entry for the specified key only if it is
@@ -558,13 +538,7 @@ interface Map(K,V) : Iterable!(K,V){
      *         or value prevents it from being stored in this map
      * @since 1.8
      */
-    final V replace(K key, V value) {
-        V curValue = V.init;
-        if (containsKey(key)) {
-            curValue = put(key, value);
-        }
-        return curValue;
-    }
+    V replace(K key, V value);
 
     /**
      * If the specified key is not already associated with a value (or is mapped
