@@ -154,7 +154,7 @@ interface EventListener {
 
 class EventObject {
 
-    private enum long serialVersionUID = 5516075349620653480L;
+    // private enum long serialVersionUID = 5516075349620653480L;
 
     /**
      * The object on which the Event initially occurred.

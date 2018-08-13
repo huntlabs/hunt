@@ -115,7 +115,5 @@ class RangeIterator(T) : Iterator!(T)
         _range.popFront();
         return r;
 	}
-
-    
 }
 

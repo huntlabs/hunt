@@ -17,19 +17,42 @@ void implementationMissing(string file = __FILE__, int line = __LINE__ )(bool ca
     }
 }
 
+mixin template BasicExceptionCtors()
+{
+    this(size_t line = __LINE__, string file = __FILE__) @nogc @safe pure nothrow
+    {
+        super("", file, line, null);
+    }
+
+    this(string msg, string file = __FILE__, size_t line = __LINE__,
+         Throwable next = null) @nogc @safe pure nothrow
+    {
+        super(msg, file, line, next);
+    }
+
+    this(string msg, Throwable next, string file = __FILE__,
+         size_t line = __LINE__) @nogc @safe pure nothrow
+    {
+        super(msg, file, line, next);
+    }
+    
+    // mixin basicExceptionCtors;
+}
+
+
 class NotImplementedException: Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class NotSupportedException: Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class IllegalArgumentException: Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class RuntimeException : Exception
@@ -64,76 +87,76 @@ class RuntimeException : Exception
     {
         super(msg, file, line, next);
     }
-    // mixin basicExceptionCtors;
+    // mixin BasicExceptionCtors;
 }
 
 
 class TimeoutException: Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class InterruptedException: Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class ExecutionException: Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class URISyntaxException : IOException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class IOException : Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class MalformedURLException : IOException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class InterruptedIOException : IOException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class CommonRuntimeException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class IndexOutOfBoundsException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class ReadOnlyBufferException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class BufferUnderflowException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class BufferOverflowException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class UnsupportedOperationException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
@@ -143,72 +166,67 @@ class NoSuchElementException : RuntimeException
     // {
     //     super("");
     // }
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class NumberFormatException : IllegalArgumentException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class NullPointerException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class EofException : RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class ClosedChannelException : IOException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class EOFException : IOException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class SecureNetException: RuntimeException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class IllegalStateException : Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class InvalidMarkException : IllegalStateException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class WritePendingException : IllegalStateException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class CancellationException : IllegalStateException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class OutOfMemoryError : Error
 {
-    this()
-    {
-        super("");
-    }
-
     this(string msg, Throwable nextInChain = null)
     {
         super(msg, nextInChain);
@@ -218,18 +236,18 @@ class OutOfMemoryError : Error
 
 class GeneralSecurityException : Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 
 class CertificateException : GeneralSecurityException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 class NoSuchAlgorithmException: GeneralSecurityException
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
 
 

@@ -107,7 +107,7 @@ class Collections {
         override K[] keySet() { return null; }
         override V[] values() { return null; }
         // Collection!(V) values()              {return emptySet();}
-        // Set!(Map.Entry!(K,V)) entrySet()      {return emptySet();}
+        // Set!(MapEntry!(K,V)) entrySet()      {return emptySet();}
 
         override
         bool opEquals(Object o) {
@@ -123,9 +123,7 @@ class Collections {
             return defaultValue;
         }
 
-        override
-        int opApply(scope int delegate(ref K, ref V) dg)
-        {
+        override int opApply(scope int delegate(ref K, ref V) dg) {
             return 0;
         }
 

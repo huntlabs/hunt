@@ -210,7 +210,7 @@ interface Map(K,V) : Iterable!(K,V){
 
     string toString();
 
-
+    
     // Comparison and hashing
 
     /**
@@ -236,7 +236,7 @@ interface Map(K,V) : Iterable!(K,V){
      * {@link Object#toHash}.
      *
      * @return the hash code value for this map
-     * @see Map.Entry#toHash()
+     * @see MapEntry#toHash()
      * @see Object#equals(Object)
      * @see #equals(Object)
      */
@@ -290,7 +290,7 @@ interface Map(K,V) : Iterable!(K,V){
      * @implSpec
      * The final implementation is equivalent to, for this {@code map}:
      * <pre> {@code
-     * for (Map.Entry<K, V> entry : map.entrySet())
+     * for (MapEntry<K, V> entry : map.entrySet())
      *     action.accept(entry.getKey(), entry.getValue());
      * }</pre>
      *
@@ -307,6 +307,9 @@ interface Map(K,V) : Iterable!(K,V){
      */
     int opApply(scope int delegate(ref K, ref V) dg);
 
+    /// ditto
+    int opApply(scope int delegate(MapEntry!(K, V) entry) dg);
+
     /**
      * Replaces each entry's value with the result of invoking the given
      * function on that entry until all entries have been processed or the
@@ -316,7 +319,7 @@ interface Map(K,V) : Iterable!(K,V){
      * @implSpec
      * <p>The final implementation is equivalent to, for this {@code map}:
      * <pre> {@code
-     * for (Map.Entry<K, V> entry : map.entrySet())
+     * for (MapEntry<K, V> entry : map.entrySet())
      *     entry.setValue(function.apply(entry.getKey(), entry.getValue()));
      * }</pre>
      *
@@ -348,7 +351,7 @@ interface Map(K,V) : Iterable!(K,V){
      */
     // final void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
     //     Objects.requireNonNull(function);
-    //     for (Map.Entry<K, V> entry : entrySet()) {
+    //     for (MapEntry<K, V> entry : entrySet()) {
     //         K k;
     //         V v;
     //         try {
@@ -578,11 +581,11 @@ interface Map(K,V) : Iterable!(K,V){
      * map.computeIfAbsent(key, k -> new Value(f(k)));
      * }</pre>
      *
-     * <p>Or to implement a multi-value map, {@code Map<K,Collection<V>>},
+     * <p>Or to implement a multi-value map, {@code Map<K,Collection!V>},
      * supporting multiple values per key:
      *
      * <pre> {@code
-     * map.computeIfAbsent(key, k -> new HashSet<V>()).add(v);
+     * map.computeIfAbsent(key, k -> new HashSet!V()).add(v);
      * }</pre>
      *
      *
@@ -865,5 +868,174 @@ interface Map(K,V) : Iterable!(K,V){
     //         put(key, newValue);
     //     }
     //     return newValue;
+    // }
+}
+
+
+/* A map entry (key-value pair).  The <tt>Map.entrySet</tt> method returns
+ * a collection-view of the map, whose elements are of this class.  The
+ * <i>only</i> way to obtain a reference to a map entry is from the
+ * iterator of this collection-view.  These <tt>MapEntry</tt> objects are
+ * valid <i>only</i> for the duration of the iteration; more formally,
+ * the behavior of a map entry is undefined if the backing map has been
+ * modified after the entry was returned by the iterator, except through
+ * the <tt>setValue</tt> operation on the map entry.
+ *
+ * @see Map#entrySet()
+ * @since 1.2
+ */
+interface MapEntry(K,V) {
+    /**
+     * Returns the key corresponding to this entry.
+     *
+     * @return the key corresponding to this entry
+     * @throws IllegalStateException implementations may, but are not
+     *         required to, throw this exception if the entry has been
+     *         removed from the backing map.
+     */
+    K getKey();
+
+    /**
+     * Returns the value corresponding to this entry.  If the mapping
+     * has been removed from the backing map (by the iterator's
+     * <tt>remove</tt> operation), the results of this call are undefined.
+     *
+     * @return the value corresponding to this entry
+     * @throws IllegalStateException implementations may, but are not
+     *         required to, throw this exception if the entry has been
+     *         removed from the backing map.
+     */
+    V getValue();
+
+    /**
+     * Replaces the value corresponding to this entry with the specified
+     * value (optional operation).  (Writes through to the map.)  The
+     * behavior of this call is undefined if the mapping has already been
+     * removed from the map (by the iterator's <tt>remove</tt> operation).
+     *
+     * @param value new value to be stored in this entry
+     * @return old value corresponding to the entry
+     * @throws UnsupportedOperationException if the <tt>put</tt> operation
+     *         is not supported by the backing map
+     * @throws ClassCastException if the class of the specified value
+     *         prevents it from being stored in the backing map
+     * @throws NullPointerException if the backing map does not permit
+     *         null values, and the specified value is null
+     * @throws IllegalArgumentException if some property of this value
+     *         prevents it from being stored in the backing map
+     * @throws IllegalStateException implementations may, but are not
+     *         required to, throw this exception if the entry has been
+     *         removed from the backing map.
+     */
+    V setValue(V value);
+
+    /**
+     * Compares the specified object with this entry for equality.
+     * Returns <tt>true</tt> if the given object is also a map entry and
+     * the two entries represent the same mapping.  More formally, two
+     * entries <tt>e1</tt> and <tt>e2</tt> represent the same mapping
+     * if<pre>
+     *     (e1.getKey()==null ?
+     *      e2.getKey()==null : e1.getKey().equals(e2.getKey()))  &amp;&amp;
+     *     (e1.getValue()==null ?
+     *      e2.getValue()==null : e1.getValue().equals(e2.getValue()))
+     * </pre>
+     * This ensures that the <tt>equals</tt> method works properly across
+     * different implementations of the <tt>MapEntry</tt> interface.
+     *
+     * @param o object to be compared for equality with this map entry
+     * @return <tt>true</tt> if the specified object is equal to this map
+     *         entry
+     */
+    bool opEquals(Object o);
+
+    /**
+     * Returns the hash code value for this map entry.  The hash code
+     * of a map entry <tt>e</tt> is defined to be: <pre>
+     *     (e.getKey()==null   ? 0 : e.getKey().hashCode()) ^
+     *     (e.getValue()==null ? 0 : e.getValue().hashCode())
+     * </pre>
+     * This ensures that <tt>e1.equals(e2)</tt> implies that
+     * <tt>e1.hashCode()==e2.hashCode()</tt> for any two Entries
+     * <tt>e1</tt> and <tt>e2</tt>, as required by the general
+     * contract of <tt>Object.hashCode</tt>.
+     *
+     * @return the hash code value for this map entry
+     * @see Object#hashCode()
+     * @see Object#equals(Object)
+     * @see #equals(Object)
+     */
+    size_t toHash() @trusted nothrow;
+
+    /**
+     * Returns a comparator that compares {@link MapEntry} in natural order on key.
+     *
+     * <p>The returned comparator is serializable and throws {@link
+     * NullPointerException} when comparing an entry with a null key.
+     *
+     * @param  !K the {@link Comparable} type of then map keys
+     * @param  !V the type of the map values
+     * @return a comparator that compares {@link MapEntry} in natural order on key.
+     * @see Comparable
+     * @since 1.8
+     */
+    // public static <K extends Comparable<? super K>, V> Comparator<MapEntry!(K,V)> comparingByKey() {
+    //     return (Comparator<MapEntry<K, V>> & Serializable)
+    //         (c1, c2) -> c1.getKey().compareTo(c2.getKey());
+    // }
+
+    /**
+     * Returns a comparator that compares {@link MapEntry} in natural order on value.
+     *
+     * <p>The returned comparator is serializable and throws {@link
+     * NullPointerException} when comparing an entry with null values.
+     *
+     * @param !K the type of the map keys
+     * @param !V the {@link Comparable} type of the map values
+     * @return a comparator that compares {@link MapEntry} in natural order on value.
+     * @see Comparable
+     * @since 1.8
+     */
+    // public static <K, V extends Comparable<? super V>> Comparator<MapEntry!(K,V)> comparingByValue() {
+    //     return (Comparator<MapEntry<K, V>> & Serializable)
+    //         (c1, c2) -> c1.getValue().compareTo(c2.getValue());
+    // }
+
+    /**
+     * Returns a comparator that compares {@link MapEntry} by key using the given
+     * {@link Comparator}.
+     *
+     * <p>The returned comparator is serializable if the specified comparator
+     * is also serializable.
+     *
+     * @param  !K the type of the map keys
+     * @param  !V the type of the map values
+     * @param  cmp the key {@link Comparator}
+     * @return a comparator that compares {@link MapEntry} by the key.
+     * @since 1.8
+     */
+    // public static <K, V> Comparator<MapEntry<K, V>> comparingByKey(Comparator<? super K> cmp) {
+    //     Objects.requireNonNull(cmp);
+    //     return (Comparator<MapEntry<K, V>> & Serializable)
+    //         (c1, c2) -> cmp.compare(c1.getKey(), c2.getKey());
+    // }
+
+    /**
+     * Returns a comparator that compares {@link MapEntry} by value using the given
+     * {@link Comparator}.
+     *
+     * <p>The returned comparator is serializable if the specified comparator
+     * is also serializable.
+     *
+     * @param  !K the type of the map keys
+     * @param  !V the type of the map values
+     * @param  cmp the value {@link Comparator}
+     * @return a comparator that compares {@link MapEntry} by the value.
+     * @since 1.8
+     */
+    // public static <K, V> Comparator<MapEntry<K, V>> comparingByValue(Comparator<? super V> cmp) {
+    //     Objects.requireNonNull(cmp);
+    //     return (Comparator<MapEntry<K, V>> & Serializable)
+    //         (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());
     // }
 }
