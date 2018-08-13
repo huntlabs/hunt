@@ -2,6 +2,7 @@ module hunt.container.NavigableMap;
 
 import hunt.container.Map;
 import hunt.container.SortedMap;
+import hunt.container.NavigableSet;
 
 /**
  * A {@link SortedMap} extended with navigation methods returning the
@@ -244,7 +245,7 @@ interface NavigableMap(K,V) : SortedMap!(K,V) {
      *
      * @return a navigable set view of the keys in this map
      */
-    // NavigableSet!K navigableKeySet();
+    NavigableSet!K navigableKeySet();
 
     /**
      * Returns a reverse order {@link NavigableSet} view of the keys contained in this map.

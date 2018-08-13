@@ -226,11 +226,11 @@ interface SortedSet(E) : Set!(E) {
      * @return a {@code Spliterator} over the elements in this sorted set
      * @since 1.8
      */
-    // @Override
+    // override
     // default Spliterator!(E) spliterator() {
     //     return new Spliterators.IteratorSpliterator!(E)(
     //             this, Spliterator.DISTINCT | Spliterator.SORTED | Spliterator.ORDERED) {
-    //         @Override
+    //         override
     //         Comparator<? super E> getComparator() {
     //             return SortedSet.this.comparator();
     //         }

@@ -1,6 +1,7 @@
 module hunt.container.NavigableSet;
 
 import hunt.container.Set;
+import hunt.container.SortedSet;
 import hunt.container.Iterator;
 
 /**
