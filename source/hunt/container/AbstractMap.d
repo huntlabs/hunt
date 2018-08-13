@@ -1,16 +1,26 @@
 module hunt.container.AbstractMap;
 
+import hunt.container.Collection;
+import hunt.container.Iterator;
 import hunt.container.Map;
+import hunt.container.Set;
+
 import hunt.util.exception;
 
 import std.conv;
 import std.exception;
+import std.range;
 
 /**
 */
 abstract class AbstractMap(K,V) : Map!(K,V) {
 
-    protected V[K] _dict;
+    /**
+     * The number of key-value mappings contained in this map.
+     */
+    protected int _size;
+
+    // protected V[K] _dict;
 
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -22,20 +32,18 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     // Query Operations
 
     /**
-     * {@inheritDoc}
+     * Returns the number of key-value mappings in this map.
      *
-     * @implSpec
-     * This implementation returns <tt>entrySet().size()</tt>.
+     * @return the number of key-value mappings in this map
      */
     int size() {
-        return cast(int) _dict.length;
+        return _size; // cast(int) _dict.length;
     }
 
     /**
-     * {@inheritDoc}
+     * Returns <tt>true</tt> if this map contains no key-value mappings.
      *
-     * @implSpec
-     * This implementation returns <tt>size() == 0</tt>.
+     * @return <tt>true</tt> if this map contains no key-value mappings
      */
     bool isEmpty() {
         return size() == 0;
@@ -55,8 +63,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws NullPointerException {@inheritDoc}
      */
     bool containsKey(K key) {
-        auto v = key in _dict;
-        return v !is null;
+        throw new UnsupportedOperationException();
     }
     /**
      * {@inheritDoc}
@@ -72,20 +79,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws NullPointerException {@inheritDoc}
      */
     bool containsValue(V value) {
-        foreach(V v; _dict.byValue())
-        {
-            static if(is(V == class))
-            {
-                if(value is v || value == v)
-                    return true;
-            }
-            else
-            {
-                if(value == v)
-                    return true;
-            }
-        }
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     V opIndex(K key)
@@ -108,10 +102,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws NullPointerException          {@inheritDoc}
      */
     V get(K key) {
-        auto v = key in _dict;
-        if(v is null)
-            throw new Exception("The key does not exist.");
-        return *v;
+        throw new UnsupportedOperationException();
     }
 
 
@@ -138,7 +129,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @since 1.8
      */
     V getOrDefault(K k, V defaultValue) {
-        return _dict.get(k, defaultValue);
+        throw new UnsupportedOperationException();
     }
 
     // Modification Operations
@@ -156,9 +147,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     V put(K key, V value) {
-        // throw new UnsupportedOperationException("");
-        _dict[key] = value;
-        return value;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -184,14 +173,16 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws NullPointerException          {@inheritDoc}
      */
     V remove(K key) {
-        auto v = key in _dict;
+        
+        throw new UnsupportedOperationException();
+        // auto v = key in _dict;
 
-        V oldValue = V.init;
-        if (v !is null) {
-            oldValue = *v;
-            _dict.remove(key);
-        }
-        return oldValue;
+        // V oldValue = V.init;
+        // if (v !is null) {
+        //     oldValue = *v;
+        //     _dict.remove(key);
+        // }
+        // return oldValue;
     }
 
 
@@ -215,7 +206,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     void putAll(Map!(K, V) m) {
-        // for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
+        // for (MapEntry!(K, V) e : m.entrySet())
         foreach(K k, V v; m)
             put(k, v);
     }
@@ -233,23 +224,55 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws UnsupportedOperationException {@inheritDoc}
      */
     void clear() {
-        _dict.clear();
+        throw new NotImplementedException("");
     }
 
-    int opApply(scope int delegate(ref K, ref V) dg)
+    int opApply(scope int delegate(ref K, ref V) dg)  {
+        throw new NotImplementedException();
+    }
+    
+    int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
+        throw new NotImplementedException();
+    }
+    
+    InputRange!K byKey()
     {
-        int result = 0;
-        foreach(K k, ref V v; _dict)
-        {
-            result = dg(k, v);
-            if(result != 0) return result;
-        }
-        return result;
+        throw new NotImplementedException();
     }
 
+    InputRange!V byValue()
+    {
+        throw new NotImplementedException();
+    }
 
     // Views
 
+    /**
+     * Each of these fields are initialized to contain an instance of the
+     * appropriate view the first time this view is requested.  The views are
+     * stateless, so there's no reason to create more than one of each.
+     *
+     * <p>Since there is no synchronization performed while accessing these fields,
+     * it is expected that java.util.Map view classes using these fields have
+     * no non-final fields (or any fields at all except for outer-this). Adhering
+     * to this rule would make the races on these fields benign.
+     *
+     * <p>It is also imperative that implementations read the field only once,
+     * as in:
+     *
+     * <pre> {@code
+     * public Set!K keySet() {
+     *   Set!K ks = keySet;  // single racy read
+     *   if (ks == null) {
+     *     ks = new KeySet();
+     *     keySet = ks;
+     *   }
+     *   return ks;
+     * }
+     *}</pre>
+     */
+    // protected Set!K       _keySet;
+    // protected Collection!V _values;
 
     /**
      * {@inheritDoc}
@@ -268,7 +291,9 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same set.
      */
     K[] keySet() {
-        return _dict.keys;
+        // return _dict.keys;
+        
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -288,7 +313,9 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same collection.
      */
     V[] values() {
-        return _dict.values;
+        // return _dict.values;
+        
+        throw new UnsupportedOperationException();
     }
 
 
@@ -317,8 +344,8 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return <tt>true</tt> if the specified object is equal to this map
      */
      override bool opEquals(Object o)
-     {
-         throw new Exception("");
+     {         
+        throw new UnsupportedOperationException();
      }
     // bool equals(Object o) {
     //     if (o == this)
@@ -353,6 +380,12 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //     return true;
     // }
 
+    
+    // Iterator!(MapEntry!(K,V)) iterator()
+    // {
+    //     throw new UnsupportedOperationException();
+    // }
+
     /**
      * Returns the hash code value for this map.  The hash code of a map is
      * defined to be the sum of the hash codes of each entry in the map's
@@ -363,28 +396,27 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      *
      * @implSpec
      * This implementation iterates over <tt>entrySet()</tt>, calling
-     * {@link Map.Entry#toHash toHash()} on each element (entry) in the
+     * {@link MapEntry#toHash toHash()} on each element (entry) in the
      * set, and adding up the results.
      *
      * @return the hash code value for this map
-     * @see Map.Entry#toHash()
+     * @see MapEntry#toHash()
      * @see Object#equals(Object)
      * @see Set#equals(Object)
      */
-     override size_t toHash() @trusted nothrow 
-     {
-        //  throw new Exception("");
-        // TODO: Tasks pending completion -@zxp at 6/26/2018, 9:17:04 AM
-        // 
-        return 0;
-     }
-    // size_t toHash() @trusted nothrow {
-    //     int h = 0;
-    //     Iterator<Entry!(K,V)> i = entrySet().iterator();
-    //     while (i.hasNext())
-    //         h += i.next().toHash();
-    //     return h;
-    // }
+    override size_t toHash() @trusted nothrow {
+        size_t h = 0;
+        try{
+            foreach(MapEntry!(K,V) i; this) {
+                h += i.toHash();
+            }
+        // Iterator!(MapEntry!(K,V)) i = this.iterator();
+        // while (i.hasNext())
+        //     h += i.next().toHash();
+        }
+        catch(Exception ex)  { }
+        return h;
+    }
 
     /**
      * Returns a string representation of this map.  The string representation
@@ -399,7 +431,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return a string representation of this map
      */
     override string toString() {
-        return to!string(_dict);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -469,7 +501,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      *
     //      * @param entry the entry to copy
     //      */
-    //     SimpleEntry(Entry<? extends K, ? extends V> entry) {
+    //     SimpleEntry(Entry!(K, V) entry) {
     //         this.key   = entry.getKey();
     //         this.value = entry.getValue();
     //     }
@@ -519,7 +551,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      *    e2.getValue()==null :
     //      *    e1.getValue().equals(e2.getValue()))</pre>
     //      * This ensures that the {@code equals} method works properly across
-    //      * different implementations of the {@code Map.Entry} interface.
+    //      * different implementations of the {@code MapEntry} interface.
     //      *
     //      * @param o object to be compared for equality with this map entry
     //      * @return {@code true} if the specified object is equal to this map
@@ -527,9 +559,9 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      * @see    #toHash
     //      */
     //     bool equals(Object o) {
-    //         if (!(o instanceof Map.Entry))
+    //         if (!(o instanceof MapEntry))
     //             return false;
-    //         Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+    //         MapEntry<?,?> e = (MapEntry<?,?>)o;
     //         return eq(key, e.getKey()) && eq(value, e.getValue());
     //     }
 
@@ -599,7 +631,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      *
     //      * @param entry the entry to copy
     //      */
-    //     SimpleImmutableEntry(Entry<? extends K, ? extends V> entry) {
+    //     SimpleImmutableEntry(Entry!(K, V) entry) {
     //         this.key   = entry.getKey();
     //         this.value = entry.getValue();
     //     }
@@ -650,7 +682,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      *    e2.getValue()==null :
     //      *    e1.getValue().equals(e2.getValue()))</pre>
     //      * This ensures that the {@code equals} method works properly across
-    //      * different implementations of the {@code Map.Entry} interface.
+    //      * different implementations of the {@code MapEntry} interface.
     //      *
     //      * @param o object to be compared for equality with this map entry
     //      * @return {@code true} if the specified object is equal to this map
@@ -658,9 +690,9 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      * @see    #toHash
     //      */
     //     bool equals(Object o) {
-    //         if (!(o instanceof Map.Entry))
+    //         if (!(o instanceof MapEntry))
     //             return false;
-    //         Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+    //         MapEntry<?,?> e = (MapEntry<?,?>)o;
     //         return eq(key, e.getKey()) && eq(value, e.getValue());
     //     }
 

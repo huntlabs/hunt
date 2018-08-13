@@ -10,7 +10,7 @@ import hunt.util.string;
 /**
  * A multi valued Map.
  * 
- * @param <V>
+ * @param !V
  *            the entry type for multimap values
  */
 class MultiMap(V) : HashMap!(string, List!(V)) {
@@ -130,7 +130,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	 *            the input map
 	 */
 	// void putAllValues(Map!(string, V) input) {
-	// 	foreach (Map.Entry!(string, V) entry ; input.entrySet()) {
+	// 	foreach (MapEntry!(string, V) entry ; input.entrySet()) {
 	// 		put(entry.getKey(), entry.getValue());
 	// 	}
 	// }
@@ -238,7 +238,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	// 		return merged;
 	// 	}
 
-	// 	for (Map.Entry!(string, List!(V)) entry : map.entrySet()) {
+	// 	for (MapEntry!(string, List!(V)) entry : map.entrySet()) {
 	// 		string name = entry.getKey();
 	// 		List!(V) values = entry.getValue();
 
@@ -295,12 +295,12 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 
 	// override
 	// string toString() {
-	// 	Iterator<Map.Entry!(string, List!(V))> iter = entrySet().iterator();
+	// 	Iterator<MapEntry!(string, List!(V))> iter = entrySet().iterator();
 	// 	StringBuilder sb = new StringBuilder();
 	// 	sb.append('{');
 	// 	bool delim = false;
 	// 	while (iter.hasNext()) {
-	// 		Map.Entry!(string, List!(V)) e = iter.next();
+	// 		MapEntry!(string, List!(V)) e = iter.next();
 	// 		if (delim) {
 	// 			sb.append(", ");
 	// 		}
@@ -344,7 +344,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	// 		}
 	// 	};
 
-	// 	for (Map.Entry!(string, List!(V)) entry : entrySet()) {
+	// 	for (MapEntry!(string, List!(V)) entry : entrySet()) {
 	// 		string[] a = null;
 	// 		if (entry.getValue() != null) {
 	// 			a = new string[entry.getValue().size()];
