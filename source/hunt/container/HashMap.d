@@ -752,10 +752,9 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
     /* ------------------------------------------------------------ */
     // iterators
 
-    override int opApply(scope int delegate(ref K, ref V) dg)
-    {
+    override int opApply(scope int delegate(ref K, ref V) dg)    {
         if(dg is null)
-            throw new NullPointerException("");
+            throw new NullPointerException();
         HashMapNode!(K, V)[] tab = table;
 
         int result = 0;
@@ -778,28 +777,27 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
         return result;
     }
 
-    override int opApply(scope int delegate(MapEntry!(K, V) entry) dg)
-    {
+    override int opApply(scope int delegate(MapEntry!(K, V) entry) dg)    {
         if(dg is null)
             throw new NullPointerException("");
         HashMapNode!(K, V)[] tab = table;
 
+        if(_size <= 0 || tab is null) 
+            return 0;
+        
         int result = 0;
-        if(_size > 0 && tab !is null) 
+        int mc = modCount;
+        for(size_t i=0; i<tab.length; i++)
         {
-            int mc = modCount;
-            for(size_t i=0; i<tab.length; i++)
+            for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
             {
-                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
-                {
-                    result = dg(e);
-                    if(result != 0) return result;
-                }
+                result = dg(e);
+                if(result != 0) return result;
             }
-
-            if(modCount != mc)
-                throw new ConcurrentModificationException("");
         }
+
+        if(modCount != mc)
+            throw new ConcurrentModificationException("");
 
         return result;
     }
