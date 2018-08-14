@@ -1,6 +1,15 @@
 module hunt.security.x509.X509CertInfo;
 
 import hunt.security.x509.CertAttrSet;
+import hunt.security.x509.CertificateAlgorithmId;
+import hunt.security.x509.CertificateExtensions;
+import hunt.security.x509.CertificateSerialNumber;
+import hunt.security.x509.CertificateValidity;
+import hunt.security.x509.CertificateVersion;
+import hunt.security.x509.CertificateX509Key;
+
+// import hunt.security.x509.CertAttrSet;
+// import hunt.security.x509.CertAttrSet;
 
 /**
  * The X509CertInfo class represents X.509 certificate information.
@@ -158,7 +167,7 @@ class X509CertInfo : CertAttrSet!string {
     //  * Return an enumeration of names of attributes existing within this
     //  * attribute.
     //  */
-    // Enumeration<string> getElements() {
+    // Enumeration!string getElements() {
     //     AttributeNameEnumeration elements = new AttributeNameEnumeration();
     //     elements.addElement(VERSION);
     //     elements.addElement(SERIAL_NUMBER);
@@ -265,27 +274,27 @@ class X509CertInfo : CertAttrSet!string {
     //     StringBuilder sb = new StringBuilder();
 
     //     sb.append("[\n");
-    //     sb.append("  " + version.toString() + "\n");
-    //     sb.append("  Subject: " + subject.toString() + "\n");
-    //     sb.append("  Signature Algorithm: " + algId.toString() + "\n");
-    //     sb.append("  Key:  " + pubKey.toString() + "\n");
-    //     sb.append("  " + interval.toString() + "\n");
-    //     sb.append("  Issuer: " + issuer.toString() + "\n");
-    //     sb.append("  " + serialNum.toString() + "\n");
+    //     sb.append("  " ~ version.toString() ~ "\n");
+    //     sb.append("  Subject: " ~ subject.toString() ~ "\n");
+    //     sb.append("  Signature Algorithm: " ~ algId.toString() ~ "\n");
+    //     sb.append("  Key:  " ~ pubKey.toString() ~ "\n");
+    //     sb.append("  " ~ interval.toString() ~ "\n");
+    //     sb.append("  Issuer: " ~ issuer.toString() ~ "\n");
+    //     sb.append("  " ~ serialNum.toString() ~ "\n");
 
     //     // optional v2, v3 extras
     //     if (issuerUniqueId !is null) {
-    //         sb.append("  Issuer Id:\n" + issuerUniqueId.toString() + "\n");
+    //         sb.append("  Issuer Id:\n" ~ issuerUniqueId.toString() ~ "\n");
     //     }
     //     if (subjectUniqueId !is null) {
-    //         sb.append("  Subject Id:\n" + subjectUniqueId.toString() + "\n");
+    //         sb.append("  Subject Id:\n" ~ subjectUniqueId.toString() ~ "\n");
     //     }
     //     if (extensions !is null) {
     //         Collection<Extension> allExts = extensions.getAllExtensions();
     //         Extension[] exts = allExts.toArray(new Extension[0]);
-    //         sb.append("\nCertificate Extensions: " + exts.length);
+    //         sb.append("\nCertificate Extensions: " ~ exts.length);
     //         for (int i = 0; i < exts.length; i++) {
-    //             sb.append("\n[" + (i+1) + "]: ");
+    //             sb.append("\n[" ~ (i+1) ~ "]: ");
     //             Extension ext = exts[i];
     //             try {
     //                 if (OIDMap.getClass(ext.getExtensionId()) is null) {
@@ -297,8 +306,8 @@ class X509CertInfo : CertAttrSet!string {
     //                         extValue = out.toByteArray();
     //                         HexDumpEncoder enc = new HexDumpEncoder();
     //                         sb.append("Extension unknown: "
-    //                                   + "DER encoded OCTET string =\n"
-    //                                   + enc.encodeBuffer(extValue) + "\n");
+    //                                   ~ "DER encoded OCTET string =\n"
+    //                                   + enc.encodeBuffer(extValue) ~ "\n");
     //                     }
     //                 } else
     //                     sb.append(ext.toString()); //sub-class exists
@@ -308,10 +317,10 @@ class X509CertInfo : CertAttrSet!string {
     //         }
     //         Map<string,Extension> invalid = extensions.getUnparseableExtensions();
     //         if (invalid.isEmpty() == false) {
-    //             sb.append("\nUnparseable certificate extensions: " + invalid.size());
+    //             sb.append("\nUnparseable certificate extensions: " ~ invalid.size());
     //             int i = 1;
     //             for (Extension ext : invalid.values()) {
-    //                 sb.append("\n[" + (i++) + "]: ");
+    //                 sb.append("\n[" ~ (i++) ~ "]: ");
     //                 sb.append(ext);
     //             }
     //         }
@@ -417,7 +426,7 @@ class X509CertInfo : CertAttrSet!string {
     //  * @exception CertificateException on invalid attributes.
     //  * @exception IOException on other errors.
     //  */
-    // void delete(string name)
+    // void remove(string name)
     // throws CertificateException, IOException {
     //     X509AttributeName attrName = new X509AttributeName(name);
 
@@ -435,21 +444,21 @@ class X509CertInfo : CertAttrSet!string {
     //         if (suffix is null) {
     //             version = null;
     //         } else {
-    //             version.delete(suffix);
+    //             version.remove(suffix);
     //         }
     //         break;
     //     case (ATTR_SERIAL):
     //         if (suffix is null) {
     //             serialNum = null;
     //         } else {
-    //             serialNum.delete(suffix);
+    //             serialNum.remove(suffix);
     //         }
     //         break;
     //     case (ATTR_ALGORITHM):
     //         if (suffix is null) {
     //             algId = null;
     //         } else {
-    //             algId.delete(suffix);
+    //             algId.remove(suffix);
     //         }
     //         break;
     //     case (ATTR_ISSUER):
@@ -459,7 +468,7 @@ class X509CertInfo : CertAttrSet!string {
     //         if (suffix is null) {
     //             interval = null;
     //         } else {
-    //             interval.delete(suffix);
+    //             interval.remove(suffix);
     //         }
     //         break;
     //     case (ATTR_SUBJECT):
@@ -469,7 +478,7 @@ class X509CertInfo : CertAttrSet!string {
     //         if (suffix is null) {
     //             pubKey = null;
     //         } else {
-    //             pubKey.delete(suffix);
+    //             pubKey.remove(suffix);
     //         }
     //         break;
     //     case (ATTR_ISSUER_ID):
@@ -483,7 +492,7 @@ class X509CertInfo : CertAttrSet!string {
     //             extensions = null;
     //         } else {
     //             if (extensions !is null)
-    //                extensions.delete(suffix);
+    //                extensions.remove(suffix);
     //         }
     //         break;
     //     }
@@ -504,7 +513,7 @@ class X509CertInfo : CertAttrSet!string {
     //     int attr = attributeMap(attrName.getPrefix());
     //     if (attr == 0) {
     //         throw new CertificateParsingException(
-    //                       "Attribute name not recognized: " + name);
+    //                       "Attribute name not recognized: " ~ name);
     //     }
     //     string suffix = attrName.getSuffix();
 
@@ -573,7 +582,7 @@ class X509CertInfo : CertAttrSet!string {
     //  * Get the Issuer or Subject name
     //  */
     // private Object getX500Name(string name, bool getIssuer)
-    //     throws IOException {
+    //     {
     //     if (name.equalsIgnoreCase(X509CertInfo.DN_NAME)) {
     //         return getIssuer ? issuer : subject;
     //     } else if (name.equalsIgnoreCase("x500principal")) {
@@ -684,8 +693,8 @@ class X509CertInfo : CertAttrSet!string {
     //     // if SubjectName is empty, check for SubjectAlternativeNameExtension
     //     if (subject.isEmpty()) {
     //         if (extensions is null) {
-    //             throw new CertificateParsingException("X.509 Certificate is " +
-    //                     "incomplete: subject field is empty, and certificate " +
+    //             throw new CertificateParsingException("X.509 Certificate is " ~
+    //                     "incomplete: subject field is empty, and certificate " ~
     //                     "has no extensions");
     //         }
     //         SubjectAlternativeNameExtension subjectAltNameExt = null;
@@ -697,19 +706,19 @@ class X509CertInfo : CertAttrSet!string {
     //             names = subjectAltNameExt.get(
     //                     SubjectAlternativeNameExtension.SUBJECT_NAME);
     //         } catch (IOException e) {
-    //             throw new CertificateParsingException("X.509 Certificate is " +
-    //                     "incomplete: subject field is empty, and " +
+    //             throw new CertificateParsingException("X.509 Certificate is " ~
+    //                     "incomplete: subject field is empty, and " ~
     //                     "SubjectAlternativeName extension is absent");
     //         }
 
     //         // SubjectAlternativeName extension is empty or not marked critical
     //         if (names is null || names.isEmpty()) {
-    //             throw new CertificateParsingException("X.509 Certificate is " +
-    //                     "incomplete: subject field is empty, and " +
+    //             throw new CertificateParsingException("X.509 Certificate is " ~
+    //                     "incomplete: subject field is empty, and " ~
     //                     "SubjectAlternativeName extension is empty");
     //         } else if (subjectAltNameExt.isCritical() == false) {
-    //             throw new CertificateParsingException("X.509 Certificate is " +
-    //                     "incomplete: SubjectAlternativeName extension MUST " +
+    //             throw new CertificateParsingException("X.509 Certificate is " ~
+    //                     "incomplete: SubjectAlternativeName extension MUST " ~
     //                     "be marked critical when subject field is empty");
     //         }
     //     }

@@ -366,10 +366,11 @@ class AlgorithmParameters {
      * specification is inappropriate for the initialization of this parameter
      * object, or if this parameter object has already been initialized.
      */
-    final void init(AlgorithmParameterSpec paramSpec)
+    final void initilize(AlgorithmParameterSpec paramSpec)
     {
         if (this.initialized)
-            throw new InvalidParameterSpecException("already initialized");
+            // throw new InvalidParameterSpecException("already initialized");
+            throw new Exception("already initialized");
         paramSpi.engineInit(paramSpec);
         this.initialized = true;
     }
@@ -385,7 +386,7 @@ class AlgorithmParameters {
      * @exception IOException on decoding errors, or if this parameter object
      * has already been initialized.
      */
-    final void init(byte[] params) {
+    final void initilize(byte[] params) {
         if (this.initialized)
             throw new IOException("already initialized");
         paramSpi.engineInit(params);
@@ -407,7 +408,7 @@ class AlgorithmParameters {
      * @exception IOException on decoding errors, or if this parameter object
      * has already been initialized.
      */
-    final void init(byte[] params, string format) {
+    final void initilize(byte[] params, string format) {
         if (this.initialized)
             throw new IOException("already initialized");
         paramSpi.engineInit(params, format);
@@ -488,7 +489,7 @@ class AlgorithmParameters {
      * @return a formatted string describing the parameters, or null if this
      * parameter object has not been initialized.
      */
-    final string toString() {
+    final override string toString() {
         if (this.initialized == false) {
             return null;
         }

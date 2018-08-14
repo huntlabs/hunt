@@ -1,5 +1,8 @@
 module hunt.security.util.ObjectIdentifier;
 
+import hunt.security.util.DerOutputStream;
+import hunt.security.util.DerValue;
+
 import hunt.util.exception;
 
 import std.conv;
@@ -197,7 +200,7 @@ final class ObjectIdentifier
         checkSecondComponent(values[0], values[1]);
         for (size_t i=2; i<values.length; i++)
             checkOtherComponent(i, values[i]);
-        init(values, values.length);
+        initilize(values, values.length);
     }
 
     /**
@@ -257,7 +260,7 @@ final class ObjectIdentifier
     //     check(encoding);
     // }
 
-    private void init(int[] components, int length) {
+    private void initilize(int[] components, int length) {
         int pos = 0;
         byte[] tmp = new byte[length*5+1];  // +1 for empty input
 
@@ -326,9 +329,8 @@ final class ObjectIdentifier
         return encoding == other.encoding;
     }
 
-    override
-    int hashCode() {
-        return Arrays.hashCode(encoding);
+    override size_t toHash() @trusted const nothrow {
+        return hashOf(encoding);
     }
 
     /**

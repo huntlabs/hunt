@@ -190,7 +190,7 @@ class X509CertificatePair {
 
     // /* Parse the encoded bytes */
     // private void parse(DerValue val)
-    //     throws IOException, CertificateException
+    //    , CertificateException
     // {
     //     if (val.tag != DerValue.tag_Sequence) {
     //         throw new IOException
@@ -205,7 +205,7 @@ class X509CertificatePair {
     //                 if (opt.isContextSpecific() && opt.isConstructed()) {
     //                     if (forward !is null) {
     //                         throw new IOException("Duplicate forward "
-    //                             + "certificate in X509CertificatePair");
+    //                             ~ "certificate in X509CertificatePair");
     //                     }
     //                     opt = opt.data.getDerValue();
     //                     forward = X509Factory.intern
@@ -216,7 +216,7 @@ class X509CertificatePair {
     //                 if (opt.isContextSpecific() && opt.isConstructed()) {
     //                     if (reverse !is null) {
     //                         throw new IOException("Duplicate reverse "
-    //                             + "certificate in X509CertificatePair");
+    //                             ~ "certificate in X509CertificatePair");
     //                     }
     //                     opt = opt.data.getDerValue();
     //                     reverse = X509Factory.intern
@@ -225,18 +225,18 @@ class X509CertificatePair {
     //                 break;
     //             default:
     //                 throw new IOException("Invalid encoding of "
-    //                     + "X509CertificatePair");
+    //                     ~ "X509CertificatePair");
     //         }
     //     }
     //     if (forward is null && reverse is null) {
     //         throw new CertificateException("at least one of certificate pair "
-    //             + "must be non-null");
+    //             ~ "must be non-null");
     //     }
     // }
 
     // /* Translate to encoded bytes */
     // private void emit(DerOutputStream outputStream)
-    //     throws IOException, CertificateEncodingException
+    //    , CertificateEncodingException
     // {
     //     DerOutputStream tagged = new DerOutputStream();
 
@@ -276,7 +276,7 @@ class X509CertificatePair {
     //     X500Principal rvIssuer = reverse.getIssuerX500Principal();
     //     if (!fwIssuer.equals(rvSubject) || !rvIssuer.equals(fwSubject)) {
     //         throw new CertificateException("subject and issuer names in "
-    //             + "forward and reverse certificates do not match");
+    //             ~ "forward and reverse certificates do not match");
     //     }
 
     //     /* check signatures unless key parameters are missing */

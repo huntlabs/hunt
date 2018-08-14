@@ -12,6 +12,8 @@ import hunt.security.Provider;
 
 import hunt.container;
 
+import hunt.util.exception;
+
 import std.datetime;
 
 /**
@@ -132,12 +134,13 @@ abstract class X509CRL : CRL , X509Extension {
     override size_t toHash() @trusted nothrow {
         size_t retval = 0;
         try {
-            byte[] crlData = X509CRLImpl.getEncodedInternal(this);
+            byte[] crlData;
+            crlData = X509CRLImpl.getEncodedInternal(this);
             for (size_t i = 1; i < crlData.length; i++) {
                  retval += crlData[i] * i;
             }
             return retval;
-        } catch (CRLException e) {
+        } catch (Exception e) {
             return retval;
         }
     }
@@ -336,7 +339,7 @@ abstract class X509CRL : CRL , X509Extension {
     X509CRLEntry getRevokedCertificate(X509Certificate certificate) {
         X500Principal certIssuer = certificate.getIssuerX500Principal();
         X500Principal crlIssuer = getIssuerX500Principal();
-        if (certIssuer.equals(crlIssuer) == false) {
+        if (!certIssuer.opEquals(crlIssuer)) {
             return null;
         }
         return getRevokedCertificate(certificate.getSerialNumber());

@@ -472,7 +472,7 @@ final class BasicPermissionCollection : PermissionCollection
     //  * serialization compatibility with earlier releases. all_allowed
     //  * and permClass unchanged.
     //  */
-    // private void writeObject(ObjectOutputStream out) throws IOException {
+    // private void writeObject(ObjectOutputStream out) {
     //     // Don't call out.defaultWriteObject()
 
     //     // Copy perms into a Hashtable
@@ -496,7 +496,7 @@ final class BasicPermissionCollection : PermissionCollection
     //  * BasicPermissionCollection from a stream.
     //  */
     // private void readObject(java.io.ObjectInputStream in)
-    //      throws IOException, ClassNotFoundException
+    //     , ClassNotFoundException
     // {
     //     // Don't call defaultReadObject()
 
