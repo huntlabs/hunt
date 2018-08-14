@@ -229,7 +229,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //             /* stream appears to be hex-encoded bytes */
 //             ByteArrayOutputStream decstream = new ByteArrayOutputStream();
 //             try {
-//                 while ((line = certBufferedReader.readLine()) != null) {
+//                 while ((line = certBufferedReader.readLine()) !is null) {
 //                     if (line.equals(X509Factory.END_CERT)) {
 //                         der = new DerValue(decstream.toByteArray());
 //                         break;
@@ -376,7 +376,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //         if (sigProvider is null) {
 //             sigProvider = "";
 //         }
-//         if ((verifiedPublicKey != null) && verifiedPublicKey.equals(key)) {
+//         if ((verifiedPublicKey !is null) && verifiedPublicKey.equals(key)) {
 //             // this certificate has already been verified using
 //             // this key. Make sure providers match, too.
 //             if (sigProvider.equals(verifiedProvider)) {
@@ -617,7 +617,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //             if (info is null) {
 //                 return null;
 //             }
-//             if (attr.getSuffix() != null) {
+//             if (attr.getSuffix() !is null) {
 //                 try {
 //                     return info.get(attr.getSuffix());
 //                 } catch (IOException e) {
@@ -631,12 +631,12 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //         } else if (id.equalsIgnoreCase(ALG_ID)) {
 //             return(algId);
 //         } else if (id.equalsIgnoreCase(SIGNATURE)) {
-//             if (signature != null)
+//             if (signature !is null)
 //                 return signature.clone();
 //             else
 //                 return null;
 //         } else if (id.equalsIgnoreCase(SIGNED_CERT)) {
-//             if (signedCert != null)
+//             if (signedCert !is null)
 //                 return signedCert.clone();
 //             else
 //                 return null;
@@ -713,7 +713,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //         id = attr.getPrefix();
 
 //         if (id.equalsIgnoreCase(INFO)) {
-//             if (attr.getSuffix() != null) {
+//             if (attr.getSuffix() !is null) {
 //                 info = null;
 //             } else {
 //                 info.delete(attr.getSuffix());
@@ -818,7 +818,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //     BigInteger getSerialNumber() {
 //         SerialNumber ser = getSerialNumberObject();
 
-//         return ser != null ? ser.getNumber() : null;
+//         return ser !is null ? ser.getNumber() : null;
 //     }
 
 //     /**
@@ -956,7 +956,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * @exception CertificateEncodingException if an encoding error occurs.
 //      */
 //     byte[] getTBSCertificate() {
-//         if (info != null) {
+//         if (info !is null) {
 //             return info.getEncodedInfo();
 //         } else
 //             throw new CertificateEncodingException("Uninitialized certificate");
@@ -1059,7 +1059,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //     KeyIdentifier getAuthKeyId() {
 //         AuthorityKeyIdentifierExtension aki
 //             = getAuthorityKeyIdentifierExtension();
-//         if (aki != null) {
+//         if (aki !is null) {
 //             try {
 //                 return (KeyIdentifier)aki.get(
 //                     AuthorityKeyIdentifierExtension.KEY_ID);
@@ -1073,7 +1073,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      */
 //     KeyIdentifier getSubjectKeyId() {
 //         SubjectKeyIdentifierExtension ski = getSubjectKeyIdentifierExtension();
-//         if (ski != null) {
+//         if (ski !is null) {
 //             try {
 //                 return (KeyIdentifier)ski.get(
 //                     SubjectKeyIdentifierExtension.KEY_ID);
@@ -1303,7 +1303,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //                 return null;
 //             } else {
 //                 Extension ex = extensions.getExtension(oid.toString());
-//                 if (ex != null) {
+//                 if (ex !is null) {
 //                     return ex;
 //                 }
 //                 for (Extension ex2: extensions.getAllExtensions()) {
@@ -1376,7 +1376,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //                 }
 //             }
 //             if (certExt is null) {
-//                 if (exts != null) {
+//                 if (exts !is null) {
 //                     certExt = exts.getUnparseableExtensions().get(oid);
 //                 }
 //                 if (certExt is null) {
@@ -1430,7 +1430,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      */
 //     synchronized List<string> getExtendedKeyUsage()
 //         throws CertificateParsingException {
-//         if (readOnly && extKeyUsage != null) {
+//         if (readOnly && extKeyUsage !is null) {
 //             return extKeyUsage;
 //         } else {
 //             ExtendedKeyUsageExtension ext = getExtendedKeyUsageExtension();
@@ -1593,7 +1593,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //     synchronized Collection<List<?>> getSubjectAlternativeNames()
 //         throws CertificateParsingException {
 //         // return cached value if we can
-//         if (readOnly && subjectAlternativeNames != null)  {
+//         if (readOnly && subjectAlternativeNames !is null)  {
 //             return cloneAltNames(subjectAlternativeNames);
 //         }
 //         SubjectAlternativeNameExtension subjectAltNameExt =
@@ -1656,7 +1656,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //     synchronized Collection<List<?>> getIssuerAlternativeNames()
 //         throws CertificateParsingException {
 //         // return cached value if we can
-//         if (readOnly && issuerAlternativeNames != null) {
+//         if (readOnly && issuerAlternativeNames !is null) {
 //             return cloneAltNames(issuerAlternativeNames);
 //         }
 //         IssuerAlternativeNameExtension issuerAltNameExt =

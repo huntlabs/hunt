@@ -3,6 +3,7 @@ module hunt.security.cert.CertificateFactory;
 import hunt.security.cert.Certificate;
 import hunt.security.cert.CertificateFactorySpi;
 import hunt.security.cert.CertPath;
+import hunt.security.cert.CRL;
 
 import hunt.security.Provider;
 

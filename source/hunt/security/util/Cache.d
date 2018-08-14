@@ -287,7 +287,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         //     CacheEntry!(K, V) currentEntry = cacheMap.remove(key);
         //     // check if the entry in the map corresponds to the expired
         //     // entry. If not, readd the entry
-        //     if ((currentEntry != null) && (entry != currentEntry)) {
+        //     if ((currentEntry !is null) && (entry != currentEntry)) {
         //         cacheMap.put(key, currentEntry);
         //     }
         // }
@@ -330,13 +330,13 @@ class MemoryCache(K, V) : Cache!(K, V) {
     }
 
     void clear() {
-        if (queue != null) {
+        if (queue !is null) {
             // if this is a SoftReference cache, first invalidate() all
             // entries so that GC does not have to enqueue them
             foreach (CacheEntry!(K, V) entry ; cacheMap.values()) {
                 entry.invalidate();
             }
-            // while (queue.poll() != null) {
+            // while (queue.poll() !is null) {
             //     // empty
             // }
         }
@@ -349,7 +349,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
                                         System.currentTimeMillis() + lifetime;
         CacheEntry!(K, V) newEntry = newEntry(key, value, expirationTime, queue);
         CacheEntry!(K, V) oldEntry = cacheMap.put(key, newEntry);
-        if (oldEntry != null) {
+        if (oldEntry !is null) {
             oldEntry.invalidate();
             return;
         }
@@ -392,7 +392,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
     void remove(Object key) {
         emptyQueue();
         CacheEntry!(K, V) entry = cacheMap.remove(key);
-        if (entry != null) {
+        if (entry !is null) {
             entry.invalidate();
         }
     }
@@ -455,7 +455,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
 
     protected CacheEntry!(K, V) newEntry(K key, V value,
             long expirationTime, ReferenceQueue!V queue) {
-        // if (queue != null) {
+        // if (queue !is null) {
         //     return new SoftCacheEntry!V(key, value, expirationTime, queue);
         // } else {
             return new HardCacheEntry!V(key, value, expirationTime);
@@ -532,7 +532,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
     //     }
 
     //     bool isValid(long currentTime) {
-    //         bool valid = (currentTime <= expirationTime) && (get() != null);
+    //         bool valid = (currentTime <= expirationTime) && (get() !is null);
     //         if (valid == false) {
     //             invalidate();
     //         }

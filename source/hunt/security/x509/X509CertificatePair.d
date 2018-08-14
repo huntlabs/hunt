@@ -109,7 +109,7 @@ class X509CertificatePair {
     //         (byte[] encoded) {
     //     Object key = new Cache.EqualByteArray(encoded);
     //     X509CertificatePair pair = cache.get(key);
-    //     if (pair != null) {
+    //     if (pair !is null) {
     //         return pair;
     //     }
     //     pair = new X509CertificatePair(encoded);
@@ -180,9 +180,9 @@ class X509CertificatePair {
     // string toString() {
     //     StringBuilder sb = new StringBuilder();
     //     sb.append("X.509 Certificate Pair: [\n");
-    //     if (forward != null)
+    //     if (forward !is null)
     //         sb.append("  Forward: ").append(forward).append("\n");
-    //     if (reverse != null)
+    //     if (reverse !is null)
     //         sb.append("  Reverse: ").append(reverse).append("\n");
     //     sb.append("]");
     //     return sb.toString();
@@ -197,13 +197,13 @@ class X509CertificatePair {
     //             ("Sequence tag missing for X509CertificatePair");
     //     }
 
-    //     while (val.data != null && val.data.available() != 0) {
+    //     while (val.data !is null && val.data.available() != 0) {
     //         DerValue opt = val.data.getDerValue();
     //         short tag = (byte) (opt.tag & 0x01f);
     //         switch (tag) {
     //             case TAG_FORWARD:
     //                 if (opt.isContextSpecific() && opt.isConstructed()) {
-    //                     if (forward != null) {
+    //                     if (forward !is null) {
     //                         throw new IOException("Duplicate forward "
     //                             + "certificate in X509CertificatePair");
     //                     }
@@ -214,7 +214,7 @@ class X509CertificatePair {
     //                 break;
     //             case TAG_REVERSE:
     //                 if (opt.isContextSpecific() && opt.isConstructed()) {
-    //                     if (reverse != null) {
+    //                     if (reverse !is null) {
     //                         throw new IOException("Duplicate reverse "
     //                             + "certificate in X509CertificatePair");
     //                     }
@@ -240,14 +240,14 @@ class X509CertificatePair {
     // {
     //     DerOutputStream tagged = new DerOutputStream();
 
-    //     if (forward != null) {
+    //     if (forward !is null) {
     //         DerOutputStream tmp = new DerOutputStream();
     //         tmp.putDerValue(new DerValue(forward.getEncoded()));
     //         tagged.write(DerValue.createTag(DerValue.TAG_CONTEXT,
     //                      true, TAG_FORWARD), tmp);
     //     }
 
-    //     if (reverse != null) {
+    //     if (reverse !is null) {
     //         DerOutputStream tmp = new DerOutputStream();
     //         tmp.putDerValue(new DerValue(reverse.getEncoded()));
     //         tagged.write(DerValue.createTag(DerValue.TAG_CONTEXT,
@@ -283,12 +283,12 @@ class X509CertificatePair {
     //     try {
     //         PublicKey pk = reverse.getPublicKey();
     //         if (!(pk instanceof DSAPublicKey) ||
-    //                     ((DSAPublicKey)pk).getParams() != null) {
+    //                     ((DSAPublicKey)pk).getParams() !is null) {
     //             forward.verify(pk);
     //         }
     //         pk = forward.getPublicKey();
     //         if (!(pk instanceof DSAPublicKey) ||
-    //                     ((DSAPublicKey)pk).getParams() != null) {
+    //                     ((DSAPublicKey)pk).getParams() !is null) {
     //             reverse.verify(pk);
     //         }
     //     } catch (GeneralSecurityException e) {

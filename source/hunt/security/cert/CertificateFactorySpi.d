@@ -2,6 +2,7 @@ module hunt.security.cert.CertificateFactorySpi;
 
 import hunt.security.cert.Certificate;
 import hunt.security.cert.CertPath;
+import hunt.security.cert.CRL;
 
 import hunt.container;
 import hunt.io.common;

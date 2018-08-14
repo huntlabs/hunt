@@ -830,7 +830,7 @@ class DerValue {
         try {
 
             string str = getAsString();
-            if (str != null)
+            if (str !is null)
                 return "\"" ~ str ~ "\"";
             if (tag == tag_Null)
                 return "[DerValue, null]";

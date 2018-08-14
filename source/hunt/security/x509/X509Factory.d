@@ -72,9 +72,9 @@ class X509Factory : CertificateFactorySpi {
         }
         try {
             byte[] encoding = readOneBlock(inputStream);
-            if (encoding != null) {
+            if (encoding !is null) {
                 X509CertImpl cert = getFromCache(certCache, encoding);
-                if (cert != null) {
+                if (cert !is null) {
                     return cert;
                 }
                 cert = new X509CertImpl(encoding);
@@ -141,7 +141,7 @@ class X509Factory : CertificateFactorySpi {
     //         encoding = c.getEncoded();
     //     }
     //     X509CertImpl newC = getFromCache(certCache, encoding);
-    //     if (newC != null) {
+    //     if (newC !is null) {
     //         return newC;
     //     }
     //     if (isImpl) {
@@ -178,7 +178,7 @@ class X509Factory : CertificateFactorySpi {
     //     }
 
     //     X509CRLImpl newC = getFromCache(crlCache, encoding);
-    //     if (newC != null) {
+    //     if (newC !is null) {
     //         return newC;
     //     }
     //     if (isImpl) {
@@ -232,7 +232,7 @@ class X509Factory : CertificateFactorySpi {
     //     }
     //     try {
     //         byte[] encoding = readOneBlock(inStream);
-    //         if (encoding != null) {
+    //         if (encoding !is null) {
     //             return new X509CertPath(new ByteArrayInputStream(encoding));
     //         } else {
     //             throw new IOException("Empty input");
@@ -264,7 +264,7 @@ class X509Factory : CertificateFactorySpi {
     //     }
     //     try {
     //         byte[] data = readOneBlock(inStream);
-    //         if (data != null) {
+    //         if (data !is null) {
     //             return new X509CertPath(new ByteArrayInputStream(data), encoding);
     //         } else {
     //             throw new IOException("Empty input");
@@ -361,9 +361,9 @@ class X509Factory : CertificateFactorySpi {
     //     }
     //     try {
     //         byte[] encoding = readOneBlock(is);
-    //         if (encoding != null) {
+    //         if (encoding !is null) {
     //             X509CRLImpl crl = getFromCache(crlCache, encoding);
-    //             if (crl != null) {
+    //             if (crl !is null) {
     //                 return crl;
     //             }
     //             crl = new X509CRLImpl(encoding);
@@ -439,14 +439,14 @@ class X509Factory : CertificateFactorySpi {
     //         PKCS7 pkcs7 = new PKCS7(data);
     //         X509Certificate[] certs = pkcs7.getCertificates();
     //         // certs are optional in PKCS #7
-    //         if (certs != null) {
+    //         if (certs !is null) {
     //             return Arrays.asList(certs);
     //         } else {
     //             // no certificates provided
     //             return new ArrayList<>(0);
     //         }
     //     } catch (ParsingException e) {
-    //         while (data != null) {
+    //         while (data !is null) {
     //             coll.add(new X509CertImpl(data));
     //             data = readOneBlock(pbis);
     //         }
@@ -491,14 +491,14 @@ class X509Factory : CertificateFactorySpi {
     //         PKCS7 pkcs7 = new PKCS7(data);
     //         X509CRL[] crls = pkcs7.getCRLs();
     //         // CRLs are optional in PKCS #7
-    //         if (crls != null) {
+    //         if (crls !is null) {
     //             return Arrays.asList(crls);
     //         } else {
     //             // no crls provided
     //             return new ArrayList<>(0);
     //         }
     //     } catch (ParsingException e) {
-    //         while (data != null) {
+    //         while (data !is null) {
     //             coll.add(new X509CRLImpl(data));
     //             data = readOneBlock(pbis);
     //         }

@@ -209,7 +209,7 @@ class SecureRandom  { // : java.util.Random
     //     this.provider = provider;
     //     this.algorithm = algorithm;
 
-    //     if (!skipDebug && pdebug != null) {
+    //     if (!skipDebug && pdebug !is null) {
     //         pdebug.println("SecureRandom." ~ algorithm +
     //             " algorithm from: " ~ this.provider.getName());
     //     }
@@ -379,7 +379,7 @@ class SecureRandom  { // : java.util.Random
     //  * @since 1.5
     //  */
     // string getAlgorithm() {
-    //     return (algorithm != null) ? algorithm : "unknown";
+    //     return (algorithm !is null) ? algorithm : "unknown";
     // }
 
     // /**
@@ -597,7 +597,7 @@ class SecureRandom  { // : java.util.Random
     //     }
 
     //     string remainder = property;
-    //     while (remainder != null) {
+    //     while (remainder !is null) {
     //         Matcher m;
     //         if ((m = StrongPatternHolder.pattern.matcher(
     //                 remainder)).matches()) {
