@@ -462,7 +462,19 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return a string representation of this map
      */
     override string toString() {
-        throw new UnsupportedOperationException();
+        if(_size == 0)
+            return "{}";
+
+        Appender!string sb;
+        sb.put("{");
+        int i = 0;
+        foreach(K key, V value; this) {
+            if(i++ > 0) sb.put(", ");
+            sb.put(key.to!string() ~ "=" ~ value.to!string());
+        }
+        sb.put("}");
+
+        return sb.data;
     }
 
     /**

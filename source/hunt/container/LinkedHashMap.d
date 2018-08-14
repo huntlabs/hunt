@@ -701,7 +701,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
         return new ValueInputRange();
     }
 
-    mixin template LinkedHashIterator() {
+    mixin template LinkedHashMapIterator() {
         private LinkedHashMapEntry!(K, V) next;
         private LinkedHashMapEntry!(K, V) current;
         private int expectedModCount;
@@ -730,7 +730,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     }
 
     final class KeyInputRange :  InputRange!K {
-        mixin LinkedHashIterator;
+        mixin LinkedHashMapIterator;
 
         final K front() @property { return next.key; }
 
@@ -779,7 +779,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     }
     
     final class ValueInputRange :  InputRange!V {
-        mixin LinkedHashIterator;
+        mixin LinkedHashMapIterator;
 
         final V front() @property { return next.value; }
 

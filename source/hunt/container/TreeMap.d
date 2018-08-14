@@ -798,7 +798,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      * the first time this view is requested.  Views are stateless, so
      * there's no reason to create more than one.
      */
-    private EntrySet _entrySet;
+    // private EntrySet _entrySet;
     private KeySet!(K,V) _navigableKeySet;
     private NavigableMap!(K,V) _descendingMap;
 
@@ -898,10 +898,10 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      * {@code clear} operations.  It does not support the
      * {@code add} or {@code addAll} operations.
      */
-    Set!(MapEntry!(K,V)) entrySet() {
-        EntrySet es = _entrySet;
-        return (es !is null) ? es : (_entrySet = new EntrySet());
-    }
+    // Set!(MapEntry!(K,V)) entrySet() {
+    //     EntrySet es = _entrySet;
+    //     return (es !is null) ? es : (_entrySet = new EntrySet());
+    // }
 
     /**
      * @since 1.6
@@ -1012,19 +1012,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     }
 
     // override
-    // void forEach(BiConsumer<? super K, ? super V> action) {
-    //     Objects.requireNonNull(action);
-    //     int expectedModCount = modCount;
-    //     for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
-    //         action.accept(e.key, e.value);
-
-    //         if (expectedModCount  !is  modCount) {
-    //             throw new ConcurrentModificationException();
-    //         }
-    //     }
-    // }
-
-    // override
     // void replaceAll(BiFunction<? super K, ? super V, ? : V> function) {
     //     Objects.requireNonNull(function);
     //     int expectedModCount = modCount;
@@ -1038,7 +1025,56 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //     }
     // }
 
+
     // View class support
+
+    override int opApply(scope int delegate(ref K, ref V) dg) {
+        if(dg is null)
+            throw new NullPointerException();
+
+        int result = 0;
+        int expectedModCount = modCount;
+        for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
+            result = dg(e.key, e.value);
+            if(result != 0) return result;
+        }
+
+        if (expectedModCount  !is  modCount) 
+            throw new ConcurrentModificationException();
+
+        return result;
+    }
+
+    
+    override int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
+        if(dg is null)
+            throw new NullPointerException();
+
+        int result = 0;
+        int expectedModCount = modCount;
+        for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
+            result = dg(e);
+            if(result != 0) return result;
+        }
+
+        if (expectedModCount  !is  modCount) 
+            throw new ConcurrentModificationException();
+
+        return result;
+    }
+    
+    override InputRange!K byKey()
+    {
+        // return new KeyInputRange();
+        throw new NotImplementedException();
+    }
+
+    override InputRange!V byValue()
+    {
+        // return new ValueInputRange();
+        throw new NotImplementedException();
+    }
+
 
     class Values : AbstractCollection!V {
         Iterator!V iterator() {
@@ -1072,46 +1108,46 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
         // }
     }
 
-    class EntrySet : AbstractSet!(MapEntry!(K,V)) {
+    // class EntrySet : AbstractSet!(MapEntry!(K,V)) {
 
-        Iterator!(MapEntry!(K,V)) iterator() {
-            return new EntryIterator(getFirstEntry());
-        }
+    //     Iterator!(MapEntry!(K,V)) iterator() {
+    //         return new EntryIterator(getFirstEntry());
+    //     }
 
-        override bool contains(MapEntry!(K,V) entry) {
-            // if (!(o instanceof MapEntry))
-            //     return false;
-            // MapEntry<?,?> entry = (MapEntry<?,?>) o;
-            V value = entry.getValue();
-            TreeMapEntry!(K,V) p = getEntry(entry.getKey());
-            return p !is null && valEquals(p.getValue(), value);
-        }
+    //     override bool contains(MapEntry!(K,V) entry) {
+    //         // if (!(o instanceof MapEntry))
+    //         //     return false;
+    //         // MapEntry<?,?> entry = (MapEntry<?,?>) o;
+    //         V value = entry.getValue();
+    //         TreeMapEntry!(K,V) p = getEntry(entry.getKey());
+    //         return p !is null && valEquals(p.getValue(), value);
+    //     }
 
-        bool remove(MapEntry!(K,V) entry) {
-            // if (!(o instanceof MapEntry))
-            //     return false;
-            // MapEntry<?,?> entry = (MapEntry<?,?>) o;
-            V value = entry.getValue();
-            TreeMapEntry!(K,V) p = getEntry(entry.getKey());
-            if (p !is null && valEquals(p.getValue(), value)) {
-                deleteEntry(p);
-                return true;
-            }
-            return false;
-        }
+    //     bool remove(MapEntry!(K,V) entry) {
+    //         // if (!(o instanceof MapEntry))
+    //         //     return false;
+    //         // MapEntry<?,?> entry = (MapEntry<?,?>) o;
+    //         V value = entry.getValue();
+    //         TreeMapEntry!(K,V) p = getEntry(entry.getKey());
+    //         if (p !is null && valEquals(p.getValue(), value)) {
+    //             deleteEntry(p);
+    //             return true;
+    //         }
+    //         return false;
+    //     }
 
-        override int size() {
-            return this.outer.size();
-        }
+    //     override int size() {
+    //         return this.outer.size();
+    //     }
 
-        override void clear() {
-            this.outer.clear();
-        }
+    //     override void clear() {
+    //         this.outer.clear();
+    //     }
 
-        // Spliterator!(MapEntry!(K,V)) spliterator() {
-        //     return new EntrySpliterator!(K,V)(this.outer, null, null, 0, -1, 0);
-        // }
-    }
+    //     // Spliterator!(MapEntry!(K,V)) spliterator() {
+    //     //     return new EntrySpliterator!(K,V)(this.outer, null, null, 0, -1, 0);
+    //     // }
+    // }
 
     /*
      * Unlike Values and EntrySet, the KeySet class is static,
@@ -1206,6 +1242,46 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     /**
      * Base class for TreeMap Iterators
      */
+
+    mixin template TreeMapIterator() {
+        TreeMapEntry!(K,V) next;
+        TreeMapEntry!(K,V) lastReturned;
+        int expectedModCount;
+
+        this(TreeMapEntry!(K,V) first) {
+            expectedModCount = modCount;
+            lastReturned = null;
+            next = first;
+        }
+
+        final bool hasNext() {
+            return next !is null;
+        }
+
+        final TreeMapEntry!(K,V) nextEntry() {
+            TreeMapEntry!(K,V) e = next;
+            if (e is null)
+                throw new NoSuchElementException();
+            if (modCount  !is  expectedModCount)
+                throw new ConcurrentModificationException();
+            next = successor(e);
+            lastReturned = e;
+            return e;
+        }
+
+        final TreeMapEntry!(K,V) prevEntry() {
+            TreeMapEntry!(K,V) e = next;
+            if (e is null)
+                throw new NoSuchElementException();
+            if (modCount  !is  expectedModCount)
+                throw new ConcurrentModificationException();
+            next = predecessor(e);
+            lastReturned = e;
+            return e;
+        }
+    }
+
+
     abstract class PrivateEntryIterator(T) : Iterator!T {
         TreeMapEntry!(K,V) next;
         TreeMapEntry!(K,V) lastReturned;
@@ -1257,14 +1333,14 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
         }
     }
 
-    final class EntryIterator : PrivateEntryIterator!(MapEntry!(K,V)) {
-        this(TreeMapEntry!(K,V) first) {
-            super(first);
-        }
-        MapEntry!(K,V) next() {
-            return nextEntry();
-        }
-    }
+    // final class EntryIterator : PrivateEntryIterator!(MapEntry!(K,V)) {
+    //     this(TreeMapEntry!(K,V) first) {
+    //         super(first);
+    //     }
+    //     MapEntry!(K,V) next() {
+    //         return nextEntry();
+    //     }
+    // }
 
     final class ValueIterator : PrivateEntryIterator!V {
         this(TreeMapEntry!(K,V) first) {
