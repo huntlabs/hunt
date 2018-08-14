@@ -1,14 +1,18 @@
-module hunt.security.cert.X509CRLEntry;
+module hunt.security.x509.X509CRLEntry;
+
+import hunt.security.x500.X500Principal;
 
 import hunt.security.cert.CRLReason;
-import hunt.security.cert.X509Extension;
-import hunt.security.x500.X500Principal;
-import hunt.security.Principal;
+import hunt.security.x509.X509Extension;
 
 import hunt.util.exception;
 
-import std.datetime;
+import hunt.container.Set;
+
 import std.bigint;
+import std.datetime;
+
+alias  BigInteger = BigInt;
 
 /**
  * <p>Abstract class for a revoked certificate in a CRL (Certificate
@@ -59,16 +63,16 @@ abstract class X509CRLEntry : X509Extension {
     override bool opEquals(Object other) {
         if (this is other)
             return true;
-        X509CRLEntry ot = cast(X509CRLEntry)other;
-        if (ot is null)
+        X509CRLEntry entry = cast(X509CRLEntry)other;
+        if (entry is null)
             return false;
         try {
             byte[] thisCRLEntry = this.getEncoded();
-            byte[] otherCRLEntry = ot.getEncoded();
+            byte[] otherCRLEntry = entry.getEncoded();
 
             if (thisCRLEntry.length != otherCRLEntry.length)
                 return false;
-            for (size_t i = 0; i < thisCRLEntry.length; i++)
+            for (int i = 0; i < thisCRLEntry.length; i++)
                  if (thisCRLEntry[i] != otherCRLEntry[i])
                      return false;
         } catch (CRLException ce) {
@@ -83,7 +87,7 @@ abstract class X509CRLEntry : X509Extension {
      *
      * @return the hashcode value.
      */
-    override size_t toHash() @trusted nothrow {
+    override size_t toHash() @trusted const nothrow {
         size_t     retval = 0;
         try {
             byte[] entryData = this.getEncoded();
@@ -103,7 +107,7 @@ abstract class X509CRLEntry : X509Extension {
      * @return the encoded form of this certificate
      * @exception CRLException if an encoding error occurs.
      */
-    abstract byte[] getEncoded() nothrow;
+    abstract byte[] getEncoded();
 
     /**
      * Gets the serial number from this X509CRLEntry,
@@ -111,7 +115,7 @@ abstract class X509CRLEntry : X509Extension {
      *
      * @return the serial number.
      */
-    abstract BigInt getSerialNumber();
+    abstract BigInteger getSerialNumber();
 
     /**
      * Get the issuer of the X509Certificate described by this entry. If
@@ -151,7 +155,7 @@ abstract class X509CRLEntry : X509Extension {
      *
      * @return a string representation of this CRL entry.
      */
-    override abstract string toString();
+    // abstract string toString();
 
     /**
      * Returns the reason the certificate has been revoked, as specified
@@ -164,10 +168,33 @@ abstract class X509CRLEntry : X509Extension {
      */
     CRLReason getRevocationReason() {
         if (!hasExtensions()) {
-            return CRLReason.UNSPECIFIED;
+            return null;
         }
-        // return X509CRLEntryImpl.getRevocationReason(this);
-        implementationMissing();
-        return CRLReason.UNSPECIFIED;
+        return getRevocationReason(this);
+    }
+
+
+    /**
+     * This static method is the default implementation of the
+     * getRevocationReason method in X509CRLEntry.
+     */
+    static CRLReason getRevocationReason(X509CRLEntry crlEntry) {
+        try {
+            byte[] ext = crlEntry.getExtensionValue("2.5.29.21");
+            if (ext is null) {
+                return null;
+            }
+            DerValue val = new DerValue(ext);
+            byte[] data = val.getOctetString();
+
+            // CRLReasonCodeExtension rcExt =
+            //     new CRLReasonCodeExtension(false, data);
+            // return rcExt.getReasonCode();
+            implementationMissing();
+            return null;
+        } catch (IOException ioe) {
+            return null;
+        }
     }
 }
+

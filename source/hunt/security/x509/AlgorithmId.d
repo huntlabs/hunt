@@ -1,9 +1,14 @@
 module hunt.security.x509.AlgorithmId;
 
+import hunt.security.AlgorithmParameters;
+
 import hunt.security.util.DerEncoder;
+import hunt.security.util.DerOutputStream;
+import hunt.security.util.DerValue;
 import hunt.security.util.ObjectIdentifier;
 
 import hunt.container;
+import hunt.io.common;
 
 import hunt.util.exception;
 import hunt.util.string;
@@ -61,8 +66,8 @@ class AlgorithmId : DerEncoder {
      * separately, for example by deserialization.
      * @deprecated use one of the other constructors.
      */
-    @Deprecated
-    this() { }
+    // @Deprecated
+    // this() { }
 
     /**
      * Constructs a parameterless algorithm ID.
@@ -314,8 +319,8 @@ class AlgorithmId : DerEncoder {
     /**
      * Returns a string describing the algorithm and its parameters.
      */
-    string toString() {
-        return getName() + paramsToString();
+    override string toString() {
+        return getName() ~ paramsToString();
     }
 
     /**
@@ -370,10 +375,10 @@ class AlgorithmId : DerEncoder {
      * @deprecated use the short get form of this method.
      * @exception NoSuchAlgorithmException on error.
      */
-    @Deprecated
-    static AlgorithmId getAlgorithmId(string algname) {
-        return get(algname);
-    }
+    // @Deprecated
+    // static AlgorithmId getAlgorithmId(string algname) {
+    //     return get(algname);
+    // }
 
     /**
      * Returns one of the algorithm IDs most commonly associated
@@ -388,12 +393,12 @@ class AlgorithmId : DerEncoder {
             oid = algOID(algname);
         } catch (IOException ioe) {
             throw new NoSuchAlgorithmException
-                ("Invalid ObjectIdentifier " + algname);
+                ("Invalid ObjectIdentifier " ~ algname);
         }
 
         if (oid is null) {
             throw new NoSuchAlgorithmException
-                ("unrecognized algorithm name: " + algname);
+                ("unrecognized algorithm name: " ~ algname);
         }
         return new AlgorithmId(oid);
     }
@@ -412,11 +417,11 @@ class AlgorithmId : DerEncoder {
             oid = algOID(algname);
         } catch (IOException ioe) {
             throw new NoSuchAlgorithmException
-                ("Invalid ObjectIdentifier " + algname);
+                ("Invalid ObjectIdentifier " ~ algname);
         }
         if (oid is null) {
             throw new NoSuchAlgorithmException
-                ("unrecognized algorithm name: " + algname);
+                ("unrecognized algorithm name: " ~ algname);
         }
         return new AlgorithmId(oid, algparams);
     }
@@ -579,13 +584,13 @@ class AlgorithmId : DerEncoder {
         //     if (oidTable is null) {
         //         oidTable = Collections.!(string,ObjectIdentifier)emptyMap();
         //     }
-            initOidTable = true;
-        }
+            // initOidTable = true;
+        // }
 
         return oidTable.get(name.toUpperCase());
     }
 
-    private static ObjectIdentifier oid(int[] values) {
+    private static ObjectIdentifier oid(int[] values...) {
         return ObjectIdentifier.newInternal(values);
     }
 
@@ -603,15 +608,13 @@ class AlgorithmId : DerEncoder {
      * Algorithm ID for the MD2 Message Digest Algorthm, from RFC 1319.
      * OID = 1.2.840.113549.2.2
      */
-    __gshared static ObjectIdentifier MD2_oid =
-    ObjectIdentifier.newInternal([1, 2, 840, 113549, 2, 2]);
+    __gshared static ObjectIdentifier MD2_oid;
 
     /**
      * Algorithm ID for the MD5 Message Digest Algorthm, from RFC 1321.
      * OID = 1.2.840.113549.2.5
      */
-    __gshared static ObjectIdentifier MD5_oid =
-    ObjectIdentifier.newInternal([1, 2, 840, 113549, 2, 5]);
+    __gshared static ObjectIdentifier MD5_oid;
 
     /**
      * Algorithm ID for the SHA1 Message Digest Algorithm, from FIPS 180-1.
@@ -619,20 +622,15 @@ class AlgorithmId : DerEncoder {
      * many people refer to FIPS 180 (which has an error) as defining SHA.
      * OID = 1.3.14.3.2.26. Old SHA-0 OID: 1.3.14.3.2.18.
      */
-    __gshared static ObjectIdentifier SHA_oid =
-    ObjectIdentifier.newInternal([1, 3, 14, 3, 2, 26]);
+    __gshared static ObjectIdentifier SHA_oid;
 
-    __gshared static ObjectIdentifier SHA224_oid =
-    ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 4]);
+    __gshared static ObjectIdentifier SHA224_oid;
 
-    __gshared static ObjectIdentifier SHA256_oid =
-    ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 1]);
+    __gshared static ObjectIdentifier SHA256_oid;
 
-    __gshared static ObjectIdentifier SHA384_oid =
-    ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 2]);
+    __gshared static ObjectIdentifier SHA384_oid;
 
-    __gshared static ObjectIdentifier SHA512_oid =
-    ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 3]);
+    __gshared static ObjectIdentifier SHA512_oid;
 
     /*
      * COMMON PUBLIC KEY TYPES
@@ -649,16 +647,15 @@ class AlgorithmId : DerEncoder {
     __gshared static ObjectIdentifier DH_PKIX_oid;
     __gshared static ObjectIdentifier DSA_oid;
     __gshared static ObjectIdentifier DSA_OIW_oid;
-    __gshared static ObjectIdentifier EC_oid = oid(1, 2, 840, 10045, 2, 1);
-    __gshared static ObjectIdentifier ECDH_oid = oid(1, 3, 132, 1, 12);
+    __gshared static ObjectIdentifier EC_oid;
+    __gshared static ObjectIdentifier ECDH_oid;
     __gshared static ObjectIdentifier RSA_oid;
     __gshared static ObjectIdentifier RSAEncryption_oid;
 
     /*
      * COMMON SECRET KEY TYPES
      */
-    __gshared static ObjectIdentifier AES_oid =
-                                            oid(2, 16, 840, 1, 101, 3, 4, 1);
+    __gshared static ObjectIdentifier AES_oid;
 
     /*
      * COMMON SIGNATURE ALGORITHMS
@@ -697,42 +694,55 @@ class AlgorithmId : DerEncoder {
     __gshared static ObjectIdentifier shaWithDSA_OIW_oid;
     __gshared static ObjectIdentifier sha1WithDSA_OIW_oid;
     __gshared static ObjectIdentifier sha1WithDSA_oid;
-    __gshared static ObjectIdentifier sha224WithDSA_oid =
-                                            oid(2, 16, 840, 1, 101, 3, 4, 3, 1);
-    __gshared static ObjectIdentifier sha256WithDSA_oid =
-                                            oid(2, 16, 840, 1, 101, 3, 4, 3, 2);
+    __gshared static ObjectIdentifier sha224WithDSA_oid;
+    __gshared static ObjectIdentifier sha256WithDSA_oid;
 
-    __gshared static ObjectIdentifier sha1WithECDSA_oid =
-                                            oid(1, 2, 840, 10045, 4, 1);
-    __gshared static ObjectIdentifier sha224WithECDSA_oid =
-                                            oid(1, 2, 840, 10045, 4, 3, 1);
-    __gshared static ObjectIdentifier sha256WithECDSA_oid =
-                                            oid(1, 2, 840, 10045, 4, 3, 2);
-    __gshared static ObjectIdentifier sha384WithECDSA_oid =
-                                            oid(1, 2, 840, 10045, 4, 3, 3);
-    __gshared static ObjectIdentifier sha512WithECDSA_oid =
-                                            oid(1, 2, 840, 10045, 4, 3, 4);
-    __gshared static ObjectIdentifier specifiedWithECDSA_oid =
-                                            oid(1, 2, 840, 10045, 4, 3);
+    __gshared static ObjectIdentifier sha1WithECDSA_oid;
+    __gshared static ObjectIdentifier sha224WithECDSA_oid;
+    __gshared static ObjectIdentifier sha256WithECDSA_oid;
+    __gshared static ObjectIdentifier sha384WithECDSA_oid;
+    __gshared static ObjectIdentifier sha512WithECDSA_oid;
+    __gshared static ObjectIdentifier specifiedWithECDSA_oid;
 
     /**
      * Algorithm ID for the PBE encryption algorithms from PKCS#5 and
      * PKCS#12.
      */
-    __gshared static ObjectIdentifier pbeWithMD5AndDES_oid =
-        ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 3]);
-    __gshared static ObjectIdentifier pbeWithMD5AndRC2_oid =
-        ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 6]);
-    __gshared static ObjectIdentifier pbeWithSHA1AndDES_oid =
-        ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 10]);
-    __gshared static ObjectIdentifier pbeWithSHA1AndRC2_oid =
-        ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 11]);
-    static ObjectIdentifier pbeWithSHA1AndDESede_oid =
-        ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 12, 1, 3]);
-    static ObjectIdentifier pbeWithSHA1AndRC2_40_oid =
-        ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 12, 1, 6]);
+    __gshared static ObjectIdentifier pbeWithMD5AndDES_oid;
+    __gshared static ObjectIdentifier pbeWithMD5AndRC2_oid;
+    __gshared static ObjectIdentifier pbeWithSHA1AndDES_oid;
+    __gshared static ObjectIdentifier pbeWithSHA1AndRC2_oid;
+    __gshared static ObjectIdentifier pbeWithSHA1AndDESede_oid;
+    __gshared static ObjectIdentifier pbeWithSHA1AndRC2_40_oid;
 
     shared static this() {
+        MD2_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 2, 2]);
+        MD5_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 2, 5]);
+        SHA_oid = ObjectIdentifier.newInternal([1, 3, 14, 3, 2, 26]);
+        SHA224_oid = ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 4]);
+        SHA256_oid = ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 1]);
+        SHA384_oid = ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 2]);
+        SHA512_oid = ObjectIdentifier.newInternal([2, 16, 840, 1, 101, 3, 4, 2, 3]);
+
+        EC_oid = oid(1, 2, 840, 10045, 2, 1);
+        ECDH_oid = oid(1, 3, 132, 1, 12);
+        AES_oid = oid(2, 16, 840, 1, 101, 3, 4, 1);
+        sha224WithDSA_oid = oid(2, 16, 840, 1, 101, 3, 4, 3, 1);
+        sha256WithDSA_oid = oid(2, 16, 840, 1, 101, 3, 4, 3, 2);
+        
+        sha1WithECDSA_oid = oid(1, 2, 840, 10045, 4, 1);
+        sha224WithECDSA_oid = oid(1, 2, 840, 10045, 4, 3, 1);
+        sha256WithECDSA_oid = oid(1, 2, 840, 10045, 4, 3, 2);
+        sha384WithECDSA_oid = oid(1, 2, 840, 10045, 4, 3, 3);
+        sha512WithECDSA_oid = oid(1, 2, 840, 10045, 4, 3, 4);
+        specifiedWithECDSA_oid = oid(1, 2, 840, 10045, 4, 3);
+
+        pbeWithMD5AndDES_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 3]);
+        pbeWithMD5AndRC2_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 6]);
+        pbeWithSHA1AndDES_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 10]);
+        pbeWithSHA1AndRC2_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 5, 11]);
+        pbeWithSHA1AndDESede_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 12, 1, 3]);
+        pbeWithSHA1AndRC2_40_oid = ObjectIdentifier.newInternal([1, 2, 840, 113549, 1, 12, 1, 6]);
     /*
      * Note the preferred OIDs are named simply with no "OIW" or
      * "PKIX" in them, even though they may point to data from these
@@ -929,7 +939,7 @@ class AlgorithmId : DerEncoder {
         digAlg = digAlg.replace("-", "");
         if (encAlg.equalsIgnoreCase("EC")) encAlg = "ECDSA";
 
-        return digAlg + "with" + encAlg;
+        return digAlg ~ "with" ~ encAlg;
     }
 
     /**
@@ -937,15 +947,15 @@ class AlgorithmId : DerEncoder {
      * algorithm name.
       */
     static string getEncAlgFromSigAlg(string signatureAlgorithm) {
-        signatureAlgorithm = signatureAlgorithm.toUpperCase(Locale.ENGLISH);
-        int with = signatureAlgorithm.indexOf("WITH");
+        signatureAlgorithm = signatureAlgorithm.toUpperCase();
+        ptrdiff_t w = signatureAlgorithm.indexOf("WITH");
         string keyAlgorithm = null;
-        if (with > 0) {
-            int and = signatureAlgorithm.indexOf("AND", with + 4);
+        if (w > 0) {
+            ptrdiff_t and = signatureAlgorithm.indexOf("AND", w + 4);
             if (and > 0) {
-                keyAlgorithm = signatureAlgorithm.substring(with + 4, and);
+                keyAlgorithm = signatureAlgorithm.substring(w + 4, and);
             } else {
-                keyAlgorithm = signatureAlgorithm.substring(with + 4);
+                keyAlgorithm = signatureAlgorithm.substring(w + 4);
             }
             if (keyAlgorithm.equalsIgnoreCase("ECDSA")) {
                 keyAlgorithm = "EC";
@@ -960,9 +970,9 @@ class AlgorithmId : DerEncoder {
       */
     static string getDigAlgFromSigAlg(string signatureAlgorithm) {
         signatureAlgorithm = signatureAlgorithm.toUpperCase(Locale.ENGLISH);
-        int with = signatureAlgorithm.indexOf("WITH");
-        if (with > 0) {
-            return signatureAlgorithm.substring(0, with);
+        int w = signatureAlgorithm.indexOf("WITH");
+        if (w > 0) {
+            return signatureAlgorithm.substring(0, w);
         }
         return null;
     }

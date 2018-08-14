@@ -1,6 +1,10 @@
 module hunt.security.x509.X509CertImpl;
 
 import hunt.security.cert.X509Certificate;
+import hunt.security.x509.AlgorithmId;
+import hunt.security.x509.CertificateSerialNumber;
+import hunt.security.x509.CertificateX509Key;
+import hunt.security.x509.CertificateVersion;
 import hunt.security.x509.X509CertInfo;
 
 import hunt.security.util.DerEncoder;
@@ -112,7 +116,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //     private Collection<List<?>> issuerAlternativeNames;
 
 //     // ExtendedKeyUsage cache
-//     private List<string> extKeyUsage;
+//     private List!string extKeyUsage;
 
 //     // AuthorityInformationAccess cache
 //     private Set!AccessDescription authInfoAccess;
@@ -214,7 +218,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * @throws IOException if stream can not be interpreted as RFC1421
 //      *                     encoded bytes
 //      */
-//     private DerValue readRFC1421Cert(InputStream in) throws IOException {
+//     private DerValue readRFC1421Cert(InputStream in) {
 //         DerValue der = null;
 //         string line = null;
 //         BufferedReader certBufferedReader =
@@ -301,7 +305,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      *
 //      * @exception IOException on encoding error.
 //      */
-//     void derEncode(OutputStream outputStream) throws IOException {
+//     void derEncode(OutputStream outputStream) {
 //         if (signedCert is null)
 //             throw new IOException("Null certificate to encode");
 //         outputStream.write(signedCert.clone());
@@ -695,7 +699,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * @exception CertificateException on invalid attribute identifier.
 //      * @exception IOException on other errors.
 //      */
-//     void delete(string name)
+//     void remove(string name)
 //    , IOException {
 //         // check if immutable
 //         if (readOnly)
@@ -716,7 +720,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //             if (attr.getSuffix() !is null) {
 //                 info = null;
 //             } else {
-//                 info.delete(attr.getSuffix());
+//                 info.remove(attr.getSuffix());
 //             }
 //         } else if (id.equalsIgnoreCase(ALG_ID)) {
 //             algId = null;
@@ -726,7 +730,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //             signedCert = null;
 //         } else {
 //             throw new CertificateException("Attribute name not recognized or " ~
-//                               "delete() not allowed for the same: " ~ id);
+//                               "remove() not allowed for the same: " ~ id);
 //         }
 //     }
 
@@ -734,7 +738,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * Return an enumeration of names of attributes existing within this
 //      * attribute.
 //      */
-//     Enumeration<string> getElements() {
+//     Enumeration!string getElements() {
 //         AttributeNameEnumeration elements = new AttributeNameEnumeration();
 //         elements.addElement(NAME + DOT + INFO);
 //         elements.addElement(NAME + DOT + ALG_ID);
@@ -1228,7 +1232,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * @return a set of the extension oid strings in the
 //      * certificate that are marked critical.
 //      */
-//     Set<string> getCriticalExtensionOIDs() {
+//     Set!string getCriticalExtensionOIDs() {
 //         if (info is null) {
 //             return null;
 //         }
@@ -1238,7 +1242,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //             if (exts is null) {
 //                 return null;
 //             }
-//             Set<string> extSet = new TreeSet<>();
+//             Set!string extSet = new TreeSet<>();
 //             for (Extension ex : exts.getAllExtensions()) {
 //                 if (ex.isCritical()) {
 //                     extSet.add(ex.getExtensionId().toString());
@@ -1258,7 +1262,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * @return a set of the extension oid strings in the
 //      * certificate that are NOT marked critical.
 //      */
-//     Set<string> getNonCriticalExtensionOIDs() {
+//     Set!string getNonCriticalExtensionOIDs() {
 //         if (info is null) {
 //             return null;
 //         }
@@ -1268,7 +1272,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //             if (exts is null) {
 //                 return null;
 //             }
-//             Set<string> extSet = new TreeSet<>();
+//             Set!string extSet = new TreeSet<>();
 //             for (Extension ex : exts.getAllExtensions()) {
 //                 if (!ex.isCritical()) {
 //                     extSet.add(ex.getExtensionId().toString());
@@ -1428,7 +1432,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * provider. It is better performance-wise since it returns cached
 //      * values.
 //      */
-//     synchronized List<string> getExtendedKeyUsage()
+//     synchronized List!string getExtendedKeyUsage()
 //         throws CertificateParsingException {
 //         if (readOnly && extKeyUsage !is null) {
 //             return extKeyUsage;
@@ -1449,7 +1453,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //      * X509Certificate provider generally should overwrite this to
 //      * provide among other things caching for better performance.
 //      */
-//     static List<string> getExtendedKeyUsage(X509Certificate cert)
+//     static List!string getExtendedKeyUsage(X509Certificate cert)
 //         throws CertificateParsingException {
 //         try {
 //             byte[] ext = cert.getExtensionValue(EXTENDED_KEY_USAGE_OID);

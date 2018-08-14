@@ -264,5 +264,15 @@ class InternalError : Exception
     mixin BasicExceptionCtors;
 }
 
+class CRLException : GeneralSecurityException
+{
+    mixin BasicExceptionCtors;
+}
+
+
+class NoSuchProviderException : Exception
+{
+    mixin BasicExceptionCtors;
+}
 
 

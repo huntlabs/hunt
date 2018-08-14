@@ -2,6 +2,8 @@ module hunt.security.x509.X509Factory;
 
 import hunt.security.x509.X509CertificatePair;
 import hunt.security.x509.X509CertImpl;
+import hunt.security.x509.X509CRLImpl;
+
 
 import hunt.security.cert.CertificateFactorySpi;
 import hunt.security.cert.Certificate;
@@ -309,7 +311,7 @@ class X509Factory : CertificateFactorySpi {
     //  * @since 1.4
     //  */
     // override
-    // Iterator<string> engineGetCertPathEncodings() {
+    // Iterator!string engineGetCertPathEncodings() {
     //     return(X509CertPath.getEncodingsStatic());
     // }
 

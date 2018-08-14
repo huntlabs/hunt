@@ -1,13 +1,22 @@
 module hunt.security.x509.X509CRLImpl;
 
 import hunt.security.key;
+import hunt.security.Principal;
 import hunt.security.Provider;
+
+import hunt.security.cert.Certificate;
 import hunt.security.cert.X509CRL;
 import hunt.security.cert.X509CRLEntry;
+import hunt.security.cert.X509Certificate;
 import hunt.security.x500.X500Principal;
 import hunt.security.x509.AlgorithmId;
+import hunt.security.x509.CRLExtensions;
+import hunt.security.x509.KeyIdentifier;
 import hunt.security.x509.X500Name;
+import hunt.security.x509.X509CRLEntryImpl;
 import hunt.security.util.DerEncoder;
+import hunt.security.util.DerValue;
+import hunt.security.util.ObjectIdentifier;
 
 import hunt.container;
 
@@ -75,8 +84,8 @@ class X509CRLImpl : X509CRL , DerEncoder {
     private AlgorithmId      infoSigAlgId; // sig alg in "to-be-signed" crl
     private X500Name         issuer = null;
     private X500Principal    issuerPrincipal = null;
-    private Date             thisUpdate = null;
-    private Date             nextUpdate = null;
+    private Date             thisUpdate;
+    private Date             nextUpdate;
     private Map!(X509IssuerSerial,X509CRLEntry) revokedMap;
     private List!X509CRLEntry revokedList;
     private CRLExtensions    extensions = null;
@@ -251,7 +260,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *
      * @exception CRLException if an encoding error occurs.
      */
-    byte[] getEncoded() {
+    override byte[] getEncoded() {
         return getEncodedInternal().clone();
     }
 
@@ -318,7 +327,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @exception SignatureException on signature errors.
      * @exception CRLException on encoding errors.
      */
-    void verify(PublicKey key) {
+    override void verify(PublicKey key) {
         verify(key, "");
     }
 
@@ -338,7 +347,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @exception SignatureException on signature errors.
      * @exception CRLException on encoding errors.
      */
-    void verify(PublicKey key, string sigProvider) {
+    override void verify(PublicKey key, string sigProvider) {
         if (sigProvider is null) {
             sigProvider = "";
         }
@@ -389,7 +398,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @exception SignatureException on signature errors.
      * @exception CRLException on encoding errors.
      */
-    void verify(PublicKey key, Provider sigProvider) {
+    override void verify(PublicKey key, Provider sigProvider) {
 
         if (signedCRL is null) {
             throw new CRLException("Uninitialized CRL");
@@ -502,7 +511,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *
      * @return value of this CRL in a printable form.
      */
-    string toString() {
+    override string toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("X.509 CRL v" ~ (_version+1) ~ "\n");
         if (sigAlgId !is null)
@@ -566,7 +575,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @return true if the given certificate is on this CRL,
      * false otherwise.
      */
-    bool isRevoked(Certificate cert) {
+    override bool isRevoked(Certificate cert) {
         if (revokedMap.isEmpty()) {
             return false;
         }
@@ -587,7 +596,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * </pre>
      * @return the version number, i.e. 1 or 2.
      */
-    int getVersion() {
+    override int getVersion() {
         return _version+1;
     }
 
@@ -619,7 +628,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * TeletexString or UniversalString.
      * @return the issuer name.
      */
-    Principal getIssuerDN() {
+    override Principal getIssuerDN() {
         return cast(Principal)issuer;
     }
 
@@ -627,7 +636,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * Return the issuer as X500Principal. Overrides method in X509CRL
      * to provide a slightly more efficient version.
      */
-    X500Principal getIssuerX500Principal() {
+    override X500Principal getIssuerX500Principal() {
         if (issuerPrincipal is null) {
             issuerPrincipal = issuer.asX500Principal();
         }
@@ -640,7 +649,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *
      * @return the thisUpdate date from the CRL.
      */
-    Date getThisUpdate() {
+    override Date getThisUpdate() {
         return (new Date(thisUpdate.getTime()));
     }
 
@@ -650,7 +659,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @return the nextUpdate date from the CRL, or null if
      * not present.
      */
-    Date getNextUpdate() {
+    override Date getNextUpdate() {
         if (nextUpdate is null)
             return null;
         return (new Date(nextUpdate.getTime()));
@@ -663,7 +672,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * no such entry exists in the CRL.
      * @see X509CRLEntry
      */
-    X509CRLEntry getRevokedCertificate(BigInteger serialNumber) {
+    override X509CRLEntry getRevokedCertificate(BigInteger serialNumber) {
         if (revokedMap.isEmpty()) {
             return null;
         }
@@ -676,7 +685,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
     /**
      * Gets the CRL entry for the given certificate.
      */
-    X509CRLEntry getRevokedCertificate(X509Certificate cert) {
+    override X509CRLEntry getRevokedCertificate(X509Certificate cert) {
         if (revokedMap.isEmpty()) {
             return null;
         }
@@ -692,7 +701,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * none.
      * @see X509CRLEntry
      */
-    Set!X509CRLEntry getRevokedCertificates() {
+    override Set!X509CRLEntry getRevokedCertificates() {
         if (revokedList.isEmpty()) {
             return null;
         } else {
@@ -708,7 +717,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @return the DER encoded CRL information.
      * @exception CRLException on encoding errors.
      */
-    byte[] getTBSCertList() {
+    override byte[] getTBSCertList() {
         if (tbsCertList is null)
             throw new CRLException("Uninitialized CRL");
         return tbsCertList.clone();
@@ -719,7 +728,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *
      * @return the signature.
      */
-    byte[] getSignature() {
+    override byte[] getSignature() {
         if (signature is null)
             return null;
         return signature.clone();
@@ -740,7 +749,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *
      * @return the signature algorithm name.
      */
-    string getSigAlgName() {
+    override string getSigAlgName() {
         if (sigAlgId is null)
             return null;
         return sigAlgId.getName();
@@ -759,7 +768,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *
      * @return the signature algorithm oid string.
      */
-    string getSigAlgOID() {
+    override string getSigAlgOID() {
         if (sigAlgId is null)
             return null;
         ObjectIdentifier oid = sigAlgId.getOID();
@@ -775,7 +784,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @return the DER encoded signature algorithm parameters, or
      *         null if no parameters are present.
      */
-    byte[] getSigAlgParams() {
+    override byte[] getSigAlgParams() {
         if (sigAlgId is null)
             return null;
         try {
@@ -817,10 +826,10 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @returns AuthorityKeyIdentifierExtension or null (if no such extension)
      * @throws IOException on error
      */
-    AuthorityKeyIdentifierExtension getAuthKeyIdExtension() {
-        Object obj = getExtension(PKIXExtensions.AuthorityKey_Id);
-        return cast(AuthorityKeyIdentifierExtension)obj;
-    }
+    // AuthorityKeyIdentifierExtension getAuthKeyIdExtension() {
+    //     Object obj = getExtension(PKIXExtensions.AuthorityKey_Id);
+    //     return cast(AuthorityKeyIdentifierExtension)obj;
+    // }
 
     /**
      * return the CRLNumberExtension, if any.
@@ -828,10 +837,10 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @returns CRLNumberExtension or null (if no such extension)
      * @throws IOException on error
      */
-    CRLNumberExtension getCRLNumberExtension() {
-        Object obj = getExtension(PKIXExtensions.CRLNumber_Id);
-        return cast(CRLNumberExtension)obj;
-    }
+    // CRLNumberExtension getCRLNumberExtension() {
+    //     Object obj = getExtension(PKIXExtensions.CRLNumber_Id);
+    //     return cast(CRLNumberExtension)obj;
+    // }
 
     /**
      * return the CRL number from the CRLNumberExtension, if any.
@@ -839,15 +848,15 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @returns number or null (if no such extension)
      * @throws IOException on error
      */
-    BigInteger getCRLNumber() {
-        CRLNumberExtension numExt = getCRLNumberExtension();
-        if (numExt !is null) {
-            BigInteger num = numExt.get(CRLNumberExtension.NUMBER);
-            return num;
-        } else {
-            return null;
-        }
-    }
+    // BigInteger getCRLNumber() {
+    //     CRLNumberExtension numExt = getCRLNumberExtension();
+    //     if (numExt !is null) {
+    //         BigInteger num = numExt.get(CRLNumberExtension.NUMBER);
+    //         return num;
+    //     } else {
+    //         return null;
+    //     }
+    // }
 
     /**
      * return the DeltaCRLIndicatorExtension, if any.
@@ -855,11 +864,11 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @returns DeltaCRLIndicatorExtension or null (if no such extension)
      * @throws IOException on error
      */
-    DeltaCRLIndicatorExtension getDeltaCRLIndicatorExtension()
-        {
-        Object obj = getExtension(PKIXExtensions.DeltaCRLIndicator_Id);
-        return cast(DeltaCRLIndicatorExtension)obj;
-    }
+    // DeltaCRLIndicatorExtension getDeltaCRLIndicatorExtension()
+    //     {
+    //     Object obj = getExtension(PKIXExtensions.DeltaCRLIndicator_Id);
+    //     return cast(DeltaCRLIndicatorExtension)obj;
+    // }
 
     /**
      * return the base CRL number from the DeltaCRLIndicatorExtension, if any.
@@ -867,15 +876,15 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @returns number or null (if no such extension)
      * @throws IOException on error
      */
-    BigInteger getBaseCRLNumber() {
-        DeltaCRLIndicatorExtension dciExt = getDeltaCRLIndicatorExtension();
-        if (dciExt !is null) {
-            BigInteger num = dciExt.get(DeltaCRLIndicatorExtension.NUMBER);
-            return num;
-        } else {
-            return null;
-        }
-    }
+    // BigInteger getBaseCRLNumber() {
+    //     DeltaCRLIndicatorExtension dciExt = getDeltaCRLIndicatorExtension();
+    //     if (dciExt !is null) {
+    //         BigInteger num = dciExt.get(DeltaCRLIndicatorExtension.NUMBER);
+    //         return num;
+    //     } else {
+    //         return null;
+    //     }
+    // }
 
     /**
      * return the IssuerAlternativeNameExtension, if any.
@@ -883,10 +892,10 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @returns IssuerAlternativeNameExtension or null (if no such extension)
      * @throws IOException on error
      */
-    IssuerAlternativeNameExtension getIssuerAltNameExtension() {
-        Object obj = getExtension(PKIXExtensions.IssuerAlternativeName_Id);
-        return cast(IssuerAlternativeNameExtension)obj;
-    }
+    // IssuerAlternativeNameExtension getIssuerAltNameExtension() {
+    //     Object obj = getExtension(PKIXExtensions.IssuerAlternativeName_Id);
+    //     return cast(IssuerAlternativeNameExtension)obj;
+    // }
 
     /**
      * return the IssuingDistributionPointExtension, if any.
@@ -895,10 +904,10 @@ class X509CRLImpl : X509CRL , DerEncoder {
      *          (if no such extension)
      * @throws IOException on error
      */
-    IssuingDistributionPointExtension getIssuingDistributionPointExtension() {
-        Object obj = getExtension(PKIXExtensions.IssuingDistributionPoint_Id);
-        return cast(IssuingDistributionPointExtension) obj;
-    }
+    // IssuingDistributionPointExtension getIssuingDistributionPointExtension() {
+    //     Object obj = getExtension(PKIXExtensions.IssuingDistributionPoint_Id);
+    //     return cast(IssuingDistributionPointExtension) obj;
+    // }
 
     /**
      * Return true if a critical extension is found that is
