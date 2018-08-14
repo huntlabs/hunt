@@ -398,7 +398,7 @@ class X500Name : GeneralNameInterface, Principal {
         return false;
         // X500Name other = cast(X500Name)obj;
         // // if we already have the canonical forms, compare now
-        // if ((this.canonicalDn != null) && (other.canonicalDn != null)) {
+        // if ((this.canonicalDn !is null) && (other.canonicalDn !is null)) {
         //     return this.canonicalDn.equals(other.canonicalDn);
         // }
         // // quick check that number of RDNs and AVAs match before canonicalizing
@@ -634,7 +634,7 @@ class X500Name : GeneralNameInterface, Principal {
         implementationMissing();
         // if (oidMap.isEmpty()) {
         //     // return cached result
-        //     if (rfc1779Dn != null) {
+        //     if (rfc1779Dn !is null) {
         //         return rfc1779Dn;
         //     } else {
         //         rfc1779Dn = generateRFC1779DN(oidMap);
@@ -662,7 +662,7 @@ class X500Name : GeneralNameInterface, Principal {
     string getRFC2253Name(Map!(string, string) oidMap) {
         /* check for and return cached name */
         if (oidMap.isEmpty()) {
-            if (rfc2253Dn != null) {
+            if (rfc2253Dn !is null) {
                 return rfc2253Dn;
             } else {
                 rfc2253Dn = generateRFC2253DN(oidMap);
@@ -706,7 +706,7 @@ class X500Name : GeneralNameInterface, Principal {
         implementationMissing();
         return "";
         // /* check for and return cached name */
-        // if (canonicalDn != null) {
+        // if (canonicalDn !is null) {
         //     return canonicalDn;
         // }
         // /*
@@ -749,10 +749,10 @@ class X500Name : GeneralNameInterface, Principal {
      * search of all the attributes in the name.
      */
     // private DerValue findAttribute(ObjectIdentifier attribute) {
-    //     if (names != null) {
+    //     if (names !is null) {
     //         for (int i = 0; i < names.length; i++) {
     //             DerValue value = names[i].findAttribute(attribute);
-    //             if (value != null) {
+    //             if (value !is null) {
     //                 return value;
     //             }
     //         }
@@ -765,10 +765,10 @@ class X500Name : GeneralNameInterface, Principal {
      * type.
      */
     // DerValue findMostSpecificAttribute(ObjectIdentifier attribute) {
-    //     if (names != null) {
+    //     if (names !is null) {
     //         for (int i = names.length - 1; i >= 0; i--) {
     //             DerValue value = names[i].findAttribute(attribute);
-    //             if (value != null) {
+    //             if (value !is null) {
     //                 return value;
     //             }
     //         }
@@ -1074,7 +1074,7 @@ class X500Name : GeneralNameInterface, Principal {
         // }
 
         // StringBuilder sb = new StringBuilder(48);
-        // if (names != null) {
+        // if (names !is null) {
         //     for (int i = names.length - 1; i >= 0; i--) {
         //         if (i != names.length - 1) {
         //             sb.append(", ");
@@ -1100,7 +1100,7 @@ class X500Name : GeneralNameInterface, Principal {
         // }
 
         // StringBuilder sb = new StringBuilder(48);
-        // if (names != null) {
+        // if (names !is null) {
         //     for (int i = names.length - 1; i >= 0; i--) {
         //         if (i != names.length - 1) {
         //             sb.append(", ");

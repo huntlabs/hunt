@@ -325,7 +325,7 @@ final class X500Principal : Principal {
      *          or null
      */
     string getName(string format) {
-        if (format != null) {
+        if (format !is null) {
             if (format.equalsIgnoreCase(RFC1779)) {
                 return thisX500Name.getRFC1779Name();
             } else if (format.equalsIgnoreCase(RFC2253)) {
@@ -375,7 +375,7 @@ final class X500Principal : Principal {
         if (oidMap is null) {
             throw new NullPointerException("provided.null.OID.map");
         }
-        if (format != null) {
+        if (format !is null) {
             if (format.equalsIgnoreCase(RFC1779)) {
                 return thisX500Name.getRFC1779Name(oidMap);
             } else if (format.equalsIgnoreCase(RFC2253)) {

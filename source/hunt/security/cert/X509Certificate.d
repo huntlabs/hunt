@@ -80,7 +80,7 @@ interface X509Extension {
      * }
      *
      * Set<string> critSet = cert.getCriticalExtensionOIDs();
-     * if (critSet != null && !critSet.isEmpty()) {
+     * if (critSet !is null && !critSet.isEmpty()) {
      *     System.out.println("Set of critical extensions:");
      *     for (string oid : critSet) {
      *         System.out.println(oid);
@@ -115,9 +115,9 @@ interface X509Extension {
      * X509CRLEntry badCert =
      *              crl.getRevokedCertificate(cert.getSerialNumber());
      *
-     * if (badCert != null) {
+     * if (badCert !is null) {
      *     Set<string> nonCritSet = badCert.getNonCriticalExtensionOIDs();
-     *     if (nonCritSet != null)
+     *     if (nonCritSet !is null)
      *         for (string oid : nonCritSet) {
      *             System.out.println(oid);
      *         }

@@ -396,7 +396,7 @@ final class BasicPermissionCollection : PermissionCollection
         //     x = perms.get(path);
         // }
 
-        // if (x != null) {
+        // if (x !is null) {
         //     // we have a direct hit!
         //     return x.implies(permission);
         // }
@@ -415,7 +415,7 @@ final class BasicPermissionCollection : PermissionCollection
         //         x = perms.get(path);
         //     }
 
-        //     if (x != null) {
+        //     if (x !is null) {
         //         return x.implies(permission);
         //     }
         //     offset = last -1;

@@ -1,5 +1,6 @@
 module hunt.security.cert.X509Extension;
 
+import hunt.container.Set;
 
 /**
  * Interface for an X.509 extension.
@@ -66,7 +67,7 @@ public interface X509Extension {
      * }
      *
      * Set!string critSet = cert.getCriticalExtensionOIDs();
-     * if (critSet != null && !critSet.isEmpty()) {
+     * if (critSet !is null && !critSet.isEmpty()) {
      *     System.out.println("Set of critical extensions:");
      *     for (string oid : critSet) {
      *         System.out.println(oid);
@@ -101,9 +102,9 @@ public interface X509Extension {
      * X509CRLEntry badCert =
      *              crl.getRevokedCertificate(cert.getSerialNumber());
      *
-     * if (badCert != null) {
+     * if (badCert !is null) {
      *     Set!string nonCritSet = badCert.getNonCriticalExtensionOIDs();
-     *     if (nonCritSet != null)
+     *     if (nonCritSet !is null)
      *         for (string oid : nonCritSet) {
      *             System.out.println(oid);
      *         }

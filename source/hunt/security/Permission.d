@@ -79,7 +79,7 @@ abstract class Permission : Guard {
     void checkGuard(Object object) {
         
         // SecurityManager sm = System.getSecurityManager();
-        // if (sm != null) sm.checkPermission(this);
+        // if (sm !is null) sm.checkPermission(this);
     }
 
     /**

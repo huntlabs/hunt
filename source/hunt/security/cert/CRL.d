@@ -1,5 +1,6 @@
 module hunt.security.cert.CRL;
 
+import hunt.security.cert.Certificate;
 
 /**
  * This class is an abstraction of certificate revocation lists (CRLs) that
@@ -19,7 +20,7 @@ module hunt.security.cert.CRL;
  * @since 1.2
  */
 
-public abstract class CRL {
+abstract class CRL {
 
     // the CRL type
     private string type;
@@ -42,7 +43,7 @@ public abstract class CRL {
      *
      * @return the type of this CRL.
      */
-    public final string getType() {
+    final string getType() {
         return this.type;
     }
 
@@ -51,7 +52,7 @@ public abstract class CRL {
      *
      * @return a string representation of this CRL.
      */
-    // public abstract string toString();
+    // abstract string toString();
 
     /**
      * Checks whether the given certificate is on this CRL.
@@ -60,5 +61,5 @@ public abstract class CRL {
      * @return true if the given certificate is on this CRL,
      * false otherwise.
      */
-    public abstract bool isRevoked(Certificate cert);
+    abstract bool isRevoked(Certificate cert);
 }

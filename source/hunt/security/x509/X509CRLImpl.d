@@ -1,9 +1,17 @@
 module hunt.security.x509.X509CRLImpl;
 
+import hunt.security.key;
+import hunt.security.Provider;
 import hunt.security.cert.X509CRL;
+import hunt.security.cert.X509CRLEntry;
+import hunt.security.x500.X500Principal;
+import hunt.security.x509.AlgorithmId;
+import hunt.security.x509.X500Name;
 import hunt.security.util.DerEncoder;
 
 import hunt.container;
+
+import hunt.io.common;
 
 import hunt.util.common;
 import hunt.util.exception;
@@ -12,6 +20,7 @@ import hunt.util.string;
 import std.algorithm;
 import std.bigint;
 import std.conv;
+import std.datetime;
 
 alias BigInteger = BigInt;
 
@@ -182,7 +191,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
         this.issuer = issuer;
         this.thisUpdate = thisDate;
         this.nextUpdate = nextDate;
-        if (badCerts != null) {
+        if (badCerts !is null) {
             X500Principal crlIssuer = getIssuerX500Principal();
             X500Principal badCertIssuer = crlIssuer;
             for (int i = 0; i < badCerts.length; i++) {
@@ -219,7 +228,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
                X509CRLEntry[] badCerts, CRLExtensions crlExts)       
     {
         this(issuer, thisDate, nextDate, badCerts);
-        if (crlExts != null) {
+        if (crlExts !is null) {
             this.extensions = crlExts;
             this._version = 1;
         }
@@ -270,7 +279,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
             else
                 tmp.putGeneralizedTime(thisUpdate);
 
-            if (nextUpdate != null) {
+            if (nextUpdate !is null) {
                 if (nextUpdate.getTime() < YR_2050)
                     tmp.putUTCTime(nextUpdate);
                 else
@@ -284,7 +293,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
                 tmp.write(DerValue.tag_Sequence, rCerts);
             }
 
-            if (extensions != null)
+            if (extensions !is null)
                 extensions.encode(tmp, isExplicit);
 
             seq.write(DerValue.tag_Sequence, tmp);
@@ -333,7 +342,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
         if (sigProvider is null) {
             sigProvider = "";
         }
-        if ((verifiedPublicKey != null) && verifiedPublicKey.equals(key)) {
+        if ((verifiedPublicKey !is null) && verifiedPublicKey.equals(key)) {
             // this CRL has already been successfully verified using
             // this key. Make sure providers match, too.
             if (sigProvider.equals(verifiedProvider)) {
@@ -496,14 +505,14 @@ class X509CRLImpl : X509CRL , DerEncoder {
     string toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("X.509 CRL v" ~ (_version+1) ~ "\n");
-        if (sigAlgId != null)
+        if (sigAlgId !is null)
             sb.append("Signature Algorithm: " ~ sigAlgId.toString() +
                   ", OID=" ~ (sigAlgId.getOID()).toString() ~ "\n");
-        if (issuer != null)
+        if (issuer !is null)
             sb.append("Issuer: " ~ issuer.toString() ~ "\n");
-        if (thisUpdate != null)
+        if (thisUpdate !is null)
             sb.append("\nThis Update: " ~ thisUpdate.toString() ~ "\n");
-        if (nextUpdate != null)
+        if (nextUpdate !is null)
             sb.append("Next Update: " ~ nextUpdate.toString() ~ "\n");
         if (revokedList.isEmpty())
             sb.append("\nNO certificates have been revoked\n");
@@ -514,7 +523,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
                 sb.append("\n[" ~ to!string(i++) ~ "] " ~ entry.toString());
             }
         }
-        if (extensions != null) {
+        if (extensions !is null) {
             Collection!Extension allExts = extensions.getAllExtensions();
             Object[] objs = allExts.toArray();
             sb.append("\nCRL Extensions: " ~ objs.length);
@@ -525,7 +534,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
                    if (OIDMap.getClass(ext.getExtensionId()) is null) {
                        sb.append(ext.toString());
                        byte[] extValue = ext.getExtensionValue();
-                       if (extValue != null) {
+                       if (extValue !is null) {
                            DerOutputStream ot = new DerOutputStream();
                            ot.putOctetString(extValue);
                            extValue = ot.toByteArray();
@@ -541,7 +550,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
                 }
             }
         }
-        if (signature != null) {
+        if (signature !is null) {
             HexDumpEncoder encoder = new HexDumpEncoder();
             sb.append("\nSignature:\n" ~ encoder.encodeBuffer(signature)
                       ~ "\n");
@@ -794,7 +803,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      */
     KeyIdentifier getAuthKeyId() {
         AuthorityKeyIdentifierExtension aki = getAuthKeyIdExtension();
-        if (aki != null) {
+        if (aki !is null) {
             KeyIdentifier keyId = cast(KeyIdentifier)aki.get(AuthorityKeyIdentifierExtension.KEY_ID);
             return keyId;
         } else {
@@ -832,7 +841,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      */
     BigInteger getCRLNumber() {
         CRLNumberExtension numExt = getCRLNumberExtension();
-        if (numExt != null) {
+        if (numExt !is null) {
             BigInteger num = numExt.get(CRLNumberExtension.NUMBER);
             return num;
         } else {
@@ -860,7 +869,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      */
     BigInteger getBaseCRLNumber() {
         DeltaCRLIndicatorExtension dciExt = getDeltaCRLIndicatorExtension();
-        if (dciExt != null) {
+        if (dciExt !is null) {
             BigInteger num = dciExt.get(DeltaCRLIndicatorExtension.NUMBER);
             return num;
         } else {
@@ -1198,7 +1207,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
 
         CertificateIssuerExtension ciExt =
             entry.getCertificateIssuerExtension();
-        if (ciExt != null) {
+        if (ciExt !is null) {
             GeneralNames names = ciExt.get(CertificateIssuerExtension.ISSUER);
             X500Name issuerDN = cast(X500Name) names.get(0).getName();
             return issuerDN.asX500Principal();
