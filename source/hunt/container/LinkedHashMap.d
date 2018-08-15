@@ -738,8 +738,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
         // https://issues.dlang.org/show_bug.cgi?id=18036
         final K moveFront() @property { throw new NotSupportedException(); }
         
-        int opApply(scope int delegate(K) dg)
-        {
+        int opApply(scope int delegate(K) dg) {
             if(dg is null)
                 throw new NullPointerException();
 
@@ -757,8 +756,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
             return result;
         }
 
-        int opApply(scope int delegate(size_t, K) dg)
-        {
+        int opApply(scope int delegate(size_t, K) dg) {
             if(dg is null)
                 throw new NullPointerException();
 
@@ -785,8 +783,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
 
         final V moveFront() @property { throw new NotSupportedException(); }
         
-        int opApply(scope int delegate(V) dg)
-        {
+        int opApply(scope int delegate(V) dg) {
             if(dg is null)
                 throw new NullPointerException();
 
@@ -804,16 +801,14 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
             return result;
         }
 
-        int opApply(scope int delegate(size_t, V) dg)
-        {
+        int opApply(scope int delegate(size_t, V) dg) {
             if(dg is null)
                 throw new NullPointerException();
 
             int result = 0;
             int mc = modCount;
             size_t index = 0;
-            for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
-            {
+            for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after) {
                 result = dg(index++, e.value);
                 if(result != 0) return result;
             }

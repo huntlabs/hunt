@@ -5,6 +5,7 @@ import hunt.container.Iterable;
 import hunt.container.Set;
 
 import hunt.util.functional;
+import std.range.interfaces : InputRange;
 
 /**
 */
@@ -309,6 +310,10 @@ interface Map(K,V) : Iterable!(K,V){
 
     /// ditto
     int opApply(scope int delegate(MapEntry!(K, V) entry) dg);
+
+    InputRange!K byKey();
+
+    InputRange!V byValue();
 
     /**
      * Replaces each entry's value with the result of invoking the given

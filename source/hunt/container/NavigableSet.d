@@ -130,7 +130,7 @@ interface NavigableSet(E) : SortedSet!(E) {
      *
      * @return an iterator over the elements in this set, in ascending order
      */
-    Iterator!(E) iterator();
+    // Iterator!(E) iterator();
 
     /**
      * Returns a reverse order view of the elements contained in this set.
@@ -147,7 +147,7 @@ interface NavigableSet(E) : SortedSet!(E) {
      *
      * @return a reverse order view of this set
      */
-    NavigableSet!(E) descendingSet();
+    // NavigableSet!(E) descendingSet();
 
     /**
      * Returns an iterator over the elements in this set, in descending order.
@@ -155,7 +155,7 @@ interface NavigableSet(E) : SortedSet!(E) {
      *
      * @return an iterator over the elements in this set, in descending order
      */
-    Iterator!(E) descendingIterator();
+    // Iterator!(E) descendingIterator();
 
     /**
      * Returns a view of the portion of this set whose elements range from
