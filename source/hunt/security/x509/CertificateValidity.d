@@ -5,6 +5,7 @@ import hunt.security.x509.CertAttrSet;
 
 import hunt.security.util.DerValue;
 import hunt.security.util.DerInputStream;
+import hunt.security.util.DerOutputStream;
 
 import hunt.container.Enumeration;
 
@@ -21,7 +22,7 @@ import std.datetime;
  * @author Hemma Prafullchandra
  * @see CertAttrSet
  */
-class CertificateValidity : CertAttrSet!string {
+class CertificateValidity : CertAttrSet!(string, Date) {
     /**
      * Identifier for this attribute, to be used with the
      * get, set, delete methods of Certificate, x509 type.
@@ -58,29 +59,30 @@ class CertificateValidity : CertAttrSet!string {
                                   "starting sequence tag missing.");
         }
         // check if UTCTime encoded or GeneralizedTime
-        if (derVal.data.available() == 0)
-            throw new IOException("No data encoded for CertificateValidity");
+        // if (derVal.data.available() == 0)
+        //     throw new IOException("No data encoded for CertificateValidity");
 
-        DerInputStream derIn = new DerInputStream(derVal.toByteArray());
-        DerValue[] seq = derIn.getSequence(2);
-        if (seq.length != 2)
-            throw new IOException("Invalid encoding for CertificateValidity");
+        // DerInputStream derIn = new DerInputStream(derVal.toByteArray());
+        // DerValue[] seq = derIn.getSequence(2);
+        // if (seq.length != 2)
+        //     throw new IOException("Invalid encoding for CertificateValidity");
 
-        if (seq[0].tag == DerValue.tag_UtcTime) {
-            notBefore = derVal.data.getUTCTime();
-        } else if (seq[0].tag == DerValue.tag_GeneralizedTime) {
-            notBefore = derVal.data.getGeneralizedTime();
-        } else {
-            throw new IOException("Invalid encoding for CertificateValidity");
-        }
+        // if (seq[0].tag == DerValue.tag_UtcTime) {
+        //     notBefore = derVal.data.getUTCTime();
+        // } else if (seq[0].tag == DerValue.tag_GeneralizedTime) {
+        //     notBefore = derVal.data.getGeneralizedTime();
+        // } else {
+        //     throw new IOException("Invalid encoding for CertificateValidity");
+        // }
 
-        if (seq[1].tag == DerValue.tag_UtcTime) {
-            notAfter = derVal.data.getUTCTime();
-        } else if (seq[1].tag == DerValue.tag_GeneralizedTime) {
-            notAfter = derVal.data.getGeneralizedTime();
-        } else {
-            throw new IOException("Invalid encoding for CertificateValidity");
-        }
+        // if (seq[1].tag == DerValue.tag_UtcTime) {
+        //     notAfter = derVal.data.getUTCTime();
+        // } else if (seq[1].tag == DerValue.tag_GeneralizedTime) {
+        //     notAfter = derVal.data.getGeneralizedTime();
+        // } else {
+        //     throw new IOException("Invalid encoding for CertificateValidity");
+        // }
+        implementationMissing();
     }
 
     /**
@@ -116,7 +118,7 @@ class CertificateValidity : CertAttrSet!string {
      * Return the validity period as user readable string.
      */
     override string toString() {
-        if (notBefore is null || notAfter is null)
+        if (notBefore == Date.init || notAfter == Date.init)
             return "";
         return ("Validity: [From: " ~ notBefore.toString() ~
              ",\n               To: " ~ notAfter.toString() ~ "]");
@@ -132,22 +134,23 @@ class CertificateValidity : CertAttrSet!string {
 
         // in cases where default constructor is used check for
         // null values
-        if (notBefore is null || notAfter is null) {
+        if (notBefore == Date.init || notAfter == Date.init) {
             throw new IOException("CertAttrSet:CertificateValidity:" ~
                                   " null values to encode.\n");
         }
         DerOutputStream pair = new DerOutputStream();
 
-        if (notBefore.getTime() < YR_2050) {
-            pair.putUTCTime(notBefore);
-        } else
-            pair.putGeneralizedTime(notBefore);
+        // if (notBefore.getTime() < YR_2050) {
+        //     pair.putUTCTime(notBefore);
+        // } else
+        //     pair.putGeneralizedTime(notBefore);
 
-        if (notAfter.getTime() < YR_2050) {
-            pair.putUTCTime(notAfter);
-        } else {
-            pair.putGeneralizedTime(notAfter);
-        }
+        // if (notAfter.getTime() < YR_2050) {
+        //     pair.putUTCTime(notAfter);
+        // } else {
+        //     pair.putGeneralizedTime(notAfter);
+        // }
+        implementationMissing();
         DerOutputStream seq = new DerOutputStream();
         seq.write(DerValue.tag_Sequence, pair);
 
@@ -157,7 +160,7 @@ class CertificateValidity : CertAttrSet!string {
     /**
      * Set the attribute value.
      */
-    void set(string name, Object obj) {
+    void set(string name, Date obj) {
         implementationMissing();
         // if (!(obj instanceof Date)) {
         //     throw new IOException("Attribute must be of type Date.");
@@ -191,9 +194,9 @@ class CertificateValidity : CertAttrSet!string {
      */
     void remove(string name) {
         if (name.equalsIgnoreCase(NOT_BEFORE)) {
-            notBefore = null;
+            notBefore = Date.init;
         } else if (name.equalsIgnoreCase(NOT_AFTER)) {
-            notAfter = null;
+            notAfter = Date.init;
         } else {
             throw new IOException("Attribute name not recognized by " ~
                             "CertAttrSet: CertificateValidity.");
@@ -205,11 +208,13 @@ class CertificateValidity : CertAttrSet!string {
      * attribute.
      */
     Enumeration!string getElements() {
-        AttributeNameEnumeration elements = new AttributeNameEnumeration();
-        elements.addElement(NOT_BEFORE);
-        elements.addElement(NOT_AFTER);
+        // AttributeNameEnumeration elements = new AttributeNameEnumeration();
+        // elements.addElement(NOT_BEFORE);
+        // elements.addElement(NOT_AFTER);
 
-        return (elements.elements());
+        // return (elements.elements());
+        implementationMissing();
+        return null;
     }
 
     /**

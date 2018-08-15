@@ -1,13 +1,19 @@
 module hunt.security.x509.CertificateX509Key;
 
 import hunt.security.x509.CertAttrSet;
+import hunt.security.x509.X509Key;
 
 import hunt.security.key;
+
+import hunt.security.util.DerValue;
 import hunt.security.util.DerInputStream;
 import hunt.security.util.DerOutputStream;
 
 import hunt.container.Enumeration;
 import hunt.io.common;
+
+import hunt.util.exception;
+import hunt.util.string;
 
 /**
  * This class defines the X509Key attribute for the Certificate.
@@ -16,7 +22,7 @@ import hunt.io.common;
  * @author Hemma Prafullchandra
  * @see CertAttrSet
  */
-class CertificateX509Key : CertAttrSet!string {
+class CertificateX509Key : CertAttrSet!(string, PublicKey) {
     /**
      * Identifier for this attribute, to be used with the
      * get, set, delete methods of Certificate, x509 type.
@@ -67,7 +73,7 @@ class CertificateX509Key : CertAttrSet!string {
      */
     override string toString() {
         if (key is null) return "";
-        return(key.toString());
+        return((cast(Object)key).toString());
     }
 
     /**
@@ -86,7 +92,7 @@ class CertificateX509Key : CertAttrSet!string {
     /**
      * Set the attribute value.
      */
-    void set(string name, Object obj) {
+    void set(string name, PublicKey obj) {
         if (name.equalsIgnoreCase(KEY)) {
             this.key = cast(PublicKey)obj;
         } else {
@@ -124,10 +130,13 @@ class CertificateX509Key : CertAttrSet!string {
      * attribute.
      */
     Enumeration!string getElements() {
-        AttributeNameEnumeration elements = new AttributeNameEnumeration();
-        elements.addElement(KEY);
+        // AttributeNameEnumeration elements = new AttributeNameEnumeration();
+        // elements.addElement(KEY);
 
-        return(elements.elements());
+        // return(elements.elements());
+                implementationMissing();
+        return null;
+
     }
 
     /**

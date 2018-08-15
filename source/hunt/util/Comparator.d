@@ -500,3 +500,14 @@ interface Comparator(T) {
     //         (c1, c2) -> Double.compare(keyExtractor.applyAsDouble(c1), keyExtractor.applyAsDouble(c2));
     // }
 }
+
+import std.traits;
+int compare(T)(T v1, T v2) if(isOrderingComparable!(T))
+{
+    if(v1 > v2)
+        return 1;
+    else if(v1 < v2)
+        return -1;
+    else
+        return 0;
+}

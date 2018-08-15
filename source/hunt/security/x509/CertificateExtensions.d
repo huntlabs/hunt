@@ -23,7 +23,7 @@ import hunt.io.common;
  * @author Hemma Prafullchandra
  * @see CertAttrSet
  */
-class CertificateExtensions : CertAttrSet!Extension {
+class CertificateExtensions : CertAttrSet!(Extension, Extension)  {
     /**
      * Identifier for this attribute, to be used with the
      * get, set, delete methods of Certificate, x509 type.
@@ -181,10 +181,9 @@ class CertificateExtensions : CertAttrSet!Extension {
      * @param obj the object to set.
      * @exception IOException if the object could not be cached.
      */
-    void set(string name, Object obj) {
-        Extension ext = cast(Extension)obj;
-        if (ext !is null) {
-            map.put(name, ext);
+    void set(string name, Extension obj) {
+        if (obj !is null) {
+            map.put(name, obj);
         } else {
             throw new IOException("Unknown extension type.");
         }
@@ -237,7 +236,10 @@ class CertificateExtensions : CertAttrSet!Extension {
      * attribute.
      */
     Enumeration!Extension getElements() {
-        return Collections.enumeration(map.values());
+        // return Collections.enumeration(map.values());
+                implementationMissing();
+        return null;
+
     }
 
     /**
@@ -245,12 +247,15 @@ class CertificateExtensions : CertAttrSet!Extension {
      * @return a collection view of the extensions in this Certificate.
      */
     Extension[] getAllExtensions() {
-        return map.values();
+        // return map.values();
+                implementationMissing();
+        return null;
+
     }
 
     Map!(string,Extension) getUnparseableExtensions() {
         if (unparseableExtensions is null) {
-            return Collections.emptyMap();
+            return Collections.emptyMap!(string,Extension)();
         } else {
             return unparseableExtensions;
         }
@@ -298,20 +303,21 @@ class CertificateExtensions : CertAttrSet!Extension {
         Extension otherExt, thisExt;
         string key = null;
         for (size_t i = 0; i < len; i++) {
-            CertAttrSet cert = cast(CertAttrSet)objs[i];
-            if (cert !is null)
-                key = cert.getName();
-            otherExt = objs[i];
-            if (key is null)
-                key = otherExt.getExtensionId().toString();
-            thisExt = map.get(key);
-            if (thisExt is null)
-                return false;
-            if (! thisExt.opEquals(otherExt))
-                return false;
+            implementationMissing();
+            // CertAttrSet!string cert = cast(CertAttrSet!string)objs[i];
+            // if (cert !is null)
+            //     key = cert.getName();
+            // otherExt = objs[i];
+            // if (key is null)
+            //     key = otherExt.getExtensionId().toString();
+            // thisExt = map.get(key);
+            // if (thisExt is null)
+            //     return false;
+            // if (! thisExt.opEquals(otherExt))
+            //     return false;
         }
-        return this.getUnparseableExtensions().opEquals(
-                (cast(CertificateExtensions)other).getUnparseableExtensions());
+        return this.getUnparseableExtensions().opEquals(cast(Object)(
+                (cast(CertificateExtensions)other).getUnparseableExtensions()));
     }
 
     /**
@@ -319,8 +325,14 @@ class CertificateExtensions : CertAttrSet!Extension {
      *
      * @return the hashcode value.
      */
-    override size_t toHash() @trusted const nothrow {
-        return map.toHash() + getUnparseableExtensions().toHash();
+    override size_t toHash() @trusted nothrow {
+        try {
+            return map.toHash() + getUnparseableExtensions().toHash();
+        }
+        catch(Exception)
+        {
+            return 0;
+        }
     }
 
     /**
@@ -363,7 +375,7 @@ class UnparseableExtension : Extension {
 
     override string toString() {
         return super.toString() ~
-                "Unparseable " ~ name ~ "extension due to\n" ~ why ~ "\n\n"; // ~
+                "Unparseable " ~ name ~ "extension due to\n" ~ why.toString() ~ "\n\n"; // ~
                 // new sun.misc.HexDumpEncoder().encodeBuffer(getExtensionValue());
     }
 }

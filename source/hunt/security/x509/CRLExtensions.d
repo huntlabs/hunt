@@ -57,11 +57,11 @@ class CRLExtensions {
      */
     this(DerInputStream inputStream) {
         this();
-        init(inputStream);
+        initilize(inputStream);
     }
 
     // helper routine
-    private void init(DerInputStream derStrm) {
+    private void initilize(DerInputStream derStrm) {
         try {
             DerInputStream str = derStrm;
 
@@ -69,8 +69,9 @@ class CRLExtensions {
             // check for context specific byte 0; skip it
             if (((nextByte & 0x0c0) == 0x080) &&
                 ((nextByte & 0x01f) == 0x000)) {
-                DerValue val = str.getDerValue();
-                str = val.data;
+                    implementationMissing();
+                // DerValue val = str.getDerValue();
+                // str = val.data;
             }
 
             DerValue[] exts = str.getSequence(5);
@@ -160,14 +161,15 @@ class CRLExtensions {
      * @param as the identifier string for the extension to retrieve.
      */
     Extension get(string as) {
-        X509AttributeName attr = new X509AttributeName(as);
+        // X509AttributeName attr = new X509AttributeName(as);
         string name;
-        string id = attr.getPrefix();
-        if (id.equalsIgnoreCase(X509CertImpl.NAME)) { // fully qualified
-            int index = as.lastIndexOf(".");
-            name = as.substring(index + 1);
-        } else
-            name = as;
+        // string id = attr.getPrefix();
+        // if (id.equalsIgnoreCase(X509CertImpl.NAME)) { // fully qualified
+        //     int index = as.lastIndexOf(".");
+        //     name = as.substring(index + 1);
+        // } else
+        //     name = as;
+        implementationMissing();
         return map.get(name);
     }
 
@@ -242,17 +244,18 @@ class CRLExtensions {
         Extension otherExt, thisExt;
         string key = null;
         for (int i = 0; i < len; i++) {
-            CertAttrSet certAttrSet = cast(CertAttrSet)objs[i];
-            if (certAttrSet !is null)
-                key = certAttrSet.getName();
-            otherExt = objs[i];
-            if (key is null)
-                key = otherExt.getExtensionId().toString();
-            thisExt = map.get(key);
-            if (thisExt is null)
-                return false;
-            if (! thisExt.opEquals(otherExt))
-                return false;
+            implementationMissing();
+            // CertAttrSet!string certAttrSet = cast(CertAttrSet!string)objs[i];
+            // if (certAttrSet !is null)
+            //     key = certAttrSet.getName();
+            // otherExt = objs[i];
+            // if (key is null)
+            //     key = otherExt.getExtensionId().toString();
+            // thisExt = map.get(key);
+            // if (thisExt is null)
+            //     return false;
+            // if (! thisExt.opEquals(otherExt))
+            //     return false;
         }
         return true;
     }
@@ -262,8 +265,8 @@ class CRLExtensions {
      *
      * @return the hashcode value.
      */
-    int hashCode() {
-        return map.hashCode();
+    override size_t toHash() @trusted nothrow {
+        return map.toHash();
     }
 
     /**

@@ -8,14 +8,20 @@ import hunt.security.cert.Certificate;
 import hunt.security.cert.X509CRL;
 import hunt.security.cert.X509CRLEntry;
 import hunt.security.cert.X509Certificate;
+
 import hunt.security.x500.X500Principal;
 import hunt.security.x509.AlgorithmId;
 import hunt.security.x509.CRLExtensions;
+import hunt.security.x509.Extension;
 import hunt.security.x509.KeyIdentifier;
 import hunt.security.x509.X500Name;
 import hunt.security.x509.X509CRLEntryImpl;
+import hunt.security.x509.X509Factory;
+
 import hunt.security.util.DerEncoder;
 import hunt.security.util.DerValue;
+import hunt.security.util.DerInputStream;
+import hunt.security.util.DerOutputStream;
 import hunt.security.util.ObjectIdentifier;
 
 import hunt.container;
@@ -132,7 +138,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
             parse(new DerValue(crlData));
         } catch (IOException e) {
             signedCRL = null;
-            throw new CRLException("Parsing error: " ~ e.getMessage());
+            throw new CRLException("Parsing error: " ~ e.msg);
         }
     }
 
@@ -148,7 +154,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
             parse(val);
         } catch (IOException e) {
             signedCRL = null;
-            throw new CRLException("Parsing error: " ~ e.getMessage());
+            throw new CRLException("Parsing error: " ~ e.msg);
         }
     }
 
@@ -165,7 +171,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
             parse(new DerValue(inStrm));
         } catch (IOException e) {
             signedCRL = null;
-            throw new CRLException("Parsing error: " ~ e.getMessage());
+            throw new CRLException("Parsing error: " ~ e.msg);
         }
     }
 
@@ -208,13 +214,13 @@ class X509CRLImpl : X509CRL , DerEncoder {
                 try {
                     badCertIssuer = getCertIssuer(badCert, badCertIssuer);
                 } catch (IOException ioe) {
-                    throw new CRLException(ioe);
+                    throw new CRLException("", ioe);
                 }
                 badCert.setCertificateIssuer(crlIssuer, badCertIssuer);
                 X509IssuerSerial issuerSerial = new X509IssuerSerial
                     (badCertIssuer, badCert.getSerialNumber());
-                this.revokedMap.put(issuerSerial, badCert);
-                this.revokedList.add(badCert);
+                this.revokedMap.put(issuerSerial, cast(X509CRLEntry)badCert);
+                this.revokedList.add(cast(X509CRLEntry)badCert);
                 if (badCert.hasExtensions()) {
                     this._version = 1;
                 }
@@ -243,6 +249,56 @@ class X509CRLImpl : X509CRL , DerEncoder {
         }
     }
 
+/**
+     * Compares this CRL for equality with the given
+     * object. If the {@code other} object is an
+     * {@code instanceof} {@code X509CRL}, then
+     * its encoded form is retrieved and compared with the
+     * encoded form of this CRL.
+     *
+     * @param other the object to test for equality with this CRL.
+     *
+     * @return true iff the encoded forms of the two CRLs
+     * match, false otherwise.
+     */
+    override bool opEquals(Object other) {
+        if (other is null) {
+            return false;
+        }
+        if (this is other) {
+            return true;
+        }
+        X509CRL ot = cast(X509CRL)other;
+        try {
+            byte[] thisCRL = X509CRLImpl.getEncodedInternal(this);
+            byte[] otherCRL = X509CRLImpl.getEncodedInternal(ot);
+
+            return thisCRL == otherCRL;
+        } catch (CRLException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns a hashcode value for this CRL from its
+     * encoded form.
+     *
+     * @return the hashcode value.
+     */
+    override size_t toHash() @trusted nothrow {
+        size_t retval = 0;
+        try {
+            byte[] crlData;
+            crlData = X509CRLImpl.getEncodedInternal(this);
+            for (size_t i = 1; i < crlData.length; i++) {
+                 retval += crlData[i] * i;
+            }
+            return retval;
+        } catch (Exception e) {
+            return retval;
+        }
+    }      
+
     /**
      * Returned the encoding as an uncloned byte array. Callers must
      * guarantee that they neither modify it nor expose it to untrusted
@@ -261,7 +317,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @exception CRLException if an encoding error occurs.
      */
     override byte[] getEncoded() {
-        return getEncodedInternal().clone();
+        return getEncodedInternal().dup;
     }
 
     /**
@@ -283,17 +339,18 @@ class X509CRLImpl : X509CRL , DerEncoder {
                 throw new CRLException("Null Issuer DN not allowed in v1 CRL");
             issuer.encode(tmp);
 
-            if (thisUpdate.getTime() < YR_2050)
-                tmp.putUTCTime(thisUpdate);
-            else
-                tmp.putGeneralizedTime(thisUpdate);
+            // if (thisUpdate.getTime() < YR_2050)
+            //     tmp.putUTCTime(thisUpdate);
+            // else
+            //     tmp.putGeneralizedTime(thisUpdate);
 
-            if (nextUpdate !is null) {
-                if (nextUpdate.getTime() < YR_2050)
-                    tmp.putUTCTime(nextUpdate);
-                else
-                    tmp.putGeneralizedTime(nextUpdate);
-            }
+            // if (nextUpdate !is null) {
+            //     if (nextUpdate.getTime() < YR_2050)
+            //         tmp.putUTCTime(nextUpdate);
+            //     else
+            //         tmp.putGeneralizedTime(nextUpdate);
+            // }
+            implementationMissing();
 
             if (!revokedList.isEmpty()) {
                 foreach (X509CRLEntry entry ; revokedList) {
@@ -310,7 +367,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
             tbsCertList = seq.toByteArray();
             outputStream.write(tbsCertList);
         } catch (IOException e) {
-             throw new CRLException("Encoding error: " ~ e.getMessage());
+             throw new CRLException("Encoding error: " ~ e.msg);
         }
     }
 
@@ -351,35 +408,36 @@ class X509CRLImpl : X509CRL , DerEncoder {
         if (sigProvider is null) {
             sigProvider = "";
         }
-        if ((verifiedPublicKey !is null) && verifiedPublicKey.equals(key)) {
-            // this CRL has already been successfully verified using
-            // this key. Make sure providers match, too.
-            if (sigProvider.equals(verifiedProvider)) {
-                return;
-            }
-        }
-        if (signedCRL is null) {
-            throw new CRLException("Uninitialized CRL");
-        }
-        Signature   sigVerf = null;
-        if (sigProvider.length() == 0) {
-            sigVerf = Signature.getInstance(sigAlgId.getName());
-        } else {
-            sigVerf = Signature.getInstance(sigAlgId.getName(), sigProvider);
-        }
-        sigVerf.initVerify(key);
+        // if ((verifiedPublicKey !is null) && verifiedPublicKey.equals(key)) {
+        //     // this CRL has already been successfully verified using
+        //     // this key. Make sure providers match, too.
+        //     if (sigProvider.equals(verifiedProvider)) {
+        //         return;
+        //     }
+        // }
+        // if (signedCRL is null) {
+        //     throw new CRLException("Uninitialized CRL");
+        // }
+        // Signature   sigVerf = null;
+        // if (sigProvider.length == 0) {
+        //     sigVerf = Signature.getInstance(sigAlgId.getName());
+        // } else {
+        //     sigVerf = Signature.getInstance(sigAlgId.getName(), sigProvider);
+        // }
+        // sigVerf.initVerify(key);
 
-        if (tbsCertList is null) {
-            throw new CRLException("Uninitialized CRL");
-        }
+        // if (tbsCertList is null) {
+        //     throw new CRLException("Uninitialized CRL");
+        // }
 
-        sigVerf.update(tbsCertList, 0, tbsCertList.length);
+        // sigVerf.update(tbsCertList, 0, tbsCertList.length);
 
-        if (!sigVerf.verify(signature)) {
-            throw new SignatureException("Signature does not match.");
-        }
-        verifiedPublicKey = key;
-        verifiedProvider = sigProvider;
+        // if (!sigVerf.verify(signature)) {
+        //     throw new SignatureException("Signature does not match.");
+        // }
+        // verifiedPublicKey = key;
+        // verifiedProvider = sigProvider;
+        implementationMissing();
     }
 
     /**
@@ -403,23 +461,24 @@ class X509CRLImpl : X509CRL , DerEncoder {
         if (signedCRL is null) {
             throw new CRLException("Uninitialized CRL");
         }
-        Signature sigVerf = null;
-        if (sigProvider is null) {
-            sigVerf = Signature.getInstance(sigAlgId.getName());
-        } else {
-            sigVerf = Signature.getInstance(sigAlgId.getName(), sigProvider);
-        }
-        sigVerf.initVerify(key);
+        // Signature sigVerf = null;
+        // if (sigProvider is null) {
+        //     sigVerf = Signature.getInstance(sigAlgId.getName());
+        // } else {
+        //     sigVerf = Signature.getInstance(sigAlgId.getName(), sigProvider);
+        // }
+        // sigVerf.initVerify(key);
 
-        if (tbsCertList is null) {
-            throw new CRLException("Uninitialized CRL");
-        }
+        // if (tbsCertList is null) {
+        //     throw new CRLException("Uninitialized CRL");
+        // }
 
-        sigVerf.update(tbsCertList, 0, tbsCertList.length);
+        // sigVerf.update(tbsCertList, 0, tbsCertList.length);
 
-        if (!sigVerf.verify(signature)) {
-            throw new SignatureException("Signature does not match.");
-        }
+        // if (!sigVerf.verify(signature)) {
+        //     throw new SignatureException("Signature does not match.");
+        // }
+        implementationMissing();
         verifiedPublicKey = key;
     }
 
@@ -469,41 +528,42 @@ class X509CRLImpl : X509CRL , DerEncoder {
         try {
             if (readOnly)
                 throw new CRLException("cannot over-write existing CRL");
-            Signature sigEngine = null;
-            if ((provider is null) || (provider.length() == 0))
-                sigEngine = Signature.getInstance(algorithm);
-            else
-                sigEngine = Signature.getInstance(algorithm, provider);
+            // Signature sigEngine = null;
+            // if ((provider is null) || (provider.length == 0))
+            //     sigEngine = Signature.getInstance(algorithm);
+            // else
+            //     sigEngine = Signature.getInstance(algorithm, provider);
 
-            sigEngine.initSign(key);
+            // sigEngine.initSign(key);
 
-                                // in case the name is reset
-            sigAlgId = AlgorithmId.get(sigEngine.getAlgorithm());
-            infoSigAlgId = sigAlgId;
+            //                     // in case the name is reset
+            // sigAlgId = AlgorithmId.get(sigEngine.getAlgorithm());
+            // infoSigAlgId = sigAlgId;
 
-            DerOutputStream ot = new DerOutputStream();
-            DerOutputStream tmp = new DerOutputStream();
+            // DerOutputStream ot = new DerOutputStream();
+            // DerOutputStream tmp = new DerOutputStream();
 
-            // encode crl info
-            encodeInfo(tmp);
+            // // encode crl info
+            // encodeInfo(tmp);
 
-            // encode algorithm identifier
-            sigAlgId.encode(tmp);
+            // // encode algorithm identifier
+            // sigAlgId.encode(tmp);
 
-            // Create and encode the signature itself.
-            sigEngine.update(tbsCertList, 0, tbsCertList.length);
-            signature = sigEngine.sign();
-            tmp.putBitString(signature);
+            // // Create and encode the signature itself.
+            // sigEngine.update(tbsCertList, 0, tbsCertList.length);
+            // signature = sigEngine.sign();
+            // tmp.putBitString(signature);
 
-            // Wrap the signed data in a SEQUENCE { data, algorithm, sig }
-            ot.write(DerValue.tag_Sequence, tmp);
-            signedCRL = ot.toByteArray();
-            readOnly = true;
+            // // Wrap the signed data in a SEQUENCE { data, algorithm, sig }
+            // ot.write(DerValue.tag_Sequence, tmp);
+            // signedCRL = ot.toByteArray();
+            // readOnly = true;
 
         } catch (IOException e) {
             throw new CRLException("Error while encoding data: " ~
-                                   e.getMessage());
+                                   e.msg);
         }
+        implementationMissing();
     }
 
     /**
@@ -513,58 +573,59 @@ class X509CRLImpl : X509CRL , DerEncoder {
      */
     override string toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("X.509 CRL v" ~ (_version+1) ~ "\n");
+        sb.append("X.509 CRL v" ~ (_version+1).to!string() ~ "\n");
         if (sigAlgId !is null)
-            sb.append("Signature Algorithm: " ~ sigAlgId.toString() +
+            sb.append("Signature Algorithm: " ~ sigAlgId.toString() ~
                   ", OID=" ~ (sigAlgId.getOID()).toString() ~ "\n");
         if (issuer !is null)
             sb.append("Issuer: " ~ issuer.toString() ~ "\n");
-        if (thisUpdate !is null)
+        if (thisUpdate != Date.init)
             sb.append("\nThis Update: " ~ thisUpdate.toString() ~ "\n");
-        if (nextUpdate !is null)
+        if (nextUpdate != Date.init)
             sb.append("Next Update: " ~ nextUpdate.toString() ~ "\n");
         if (revokedList.isEmpty())
             sb.append("\nNO certificates have been revoked\n");
         else {
-            sb.append("\nRevoked Certificates: " ~ revokedList.size());
+            sb.append("\nRevoked Certificates: " ~ revokedList.size().to!string());
             int i = 1;
             foreach (X509CRLEntry entry; revokedList) {
                 sb.append("\n[" ~ to!string(i++) ~ "] " ~ entry.toString());
             }
         }
-        if (extensions !is null) {
-            Collection!Extension allExts = extensions.getAllExtensions();
-            Object[] objs = allExts.toArray();
-            sb.append("\nCRL Extensions: " ~ objs.length);
-            for (int i = 0; i < objs.length; i++) {
-                sb.append("\n[" ~ (i+1) ~ "]: ");
-                Extension ext = cast(Extension)objs[i];
-                try {
-                   if (OIDMap.getClass(ext.getExtensionId()) is null) {
-                       sb.append(ext.toString());
-                       byte[] extValue = ext.getExtensionValue();
-                       if (extValue !is null) {
-                           DerOutputStream ot = new DerOutputStream();
-                           ot.putOctetString(extValue);
-                           extValue = ot.toByteArray();
-                           HexDumpEncoder enc = new HexDumpEncoder();
-                           sb.append("Extension unknown: "
-                                     ~ "DER encoded OCTET string =\n"
-                                     + enc.encodeBuffer(extValue) ~ "\n");
-                      }
-                   } else
-                       sb.append(ext.toString()); // sub-class exists
-                } catch (Exception e) {
-                    sb.append(", Error parsing this extension");
-                }
-            }
-        }
-        if (signature !is null) {
-            HexDumpEncoder encoder = new HexDumpEncoder();
-            sb.append("\nSignature:\n" ~ encoder.encodeBuffer(signature)
-                      ~ "\n");
-        } else
-            sb.append("NOT signed yet\n");
+        implementationMissing();
+        // if (extensions !is null) {
+        //     Collection!Extension allExts = extensions.getAllExtensions();
+        //     Object[] objs = allExts.toArray();
+        //     sb.append("\nCRL Extensions: " ~ objs.length);
+        //     for (int i = 0; i < objs.length; i++) {
+        //         sb.append("\n[" ~ (i+1) ~ "]: ");
+        //         Extension ext = cast(Extension)objs[i];
+        //         try {
+        //            if (OIDMap.getClass(ext.getExtensionId()) is null) {
+        //                sb.append(ext.toString());
+        //                byte[] extValue = ext.getExtensionValue();
+        //                if (extValue !is null) {
+        //                    DerOutputStream ot = new DerOutputStream();
+        //                    ot.putOctetString(extValue);
+        //                    extValue = ot.toByteArray();
+        //                    HexDumpEncoder enc = new HexDumpEncoder();
+        //                    sb.append("Extension unknown: "
+        //                              ~ "DER encoded OCTET string =\n"
+        //                              + enc.encodeBuffer(extValue) ~ "\n");
+        //               }
+        //            } else
+        //                sb.append(ext.toString()); // sub-class exists
+        //         } catch (Exception e) {
+        //             sb.append(", Error parsing this extension");
+        //         }
+        //     }
+        // }
+        // if (signature !is null) {
+        //     HexDumpEncoder encoder = new HexDumpEncoder();
+        //     sb.append("\nSignature:\n" ~ encoder.encodeBuffer(signature)
+        //               ~ "\n");
+        // } else
+        //     sb.append("NOT signed yet\n");
         return sb.toString();
     }
 
@@ -650,7 +711,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @return the thisUpdate date from the CRL.
      */
     override Date getThisUpdate() {
-        return (new Date(thisUpdate.getTime()));
+        return (Date(thisUpdate.dayOfGregorianCal));
     }
 
     /**
@@ -660,9 +721,9 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * not present.
      */
     override Date getNextUpdate() {
-        if (nextUpdate is null)
-            return null;
-        return (new Date(nextUpdate.getTime()));
+        if (nextUpdate == Date.init)
+            return Date.init;
+        return (Date(nextUpdate.dayOfGregorianCal()));
     }
 
     /**
@@ -720,7 +781,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
     override byte[] getTBSCertList() {
         if (tbsCertList is null)
             throw new CRLException("Uninitialized CRL");
-        return tbsCertList.clone();
+        return tbsCertList.dup;
     }
 
     /**
@@ -731,7 +792,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
     override byte[] getSignature() {
         if (signature is null)
             return null;
-        return signature.clone();
+        return signature.dup;
     }
 
     /**
@@ -811,13 +872,15 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * @throws IOException on error
      */
     KeyIdentifier getAuthKeyId() {
-        AuthorityKeyIdentifierExtension aki = getAuthKeyIdExtension();
-        if (aki !is null) {
-            KeyIdentifier keyId = cast(KeyIdentifier)aki.get(AuthorityKeyIdentifierExtension.KEY_ID);
-            return keyId;
-        } else {
-            return null;
-        }
+        // AuthorityKeyIdentifierExtension aki = getAuthKeyIdExtension();
+        // if (aki !is null) {
+        //     KeyIdentifier keyId = cast(KeyIdentifier)aki.get(AuthorityKeyIdentifierExtension.KEY_ID);
+        //     return keyId;
+        // } else {
+        //     return null;
+        // }
+        implementationMissing();
+        return null;
     }
 
     /**
@@ -975,36 +1038,38 @@ class X509CRLImpl : X509CRL , DerEncoder {
     byte[] getExtensionValue(string oid) {
         if (extensions is null)
             return null;
-        try {
-            string extAlias = OIDMap.getName(new ObjectIdentifier(oid));
-            Extension crlExt = null;
+        // try {
+        //     string extAlias = OIDMap.getName(new ObjectIdentifier(oid));
+        //     Extension crlExt = null;
 
-            if (extAlias is null) { // may be unknown
-                ObjectIdentifier findOID = new ObjectIdentifier(oid);
-                Extension ex = null;
-                ObjectIdentifier inCertOID;
-                for (Enumeration!Extension e = extensions.getElements();
-                                                 e.hasMoreElements();) {
-                    ex = e.nextElement();
-                    inCertOID = ex.getExtensionId();
-                    if (inCertOID.equals(cast(Object)findOID)) {
-                        crlExt = ex;
-                        break;
-                    }
-                }
-            } else
-                crlExt = extensions.get(extAlias);
-            if (crlExt is null)
-                return null;
-            byte[] extData = crlExt.getExtensionValue();
-            if (extData is null)
-                return null;
-            DerOutputStream ot = new DerOutputStream();
-            ot.putOctetString(extData);
-            return ot.toByteArray();
-        } catch (Exception e) {
-            return null;
-        }
+        //     if (extAlias is null) { // may be unknown
+        //         ObjectIdentifier findOID = new ObjectIdentifier(oid);
+        //         Extension ex = null;
+        //         ObjectIdentifier inCertOID;
+        //         for (Enumeration!Extension e = extensions.getElements();
+        //                                          e.hasMoreElements();) {
+        //             ex = e.nextElement();
+        //             inCertOID = ex.getExtensionId();
+        //             if (inCertOID.equals(cast(Object)findOID)) {
+        //                 crlExt = ex;
+        //                 break;
+        //             }
+        //         }
+        //     } else
+        //         crlExt = extensions.get(extAlias);
+        //     if (crlExt is null)
+        //         return null;
+        //     byte[] extData = crlExt.getExtensionValue();
+        //     if (extData is null)
+        //         return null;
+        //     DerOutputStream ot = new DerOutputStream();
+        //     ot.putOctetString(extData);
+        //     return ot.toByteArray();
+        // } catch (Exception e) {
+        //     return null;
+        // }
+        implementationMissing();
+        return null;
     }
 
     /**
@@ -1019,7 +1084,9 @@ class X509CRLImpl : X509CRL , DerEncoder {
             return null;
 
         // XXX Consider cloning this
-        return extensions.get(OIDMap.getName(oid));
+        // return extensions.get(OIDMap.getName(oid));
+        implementationMissing();
+        return null;
     }
 
     /*
@@ -1030,119 +1097,120 @@ class X509CRLImpl : X509CRL , DerEncoder {
         if (readOnly)
             throw new CRLException("cannot over-write existing CRL");
 
-        if ( val.getData() is null || val.tag != DerValue.tag_Sequence)
-            throw new CRLException("Invalid DER-encoded CRL data");
+        // if ( val.getData() is null || val.tag != DerValue.tag_Sequence)
+        //     throw new CRLException("Invalid DER-encoded CRL data");
 
-        signedCRL = val.toByteArray();
-        DerValue[] seq = new DerValue[3];
+        // signedCRL = val.toByteArray();
+        // DerValue[] seq = new DerValue[3];
 
-        seq[0] = val.data.getDerValue();
-        seq[1] = val.data.getDerValue();
-        seq[2] = val.data.getDerValue();
+        // seq[0] = val.data.getDerValue();
+        // seq[1] = val.data.getDerValue();
+        // seq[2] = val.data.getDerValue();
 
-        if (val.data.available() != 0)
-            throw new CRLException("signed overrun, bytes = "
-                                     + val.data.available());
+        // if (val.data.available() != 0)
+        //     throw new CRLException("signed overrun, bytes = "
+        //                              + val.data.available());
 
-        if (seq[0].tag != DerValue.tag_Sequence)
-            throw new CRLException("signed CRL fields invalid");
+        // if (seq[0].tag != DerValue.tag_Sequence)
+        //     throw new CRLException("signed CRL fields invalid");
 
-        sigAlgId = AlgorithmId.parse(seq[1]);
-        signature = seq[2].getBitString();
+        // sigAlgId = AlgorithmId.parse(seq[1]);
+        // signature = seq[2].getBitString();
 
-        if (seq[1].data.available() != 0)
-            throw new CRLException("AlgorithmId field overrun");
+        // if (seq[1].data.available() != 0)
+        //     throw new CRLException("AlgorithmId field overrun");
 
-        if (seq[2].data.available() != 0)
-            throw new CRLException("Signature field overrun");
+        // if (seq[2].data.available() != 0)
+        //     throw new CRLException("Signature field overrun");
 
-        // the tbsCertsList
-        tbsCertList = seq[0].toByteArray();
+        // // the tbsCertsList
+        // tbsCertList = seq[0].toByteArray();
 
-        // parse the information
-        DerInputStream derStrm = seq[0].data;
-        DerValue       tmp;
-        byte           nextByte;
+        // // parse the information
+        // DerInputStream derStrm = seq[0].data;
+        // DerValue       tmp;
+        // byte           nextByte;
 
-        // version (optional if v1)
-        _version = 0;   // by default, version = v1 == 0
-        nextByte = cast(byte)derStrm.peekByte();
-        if (nextByte == DerValue.tag_Integer) {
-            _version = derStrm.getInteger();
-            if (_version != 1)  // i.e. v2
-                throw new CRLException("Invalid version");
-        }
-        tmp = derStrm.getDerValue();
+        // // version (optional if v1)
+        // _version = 0;   // by default, version = v1 == 0
+        // nextByte = cast(byte)derStrm.peekByte();
+        // if (nextByte == DerValue.tag_Integer) {
+        //     _version = derStrm.getInteger();
+        //     if (_version != 1)  // i.e. v2
+        //         throw new CRLException("Invalid version");
+        // }
+        // tmp = derStrm.getDerValue();
 
-        // signature
-        AlgorithmId tmpId = AlgorithmId.parse(tmp);
+        // // signature
+        // AlgorithmId tmpId = AlgorithmId.parse(tmp);
 
-        // the "inner" and "outer" signature algorithms must match
-        if (! tmpId.equals(sigAlgId))
-            throw new CRLException("Signature algorithm mismatch");
-        infoSigAlgId = tmpId;
+        // // the "inner" and "outer" signature algorithms must match
+        // if (! tmpId.equals(sigAlgId))
+        //     throw new CRLException("Signature algorithm mismatch");
+        // infoSigAlgId = tmpId;
 
-        // issuer
-        issuer = new X500Name(derStrm);
-        if (issuer.isEmpty()) {
-            throw new CRLException("Empty issuer DN not allowed in X509CRLs");
-        }
+        // // issuer
+        // issuer = new X500Name(derStrm);
+        // if (issuer.isEmpty()) {
+        //     throw new CRLException("Empty issuer DN not allowed in X509CRLs");
+        // }
 
-        // thisUpdate
-        // check if UTCTime encoded or GeneralizedTime
+        // // thisUpdate
+        // // check if UTCTime encoded or GeneralizedTime
 
-        nextByte = cast(byte)derStrm.peekByte();
-        if (nextByte == DerValue.tag_UtcTime) {
-            thisUpdate = derStrm.getUTCTime();
-        } else if (nextByte == DerValue.tag_GeneralizedTime) {
-            thisUpdate = derStrm.getGeneralizedTime();
-        } else {
-            throw new CRLException("Invalid encoding for thisUpdate"
-                                   ~ " (tag=" ~ nextByte ~ ")");
-        }
+        // nextByte = cast(byte)derStrm.peekByte();
+        // if (nextByte == DerValue.tag_UtcTime) {
+        //     thisUpdate = derStrm.getUTCTime();
+        // } else if (nextByte == DerValue.tag_GeneralizedTime) {
+        //     thisUpdate = derStrm.getGeneralizedTime();
+        // } else {
+        //     throw new CRLException("Invalid encoding for thisUpdate"
+        //                            ~ " (tag=" ~ nextByte ~ ")");
+        // }
 
-        if (derStrm.available() == 0)
-           return;     // done parsing no more optional fields present
+        // if (derStrm.available() == 0)
+        //    return;     // done parsing no more optional fields present
 
-        // nextUpdate (optional)
-        nextByte = cast(byte)derStrm.peekByte();
-        if (nextByte == DerValue.tag_UtcTime) {
-            nextUpdate = derStrm.getUTCTime();
-        } else if (nextByte == DerValue.tag_GeneralizedTime) {
-            nextUpdate = derStrm.getGeneralizedTime();
-        } // else it is not present
+        // // nextUpdate (optional)
+        // nextByte = cast(byte)derStrm.peekByte();
+        // if (nextByte == DerValue.tag_UtcTime) {
+        //     nextUpdate = derStrm.getUTCTime();
+        // } else if (nextByte == DerValue.tag_GeneralizedTime) {
+        //     nextUpdate = derStrm.getGeneralizedTime();
+        // } // else it is not present
 
-        if (derStrm.available() == 0)
-            return;     // done parsing no more optional fields present
+        // if (derStrm.available() == 0)
+        //     return;     // done parsing no more optional fields present
 
-        // revokedCertificates (optional)
-        nextByte = cast(byte)derStrm.peekByte();
-        if ((nextByte == DerValue.tag_SequenceOf)
-            && (! ((nextByte & 0x0c0) == 0x080))) {
-            DerValue[] badCerts = derStrm.getSequence(4);
+        // // revokedCertificates (optional)
+        // nextByte = cast(byte)derStrm.peekByte();
+        // if ((nextByte == DerValue.tag_SequenceOf)
+        //     && (! ((nextByte & 0x0c0) == 0x080))) {
+        //     DerValue[] badCerts = derStrm.getSequence(4);
 
-            X500Principal crlIssuer = getIssuerX500Principal();
-            X500Principal badCertIssuer = crlIssuer;
-            for (int i = 0; i < badCerts.length; i++) {
-                X509CRLEntryImpl entry = new X509CRLEntryImpl(badCerts[i]);
-                badCertIssuer = getCertIssuer(entry, badCertIssuer);
-                entry.setCertificateIssuer(crlIssuer, badCertIssuer);
-                X509IssuerSerial issuerSerial = new X509IssuerSerial
-                    (badCertIssuer, entry.getSerialNumber());
-                revokedMap.put(issuerSerial, entry);
-                revokedList.add(entry);
-            }
-        }
+        //     X500Principal crlIssuer = getIssuerX500Principal();
+        //     X500Principal badCertIssuer = crlIssuer;
+        //     for (int i = 0; i < badCerts.length; i++) {
+        //         X509CRLEntryImpl entry = new X509CRLEntryImpl(badCerts[i]);
+        //         badCertIssuer = getCertIssuer(entry, badCertIssuer);
+        //         entry.setCertificateIssuer(crlIssuer, badCertIssuer);
+        //         X509IssuerSerial issuerSerial = new X509IssuerSerial
+        //             (badCertIssuer, entry.getSerialNumber());
+        //         revokedMap.put(issuerSerial, entry);
+        //         revokedList.add(entry);
+        //     }
+        // }
 
-        if (derStrm.available() == 0)
-            return;     // done parsing no extensions
+        // if (derStrm.available() == 0)
+        //     return;     // done parsing no extensions
 
-        // crlExtensions (optional)
-        tmp = derStrm.getDerValue();
-        if (tmp.isConstructed() && tmp.isContextSpecific(cast(byte)0)) {
-            extensions = new CRLExtensions(tmp.data);
-        }
-        readOnly = true;
+        // // crlExtensions (optional)
+        // tmp = derStrm.getDerValue();
+        // if (tmp.isConstructed() && tmp.isContextSpecific(cast(byte)0)) {
+        //     extensions = new CRLExtensions(tmp.data);
+        // }
+        // readOnly = true;
+        implementationMissing();
     }
 
     /**
@@ -1152,26 +1220,29 @@ class X509CRLImpl : X509CRL , DerEncoder {
      * Called by java.security.cert.X509CRL.getIssuerX500Principal().
      */
     static X500Principal getIssuerX500Principal(X509CRL crl) {
-        try {
-            byte[] encoded = crl.getEncoded();
-            DerInputStream derIn = new DerInputStream(encoded);
-            DerValue tbsCert = derIn.getSequence(3)[0];
-            DerInputStream tbsIn = tbsCert.data;
+        // try {
+        //     byte[] encoded = crl.getEncoded();
+        //     DerInputStream derIn = new DerInputStream(encoded);
+        //     DerValue tbsCert = derIn.getSequence(3)[0];
+        //     DerInputStream tbsIn = tbsCert.data;
 
-            DerValue tmp;
-            // skip version number if present
-            byte nextByte = cast(byte)tbsIn.peekByte();
-            if (nextByte == DerValue.tag_Integer) {
-                tmp = tbsIn.getDerValue();
-            }
+        //     DerValue tmp;
+        //     // skip version number if present
+        //     byte nextByte = cast(byte)tbsIn.peekByte();
+        //     if (nextByte == DerValue.tag_Integer) {
+        //         tmp = tbsIn.getDerValue();
+        //     }
 
-            tmp = tbsIn.getDerValue();  // skip signature
-            tmp = tbsIn.getDerValue();  // issuer
-            byte[] principalBytes = tmp.toByteArray();
-            return new X500Principal(principalBytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not parse issuer", e);
-        }
+        //     tmp = tbsIn.getDerValue();  // skip signature
+        //     tmp = tbsIn.getDerValue();  // issuer
+        //     byte[] principalBytes = tmp.toByteArray();
+        //     return new X500Principal(principalBytes);
+        // } catch (Exception e) {
+        //     throw new RuntimeException("Could not parse issuer", e);
+        // }
+                implementationMissing();
+        return null;
+
     }
 
     /**
@@ -1214,22 +1285,25 @@ class X509CRLImpl : X509CRL , DerEncoder {
     private X500Principal getCertIssuer(X509CRLEntryImpl entry,
         X500Principal prevCertIssuer) {
 
-        CertificateIssuerExtension ciExt =
-            entry.getCertificateIssuerExtension();
-        if (ciExt !is null) {
-            GeneralNames names = ciExt.get(CertificateIssuerExtension.ISSUER);
-            X500Name issuerDN = cast(X500Name) names.get(0).getName();
-            return issuerDN.asX500Principal();
-        } else {
-            return prevCertIssuer;
-        }
+        // CertificateIssuerExtension ciExt =
+        //     entry.getCertificateIssuerExtension();
+        // if (ciExt !is null) {
+        //     GeneralNames names = ciExt.get(CertificateIssuerExtension.ISSUER);
+        //     X500Name issuerDN = cast(X500Name) names.get(0).getName();
+        //     return issuerDN.asX500Principal();
+        // } else {
+        //     return prevCertIssuer;
+        // }
+                implementationMissing();
+        return null;
+
     }
 
     override
     void derEncode(OutputStream ot) {
         if (signedCRL is null)
             throw new IOException("Null CRL to encode");
-        ot.write(signedCRL.clone());
+        ot.write(signedCRL.dup);
     }
 
     /**
@@ -1318,7 +1392,7 @@ class X509CRLImpl : X509CRL , DerEncoder {
         int compareTo(X509IssuerSerial another) {
             int cissuer =  std.algorithm.cmp(issuer.toString(), another.issuer.toString());
             if (cissuer != 0) return cissuer;
-            return this.serial - another.serial;
+            return (this.serial - another.serial).toInt();
         }
     }
 }

@@ -3,12 +3,15 @@ module hunt.security.x509.CertificateVersion;
 import hunt.security.x509.CertAttrSet;
 
 import hunt.security.util.DerInputStream;
+import hunt.security.util.DerOutputStream;
 import hunt.security.util.DerValue;
 
 import hunt.container;
 import hunt.io.common;
 
 import hunt.util.exception;
+import hunt.util.string;
+
 import std.conv;
 
 /**
@@ -18,7 +21,7 @@ import std.conv;
  * @author Hemma Prafullchandra
  * @see CertAttrSet
  */
-class CertificateVersion : CertAttrSet!string {
+class CertificateVersion : CertAttrSet!(string, int)  {
     /**
      * X509Certificate Version 1
      */
@@ -52,13 +55,14 @@ class CertificateVersion : CertAttrSet!string {
 
     // Construct the class from the passed DerValue
     private void construct(DerValue derVal) {
-        if (derVal.isConstructed() && derVal.isContextSpecific()) {
-            derVal = derVal.data.getDerValue();
-            _version = derVal.getInteger();
-            if (derVal.data.available() != 0) {
-                throw new IOException("X.509 version, bad format");
-            }
-        }
+        // if (derVal.isConstructed() && derVal.isContextSpecific()) {
+        //     derVal = derVal.data.getDerValue();
+        //     _version = derVal.getInteger();
+        //     if (derVal.data.available() != 0) {
+        //         throw new IOException("X.509 version, bad format");
+        //     }
+        // }
+        implementationMissing();
     }
 
     /**
@@ -155,7 +159,7 @@ class CertificateVersion : CertAttrSet!string {
     /**
      * Set the attribute value.
      */
-    void set(string name, Object obj) {
+    void set(string name, int obj) {
         implementationMissing();
         // if (!(obj instanceof int)) {
         //     throw new IOException("Attribute must be of type int.");
@@ -173,7 +177,7 @@ class CertificateVersion : CertAttrSet!string {
      */
     int get(string name) {
         if (name.equalsIgnoreCase(VERSION)) {
-            return(new int(getVersion()));
+            return(getVersion());
         } else {
             throw new IOException("Attribute name not recognized by " ~
                                   "CertAttrSet: CertificateVersion.");
@@ -197,10 +201,13 @@ class CertificateVersion : CertAttrSet!string {
      * attribute.
      */
     Enumeration!string getElements() {
-        AttributeNameEnumeration elements = new AttributeNameEnumeration();
-        elements.addElement(VERSION);
+        // AttributeNameEnumeration elements = new AttributeNameEnumeration();
+        // elements.addElement(VERSION);
 
-        return (elements.elements());
+        // return (elements.elements());
+                implementationMissing();
+        return null;
+
     }
 
     /**

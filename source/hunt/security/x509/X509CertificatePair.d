@@ -3,6 +3,8 @@ module hunt.security.x509.X509CertificatePair;
 import hunt.security.cert.X509Certificate;
 
 import hunt.security.util.Cache;
+import hunt.security.util.DerValue;
+
 import hunt.util.exception;
 
 /**
@@ -48,7 +50,7 @@ class X509CertificatePair {
 
     static this()
     {
-        cache = Cache.newSoftMemoryCache(750);
+        cache = newSoftMemoryCache!(Object, X509CertificatePair)(750);
     }
 
     /**
@@ -188,51 +190,51 @@ class X509CertificatePair {
     //     return sb.toString();
     // }
 
-    // /* Parse the encoded bytes */
-    // private void parse(DerValue val)
-    //    , CertificateException
-    // {
-    //     if (val.tag != DerValue.tag_Sequence) {
-    //         throw new IOException
-    //             ("Sequence tag missing for X509CertificatePair");
-    //     }
+    /* Parse the encoded bytes */
+    private void parse(DerValue val)
+    {
+        if (val.tag != DerValue.tag_Sequence) {
+            throw new IOException
+                ("Sequence tag missing for X509CertificatePair");
+        }
 
-    //     while (val.data !is null && val.data.available() != 0) {
-    //         DerValue opt = val.data.getDerValue();
-    //         short tag = (byte) (opt.tag & 0x01f);
-    //         switch (tag) {
-    //             case TAG_FORWARD:
-    //                 if (opt.isContextSpecific() && opt.isConstructed()) {
-    //                     if (forward !is null) {
-    //                         throw new IOException("Duplicate forward "
-    //                             ~ "certificate in X509CertificatePair");
-    //                     }
-    //                     opt = opt.data.getDerValue();
-    //                     forward = X509Factory.intern
-    //                                     (new X509CertImpl(opt.toByteArray()));
-    //                 }
-    //                 break;
-    //             case TAG_REVERSE:
-    //                 if (opt.isContextSpecific() && opt.isConstructed()) {
-    //                     if (reverse !is null) {
-    //                         throw new IOException("Duplicate reverse "
-    //                             ~ "certificate in X509CertificatePair");
-    //                     }
-    //                     opt = opt.data.getDerValue();
-    //                     reverse = X509Factory.intern
-    //                                     (new X509CertImpl(opt.toByteArray()));
-    //                 }
-    //                 break;
-    //             default:
-    //                 throw new IOException("Invalid encoding of "
-    //                     ~ "X509CertificatePair");
-    //         }
-    //     }
-    //     if (forward is null && reverse is null) {
-    //         throw new CertificateException("at least one of certificate pair "
-    //             ~ "must be non-null");
-    //     }
-    // }
+        // while (val.data !is null && val.data.available() != 0) {
+        //     DerValue opt = val.data.getDerValue();
+        //     short tag = (byte) (opt.tag & 0x01f);
+        //     switch (tag) {
+        //         case TAG_FORWARD:
+        //             if (opt.isContextSpecific() && opt.isConstructed()) {
+        //                 if (forward !is null) {
+        //                     throw new IOException("Duplicate forward "
+        //                         ~ "certificate in X509CertificatePair");
+        //                 }
+        //                 opt = opt.data.getDerValue();
+        //                 forward = X509Factory.intern
+        //                                 (new X509CertImpl(opt.toByteArray()));
+        //             }
+        //             break;
+        //         case TAG_REVERSE:
+        //             if (opt.isContextSpecific() && opt.isConstructed()) {
+        //                 if (reverse !is null) {
+        //                     throw new IOException("Duplicate reverse "
+        //                         ~ "certificate in X509CertificatePair");
+        //                 }
+        //                 opt = opt.data.getDerValue();
+        //                 reverse = X509Factory.intern
+        //                                 (new X509CertImpl(opt.toByteArray()));
+        //             }
+        //             break;
+        //         default:
+        //             throw new IOException("Invalid encoding of "
+        //                 ~ "X509CertificatePair");
+        //     }
+        // }
+        // if (forward is null && reverse is null) {
+        //     throw new CertificateException("at least one of certificate pair "
+        //         ~ "must be non-null");
+        // }
+        implementationMissing();
+    }
 
     // /* Translate to encoded bytes */
     // private void emit(DerOutputStream outputStream)
@@ -257,43 +259,44 @@ class X509CertificatePair {
     //     outputStream.write(DerValue.tag_Sequence, tagged);
     // }
 
-    // /*
-    //  * Check for a valid certificate pair
-    //  */
-    // private void checkPair() {
+    /*
+     * Check for a valid certificate pair
+     */
+    private void checkPair() {
 
-    //     /* if either of pair is missing, return w/o error */
-    //     if (forward is null || reverse is null) {
-    //         return;
-    //     }
-    //     /*
-    //      * If both elements of the pair are present, check that they
-    //      * are a valid pair.
-    //      */
-    //     X500Principal fwSubject = forward.getSubjectX500Principal();
-    //     X500Principal fwIssuer = forward.getIssuerX500Principal();
-    //     X500Principal rvSubject = reverse.getSubjectX500Principal();
-    //     X500Principal rvIssuer = reverse.getIssuerX500Principal();
-    //     if (!fwIssuer.equals(rvSubject) || !rvIssuer.equals(fwSubject)) {
-    //         throw new CertificateException("subject and issuer names in "
-    //             ~ "forward and reverse certificates do not match");
-    //     }
+        /* if either of pair is missing, return w/o error */
+        if (forward is null || reverse is null) {
+            return;
+        }
+        implementationMissing();
+        /*
+         * If both elements of the pair are present, check that they
+         * are a valid pair.
+         */
+        // X500Principal fwSubject = forward.getSubjectX500Principal();
+        // X500Principal fwIssuer = forward.getIssuerX500Principal();
+        // X500Principal rvSubject = reverse.getSubjectX500Principal();
+        // X500Principal rvIssuer = reverse.getIssuerX500Principal();
+        // if (!fwIssuer.equals(rvSubject) || !rvIssuer.equals(fwSubject)) {
+        //     throw new CertificateException("subject and issuer names in "
+        //         ~ "forward and reverse certificates do not match");
+        // }
 
-    //     /* check signatures unless key parameters are missing */
-    //     try {
-    //         PublicKey pk = reverse.getPublicKey();
-    //         if (!(pk instanceof DSAPublicKey) ||
-    //                     ((DSAPublicKey)pk).getParams() !is null) {
-    //             forward.verify(pk);
-    //         }
-    //         pk = forward.getPublicKey();
-    //         if (!(pk instanceof DSAPublicKey) ||
-    //                     ((DSAPublicKey)pk).getParams() !is null) {
-    //             reverse.verify(pk);
-    //         }
-    //     } catch (GeneralSecurityException e) {
-    //         throw new CertificateException("invalid signature: "
-    //             + e.getMessage());
-    //     }
-    // }
+        // /* check signatures unless key parameters are missing */
+        // try {
+        //     PublicKey pk = reverse.getPublicKey();
+        //     if (!(pk instanceof DSAPublicKey) ||
+        //                 ((DSAPublicKey)pk).getParams() !is null) {
+        //         forward.verify(pk);
+        //     }
+        //     pk = forward.getPublicKey();
+        //     if (!(pk instanceof DSAPublicKey) ||
+        //                 ((DSAPublicKey)pk).getParams() !is null) {
+        //         reverse.verify(pk);
+        //     }
+        // } catch (GeneralSecurityException e) {
+        //     throw new CertificateException("invalid signature: "
+        //         + e.getMessage());
+        // }
+    }
 }

@@ -19,7 +19,7 @@ import hunt.io.common;
  * @author Hemma Prafullchandra
  * @see CertificateException
  */
-interface CertAttrSet(T) {
+interface CertAttrSet(T, V) {
     /**
      * Returns a short string describing this certificate attribute.
      *
@@ -48,7 +48,7 @@ interface CertAttrSet(T) {
      * @exception CertificateException on attribute handling errors.
      * @exception IOException on other errors.
      */
-    void set(string name, Object obj);
+    void set(string name, V obj);
 
     /**
      * Gets an attribute value for this CertAttrSet.
@@ -58,7 +58,7 @@ interface CertAttrSet(T) {
      * @exception CertificateException on attribute handling errors.
      * @exception IOException on other errors.
      */
-    Object get(string name);
+    V get(string name);
 
     /**
      * Deletes an attribute value from this CertAttrSet.

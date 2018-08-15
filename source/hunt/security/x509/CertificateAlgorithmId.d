@@ -7,6 +7,9 @@ import hunt.security.util.DerValue;
 import hunt.security.util.DerInputStream;
 import hunt.security.util.DerOutputStream;
 
+import hunt.util.exception;
+import hunt.util.string;
+
 import hunt.io.common;
 import hunt.container;
 
@@ -19,7 +22,7 @@ import std.conv;
  * @author Amit Kapoor
  * @author Hemma Prafullchandra
  */
-class CertificateAlgorithmId : CertAttrSet!string {
+class CertificateAlgorithmId : CertAttrSet!(string, AlgorithmId) {
     private AlgorithmId algId;
 
     /**
@@ -96,9 +99,8 @@ class CertificateAlgorithmId : CertAttrSet!string {
     /**
      * Set the attribute value.
      */
-    void set(string name, Object obj) {
-        AlgorithmId id = cast(AlgorithmId)obj;
-        if (id is null) {
+    void set(string name, AlgorithmId obj) {
+        if (obj is null) {
             throw new IOException("Attribute must be of type AlgorithmId.");
         }
         if (name.equalsIgnoreCase(ALGORITHM)) {
@@ -138,9 +140,11 @@ class CertificateAlgorithmId : CertAttrSet!string {
      * attribute.
      */
     Enumeration!string getElements() {
-        AttributeNameEnumeration elements = new AttributeNameEnumeration();
-        elements.addElement(ALGORITHM);
-        return (elements.elements());
+        // AttributeNameEnumeration elements = new AttributeNameEnumeration();
+        // elements.addElement(ALGORITHM);
+        // return (elements.elements());
+        implementationMissing();
+        return null;
     }
 
    /**

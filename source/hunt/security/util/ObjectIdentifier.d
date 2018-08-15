@@ -624,11 +624,12 @@ final class ObjectIdentifier
         }
     }
     private static void checkFirstComponent(BigInteger first) {
-        if (first.signum() == -1 ||
-                first > BigInteger(2)) {
-            throw new IOException("ObjectIdentifier() -- " ~
-                    "First oid component is invalid ");
-        }
+        implementationMissing();
+        // if (first.signum() == -1 ||
+        //         first > BigInteger(2)) {
+        //     throw new IOException("ObjectIdentifier() -- " ~
+        //             "First oid component is invalid ");
+        // }
     }
     private static void checkSecondComponent(size_t first, int second) {
         if (second < 0 || first != 2 && second > 39) {
@@ -637,23 +638,27 @@ final class ObjectIdentifier
         }
     }
     private static void checkSecondComponent(size_t first, BigInteger second) {
-        if (second.signum() == -1 ||
-                first != 2 &&
-                second > BigInteger(39)) {
-            throw new IOException("ObjectIdentifier() -- " ~
-                    "Second oid component is invalid ");
-        }
+
+        implementationMissing();
+        // if (second.signum() == -1 ||
+        //         first != 2 &&
+        //         second > BigInteger(39)) {
+        //     throw new IOException("ObjectIdentifier() -- " ~
+        //             "Second oid component is invalid ");
+        // }
     }
     private static void checkOtherComponent(size_t i, int num) {
         if (num < 0) {
             throw new IOException("ObjectIdentifier() -- " ~
-                    "oid component #" ~ (i+1) ~ " must be non-negative ");
+                    "oid component #" ~ (i+1).to!string() ~ " must be non-negative ");
         }
     }
     private static void checkOtherComponent(size_t i, BigInteger num) {
-        if (num.signum() == -1) {
-            throw new IOException("ObjectIdentifier() -- " ~
-                    "oid component #" ~ (i+1).to!string() ~ " must be non-negative ");
-        }
+
+        implementationMissing();
+        // if (num.signum() == -1) {
+        //     throw new IOException("ObjectIdentifier() -- " ~
+        //             "oid component #" ~ (i+1).to!string() ~ " must be non-negative ");
+        // }
     }
 }

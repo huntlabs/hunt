@@ -8,6 +8,7 @@ import hunt.io.common;
 import hunt.util.exception;
 
 import std.datetime;
+import std.bitmanip;
 
 /**
  * Output stream marshaling DER-encoded data.  This is eventually provided
@@ -221,14 +222,15 @@ class DerOutputStream : ByteArrayOutputStream, DerEncoder {
      *
      * @param bits the bit string, MSB first
      */
-    // void putUnalignedBitString(BitArray ba) {
-    //     byte[] bits = ba.toByteArray();
+    void putUnalignedBitString(BitArray ba) {
+        implementationMissing();
+        // byte[] bits = ba.toByteArray();
 
-    //     write(DerValue.tag_BitString);
-    //     putLength(bits.length + 1);
-    //     write(bits.length*8 - ba.length()); // excess bits in last octet
-    //     write(bits);
-    // }
+        // write(DerValue.tag_BitString);
+        // putLength(bits.length + 1);
+        // write(bits.length*8 - ba.length()); // excess bits in last octet
+        // write(bits);
+    }
 
     /**
      * Marshals a truncated DER bit string on the output stream.

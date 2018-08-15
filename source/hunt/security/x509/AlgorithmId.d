@@ -3,6 +3,7 @@ module hunt.security.x509.AlgorithmId;
 import hunt.security.AlgorithmParameters;
 
 import hunt.security.util.DerEncoder;
+import hunt.security.util.DerInputStream;
 import hunt.security.util.DerOutputStream;
 import hunt.security.util.DerValue;
 import hunt.security.util.ObjectIdentifier;
@@ -115,7 +116,7 @@ class AlgorithmId : DerEncoder {
         try {
             algParams.initilize(params.toByteArray());
         } catch (IOException e) {
-            if (null != e.getMessage() && e.getMessage().startsWith("Unknown named curve: ")) {
+            if (null != e.msg && e.msg.startsWith("Unknown named curve: ")) {
                 // named curve not supported
                 algParams = null;
                 return;
@@ -144,7 +145,8 @@ class AlgorithmId : DerEncoder {
         DerOutputStream bytes = new DerOutputStream();
         DerOutputStream tmp = new DerOutputStream();
 
-        bytes.putOID(algid);
+        algid.encode(bytes);
+
         // Setup params from algParams since no DER encoding is given
         if (constructedFromDer == false) {
             if (algParams !is null) {
@@ -222,7 +224,7 @@ class AlgorithmId : DerEncoder {
         if (algName !is null) {
             return algName;
         }
-        if ((params !is null) && algid.equals(cast(Object)specifiedWithECDSA_oid)) {
+        if ((params !is null) && algid.opEquals(cast(Object)specifiedWithECDSA_oid)) {
             try {
                 AlgorithmId paramsId =
                         AlgorithmId.parse(new DerValue(getEncodedParams()));
@@ -255,7 +257,7 @@ class AlgorithmId : DerEncoder {
      */
     bool equals(AlgorithmId other) {
         bool paramsEqual =
-          (params is null ? other.params is null : params.equals(other.params));
+          (params is null ? other.params is null : params.opEquals(other.params));
         return algid == other.algid && paramsEqual;
     }
 
@@ -295,11 +297,18 @@ class AlgorithmId : DerEncoder {
      *
      * @return a hashcode for this AlgorithmId.
      */
-    override size_t toHash() @trusted const nothrow {
-        StringBuilder sbuf = new StringBuilder();
-        sbuf.append(algid.toString());
-        sbuf.append(paramsToString());
-        return sbuf.toString().hashOf();
+    override size_t toHash() @trusted nothrow {
+        try
+        {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(algid.toString());
+            sbuf.append(paramsToString());
+            return sbuf.toString().hashOf();
+        }
+        catch(Exception)
+        {
+            return 0;
+        }
     }
 
     /**
@@ -346,9 +355,12 @@ class AlgorithmId : DerEncoder {
          */
         ObjectIdentifier        algid;
         DerValue                params;
-        DerInputStream          inputStream = val.toDerInputStream();
+        DerInputStream          inputStream; //  = val.toDerInputStream();
+        // inputStream = new DerInputStream(val.toByteArray);
 
-        algid = inputStream.getOID();
+        implementationMissing();
+
+        algid = new ObjectIdentifier(inputStream); // inputStream.getOID();
         if (inputStream.available() == 0) {
             params = null;
         } else {
@@ -947,15 +959,15 @@ class AlgorithmId : DerEncoder {
      * algorithm name.
       */
     static string getEncAlgFromSigAlg(string signatureAlgorithm) {
-        signatureAlgorithm = signatureAlgorithm.toUpperCase();
+        signatureAlgorithm = signatureAlgorithm.toUpper();
         ptrdiff_t w = signatureAlgorithm.indexOf("WITH");
         string keyAlgorithm = null;
         if (w > 0) {
             ptrdiff_t and = signatureAlgorithm.indexOf("AND", w + 4);
             if (and > 0) {
-                keyAlgorithm = signatureAlgorithm.substring(w + 4, and);
+                keyAlgorithm = signatureAlgorithm[w + 4 .. and];
             } else {
-                keyAlgorithm = signatureAlgorithm.substring(w + 4);
+                keyAlgorithm = signatureAlgorithm[w + 4 .. $];
             }
             if (keyAlgorithm.equalsIgnoreCase("ECDSA")) {
                 keyAlgorithm = "EC";
@@ -969,10 +981,10 @@ class AlgorithmId : DerEncoder {
      * algorithm name.
       */
     static string getDigAlgFromSigAlg(string signatureAlgorithm) {
-        signatureAlgorithm = signatureAlgorithm.toUpperCase(Locale.ENGLISH);
-        int w = signatureAlgorithm.indexOf("WITH");
+        signatureAlgorithm = signatureAlgorithm.toUpper();
+        ptrdiff_t w = signatureAlgorithm.indexOf("WITH");
         if (w > 0) {
-            return signatureAlgorithm.substring(0, w);
+            return signatureAlgorithm[0 .. w];
         }
         return null;
     }

@@ -14,11 +14,14 @@ import hunt.security.util.DerOutputStream;
 import hunt.security.util.ObjectIdentifier;
 
 import hunt.util.exception;
+import hunt.util.Comparator;
+import hunt.util.string;
 
 import hunt.container;
 
 import std.conv;
 import std.datetime;
+import std.format;
 
 
 /**
@@ -128,7 +131,7 @@ class X509CRLEntryImpl : X509CRLEntry {
      * false.
      */
     override bool hasExtensions() {
-        return (extensions != null);
+        return (extensions !is null);
     }
 
     /**
@@ -145,13 +148,13 @@ class X509CRLEntryImpl : X509CRLEntry {
                 // sequence { serialNumber, revocationDate, extensions }
                 serialNumber.encode(tmp);
 
-                if (revocationDate.getTime() < YR_2050) {
-                    tmp.putUTCTime(revocationDate);
-                } else {
-                    tmp.putGeneralizedTime(revocationDate);
-                }
-
-                if (extensions != null)
+                // if (revocationDate.getTime() < YR_2050) {
+                //     tmp.putUTCTime(revocationDate);
+                // } else {
+                //     tmp.putGeneralizedTime(revocationDate);
+                // }
+implementationMissing();
+                if (extensions !is null)
                     extensions.encode(tmp, isExplicit);
 
                 DerOutputStream seq = new DerOutputStream();
@@ -172,7 +175,7 @@ class X509CRLEntryImpl : X509CRLEntry {
      * @exception CRLException if an encoding error occurs.
      */
     override byte[] getEncoded()  {
-        return getEncoded0().clone();
+        return getEncoded0().dup;
     }
 
     // Called internally to avoid clone
@@ -188,7 +191,7 @@ class X509CRLEntryImpl : X509CRLEntry {
     }
 
     void setCertificateIssuer(X500Principal crlIssuer, X500Principal certIssuer) {
-        if (crlIssuer.equals(certIssuer)) {
+        if (crlIssuer == certIssuer) {
             this.certIssuer = null;
         } else {
             this.certIssuer = certIssuer;
@@ -212,7 +215,7 @@ class X509CRLEntryImpl : X509CRLEntry {
      * @return the revocation date.
      */
     override Date getRevocationDate() {
-        return new Date(revocationDate.getTime());
+        return Date(revocationDate.dayOfGregorianCal);
     }
 
     /**
@@ -222,14 +225,15 @@ class X509CRLEntryImpl : X509CRLEntry {
      */
     override
     CRLReason getRevocationReason() {
-        Extension ext = getExtension(PKIXExtensions.ReasonCode_Id);
-        if (ext is null) {
-            return null;
-        }
+        // Extension ext = getExtension(PKIXExtensions.ReasonCode_Id);
+        // if (ext is null) {
+        //     return null;
+        // }
 
         implementationMissing();
         // CRLReasonCodeExtension rcExt = cast(CRLReasonCodeExtension) ext;
         // return rcExt.getReasonCode();
+        return CRLReason.UNSPECIFIED;
     }
 
 
@@ -241,6 +245,7 @@ class X509CRLEntryImpl : X509CRLEntry {
      */
     int getReasonCode() {
         implementationMissing();
+        return 0;
         // Object obj = getExtension(PKIXExtensions.ReasonCode_Id);
         // if (obj is null)
         //     return null;
@@ -259,36 +264,37 @@ class X509CRLEntryImpl : X509CRLEntry {
 
         sb.append(serialNumber.toString());
         sb.append("  On: " ~ revocationDate.toString());
-        if (certIssuer != null) {
-            sb.append("\n    Certificate issuer: " ~ certIssuer);
+        if (certIssuer !is null) {
+            sb.append("\n    Certificate issuer: " ~ certIssuer.toString());
         }
-        if (extensions != null) {
-            Extension[] exts = extensions.getAllExtensions();
+        implementationMissing();
+        // if (extensions !is null) {
+        //     Extension[] exts = extensions.getAllExtensions();
 
-            sb.append("\n    CRL Entry Extensions: " ~ exts.length);
-            for (size_t i = 0; i < exts.length; i++) {
-                sb.append("\n    [" ~ (i+1).to!string() ~ "]: ");
-                Extension ext = exts[i];
-                try {
-                    if (OIDMap.getClass(ext.getExtensionId()) is null) {
-                        sb.append(ext.toString());
-                        byte[] extValue = ext.getExtensionValue();
-                        if (extValue != null) {
-                            DerOutputStream stream = new DerOutputStream();
-                            stream.putOctetString(extValue);
-                            extValue = stream.toByteArray();
-                            HexDumpEncoder enc = new HexDumpEncoder();
-                            sb.append("Extension unknown: "
-                                      ~ "DER encoded OCTET string =\n"
-                                      + enc.encodeBuffer(extValue) ~ "\n");
-                        }
-                    } else
-                        sb.append(ext.toString()); //sub-class exists
-                } catch (Exception e) {
-                    sb.append(", Error parsing this extension");
-                }
-            }
-        }
+        //     sb.append("\n    CRL Entry Extensions: " ~ exts.length);
+        //     for (size_t i = 0; i < exts.length; i++) {
+        //         sb.append("\n    [" ~ (i+1).to!string() ~ "]: ");
+        //         Extension ext = exts[i];
+        //         try {
+        //             if (OIDMap.getClass(ext.getExtensionId()) is null) {
+        //                 sb.append(ext.toString());
+        //                 byte[] extValue = ext.getExtensionValue();
+        //                 if (extValue !is null) {
+        //                     DerOutputStream stream = new DerOutputStream();
+        //                     stream.putOctetString(extValue);
+        //                     extValue = stream.toByteArray();
+        //                     // HexDumpEncoder enc = new HexDumpEncoder();
+        //                     sb.append("Extension unknown: "
+        //                               ~ "DER encoded OCTET string =\n"
+        //                               + format("%(%02X%)", extValue) ~ "\n");
+        //                 }
+        //             } else
+        //                 sb.append(ext.toString()); //sub-class exists
+        //         } catch (Exception e) {
+        //             sb.append(", Error parsing this extension");
+        //         }
+        //     }
+        // }
         sb.append("\n");
         return sb.toString();
     }
@@ -360,37 +366,40 @@ class X509CRLEntryImpl : X509CRLEntry {
     byte[] getExtensionValue(string oid) {
         if (extensions is null)
             return null;
-        try {
-            string extAlias = OIDMap.getName(new ObjectIdentifier(oid));
-            Extension crlExt = null;
+                implementationMissing();
+        return null;
 
-            if (extAlias is null) { // may be unknown
-                ObjectIdentifier findOID = new ObjectIdentifier(oid);
-                Extension ex = null;
-                ObjectIdentifier inCertOID;
-                for (Enumeration!Extension e = extensions.getElements();
-                                                 e.hasMoreElements();) {
-                    ex = e.nextElement();
-                    inCertOID = ex.getExtensionId();
-                    if (inCertOID.opEquals(cast(Object)findOID)) {
-                        crlExt = ex;
-                        break;
-                    }
-                }
-            } else
-                crlExt = extensions.get(extAlias);
-            if (crlExt is null)
-                return null;
-            byte[] extData = crlExt.getExtensionValue();
-            if (extData is null)
-                return null;
+        // try {
+        //     string extAlias = OIDMap.getName(new ObjectIdentifier(oid));
+        //     Extension crlExt = null;
 
-            DerOutputStream stream = new DerOutputStream();
-            stream.putOctetString(extData);
-            return stream.toByteArray();
-        } catch (Exception e) {
-            return null;
-        }
+        //     if (extAlias is null) { // may be unknown
+        //         ObjectIdentifier findOID = new ObjectIdentifier(oid);
+        //         Extension ex = null;
+        //         ObjectIdentifier inCertOID;
+        //         for (Enumeration!Extension e = extensions.getElements();
+        //                                          e.hasMoreElements();) {
+        //             ex = e.nextElement();
+        //             inCertOID = ex.getExtensionId();
+        //             if (inCertOID.opEquals(cast(Object)findOID)) {
+        //                 crlExt = ex;
+        //                 break;
+        //             }
+        //         }
+        //     } else
+        //         crlExt = extensions.get(extAlias);
+        //     if (crlExt is null)
+        //         return null;
+        //     byte[] extData = crlExt.getExtensionValue();
+        //     if (extData is null)
+        //         return null;
+
+        //     DerOutputStream stream = new DerOutputStream();
+        //     stream.putOctetString(extData);
+        //     return stream.toByteArray();
+        // } catch (Exception e) {
+        //     return null;
+        // }
     }
 
     /**
@@ -405,7 +414,10 @@ class X509CRLEntryImpl : X509CRLEntry {
 
         // following returns null if no such OID in map
         //XXX consider cloning this
-        return extensions.get(OIDMap.getName(oid));
+        // return extensions.get(OIDMap.getName(oid));
+                implementationMissing();
+        return null;
+
     }
 
     private void parse(DerValue derVal) {
@@ -414,29 +426,30 @@ class X509CRLEntryImpl : X509CRLEntry {
             throw new CRLException("Invalid encoded RevokedCertificate, " ~
                                   "starting sequence tag missing.");
         }
-        if (derVal.data.available() == 0)
-            throw new CRLException("No data encoded for RevokedCertificates");
+        // if (derVal.data.available() == 0)
+        //     throw new CRLException("No data encoded for RevokedCertificates");
 
-        revokedCert = derVal.toByteArray();
-        // serial number
-        DerInputStream stream = derVal.toDerInputStream();
-        DerValue val = stream.getDerValue();
-        this.serialNumber = new SerialNumber(val);
+        // revokedCert = derVal.toByteArray();
+        // // serial number
+        // DerInputStream stream = derVal.toDerInputStream();
+        // DerValue val = stream.getDerValue();
+        // this.serialNumber = new SerialNumber(val);
 
-        // revocationDate
-        int nextByte = derVal.data.peekByte();
-        if (cast(byte)nextByte == DerValue.tag_UtcTime) {
-            this.revocationDate = derVal.data.getUTCTime();
-        } else if (cast(byte)nextByte == DerValue.tag_GeneralizedTime) {
-            this.revocationDate = derVal.data.getGeneralizedTime();
-        } else
-            throw new CRLException("Invalid encoding for revocation date");
+        // // revocationDate
+        // int nextByte = derVal.data.peekByte();
+        // if (cast(byte)nextByte == DerValue.tag_UtcTime) {
+        //     this.revocationDate = derVal.data.getUTCTime();
+        // } else if (cast(byte)nextByte == DerValue.tag_GeneralizedTime) {
+        //     this.revocationDate = derVal.data.getGeneralizedTime();
+        // } else
+        //     throw new CRLException("Invalid encoding for revocation date");
 
-        if (derVal.data.available() == 0)
-            return;  // no extensions
+        // if (derVal.data.available() == 0)
+        //     return;  // no extensions
 
-        // crlEntryExtensions
-        this.extensions = new CRLExtensions(derVal.toDerInputStream());
+        // // crlEntryExtensions
+        // this.extensions = new CRLExtensions(derVal.toDerInputStream());
+        implementationMissing();
     }
 
     /**
@@ -482,19 +495,23 @@ class X509CRLEntryImpl : X509CRLEntry {
 
     // override
     int compareTo(X509CRLEntryImpl that) {
-        int compSerial = getSerialNumber().compareTo(that.getSerialNumber());
+        // auto v = getSerialNumber() - that.getSerialNumber();
+        int compSerial = compare(getSerialNumber(), that.getSerialNumber());
+        // if(v>0) compSerial = 1;
+        // else if(v <0) compSerial = -1;
+
         if (compSerial != 0) {
             return compSerial;
         }
         try {
             byte[] thisEncoded = this.getEncoded0();
             byte[] thatEncoded = that.getEncoded0();
-            for (int i=0; i<thisEncoded.length && i<thatEncoded.length; i++) {
+            for (size_t i=0; i<thisEncoded.length && i<thatEncoded.length; i++) {
                 int a = thisEncoded[i] & 0xff;
                 int b = thatEncoded[i] & 0xff;
                 if (a != b) return a-b;
             }
-            return thisEncoded.length -thatEncoded.length;
+            return cast(int)(thisEncoded.length -thatEncoded.length);
         } catch (CRLException ce) {
             return -1;
         }

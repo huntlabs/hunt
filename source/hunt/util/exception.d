@@ -276,3 +276,35 @@ class NoSuchProviderException : Exception
 }
 
 
+class CertificateNotYetValidException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+
+class CertificateExpiredException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+class SignatureException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+class CertificateEncodingException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+class CertificateParsingException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+class InvalidKeyException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+

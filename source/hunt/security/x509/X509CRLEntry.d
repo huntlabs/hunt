@@ -4,6 +4,7 @@ import hunt.security.x500.X500Principal;
 
 import hunt.security.cert.CRLReason;
 import hunt.security.x509.X509Extension;
+import hunt.security.util.DerValue;
 
 import hunt.util.exception;
 
@@ -87,14 +88,14 @@ abstract class X509CRLEntry : X509Extension {
      *
      * @return the hashcode value.
      */
-    override size_t toHash() @trusted const nothrow {
+    override size_t toHash() @trusted nothrow {
         size_t     retval = 0;
         try {
             byte[] entryData = this.getEncoded();
             for (size_t i = 1; i < entryData.length; i++)
                  retval += entryData[i] * i;
 
-        } catch (CRLException ce) {
+        } catch (Exception ce) {
             return(retval);
         }
         return(retval);
@@ -168,7 +169,7 @@ abstract class X509CRLEntry : X509Extension {
      */
     CRLReason getRevocationReason() {
         if (!hasExtensions()) {
-            return null;
+            return CRLReason.UNSPECIFIED;
         }
         return getRevocationReason(this);
     }
@@ -182,7 +183,7 @@ abstract class X509CRLEntry : X509Extension {
         try {
             byte[] ext = crlEntry.getExtensionValue("2.5.29.21");
             if (ext is null) {
-                return null;
+                return CRLReason.UNSPECIFIED;
             }
             DerValue val = new DerValue(ext);
             byte[] data = val.getOctetString();
@@ -191,9 +192,9 @@ abstract class X509CRLEntry : X509Extension {
             //     new CRLReasonCodeExtension(false, data);
             // return rcExt.getReasonCode();
             implementationMissing();
-            return null;
+            return CRLReason.UNSPECIFIED;
         } catch (IOException ioe) {
-            return null;
+            return CRLReason.UNSPECIFIED;
         }
     }
 }
