@@ -35,20 +35,21 @@ class DerInputBuffer : ByteArrayInputStream {
         this.allowBER = allowBER;
     }
 
-    this(byte[] buf, int offset, int len, bool allowBER) {
+    this(byte[] buf, int offset, size_t len, bool allowBER) {
         super(buf, offset, len);
         this.allowBER = allowBER;
     }
 
-    // DerInputBuffer dup() {
-    //     try {
-    //         DerInputBuffer retval = (DerInputBuffer)clone();
-    //         retval.mark(int.max);
-    //         return retval;
-    //     } catch (CloneNotSupportedException e) {
-    //         throw new IllegalArgumentException(e.toString());
-    //     }
-    // }
+    DerInputBuffer dup() {
+        try {
+            DerInputBuffer retval = this; // (DerInputBuffer)clone();
+            // retval.mark(int.max);
+            implementationMissing();
+            return retval;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.toString());
+        }
+    }
 
     byte[] toByteArray() {
         int     len = available();
@@ -101,7 +102,7 @@ class DerInputBuffer : ByteArrayInputStream {
      *
      * @return a hashcode for this DerInputBuffer.
      */
-    override size_t toHash() @trusted const nothrow {
+    override size_t toHash() @trusted nothrow {
         size_t retval = 0;
 
         int len = available();
@@ -145,11 +146,13 @@ class DerInputBuffer : ByteArrayInputStream {
             throw new IOException("Invalid encoding: redundant leading 0s");
         }
 
-        if (makePositive) {
-            return new BigInteger(1, bytes);
-        } else {
-            return new BigInteger(bytes);
-        }
+        // if (makePositive) {
+        //     return new BigInteger(1, bytes);
+        // } else {
+        //     return new BigInteger(bytes);
+        // }
+        implementationMissing();
+        return BigInteger(0);
     }
 
     /**
@@ -167,10 +170,10 @@ class DerInputBuffer : ByteArrayInputStream {
         if (result < int.min) {
             throw new IOException("Integer below minimum valid value");
         }
-        if (result > int.max) > 0) {
+        if (result > int.max) {
             throw new IOException("Integer exceeds maximum valid value");
         }
-        return result.intValue();
+        return result.toInt();
     }
 
     /**
@@ -214,7 +217,7 @@ class DerInputBuffer : ByteArrayInputStream {
      */
     BitArray getUnalignedBitString() {
         if (pos >= count)
-            return null;
+            return BitArray.init;
         // /*
         //  * Just copy the data into an aligned, padded octet buffer,
         //  * and consume the rest of the buffer.

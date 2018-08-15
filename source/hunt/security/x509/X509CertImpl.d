@@ -186,7 +186,7 @@ class X509CertImpl : X509Certificate , DerEncoder {
 //         // First try reading stream as HEX-encoded DER-encoded bytes,
 //         // since not mistakable for raw DER
 //         try {
-//             inBuffered.mark(Integer.MAX_VALUE);
+//             inBuffered.mark(int.max);
 //             der = readRFC1421Cert(inBuffered);
 //         } catch (IOException ioe) {
 //             try {

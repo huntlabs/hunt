@@ -42,7 +42,7 @@ class SerialNumber {
      * @param num the BigInteger number used to create the serial number.
      */
     this(int num) {
-        serialNum = BigInteger.valueOf(num);
+        serialNum = BigInteger(num);
     }
 
     /**

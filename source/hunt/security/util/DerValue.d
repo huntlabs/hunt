@@ -213,7 +213,7 @@ class DerValue {
         // buffer = new DerInputBuffer(data.clone(), allowBER);
         _length = cast(int)data.length;
         // this.data = new DerInputStream(buffer);
-        // this.data.mark(Integer.MAX_VALUE);
+        // this.data.mark(int.max);
     }
 
     /**
@@ -360,7 +360,7 @@ class DerValue {
     //     length = buf.length;
     //     buffer = new DerInputBuffer(buf, true);
     //     DerInputStream result = new DerInputStream(buffer);
-    //     result.mark(Integer.MAX_VALUE);
+    //     result.mark(int.max);
     //     return result;
     // }
 
