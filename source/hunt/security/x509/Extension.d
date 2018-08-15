@@ -3,10 +3,12 @@ module hunt.security.x509.Extension;
 import hunt.security.cert.Extension;
 
 import hunt.security.util.DerValue;
+import hunt.security.util.DerInputStream;
 import hunt.security.util.DerOutputStream;
 import hunt.security.util.ObjectIdentifier;
 
 import hunt.io.common;
+import hunt.util.exception;
 
 /**
  * Represent a X509 Extension Attribute.
@@ -52,10 +54,11 @@ class Extension : CertExtension {
      */
     this(DerValue derVal) {
 
-        DerInputStream stream = derVal.toDerInputStream();
+        implementationMissing();
+        DerInputStream stream; // = derVal.toDerInputStream();
 
         // Object identifier
-        extensionId = stream.getOID();
+        extensionId = new ObjectIdentifier(stream); // stream.getOID();
 
         // If the criticality flag was false, it will not have been encoded.
         DerValue val = stream.getDerValue();
@@ -127,7 +130,8 @@ class Extension : CertExtension {
         DerOutputStream dos1 = new DerOutputStream();
         DerOutputStream dos2 = new DerOutputStream();
 
-        dos1.putOID(extensionId);
+        // dos1.putOID(extensionId);
+        extensionId.encode(dos1);
         if (critical) {
             dos1.putBoolean(critical);
         }
@@ -152,7 +156,8 @@ class Extension : CertExtension {
 
         DerOutputStream dos = new DerOutputStream();
 
-        dos.putOID(extensionId);
+        // dos.putOID(extensionId);
+        extensionId.encode(dos);
         if (critical)
             dos.putBoolean(critical);
         dos.putOctetString(extensionValue);
@@ -175,7 +180,7 @@ class Extension : CertExtension {
     }
 
     byte[] getValue() {
-        return extensionValue.clone();
+        return extensionValue.dup;
     }
 
     /**
@@ -214,7 +219,7 @@ class Extension : CertExtension {
      *
      * @return the hashcode value.
      */
-    override size_t toHash() @trusted const nothrow {
+    override size_t toHash() @trusted nothrow {
         size_t h = 0;
         if (extensionValue !is null) {
             byte[] val = extensionValue;

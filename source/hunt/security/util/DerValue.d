@@ -1,6 +1,9 @@
 module hunt.security.util.DerValue;
 
+import hunt.security.util.DerInputBuffer;
 import hunt.security.util.DerOutputStream;
+// import hunt.security.util.DerInputStream;
+
 import hunt.io.common;
 import hunt.util.exception;
 
@@ -43,7 +46,7 @@ class DerValue {
     /** The DER tag of the value; one of the tag_ constants. */
     byte                 tag;
 
-    // protected DerInputBuffer    buffer;
+    protected DerInputBuffer    buffer;
 
     /**
      * The DER-encoded data of the value, never null
@@ -575,13 +578,15 @@ class DerValue {
      *
      * @return a BitArray representing the bit string held in this value
      */
-    // BitArray getUnalignedBitString() {
-    //     if (tag != tag_BitString)
-    //         throw new IOException(
-    //             "DerValue.getBitString, not a bit string " ~ tag);
+    BitArray getUnalignedBitString() {
+        // if (tag != tag_BitString)
+        //     throw new IOException(
+        //         "DerValue.getBitString, not a bit string " ~ tag);
 
-    //     return buffer.getUnalignedBitString();
-    // }
+        // return buffer.getUnalignedBitString();
+        implementationMissing();
+        return BitArray.init;
+    }
 
     /**
      * Returns the name component as a Java string, regardless of its
@@ -632,15 +637,15 @@ class DerValue {
      * @params tagImplicit if true, the tag is assumed implicit.
      * @return the bit string held in this value
      */
-    // BitArray getUnalignedBitString(bool tagImplicit)
-    // {
-    //     if (!tagImplicit) {
-    //         if (tag != tag_BitString)
-    //             throw new IOException("DerValue.getBitString, not a bit string "
-    //                                    ~ tag.to!string());
-    //         }
-    //     return buffer.getUnalignedBitString();
-    // }
+    BitArray getUnalignedBitString(bool tagImplicit)
+    {
+        if (!tagImplicit) {
+            if (tag != tag_BitString)
+                throw new IOException("DerValue.getBitString, not a bit string "
+                                       ~ tag.to!string());
+            }
+        return buffer.getUnalignedBitString();
+    }
 
     /**
      * Helper routine to return all the bytes contained in the
@@ -854,7 +859,7 @@ class DerValue {
      */
     byte[] toByteArray() {
         DerOutputStream ot = new DerOutputStream();
-implementationMissing();
+        implementationMissing();
         // encode(ot);
         // data.reset();
         return ot.toByteArray();

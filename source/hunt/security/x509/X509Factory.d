@@ -9,6 +9,8 @@ import hunt.security.cert.CertificateFactorySpi;
 import hunt.security.cert.Certificate;
 import hunt.security.cert.CertPath;
 import hunt.security.cert.CRL;
+import hunt.security.cert.X509CRL;
+import hunt.security.cert.X509Certificate;
 
 import hunt.security.util.Cache;
 
@@ -49,8 +51,8 @@ class X509Factory : CertificateFactorySpi {
 
     static this()
     {
-        certCache = Cache.newSoftMemoryCache(750);
-        crlCache = Cache.newSoftMemoryCache(750);
+        certCache = newSoftMemoryCache!(Object, X509CertImpl)(750);
+        crlCache = newSoftMemoryCache!(Object, X509CRLImpl)(750);
     }
 
     /**
@@ -112,108 +114,112 @@ class X509Factory : CertificateFactorySpi {
     //     return read;
     // }
 
-    // /**
-    //  * Return an interned X509CertImpl for the given certificate.
-    //  * If the given X509Certificate or X509CertImpl is already present
-    //  * in the cert cache, the cached object is returned. Otherwise,
-    //  * if it is a X509Certificate, it is first converted to a X509CertImpl.
-    //  * Then the X509CertImpl is added to the cache and returned.
-    //  *
-    //  * Note that all certificates created via generateCertificate(InputStream)
-    //  * are already interned and this method does not need to be called.
-    //  * It is useful for certificates that cannot be created via
-    //  * generateCertificate() and for converting other X509Certificate
-    //  * implementations to an X509CertImpl.
-    //  *
-    //  * @param c The source X509Certificate
-    //  * @return An X509CertImpl object that is either a cached certificate or a
-    //  *      newly built X509CertImpl from the provided X509Certificate
-    //  * @ if failures occur while obtaining the DER
-    //  *      encoding for certificate data.
-    //  */
-    // static synchronized X509CertImpl intern(X509Certificate c)
-    //          {
-    //     if (c is null) {
-    //         return null;
-    //     }
-    //     bool isImpl = c instanceof X509CertImpl;
-    //     byte[] encoding;
-    //     if (isImpl) {
-    //         encoding = ((X509CertImpl)c).getEncodedInternal();
-    //     } else {
-    //         encoding = c.getEncoded();
-    //     }
-    //     X509CertImpl newC = getFromCache(certCache, encoding);
-    //     if (newC !is null) {
-    //         return newC;
-    //     }
-    //     if (isImpl) {
-    //         newC = (X509CertImpl)c;
-    //     } else {
-    //         newC = new X509CertImpl(encoding);
-    //         encoding = newC.getEncodedInternal();
-    //     }
-    //     addToCache(certCache, encoding, newC);
-    //     return newC;
-    // }
+    /**
+     * Return an interned X509CertImpl for the given certificate.
+     * If the given X509Certificate or X509CertImpl is already present
+     * in the cert cache, the cached object is returned. Otherwise,
+     * if it is a X509Certificate, it is first converted to a X509CertImpl.
+     * Then the X509CertImpl is added to the cache and returned.
+     *
+     * Note that all certificates created via generateCertificate(InputStream)
+     * are already interned and this method does not need to be called.
+     * It is useful for certificates that cannot be created via
+     * generateCertificate() and for converting other X509Certificate
+     * implementations to an X509CertImpl.
+     *
+     * @param c The source X509Certificate
+     * @return An X509CertImpl object that is either a cached certificate or a
+     *      newly built X509CertImpl from the provided X509Certificate
+     * @ if failures occur while obtaining the DER
+     *      encoding for certificate data.
+     */
+    static X509CertImpl intern(X509Certificate c) {
+        implementationMissing();
+        return null;
+        // if (c is null) {
+        //     return null;
+        // }
+        // bool isImpl = c instanceof X509CertImpl;
+        // byte[] encoding;
+        // if (isImpl) {
+        //     encoding = ((X509CertImpl)c).getEncodedInternal();
+        // } else {
+        //     encoding = c.getEncoded();
+        // }
+        // X509CertImpl newC = getFromCache(certCache, encoding);
+        // if (newC !is null) {
+        //     return newC;
+        // }
+        // if (isImpl) {
+        //     newC = (X509CertImpl)c;
+        // } else {
+        //     newC = new X509CertImpl(encoding);
+        //     encoding = newC.getEncodedInternal();
+        // }
+        // addToCache(certCache, encoding, newC);
+        // return newC;
+    }
 
-    // /**
-    //  * Return an interned X509CRLImpl for the given certificate.
-    //  * For more information, see intern(X509Certificate).
-    //  *
-    //  * @param c The source X509CRL
-    //  * @return An X509CRLImpl object that is either a cached CRL or a
-    //  *      newly built X509CRLImpl from the provided X509CRL
-    //  * @throws CRLException if failures occur while obtaining the DER
-    //  *      encoding for CRL data.
-    //  */
-    // static X509CRLImpl intern(X509CRL c) {
-    //     if (c is null) {
-    //         return null;
-    //     }
-    //     X509CRLImpl cc = cast(X509CRLImpl)c;
-    //     bool isImpl = cc !is null;
-    //     byte[] encoding;
-    //     if (isImpl) {
-    //         encoding = cc.getEncodedInternal();
-    //     } else {
-    //         encoding = c.getEncoded();
-    //     }
+    /**
+     * Return an interned X509CRLImpl for the given certificate.
+     * For more information, see intern(X509Certificate).
+     *
+     * @param c The source X509CRL
+     * @return An X509CRLImpl object that is either a cached CRL or a
+     *      newly built X509CRLImpl from the provided X509CRL
+     * @throws CRLException if failures occur while obtaining the DER
+     *      encoding for CRL data.
+     */
+    static X509CRLImpl intern(X509CRL c) {
+        if (c is null) {
+            return null;
+        }
+                implementationMissing();
+        return null;
 
-    //     X509CRLImpl newC = getFromCache(crlCache, encoding);
-    //     if (newC !is null) {
-    //         return newC;
-    //     }
-    //     if (isImpl) {
-    //         newC = cc;
-    //     } else {
-    //         newC = new X509CRLImpl(encoding);
-    //         encoding = newC.getEncodedInternal();
-    //     }
-    //     addToCache(crlCache, encoding, newC);
-    //     return newC;
-    // }
+        // X509CRLImpl cc = cast(X509CRLImpl)c;
+        // bool isImpl = cc !is null;
+        // byte[] encoding;
+        // if (isImpl) {
+        //     encoding = cc.getEncodedInternal();
+        // } else {
+        //     encoding = c.getEncoded();
+        // }
+
+        // X509CRLImpl newC = getFromCache(crlCache, encoding);
+        // if (newC !is null) {
+        //     return newC;
+        // }
+        // if (isImpl) {
+        //     newC = cc;
+        // } else {
+        //     newC = new X509CRLImpl(encoding);
+        //     encoding = newC.getEncodedInternal();
+        // }
+        // addToCache(crlCache, encoding, newC);
+        // return newC;
+    }
 
     /**
      * Get the X509CertImpl or X509CRLImpl from the cache.
      */
     private static V getFromCache(K,V)(Cache!(K, V) cache,
             byte[] encoding) {
-        Object key = new Cache.EqualByteArray(encoding);
+        Object key = new EqualByteArray(encoding);
         return cache.get(key);
     }
 
-    // /**
-    //  * Add the X509CertImpl or X509CRLImpl to the cache.
-    //  */
-    // private static synchronized <V> void addToCache(Cache<Object, V> cache,
-    //         byte[] encoding, V value) {
-    //     if (encoding.length > ENC_MAX_LENGTH) {
-    //         return;
-    //     }
-    //     Object key = new Cache.EqualByteArray(encoding);
-    //     cache.put(key, value);
-    // }
+    /**
+     * Add the X509CertImpl or X509CRLImpl to the cache.
+     */
+    private static void addToCache(V)(Cache!(Object, V) cache,
+            byte[] encoding, V value) {
+        if (encoding.length > ENC_MAX_LENGTH) {
+            return;
+        }
+        Object key = new EqualByteArray(encoding);
+        cache.put(key, value);
+    }
 
     // /**
     //  * Generates a <code>CertPath</code> object and initializes it with
@@ -241,7 +247,7 @@ class X509Factory : CertificateFactorySpi {
     //             throw new IOException("Empty input");
     //         }
     //     } catch (IOException ioe) {
-    //         throw new CertificateException(ioe.getMessage());
+    //         throw new CertificateException(ioe.msg);
     //     }
     // }
 
@@ -273,7 +279,7 @@ class X509Factory : CertificateFactorySpi {
     //             throw new IOException("Empty input");
     //         }
     //     } catch (IOException ioe) {
-    //         throw new CertificateException(ioe.getMessage());
+    //         throw new CertificateException(ioe.msg);
     //     }
     // }
 
@@ -335,7 +341,7 @@ class X509Factory : CertificateFactorySpi {
         try {
             return parseX509orPKCS7Cert(stream);
         } catch (IOException ioe) {
-            throw new CertificateException(ioe);
+            throw new CertificateException("", ioe);
         }
     }
 
@@ -374,7 +380,7 @@ class X509Factory : CertificateFactorySpi {
             implementationMissing();
             return null;
         } catch (IOException ioe) {
-            throw new CRLException(ioe.getMessage());
+            throw new CRLException(ioe.msg);
         }
     }
 
@@ -398,7 +404,7 @@ class X509Factory : CertificateFactorySpi {
             implementationMissing();
             return null;
         } catch (IOException ioe) {
-            throw new CRLException(ioe.getMessage());
+            throw new CRLException(ioe.msg);
         }
     }
 
@@ -410,27 +416,27 @@ class X509Factory : CertificateFactorySpi {
     private Collection!(Certificate) parseX509orPKCS7Cert(InputStream stream)  {
         int peekByte;
         byte[] data;
-        PushbackInputStream pbis = new PushbackInputStream(stream);
+        // PushbackInputStream pbis = new PushbackInputStream(stream);
         Collection!X509CertImpl coll = new ArrayList!X509CertImpl();
 
-        // Test the InputStream for end-of-stream.  If the stream's
-        // initial state is already at end-of-stream then return
-        // an empty collection.  Otherwise, push the byte back into the
-        // stream and let readOneBlock look for the first certificate.
-        peekByte = pbis.read();
-        if (peekByte == -1) {
-            return new ArrayList!Certificate(0);
-        } else {
-            pbis.unread(peekByte);
-            data = readOneBlock(pbis);
-        }
+        // // Test the InputStream for end-of-stream.  If the stream's
+        // // initial state is already at end-of-stream then return
+        // // an empty collection.  Otherwise, push the byte back into the
+        // // stream and let readOneBlock look for the first certificate.
+        // peekByte = pbis.read();
+        // if (peekByte == -1) {
+        //     return new ArrayList!Certificate(0);
+        // } else {
+        //     pbis.unread(peekByte);
+        //     data = readOneBlock(pbis);
+        // }
 
-        // If we end up with a null value after reading the first block
-        // then we know the end-of-stream has been reached and no certificate
-        // data has been found.
-        if (data is null) {
-            throw new CertificateException("No certificate data found");
-        }
+        // // If we end up with a null value after reading the first block
+        // // then we know the end-of-stream has been reached and no certificate
+        // // data has been found.
+        // if (data is null) {
+        //     throw new CertificateException("No certificate data found");
+        // }
 
         // try {
         //     PKCS7 pkcs7 = new PKCS7(data);
@@ -448,8 +454,9 @@ class X509Factory : CertificateFactorySpi {
         //         data = readOneBlock(pbis);
         //     }
         // }
+        // return coll;
         implementationMissing();
-        return coll;
+        return null;
     }
 
     // /*
@@ -504,117 +511,118 @@ class X509Factory : CertificateFactorySpi {
     //     return coll;
     // }
 
-    // /**
-    //  * Returns an ASN.1 SEQUENCE from a stream, which might be a BER-encoded
-    //  * binary block or a PEM-style BASE64-encoded ASCII data. In the latter
-    //  * case, it's de-BASE64'ed before return.
-    //  *
-    //  * After the reading, the input stream pointer is after the BER block, or
-    //  * after the newline character after the -----END SOMETHING----- line.
-    //  *
-    //  * @param is the InputStream
-    //  * @returns byte block or null if end of stream
-    //  * @If any parsing error
-    //  */
-    // private static byte[] readOneBlock(InputStream is) {
+    /**
+     * Returns an ASN.1 SEQUENCE from a stream, which might be a BER-encoded
+     * binary block or a PEM-style BASE64-encoded ASCII data. In the latter
+     * case, it's de-BASE64'ed before return.
+     *
+     * After the reading, the input stream pointer is after the BER block, or
+     * after the newline character after the -----END SOMETHING----- line.
+     *
+     * @param is the InputStream
+     * @returns byte block or null if end of stream
+     * @If any parsing error
+     */
+    private static byte[] readOneBlock(InputStream stream) {
+        implementationMissing();
+        return null;
+        // The first character of a BLOCK.
+        // int c = stream.read();
+        // if (c == -1) {
+        //     return null;
+        // }
+        // if (c == DerValue.tag_Sequence) {
+        //     ByteArrayOutputStream bout = new ByteArrayOutputStream(2048);
+        //     bout.write(c);
+        //     readBERInternal(stream, bout, c);
+        //     return bout.toByteArray();
+        // } else {
+        //     // Read BASE64 encoded data, might skip info at the beginning
+        //     char[] data = new char[2048];
+        //     int pos = 0;
 
-    //     // The first character of a BLOCK.
-    //     int c = is.read();
-    //     if (c == -1) {
-    //         return null;
-    //     }
-    //     if (c == DerValue.tag_Sequence) {
-    //         ByteArrayOutputStream bout = new ByteArrayOutputStream(2048);
-    //         bout.write(c);
-    //         readBERInternal(is, bout, c);
-    //         return bout.toByteArray();
-    //     } else {
-    //         // Read BASE64 encoded data, might skip info at the beginning
-    //         char[] data = new char[2048];
-    //         int pos = 0;
+        //     // Step 1: Read until header is found
+        //     int hyphen = (c=='-') ? 1: 0;   // count of consequent hyphens
+        //     int last = (c=='-') ? -1: c;    // the char before hyphen
+        //     while (true) {
+        //         int next = stream.read();
+        //         if (next == -1) {
+        //             // We accept useless data after the last block,
+        //             // say, empty lines.
+        //             return null;
+        //         }
+        //         if (next == '-') {
+        //             hyphen++;
+        //         } else {
+        //             hyphen = 0;
+        //             last = next;
+        //         }
+        //         if (hyphen == 5 && (last == -1 || last == '\r' || last == '\n')) {
+        //             break;
+        //         }
+        //     }
 
-    //         // Step 1: Read until header is found
-    //         int hyphen = (c=='-') ? 1: 0;   // count of consequent hyphens
-    //         int last = (c=='-') ? -1: c;    // the char before hyphen
-    //         while (true) {
-    //             int next = is.read();
-    //             if (next == -1) {
-    //                 // We accept useless data after the last block,
-    //                 // say, empty lines.
-    //                 return null;
-    //             }
-    //             if (next == '-') {
-    //                 hyphen++;
-    //             } else {
-    //                 hyphen = 0;
-    //                 last = next;
-    //             }
-    //             if (hyphen == 5 && (last == -1 || last == '\r' || last == '\n')) {
-    //                 break;
-    //             }
-    //         }
+        //     // Step 2: Read the rest of header, determine the line end
+        //     int end;
+        //     StringBuilder header = new StringBuilder("-----");
+        //     while (true) {
+        //         int next = stream.read();
+        //         if (next == -1) {
+        //             throw new IOException("Incomplete data");
+        //         }
+        //         if (next == '\n') {
+        //             end = '\n';
+        //             break;
+        //         }
+        //         if (next == '\r') {
+        //             next = stream.read();
+        //             if (next == -1) {
+        //                 throw new IOException("Incomplete data");
+        //             }
+        //             if (next == '\n') {
+        //                 end = '\n';
+        //             } else {
+        //                 end = '\r';
+        //                 data[pos++] = (char)next;
+        //             }
+        //             break;
+        //         }
+        //         header.append((char)next);
+        //     }
 
-    //         // Step 2: Read the rest of header, determine the line end
-    //         int end;
-    //         StringBuilder header = new StringBuilder("-----");
-    //         while (true) {
-    //             int next = is.read();
-    //             if (next == -1) {
-    //                 throw new IOException("Incomplete data");
-    //             }
-    //             if (next == '\n') {
-    //                 end = '\n';
-    //                 break;
-    //             }
-    //             if (next == '\r') {
-    //                 next = is.read();
-    //                 if (next == -1) {
-    //                     throw new IOException("Incomplete data");
-    //                 }
-    //                 if (next == '\n') {
-    //                     end = '\n';
-    //                 } else {
-    //                     end = '\r';
-    //                     data[pos++] = (char)next;
-    //                 }
-    //                 break;
-    //             }
-    //             header.append((char)next);
-    //         }
+        //     // Step 3: Read the data
+        //     while (true) {
+        //         int next = stream.read();
+        //         if (next == -1) {
+        //             throw new IOException("Incomplete data");
+        //         }
+        //         if (next != '-') {
+        //             data[pos++] = (char)next;
+        //             if (pos >= data.length) {
+        //                 data = Arrays.copyOf(data, data.length+1024);
+        //             }
+        //         } else {
+        //             break;
+        //         }
+        //     }
 
-    //         // Step 3: Read the data
-    //         while (true) {
-    //             int next = is.read();
-    //             if (next == -1) {
-    //                 throw new IOException("Incomplete data");
-    //             }
-    //             if (next != '-') {
-    //                 data[pos++] = (char)next;
-    //                 if (pos >= data.length) {
-    //                     data = Arrays.copyOf(data, data.length+1024);
-    //                 }
-    //             } else {
-    //                 break;
-    //             }
-    //         }
+        //     // Step 4: Consume the footer
+        //     StringBuilder footer = new StringBuilder("-");
+        //     while (true) {
+        //         int next = stream.read();
+        //         // Add next == '\n' for maximum safety, in case endline
+        //         // is not consistent.
+        //         if (next == -1 || next == end || next == '\n') {
+        //             break;
+        //         }
+        //         if (next != '\r') footer.append((char)next);
+        //     }
 
-    //         // Step 4: Consume the footer
-    //         StringBuilder footer = new StringBuilder("-");
-    //         while (true) {
-    //             int next = is.read();
-    //             // Add next == '\n' for maximum safety, in case endline
-    //             // is not consistent.
-    //             if (next == -1 || next == end || next == '\n') {
-    //                 break;
-    //             }
-    //             if (next != '\r') footer.append((char)next);
-    //         }
+        //     checkHeaderFooter(header.toString(), footer.toString());
 
-    //         checkHeaderFooter(header.toString(), footer.toString());
-
-    //         return Pem.decode(new string(data, 0, pos));
-    //     }
-    // }
+        //     return Pem.decode(new string(data, 0, pos));
+        // }
+    }
 
     // private static void checkHeaderFooter(string header,
     //         string footer) {
@@ -638,17 +646,17 @@ class X509Factory : CertificateFactorySpi {
     //  * Read one BER data block. This method is aware of indefinite-length BER
     //  * encoding and will read all of the sub-sections in a recursive way
     //  *
-    //  * @param is    Read from this InputStream
+    //  * @param stream    Read from this InputStream
     //  * @param bout  Write into this OutputStream
     //  * @param tag   Tag already read (-1 mean not read)
     //  * @returns     The current tag, used to check EOC in indefinite-length BER
     //  * @Any parsing error
     //  */
-    // private static int readBERInternal(InputStream is,
+    // private static int readBERInternal(InputStream stream,
     //         ByteArrayOutputStream bout, int tag) {
 
     //     if (tag == -1) {        // Not read before the call, read now
-    //         tag = is.read();
+    //         tag = stream.read();
     //         if (tag == -1) {
     //             throw new IOException("BER/DER tag info absent");
     //         }
@@ -658,7 +666,7 @@ class X509Factory : CertificateFactorySpi {
     //         bout.write(tag);
     //     }
 
-    //     int n = is.read();
+    //     int n = stream.read();
     //     if (n == -1) {
     //         throw new IOException("BER/DER length info absent");
     //     }
@@ -672,7 +680,7 @@ class X509Factory : CertificateFactorySpi {
     //                     "Non constructed encoding must have definite length");
     //         }
     //         while (true) {
-    //             int subTag = readBERInternal(is, bout, -1);
+    //             int subTag = readBERInternal(stream, bout, -1);
     //             if (subTag == 0) {   // EOC, end of indefinite-length section
     //                 break;
     //             }
@@ -681,14 +689,14 @@ class X509Factory : CertificateFactorySpi {
     //         if (n < 0x80) {
     //             length = n;
     //         } else if (n == 0x81) {
-    //             length = is.read();
+    //             length = stream.read();
     //             if (length == -1) {
     //                 throw new IOException("Incomplete BER/DER length info");
     //             }
     //             bout.write(length);
     //         } else if (n == 0x82) {
-    //             int highByte = is.read();
-    //             int lowByte = is.read();
+    //             int highByte = stream.read();
+    //             int lowByte = stream.read();
     //             if (lowByte == -1) {
     //                 throw new IOException("Incomplete BER/DER length info");
     //             }
@@ -696,9 +704,9 @@ class X509Factory : CertificateFactorySpi {
     //             bout.write(lowByte);
     //             length = (highByte << 8) | lowByte;
     //         } else if (n == 0x83) {
-    //             int highByte = is.read();
-    //             int midByte = is.read();
-    //             int lowByte = is.read();
+    //             int highByte = stream.read();
+    //             int midByte = stream.read();
+    //             int lowByte = stream.read();
     //             if (lowByte == -1) {
     //                 throw new IOException("Incomplete BER/DER length info");
     //             }
@@ -707,10 +715,10 @@ class X509Factory : CertificateFactorySpi {
     //             bout.write(lowByte);
     //             length = (highByte << 16) | (midByte << 8) | lowByte;
     //         } else if (n == 0x84) {
-    //             int highByte = is.read();
-    //             int nextByte = is.read();
-    //             int midByte = is.read();
-    //             int lowByte = is.read();
+    //             int highByte = stream.read();
+    //             int nextByte = stream.read();
+    //             int midByte = stream.read();
+    //             int lowByte = stream.read();
     //             if (lowByte == -1) {
     //                 throw new IOException("Incomplete BER/DER length info");
     //             }
@@ -726,7 +734,7 @@ class X509Factory : CertificateFactorySpi {
     //         } else { // ignore longer length forms
     //             throw new IOException("Invalid BER/DER data (too huge?)");
     //         }
-    //         if (readFully(is, bout, length) != length) {
+    //         if (readFully(stream, bout, length) != length) {
     //             throw new IOException("Incomplete BER/DER data");
     //         }
     //     }

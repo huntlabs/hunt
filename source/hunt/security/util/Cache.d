@@ -6,6 +6,7 @@ import hunt.util.exception;
 import hunt.util.memory;
 
 import std.conv;
+import std.datetime;
 
 /**
  * Abstract base class and factory for caches. A cache is a key-value mapping.
@@ -72,12 +73,12 @@ abstract class Cache(K,V) {
     /**
      * Get a value from the cache.
      */
-    abstract V get(Object key);
+    abstract V get(K key);
 
     /**
      * Remove an entry from the cache.
      */
-    abstract void remove(Object key);
+    abstract void remove(K key);
 
     /**
      * Set the maximum size.
@@ -94,92 +95,52 @@ abstract class Cache(K,V) {
      */
     abstract void accept(CacheVisitor!(K, V) visitor);
 
-    /**
-     * Return a new memory cache with the specified maximum size, unlimited
-     * lifetime for entries, with the values held by SoftReferences.
-     */
-    static Cache!(K, V) newSoftMemoryCache(K, V)(int size) {
-        return new MemoryCache!(K, V)(true, size);
-    }
-
-    /**
-     * Return a new memory cache with the specified maximum size, the
-     * specified maximum lifetime (in seconds), with the values held
-     * by SoftReferences.
-     */
-    static Cache!(K, V) newSoftMemoryCache(K, V)(int size, int timeout) {
-        return new MemoryCache!(K, V)(true, size, timeout);
-    }
-
-    /**
-     * Return a new memory cache with the specified maximum size, unlimited
-     * lifetime for entries, with the values held by standard references.
-     */
-    static Cache!(K, V) newHardMemoryCache(K, V)(int size) {
-        return new MemoryCache!(K, V)(false, size);
-    }
-
-    /**
-     * Return a dummy cache that does nothing.
-     */
-    static Cache!(K, V) newNullCache(K, V)() {
-        return NullCache!(K, V).INSTANCE;
-    }
-
-    /**
-     * Return a new memory cache with the specified maximum size, the
-     * specified maximum lifetime (in seconds), with the values held
-     * by standard references.
-     */
-    static Cache!(K, V) newHardMemoryCache(K, V)(int size, int timeout) {
-        return new MemoryCache!(K, V)(false, size, timeout);
-    }
-
-    /**
-     * Utility class that wraps a byte array and implements the equals()
-     * and hashCode() contract in a way suitable for Maps and caches.
-     */
-    static class EqualByteArray {
-
-        private byte[] b;
-        private size_t hash;
-
-        this(byte[] b) {
-            this.b = b;
-            hash = 0;
-        }
-
-        override size_t toHash() @trusted nothrow {
-            size_t h = hash;
-            if (h == 0) {
-                h = b.length + 1;
-                for (size_t i = 0; i < b.length; i++) {
-                    h += (b[i] & 0xff) * 37;
-                }
-                hash = h;
-            }
-            return h;
-        }
-
-        override bool opEquals(Object obj) {
-            if (this is obj) {
-                return true;
-            }
-            if (obj is null) {
-                return false;
-            }
-            EqualByteArray other = cast(EqualByteArray)obj;
-            if(other is null)
-                return false;
-            return this.b == other.b;
-        }
-    }
-
     interface CacheVisitor(K, V) {
         void visit(Map!(K, V) map);
     }
 
 }
+
+/**
+* Utility class that wraps a byte array and implements the equals()
+* and hashCode() contract in a way suitable for Maps and caches.
+*/
+static class EqualByteArray {
+
+    private byte[] b;
+    private size_t hash;
+
+    this(byte[] b) {
+        this.b = b;
+        hash = 0;
+    }
+
+    override size_t toHash() @trusted nothrow {
+        size_t h = hash;
+        if (h == 0) {
+            h = b.length + 1;
+            for (size_t i = 0; i < b.length; i++) {
+                h += (b[i] & 0xff) * 37;
+            }
+            hash = h;
+        }
+        return h;
+    }
+
+    override bool opEquals(Object obj) {
+        if (this is obj) {
+            return true;
+        }
+        if (obj is null) {
+            return false;
+        }
+        EqualByteArray other = cast(EqualByteArray)obj;
+        if(other is null)
+            return false;
+        return this.b == other.b;
+    }
+}
+
 
 class NullCache(K, V) : Cache!(K, V) {
 
@@ -206,11 +167,11 @@ class NullCache(K, V) : Cache!(K, V) {
         // empty
     }
 
-    V get(Object key) {
+    V get(K key) {
         return null;
     }
 
-    void remove(Object key) {
+    void remove(K key) {
         // empty
     }
 
@@ -259,7 +220,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
             this.queue = null;
 
         int buckets = cast(int)(maxSize / LOAD_FACTOR) + 1;
-        cacheMap = new LinkedHashMap!(K, V)(buckets, LOAD_FACTOR, true);
+        cacheMap = new LinkedHashMap!(K, CacheEntry!(K, V))(buckets, LOAD_FACTOR, true);
     }
 
     /**
@@ -309,13 +270,14 @@ class MemoryCache(K, V) : Cache!(K, V) {
             return;
         }
         int cnt = 0;
-        long time = System.currentTimeMillis();
-        foreach (CacheEntry!(K, V) entry; cacheMap.values()) {
-            if (entry.isValid(time) == false) {
-                t.remove();
-                cnt++;
-            }
-        }
+        long time = Clock.currStdTime;
+        // foreach (CacheEntry!(K, V) entry; cacheMap.values()) {
+        //     if (entry.isValid(time) == false) {
+        //         t.remove();
+        //         cnt++;
+        //     }
+        // }
+        implementationMissing();
         version(HuntDebugMode)  {
             if (cnt != 0) {
                 trace("Removed " ~ cnt.to!string()
@@ -324,12 +286,12 @@ class MemoryCache(K, V) : Cache!(K, V) {
         }
     }
 
-    int size() {
+    override int size() {
         expungeExpiredEntries();
         return cacheMap.size();
     }
 
-    void clear() {
+    override void clear() {
         if (queue !is null) {
             // if this is a SoftReference cache, first invalidate() all
             // entries so that GC does not have to enqueue them
@@ -343,10 +305,10 @@ class MemoryCache(K, V) : Cache!(K, V) {
         cacheMap.clear();
     }
 
-    void put(K key, V value) {
+    override void put(K key, V value) {
         emptyQueue();
         long expirationTime = (lifetime == 0) ? 0 :
-                                        System.currentTimeMillis() + lifetime;
+                                       Clock.currStdTime + lifetime;
         CacheEntry!(K, V) newEntry = newEntry(key, value, expirationTime, queue);
         CacheEntry!(K, V) oldEntry = cacheMap.put(key, newEntry);
         if (oldEntry !is null) {
@@ -358,27 +320,29 @@ class MemoryCache(K, V) : Cache!(K, V) {
             if (cacheMap.size() > maxSize) { // still too large?
                 // Iterator<CacheEntry!(K, V)> t = cacheMap.values().iterator();
                 // CacheEntry!(K, V) lruEntry = t.next();
-                foreach(CacheEntry!(K, V) lruEntry; cacheMap.values())
-                {
-                    version(HuntDebugMode)  {
-                        tracef("** Overflow removal "
-                            + lruEntry.getKey() ~ " | " ~ lruEntry.getValue());
-                    }
-                    t.remove();
-                    lruEntry.invalidate();
-                    break;
-                }
+                // foreach(CacheEntry!(K, V) lruEntry; cacheMap.values())
+                // {
+                //     version(HuntDebugMode)  {
+                //         tracef("** Overflow removal "
+                //             + lruEntry.getKey() ~ " | " ~ lruEntry.getValue());
+                //     }
+                //     t.remove();
+                //     lruEntry.invalidate();
+                //     break;
+                // }
+
+        implementationMissing();
             }
         }
     }
 
-    V get(Object key) {
+    override V get(K key) {
         emptyQueue();
         CacheEntry!(K, V) entry = cacheMap.get(key);
         if (entry is null) {
             return null;
         }
-        long time = (lifetime == 0) ? 0 : System.currentTimeMillis();
+        long time = (lifetime == 0) ? 0 :Clock.currStdTime;
         if (entry.isValid(time) == false) {
             version(HuntDebugMode)  {
                 tracef("Ignoring expired entry");
@@ -389,7 +353,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         return entry.getValue();
     }
 
-    void remove(Object key) {
+    override void remove(K key) {
         emptyQueue();
         CacheEntry!(K, V) entry = cacheMap.remove(key);
         if (entry !is null) {
@@ -397,7 +361,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         }
     }
 
-    void setCapacity(int size) {
+    override void setCapacity(int size) {
         expungeExpiredEntries();
         // TODO: Tasks pending completion -@zxp at 8/10/2018, 4:50:39 PM
         // 
@@ -426,7 +390,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         }
     }
 
-    void setTimeout(int timeout) {
+    override void setTimeout(int timeout) {
         emptyQueue();
         lifetime = timeout > 0 ? timeout * 1000L : 0L;
 
@@ -436,7 +400,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
     }
 
     // it is a heavyweight method.
-    void accept(CacheVisitor!(K, V) visitor) {
+    override void accept(CacheVisitor!(K, V) visitor) {
         expungeExpiredEntries();
         Map!(K, V) cached = getCachedEntries();
 
@@ -458,7 +422,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         // if (queue !is null) {
         //     return new SoftCacheEntry!V(key, value, expirationTime, queue);
         // } else {
-            return new HardCacheEntry!V(key, value, expirationTime);
+            return new HardCacheEntry!(K, V)(key, value, expirationTime);
         // }
     }
 
@@ -547,3 +511,46 @@ class MemoryCache(K, V) : Cache!(K, V) {
     // }
 
 }
+
+
+
+    /**
+     * Return a new memory cache with the specified maximum size, unlimited
+     * lifetime for entries, with the values held by SoftReferences.
+     */
+    static Cache!(K, V) newSoftMemoryCache(K, V)(int size) {
+        return new MemoryCache!(K, V)(true, size);
+    }
+
+    /**
+     * Return a new memory cache with the specified maximum size, the
+     * specified maximum lifetime (in seconds), with the values held
+     * by SoftReferences.
+     */
+    static Cache!(K, V) newSoftMemoryCache(K, V)(int size, int timeout) {
+        return new MemoryCache!(K, V)(true, size, timeout);
+    }
+
+    /**
+     * Return a new memory cache with the specified maximum size, unlimited
+     * lifetime for entries, with the values held by standard references.
+     */
+    static Cache!(K, V) newHardMemoryCache(K, V)(int size) {
+        return new MemoryCache!(K, V)(false, size);
+    }
+
+    /**
+     * Return a dummy cache that does nothing.
+     */
+    static Cache!(K, V) newNullCache(K, V)() {
+        return NullCache!(K, V).INSTANCE;
+    }
+
+    /**
+     * Return a new memory cache with the specified maximum size, the
+     * specified maximum lifetime (in seconds), with the values held
+     * by standard references.
+     */
+    static Cache!(K, V) newHardMemoryCache(K, V)(int size, int timeout) {
+        return new MemoryCache!(K, V)(false, size, timeout);
+    }

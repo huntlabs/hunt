@@ -63,7 +63,9 @@ class UniqueIdentity {
      * Return the UniqueIdentity as a printable string.
      */
     override string toString() {
-        return ("UniqueIdentity:" ~ id.toString() ~ "\n");
+        // return ("UniqueIdentity:" ~ id.toString() ~ "\n");
+        implementationMissing();
+        return "";
     }
 
     /**
@@ -74,22 +76,25 @@ class UniqueIdentity {
      * @exception IOException on errors.
      */
     void encode(DerOutputStream stream, byte tag) {
-        byte[] bytes = id.toByteArray();
-        int excessBits = bytes.length*8 - id.length();
+        // byte[] bytes = id.toByteArray();
+        // int excessBits = bytes.length*8 - id.length();
 
-        stream.write(tag);
-        stream.putLength(bytes.length + 1);
+        // stream.write(tag);
+        // stream.putLength(bytes.length + 1);
 
-        stream.write(excessBits);
-        stream.write(bytes);
+        // stream.write(excessBits);
+        // stream.write(bytes);
+        implementationMissing();
     }
 
     /**
      * Return the unique id.
      */
     bool[] getId() {
-        if (id is null) return null;
+        // if (id == BitArray.init) return null;
 
-        return id.toBooleanArray();
+        // return id.toBooleanArray();
+        implementationMissing();
+        return [];
     }
 }

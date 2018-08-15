@@ -5,7 +5,7 @@ import hunt.security.cert.X509Certificate;
 import hunt.security.cert.X509CRLEntry;
 
 import hunt.security.key;
-import hunt.security.x509.X509CRLImpl;
+// import hunt.security.x509.X509CRLImpl;
 import hunt.security.x500.X500Principal;
 import hunt.security.Principal;
 import hunt.security.Provider;
@@ -15,6 +15,9 @@ import hunt.container;
 import hunt.util.exception;
 
 import std.datetime;
+import std.bigint;
+
+alias BigInteger = BigInt;
 
 /**
  * <p>
@@ -95,56 +98,7 @@ abstract class X509CRL : CRL , X509Extension {
         super("X.509");
     }
 
-    /**
-     * Compares this CRL for equality with the given
-     * object. If the {@code other} object is an
-     * {@code instanceof} {@code X509CRL}, then
-     * its encoded form is retrieved and compared with the
-     * encoded form of this CRL.
-     *
-     * @param other the object to test for equality with this CRL.
-     *
-     * @return true iff the encoded forms of the two CRLs
-     * match, false otherwise.
-     */
-    override bool opEquals(Object other) {
-        if (other is null) {
-            return false;
-        }
-        if (this is other) {
-            return true;
-        }
-        X509CRL ot = cast(X509CRL)other;
-        try {
-            byte[] thisCRL = X509CRLImpl.getEncodedInternal(this);
-            byte[] otherCRL = X509CRLImpl.getEncodedInternal(ot);
-
-            return thisCRL == otherCRL;
-        } catch (CRLException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Returns a hashcode value for this CRL from its
-     * encoded form.
-     *
-     * @return the hashcode value.
-     */
-    override size_t toHash() @trusted nothrow {
-        size_t retval = 0;
-        try {
-            byte[] crlData;
-            crlData = X509CRLImpl.getEncodedInternal(this);
-            for (size_t i = 1; i < crlData.length; i++) {
-                 retval += crlData[i] * i;
-            }
-            return retval;
-        } catch (Exception e) {
-            return retval;
-        }
-    }
-
+    
     /**
      * Returns the ASN.1 DER-encoded form of this CRL.
      *
@@ -208,9 +162,10 @@ abstract class X509CRL : CRL , X509Extension {
      * @exception CRLException on encoding errors.
      * @since 1.8
      */
-    void verify(PublicKey key, Provider sigProvider) {
-        X509CRLImpl.verify(this, key, sigProvider);
-    }
+    abstract void verify(PublicKey key, Provider sigProvider);
+    // void verify(PublicKey key, Provider sigProvider) {
+    //     X509CRLImpl.verify(this, key, sigProvider);
+    // }
 
     /**
      * Gets the {@code version} (version number) value from the CRL.
@@ -279,12 +234,7 @@ abstract class X509CRL : CRL , X509Extension {
      *          distinguished name
      * @since 1.4
      */
-    X500Principal getIssuerX500Principal() {
-        if (issuerPrincipal is null) {
-            issuerPrincipal = X509CRLImpl.getIssuerX500Principal(this);
-        }
-        return issuerPrincipal;
-    }
+    abstract X500Principal getIssuerX500Principal();
 
     /**
      * Gets the {@code thisUpdate} date from the CRL.

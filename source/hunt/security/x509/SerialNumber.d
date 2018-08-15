@@ -5,8 +5,10 @@ import hunt.security.util.DerInputStream;
 import hunt.security.util.DerOutputStream;
 
 import hunt.io.common;
+import hunt.util.exception;
 
 import std.bigint;
+import std.format;
 
 alias BigInteger = BigInt;
 
@@ -22,9 +24,10 @@ class SerialNumber {
     // Construct the class from the DerValue
     private void construct(DerValue derVal) {
         serialNum = derVal.getBigInteger();
-        if (derVal.data.available() != 0) {
-            throw new IOException("Excess SerialNumber data");
-        }
+        implementationMissing();
+        // if (derVal.data.available() != 0) {
+        //     throw new IOException("Excess SerialNumber data");
+        // }
     }
 
     /**
@@ -81,7 +84,8 @@ class SerialNumber {
      * Return the SerialNumber as user readable string.
      */
     override string toString() {
-        return ("SerialNumber: [" ~ Debug.toHexString(serialNum) ~ "]");
+        // return ("SerialNumber: [" ~ Debug.toHexString(serialNum) ~ "]");
+        return ("SerialNumber: [" ~ format("%02X", serialNum) ~ "]");
     }
 
     /**
@@ -91,7 +95,7 @@ class SerialNumber {
      * @exception IOException on errors.
      */
     void encode(DerOutputStream stream) {
-        stream.putInteger(serialNum);
+        stream.putInteger(serialNum.toInt());
     }
 
     /**

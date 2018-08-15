@@ -1,10 +1,13 @@
 module hunt.security.x509.KeyIdentifier;
 
+import hunt.security.x509.AlgorithmId;
 import hunt.security.util.DerValue;
 import hunt.security.util.DerOutputStream;
 
 import hunt.security.key;
 import hunt.util.exception;
+
+import std.format;
 
 /**
  * Represent the Key Identifier ASN.1 object.
@@ -59,35 +62,37 @@ class KeyIdentifier {
             throw new IOException("PublicKey value is not a valid "
                                   ~ "X.509 key");
 
-        AlgorithmId algid = AlgorithmId.parse(algAndKey.data.getDerValue());
-        byte[] key = algAndKey.data.getUnalignedBitString().toByteArray();
+        // AlgorithmId algid = AlgorithmId.parse(algAndKey.data.getDerValue());
+        // byte[] key = algAndKey.data.getUnalignedBitString().toByteArray();
 
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e3) {
-            throw new IOException("SHA1 not supported");
-        }
-        md.update(key);
-        this.octetString = md.digest();
+        // MessageDigest md = null;
+        // try {
+        //     md = MessageDigest.getInstance("SHA1");
+        // } catch (NoSuchAlgorithmException e3) {
+        //     throw new IOException("SHA1 not supported");
+        // }
+        // md.update(key);
+        // this.octetString = md.digest();
+        implementationMissing();
     }
 
     /**
      * Return the value of the KeyIdentifier as byte array.
      */
     byte[] getIdentifier() {
-        return octetString.clone();
+        return octetString.dup;
     }
 
     /**
      * Returns a printable representation of the KeyUsage.
      */
     override string toString() {
-        string s = "KeyIdentifier [\n";
+        // string s = "KeyIdentifier [\n";
 
-        HexDumpEncoder encoder = new HexDumpEncoder();
-        s += encoder.encodeBuffer(octetString);
-        s += "]\n";
+        // HexDumpEncoder encoder = new HexDumpEncoder();
+        // s += encoder.encodeBuffer(octetString);
+        // s += "]\n";
+        string s = format("KeyIdentifier [\n%(%02X%)]\n", octetString);
         return (s);
     }
 

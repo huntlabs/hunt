@@ -354,10 +354,11 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
         K k = key;
         TreeMapEntry!(K,V) p = root;
         while (p !is null) {
-            static if(isNumeric!(K))
-                int cp = std.math.cmp(cast(float)k, cast(float)p.key);
-            else
-                int cp = std.algorithm.cmp(k, p.key);
+            // static if(isNumeric!(K))
+            //     int cp = std.math.cmp(cast(float)k, cast(float)p.key);
+            // else
+            //     int cp = std.algorithm.cmp(k, p.key);
+            int cp = compare(k, p.key);
 
             if (cp < 0)
                 p = p.left;
@@ -543,7 +544,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     override V put(K key, V value) {
         TreeMapEntry!(K,V) t = root;
         if (t is null) {
-            compare(key, key); // type (and possibly null) check
+            // compare(key, key); // type (and possibly null) check
 
             root = new TreeMapEntry!(K,V)(key, value, null);
             _size = 1;
@@ -575,10 +576,11 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
                 parent = t;
                 // _cmp = k.compareTo(t.key);
                 
-                static if(isNumeric!(K))
-                    _cmp = std.math.cmp(cast(float)k, cast(float)t.key);
-                else
-                    _cmp = std.algorithm.cmp(k, t.key);
+                // static if(isNumeric!(K))
+                //     _cmp = std.math.cmp(cast(float)k, cast(float)t.key);
+                // else
+                //     _cmp = std.algorithm.cmp(k, t.key);
+                _cmp = compare(k, t.key);
 
                 if (_cmp < 0)
                     t = t.left;
@@ -1469,11 +1471,11 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     /**
      * Compares two keys using the correct comparison method for this TreeMap.
      */
-    final private int compare(K k1, K k2) {
-        if(k1 == k2) return 0;
-        else if(k1 > k2) return 1;
-        else return -1;
-    }
+    // final private int compare(K k1, K k2) {
+    //     if(k1 == k2) return 0;
+    //     else if(k1 > k2) return 1;
+    //     else return -1;
+    // }
 
 
     // SubMaps
@@ -2498,13 +2500,13 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
                     bool fromStart, K lo, bool loInclusive,
                     bool toEnd,     K hi, bool hiInclusive) {
         if (!fromStart && !toEnd) {
-            if (m.compare(lo, hi) > 0)
+            if (compare(lo, hi) > 0)
                 throw new IllegalArgumentException("fromKey > toKey");
         } else {
-            if (!fromStart) // type check
-                m.compare(lo, lo);
-            if (!toEnd)
-                m.compare(hi, hi);
+            // if (!fromStart) // type check
+            //     compare(lo, lo);
+            // if (!toEnd)
+            //     compare(hi, hi);
         }
 
         this.m = m;
@@ -2520,7 +2522,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
 
     final bool tooLow(K key) {
         if (!fromStart) {
-            int c = m.compare(key, lo);
+            int c = compare(key, lo);
             if (c < 0 || (c == 0 && !loInclusive))
                 return true;
         }
@@ -2529,7 +2531,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
 
     final bool tooHigh(K key) {
         if (!toEnd) {
-            int c = m.compare(key, hi);
+            int c = compare(key, hi);
             if (c > 0 || (c == 0 && !hiInclusive))
                 return true;
         }
@@ -2541,8 +2543,8 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     }
 
     final bool inClosedRange(K key) {
-        return (fromStart || m.compare(key, lo) >= 0)
-            && (toEnd || m.compare(hi, key) >= 0);
+        return (fromStart || compare(key, lo) >= 0)
+            && (toEnd || compare(hi, key) >= 0);
     }
 
     final bool inRange(K key, bool inclusive) {

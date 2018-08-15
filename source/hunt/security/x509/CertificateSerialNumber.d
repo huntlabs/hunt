@@ -7,6 +7,7 @@ import hunt.container.Enumeration;
 
 import hunt.security.util.DerValue;
 import hunt.security.util.DerInputStream;
+import hunt.security.util.DerOutputStream;
 
 import hunt.io.common;
 import hunt.util.exception;
@@ -19,7 +20,7 @@ import hunt.util.string;
  * @author Hemma Prafullchandra
  * @see CertAttrSet
  */
-class CertificateSerialNumber : CertAttrSet!string {
+class CertificateSerialNumber : CertAttrSet!(string, SerialNumber) {
     /**
      * Identifier for this attribute, to be used with the
      * get, set, delete methods of Certificate, x509 type.
@@ -106,13 +107,12 @@ class CertificateSerialNumber : CertAttrSet!string {
     /**
      * Set the attribute value.
      */
-    void set(string name, Object obj) {
-        SerialNumber s = cast(SerialNumber)obj;
-        if (s is null) {
+    void set(string name, SerialNumber obj) {
+        if (obj is null) {
             throw new IOException("Attribute must be of type SerialNumber.");
         }
         if (name.equalsIgnoreCase(NUMBER)) {
-            serial = s;
+            serial = obj;
         } else {
             throw new IOException("Attribute name not recognized by " ~
                                 "CertAttrSet:CertificateSerialNumber.");
@@ -148,10 +148,12 @@ class CertificateSerialNumber : CertAttrSet!string {
      * attribute.
      */
     Enumeration!string getElements() {
-        AttributeNameEnumeration elements = new AttributeNameEnumeration();
-        elements.addElement(NUMBER);
+        // AttributeNameEnumeration elements = new AttributeNameEnumeration();
+        // elements.addElement(NUMBER);
 
-        return (elements.elements());
+        // return (elements.elements());
+        implementationMissing();
+        return null;
     }
 
     /**

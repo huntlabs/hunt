@@ -83,7 +83,7 @@ interface Key {
     * serialization compatibility with a previous
     * version of the class.
     */
-    enum long serialVersionUID = 6603384152749567654L;
+    // enum long serialVersionUID = 6603384152749567654L;
 
     /**
      * Returns the standard algorithm name for this key. For

@@ -1413,15 +1413,23 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
                     else if (pr is null)
                         p = pl;
                     else {
-                        static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
-                        else { dir = std.algorithm.cmp(k, pk); }    
+                        // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
+                        // else { dir = std.algorithm.cmp(k, pk); }    
 
-                        if (dir != 0)
-                            p = (dir < 0) ? pl : pr;
+                        // if (dir != 0)
+                        //     p = (dir < 0) ? pl : pr;
+                        // else if ((q = pr.find(h, k)) !is null)
+                        //     return q;
+                        // else
+                        //     p = pl;
+                        if(k < pk) 
+                            p = pl;
+                        else if( k>pk) 
+                            p = pr;
                         else if ((q = pr.find(h, k)) !is null)
                             return q;
                         else
-                            p = pl;
+                            p = pl; 
                     }
                 } 
             } while (p !is null);
@@ -1482,10 +1490,14 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
                         else if (ph < h)
                             dir = 1;
                         else {
-                            static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
-                            else { dir = std.algorithm.cmp(k, pk); }
-                            if (dir == 0)
-                            dir = tieBreakOrder!(K)(k, pk);
+                            // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
+                            // else { dir = std.algorithm.cmp(k, pk); }
+                            if (k == pk)
+                                dir = tieBreakOrder!(K)(k, pk);
+                            else if(k > pk)
+                                dir = 1;
+                            else 
+                                dir = -1;
                         }
 
                         TreeNode!(K, V) xp = p;
@@ -1541,10 +1553,10 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
                     if (pk == k)
                         return p;
                     else {
-                        static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
-                        else { dir = std.algorithm.cmp(k, pk); }
+                        // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
+                        // else { dir = std.algorithm.cmp(k, pk); }
 
-                        if(dir == 0) {
+                        if(k == pk) {
                             if (!searched) {
                                 TreeNode!(K, V) q, ch;
                                 searched = true;
@@ -1555,7 +1567,10 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
                                     return q;
                             }
                             dir = tieBreakOrder(k, pk);
-                        }
+                        } else if(k > pk)
+                            dir = 1;
+                        else
+                            dir = -1;
                     }
                 }
 
