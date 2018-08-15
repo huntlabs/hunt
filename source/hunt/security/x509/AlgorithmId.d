@@ -113,7 +113,7 @@ class AlgorithmId : DerEncoder {
 
         // Decode (parse) the parameters
         try {
-            algParams.init(params.toByteArray());
+            algParams.initilize(params.toByteArray());
         } catch (IOException e) {
             if (null != e.getMessage() && e.getMessage().startsWith("Unknown named curve: ")) {
                 // named curve not supported
@@ -295,11 +295,11 @@ class AlgorithmId : DerEncoder {
      *
      * @return a hashcode for this AlgorithmId.
      */
-    int hashCode() {
+    override size_t toHash() @trusted const nothrow {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(algid.toString());
         sbuf.append(paramsToString());
-        return sbuf.toString().hashCode();
+        return sbuf.toString().hashOf();
     }
 
     /**
@@ -442,7 +442,7 @@ class AlgorithmId : DerEncoder {
         // See if algname is in printable OID ("dot-dot") notation
         if (name.indexOf('.') != -1) {
             if (name.startsWith("OID.")) {
-                return new ObjectIdentifier(name.substring("OID.".length()));
+                return new ObjectIdentifier(name.substring("OID.".length));
             } else {
                 return new ObjectIdentifier(name);
             }
@@ -587,7 +587,7 @@ class AlgorithmId : DerEncoder {
             // initOidTable = true;
         // }
 
-        return oidTable.get(name.toUpperCase());
+        return oidTable.get(name.toUpper());
     }
 
     private static ObjectIdentifier oid(int[] values...) {

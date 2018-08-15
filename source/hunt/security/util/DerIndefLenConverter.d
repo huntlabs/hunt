@@ -302,7 +302,7 @@ class DerIndefLenConverter {
     byte[] convert(byte[] indefData) {
         data = indefData;
         dataPos=0; index=0;
-        dataSize = data.length;
+        dataSize = cast(int)data.length;
         int len=0;
         int unused = 0;
 

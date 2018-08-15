@@ -8,6 +8,7 @@ import hunt.security.x509.X509CRLImpl;
 import hunt.security.cert.CertificateFactorySpi;
 import hunt.security.cert.Certificate;
 import hunt.security.cert.CertPath;
+import hunt.security.cert.CRL;
 
 import hunt.security.util.Cache;
 
@@ -315,146 +316,141 @@ class X509Factory : CertificateFactorySpi {
     //     return(X509CertPath.getEncodingsStatic());
     // }
 
-    // /**
-    //  * Returns a (possibly empty) collection view of X.509 certificates read
-    //  * from the given input stream <code>is</code>.
-    //  *
-    //  * @param is the input stream with the certificates.
-    //  *
-    //  * @return a (possibly empty) collection view of X.509 certificate objects
-    //  * initialized with the data from the input stream.
-    //  *
-    //  * @exception CertificateException on parsing errors.
-    //  */
-    // override
-    // Collection<? : java.security.cert.Certificate>
-    //         engineGenerateCertificates(InputStream is)
-    //          {
-    //     if (is is null) {
-    //         throw new CertificateException("Missing input stream");
-    //     }
-    //     try {
-    //         return parseX509orPKCS7Cert(is);
-    //     } catch (IOException ioe) {
-    //         throw new CertificateException(ioe);
-    //     }
-    // }
+    /**
+     * Returns a (possibly empty) collection view of X.509 certificates read
+     * from the given input stream <code>is</code>.
+     *
+     * @param stream the input stream with the certificates.
+     *
+     * @return a (possibly empty) collection view of X.509 certificate objects
+     * initialized with the data from the input stream.
+     *
+     * @exception CertificateException on parsing errors.
+     */
+    override
+    Collection!(Certificate) engineGenerateCertificates(InputStream stream) {
+        if (stream is null) {
+            throw new CertificateException("Missing input stream");
+        }
+        try {
+            return parseX509orPKCS7Cert(stream);
+        } catch (IOException ioe) {
+            throw new CertificateException(ioe);
+        }
+    }
 
-    // /**
-    //  * Generates an X.509 certificate revocation list (CRL) object and
-    //  * initializes it with the data read from the given input stream
-    //  * <code>is</code>.
-    //  *
-    //  * @param is an input stream with the CRL data.
-    //  *
-    //  * @return an X.509 CRL object initialized with the data
-    //  * from the input stream.
-    //  *
-    //  * @exception CRLException on parsing errors.
-    //  */
-    // override
-    // CRL engineGenerateCRL(InputStream is)
-        
-    // {
-    //     if (is is null) {
-    //         // clear the cache (for debugging)
-    //         crlCache.clear();
-    //         throw new CRLException("Missing input stream");
-    //     }
-    //     try {
-    //         byte[] encoding = readOneBlock(is);
-    //         if (encoding !is null) {
-    //             X509CRLImpl crl = getFromCache(crlCache, encoding);
-    //             if (crl !is null) {
-    //                 return crl;
-    //             }
-    //             crl = new X509CRLImpl(encoding);
-    //             addToCache(crlCache, crl.getEncodedInternal(), crl);
-    //             return crl;
-    //         } else {
-    //             throw new IOException("Empty input");
-    //         }
-    //     } catch (IOException ioe) {
-    //         throw new CRLException(ioe.getMessage());
-    //     }
-    // }
+    /**
+     * Generates an X.509 certificate revocation list (CRL) object and
+     * initializes it with the data read from the given input stream
+     * <code>is</code>.
+     *
+     * @param is an input stream with the CRL data.
+     *
+     * @return an X.509 CRL object initialized with the data
+     * from the input stream.
+     *
+     * @exception CRLException on parsing errors.
+     */
+    override CRL engineGenerateCRL(InputStream stream)
+    {
+        if (stream is null) {
+            // clear the cache (for debugging)
+            crlCache.clear();
+            throw new CRLException("Missing input stream");
+        }
+        try {
+            // byte[] encoding = readOneBlock(stream);
+            // if (encoding !is null) {
+            //     X509CRLImpl crl = getFromCache(crlCache, encoding);
+            //     if (crl !is null) {
+            //         return crl;
+            //     }
+            //     crl = new X509CRLImpl(encoding);
+            //     addToCache(crlCache, crl.getEncodedInternal(), crl);
+            //     return crl;
+            // } else {
+            //     throw new IOException("Empty input");
+            // }
+            implementationMissing();
+            return null;
+        } catch (IOException ioe) {
+            throw new CRLException(ioe.getMessage());
+        }
+    }
 
-    // /**
-    //  * Returns a (possibly empty) collection view of X.509 CRLs read
-    //  * from the given input stream <code>is</code>.
-    //  *
-    //  * @param is the input stream with the CRLs.
-    //  *
-    //  * @return a (possibly empty) collection view of X.509 CRL objects
-    //  * initialized with the data from the input stream.
-    //  *
-    //  * @exception CRLException on parsing errors.
-    //  */
-    // override
-    // Collection<? : java.security.cert.CRL> engineGenerateCRLs(
-    //         InputStream is) 
-    // {
-    //     if (is is null) {
-    //         throw new CRLException("Missing input stream");
-    //     }
-    //     try {
-    //         return parseX509orPKCS7CRL(is);
-    //     } catch (IOException ioe) {
-    //         throw new CRLException(ioe.getMessage());
-    //     }
-    // }
+    /**
+     * Returns a (possibly empty) collection view of X.509 CRLs read
+     * from the given input stream <code>is</code>.
+     *
+     * @param stream the input stream with the CRLs.
+     *
+     * @return a (possibly empty) collection view of X.509 CRL objects
+     * initialized with the data from the input stream.
+     *
+     * @exception CRLException on parsing errors.
+     */
+    override Collection!(CRL) engineGenerateCRLs(InputStream stream)  {
+        if (stream is null) {
+            throw new CRLException("Missing input stream");
+        }
+        try {
+            // return parseX509orPKCS7CRL(stream);
+            implementationMissing();
+            return null;
+        } catch (IOException ioe) {
+            throw new CRLException(ioe.getMessage());
+        }
+    }
 
-    // /*
-    //  * Parses the data in the given input stream as a sequence of DER
-    //  * encoded X.509 certificates (in binary or base 64 encoded format) OR
-    //  * as a single PKCS#7 encoded blob (in binary or base64 encoded format).
-    //  */
-    // private Collection<? : java.security.cert.Certificate>
-    //     parseX509orPKCS7Cert(InputStream is)
-    //     , IOException
-    // {
-    //     int peekByte;
-    //     byte[] data;
-    //     PushbackInputStream pbis = new PushbackInputStream(is);
-    //     Collection<X509CertImpl> coll = new ArrayList<>();
+    /*
+     * Parses the data in the given input stream as a sequence of DER
+     * encoded X.509 certificates (in binary or base 64 encoded format) OR
+     * as a single PKCS#7 encoded blob (in binary or base64 encoded format).
+     */
+    private Collection!(Certificate) parseX509orPKCS7Cert(InputStream stream)  {
+        int peekByte;
+        byte[] data;
+        PushbackInputStream pbis = new PushbackInputStream(stream);
+        Collection!X509CertImpl coll = new ArrayList!X509CertImpl();
 
-    //     // Test the InputStream for end-of-stream.  If the stream's
-    //     // initial state is already at end-of-stream then return
-    //     // an empty collection.  Otherwise, push the byte back into the
-    //     // stream and let readOneBlock look for the first certificate.
-    //     peekByte = pbis.read();
-    //     if (peekByte == -1) {
-    //         return new ArrayList<>(0);
-    //     } else {
-    //         pbis.unread(peekByte);
-    //         data = readOneBlock(pbis);
-    //     }
+        // Test the InputStream for end-of-stream.  If the stream's
+        // initial state is already at end-of-stream then return
+        // an empty collection.  Otherwise, push the byte back into the
+        // stream and let readOneBlock look for the first certificate.
+        peekByte = pbis.read();
+        if (peekByte == -1) {
+            return new ArrayList!Certificate(0);
+        } else {
+            pbis.unread(peekByte);
+            data = readOneBlock(pbis);
+        }
 
-    //     // If we end up with a null value after reading the first block
-    //     // then we know the end-of-stream has been reached and no certificate
-    //     // data has been found.
-    //     if (data is null) {
-    //         throw new CertificateException("No certificate data found");
-    //     }
+        // If we end up with a null value after reading the first block
+        // then we know the end-of-stream has been reached and no certificate
+        // data has been found.
+        if (data is null) {
+            throw new CertificateException("No certificate data found");
+        }
 
-    //     try {
-    //         PKCS7 pkcs7 = new PKCS7(data);
-    //         X509Certificate[] certs = pkcs7.getCertificates();
-    //         // certs are optional in PKCS #7
-    //         if (certs !is null) {
-    //             return Arrays.asList(certs);
-    //         } else {
-    //             // no certificates provided
-    //             return new ArrayList<>(0);
-    //         }
-    //     } catch (ParsingException e) {
-    //         while (data !is null) {
-    //             coll.add(new X509CertImpl(data));
-    //             data = readOneBlock(pbis);
-    //         }
-    //     }
-    //     return coll;
-    // }
+        // try {
+        //     PKCS7 pkcs7 = new PKCS7(data);
+        //     X509Certificate[] certs = pkcs7.getCertificates();
+        //     // certs are optional in PKCS #7
+        //     if (certs !is null) {
+        //         return Arrays.asList(certs);
+        //     } else {
+        //         // no certificates provided
+        //         return new ArrayList<>(0);
+        //     }
+        // } catch (ParsingException e) {
+        //     while (data !is null) {
+        //         coll.add(new X509CertImpl(data));
+        //         data = readOneBlock(pbis);
+        //     }
+        // }
+        implementationMissing();
+        return coll;
+    }
 
     // /*
     //  * Parses the data in the given input stream as a sequence of DER encoded

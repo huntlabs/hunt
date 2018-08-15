@@ -1,9 +1,13 @@
 module hunt.security.util.ObjectIdentifier;
 
+import hunt.security.util.DerInputBuffer;
+import hunt.security.util.DerInputStream;
 import hunt.security.util.DerOutputStream;
 import hunt.security.util.DerValue;
 
 import hunt.util.exception;
+import hunt.util.string;
+import hunt.container;
 
 import std.conv;
 import std.string;
@@ -123,8 +127,8 @@ final class ObjectIdentifier
     this (string oid)
     {
         int ch = '.';
-        int start = 0;
-        int end = 0;
+        ptrdiff_t start = 0;
+        ptrdiff_t end = 0;
 
         int pos = 0;
         byte[] tmp = new byte[oid.length];
@@ -134,32 +138,32 @@ final class ObjectIdentifier
         try {
             string comp = null;
             do {
-                int length = 0; // length of one section
+                size_t length = 0; // length of one section
                 end = oid.indexOf(ch,start);
                 if (end == -1) {
-                    comp = oid.substring(start);
+                    comp = oid[start .. $];
                     length = oid.length - start;
                 } else {
-                    comp = oid.substring(start,end);
+                    comp = oid[start .. end];
                     length = end - start;
                 }
 
                 if (length > 9) {
-                    BigInteger bignum = new BigInteger(comp);
+                    BigInteger bignum = BigInteger(comp);
                     if (count == 0) {
                         checkFirstComponent(bignum);
-                        first = bignum.intValue();
+                        first = bignum.toInt();
                     } else {
                         if (count == 1) {
                             checkSecondComponent(first, bignum);
-                            bignum = bignum.add(BigInteger.valueOf(40*first));
+                            bignum = bignum + BigInteger(40*first);
                         } else {
                             checkOtherComponent(count, bignum);
                         }
                         pos += pack7Oid(bignum, tmp, pos);
                     }
                 } else {
-                    int num = Integer.parseInt(comp);
+                    int num = to!int(comp);
                     if (count == 0) {
                         checkFirstComponent(num);
                         first = num;
@@ -178,14 +182,14 @@ final class ObjectIdentifier
             } while (end != -1);
 
             checkCount(count);
-            encoding = new byte[pos];
-            System.arraycopy(tmp, 0, encoding, 0, pos);
+            encoding = tmp.dup; // new byte[pos];
+            // System.arraycopy(tmp, 0, encoding, 0, pos);
             this.stringForm = oid;
         } catch (IOException ioe) { // already detected by checkXXX
             throw ioe;
         } catch (Exception e) {
             throw new IOException("ObjectIdentifier() -- Invalid format: "
-                    + e.toString(), e);
+                    ~ e.toString(), e);
         }
     }
 
@@ -200,7 +204,7 @@ final class ObjectIdentifier
         checkSecondComponent(values[0], values[1]);
         for (size_t i=2; i<values.length; i++)
             checkOtherComponent(i, values[i]);
-        initilize(values, values.length);
+        initilize(values, cast(int)values.length);
     }
 
     /**
@@ -215,68 +219,69 @@ final class ObjectIdentifier
      * @param in DER-encoded data holding an object ID
      * @exception IOException indicates a decoding error
      */
-    // this (DerInputStream inputStream)
-    // {
-    //     byte    type_id;
-    //     int     bufferEnd;
+    this (DerInputStream inputStream)
+    {
+        byte    type_id;
+        int     bufferEnd;
 
-    //     /*
-    //      * Object IDs are a "universal" type, and their tag needs only
-    //      * one byte of encoding.  Verify that the tag of this datum
-    //      * is that of an object ID.
-    //      *
-    //      * Then get and check the length of the ID's encoding.  We set
-    //      * up so that we can use inputStream.available() to check for the end of
-    //      * this value in the data stream.
-    //      */
-    //     type_id = cast(byte) inputStream.getByte ();
-    //     if (type_id != DerValue.tag_ObjectId)
-    //         throw new IOException (
-    //             "ObjectIdentifier() -- data isn't an object ID"
-    //             ~ " (tag = " ~  type_id ~ ")"
-    //             );
+        /*
+         * Object IDs are a "universal" type, and their tag needs only
+         * one byte of encoding.  Verify that the tag of this datum
+         * is that of an object ID.
+         *
+         * Then get and check the length of the ID's encoding.  We set
+         * up so that we can use inputStream.available() to check for the end of
+         * this value in the data stream.
+         */
+        type_id = cast(byte) inputStream.getByte ();
+        if (type_id != DerValue.tag_ObjectId)
+            throw new IOException (
+                "ObjectIdentifier() -- data isn't an object ID"
+                ~ " (tag = " ~  type_id ~ ")"
+                );
 
-    //     int len = inputStream.getLength();
-    //     if (len > inputStream.available()) {
-    //         throw new IOException("ObjectIdentifier() -- length exceeds" ~
-    //                 "data available.  Length: " ~ len ~ ", Available: " ~
-    //                 inputStream.available());
-    //     }
-    //     encoding = new byte[len];
-    //     inputStream.getBytes(encoding);
-    //     check(encoding);
-    // }
+        int len = inputStream.getLength();
+        if (len > inputStream.available()) {
+            throw new IOException("ObjectIdentifier() -- length exceeds" ~
+                    "data available.  Length: " ~ len.to!string() ~ ", Available: " ~
+                    inputStream.available().to!string());
+        }
+        encoding = new byte[len];
+        inputStream.getBytes(encoding);
+        check(encoding);
+    }
 
     /*
      * Constructor, from the rest of a DER input buffer;
      * the tag and length have been removed/verified
      * Validity check NOT included.
      */
-    // this (DerInputBuffer buf)
-    // {
-    //     DerInputStream in = new DerInputStream(buf);
-    //     encoding = new byte[inputStream.available()];
-    //     inputStream.getBytes(encoding);
-    //     check(encoding);
-    // }
+    this (DerInputBuffer buf)
+    {
+        DerInputStream inputStream = new DerInputStream(buf);
+        encoding = new byte[inputStream.available()];
+        inputStream.getBytes(encoding);
+        check(encoding);
+    }
 
     private void initilize(int[] components, int length) {
         int pos = 0;
         byte[] tmp = new byte[length*5+1];  // +1 for empty input
 
-        if (components[1] < Integer.MAX_VALUE - components[0]*40)
+        if (components[1] < int.max - components[0]*40)
             pos += pack7Oid(components[0]*40+components[1], tmp, pos);
         else {
-            BigInteger big = BigInteger.valueOf(components[1]);
-            big = big.add(BigInteger.valueOf(components[0]*40));
+            BigInteger big = BigInteger(components[1]);
+            big = big + BigInteger(components[0]*40);
             pos += pack7Oid(big, tmp, pos);
         }
 
         for (int i=2; i<length; i++) {
             pos += pack7Oid(components[i], tmp, pos);
         }
-        encoding = new byte[pos];
-        System.arraycopy(tmp, 0, encoding, 0, pos);
+        encoding = tmp.dup;
+        // encoding = new byte[pos];
+        // System.arraycopy(tmp, 0, encoding, 0, pos);
     }
 
     /**
@@ -337,36 +342,37 @@ final class ObjectIdentifier
      * Private helper method for serialization. To be compatible with old
      * versions of JDK.
      * @return components in an int array, if all the components are less than
-     *         Integer.MAX_VALUE. Otherwise, null.
+     *         int.max. Otherwise, null.
      */
     private int[] toIntArray() {
-        int length = encoding.length;
+        size_t length = encoding.length;
         int[] result = new int[20];
         int which = 0;
-        int fromPos = 0;
-        for (int i = 0; i < length; i++) {
+        size_t fromPos = 0;
+        for (size_t i = 0; i < length; i++) {
             if ((encoding[i] & 0x80) == 0) {
                 // one section [fromPos..i]
                 if (i - fromPos + 1 > 4) {
-                    BigInteger big = new BigInteger(pack(encoding, fromPos, i-fromPos+1, 7, 8));
+                    implementationMissing();
+                    BigInteger big ; //= BigInteger(pack(encoding, fromPos, i-fromPos+1, 7, 8));
                     if (fromPos == 0) {
                         result[which++] = 2;
-                        BigInteger second = big.subtract(BigInteger.valueOf(80));
-                        if (second.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) == 1) {
+                        BigInteger second = big - BigInteger(80);
+                        if (second > BigInteger(int.max)) {
                             return null;
                         } else {
-                            result[which++] = second.intValue();
+                            result[which++] = second.toInt();
                         }
                     } else {
-                        if (big.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) == 1) {
+                        if (big > BigInteger(int.max)) {
                             return null;
                         } else {
-                            result[which++] = big.intValue();
+                            result[which++] = big.toInt();
                         }
                     }
                 } else {
                     int retval = 0;
-                    for (int j = fromPos; j <= i; j++) {
+                    for (size_t j = fromPos; j <= i; j++) {
                         retval <<= 7;
                         byte tmp = encoding[j];
                         retval |= (tmp & 0x07f);
@@ -386,10 +392,10 @@ final class ObjectIdentifier
                 fromPos = i+1;
             }
             if (which >= result.length) {
-                result = Arrays.copyOf(result, which + 10);
+                result = result[0..which + 10].dup; // Arrays.copyOf(result, which + 10);
             }
         }
-        return Arrays.copyOf(result, which);
+        return  result[0..which].dup; //Arrays.copyOf(result, which);
     }
 
     /**
@@ -402,29 +408,30 @@ final class ObjectIdentifier
     string toString() {
         string s = stringForm;
         if (s is null) {
-            int length = encoding.length;
+            size_t length = encoding.length;
             StringBuffer sb = new StringBuffer(length * 4);
 
-            int fromPos = 0;
-            for (int i = 0; i < length; i++) {
+            size_t fromPos = 0;
+            for (size_t i = 0; i < length; i++) {
                 if ((encoding[i] & 0x80) == 0) {
                     // one section [fromPos..i]
                     if (fromPos != 0) {  // not the first segment
                         sb.append('.');
                     }
                     if (i - fromPos + 1 > 4) { // maybe big integer
-                        BigInteger big = new BigInteger(pack(encoding, fromPos, i-fromPos+1, 7, 8));
+                        implementationMissing();
+                        BigInteger big ; // = new BigInteger(pack(encoding, fromPos, i-fromPos+1, 7, 8));
                         if (fromPos == 0) {
                             // first section encoded with more than 4 bytes,
                             // must be 2.something
                             sb.append("2.");
-                            sb.append(big.subtract(BigInteger.valueOf(80)));
+                            sb.append(format("%d", big - BigInteger(80)));
                         } else {
-                            sb.append(big);
+                            sb.append(format("%d", big));
                         }
                     } else { // small integer
                         int retval = 0;
-                        for (int j = fromPos; j <= i; j++) {
+                        for (size_t j = fromPos; j <= i; j++) {
                             retval <<= 7;
                             byte tmp = encoding[j];
                             retval |= (tmp & 0x07f);
@@ -476,25 +483,25 @@ final class ObjectIdentifier
      * @param ow        NUB for output
      * @return          the repacked bytes
      */
-    private static byte[] pack(byte[] data, int ioffset, int ilength, int iw, int ow) {
+    private static byte[] pack(byte[] data, size_t ioffset, size_t ilength, int iw, int ow) {
         assert (iw > 0 && iw <= 8, "input NUB must be between 1 and 8");
         assert (ow > 0 && ow <= 8, "output NUB must be between 1 and 8");
 
         if (iw == ow) {
-            return inputStream.clone();
+            return data.dup;
         }
 
-        int bits = ilength * iw;    // number of all used bits
+        size_t bits = ilength * iw;    // number of all used bits
         byte[] ot = new byte[(bits+ow-1)/ow];
 
         // starting from the 0th bit in the input
-        int ipos = 0;
+        size_t ipos = 0;
 
         // the number of padding 0's needed in the output, skip them
-        int opos = (bits+ow-1)/ow*ow-bits;
+        size_t opos = (bits+ow-1)/ow*ow-bits;
 
         while(ipos < bits) {
-            int count = iw - ipos%iw;   // unpacked bits in current input byte
+            size_t count = iw - ipos%iw;   // unpacked bits in current input byte
             if (count > ow - opos%ow) { // free space available in output byte
                 count = ow - opos%ow;   // choose the smaller number
             }
@@ -519,17 +526,19 @@ final class ObjectIdentifier
      * @param ooffset the starting position to paste
      * @return the number of bytes pasted
      */
-    private static int pack7Oid(byte[] data, int ioffset, int ilength, byte[] ot, int ooffset) {
+    private static int pack7Oid(byte[] data, int ioffset, size_t ilength, byte[] ot, int ooffset) {
         byte[] pack = pack(data, ioffset, ilength, 8, 7);
-        int firstNonZero = pack.length-1;   // paste at least one byte
-        for (int i=pack.length-2; i>=0; i--) {
+        size_t firstNonZero = pack.length-1;   // paste at least one byte
+        for (size_t i=pack.length-2; i>=0; i--) {
             if (pack[i] != 0) {
                 firstNonZero = i;
             }
             pack[i] |= 0x80;
         }
-        System.arraycopy(pack, firstNonZero, ot, ooffset, pack.length-firstNonZero);
-        return pack.length-firstNonZero;
+        // System.arraycopy(pack, firstNonZero, ot, ooffset, pack.length-firstNonZero);
+        size_t len = pack.length-firstNonZero;
+        ot[ooffset .. ooffset+len] = pack[firstNonZero .. firstNonZero+len];
+        return cast(int)(pack.length-firstNonZero);
     }
 
     /**
@@ -541,14 +550,16 @@ final class ObjectIdentifier
      */
     private static int pack8(byte[] data, int ioffset, int ilength, byte[] ot, int ooffset) {
         byte[] pack = pack(data, ioffset, ilength, 7, 8);
-        int firstNonZero = pack.length-1;   // paste at least one byte
-        for (int i=pack.length-2; i>=0; i--) {
+        size_t firstNonZero = pack.length-1;   // paste at least one byte
+        for (size_t i=pack.length-2; i>=0; i--) {
             if (pack[i] != 0) {
                 firstNonZero = i;
             }
         }
-        System.arraycopy(pack, firstNonZero, ot, ooffset, pack.length-firstNonZero);
-        return pack.length-firstNonZero;
+        // System.arraycopy(pack, firstNonZero, ot, ooffset, pack.length-firstNonZero);
+        size_t len = pack.length-firstNonZero;
+        ot[ooffset .. ooffset+len] = pack[firstNonZero .. firstNonZero+len];
+        return cast(int)(pack.length-firstNonZero);
     }
 
     /**
@@ -567,7 +578,8 @@ final class ObjectIdentifier
      * Pack the BigInteger into a OID subidentifier DER encoding
      */
     private static int pack7Oid(BigInteger input, byte[] ot, int ooffset) {
-        byte[] b = input.toByteArray();
+        implementationMissing();
+        byte[] b = null; // input.toByteArray();
         return pack7Oid(b, 0, b.length, ot, ooffset);
     }
 
@@ -599,13 +611,13 @@ final class ObjectIdentifier
             }
         }
     }
-    private static void checkCount(int count) {
+    private static void checkCount(size_t count) {
         if (count < 2) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "Must be at least two oid components ");
         }
     }
-    private static void checkFirstComponent(int first) {
+    private static void checkFirstComponent(size_t first) {
         if (first < 0 || first > 2) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "First oid component is invalid ");
@@ -613,32 +625,32 @@ final class ObjectIdentifier
     }
     private static void checkFirstComponent(BigInteger first) {
         if (first.signum() == -1 ||
-                first.compareTo(BigInteger.valueOf(2)) == 1) {
+                first > BigInteger(2)) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "First oid component is invalid ");
         }
     }
-    private static void checkSecondComponent(int first, int second) {
+    private static void checkSecondComponent(size_t first, int second) {
         if (second < 0 || first != 2 && second > 39) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "Second oid component is invalid ");
         }
     }
-    private static void checkSecondComponent(int first, BigInteger second) {
+    private static void checkSecondComponent(size_t first, BigInteger second) {
         if (second.signum() == -1 ||
                 first != 2 &&
-                second.compareTo(BigInteger.valueOf(39)) == 1) {
+                second > BigInteger(39)) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "Second oid component is invalid ");
         }
     }
-    private static void checkOtherComponent(int i, int num) {
+    private static void checkOtherComponent(size_t i, int num) {
         if (num < 0) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "oid component #" ~ (i+1) ~ " must be non-negative ");
         }
     }
-    private static void checkOtherComponent(int i, BigInteger num) {
+    private static void checkOtherComponent(size_t i, BigInteger num) {
         if (num.signum() == -1) {
             throw new IOException("ObjectIdentifier() -- " ~
                     "oid component #" ~ (i+1).to!string() ~ " must be non-negative ");

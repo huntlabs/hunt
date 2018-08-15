@@ -65,6 +65,8 @@ class ByteArrayInputStream : InputStream {
      */
     protected int count;
 
+    alias read = InputStream.read;
+
     /**
      * Creates a <code>ByteArrayInputStream</code>
      * so that it  uses <code>buf</code> as its
@@ -97,10 +99,10 @@ class ByteArrayInputStream : InputStream {
      * @param   offset   the offset in the buffer of the first byte to read.
      * @param   length   the maximum number of bytes to read from the buffer.
      */
-    this(byte[] buf, int offset, int length) {
+    this(byte[] buf, int offset, size_t length) {
         this.buf = buf;
         this.pos = offset;
-        this.count = min(offset + length, buf.length);
+        this.count = cast(int) min(offset + length, buf.length);
         this._mark = offset;
     }
 
@@ -211,7 +213,7 @@ class ByteArrayInputStream : InputStream {
      * @return  the number of remaining bytes that can be read (or skipped
      *          over) from this input stream without blocking.
      */
-    override int available() {
+    override int available() @trusted nothrow {
         return count - pos;
     }
 
