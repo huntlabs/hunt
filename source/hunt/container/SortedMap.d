@@ -3,8 +3,8 @@ module hunt.container.SortedMap;
 import hunt.container.Collection;
 import hunt.container.Map;
 import hunt.container.Set;
-import hunt.util.Comparator;
 
+import hunt.util.Comparator;
 import hunt.util.common;
 
 /**

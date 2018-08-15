@@ -229,7 +229,7 @@ interface NavigableMap(K,V) : SortedMap!(K,V) {
      *
      * @return a reverse order view of this map
      */
-    NavigableMap!(K,V) descendingMap();
+    // NavigableMap!(K,V) descendingMap();
 
     /**
      * Returns a {@link NavigableSet} view of the keys contained in this map.
@@ -245,7 +245,7 @@ interface NavigableMap(K,V) : SortedMap!(K,V) {
      *
      * @return a navigable set view of the keys in this map
      */
-    NavigableSet!K navigableKeySet();
+    // NavigableSet!K navigableKeySet();
 
     /**
      * Returns a reverse order {@link NavigableSet} view of the keys contained in this map.

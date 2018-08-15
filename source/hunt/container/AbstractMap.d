@@ -270,13 +270,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         throw new NotImplementedException();
     }
     
-    InputRange!K byKey()
-    {
+    InputRange!K byKey() {
         throw new NotImplementedException();
     }
 
-    InputRange!V byValue()
-    {
+    InputRange!V byValue() {
         throw new NotImplementedException();
     }
 
@@ -467,10 +465,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
 
         Appender!string sb;
         sb.put("{");
-        int i = 0;
+        bool isFirst = true;
         foreach(K key, V value; this) {
-            if(i++ > 0) sb.put(", ");
+            if(!isFirst) { sb.put(", "); }
             sb.put(key.to!string() ~ "=" ~ value.to!string());
+            isFirst = false;
         }
         sb.put("}");
 

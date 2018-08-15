@@ -799,7 +799,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      * there's no reason to create more than one.
      */
     // private EntrySet _entrySet;
-    private KeySet!(K,V) _navigableKeySet;
+    // private KeySet!(K,V) _navigableKeySet;
     private NavigableMap!(K,V) _descendingMap;
 
     /**
@@ -834,17 +834,17 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     /**
      * @since 1.6
      */
-    NavigableSet!K navigableKeySet() {
-        KeySet!(K, V) nks = _navigableKeySet;
-        return (nks !is null) ? nks : (_navigableKeySet = new KeySet!(K, V)(this));
-    }
+    // NavigableSet!K navigableKeySet() {
+    //     KeySet!(K, V) nks = _navigableKeySet;
+    //     return (nks !is null) ? nks : (_navigableKeySet = new KeySet!(K, V)(this));
+    // }
 
     /**
      * @since 1.6
      */
-    NavigableSet!K descendingKeySet() {
-        return descendingMap().navigableKeySet();
-    }
+    // NavigableSet!K descendingKeySet() {
+    //     return descendingMap().navigableKeySet();
+    // }
 
     /**
      * Returns a {@link Collection} view of the values contained in this map.
@@ -906,13 +906,13 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     /**
      * @since 1.6
      */
-    NavigableMap!(K, V) descendingMap() {
-        NavigableMap!(K, V) km = _descendingMap;
-        return (km !is null) ? km :
-            (_descendingMap = new DescendingSubMap!(K, V)(this,
-                                                    true, K.init, true,
-                                                    true, K.init, true));
-    }
+    // NavigableMap!(K, V) descendingMap() {
+    //     NavigableMap!(K, V) km = _descendingMap;
+    //     return (km !is null) ? km :
+    //         (_descendingMap = new DescendingSubMap!(K, V)(this,
+    //                                                 true, K.init, true,
+    //                                                 true, K.init, true));
+    // }
 
     /**
      * @throws ClassCastException       {@inheritDoc}
@@ -1065,48 +1065,48 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     
     override InputRange!K byKey()
     {
-        // return new KeyInputRange();
-        throw new NotImplementedException();
+        return new KeyInputRange();
+        // throw new NotImplementedException();
     }
 
     override InputRange!V byValue()
     {
-        // return new ValueInputRange();
-        throw new NotImplementedException();
+        return new ValueInputRange();
+        // throw new NotImplementedException();
     }
 
 
-    class Values : AbstractCollection!V {
-        Iterator!V iterator() {
-            return new ValueIterator(getFirstEntry());
-        }
+    // class Values : AbstractCollection!V {
+    //     Iterator!V iterator() {
+    //         return new ValueIterator(getFirstEntry());
+    //     }
 
-        override int size() {
-            return this.outer.size();
-        }
+    //     override int size() {
+    //         return this.outer.size();
+    //     }
 
-        override bool contains(V o) {
-            return this.outer.containsValue(o);
-        }
+    //     override bool contains(V o) {
+    //         return this.outer.containsValue(o);
+    //     }
 
-        bool remove(V o) {
-            for (TreeMapEntry!(K,V) e = getFirstEntry(); e !is null; e = successor(e)) {
-                if (valEquals(e.getValue(), o)) {
-                    deleteEntry(e);
-                    return true;
-                }
-            }
-            return false;
-        }
+    //     bool remove(V o) {
+    //         for (TreeMapEntry!(K,V) e = getFirstEntry(); e !is null; e = successor(e)) {
+    //             if (valEquals(e.getValue(), o)) {
+    //                 deleteEntry(e);
+    //                 return true;
+    //             }
+    //         }
+    //         return false;
+    //     }
 
-        override void clear() {
-            this.outer.clear();
-        }
+    //     override void clear() {
+    //         this.outer.clear();
+    //     }
 
-        // Spliterator!V spliterator() {
-        //     return new ValueSpliterator!(K,V)(TreeMap.this, null, null, 0, -1, 0);
-        // }
-    }
+    //     // Spliterator!V spliterator() {
+    //     //     return new ValueSpliterator!(K,V)(TreeMap.this, null, null, 0, -1, 0);
+    //     // }
+    // }
 
     // class EntrySet : AbstractSet!(MapEntry!(K,V)) {
 
@@ -1157,87 +1157,87 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      * submap classes.
      */
 
-    Iterator!K keyIterator() {
-        return new KeyIterator(getFirstEntry());
-    }
+    // Iterator!K keyIterator() {
+    //     return new KeyIterator(getFirstEntry());
+    // }
 
-    Iterator!K descendingKeyIterator() {
-        return new DescendingKeyIterator(getLastEntry());
-    }
+    // Iterator!K descendingKeyIterator() {
+    //     return new DescendingKeyIterator(getLastEntry());
+    // }
 
-    static final class KeySet(E, V) : AbstractSet!E , NavigableSet!E {
-        private NavigableMap!(E, V) m;
+    // static final class KeySet(E, V) : AbstractSet!E , NavigableSet!E {
+    //     private NavigableMap!(E, V) m;
 
-        this(NavigableMap!(E, V) map) { m = map; }
+    //     this(NavigableMap!(E, V) map) { m = map; }
 
-        Iterator!E iterator() {
-            TreeMap!(E, V) mm = cast(TreeMap!(E, V))m;
-            if (mm !is null)
-                return mm.keyIterator();
-            else
-                return (cast(TreeMap.NavigableSubMap!(E, V))m).keyIterator();
-        }
+    //     Iterator!E iterator() {
+    //         TreeMap!(E, V) mm = cast(TreeMap!(E, V))m;
+    //         if (mm !is null)
+    //             return mm.keyIterator();
+    //         else
+    //             return (cast(TreeMap.NavigableSubMap!(E, V))m).keyIterator();
+    //     }
 
-        Iterator!E descendingIterator() {
-            TreeMap!(E, V) mm = cast(TreeMap!(E, V))m;
-            if (mm !is null)
-                return mm.descendingKeyIterator();
-            else
-                return (cast(TreeMap.NavigableSubMap!(E, V))m).descendingKeyIterator();
-        }
+    //     Iterator!E descendingIterator() {
+    //         TreeMap!(E, V) mm = cast(TreeMap!(E, V))m;
+    //         if (mm !is null)
+    //             return mm.descendingKeyIterator();
+    //         else
+    //             return (cast(TreeMap.NavigableSubMap!(E, V))m).descendingKeyIterator();
+    //     }
 
-        override int size() { return m.size(); }
-        override bool isEmpty() { return m.isEmpty(); }
-        override bool contains(K o) { return m.containsKey(o); }
-        override void clear() { m.clear(); }
-        E lower(E e) { return m.lowerKey(e); }
-        E floor(E e) { return m.floorKey(e); }
-        E ceiling(E e) { return m.ceilingKey(e); }
-        E higher(E e) { return m.higherKey(e); }
-        E first() { return m.firstKey(); }
-        E last() { return m.lastKey(); }
-        // Comparator!E comparator() { return m.comparator(); }
-        E pollFirst() {
-            MapEntry!(E, V) e = m.pollFirstEntry();
-            return (e is null) ? E.init : e.getKey();
-        }
-        E pollLast() {
-            MapEntry!(E, V) e = m.pollLastEntry();
-            return (e is null) ? E.init : e.getKey();
-        }
-        bool remove(E o) {
-            int oldSize = size();
-            m.remove(o);
-            return size()  !is  oldSize;
-        }
-        NavigableSet!E subSet(E fromElement, bool fromInclusive,
-                                      E toElement,   bool toInclusive) {
-            return new KeySet!(E, V)(m.subMap(fromElement, fromInclusive,
-                                          toElement,   toInclusive));
-        }
-        NavigableSet!E headSet(E toElement, bool inclusive) {
-            return new KeySet!(E, V)(m.headMap(toElement, inclusive));
-        }
-        NavigableSet!E tailSet(E fromElement, bool inclusive) {
-            return new KeySet!(E, V)(m.tailMap(fromElement, inclusive));
-        }
-        SortedSet!E subSet(E fromElement, E toElement) {
-            return subSet(fromElement, true, toElement, false);
-        }
-        SortedSet!E headSet(E toElement) {
-            return headSet(toElement, false);
-        }
-        SortedSet!E tailSet(E fromElement) {
-            return tailSet(fromElement, true);
-        }
-        NavigableSet!E descendingSet() {
-            return new KeySet!(E, V)(m.descendingMap());
-        }
+    //     override int size() { return m.size(); }
+    //     override bool isEmpty() { return m.isEmpty(); }
+    //     override bool contains(K o) { return m.containsKey(o); }
+    //     override void clear() { m.clear(); }
+    //     E lower(E e) { return m.lowerKey(e); }
+    //     E floor(E e) { return m.floorKey(e); }
+    //     E ceiling(E e) { return m.ceilingKey(e); }
+    //     E higher(E e) { return m.higherKey(e); }
+    //     E first() { return m.firstKey(); }
+    //     E last() { return m.lastKey(); }
+    //     // Comparator!E comparator() { return m.comparator(); }
+    //     E pollFirst() {
+    //         MapEntry!(E, V) e = m.pollFirstEntry();
+    //         return (e is null) ? E.init : e.getKey();
+    //     }
+    //     E pollLast() {
+    //         MapEntry!(E, V) e = m.pollLastEntry();
+    //         return (e is null) ? E.init : e.getKey();
+    //     }
+    //     bool remove(E o) {
+    //         int oldSize = size();
+    //         m.remove(o);
+    //         return size()  !is  oldSize;
+    //     }
+    //     NavigableSet!E subSet(E fromElement, bool fromInclusive,
+    //                                   E toElement,   bool toInclusive) {
+    //         return new KeySet!(E, V)(m.subMap(fromElement, fromInclusive,
+    //                                       toElement,   toInclusive));
+    //     }
+    //     NavigableSet!E headSet(E toElement, bool inclusive) {
+    //         return new KeySet!(E, V)(m.headMap(toElement, inclusive));
+    //     }
+    //     NavigableSet!E tailSet(E fromElement, bool inclusive) {
+    //         return new KeySet!(E, V)(m.tailMap(fromElement, inclusive));
+    //     }
+    //     SortedSet!E subSet(E fromElement, E toElement) {
+    //         return subSet(fromElement, true, toElement, false);
+    //     }
+    //     SortedSet!E headSet(E toElement) {
+    //         return headSet(toElement, false);
+    //     }
+    //     SortedSet!E tailSet(E fromElement) {
+    //         return tailSet(fromElement, true);
+    //     }
+    //     NavigableSet!E descendingSet() {
+    //         return new KeySet!(E, V)(m.descendingMap());
+    //     }
 
-        // Spliterator!E spliterator() {
-        //     return keySpliteratorFor(m);
-        // }
-    }
+    //     // Spliterator!E spliterator() {
+    //     //     return keySpliteratorFor(m);
+    //     // }
+    // }
 
     /**
      * Base class for TreeMap Iterators
@@ -1248,17 +1248,17 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
         TreeMapEntry!(K,V) lastReturned;
         int expectedModCount;
 
-        this(TreeMapEntry!(K,V) first) {
+        this() {
             expectedModCount = modCount;
             lastReturned = null;
-            next = first;
+            next = getFirstEntry();
         }
 
-        final bool hasNext() {
-            return next !is null;
+        final bool empty() {
+            return next is null;
         }
 
-        final TreeMapEntry!(K,V) nextEntry() {
+        final void popFront() {
             TreeMapEntry!(K,V) e = next;
             if (e is null)
                 throw new NoSuchElementException();
@@ -1266,72 +1266,159 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
                 throw new ConcurrentModificationException();
             next = successor(e);
             lastReturned = e;
-            return e;
+            // return e;
         }
 
-        final TreeMapEntry!(K,V) prevEntry() {
-            TreeMapEntry!(K,V) e = next;
-            if (e is null)
-                throw new NoSuchElementException();
-            if (modCount  !is  expectedModCount)
+        // final TreeMapEntry!(K,V) prevEntry() {
+        //     TreeMapEntry!(K,V) e = next;
+        //     if (e is null)
+        //         throw new NoSuchElementException();
+        //     if (modCount  !is  expectedModCount)
+        //         throw new ConcurrentModificationException();
+        //     next = predecessor(e);
+        //     lastReturned = e;
+        //     return e;
+        // }
+    }
+
+    final class KeyInputRange :  InputRange!K {
+        mixin TreeMapIterator;
+
+        final K front() @property { return next.key; }
+
+        // https://forum.dlang.org/thread/amzthhonuozlobghqqgk@forum.dlang.org?page=1
+        // https://issues.dlang.org/show_bug.cgi?id=18036
+        final K moveFront() @property { throw new NotSupportedException(); }
+        
+        int opApply(scope int delegate(K) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            int expectedModCount = modCount;
+            for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
+                result = dg(e.key);
+                if(result != 0) return result;
+            }
+
+            if (expectedModCount !is modCount) 
                 throw new ConcurrentModificationException();
-            next = predecessor(e);
-            lastReturned = e;
-            return e;
+
+            return result;
+        }
+
+        int opApply(scope int delegate(size_t, K) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            int mc = modCount;
+            size_t index = 0;
+             for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
+                result = dg(index++, e.key);
+                if(result != 0) return result;
+            }
+
+            if(modCount != mc)
+                throw new ConcurrentModificationException();
+
+            return result;
+        }
+    }
+    
+    final class ValueInputRange :  InputRange!V {
+        mixin TreeMapIterator;
+
+        final V front() @property { return next.value; }
+
+        final V moveFront() @property { throw new NotSupportedException(); }
+        
+        int opApply(scope int delegate(V) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            int mc = modCount;
+             for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
+                result = dg(e.value);
+                if(result != 0) return result;
+            }
+
+            if(modCount != mc)
+                throw new ConcurrentModificationException();
+
+            return result;
+        }
+
+        int opApply(scope int delegate(size_t, V) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            int mc = modCount;
+            size_t index = 0;
+            for (TreeMapEntry!(K, V) e = getFirstEntry(); e !is null; e = successor(e)) {
+                result = dg(index++, e.value);
+                if(result != 0) return result;
+            }
+
+            if(modCount != mc)
+                throw new ConcurrentModificationException();
+
+            return result;
         }
     }
 
+    // abstract class PrivateEntryIterator(T) : Iterator!T {
+    //     TreeMapEntry!(K,V) next;
+    //     TreeMapEntry!(K,V) lastReturned;
+    //     int expectedModCount;
 
-    abstract class PrivateEntryIterator(T) : Iterator!T {
-        TreeMapEntry!(K,V) next;
-        TreeMapEntry!(K,V) lastReturned;
-        int expectedModCount;
+    //     this(TreeMapEntry!(K,V) first) {
+    //         expectedModCount = modCount;
+    //         lastReturned = null;
+    //         next = first;
+    //     }
 
-        this(TreeMapEntry!(K,V) first) {
-            expectedModCount = modCount;
-            lastReturned = null;
-            next = first;
-        }
+    //     final bool hasNext() {
+    //         return next !is null;
+    //     }
 
-        final bool hasNext() {
-            return next !is null;
-        }
+    //     final TreeMapEntry!(K,V) nextEntry() {
+    //         TreeMapEntry!(K,V) e = next;
+    //         if (e is null)
+    //             throw new NoSuchElementException();
+    //         if (modCount  !is  expectedModCount)
+    //             throw new ConcurrentModificationException();
+    //         next = successor(e);
+    //         lastReturned = e;
+    //         return e;
+    //     }
 
-        final TreeMapEntry!(K,V) nextEntry() {
-            TreeMapEntry!(K,V) e = next;
-            if (e is null)
-                throw new NoSuchElementException();
-            if (modCount  !is  expectedModCount)
-                throw new ConcurrentModificationException();
-            next = successor(e);
-            lastReturned = e;
-            return e;
-        }
+    //     final TreeMapEntry!(K,V) prevEntry() {
+    //         TreeMapEntry!(K,V) e = next;
+    //         if (e is null)
+    //             throw new NoSuchElementException();
+    //         if (modCount  !is  expectedModCount)
+    //             throw new ConcurrentModificationException();
+    //         next = predecessor(e);
+    //         lastReturned = e;
+    //         return e;
+    //     }
 
-        final TreeMapEntry!(K,V) prevEntry() {
-            TreeMapEntry!(K,V) e = next;
-            if (e is null)
-                throw new NoSuchElementException();
-            if (modCount  !is  expectedModCount)
-                throw new ConcurrentModificationException();
-            next = predecessor(e);
-            lastReturned = e;
-            return e;
-        }
-
-        void remove() {
-            if (lastReturned is null)
-                throw new IllegalStateException();
-            if (modCount  !is  expectedModCount)
-                throw new ConcurrentModificationException();
-            // deleted entries are replaced by their successors
-            if (lastReturned.left !is null && lastReturned.right !is null)
-                next = lastReturned;
-            deleteEntry(lastReturned);
-            expectedModCount = modCount;
-            lastReturned = null;
-        }
-    }
+    //     void remove() {
+    //         if (lastReturned is null)
+    //             throw new IllegalStateException();
+    //         if (modCount  !is  expectedModCount)
+    //             throw new ConcurrentModificationException();
+    //         // deleted entries are replaced by their successors
+    //         if (lastReturned.left !is null && lastReturned.right !is null)
+    //             next = lastReturned;
+    //         deleteEntry(lastReturned);
+    //         expectedModCount = modCount;
+    //         lastReturned = null;
+    //     }
+    // }
 
     // final class EntryIterator : PrivateEntryIterator!(MapEntry!(K,V)) {
     //     this(TreeMapEntry!(K,V) first) {
@@ -1342,86 +1429,50 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //     }
     // }
 
-    final class ValueIterator : PrivateEntryIterator!V {
-        this(TreeMapEntry!(K,V) first) {
-            super(first);
-        }
-        V next() {
-            return nextEntry().value;
-        }
-    }
+    // final class ValueIterator : PrivateEntryIterator!V {
+    //     this(TreeMapEntry!(K,V) first) {
+    //         super(first);
+    //     }
+    //     V next() {
+    //         return nextEntry().value;
+    //     }
+    // }
 
-    final class KeyIterator : PrivateEntryIterator!K {
-        this(TreeMapEntry!(K,V) first) {
-            super(first);
-        }
-        K next() {
-            return nextEntry().key;
-        }
-    }
+    // final class KeyIterator : PrivateEntryIterator!K {
+    //     this(TreeMapEntry!(K,V) first) {
+    //         super(first);
+    //     }
+    //     K next() {
+    //         return nextEntry().key;
+    //     }
+    // }
 
-    final class DescendingKeyIterator : PrivateEntryIterator!K {
-        this(TreeMapEntry!(K,V) first) {
-            super(first);
-        }
-        K next() {
-            return prevEntry().key;
-        }
+    // final class DescendingKeyIterator : PrivateEntryIterator!K {
+    //     this(TreeMapEntry!(K,V) first) {
+    //         super(first);
+    //     }
+    //     K next() {
+    //         return prevEntry().key;
+    //     }
 
-        override void remove() {
-            if (lastReturned is null)
-                throw new IllegalStateException();
-            if (modCount  !is  expectedModCount)
-                throw new ConcurrentModificationException();
-            deleteEntry(lastReturned);
-            lastReturned = null;
-            expectedModCount = modCount;
-        }
-    }
-
-    // Little utilities
+    //     override void remove() {
+    //         if (lastReturned is null)
+    //             throw new IllegalStateException();
+    //         if (modCount  !is  expectedModCount)
+    //             throw new ConcurrentModificationException();
+    //         deleteEntry(lastReturned);
+    //         lastReturned = null;
+    //         expectedModCount = modCount;
+    //     }
+    // }
 
     /**
      * Compares two keys using the correct comparison method for this TreeMap.
      */
-    final int compare(K k1, K k2) {
-        return k1 == k2;
-        // return _comparator is null ? (cast(Comparable!K)k1).compareTo(cast(K)k2)
-        //     : _comparator.compare(cast(K)k1, cast(K)k2);
-    }
-
-    /**
-     * Test two values for equality.  Differs from o1.equals(o2) only in
-     * that it copes with {@code null} o1 properly.
-     */
-    static final bool valEquals(V o1, V o2) {
-        // return (o1 is null ? o2 is null : o1.equals(o2));
-        return o1 == o2;
-    }
-
-    /**
-     * Return SimpleImmutableEntry for entry, or null if null
-     */
-    static MapEntry!(K,V) exportEntry(K,V)(TreeMapEntry!(K,V) e) {
-        return (e is null) ? null :
-            new SimpleImmutableEntry!(K,V)(e);
-    }
-
-    /**
-     * Return key for entry, or null if null
-     */
-    static K keyOrNull(K,V)(TreeMapEntry!(K,V) e) {        
-        return (e is null) ? K.init : e.key;
-    }
-
-    /**
-     * Returns the key corresponding to the specified Entry.
-     * @throws NoSuchElementException if the Entry is null
-     */
-    static K key(K, V)(TreeMapEntry!(K,V) e) {
-        if (e is null)
-            throw new NoSuchElementException();
-        return e.key;
+    final private int compare(K k1, K k2) {
+        if(k1 == k2) return 0;
+        else if(k1 > k2) return 1;
+        else return -1;
     }
 
 
@@ -1436,687 +1487,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     shared static this()
     {
         UNBOUNDED = new Object();
-    }
-
-    /**
-     * @serial include
-     */
-    abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K,V) {
-        // private static final long serialVersionUID = -2102997345730753016L;
-        /**
-         * The backing map.
-         */
-        TreeMap!(K,V) m;
-
-        /**
-         * Endpoints are represented as triples (fromStart, lo,
-         * loInclusive) and (toEnd, hi, hiInclusive). If fromStart is
-         * true, then the low (absolute) bound is the start of the
-         * backing map, and the other values are ignored. Otherwise,
-         * if loInclusive is true, lo is the inclusive bound, else lo
-         * is the exclusive bound. Similarly for the upper bound.
-         */
-        K lo, hi;
-        bool fromStart, toEnd;
-        bool loInclusive, hiInclusive;
-
-        this(TreeMap!(K,V) m,
-                        bool fromStart, K lo, bool loInclusive,
-                        bool toEnd,     K hi, bool hiInclusive) {
-            if (!fromStart && !toEnd) {
-                if (m.compare(lo, hi) > 0)
-                    throw new IllegalArgumentException("fromKey > toKey");
-            } else {
-                if (!fromStart) // type check
-                    m.compare(lo, lo);
-                if (!toEnd)
-                    m.compare(hi, hi);
-            }
-
-            this.m = m;
-            this.fromStart = fromStart;
-            this.lo = lo;
-            this.loInclusive = loInclusive;
-            this.toEnd = toEnd;
-            this.hi = hi;
-            this.hiInclusive = hiInclusive;
-        }
-
-        // internal utilities
-
-        final bool tooLow(K key) {
-            if (!fromStart) {
-                int c = m.compare(key, lo);
-                if (c < 0 || (c == 0 && !loInclusive))
-                    return true;
-            }
-            return false;
-        }
-
-        final bool tooHigh(K key) {
-            if (!toEnd) {
-                int c = m.compare(key, hi);
-                if (c > 0 || (c == 0 && !hiInclusive))
-                    return true;
-            }
-            return false;
-        }
-
-        final bool inRange(K key) {
-            return !tooLow(key) && !tooHigh(key);
-        }
-
-        final bool inClosedRange(K key) {
-            return (fromStart || m.compare(key, lo) >= 0)
-                && (toEnd || m.compare(hi, key) >= 0);
-        }
-
-        final bool inRange(K key, bool inclusive) {
-            return inclusive ? inRange(key) : inClosedRange(key);
-        }
-
-        /*
-         * Absolute versions of relation operations.
-         * Subclasses map to these using like-named "sub"
-         * versions that invert senses for descending maps
-         */
-
-        final TreeMapEntry!(K,V) absLowest() {
-            TreeMapEntry!(K,V) e =
-                (fromStart ?  m.getFirstEntry() :
-                 (loInclusive ? m.getCeilingEntry(lo) :
-                                m.getHigherEntry(lo)));
-            return (e is null || tooHigh(e.key)) ? null : e;
-        }
-
-        final TreeMapEntry!(K,V) absHighest() {
-            TreeMapEntry!(K,V) e =
-                (toEnd ?  m.getLastEntry() :
-                 (hiInclusive ?  m.getFloorEntry(hi) :
-                                 m.getLowerEntry(hi)));
-            return (e is null || tooLow(e.key)) ? null : e;
-        }
-
-        final TreeMapEntry!(K,V) absCeiling(K key) {
-            if (tooLow(key))
-                return absLowest();
-            TreeMapEntry!(K,V) e = m.getCeilingEntry(key);
-            return (e is null || tooHigh(e.key)) ? null : e;
-        }
-
-        final TreeMapEntry!(K,V) absHigher(K key) {
-            if (tooLow(key))
-                return absLowest();
-            TreeMapEntry!(K,V) e = m.getHigherEntry(key);
-            return (e is null || tooHigh(e.key)) ? null : e;
-        }
-
-        final TreeMapEntry!(K,V) absFloor(K key) {
-            if (tooHigh(key))
-                return absHighest();
-            TreeMapEntry!(K,V) e = m.getFloorEntry(key);
-            return (e is null || tooLow(e.key)) ? null : e;
-        }
-
-        final TreeMapEntry!(K,V) absLower(K key) {
-            if (tooHigh(key))
-                return absHighest();
-            TreeMapEntry!(K,V) e = m.getLowerEntry(key);
-            return (e is null || tooLow(e.key)) ? null : e;
-        }
-
-        /** Returns the absolute high fence for ascending traversal */
-        final TreeMapEntry!(K,V) absHighFence() {
-            return (toEnd ? null : (hiInclusive ?
-                                    m.getHigherEntry(hi) :
-                                    m.getCeilingEntry(hi)));
-        }
-
-        /** Return the absolute low fence for descending traversal  */
-        final TreeMapEntry!(K,V) absLowFence() {
-            return (fromStart ? null : (loInclusive ?
-                                        m.getLowerEntry(lo) :
-                                        m.getFloorEntry(lo)));
-        }
-
-        // Abstract methods defined in ascending vs descending classes
-        // These relay to the appropriate absolute versions
-
-        abstract TreeMapEntry!(K,V) subLowest();
-        abstract TreeMapEntry!(K,V) subHighest();
-        abstract TreeMapEntry!(K,V) subCeiling(K key);
-        abstract TreeMapEntry!(K,V) subHigher(K key);
-        abstract TreeMapEntry!(K,V) subFloor(K key);
-        abstract TreeMapEntry!(K,V) subLower(K key);
-
-        /** Returns ascending iterator from the perspective of this submap */
-        abstract Iterator!K keyIterator();
-
-        // abstract Spliterator!K keySpliterator();
-
-        /** Returns descending iterator from the perspective of this submap */
-        abstract Iterator!K descendingKeyIterator();
-
-        // methods
-
-        override bool isEmpty() {
-            // return (fromStart && toEnd) ? m.isEmpty() : entrySet().isEmpty();
-            return m.isEmpty();
-        }
-
-        override int size() {
-            // return (fromStart && toEnd) ? m.size() : entrySet().size();
-            return  m.size();
-        }
-
-        final override bool containsKey(K key) {
-            return inRange(key) && m.containsKey(key);
-        }
-
-        final override V put(K key, V value) {
-            if (!inRange(key))
-                throw new IllegalArgumentException("key out of range");
-            return m.put(key, value);
-        }
-
-        final override V get(K key) {
-            return !inRange(key) ? null :  m.get(key);
-        }
-
-        final override V remove(K key) {
-            return !inRange(key) ? null : m.remove(key);
-        }
-
-        final MapEntry!(K,V) ceilingEntry(K key) {
-            return exportEntry!(K,V)(subCeiling(key));
-        }
-
-        final K ceilingKey(K key) {
-            return keyOrNull(subCeiling(key));
-        }
-
-        final MapEntry!(K,V) higherEntry(K key) {
-            return exportEntry!(K,V)(subHigher(key));
-        }
-
-        final K higherKey(K key) {
-            return keyOrNull(subHigher(key));
-        }
-
-        final MapEntry!(K,V) floorEntry(K key) {
-            return exportEntry!(K,V)(subFloor(key));
-        }
-
-        final K floorKey(K key) {
-            return keyOrNull(subFloor(key));
-        }
-
-        final MapEntry!(K,V) lowerEntry(K key) {
-            return exportEntry!(K,V)(subLower(key));
-        }
-
-        final K lowerKey(K key) {
-            return keyOrNull(subLower(key));
-        }
-
-        final K firstKey() {
-            return key(subLowest());
-        }
-
-        final K lastKey() {
-            return key(subHighest());
-        }
-
-        final MapEntry!(K,V) firstEntry() {
-            return exportEntry!(K,V)(subLowest());
-        }
-
-        final MapEntry!(K,V) lastEntry() {
-            return exportEntry!(K,V)(subHighest());
-        }
-
-        final MapEntry!(K,V) pollFirstEntry() {
-            TreeMapEntry!(K,V) e = subLowest();
-            MapEntry!(K,V) result = exportEntry!(K,V)(e);
-            if (e !is null)
-                m.deleteEntry(e);
-            return result;
-        }
-
-        final MapEntry!(K,V) pollLastEntry() {
-            TreeMapEntry!(K,V) e = subHighest();
-            MapEntry!(K,V) result = exportEntry!(K,V)(e);
-            if (e !is null)
-                m.deleteEntry(e);
-            return result;
-        }
-
-        // Views
-        NavigableMap!(K,V) descendingMapView;
-        EntrySetView entrySetView;
-        KeySet!(K, V) navigableKeySetView;
-
-        final NavigableSet!K navigableKeySet() {
-            KeySet!(K, V) nksv = navigableKeySetView;
-            return (nksv !is null) ? nksv :
-                (navigableKeySetView = new TreeMap.KeySet!(K, V)(this));
-            // implementationMissing();
-            // return null;
-        }
-
-        final Set!K keySet() {
-            return navigableKeySet();
-        }
-
-        NavigableSet!K descendingKeySet() {
-            return descendingMap().navigableKeySet();
-        }
-
-        alias subMap = NavigableMap!(K,V).subMap;
-        alias headMap = NavigableMap!(K,V).headMap;
-        alias tailMap = NavigableMap!(K,V).tailMap;
-
-        final SortedMap!(K,V) subMap(K fromKey, K toKey) {
-            return subMap(fromKey, true, toKey, false);
-        }
-
-        final SortedMap!(K,V) headMap(K toKey) {
-            return headMap(toKey, false);
-        }
-
-        final SortedMap!(K,V) tailMap(K fromKey) {
-            return tailMap(fromKey, true);
-        }
-
-        // View classes
-
-        abstract class EntrySetView : AbstractSet!(MapEntry!(K,V)) {
-            private int _size = -1, sizeModCount;
-
-            override int size() {
-                if (fromStart && toEnd)
-                    return m.size();
-                // if (_size == -1 || sizeModCount  !is  m.modCount) {
-                //     sizeModCount = m.modCount;
-                //     _size = 0;
-                //     Iterator!K i = iterator();
-                //     while (i.hasNext()) {
-                //         _size++;
-                //         i.next();
-                //     }
-                // }
-                implementationMissing();
-                return _size;
-            }
-
-            override bool isEmpty() {
-                TreeMapEntry!(K,V) n = absLowest();
-                return n is null || tooHigh(n.key);
-            }
-
-            override bool contains(MapEntry!(K,V) entry) {
-                // MapEntry!(K,V) entry = cast(MapEntry!(K,V)) o;
-                // if (!(o instanceof MapEntry))
-                //     return false;
-                K key = entry.getKey();
-                if (!inRange(key))
-                    return false;
-                TreeMapEntry!(K,V) node = m.getEntry(key);
-                return node !is null &&
-                    valEquals(node.getValue(), entry.getValue());
-            }
-
-            bool remove(MapEntry!(K,V) entry) {
-                // if (!(o instanceof MapEntry))
-                //     return false;
-                // MapEntry<?,?> entry = (MapEntry<?,?>) o;
-                K key = entry.getKey();
-                if (!inRange(key))
-                    return false;
-                TreeMapEntry!(K,V) node = m.getEntry(key);
-                if (node !is null && valEquals(node.getValue(),
-                                            entry.getValue())) {
-                    m.deleteEntry(node);
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        /**
-         * Iterators for SubMaps
-         */
-        abstract class SubMapIterator(T) : Iterator!T {
-            TreeMapEntry!(K,V) lastReturned;
-            TreeMapEntry!(K,V) next;
-            K fenceKey;
-            int expectedModCount;
-
-            this(TreeMapEntry!(K,V) first,
-                           TreeMapEntry!(K,V) fence) {
-                expectedModCount = m.modCount;
-                lastReturned = null;
-                next = first;
-                fenceKey = fence is null ? K.init : fence.key;
-            }
-
-            final bool hasNext() {
-                return next !is null && next.key  !is  fenceKey;
-            }
-
-            final TreeMapEntry!(K,V) nextEntry() {
-                TreeMapEntry!(K,V) e = next;
-                if (e is null || e.key == fenceKey)
-                    throw new NoSuchElementException();
-                if (m.modCount  !is  expectedModCount)
-                    throw new ConcurrentModificationException();
-                next = successor(e);
-                lastReturned = e;
-                return e;
-            }
-
-            final TreeMapEntry!(K,V) prevEntry() {
-                TreeMapEntry!(K,V) e = next;
-                if (e is null || e.key == fenceKey)
-                    throw new NoSuchElementException();
-                if (m.modCount  !is  expectedModCount)
-                    throw new ConcurrentModificationException();
-                next = predecessor(e);
-                lastReturned = e;
-                return e;
-            }
-
-            final void removeAscending() {
-                if (lastReturned is null)
-                    throw new IllegalStateException();
-                if (m.modCount  !is  expectedModCount)
-                    throw new ConcurrentModificationException();
-                // deleted entries are replaced by their successors
-                if (lastReturned.left !is null && lastReturned.right !is null)
-                    next = lastReturned;
-                m.deleteEntry(lastReturned);
-                lastReturned = null;
-                expectedModCount = m.modCount;
-            }
-
-            final void removeDescending() {
-                if (lastReturned is null)
-                    throw new IllegalStateException();
-                if (m.modCount  !is  expectedModCount)
-                    throw new ConcurrentModificationException();
-                m.deleteEntry(lastReturned);
-                lastReturned = null;
-                expectedModCount = m.modCount;
-            }
-
-        }
-
-        final class SubMapEntryIterator : SubMapIterator!(MapEntry!(K,V)) {
-            this(TreeMapEntry!(K,V) first,
-                                TreeMapEntry!(K,V) fence) {
-                super(first, fence);
-            }
-            MapEntry!(K,V) next() {
-                return nextEntry();
-            }
-            void remove() {
-                removeAscending();
-            }
-        }
-
-        final class DescendingSubMapEntryIterator : SubMapIterator!(MapEntry!(K,V)) {
-            this(TreeMapEntry!(K,V) last, TreeMapEntry!(K,V) fence) {
-                super(last, fence);
-            }
-
-            MapEntry!(K,V) next() {
-                return prevEntry();
-            }
-            void remove() {
-                removeDescending();
-            }
-        }
-
-        // Implement minimal Spliterator as KeySpliterator backup
-        final class SubMapKeyIterator : SubMapIterator!K { // , Spliterator!K
-            this(TreeMapEntry!(K,V) first,
-                              TreeMapEntry!(K,V) fence) {
-                super(first, fence);
-            }
-            K next() {
-                return nextEntry().key;
-            }
-            void remove() {
-                removeAscending();
-            }
-            Spliterator!K trySplit() {
-                return null;
-            }
-            void forEachRemaining(Consumer!K action) {
-                while (hasNext())
-                    action(next());
-            }
-            bool tryAdvance(Consumer!K action) {
-                if (hasNext()) {
-                    action(next());
-                    return true;
-                }
-                return false;
-            }
-            long estimateSize() {
-                return long.max;
-            }
-            int characteristics() {
-                return SpliteratorCharacteristic.DISTINCT | SpliteratorCharacteristic.ORDERED |
-                    SpliteratorCharacteristic.SORTED;
-            }
-            final Comparator!K  getComparator() {
-                return this.outer.comparator();
-            }
-        }
-
-        final class DescendingSubMapKeyIterator : SubMapIterator!K { // , Spliterator!K
-            this(TreeMapEntry!(K,V) last,
-                                        TreeMapEntry!(K,V) fence) {
-                super(last, fence);
-            }
-            K next() {
-                return prevEntry().key;
-            }
-            void remove() {
-                removeDescending();
-            }
-            Spliterator!K trySplit() {
-                return null;
-            }
-            void forEachRemaining(Consumer!K action) {
-                while (hasNext())
-                    action(next());
-            }
-            bool tryAdvance(Consumer!K action) {
-                if (hasNext()) {
-                    action(next());
-                    return true;
-                }
-                return false;
-            }
-            long estimateSize() {
-                return long.max;
-            }
-            // int characteristics() {
-            //     return Spliterator.DISTINCT | Spliterator.ORDERED;
-            // }
-        }
-    }
-
-    /**
-     * @serial include
-     */
-    static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
-        // private static final long serialVersionUID = 912986545866124060L;
-
-        this(TreeMap!(K,V) m,
-                        bool fromStart, K lo, bool loInclusive,
-                        bool toEnd,     K hi, bool hiInclusive) {
-            super(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive);
-        }
-
-        Comparator!K comparator() {
-            return m.comparator();
-        }
-
-        NavigableMap!(K,V) subMap(K fromKey, bool fromInclusive,
-                                        K toKey,   bool toInclusive) {
-            if (!inRange(fromKey, fromInclusive))
-                throw new IllegalArgumentException("fromKey out of range");
-            if (!inRange(toKey, toInclusive))
-                throw new IllegalArgumentException("toKey out of range");
-            return new AscendingSubMap!(K,V)(m,
-                                         false, fromKey, fromInclusive,
-                                         false, toKey,   toInclusive);
-        }
-
-        NavigableMap!(K,V) headMap(K toKey, bool inclusive) {
-            if (!inRange(toKey, inclusive))
-                throw new IllegalArgumentException("toKey out of range");
-            return new AscendingSubMap!(K,V)(m,
-                                         fromStart, lo,    loInclusive,
-                                         false,     toKey, inclusive);
-        }
-
-        NavigableMap!(K,V) tailMap(K fromKey, bool inclusive) {
-            if (!inRange(fromKey, inclusive))
-                throw new IllegalArgumentException("fromKey out of range");
-            return new AscendingSubMap!(K,V)(m,
-                                         false, fromKey, inclusive,
-                                         toEnd, hi,      hiInclusive);
-        }
-
-        NavigableMap!(K,V) descendingMap() {
-            NavigableMap!(K,V) mv = descendingMapView;
-            return (mv !is null) ? mv :
-                (descendingMapView =
-                 new DescendingSubMap!(K,V)(m,
-                                        fromStart, lo, loInclusive,
-                                        toEnd,     hi, hiInclusive));
-        }
-
-        override Iterator!K keyIterator() {
-            return new SubMapKeyIterator(absLowest(), absHighFence());
-        }
-
-        // Spliterator!K keySpliterator() {
-        //     return new SubMapKeyIterator(absLowest(), absHighFence());
-        // }
-
-        override Iterator!K descendingKeyIterator() {
-            return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
-        }
-
-        final class AscendingEntrySetView : EntrySetView {
-            Iterator!(MapEntry!(K,V)) iterator() {
-                return new SubMapEntryIterator(absLowest(), absHighFence());
-            }
-        }
-
-        Set!(MapEntry!(K,V)) entrySet() {
-            EntrySetView es = entrySetView;
-            return (es !is null) ? es : (entrySetView = new AscendingEntrySetView());
-        }
-
-        override TreeMapEntry!(K,V) subLowest()       { return absLowest(); }
-        override TreeMapEntry!(K,V) subHighest()      { return absHighest(); }
-        override TreeMapEntry!(K,V) subCeiling(K key) { return absCeiling(key); }
-        override TreeMapEntry!(K,V) subHigher(K key)  { return absHigher(key); }
-        override TreeMapEntry!(K,V) subFloor(K key)   { return absFloor(key); }
-        override TreeMapEntry!(K,V) subLower(K key)   { return absLower(key); }
-    }
-
-    /**
-     * @serial include
-     */
-    static final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
-        // private static final long serialVersionUID = 912986545866120460L;
-        this(TreeMap!(K,V) m,
-                        bool fromStart, K lo, bool loInclusive,
-                        bool toEnd,     K hi, bool hiInclusive) {
-            super(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive);
-
-            // reverseComparator = Collections.reverseOrder(m._comparator);
-        }
-
-        private Comparator!K reverseComparator;
-
-        Comparator!K comparator() {
-            implementationMissing();
-            return reverseComparator;
-        }
-
-        NavigableMap!(K,V) subMap(K fromKey, bool fromInclusive,
-                                        K toKey,   bool toInclusive) {
-            if (!inRange(fromKey, fromInclusive))
-                throw new IllegalArgumentException("fromKey out of range");
-            if (!inRange(toKey, toInclusive))
-                throw new IllegalArgumentException("toKey out of range");
-            return new DescendingSubMap!(K,V)(m,
-                                          false, toKey,   toInclusive,
-                                          false, fromKey, fromInclusive);
-        }
-
-        NavigableMap!(K,V) headMap(K toKey, bool inclusive) {
-            if (!inRange(toKey, inclusive))
-                throw new IllegalArgumentException("toKey out of range");
-            return new DescendingSubMap!(K,V)(m,
-                                          false, toKey, inclusive,
-                                          toEnd, hi,    hiInclusive);
-        }
-
-        NavigableMap!(K,V) tailMap(K fromKey, bool inclusive) {
-            if (!inRange(fromKey, inclusive))
-                throw new IllegalArgumentException("fromKey out of range");
-            return new DescendingSubMap!(K,V)(m,
-                                          fromStart, lo, loInclusive,
-                                          false, fromKey, inclusive);
-        }
-
-        NavigableMap!(K,V) descendingMap() {
-            NavigableMap!(K,V) mv = descendingMapView;
-            return (mv !is null) ? mv :
-                (descendingMapView =
-                 new AscendingSubMap!(K,V)(m,
-                                       fromStart, lo, loInclusive,
-                                       toEnd,     hi, hiInclusive));
-        }
-
-        override Iterator!K keyIterator() {
-            return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
-        }
-
-        // override Spliterator!K keySpliterator() {
-        //     return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
-        // }
-
-        override Iterator!K descendingKeyIterator() {
-            return new SubMapKeyIterator(absLowest(), absHighFence());
-        }
-
-        final class DescendingEntrySetView : EntrySetView {
-            Iterator!(MapEntry!(K,V)) iterator() {
-                return new DescendingSubMapEntryIterator(absHighest(), absLowFence());
-            }
-        }
-
-        Set!(MapEntry!(K,V)) entrySet() {
-            EntrySetView es = entrySetView;
-            return (es !is null) ? es : (entrySetView = new DescendingEntrySetView());
-        }
-
-        override TreeMapEntry!(K,V) subLowest()       { return absHighest(); }
-        override TreeMapEntry!(K,V) subHighest()      { return absLowest(); }
-        override TreeMapEntry!(K,V) subCeiling(K key) { return absFloor(key); }
-        override TreeMapEntry!(K,V) subHigher(K key)  { return absLower(key); }
-        override TreeMapEntry!(K,V) subFloor(K key)   { return absCeiling(key); }
-        override TreeMapEntry!(K,V) subLower(K key)   { return absHigher(key); }
     }
 
     /**
@@ -2179,49 +1549,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
         return p;
     }
 
-    /**
-     * Returns the successor of the specified Entry, or null if no such.
-     */
-    static TreeMapEntry!(K,V) successor(K,V)(TreeMapEntry!(K,V) t) {
-        if (t is null)
-            return null;
-        else if (t.right !is null) {
-            TreeMapEntry!(K,V) p = t.right;
-            while (p.left !is null)
-                p = p.left;
-            return p;
-        } else {
-            TreeMapEntry!(K,V) p = t.parent;
-            TreeMapEntry!(K,V) ch = t;
-            while (p !is null && ch == p.right) {
-                ch = p;
-                p = p.parent;
-            }
-            return p;
-        }
-    }
-
-    /**
-     * Returns the predecessor of the specified Entry, or null if no such.
-     */
-    static TreeMapEntry!(K,V) predecessor(K,V)(TreeMapEntry!(K,V) t) {
-        if (t is null)
-            return null;
-        else if (t.left !is null) {
-            TreeMapEntry!(K,V) p = t.left;
-            while (p.right !is null)
-                p = p.right;
-            return p;
-        } else {
-            TreeMapEntry!(K,V) p = t.parent;
-            TreeMapEntry!(K,V) ch = t;
-            while (p !is null && ch == p.left) {
-                ch = p;
-                p = p.parent;
-            }
-            return p;
-        }
-    }
+    
 
     /**
      * Balancing operations.
@@ -3141,4 +2469,769 @@ static final class TreeMapEntry(K,V) : MapEntry!(K,V) {
     override string toString() {
         return key.to!string() ~ "=" ~ value.to!string();
     }
+}
+
+
+/**
+ * @serial include
+ */
+abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K,V) {
+    // private static final long serialVersionUID = -2102997345730753016L;
+    /**
+     * The backing map.
+     */
+    TreeMap!(K,V) m;
+
+    /**
+     * Endpoints are represented as triples (fromStart, lo,
+     * loInclusive) and (toEnd, hi, hiInclusive). If fromStart is
+     * true, then the low (absolute) bound is the start of the
+     * backing map, and the other values are ignored. Otherwise,
+     * if loInclusive is true, lo is the inclusive bound, else lo
+     * is the exclusive bound. Similarly for the upper bound.
+     */
+    K lo, hi;
+    bool fromStart, toEnd;
+    bool loInclusive, hiInclusive;
+
+    this(TreeMap!(K,V) m,
+                    bool fromStart, K lo, bool loInclusive,
+                    bool toEnd,     K hi, bool hiInclusive) {
+        if (!fromStart && !toEnd) {
+            if (m.compare(lo, hi) > 0)
+                throw new IllegalArgumentException("fromKey > toKey");
+        } else {
+            if (!fromStart) // type check
+                m.compare(lo, lo);
+            if (!toEnd)
+                m.compare(hi, hi);
+        }
+
+        this.m = m;
+        this.fromStart = fromStart;
+        this.lo = lo;
+        this.loInclusive = loInclusive;
+        this.toEnd = toEnd;
+        this.hi = hi;
+        this.hiInclusive = hiInclusive;
+    }
+
+    // internal utilities
+
+    final bool tooLow(K key) {
+        if (!fromStart) {
+            int c = m.compare(key, lo);
+            if (c < 0 || (c == 0 && !loInclusive))
+                return true;
+        }
+        return false;
+    }
+
+    final bool tooHigh(K key) {
+        if (!toEnd) {
+            int c = m.compare(key, hi);
+            if (c > 0 || (c == 0 && !hiInclusive))
+                return true;
+        }
+        return false;
+    }
+
+    final bool inRange(K key) {
+        return !tooLow(key) && !tooHigh(key);
+    }
+
+    final bool inClosedRange(K key) {
+        return (fromStart || m.compare(key, lo) >= 0)
+            && (toEnd || m.compare(hi, key) >= 0);
+    }
+
+    final bool inRange(K key, bool inclusive) {
+        return inclusive ? inRange(key) : inClosedRange(key);
+    }
+
+    /*
+     * Absolute versions of relation operations.
+     * Subclasses map to these using like-named "sub"
+     * versions that invert senses for descending maps
+     */
+
+    final TreeMapEntry!(K,V) absLowest() {
+        TreeMapEntry!(K,V) e =
+            (fromStart ?  m.getFirstEntry() :
+             (loInclusive ? m.getCeilingEntry(lo) :
+                            m.getHigherEntry(lo)));
+        return (e is null || tooHigh(e.key)) ? null : e;
+    }
+
+    final TreeMapEntry!(K,V) absHighest() {
+        TreeMapEntry!(K,V) e =
+            (toEnd ?  m.getLastEntry() :
+             (hiInclusive ?  m.getFloorEntry(hi) :
+                             m.getLowerEntry(hi)));
+        return (e is null || tooLow(e.key)) ? null : e;
+    }
+
+    final TreeMapEntry!(K,V) absCeiling(K key) {
+        if (tooLow(key))
+            return absLowest();
+        TreeMapEntry!(K,V) e = m.getCeilingEntry(key);
+        return (e is null || tooHigh(e.key)) ? null : e;
+    }
+
+    final TreeMapEntry!(K,V) absHigher(K key) {
+        if (tooLow(key))
+            return absLowest();
+        TreeMapEntry!(K,V) e = m.getHigherEntry(key);
+        return (e is null || tooHigh(e.key)) ? null : e;
+    }
+
+    final TreeMapEntry!(K,V) absFloor(K key) {
+        if (tooHigh(key))
+            return absHighest();
+        TreeMapEntry!(K,V) e = m.getFloorEntry(key);
+        return (e is null || tooLow(e.key)) ? null : e;
+    }
+
+    final TreeMapEntry!(K,V) absLower(K key) {
+        if (tooHigh(key))
+            return absHighest();
+        TreeMapEntry!(K,V) e = m.getLowerEntry(key);
+        return (e is null || tooLow(e.key)) ? null : e;
+    }
+
+    /** Returns the absolute high fence for ascending traversal */
+    final TreeMapEntry!(K,V) absHighFence() {
+        return (toEnd ? null : (hiInclusive ?
+                                m.getHigherEntry(hi) :
+                                m.getCeilingEntry(hi)));
+    }
+
+    /** Return the absolute low fence for descending traversal  */
+    final TreeMapEntry!(K,V) absLowFence() {
+        return (fromStart ? null : (loInclusive ?
+                                    m.getLowerEntry(lo) :
+                                    m.getFloorEntry(lo)));
+    }
+
+    // Abstract methods defined in ascending vs descending classes
+    // These relay to the appropriate absolute versions
+
+    abstract TreeMapEntry!(K,V) subLowest();
+    abstract TreeMapEntry!(K,V) subHighest();
+    abstract TreeMapEntry!(K,V) subCeiling(K key);
+    abstract TreeMapEntry!(K,V) subHigher(K key);
+    abstract TreeMapEntry!(K,V) subFloor(K key);
+    abstract TreeMapEntry!(K,V) subLower(K key);
+
+    /** Returns ascending iterator from the perspective of this submap */
+    abstract Iterator!K keyIterator();
+
+    // abstract Spliterator!K keySpliterator();
+
+    /** Returns descending iterator from the perspective of this submap */
+    abstract Iterator!K descendingKeyIterator();
+
+    // methods
+
+    override bool isEmpty() {
+        // return (fromStart && toEnd) ? m.isEmpty() : entrySet().isEmpty();
+        return m.isEmpty();
+    }
+
+    override int size() {
+        // return (fromStart && toEnd) ? m.size() : entrySet().size();
+        return  m.size();
+    }
+
+    final override bool containsKey(K key) {
+        return inRange(key) && m.containsKey(key);
+    }
+
+    final override V put(K key, V value) {
+        if (!inRange(key))
+            throw new IllegalArgumentException("key out of range");
+        return m.put(key, value);
+    }
+
+    final override V get(K key) {
+        return !inRange(key) ? null :  m.get(key);
+    }
+
+    final override V remove(K key) {
+        return !inRange(key) ? null : m.remove(key);
+    }
+
+    final MapEntry!(K,V) ceilingEntry(K key) {
+        return exportEntry!(K,V)(subCeiling(key));
+    }
+
+    final K ceilingKey(K key) {
+        return keyOrNull(subCeiling(key));
+    }
+
+    final MapEntry!(K,V) higherEntry(K key) {
+        return exportEntry!(K,V)(subHigher(key));
+    }
+
+    final K higherKey(K key) {
+        return keyOrNull(subHigher(key));
+    }
+
+    final MapEntry!(K,V) floorEntry(K key) {
+        return exportEntry!(K,V)(subFloor(key));
+    }
+
+    final K floorKey(K key) {
+        return keyOrNull(subFloor(key));
+    }
+
+    final MapEntry!(K,V) lowerEntry(K key) {
+        return exportEntry!(K,V)(subLower(key));
+    }
+
+    final K lowerKey(K key) {
+        return keyOrNull(subLower(key));
+    }
+
+    final K firstKey() {
+        return key(subLowest());
+    }
+
+    final K lastKey() {
+        return key(subHighest());
+    }
+
+    final MapEntry!(K,V) firstEntry() {
+        return exportEntry!(K,V)(subLowest());
+    }
+
+    final MapEntry!(K,V) lastEntry() {
+        return exportEntry!(K,V)(subHighest());
+    }
+
+    final MapEntry!(K,V) pollFirstEntry() {
+        TreeMapEntry!(K,V) e = subLowest();
+        MapEntry!(K,V) result = exportEntry!(K,V)(e);
+        if (e !is null)
+            m.deleteEntry(e);
+        return result;
+    }
+
+    final MapEntry!(K,V) pollLastEntry() {
+        TreeMapEntry!(K,V) e = subHighest();
+        MapEntry!(K,V) result = exportEntry!(K,V)(e);
+        if (e !is null)
+            m.deleteEntry(e);
+        return result;
+    }
+
+    // Views
+    // NavigableMap!(K,V) descendingMapView;
+    // EntrySetView entrySetView;
+    // KeySet!(K, V) navigableKeySetView;
+
+    // final NavigableSet!K navigableKeySet() {
+    //     KeySet!(K, V) nksv = navigableKeySetView;
+    //     return (nksv !is null) ? nksv :
+    //         (navigableKeySetView = new TreeMap.KeySet!(K, V)(this));
+    // }
+
+    // final Set!K keySet() {
+    //     return navigableKeySet();
+    // }
+
+    // NavigableSet!K descendingKeySet() {
+    //     return descendingMap().navigableKeySet();
+    // }
+
+    alias subMap = NavigableMap!(K,V).subMap;
+    alias headMap = NavigableMap!(K,V).headMap;
+    alias tailMap = NavigableMap!(K,V).tailMap;
+
+    final SortedMap!(K,V) subMap(K fromKey, K toKey) {
+        return subMap(fromKey, true, toKey, false);
+    }
+
+    final SortedMap!(K,V) headMap(K toKey) {
+        return headMap(toKey, false);
+    }
+
+    final SortedMap!(K,V) tailMap(K fromKey) {
+        return tailMap(fromKey, true);
+    }
+
+    // View classes
+
+    // abstract class EntrySetView : AbstractSet!(MapEntry!(K,V)) {
+    //     private int _size = -1, sizeModCount;
+
+    //     override int size() {
+    //         if (fromStart && toEnd)
+    //             return m.size();
+    //         // if (_size == -1 || sizeModCount  !is  m.modCount) {
+    //         //     sizeModCount = m.modCount;
+    //         //     _size = 0;
+    //         //     Iterator!K i = iterator();
+    //         //     while (i.hasNext()) {
+    //         //         _size++;
+    //         //         i.next();
+    //         //     }
+    //         // }
+    //         implementationMissing();
+    //         return _size;
+    //     }
+
+    //     override bool isEmpty() {
+    //         TreeMapEntry!(K,V) n = absLowest();
+    //         return n is null || tooHigh(n.key);
+    //     }
+
+    //     override bool contains(MapEntry!(K,V) entry) {
+    //         // MapEntry!(K,V) entry = cast(MapEntry!(K,V)) o;
+    //         // if (!(o instanceof MapEntry))
+    //         //     return false;
+    //         K key = entry.getKey();
+    //         if (!inRange(key))
+    //             return false;
+    //         TreeMapEntry!(K,V) node = m.getEntry(key);
+    //         return node !is null &&
+    //             valEquals(node.getValue(), entry.getValue());
+    //     }
+
+    //     bool remove(MapEntry!(K,V) entry) {
+    //         // if (!(o instanceof MapEntry))
+    //         //     return false;
+    //         // MapEntry<?,?> entry = (MapEntry<?,?>) o;
+    //         K key = entry.getKey();
+    //         if (!inRange(key))
+    //             return false;
+    //         TreeMapEntry!(K,V) node = m.getEntry(key);
+    //         if (node !is null && valEquals(node.getValue(),
+    //                                     entry.getValue())) {
+    //             m.deleteEntry(node);
+    //             return true;
+    //         }
+    //         return false;
+    //     }
+    // }
+
+
+    /**
+     * Iterators for SubMaps
+     */
+    abstract class SubMapIterator(T) : Iterator!T {
+        TreeMapEntry!(K,V) lastReturned;
+        TreeMapEntry!(K,V) next;
+        K fenceKey;
+        int expectedModCount;
+
+        this(TreeMapEntry!(K,V) first,
+                       TreeMapEntry!(K,V) fence) {
+            expectedModCount = m.modCount;
+            lastReturned = null;
+            next = first;
+            fenceKey = fence is null ? K.init : fence.key;
+        }
+
+        final bool hasNext() {
+            return next !is null && next.key  !is  fenceKey;
+        }
+
+        final TreeMapEntry!(K,V) nextEntry() {
+            TreeMapEntry!(K,V) e = next;
+            if (e is null || e.key == fenceKey)
+                throw new NoSuchElementException();
+            if (m.modCount  !is  expectedModCount)
+                throw new ConcurrentModificationException();
+            next = successor(e);
+            lastReturned = e;
+            return e;
+        }
+
+        final TreeMapEntry!(K,V) prevEntry() {
+            TreeMapEntry!(K,V) e = next;
+            if (e is null || e.key == fenceKey)
+                throw new NoSuchElementException();
+            if (m.modCount  !is  expectedModCount)
+                throw new ConcurrentModificationException();
+            next = predecessor(e);
+            lastReturned = e;
+            return e;
+        }
+
+        final void removeAscending() {
+            if (lastReturned is null)
+                throw new IllegalStateException();
+            if (m.modCount  !is  expectedModCount)
+                throw new ConcurrentModificationException();
+            // deleted entries are replaced by their successors
+            if (lastReturned.left !is null && lastReturned.right !is null)
+                next = lastReturned;
+            m.deleteEntry(lastReturned);
+            lastReturned = null;
+            expectedModCount = m.modCount;
+        }
+
+        final void removeDescending() {
+            if (lastReturned is null)
+                throw new IllegalStateException();
+            if (m.modCount  !is  expectedModCount)
+                throw new ConcurrentModificationException();
+            m.deleteEntry(lastReturned);
+            lastReturned = null;
+            expectedModCount = m.modCount;
+        }
+
+    }
+
+    final class SubMapEntryIterator : SubMapIterator!(MapEntry!(K,V)) {
+        this(TreeMapEntry!(K,V) first,
+                            TreeMapEntry!(K,V) fence) {
+            super(first, fence);
+        }
+        MapEntry!(K,V) next() {
+            return nextEntry();
+        }
+        void remove() {
+            removeAscending();
+        }
+    }
+
+    final class DescendingSubMapEntryIterator : SubMapIterator!(MapEntry!(K,V)) {
+        this(TreeMapEntry!(K,V) last, TreeMapEntry!(K,V) fence) {
+            super(last, fence);
+        }
+
+        MapEntry!(K,V) next() {
+            return prevEntry();
+        }
+        void remove() {
+            removeDescending();
+        }
+    }
+
+    // Implement minimal Spliterator as KeySpliterator backup
+    final class SubMapKeyIterator : SubMapIterator!K { // , Spliterator!K
+        this(TreeMapEntry!(K,V) first,
+                          TreeMapEntry!(K,V) fence) {
+            super(first, fence);
+        }
+        K next() {
+            return nextEntry().key;
+        }
+        void remove() {
+            removeAscending();
+        }
+        Spliterator!K trySplit() {
+            return null;
+        }
+        void forEachRemaining(Consumer!K action) {
+            while (hasNext())
+                action(next());
+        }
+        bool tryAdvance(Consumer!K action) {
+            if (hasNext()) {
+                action(next());
+                return true;
+            }
+            return false;
+        }
+        long estimateSize() {
+            return long.max;
+        }
+        int characteristics() {
+            return SpliteratorCharacteristic.DISTINCT | SpliteratorCharacteristic.ORDERED |
+                SpliteratorCharacteristic.SORTED;
+        }
+        final Comparator!K  getComparator() {
+            return this.outer.comparator();
+        }
+    }
+
+    final class DescendingSubMapKeyIterator : SubMapIterator!K { // , Spliterator!K
+        this(TreeMapEntry!(K,V) last,
+                                    TreeMapEntry!(K,V) fence) {
+            super(last, fence);
+        }
+        K next() {
+            return prevEntry().key;
+        }
+        void remove() {
+            removeDescending();
+        }
+        Spliterator!K trySplit() {
+            return null;
+        }
+        void forEachRemaining(Consumer!K action) {
+            while (hasNext())
+                action(next());
+        }
+        bool tryAdvance(Consumer!K action) {
+            if (hasNext()) {
+                action(next());
+                return true;
+            }
+            return false;
+        }
+        long estimateSize() {
+            return long.max;
+        }
+        // int characteristics() {
+        //     return Spliterator.DISTINCT | Spliterator.ORDERED;
+        // }
+    }
+
+    
+}
+
+/**
+ * @serial include
+ */
+static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
+    // private static final long serialVersionUID = 912986545866124060L;
+
+    this(TreeMap!(K,V) m,
+                    bool fromStart, K lo, bool loInclusive,
+                    bool toEnd,     K hi, bool hiInclusive) {
+        super(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive);
+    }
+
+    Comparator!K comparator() {
+        return m.comparator();
+    }
+
+    NavigableMap!(K,V) subMap(K fromKey, bool fromInclusive,
+                                    K toKey,   bool toInclusive) {
+        if (!inRange(fromKey, fromInclusive))
+            throw new IllegalArgumentException("fromKey out of range");
+        if (!inRange(toKey, toInclusive))
+            throw new IllegalArgumentException("toKey out of range");
+        return new AscendingSubMap!(K,V)(m,
+                                     false, fromKey, fromInclusive,
+                                     false, toKey,   toInclusive);
+    }
+
+    NavigableMap!(K,V) headMap(K toKey, bool inclusive) {
+        if (!inRange(toKey, inclusive))
+            throw new IllegalArgumentException("toKey out of range");
+        return new AscendingSubMap!(K,V)(m,
+                                     fromStart, lo,    loInclusive,
+                                     false,     toKey, inclusive);
+    }
+
+    NavigableMap!(K,V) tailMap(K fromKey, bool inclusive) {
+        if (!inRange(fromKey, inclusive))
+            throw new IllegalArgumentException("fromKey out of range");
+        return new AscendingSubMap!(K,V)(m,
+                                     false, fromKey, inclusive,
+                                     toEnd, hi,      hiInclusive);
+    }
+
+    // NavigableMap!(K,V) descendingMap() {
+    //     NavigableMap!(K,V) mv = descendingMapView;
+    //     return (mv !is null) ? mv :
+    //         (descendingMapView =
+    //          new DescendingSubMap!(K,V)(m,
+    //                                 fromStart, lo, loInclusive,
+    //                                 toEnd,     hi, hiInclusive));
+    // }
+
+    override Iterator!K keyIterator() {
+        return new SubMapKeyIterator(absLowest(), absHighFence());
+    }
+
+    // Spliterator!K keySpliterator() {
+    //     return new SubMapKeyIterator(absLowest(), absHighFence());
+    // }
+
+    override Iterator!K descendingKeyIterator() {
+        return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
+    }
+
+    // final class AscendingEntrySetView : EntrySetView {
+    //     Iterator!(MapEntry!(K,V)) iterator() {
+    //         return new SubMapEntryIterator(absLowest(), absHighFence());
+    //     }
+    // }
+
+    // Set!(MapEntry!(K,V)) entrySet() {
+    //     EntrySetView es = entrySetView;
+    //     return (es !is null) ? es : (entrySetView = new AscendingEntrySetView());
+    // }
+
+    override TreeMapEntry!(K,V) subLowest()       { return absLowest(); }
+    override TreeMapEntry!(K,V) subHighest()      { return absHighest(); }
+    override TreeMapEntry!(K,V) subCeiling(K key) { return absCeiling(key); }
+    override TreeMapEntry!(K,V) subHigher(K key)  { return absHigher(key); }
+    override TreeMapEntry!(K,V) subFloor(K key)   { return absFloor(key); }
+    override TreeMapEntry!(K,V) subLower(K key)   { return absLower(key); }
+}
+
+/**
+ * @serial include
+ */
+static final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
+    // private static final long serialVersionUID = 912986545866120460L;
+    this(TreeMap!(K,V) m,
+                    bool fromStart, K lo, bool loInclusive,
+                    bool toEnd,     K hi, bool hiInclusive) {
+        super(m, fromStart, lo, loInclusive, toEnd, hi, hiInclusive);
+
+        // reverseComparator = Collections.reverseOrder(m._comparator);
+    }
+
+    private Comparator!K reverseComparator;
+
+    Comparator!K comparator() {
+        implementationMissing();
+        return reverseComparator;
+    }
+
+    NavigableMap!(K,V) subMap(K fromKey, bool fromInclusive,
+                                    K toKey,   bool toInclusive) {
+        if (!inRange(fromKey, fromInclusive))
+            throw new IllegalArgumentException("fromKey out of range");
+        if (!inRange(toKey, toInclusive))
+            throw new IllegalArgumentException("toKey out of range");
+        return new DescendingSubMap!(K,V)(m,
+                                      false, toKey,   toInclusive,
+                                      false, fromKey, fromInclusive);
+    }
+
+    NavigableMap!(K,V) headMap(K toKey, bool inclusive) {
+        if (!inRange(toKey, inclusive))
+            throw new IllegalArgumentException("toKey out of range");
+        return new DescendingSubMap!(K,V)(m,
+                                      false, toKey, inclusive,
+                                      toEnd, hi,    hiInclusive);
+    }
+
+    NavigableMap!(K,V) tailMap(K fromKey, bool inclusive) {
+        if (!inRange(fromKey, inclusive))
+            throw new IllegalArgumentException("fromKey out of range");
+        return new DescendingSubMap!(K,V)(m,
+                                      fromStart, lo, loInclusive,
+                                      false, fromKey, inclusive);
+    }
+
+    // NavigableMap!(K,V) descendingMap() {
+    //     NavigableMap!(K,V) mv = descendingMapView;
+    //     return (mv !is null) ? mv :
+    //         (descendingMapView =
+    //          new AscendingSubMap!(K,V)(m,
+    //                                fromStart, lo, loInclusive,
+    //                                toEnd,     hi, hiInclusive));
+    // }
+
+    override Iterator!K keyIterator() {
+        return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
+    }
+
+    // override Spliterator!K keySpliterator() {
+    //     return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
+    // }
+
+    override Iterator!K descendingKeyIterator() {
+        return new SubMapKeyIterator(absLowest(), absHighFence());
+    }
+
+    // final class DescendingEntrySetView : EntrySetView {
+    //     Iterator!(MapEntry!(K,V)) iterator() {
+    //         return new DescendingSubMapEntryIterator(absHighest(), absLowFence());
+    //     }
+    // }
+
+    // Set!(MapEntry!(K,V)) entrySet() {
+    //     EntrySetView es = entrySetView;
+    //     return (es !is null) ? es : (entrySetView = new DescendingEntrySetView());
+    // }
+
+    override TreeMapEntry!(K,V) subLowest()       { return absHighest(); }
+    override TreeMapEntry!(K,V) subHighest()      { return absLowest(); }
+    override TreeMapEntry!(K,V) subCeiling(K key) { return absFloor(key); }
+    override TreeMapEntry!(K,V) subHigher(K key)  { return absLower(key); }
+    override TreeMapEntry!(K,V) subFloor(K key)   { return absCeiling(key); }
+    override TreeMapEntry!(K,V) subLower(K key)   { return absHigher(key); }
+}
+
+
+// Little utilities
+
+/**
+* Returns the successor of the specified Entry, or null if no such.
+*/
+static TreeMapEntry!(K,V) successor(K,V)(TreeMapEntry!(K,V) t) {
+    if (t is null)
+        return null;
+    else if (t.right !is null) {
+        TreeMapEntry!(K,V) p = t.right;
+        while (p.left !is null)
+            p = p.left;
+        return p;
+    } else {
+        TreeMapEntry!(K,V) p = t.parent;
+        TreeMapEntry!(K,V) ch = t;
+        while (p !is null && ch == p.right) {
+            ch = p;
+            p = p.parent;
+        }
+        return p;
+    }
+}
+
+/**
+    * Returns the predecessor of the specified Entry, or null if no such.
+    */
+static TreeMapEntry!(K,V) predecessor(K,V)(TreeMapEntry!(K,V) t) {
+    if (t is null)
+        return null;
+    else if (t.left !is null) {
+        TreeMapEntry!(K,V) p = t.left;
+        while (p.right !is null)
+            p = p.right;
+        return p;
+    } else {
+        TreeMapEntry!(K,V) p = t.parent;
+        TreeMapEntry!(K,V) ch = t;
+        while (p !is null && ch == p.left) {
+            ch = p;
+            p = p.parent;
+        }
+        return p;
+    }
+}
+
+
+/**
+    * Test two values for equality.  Differs from o1.equals(o2) only in
+    * that it copes with {@code null} o1 properly.
+    */
+static final bool valEquals(V)(V o1, V o2) {
+    // return (o1 is null ? o2 is null : o1.equals(o2));
+    return o1 == o2;
+}
+
+/**
+    * Return SimpleImmutableEntry for entry, or null if null
+    */
+static MapEntry!(K,V) exportEntry(K,V)(TreeMapEntry!(K,V) e) {
+    return (e is null) ? null :
+        new SimpleImmutableEntry!(K,V)(e);
+}
+
+/**
+    * Return key for entry, or null if null
+    */
+static K keyOrNull(K,V)(TreeMapEntry!(K,V) e) {        
+    return (e is null) ? K.init : e.key;
+}
+
+/**
+    * Returns the key corresponding to the specified Entry.
+    * @throws NoSuchElementException if the Entry is null
+    */
+static K key(K, V)(TreeMapEntry!(K,V) e) {
+    if (e is null)
+        throw new NoSuchElementException();
+    return e.key;
 }

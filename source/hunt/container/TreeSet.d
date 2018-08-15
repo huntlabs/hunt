@@ -1,11 +1,16 @@
 module hunt.container.TreeSet;
 
+import hunt.container.AbstractSet;
+import hunt.container.Collection;
+import hunt.container.Iterator;
+import hunt.container.Map;
 import hunt.container.NavigableSet;
 import hunt.container.NavigableMap;
-
 import hunt.container.Set;
-import hunt.container.Iterator;
+import hunt.container.SortedSet;
+import hunt.container.TreeMap;
 
+import hunt.util.Comparator;
 import hunt.util.exception;
 
 /**
@@ -154,19 +159,35 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @param s sorted set whose elements will comprise the new set
      * @throws NullPointerException if the specified sorted set is null
      */
-    this(SortedSet!(E) s) {
-        this(s.comparator());
-        addAll(s);
-    }
+    // this(SortedSet!(E) s) {
+    //     this(s.comparator());
+    //     addAll(s);
+    // }
 
+    override int opApply(scope int delegate(ref E) dg)  {
+        if(dg is null)
+            throw new NullPointerException();
+        
+        int result = 0;
+        int expectedModCount = m.size();
+        foreach(E k; m.byKey) {
+            result = dg(k);
+            if(result != 0) return result;
+        } 
+        
+        if (expectedModCount !is m.size()) 
+            throw new ConcurrentModificationException();
+        return result;
+    }
+    
     /**
      * Returns an iterator over the elements in this set in ascending order.
      *
      * @return an iterator over the elements in this set in ascending order
      */
-    Iterator!(E) iterator() {
-        return m.navigableKeySet().iterator();
-    }
+    // Iterator!(E) iterator() {
+    //     return m.navigableKeySet().iterator();
+    // }
 
     /**
      * Returns an iterator over the elements in this set in descending order.
@@ -174,23 +195,23 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @return an iterator over the elements in this set in descending order
      * @since 1.6
      */
-    Iterator!(E) descendingIterator() {
-        return m.descendingKeySet().iterator();
-    }
+    // Iterator!(E) descendingIterator() {
+    //     return m.descendingKeySet().iterator();
+    // }
 
     /**
      * @since 1.6
      */
-    NavigableSet!(E) descendingSet() {
-        return new TreeSet!(E,Object)(m.descendingMap());
-    }
+    // NavigableSet!(E) descendingSet() {
+    //     return new TreeSet!(E,Object)(m.descendingMap());
+    // }
 
     /**
      * Returns the number of elements in this set (its cardinality).
      *
      * @return the number of elements in this set (its cardinality)
      */
-    int size() {
+    override int size() {
         return m.size();
     }
 
@@ -199,7 +220,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      *
      * @return {@code true} if this set contains no elements
      */
-    bool isEmpty() {
+    override bool isEmpty() {
         return m.isEmpty();
     }
 
@@ -217,7 +238,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
      */
-    bool contains(Object o) {
+    override bool contains(E o) {
         return m.containsKey(o);
     }
 
@@ -238,8 +259,8 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
      */
-    bool add(E e) {
-        return m.put(e, PRESENT)==null;
+    override bool add(E e) {
+        return m.put(e, PRESENT) is null;
     }
 
     /**
@@ -259,7 +280,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
      */
-    bool remove(Object o) {
+    override bool remove(E o) {
         return m.remove(o)==PRESENT;
     }
 
@@ -267,7 +288,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * Removes all of the elements from this set.
      * The set will be empty after this call returns.
      */
-    void clear() {
+    override void clear() {
         m.clear();
     }
 
@@ -282,7 +303,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      *         if any element is null and this set uses natural ordering, or
      *         its comparator does not permit null elements
      */
-     bool addAll(Collection!(E) c) {
+     override bool addAll(Collection!(E) c) {
         // Use linear-time version if applicable
         // if (m.size()==0 && c.size() > 0 &&
         //     c instanceof SortedSet &&
@@ -309,7 +330,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      */
     NavigableSet!(E) subSet(E fromElement, bool fromInclusive,
                                   E toElement,   bool toInclusive) {
-        return new TreeSet!(E,Object)(m.subMap(fromElement, fromInclusive,
+        return new TreeSet!(E)(m.subMap(fromElement, fromInclusive,
                                        toElement,   toInclusive));
     }
 
@@ -322,7 +343,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @since 1.6
      */
     NavigableSet!(E) headSet(E toElement, bool inclusive) {
-        return new TreeSet!(E,Object)(m.headMap(toElement, inclusive));
+        return new TreeSet!(E)(m.headMap(toElement, inclusive));
     }
 
     /**
@@ -334,7 +355,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @since 1.6
      */
     NavigableSet!(E) tailSet(E fromElement, bool inclusive) {
-        return new TreeSet!(E,Object)(m.tailMap(fromElement, inclusive));
+        return new TreeSet!(E)(m.tailMap(fromElement, inclusive));
     }
 
     /**
@@ -439,7 +460,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      */
     E pollFirst() {
         MapEntry!(E,Object) e = m.pollFirstEntry();
-        return (e == null) ? null : e.getKey();
+        return (e is null) ? null : e.getKey();
     }
 
     /**
@@ -447,7 +468,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      */
     E pollLast() {
         MapEntry!(E,Object) e = m.pollLastEntry();
-        return (e == null) ? null : e.getKey();
+        return (e is null) ? null : e.getKey();
     }
 
     /**

@@ -3,6 +3,41 @@ module hunt.container.AbstractCollection;
 import hunt.util.exception;
 import hunt.container.Collection;
 
+import std.array;
+import std.conv;
+
+/**
+ * This class provides a skeletal implementation of the {@code Collection}
+ * interface, to minimize the effort required to implement this interface. <p>
+ *
+ * To implement an unmodifiable collection, the programmer needs only to
+ * extend this class and provide implementations for the {@code iterator} and
+ * {@code size} methods.  (The iterator returned by the {@code iterator}
+ * method must implement {@code hasNext} and {@code next}.)<p>
+ *
+ * To implement a modifiable collection, the programmer must additionally
+ * override this class's {@code add} method (which otherwise throws an
+ * {@code UnsupportedOperationException}), and the iterator returned by the
+ * {@code iterator} method must additionally implement its {@code remove}
+ * method.<p>
+ *
+ * The programmer should generally provide a void (no argument) and
+ * {@code Collection} constructor, as per the recommendation in the
+ * {@code Collection} interface specification.<p>
+ *
+ * The documentation for each non-abstract method in this class describes its
+ * implementation in detail.  Each of these methods may be overridden if
+ * the collection being implemented admits a more efficient implementation.<p>
+ *
+ * This class is a member of the
+ * <a href="{@docRoot}/java/util/package-summary.html#CollectionsFramework">
+ * Java Collections Framework</a>.
+ *
+ * @author  Josh Bloch
+ * @author  Neal Gafter
+ * @see Collection
+ * @since 1.2
+ */
 abstract class AbstractCollection(E) : Collection!E {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -123,8 +158,36 @@ abstract class AbstractCollection(E) : Collection!E {
         return super.toHash();
     }
 
+    //  String conversion
+
+    /**
+     * Returns a string representation of this collection.  The string
+     * representation consists of a list of the collection's elements in the
+     * order they are returned by its iterator, enclosed in square brackets
+     * ({@code "[]"}).  Adjacent elements are separated by the characters
+     * {@code ", "} (comma and space).  Elements are converted to strings as
+     * by {@link String#valueOf(Object)}.
+     *
+     * @return a string representation of this collection
+     */
     override string toString()
     {
-        return super.toString();
+        if(size() == 0)
+            return "[]";
+        
+        Appender!string sb;
+        sb.put("[");
+        bool isFirst = true;
+        foreach(E e; this)
+        {
+           if(!isFirst) sb.put(", ");
+            static if(is(E == class))
+                sb.put(e is this ? "(this Collection)" : e.toString());
+            else
+                sb.put(e.to!string());
+            isFirst = false;
+        }
+        sb.put(']');
+        return sb.data;
     }
 }
