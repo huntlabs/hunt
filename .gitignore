@@ -26,6 +26,8 @@ __dummy.html
 *.zip
 *-test-*
 __test__*__
+test.config
+
 examples/*/log.txt
 examples/Benchmark/kiss-benchmark
 examples/TcpClient/tcp-client
@@ -34,6 +36,6 @@ examples/UdpDemo/udp-demo
 examples/HttpServer/http-server
 examples/TcpServer/tcp-server
 examples/EventGroupDemo/http-server-powered
-test.config
 examples/PerformanceTest/performance
 examples/ConfigurationDemo/configuration
+examples/ContainerDemo/container-demo

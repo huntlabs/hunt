@@ -13,6 +13,8 @@ import std.conv;
 import std.string;
 import std.bigint;
 
+import kiss.logger;
+
 alias BigInteger = BigInt;
 
 /**
@@ -528,17 +530,19 @@ final class ObjectIdentifier
      */
     private static int pack7Oid(byte[] data, int ioffset, size_t ilength, byte[] ot, int ooffset) {
         byte[] pack = pack(data, ioffset, ilength, 8, 7);
-        size_t firstNonZero = pack.length-1;   // paste at least one byte
-        for (size_t i=pack.length-2; i>=0; i--) {
+        size_t packLenth = pack.length;
+        size_t firstNonZero = packLenth-1;   // paste at least one byte        
+        for (int i= cast(int)packLenth-2; i>=0; i--) {
+            // tracef("i=%d, len=%d", i, packLenth);
             if (pack[i] != 0) {
                 firstNonZero = i;
             }
             pack[i] |= 0x80;
         }
-        // System.arraycopy(pack, firstNonZero, ot, ooffset, pack.length-firstNonZero);
-        size_t len = pack.length-firstNonZero;
+        // System.arraycopy(pack, firstNonZero, ot, ooffset, packLenth-firstNonZero);
+        size_t len = packLenth-firstNonZero;
         ot[ooffset .. ooffset+len] = pack[firstNonZero .. firstNonZero+len];
-        return cast(int)(pack.length-firstNonZero);
+        return cast(int)(packLenth-firstNonZero);
     }
 
     /**
@@ -551,7 +555,7 @@ final class ObjectIdentifier
     private static int pack8(byte[] data, int ioffset, int ilength, byte[] ot, int ooffset) {
         byte[] pack = pack(data, ioffset, ilength, 7, 8);
         size_t firstNonZero = pack.length-1;   // paste at least one byte
-        for (size_t i=pack.length-2; i>=0; i--) {
+        for (int i=cast(int)pack.length-2; i>=0; i--) {
             if (pack[i] != 0) {
                 firstNonZero = i;
             }

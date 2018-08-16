@@ -342,24 +342,25 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
      * true (relayed to method afterNodeInsertion).
      */
     final void putMapEntries(Map!(K, V) m, bool evict) {
-        throw new NotImplementedException("");
-        // int s = m.size();
-        // if (s > 0) {
-        //     if (table is null) { // pre-size
-        //         float ft = ((float)s / loadFactor) + 1.0F;
-        //         int t = ((ft < (float)MAXIMUM_CAPACITY) ?
-        //                  cast(int)ft : MAXIMUM_CAPACITY);
-        //         if (t > threshold)
-        //             threshold = tableSizeFor(t);
-        //     }
-        //     else if (s > threshold)
-        //         resize();
-        //     for (MapEntry!(K, V) e : m.entrySet()) {
-        //         K key = e.getKey();
-        //         V value = e.getValue();
-        //         putVal(hash(key), key, value, false, evict);
-        //     }
-        // }
+        // throw new NotImplementedException("");
+        int s = m.size();
+        if (s > 0) {
+            if (table is null) { // pre-size
+                float ft = (cast(float)s / loadFactor) + 1.0F;
+                int t = ((ft < cast(float)MAXIMUM_CAPACITY) ?
+                         cast(int)ft : MAXIMUM_CAPACITY);
+                if (t > threshold)
+                    threshold = tableSizeFor(t);
+            }
+            else if (s > threshold)
+                resize();
+            // for (MapEntry!(K, V) e : m.entrySet()) {
+            foreach(K key, V value; m) {
+                // K key = e.getKey();
+                // V value = e.getValue();
+                putVal(hash(key), key, value, false, evict);
+            }
+        }
     }
 
   
@@ -381,7 +382,8 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
      * @see #put(Object, Object)
      */
     override V get(K key) {
-        throw new NotImplementedException("");
+        HashMapNode!(K, V) e = getNode(hash(key), key);
+        return e is null ? V.init : e.value;
     }
 
     /**
@@ -635,11 +637,12 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
      *         (A <tt>null</tt> return can also indicate that the map
      *         previously associated <tt>null</tt> with <tt>key</tt>.)
      */
-    // V remove(Object key) {
-    //     HashMapNode!(K,V) e;
-    //     return (e = removeNode(hash(key), key, null, false, true)) is null ?
-    //         null : e.value;
-    // }
+    override V remove(K key) {
+        HashMapNode!(K,V) e = removeNode(hash(key), key, V.init, false, true);
+        return e is null ? V.init : e.value;
+    }
+
+    alias remove = AbstractMap!(K, V).remove;
 
     /**
      * Implements Map.remove and related methods
@@ -1457,8 +1460,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
          * necessary simplifies testing a bit.
          */
         static int tieBreakOrder(T)(T a, T b) if(isBasicType!(T) || isSomeString!T) {
-            int d = (hashOf(a) <= hashOf(b) ? -1 : 1);
-            return d;
+            return (hashOf(a) <= hashOf(b) ? -1 : 1);
         }
 
         static int tieBreakOrder(T)(T a, T b) if(is(T == class) || is(T == interface)) {
