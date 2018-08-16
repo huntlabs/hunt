@@ -8,6 +8,8 @@ import hunt.util.memory;
 import std.conv;
 import std.datetime;
 
+import kiss.logger;
+
 /**
  * Abstract base class and factory for caches. A cache is a key-value mapping.
  * It has properties that make it more suitable for caching than a Map.
@@ -386,7 +388,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         maxSize = size > 0 ? size : 0;
 
         version(HuntDebugMode)  {
-            tracef("** capacity reset to " ~ size);
+            tracef("** capacity reset to " ~ size.to!string());
         }
     }
 
@@ -395,7 +397,7 @@ class MemoryCache(K, V) : Cache!(K, V) {
         lifetime = timeout > 0 ? timeout * 1000L : 0L;
 
         version(HuntDebugMode)  {
-            tracef("** lifetime reset to " ~ timeout);
+            tracef("** lifetime reset to " ~ timeout.to!string());
         }
     }
 

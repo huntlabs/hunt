@@ -32,7 +32,8 @@ interface Cloneable {
 
 
 interface Comparable(T) {
-    int compareTo(T o);
+    // int compareTo(T o);
+    int opCmp(T o);
 }
 
 

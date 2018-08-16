@@ -485,8 +485,14 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
 
             if (e !is null) { // existing mapping for key
                 V oldValue = e.value;
-                if (!onlyIfAbsent || oldValue is null)
-                    e.value = value;
+                static if( is(V == class)) {
+                    if (!onlyIfAbsent || oldValue is null)
+                        e.value = value;
+                }
+                else {
+                    if (!onlyIfAbsent)
+                        e.value = value;
+                }
                 afterNodeAccess(e);
                 return oldValue;
             }
@@ -495,7 +501,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
         if (++_size > threshold)
             resize();
         afterNodeInsertion(evict);
-        return null;                       
+        return V.init;                       
     }
 
   
@@ -1455,13 +1461,20 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             return d;
         }
 
-        static int tieBreakOrder(T)(T a, T b) if(is(T == class)) {
+        static int tieBreakOrder(T)(T a, T b) if(is(T == class) || is(T == interface)) {
             int d = 0;
             if (a is null || b is null  ||
                 (d = std.algorithm.cmp(typeid(a).name, 
                     typeid(b).name)) == 0)
-                d = (hashOf(a) <= hashOf(b) ?
-                     -1 : 1);
+                d = ((cast(Object)a).toHash() <= (cast(Object)b).toHash() ? -1 : 1);
+            return d;
+        }
+
+        static int tieBreakOrder(T)(T a, T b) if(is(T == struct)) {
+            int d = std.algorithm.cmp(typeid(a).name,
+                    typeid(b).name);
+            if (d == 0)
+                d = (a.toHash() <= b.toHash() ? -1 : 1);
             return d;
         }
 
@@ -1566,7 +1579,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
                                     (q = ch.find(h, k)) !is null))
                                     return q;
                             }
-                            dir = tieBreakOrder(k, pk);
+                            dir = tieBreakOrder!(K)(k, pk);
                         } else if(k > pk)
                             dir = 1;
                         else
