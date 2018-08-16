@@ -137,7 +137,7 @@ class HashSet(E)
      * @return <tt>true</tt> if this set did not already contain the specified
      * element
      */
-    bool add(E e) {
+    override bool add(E e) {
         return _array.insertBack(e) >=0;
     }
 
@@ -182,7 +182,7 @@ class HashSet(E)
      * Removes all of the elements from this set.
      * The set will be empty after this call returns.
      */
-    void clear() {
+    override void clear() {
         _array.clear();
     }
 
@@ -294,11 +294,9 @@ class HashSet(E)
     //     return new HashMap.KeySpliterator<E,Object>(map, 0, -1, 0, 0);
     // }
 
-    int opApply(scope int delegate(ref E) dg)
-    {
+    override int opApply(scope int delegate(ref E) dg) {
         int result = 0;
-        foreach(E v; _array)
-        {
+        foreach(E v; _array) {
             result = dg(v);
             if(result != 0) return result;
         }

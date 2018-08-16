@@ -1389,7 +1389,12 @@ class X509CRLImpl : X509CRL , DerEncoder {
             return hashcode;
         }
 
-        int compareTo(X509IssuerSerial another) {
+        override int opCmp(Object o)
+        {
+            return opCmp(cast(X509IssuerSerial) o);
+        }
+
+        int opCmp(X509IssuerSerial another) {
             int cissuer =  std.algorithm.cmp(issuer.toString(), another.issuer.toString());
             if (cissuer != 0) return cissuer;
             return (this.serial - another.serial).toInt();
