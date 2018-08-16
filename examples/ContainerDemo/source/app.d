@@ -8,7 +8,7 @@ import SetDemo;
 void main()
 {
 
-    // testUnits!MapDemo();
+    testUnits!MapDemo();
     testUnits!SetDemo();
 
 }

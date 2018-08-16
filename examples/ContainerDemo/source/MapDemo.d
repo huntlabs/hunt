@@ -14,7 +14,7 @@ import std.range;
 
 class MapDemo
 {
-    void testHashMap()
+    void testHashMapForeach()
     {
         // https://stackoverflow.com/questions/4234985/how-to-for-each-the-hashmap
         // HashMap Declaration
@@ -27,6 +27,8 @@ class MapDemo
         hmap.put(1, "Sherry");
         hmap.put(2, "Karon");
         hmap.put(100, "Jim");
+
+        writeln(hmap.toString());
 
         writeln("\nTesting HashMap foreach1...");
         foreach (int key, string v; hmap)
@@ -88,10 +90,33 @@ class MapDemo
 
     }
 
+    void testHashMapRemove()
+    {
+        HashMap!(int, string) hmap = new HashMap!(int, string)();
+
+        //Adding elements to LinkedHashMap
+        hmap.put(22, "Abey");
+        hmap.put(33, "Dawn");
+        hmap.put(1, "Sherry");
+        hmap.put(2, "Karon");
+        hmap.put(100, "Jim");
+
+        writefln("item[%d]=%s", 33, hmap.get(33));
+
+        writeln(hmap.toString());
+
+        assert(hmap.size() == 5);
+        hmap.remove(1);
+        
+        writeln(hmap.toString());
+        assert(hmap.size() == 4);
+
+    }
+
     void testLinkedHashMap()
     {
         //
-        writeln("\n\nTesting LinkedHashMap...");
+        writeln("Testing LinkedHashMap...");
         LinkedHashMap!(int, string) lhmap = new LinkedHashMap!(int, string)();
 
         //Adding elements to LinkedHashMap
