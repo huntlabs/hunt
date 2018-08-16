@@ -77,12 +77,12 @@ import hunt.util.exception;
  * @since   1.2
  */
 
-class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Serializable
+class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
 {
     /**
      * The backing map.
      */
-    private NavigableMap!(E,Object) m;
+    private NavigableMap!(E, Object) m;
 
     // Dummy value to associate with an Object in the backing Map
     private __gshared static Object PRESENT;
@@ -95,7 +95,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
     /**
      * Constructs a set backed by the specified navigable map.
      */
-    this(NavigableMap!(E,Object) m) {
+    this(NavigableMap!(E, Object) m) {
         this.m = m;
     }
 
@@ -113,7 +113,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * {@code ClassCastException}.
      */
     this() {
-        this(new TreeMap!(E,Object)());
+        this(new TreeMap!(E, Object)());
     }
 
     /**
@@ -130,7 +130,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      *        ordering} of the elements will be used.
      */
     // this(Comparator!E comparator) {
-    //     this(new TreeMap!(E,Object)(comparator));
+    //     this(new TreeMap!(E, Object)(comparator));
     // }
 
     /**
@@ -203,7 +203,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @since 1.6
      */
     // NavigableSet!(E) descendingSet() {
-    //     return new TreeSet!(E,Object)(m.descendingMap());
+    //     return new TreeSet!(E, Object)(m.descendingMap());
     // }
 
     /**
@@ -309,7 +309,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
         //     c instanceof SortedSet &&
         //     m instanceof TreeMap) {
         //     SortedSet!(E) set = (SortedSet!(E)) c;
-        //     TreeMap!(E,Object) map = (TreeMap<E, Object>) m;
+        //     TreeMap!(E, Object) map = (TreeMap<E, Object>) m;
         //     Comparator<?> cc = set.comparator();
         //     Comparator<? super E> mc = map.comparator();
         //     if (cc==mc || (cc != null && cc.equals(mc))) {
@@ -459,7 +459,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @since 1.6
      */
     E pollFirst() {
-        MapEntry!(E,Object) e = m.pollFirstEntry();
+        MapEntry!(E, Object) e = m.pollFirstEntry();
         return (e is null) ? null : e.getKey();
     }
 
@@ -467,7 +467,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
      * @since 1.6
      */
     E pollLast() {
-        MapEntry!(E,Object) e = m.pollLastEntry();
+        MapEntry!(E, Object) e = m.pollLastEntry();
         return (e is null) ? null : e.getKey();
     }
 
@@ -531,7 +531,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable, java.io.Seri
     //         Comparator<? super E> c = (Comparator<? super E>) s.readObject();
 
     //     // Create backing TreeMap
-    //     TreeMap!(E,Object) tm = new TreeMap<>(c);
+    //     TreeMap!(E, Object) tm = new TreeMap<>(c);
     //     m = tm;
 
     //     // Read in size
