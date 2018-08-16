@@ -150,7 +150,15 @@ abstract class AbstractCollection(E) : Collection!E {
      * }</pre>
      */
     E[] toArray() {
-        throw new NotImplementedException("toArray");
+        // throw new NotImplementedException("toArray");
+        if(size() == 0)
+            return [];
+
+        E[] r = new E[size()];
+        int i=0;
+        foreach(E e; this)
+            r[i++] = e;
+        return r;
      }
 
     override size_t toHash() @trusted nothrow

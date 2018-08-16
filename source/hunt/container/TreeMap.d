@@ -26,6 +26,7 @@ import std.range;
 import std.traits;
 
 
+                import kiss.logger;
 // Red-black mechanics
 
 private enum bool RED   = false;
@@ -2482,7 +2483,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     /**
      * The backing map.
      */
-    TreeMap!(K,V) m;
+    protected TreeMap!(K,V) m;
 
     /**
      * Endpoints are represented as triples (fromStart, lo,
@@ -2626,12 +2627,13 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     abstract TreeMapEntry!(K,V) subLower(K key);
 
     /** Returns ascending iterator from the perspective of this submap */
-    abstract Iterator!K keyIterator();
+    // abstract Iterator!K keyIterator();
 
     // abstract Spliterator!K keySpliterator();
 
     /** Returns descending iterator from the perspective of this submap */
     abstract Iterator!K descendingKeyIterator();
+
 
     // methods
 
@@ -2821,6 +2823,124 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     /**
      * Iterators for SubMaps
      */
+
+    // see also: SubMapIterator
+    mixin template SubMapInputRange() {
+        TreeMapEntry!(K,V) lastReturned;
+        TreeMapEntry!(K,V) next;
+        K fenceKey;
+        int expectedModCount;
+
+        this(TreeMapEntry!(K,V) first,
+                       TreeMapEntry!(K,V) fence) {
+            expectedModCount = m.modCount;
+            lastReturned = null;
+            next = first;
+            fenceKey = fence is null ? K.init : fence.key;
+        }
+
+        final bool empty() {
+            return next is null || next.key == fenceKey;
+        }
+
+        final void popFront() {
+            TreeMapEntry!(K,V) e = next;
+            if (e is null || e.key == fenceKey) {
+                throw new NoSuchElementException();
+            }
+            
+            next = successor(e);
+            lastReturned = e;
+            // return e;
+        }
+    }
+
+    final class KeyInputRange :  InputRange!K {
+        mixin SubMapInputRange;
+
+        final K front() @property { return next.key; }
+
+        final K moveFront() @property { throw new NotSupportedException(); }
+        
+        int opApply(scope int delegate(K) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            while(!empty()) {
+                result = dg(next.key);
+                // popFront();
+                if(result != 0) return result;
+                next = successor(next);
+            }
+
+            if (m.modCount  !=  expectedModCount)
+                throw new ConcurrentModificationException();
+            return result;
+        }
+
+        int opApply(scope int delegate(size_t, K) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            size_t index = 0;
+            while(!empty()) {
+                result = dg(index++, next.key);
+                if(result != 0) return result;
+                next = successor(next);
+            }
+
+            if (m.modCount  !=  expectedModCount)
+                throw new ConcurrentModificationException();
+
+            return result;
+        }
+    }
+
+    final class ValueInputRange :  InputRange!V {
+        mixin SubMapInputRange;
+
+        final V front() @property { return next.value; }
+
+        final V moveFront() @property { throw new NotSupportedException(); }
+        
+        int opApply(scope int delegate(V) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            while(!empty()) {
+                result = dg(next.value);
+                if(result != 0) return result;
+                next = successor(next);
+            }
+
+            if (m.modCount  !=  expectedModCount)
+                throw new ConcurrentModificationException();
+            return result;
+        }
+
+        int opApply(scope int delegate(size_t, V) dg) {
+            if(dg is null)
+                throw new NullPointerException();
+
+            int result = 0;
+            size_t index = 0;
+            while(!empty()) {
+                result = dg(index++, next.value);
+                if(result != 0) return result;
+                next = successor(next);
+            }
+
+            if (m.modCount  !=  expectedModCount)
+                throw new ConcurrentModificationException();
+
+            return result;
+        }
+    }
+
+
     abstract class SubMapIterator(T) : Iterator!T {
         TreeMapEntry!(K,V) lastReturned;
         TreeMapEntry!(K,V) next;
@@ -3038,9 +3158,16 @@ static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
     //                                 toEnd,     hi, hiInclusive));
     // }
 
-    override Iterator!K keyIterator() {
-        return new SubMapKeyIterator(absLowest(), absHighFence());
+    override InputRange!K byKey()    {
+        return new KeyInputRange(absLowest(), absHighFence());
     }
+
+    override InputRange!V byValue()    {
+        return new ValueInputRange(absLowest(), absHighFence());
+    }
+    // override Iterator!K keyIterator() {
+    //     return new SubMapKeyIterator(absLowest(), absHighFence());
+    // }
 
     // Spliterator!K keySpliterator() {
     //     return new SubMapKeyIterator(absLowest(), absHighFence());
@@ -3048,6 +3175,36 @@ static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
 
     override Iterator!K descendingKeyIterator() {
         return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
+    }
+
+
+    override int opApply(scope int delegate(ref K, ref V) dg)  {
+        if(dg is null)
+            throw new NullPointerException();
+
+        int result = 0;
+        Iterator!(MapEntry!(K,V)) iterator = new SubMapEntryIterator(absLowest(), absHighFence());
+        while(iterator.hasNext()) {
+            TreeMapEntry!(K,V) e = cast(TreeMapEntry!(K,V)) iterator.next();
+            result = dg(e.key, e.value);
+            if(result != 0) return result;
+        }
+
+        return result;
+    }
+    
+    override int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
+        if(dg is null)
+            throw new NullPointerException();
+
+        int result = 0;
+        Iterator!(MapEntry!(K,V)) iterator = new SubMapEntryIterator(absLowest(), absHighFence());
+        while(iterator.hasNext()) {
+            result = dg(iterator.next());
+            if(result != 0) return result;
+        }
+
+        return result;
     }
 
     // final class AscendingEntrySetView : EntrySetView {
@@ -3125,9 +3282,9 @@ static final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
     //                                toEnd,     hi, hiInclusive));
     // }
 
-    override Iterator!K keyIterator() {
-        return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
-    }
+    // override Iterator!K keyIterator() {
+    //     return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
+    // }
 
     // override Spliterator!K keySpliterator() {
     //     return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
@@ -3162,7 +3319,7 @@ static final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
 /**
 * Returns the successor of the specified Entry, or null if no such.
 */
-static TreeMapEntry!(K,V) successor(K,V)(TreeMapEntry!(K,V) t) {
+private TreeMapEntry!(K,V) successor(K,V)(TreeMapEntry!(K,V) t) {
     if (t is null)
         return null;
     else if (t.right !is null) {
@@ -3182,9 +3339,9 @@ static TreeMapEntry!(K,V) successor(K,V)(TreeMapEntry!(K,V) t) {
 }
 
 /**
-    * Returns the predecessor of the specified Entry, or null if no such.
-    */
-static TreeMapEntry!(K,V) predecessor(K,V)(TreeMapEntry!(K,V) t) {
+* Returns the predecessor of the specified Entry, or null if no such.
+*/
+private TreeMapEntry!(K,V) predecessor(K,V)(TreeMapEntry!(K,V) t) {
     if (t is null)
         return null;
     else if (t.left !is null) {
@@ -3205,34 +3362,34 @@ static TreeMapEntry!(K,V) predecessor(K,V)(TreeMapEntry!(K,V) t) {
 
 
 /**
-    * Test two values for equality.  Differs from o1.equals(o2) only in
-    * that it copes with {@code null} o1 properly.
-    */
-static final bool valEquals(V)(V o1, V o2) {
+* Test two values for equality.  Differs from o1.equals(o2) only in
+* that it copes with {@code null} o1 properly.
+*/
+private bool valEquals(V)(V o1, V o2) {
     // return (o1 is null ? o2 is null : o1.equals(o2));
     return o1 == o2;
 }
 
 /**
-    * Return SimpleImmutableEntry for entry, or null if null
-    */
-static MapEntry!(K,V) exportEntry(K,V)(TreeMapEntry!(K,V) e) {
+* Return SimpleImmutableEntry for entry, or null if null
+*/
+private MapEntry!(K,V) exportEntry(K,V)(TreeMapEntry!(K,V) e) {
     return (e is null) ? null :
         new SimpleImmutableEntry!(K,V)(e);
 }
 
 /**
-    * Return key for entry, or null if null
-    */
-static K keyOrNull(K,V)(TreeMapEntry!(K,V) e) {        
+* Return key for entry, or null if null
+*/
+private K keyOrNull(K,V)(TreeMapEntry!(K,V) e) {        
     return (e is null) ? K.init : e.key;
 }
 
 /**
-    * Returns the key corresponding to the specified Entry.
-    * @throws NoSuchElementException if the Entry is null
-    */
-static K key(K, V)(TreeMapEntry!(K,V) e) {
+* Returns the key corresponding to the specified Entry.
+* @throws NoSuchElementException if the Entry is null
+*/
+private K key(K, V)(TreeMapEntry!(K,V) e) {
     if (e is null)
         throw new NoSuchElementException();
     return e.key;
