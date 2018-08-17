@@ -1,6 +1,7 @@
 import std.stdio;
 
 import hunt.util.UnitTest;
+import LinkedHashMapDemo;
 import MapDemo;
 import SetDemo;
 
@@ -8,7 +9,9 @@ import SetDemo;
 void main()
 {
 
-    testUnits!MapDemo();
-    testUnits!SetDemo();
+
+    testUnits!LinkedHashMapDemo();
+    // testUnits!MapDemo();
+    // testUnits!SetDemo();
 
 }

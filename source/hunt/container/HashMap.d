@@ -455,11 +455,14 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
      */
     final V putVal(size_t hash, K key, V value, bool onlyIfAbsent, bool evict) {
         HashMapNode!(K, V)[] tab; HashMapNode!(K, V) p; 
-        size_t n, i;
+        size_t n;
         if ((tab = table) is null || (n = tab.length) == 0)
             n = (tab = resize()).length;
-        if ((p = tab[i = (n - 1) & hash]) is null)
+
+        size_t i = (n - 1) & hash;
+        if ((p = tab[i]) is null) {
             tab[i] = newNode(hash, key, value, null);
+        }
         else {
             HashMapNode!(K, V) e; K k;
             k = p.key;
