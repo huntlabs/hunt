@@ -524,7 +524,7 @@ class X509Factory : CertificateFactorySpi {
      * @If any parsing error
      */
     private static byte[] readOneBlock(InputStream stream) {
-        implementationMissing();
+        implementationMissing(false);
         return null;
         // The first character of a BLOCK.
         // int c = stream.read();

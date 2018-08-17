@@ -2,7 +2,6 @@ module MapDemo;
 
 import std.stdio;
 
-import hunt.container.LinkedHashMap;
 import hunt.container.HashMap;
 import hunt.container.TreeMap;
 import hunt.container.Map;
@@ -14,6 +13,7 @@ import std.range;
 
 class MapDemo
 {
+    
     void testHashMapForeach()
     {
         // https://stackoverflow.com/questions/4234985/how-to-for-each-the-hashmap
@@ -113,33 +113,6 @@ class MapDemo
 
     }
 
-    void testLinkedHashMap()
-    {
-        //
-        writeln("Testing LinkedHashMap...");
-        LinkedHashMap!(int, string) lhmap = new LinkedHashMap!(int, string)();
-
-        //Adding elements to LinkedHashMap
-        lhmap.put(22, "Abey");
-        lhmap.put(33, "Dawn");
-        lhmap.put(1, "Sherry");
-        lhmap.put(2, "Karon");
-        lhmap.put(100, "Jim");
-
-        assert(lhmap[1] == "Sherry");
-
-        foreach (int key, string v; lhmap)
-        {
-            writeln("Key is: " ~ key.to!string ~ " & Value is: " ~ v);
-        }
-
-        writeln("\nTesting LinkedHashMap byValue...");
-        foreach (size_t index, string value; lhmap.byValue)
-        {
-            writefln("value[%d] is: %s ", index, value);
-        }
-    }
-
     void testTreeMap()
     {
         /* This is how to declare TreeMap */
@@ -161,7 +134,7 @@ class MapDemo
         //   while(iterator.hasNext()) {
         //      Map.Entry mentry = (Map.Entry)iterator.next();
         //      System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
-        //      System.out.println(mentry.getValue());
+        //      writeln(mentry.getValue());
         //   }
         writeln("\nTesting TreeMap foreach1...");
         foreach (int key, string value; tmap)

@@ -9,10 +9,9 @@ import std.container.array;
 
 /**
 */
-class HashSet(E)
-    : AbstractSet!E, Set!E // Cloneable , java.io.Serializable
+class HashSet(E) : AbstractSet!E, Set!E 
 {
-    enum long serialVersionUID = -5024744406713321676L;
+    // enum long serialVersionUID = -5024744406713321676L;
 
     protected Array!(E) _array;
 
