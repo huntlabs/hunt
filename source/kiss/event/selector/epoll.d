@@ -30,6 +30,8 @@ import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
 import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
 
+public import core.sys.linux.epoll;
+
 import kiss.event.core;
 import kiss.event.socket;
 import kiss.event.timer;
@@ -291,31 +293,12 @@ enum
     EPOLL_CTL_MOD = 3, // Change file descriptor epoll_event structure.
 }
 
-
+// https://github.com/dlang/druntime/pull/2279
+version (ARM) enum SO_REUSEPORT = 15;
+version (AArch64) enum SO_REUSEPORT = 15;
 
 // dfmt off
 extern (C) : @system : nothrow :
 // dfmt on
 
-align(1) struct epoll_event
-{
-align(1):
-uint events;
-    epoll_data_t data;
-}
-
-union epoll_data_t
-{
-    void* ptr;
-    int fd;
-    uint u32;
-    ulong u64;
-}
-
-int epoll_create(int size);
-int epoll_create1(int flags);
-int epoll_ctl(int epfd, int op, int fd, epoll_event* event);
-int epoll_wait(int epfd, epoll_event* events, int maxevents, int timeout);
-
 socket_t eventfd(uint initval, int flags);
-
