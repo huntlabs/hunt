@@ -180,6 +180,8 @@ interface List(E) : Collection!E {
      */
     E get(int index);
 
+    E opIndex(int index);
+
     /**
      * Replaces the element at the specified position in this list with the
      * specified element (optional operation).

@@ -278,7 +278,7 @@ class ArrayList(E) : AbstractList!E {
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     override void add(int index, E element) {
-        _array.insertAfter(_array[index .. index+1], element);
+        _array.insertAfter(_array[index-1 .. index], element);
     }
 
     alias add = AbstractList!(E).add;

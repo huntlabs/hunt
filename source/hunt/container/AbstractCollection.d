@@ -100,6 +100,28 @@ abstract class AbstractCollection(E) : Collection!E {
 
     // E get(int index) { throw new UnsupportedOperationException(); }
 
+    // Bulk Operations
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over the specified collection,
+     * checking each element returned by the iterator in turn to see
+     * if it's contained in this collection.  If all elements are so
+     * contained <tt>true</tt> is returned, otherwise <tt>false</tt>.
+     *
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     * @see #contains(Object)
+     */
+    public bool containsAll(Collection!E c) {
+        foreach (E e ; c)
+            if (!contains(e))
+                return false;
+        return true;
+    }
+
+
     /**
      * {@inheritDoc}
      *
@@ -127,7 +149,7 @@ abstract class AbstractCollection(E) : Collection!E {
         return modified;
     }
 
-       /**
+    /**
      * {@inheritDoc}
      *
      * <p>This implementation iterates over this collection, checking each

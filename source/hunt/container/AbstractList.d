@@ -85,6 +85,8 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     E get(int index) { throw new UnsupportedOperationException(""); }
+    
+    E opIndex(int index) { return get(index); }
 
     /**
      * {@inheritDoc}
