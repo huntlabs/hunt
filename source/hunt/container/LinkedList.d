@@ -2,6 +2,7 @@ module hunt.container.LinkedList;
 
 import hunt.container.AbstractList;
 import hunt.container.AbstractSequentialList;
+import hunt.container.Collection;
 import hunt.container.Deque;
 import hunt.container.List;
 
@@ -267,24 +268,34 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
         //         return true;
         //     }
         // }
+
+        _size--;
+        modCount++;
         return _dlist.linearRemoveElement(o);
     }
 
-//     /**
-//      * Appends all of the elements in the specified collection to the end of
-//      * this list, in the order that they are returned by the specified
-//      * collection's iterator.  The behavior of this operation is undefined if
-//      * the specified collection is modified while the operation is in
-//      * progress.  (Note that this will occur if the specified collection is
-//      * this list, and it's nonempty.)
-//      *
-//      * @param c collection containing elements to be added to this list
-//      * @return {@code true} if this list changed as a result of the call
-//      * @throws NullPointerException if the specified collection is null
-//      */
-//     bool addAll(Collection<? extends E> c) {
-//         return addAll(_size, c);
-//     }
+    /**
+     * Appends all of the elements in the specified collection to the end of
+     * this list, in the order that they are returned by the specified
+     * collection's iterator.  The behavior of this operation is undefined if
+     * the specified collection is modified while the operation is in
+     * progress.  (Note that this will occur if the specified collection is
+     * this list, and it's nonempty.)
+     *
+     * @param c collection containing elements to be added to this list
+     * @return {@code true} if this list changed as a result of the call
+     * @throws NullPointerException if the specified collection is null
+     */
+    override bool addAll(Collection!E c) {
+
+        bool modified = c.size() > 0;
+        foreach (E e ; c) {
+            linkLast(e);
+        }
+        return modified;
+
+        // return addAll(_size, c);
+    }
 
 //     /**
 //      * Inserts all of the elements in the specified collection into this
@@ -301,6 +312,10 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
 //      * @throws IndexOutOfBoundsException {@inheritDoc}
 //      * @throws NullPointerException if the specified collection is null
 //      */
+
+bool addAll(int index, Collection!E c) {
+    throw new NotImplementedException();
+}
 //     bool addAll(int index, Collection<? extends E> c) {
 //         checkPositionIndex(index);
 
@@ -729,33 +744,34 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
         return remove(o);
     }
 
-//     /**
-//      * Removes the last occurrence of the specified element in this
-//      * list (when traversing the list from head to tail).  If the list
-//      * does not contain the element, it is unchanged.
-//      *
-//      * @param o element to be removed from this list, if present
-//      * @return {@code true} if the list contained the specified element
-//      * @since 1.6
-//      */
-//     bool removeLastOccurrence(Object o) {
-//         if (o == null) {
-//             for (Node!E x = last; x != null; x = x.prev) {
-//                 if (x.item == null) {
-//                     unlink(x);
-//                     return true;
-//                 }
-//             }
-//         } else {
-//             for (Node!E x = last; x != null; x = x.prev) {
-//                 if (o.equals(x.item)) {
-//                     unlink(x);
-//                     return true;
-//                 }
-//             }
-//         }
-//         return false;
-//     }
+    /**
+     * Removes the last occurrence of the specified element in this
+     * list (when traversing the list from head to tail).  If the list
+     * does not contain the element, it is unchanged.
+     *
+     * @param o element to be removed from this list, if present
+     * @return {@code true} if the list contained the specified element
+     * @since 1.6
+     */
+    // bool removeLastOccurrence(E o) {
+
+    //     // if (o == null) {
+    //     //     for (Node!E x = last; x != null; x = x.prev) {
+    //     //         if (x.item == null) {
+    //     //             unlink(x);
+    //     //             return true;
+    //     //         }
+    //     //     }
+    //     // } else {
+    //     //     for (Node!E x = last; x != null; x = x.prev) {
+    //     //         if (o.equals(x.item)) {
+    //     //             unlink(x);
+    //     //             return true;
+    //     //         }
+    //     //     }
+    //     // }
+    //     // return false;
+    // }
 
 
 //     @SuppressWarnings("unchecked")
