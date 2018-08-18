@@ -11,11 +11,9 @@ import hunt.container.List;
 
 /**
 */
-class ArrayList(E) : AbstractList!E
-         // List!E // , RandomAccess, Cloneable, java.io.Serializable
-{
+class ArrayList(E) : AbstractList!E {
 
-    private enum long serialVersionUID = 8683452581122892189L;
+    // private enum long serialVersionUID = 8683452581122892189L;
 
     /**
      * Default initial capacity.
