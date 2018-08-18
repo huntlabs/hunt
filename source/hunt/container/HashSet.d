@@ -2,28 +2,93 @@ module hunt.container.HashSet;
 
 
 import hunt.container.AbstractSet;
+import hunt.container.Collection;
+import hunt.container.HashMap;
+import hunt.container.LinkedHashMap;
 import hunt.container.Set;
 
 import std.algorithm;
-import std.container.array;
+import std.range;
+
 
 /**
-*/
+ * This class implements the <tt>Set</tt> interface, backed by a hash table
+ * (actually a <tt>HashMap</tt> instance).  It makes no guarantees as to the
+ * iteration order of the set; in particular, it does not guarantee that the
+ * order will remain constant over time.  This class permits the <tt>null</tt>
+ * element.
+ *
+ * <p>This class offers constant time performance for the basic operations
+ * (<tt>add</tt>, <tt>remove</tt>, <tt>contains</tt> and <tt>size</tt>),
+ * assuming the hash function disperses the elements properly among the
+ * buckets.  Iterating over this set requires time proportional to the sum of
+ * the <tt>HashSet</tt> instance's size (the number of elements) plus the
+ * "capacity" of the backing <tt>HashMap</tt> instance (the number of
+ * buckets).  Thus, it's very important not to set the initial capacity too
+ * high (or the load factor too low) if iteration performance is important.
+ *
+ * <p><strong>Note that this implementation is not synchronized.</strong>
+ * If multiple threads access a hash set concurrently, and at least one of
+ * the threads modifies the set, it <i>must</i> be synchronized externally.
+ * This is typically accomplished by synchronizing on some object that
+ * naturally encapsulates the set.
+ *
+ * If no such object exists, the set should be "wrapped" using the
+ * {@link Collections#synchronizedSet Collections.synchronizedSet}
+ * method.  This is best done at creation time, to prevent accidental
+ * unsynchronized access to the set:<pre>
+ *   Set s = Collections.synchronizedSet(new HashSet(...));</pre>
+ *
+ * <p>The iterators returned by this class's <tt>iterator</tt> method are
+ * <i>fail-fast</i>: if the set is modified at any time after the iterator is
+ * created, in any way except through the iterator's own <tt>remove</tt>
+ * method, the Iterator throws a {@link ConcurrentModificationException}.
+ * Thus, in the face of concurrent modification, the iterator fails quickly
+ * and cleanly, rather than risking arbitrary, non-deterministic behavior at
+ * an undetermined time in the future.
+ *
+ * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
+ * as it is, generally speaking, impossible to make any hard guarantees in the
+ * presence of unsynchronized concurrent modification.  Fail-fast iterators
+ * throw <tt>ConcurrentModificationException</tt> on a best-effort basis.
+ * Therefore, it would be wrong to write a program that depended on this
+ * exception for its correctness: <i>the fail-fast behavior of iterators
+ * should be used only to detect bugs.</i>
+ *
+ * <p>This class is a member of the
+ * <a href="{@docRoot}/../technotes/guides/collections/index.html">
+ * Java Collections Framework</a>.
+ *
+ * @param <E> the type of elements maintained by this set
+ *
+ * @author  Josh Bloch
+ * @author  Neal Gafter
+ * @see     Collection
+ * @see     Set
+ * @see     TreeSet
+ * @see     HashMap
+ * @since   1.2
+ */
 class HashSet(E) : AbstractSet!E, Set!E 
 {
     // enum long serialVersionUID = -5024744406713321676L;
 
-    protected Array!(E) _array;
+    protected HashMap!(E, Object) map;
 
     // Dummy value to associate with an Object in the backing Map
-    // private static Object PRESENT = new Object();
+    private __gshared static Object PRESENT; // = new Object();
+
+    shared static this()
+    {
+        PRESENT = new Object();
+    }
 
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * default initial capacity (16) and load factor (0.75).
      */
     this() {
-        // _array = new HashMap();
+        map = new HashMap!(E, Object)();
     }
 
     /**
@@ -35,10 +100,10 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @param c the collection whose elements are to be placed into this set
      * @throws NullPointerException if the specified collection is null
      */
-    // this(Collection<? extends E> c) {
-    //     _array = new HashMap<>(std.algorithm.max((int) (c.size()/.75f) + 1, 16));
-    //     addAll(c);
-    // }
+    this(Collection!E c) {
+        map = new HashMap!(E, Object)(std.algorithm.max(cast(int) (c.size()/.75f) + 1, 16));
+        addAll(c);
+    }
 
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
@@ -49,9 +114,9 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    // this(int initialCapacity, float loadFactor) {
-    //     _array = new HashMap<>(initialCapacity, loadFactor);
-    // }
+    this(int initialCapacity, float loadFactor) {
+        map = new HashMap!(E, Object)(initialCapacity, loadFactor);
+    }
 
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
@@ -62,7 +127,7 @@ class HashSet(E) : AbstractSet!E, Set!E
      *             than zero
      */
     this(int initialCapacity) {
-        _array.reserve(initialCapacity);
+        map = new HashMap!(E, Object)(initialCapacity);
     }
 
     /**
@@ -78,9 +143,9 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    // this(int initialCapacity, float loadFactor, bool dummy) {
-    //     map = new LinkedHashMap<>(initialCapacity, loadFactor);
-    // }
+    this(int initialCapacity, float loadFactor, bool dummy) {
+        map = new LinkedHashMap!(E, Object)(initialCapacity, loadFactor);
+    }
 
     /**
      * Returns an iterator over the elements in this set.  The elements
@@ -89,17 +154,17 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @return an Iterator over the elements in this set
      * @see ConcurrentModificationException
      */
-    // Iterator<E> iterator() {
-    //     return _array.keySet().iterator();
+    // override InputRange!E iterator() {
+    //     return map.byKey;
     // }
 
-    /**
+   /**
      * Returns the number of elements in this set (its cardinality).
      *
      * @return the number of elements in this set (its cardinality)
      */
     override int size() {
-        return cast(int)_array.length;
+        return map.size();
     }
 
     /**
@@ -108,27 +173,27 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @return <tt>true</tt> if this set contains no elements
      */
     override bool isEmpty() {
-        return _array.empty;
+        return map.isEmpty();
     }
 
     /**
      * Returns <tt>true</tt> if this set contains the specified element.
      * More formally, returns <tt>true</tt> if and only if this set
      * contains an element <tt>e</tt> such that
-     * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>.
+     * <tt>(o is null&nbsp;?&nbsp;e is null&nbsp;:&nbsp;o.equals(e))</tt>.
      *
      * @param o element whose presence in this set is to be tested
      * @return <tt>true</tt> if this set contains the specified element
      */
     override bool contains(E o) {
-        return _array[].canFind(o);
+        return map.containsKey(o);
     }
 
     /**
      * Adds the specified element to this set if it is not already present.
      * More formally, adds the specified element <tt>e</tt> to this set if
      * this set contains no element <tt>e2</tt> such that
-     * <tt>(e==null&nbsp;?&nbsp;e2==null&nbsp;:&nbsp;e.equals(e2))</tt>.
+     * <tt>(e is null&nbsp;?&nbsp;e2 is null&nbsp;:&nbsp;e.equals(e2))</tt>.
      * If this set already contains the element, the call leaves the set
      * unchanged and returns <tt>false</tt>.
      *
@@ -137,13 +202,13 @@ class HashSet(E) : AbstractSet!E, Set!E
      * element
      */
     override bool add(E e) {
-        return _array.insertBack(e) >=0;
+        return map.put(e, PRESENT) is null;
     }
 
     /**
      * Removes the specified element from this set if it is present.
      * More formally, removes an element <tt>e</tt> such that
-     * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>,
+     * <tt>(o is null&nbsp;?&nbsp;e is null&nbsp;:&nbsp;o.equals(e))</tt>,
      * if this set contains such an element.  Returns <tt>true</tt> if
      * this set contained the element (or equivalently, if this set
      * changed as a result of the call).  (This set will not contain the
@@ -152,29 +217,8 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @param o object to be removed from this set, if present
      * @return <tt>true</tt> if the set contained the specified element
      */
-    bool remove(E o)
-    {
-        int index = indexOf(o);
-        if(index < 0)   return false;
-        _array.linearRemove(_array[index .. index+1]);
-        return true;
-    }
-   
-    private int indexOf(E o) {
-        // return cast(int) _array[].indexOf(o);
-        for(size_t i=0; i<_array.length; i++)
-        {
-            static if(is(E == class))
-            {
-                if(_array[i] is o) return cast(int)i;
-            }
-            else
-            {
-                if(_array[i] == o) return cast(int)i;
-            }
-        }
-
-        return -1;
+    override bool remove(E o) {
+        return map.remove(o)==PRESENT;
     }
 
     /**
@@ -182,8 +226,9 @@ class HashSet(E) : AbstractSet!E, Set!E
      * The set will be empty after this call returns.
      */
     override void clear() {
-        _array.clear();
+        map.clear();
     }
+
 
     /**
      * Returns a shallow copy of this <tt>HashSet</tt> instance: the elements
@@ -195,7 +240,7 @@ class HashSet(E) : AbstractSet!E, Set!E
     // Object clone() {
     //     try {
     //         HashSet<E> newSet = (HashSet<E>) super.clone();
-    //         newSet.map = (HashMap<E, Object>) _array.clone();
+    //         newSet.map = (HashMap<E, Object>) map.clone();
     //         return newSet;
     //     } catch (CloneNotSupportedException e) {
     //         throw new InternalError(e);
@@ -218,14 +263,14 @@ class HashSet(E) : AbstractSet!E, Set!E
     //     s.defaultWriteObject();
 
     //     // Write out HashMap capacity and load factor
-    //     s.writeInt(_array.capacity());
-    //     s.writeFloat(_array.loadFactor());
+    //     s.writeInt(map.capacity());
+    //     s.writeFloat(map.loadFactor());
 
     //     // Write out size
-    //     s.writeInt(_array.size());
+    //     s.writeInt(map.size());
 
     //     // Write out all elements in the proper order.
-    //     for (E e : _array.keySet())
+    //     for (E e : map.keySet())
     //         s.writeObject(e);
     // }
 
@@ -266,14 +311,14 @@ class HashSet(E) : AbstractSet!E, Set!E
 
     //     // Create backing HashMap
     //     map = (((HashSet<?>)this) instanceof LinkedHashSet ?
-    //            new LinkedHashMap<E,Object>(capacity, loadFactor) :
-    //            new HashMap<E,Object>(capacity, loadFactor));
+    //            new LinkedHashMap!(E, Object)(capacity, loadFactor) :
+    //            new HashMap!(E, Object)(capacity, loadFactor));
 
     //     // Read in all elements in the proper order.
     //     for (int i=0; i<size; i++) {
     //         
     //             E e = (E) s.readObject();
-    //         _array.put(e, PRESENT);
+    //         map.put(e, PRESENT);
     //     }
     // }
 
@@ -290,12 +335,12 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @since 1.8
      */
     // Spliterator<E> spliterator() {
-    //     return new HashMap.KeySpliterator<E,Object>(map, 0, -1, 0, 0);
+    //     return new HashMap.KeySpliterator!(E, Object)(map, 0, -1, 0, 0);
     // }
 
     override int opApply(scope int delegate(ref E) dg) {
         int result = 0;
-        foreach(E v; _array) {
+        foreach(E v; map.byKey) {
             result = dg(v);
             if(result != 0) return result;
         }

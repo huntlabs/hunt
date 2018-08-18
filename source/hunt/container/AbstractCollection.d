@@ -5,6 +5,7 @@ import hunt.container.Collection;
 
 import std.array;
 import std.conv;
+import std.range;
 
 /**
  * This class provides a skeletal implementation of the {@code Collection}
@@ -48,6 +49,14 @@ abstract class AbstractCollection(E) : Collection!E {
 
     // Query Operations
 
+    /**
+     * Returns an iterator over the elements contained in this collection.
+     *
+     * @return an iterator over the elements contained in this collection
+     */
+    // InputRange!E iterator() {
+    //     throw new NotImplementedException();
+    // }
 
     abstract int size();
 
@@ -111,13 +120,102 @@ abstract class AbstractCollection(E) : Collection!E {
      */
     bool addAll(Collection!E c) {
         bool modified = false;
-        foreach (E e ; c)
+        foreach (E e ; c) {
             if (add(e))
                 modified = true;
+        }
         return modified;
     }
 
-    void clear() { throw new UnsupportedOperationException(""); }
+       /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over this collection, checking each
+     * element returned by the iterator in turn to see if it's contained
+     * in the specified collection.  If it's so contained, it's removed from
+     * this collection with the iterator's <tt>remove</tt> method.
+     *
+     * <p>Note that this implementation will throw an
+     * <tt>UnsupportedOperationException</tt> if the iterator returned by the
+     * <tt>iterator</tt> method does not implement the <tt>remove</tt> method
+     * and this collection contains one or more elements in common with the
+     * specified collection.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     *
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    bool removeAll(Collection!E c) {
+        assert(c !is null);
+        bool modified = false;
+        foreach(E k; c)
+        {
+            if(this.contains(k)) {
+                this.remove(k); modified = true;
+            }
+        }
+
+        return modified;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over this collection, checking each
+     * element returned by the iterator in turn to see if it's contained
+     * in the specified collection.  If it's not so contained, it's removed
+     * from this collection with the iterator's <tt>remove</tt> method.
+     *
+     * <p>Note that this implementation will throw an
+     * <tt>UnsupportedOperationException</tt> if the iterator returned by the
+     * <tt>iterator</tt> method does not implement the <tt>remove</tt> method
+     * and this collection contains one or more elements not present in the
+     * specified collection.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     *
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    bool retainAll(Collection!E c) {
+        assert(c !is null);
+        bool modified = false;
+
+
+        // InputRange!E it = iterator();
+        // while (!it.empty) {
+        //     E current = it.front();
+        //     it.popFront();
+
+        //     if (!c.contains(current)) {
+        //         // it.remove();
+        //         this.remove(current);
+        //         modified = true;
+        //     }
+        // }
+        import std.container.slist;
+        SList!E list;
+
+        foreach(E k; this) {
+            if(!c.contains(k)) {
+                // this.remove(k);
+                list.insert(k);
+            }
+        }
+
+        modified = !list.empty();
+        foreach(E e; list)
+            this.remove(e);
+
+        return modified;
+    }
+
+    void clear() { throw new NotImplementedException(); }
 
     int opApply(scope int delegate(ref E) dg)  {
         throw new NotImplementedException();
@@ -150,7 +248,6 @@ abstract class AbstractCollection(E) : Collection!E {
      * }</pre>
      */
     E[] toArray() {
-        // throw new NotImplementedException("toArray");
         if(size() == 0)
             return [];
 

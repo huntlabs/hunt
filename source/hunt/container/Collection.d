@@ -2,6 +2,7 @@ module hunt.container.Collection;
 
 import hunt.container.Iterable;
 import hunt.util.functional;
+import std.range;
 
 interface Collection(E) : Iterable!E {
     // Query Operations
@@ -48,7 +49,7 @@ interface Collection(E) : Iterable!E {
      *
      * @return an <tt>Iterator</tt> over the elements in this collection
      */
-    // Iterator!E iterator();
+    // InputRange!E iterator();
 
     /**
      * Returns an array containing all of the elements in this collection.

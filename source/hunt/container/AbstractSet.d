@@ -117,25 +117,37 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    bool removeAll(Collection!E c) {
+    override bool removeAll(Collection!E c) {
         assert(c !is null);
 
         bool modified = false;
 
-        throw new NotImplementedException("");
+        // throw new NotImplementedException("");
 
-        // if (size() > c.size()) {
-        //     for (Iterator<?> i = c.iterator(); i.hasNext(); )
-        //         modified |= remove(i.next());
-        // } else {
-        //     for (Iterator<?> i = iterator(); i.hasNext(); ) {
-        //         if (c.contains(i.next())) {
-        //             i.remove();
-        //             modified = true;
-        //         }
-        //     }
-        // }
-        // return modified;
+        if (size() > c.size()) {
+            foreach(E k; c)        {
+                if(this.contains(k)) {
+                    this.remove(k); modified = true;
+                }
+            }
+            // for (Iterator<?> i = c.iterator(); i.hasNext(); )
+            //     modified |= remove(i.next());
+        } else {
+            // for (Iterator<?> i = iterator(); i.hasNext(); ) {
+            //     if (c.contains(i.next())) {
+            //         i.remove();
+            //         modified = true;
+            //     }
+            // }
+            foreach(E k; this) {
+                if(c.contains(k))  {
+                    this.remove(k);
+                    modified = true;
+                }
+            }
+            
+        }
+        return modified;
     }
 
 }
