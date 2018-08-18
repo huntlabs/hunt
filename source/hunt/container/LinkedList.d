@@ -66,7 +66,7 @@ import std.range;
  * @param !E the type of elements held in this collection
  */
 
-class LinkedList(E) : AbstractSequentialList!E,  List!E , Deque!E //, Cloneable
+class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
 {
     DList!E _dlist;
     int _size = 0;
