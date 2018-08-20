@@ -21,6 +21,20 @@ class Completable(S) : CompletableFuture!S , Promise!S {
     void failed(Exception x) {
         completeExceptionally(x);
     }
+
+    string id() {
+        return _id;
+    }
+
+    void id(string id) { _id = id;}
+
+    this()
+    {
+        _id = "undefined";
+        super();
+    }
+
+    private string _id;
 }
 
 

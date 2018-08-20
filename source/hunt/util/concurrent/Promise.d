@@ -8,6 +8,9 @@ import hunt.util.exception;
  * @param <C> the type of the context object
  */
 interface Promise(C) {
+
+    string id();
+
     /**
      * <p>Callback invoked when the operation completes.</p>
      *
@@ -43,6 +46,8 @@ interface Promise(C) {
 
 class DefaultPromise(C) : Promise!C
 {
+    string id() { return "default"; }
+
     void succeeded(C result) {
     }
     

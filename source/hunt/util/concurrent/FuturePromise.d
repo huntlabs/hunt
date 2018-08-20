@@ -13,6 +13,7 @@ class FuturePromise(C) : Future!C, Promise!C
     private bool _done;	
     private Exception _cause;
 	private C _result;
+	private string _id;
 
     static this()
     {
@@ -25,6 +26,9 @@ class FuturePromise(C) : Future!C, Promise!C
 		// 
         // _cause = COMPLETED;
     }
+
+    string id() { return _id; }
+	void id(string id) { _id = id; }
     
 	void succeeded(C result) {
 		if (!_done) {
