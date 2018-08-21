@@ -7,6 +7,33 @@ import hunt.container.Set;
 
 import hunt.util.exception;
 
+
+/**
+ * This class provides a skeletal implementation of the <tt>Set</tt>
+ * interface to minimize the effort required to implement this
+ * interface. <p>
+ *
+ * The process of implementing a set by extending this class is identical
+ * to that of implementing a Collection by extending AbstractCollection,
+ * except that all of the methods and constructors in subclasses of this
+ * class must obey the additional constraints imposed by the <tt>Set</tt>
+ * interface (for instance, the add method must not permit addition of
+ * multiple instances of an object to a set).<p>
+ *
+ * Note that this class does not override any of the implementations from
+ * the <tt>AbstractCollection</tt> class.  It merely adds implementations
+ * for <tt>equals</tt> and <tt>hashCode</tt>.<p>
+ *
+ * This class is a member of the
+ * <a href="{@docRoot}/../technotes/guides/collections/index.html">
+ * Java Collections Framework</a>.
+ *
+ * @param <E> the type of elements maintained by this set
+ *
+ * @see Collection
+ * @see AbstractCollection
+ * @see Set
+ */
 abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -34,23 +61,21 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
      * @param o object to be compared for equality with this set
      * @return <tt>true</tt> if the specified object is equal to this set
      */
-    // bool equals(Object o) {
-    //     if (o == this)
-    //         return true;
+    override bool opEquals(Object o) {
+        if (o is this)
+            return true;
 
-    //     if (!(o instanceof Set))
-    //         return false;
-    //     Collection<?> c = (Collection<?>) o;
-    //     if (c.size() != size())
-    //         return false;
-    //     try {
-    //         return containsAll(c);
-    //     } catch (ClassCastException unused)   {
-    //         return false;
-    //     } catch (NullPointerException unused) {
-    //         return false;
-    //     }
-    // }
+        Collection!E c = cast(Collection!E) o;
+        if(c is null) return false;
+        if (c.size() != size())
+            return false;
+
+        try {
+            return containsAll(c);
+        } catch (Exception) {
+            return false;
+        }
+    }
 
     /**
      * Returns the hash code value for this set.  The hash code of a set is
@@ -69,16 +94,17 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
      * @see Object#equals(Object)
      * @see Set#equals(Object)
      */
-    // int toHash() {
-    //     int h = 0;
-    //     Iterator<E> i = iterator();
-    //     while (i.hasNext()) {
-    //         E obj = i.next();
-    //         if (obj != null)
-    //             h += obj.toHash();
-    //     }
-    //     return h;
-    // }
+    override size_t toHash() @trusted nothrow {
+        try {
+            size_t h = 0;
+            foreach(E item; this)
+                h += hashOf(item);
+            return h;
+        }
+        catch(Exception) {
+            return 0;
+        }
+    }
 
     /**
      * Removes from this set all of its elements that are contained in the
