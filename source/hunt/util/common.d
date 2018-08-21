@@ -200,3 +200,16 @@ enum ByteOrder
     BitEndian,
     LittleEndian
 }
+
+
+size_t hashCode(T)(T[] a...) {
+    if (a is null)
+        return 0;
+
+    size_t result = 1;
+
+    foreach (T element ; a)
+        result = 31 * result + (element == T.init ? 0 : hashOf(element));
+
+    return result;
+}

@@ -37,7 +37,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return the number of key-value mappings in this map
      */
     int size() {
-        return _size; // cast(int) _dict.length;
+        return _size; 
     }
 
     /**
@@ -46,7 +46,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return <tt>true</tt> if this map contains no key-value mappings
      */
     bool isEmpty() {
-        return size() == 0;
+        return _size == 0;
     }
 
     /**

@@ -114,7 +114,7 @@ abstract class AbstractCollection(E) : Collection!E {
      * @throws NullPointerException          {@inheritDoc}
      * @see #contains(Object)
      */
-    public bool containsAll(Collection!E c) {
+    bool containsAll(Collection!E c) {
         foreach (E e ; c)
             if (!contains(e))
                 return false;
