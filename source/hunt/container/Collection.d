@@ -194,7 +194,7 @@ interface Collection(E) : Iterable!E {
      *         or if the specified collection is null.
      * @see    #contains(Object)
      */
-    // bool containsAll(Collection!E c);
+    bool containsAll(Collection!E c);
 
     /**
      * Adds all of the elements in the specified collection to this collection
@@ -245,7 +245,7 @@ interface Collection(E) : Iterable!E {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    // bool removeAll(Collection!E c);
+    bool removeAll(Collection!E c);
 
     /**
      * Removes all of the elements of this collection that satisfy the given
@@ -269,18 +269,6 @@ interface Collection(E) : Iterable!E {
      *         supported.
      * @since 1.8
      */
-    // final bool removeIf(Predicate<? super E> filter) {
-    //     Objects.requireNonNull(filter);
-    //     bool removed = false;
-    //     final Iterator!E each = iterator();
-    //     while (each.hasNext()) {
-    //         if (filter.test(each.next())) {
-    //             each.remove();
-    //             removed = true;
-    //         }
-    //     }
-    //     return removed;
-    // }
     final bool removeIf(Predicate!E filter) {
         assert(filter !is null);
         E[] items;
@@ -320,7 +308,7 @@ interface Collection(E) : Iterable!E {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    // bool retainAll(Collection!E c);
+    bool retainAll(Collection!E c);
 
     /**
      * Removes all of the elements from this collection (optional operation).
