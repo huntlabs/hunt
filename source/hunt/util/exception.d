@@ -6,14 +6,14 @@ import core.exception;
 import std.stdio;
 import kiss.logger;
 
-void implementationMissing(string file = __FILE__, int line = __LINE__ )(bool canThrow=true)
+void implementationMissing(string name = __FUNCTION__, string file = __FILE__, int line = __LINE__ )(bool canThrow=true)
 {
     if(canThrow)
-        throw new Exception("Implementation missing", file, line);
+        throw new Exception("Implementation missing: " ~ name, file, line);
     else
     {
         // writefln("Implementation missing, in %s:%d", file, line);
-        warningf("Implementation missing, in %s:%d", file, line);
+        warningf("Implementation missing %s, in %s:%d", name, file, line);
     }
 }
 
@@ -34,6 +34,12 @@ mixin template BasicExceptionCtors()
          size_t line = __LINE__) @nogc @safe pure nothrow
     {
         super(msg, file, line, next);
+    }
+    
+    this(Throwable next, string file = __FILE__,
+         size_t line = __LINE__) @nogc @safe pure nothrow
+    {
+        super("", file, line, next);
     }
     
     // mixin basicExceptionCtors;
@@ -297,7 +303,12 @@ class CertificateEncodingException : Exception
     mixin BasicExceptionCtors;
 }
 
-class CertificateParsingException : Exception
+class ParsingException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+class CertificateParsingException : ParsingException
 {
     mixin BasicExceptionCtors;
 }
@@ -308,3 +319,18 @@ class InvalidKeyException : Exception
 }
 
 
+class KeyStoreException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+
+class UnrecoverableKeyException : Exception
+{
+    mixin BasicExceptionCtors;
+}
+
+class KeyManagementException : Exception
+{
+    mixin BasicExceptionCtors;
+}
