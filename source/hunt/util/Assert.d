@@ -823,7 +823,7 @@ class Assert {
 
     static private void failNotNull(T, size_t line = __LINE__ , string file = __FILE__ )(string message, T actual) {
         string formatted = "";
-        if (message != null) {
+        if (message !is null) {
             formatted = message ~ " ";
         }
         static if(is(T == class))
@@ -1081,7 +1081,7 @@ class Assert {
 	 * IllegalArgumentException on an assertion failure.
 	 * 
 	 * <pre class="code">
-	 * Assert.state(id == null, "The id property must not already be initialized");
+	 * Assert.state(id is null, "The id property must not already be initialized");
 	 * </pre>
 	 * 
 	 * @param expression

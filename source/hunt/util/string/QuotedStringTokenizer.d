@@ -40,7 +40,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	this(string str, string delim, bool returnDelimiters, bool returnQuotes) {
 		super("");
 		_string = str;
-		if (delim != null)
+		if (delim !is null)
 			_delim = delim;
 		_returnDelimiters = returnDelimiters;
 		_returnQuotes = returnQuotes;
@@ -200,7 +200,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	 * @return quoted string
 	 */
 	static string quoteIfNeeded(string s, string delim) {
-		if (s == null)
+		if (s is null)
 			return null;
 		if (s.length == 0)
 			return "\"\"";
@@ -226,7 +226,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	 * @return quoted string
 	 */
 	static string quote(string s) {
-		if (s == null)
+		if (s is null)
 			return null;
 		if (s.length == 0)
 			return "\"\"";
@@ -261,7 +261,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	 *            The string to quote.
 	 */
 	static void quoteOnly(Appendable buffer, string input) {
-		if (input == null)
+		if (input is null)
 			return;
 
 		try {
@@ -288,7 +288,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	 *            The string to quote.
 	 */
 	static void quote(Appendable buffer, string input) {
-		if (input == null)
+		if (input is null)
 			return;
 
 		try {
@@ -332,7 +332,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	 * @return quoted string
 	 */
 	static string unquoteOnly(string s, bool lenient) {
-		if (s == null)
+		if (s is null)
 			return null;
 		if (s.length < 2)
 			return s;
@@ -378,7 +378,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	 * @return quoted string
 	 */
 	static string unquote(string s, bool lenient) {
-		if (s == null)
+		if (s is null)
 			return null;
 		if (s.length < 2)
 			return s;
@@ -455,7 +455,7 @@ class QuotedStringTokenizer : StringTokenizer {
 	}
 
 	static bool isQuoted(string s) {
-		return s != null && s.length > 0 && s.charAt(0) == '"' && s.charAt(cast(int)s.length - 1) == '"';
+		return s !is null && s.length > 0 && s.charAt(0) == '"' && s.charAt(cast(int)s.length - 1) == '"';
 	}
 
 	/**

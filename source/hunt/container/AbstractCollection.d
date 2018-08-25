@@ -285,7 +285,7 @@ abstract class AbstractCollection(E) : Collection!E {
         return super.toHash();
     }
 
-    //  String conversion
+    //  string conversion
 
     /**
      * Returns a string representation of this collection.  The string
@@ -293,7 +293,7 @@ abstract class AbstractCollection(E) : Collection!E {
      * order they are returned by its iterator, enclosed in square brackets
      * ({@code "[]"}).  Adjacent elements are separated by the characters
      * {@code ", "} (comma and space).  Elements are converted to strings as
-     * by {@link String#valueOf(Object)}.
+     * by {@link string#valueOf(Object)}.
      *
      * @return a string representation of this collection
      */

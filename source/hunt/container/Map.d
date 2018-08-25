@@ -390,7 +390,7 @@ interface Map(K,V) : Iterable!(K,V){
      *
      * <pre> {@code
      * V v = map.get(key);
-     * if (v == null)
+     * if (v is null)
      *     v = map.put(key, value);
      *
      * return v;
@@ -574,9 +574,9 @@ interface Map(K,V) : Iterable!(K,V){
      * absent:
      *
      * <pre> {@code
-     * if (map.get(key) == null) {
+     * if (map.get(key) is null) {
      *     V newValue = mappingFunction.apply(key);
-     *     if (newValue != null)
+     *     if (newValue !is null)
      *         map.put(key, newValue);
      * }
      * }</pre>
@@ -645,10 +645,10 @@ interface Map(K,V) : Iterable!(K,V){
      * {@code null} if now absent:
      *
      * <pre> {@code
-     * if (map.get(key) != null) {
+     * if (map.get(key) !is null) {
      *     V oldValue = map.get(key);
      *     V newValue = remappingFunction.apply(key, oldValue);
-     *     if (newValue != null)
+     *     if (newValue !is null)
      *         map.put(key, newValue);
      *     else
      *         map.remove(key);
@@ -681,9 +681,9 @@ interface Map(K,V) : Iterable!(K,V){
     //         BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
     //     Objects.requireNonNull(remappingFunction);
     //     V oldValue;
-    //     if ((oldValue = get(key)) != null) {
+    //     if ((oldValue = get(key)) !is null) {
     //         V newValue = remappingFunction.apply(key, oldValue);
-    //         if (newValue != null) {
+    //         if (newValue !is null) {
     //             put(key, newValue);
     //             return newValue;
     //         } else {
@@ -702,7 +702,7 @@ interface Map(K,V) : Iterable!(K,V){
      * mapping:
      *
      * <pre> {@code
-     * map.compute(key, (k, v) -> (v == null) ? msg : v.concat(msg))}</pre>
+     * map.compute(key, (k, v) -> (v is null) ? msg : v.concat(msg))}</pre>
      * (Method {@link #merge merge()} is often simpler to use for such purposes.)
      *
      * <p>If the function returns {@code null}, the mapping is removed (or
@@ -718,13 +718,13 @@ interface Map(K,V) : Iterable!(K,V){
      * <pre> {@code
      * V oldValue = map.get(key);
      * V newValue = remappingFunction.apply(key, oldValue);
-     * if (oldValue != null ) {
-     *    if (newValue != null)
+     * if (oldValue !is null ) {
+     *    if (newValue !is null)
      *       map.put(key, newValue);
      *    else
      *       map.remove(key);
      * } else {
-     *    if (newValue != null)
+     *    if (newValue !is null)
      *       map.put(key, newValue);
      *    else
      *       return null;
@@ -759,9 +759,9 @@ interface Map(K,V) : Iterable!(K,V){
     //     V oldValue = get(key);
 
     //     V newValue = remappingFunction.apply(key, oldValue);
-    //     if (newValue == null) {
+    //     if (newValue is null) {
     //         // delete mapping
-    //         if (oldValue != null || containsKey(key)) {
+    //         if (oldValue !is null || containsKey(key)) {
     //             // something to remove
     //             remove(key);
     //             return null;
@@ -800,9 +800,9 @@ interface Map(K,V) : Iterable!(K,V){
      *
      * <pre> {@code
      * V oldValue = map.get(key);
-     * V newValue = (oldValue == null) ? value :
+     * V newValue = (oldValue is null) ? value :
      *              remappingFunction.apply(oldValue, value);
-     * if (newValue == null)
+     * if (newValue is null)
      *     map.remove(key);
      * else
      *     map.put(key, newValue);
@@ -839,9 +839,9 @@ interface Map(K,V) : Iterable!(K,V){
     //     Objects.requireNonNull(remappingFunction);
     //     Objects.requireNonNull(value);
     //     V oldValue = get(key);
-    //     V newValue = (oldValue == null) ? value :
+    //     V newValue = (oldValue is null) ? value :
     //                remappingFunction.apply(oldValue, value);
-    //     if(newValue == null) {
+    //     if(newValue is null) {
     //         remove(key);
     //     } else {
     //         put(key, newValue);

@@ -77,10 +77,10 @@ module hunt.util.concurrent.IdleTimeout;
 
 //     private void scheduleIdleTimeout(long delay) {
 //         Scheduler.Future newTimeout = null;
-//         if (isOpen() && delay > 0 && scheduler != null)
+//         if (isOpen() && delay > 0 && scheduler !is null)
 //             newTimeout = scheduler.schedule(idleTask, delay, TimeUnit.MILLISECONDS);
 //         Scheduler.Future oldTimeout = timeout.getAndSet(newTimeout);
-//         if (oldTimeout != null)
+//         if (oldTimeout !is null)
 //             oldTimeout.cancel();
 //     }
 
@@ -99,7 +99,7 @@ module hunt.util.concurrent.IdleTimeout;
 
 //     private void deactivate() {
 //         Scheduler.Future oldTimeout = timeout.getAndSet(null);
-//         if (oldTimeout != null)
+//         if (oldTimeout !is null)
 //             oldTimeout.cancel();
 //     }
 

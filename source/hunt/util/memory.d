@@ -19,7 +19,7 @@ class ReferenceQueue(T) {
     this() { }
 
     // private static class Null<S> extends ReferenceQueue<S> {
-    //     boolean enqueue(Reference<? extends S> r) {
+    //     bool enqueue(Reference<? extends S> r) {
     //         return false;
     //     }
     // }
@@ -32,7 +32,7 @@ class ReferenceQueue(T) {
     // private volatile Reference<? extends T> head = null;
     // private long queueLength = 0;
 
-    // boolean enqueue(Reference<? extends T> r) { /* Called only by Reference class */
+    // bool enqueue(Reference<? extends T> r) { /* Called only by Reference class */
     //     synchronized (lock) {
     //         // Check that since getting the lock this reference hasn't already been
     //         // enqueued (and even then removed)
@@ -42,7 +42,7 @@ class ReferenceQueue(T) {
     //         }
     //         assert queue == this;
     //         r.queue = ENQUEUED;
-    //         r.next = (head == null) ? r : head;
+    //         r.next = (head is null) ? r : head;
     //         head = r;
     //         queueLength++;
     //         if (r instanceof FinalReference) {
@@ -56,7 +56,7 @@ class ReferenceQueue(T) {
     // @SuppressWarnings("unchecked")
     // private Reference<? extends T> reallyPoll() {       /* Must hold lock */
     //     Reference<? extends T> r = head;
-    //     if (r != null) {
+    //     if (r !is null) {
     //         head = (r.next == r) ?
     //             null :
     //             r.next; // Unchecked due to the next field having a raw type in Reference
@@ -80,7 +80,7 @@ class ReferenceQueue(T) {
     //  *          otherwise <code>null</code>
     //  */
     // Reference<? extends T> poll() {
-    //     if (head == null)
+    //     if (head is null)
     //         return null;
     //     synchronized (lock) {
     //         return reallyPoll();
@@ -115,12 +115,12 @@ class ReferenceQueue(T) {
     //     }
     //     synchronized (lock) {
     //         Reference<? extends T> r = reallyPoll();
-    //         if (r != null) return r;
+    //         if (r !is null) return r;
     //         long start = (timeout == 0) ? 0 : System.nanoTime();
     //         for (;;) {
     //             lock.wait(timeout);
     //             r = reallyPoll();
-    //             if (r != null) return r;
+    //             if (r !is null) return r;
     //             if (timeout != 0) {
     //                 long end = System.nanoTime();
     //                 timeout -= (end - start) / 1000_000;

@@ -20,7 +20,7 @@ abstract class ByteBuffer : Buffer
 
     bool bigEndian                                   // package-private
         = true;
-    // boolean nativeByteOrder                             // package-private
+    // bool nativeByteOrder                             // package-private
     //     = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
 
     /**
@@ -94,9 +94,9 @@ abstract class ByteBuffer : Buffer
      * @throws  IllegalArgumentException
      *          If the <tt>capacity</tt> is a negative integer
      */
-    static ByteBuffer allocateDirect(int capacity) {
-        return new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity);
-    }
+    // static ByteBuffer allocateDirect(int capacity) {
+    //     return new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity);
+    // }
 
     /**
      * Allocates a new byte buffer.
@@ -647,7 +647,7 @@ abstract class ByteBuffer : Buffer
      *          is backed by an array and is not read-only
      */
     final override bool hasArray() {
-        return (hb != null) && !isReadOnly;
+        return (hb !is null) && !isReadOnly;
     }
 
     /**
@@ -670,7 +670,7 @@ abstract class ByteBuffer : Buffer
      *          If this buffer is not backed by an accessible array
      */
     final byte[] array() {
-        if (hb == null)
+        if (hb is null)
             throw new UnsupportedOperationException("");
         if (isReadOnly)
             throw new ReadOnlyBufferException("");
@@ -698,7 +698,7 @@ abstract class ByteBuffer : Buffer
      *          If this buffer is not backed by an accessible array
      */
     final override int arrayOffset() {
-        if (hb == null)
+        if (hb is null)
             throw new UnsupportedOperationException("");
         if (isReadOnly)
             throw new ReadOnlyBufferException("");
@@ -1209,7 +1209,7 @@ class HeapByteBuffer : ByteBuffer
 //     }
 
 //     private void checkMapped() {
-//         if (fd == null)
+//         if (fd is null)
 //             // Can only happen if a luser explicitly casts a direct byte buffer
 //             throw new UnsupportedOperationException();
 //     }

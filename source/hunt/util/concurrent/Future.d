@@ -27,8 +27,8 @@ import std.datetime;
  *   ArchiveSearcher searcher = ...
  *   void showSearch(final string target)
  *       throws InterruptedException {
- *     Future<string> future
- *       = executor.submit(new Callable<string>() {
+ *     Future!(string) future
+ *       = executor.submit(new Callable!(string)() {
  *         string call() {
  *             return searcher.search(target);
  *         }});
@@ -43,8 +43,8 @@ import std.datetime;
  * implements {@code Runnable}, and so may be executed by an {@code Executor}.
  * For example, the above construction with {@code submit} could be replaced by:
  *  <pre> {@code
- * FutureTask<string> future =
- *   new FutureTask<string>(new Callable<string>() {
+ * FutureTask!(string) future =
+ *   new FutureTask!(string)(new Callable!(string)() {
  *     string call() {
  *       return searcher.search(target);
  *   }});

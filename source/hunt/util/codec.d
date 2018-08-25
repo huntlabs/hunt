@@ -61,7 +61,7 @@ class B64Code {
      * @return char array containing the encoded form of the input.
      */
     static char[] encode(byte[] b) {
-        if (b == null)
+        if (b is null)
             return null;
 
         int bLen = cast(int)b.length;

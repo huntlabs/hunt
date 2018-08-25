@@ -113,11 +113,11 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
      * Inserts element e before non-null Node succ.
      */
     // void linkBefore(E e, Node!E succ) {
-    //     // assert succ != null;
+    //     // assert succ !is null;
     //     final Node!E pred = succ.prev;
     //     final Node!E newNode = new Node<>(pred, e, succ);
     //     succ.prev = newNode;
-    //     if (pred == null)
+    //     if (pred is null)
     //         first = newNode;
     //     else
     //         pred.next = newNode;
@@ -336,14 +336,14 @@ bool addAll(int index, Collection!E c) {
 //         for (Object o : a) {
 //             @SuppressWarnings("unchecked") E e = (E) o;
 //             Node!E newNode = new Node<>(pred, e, null);
-//             if (pred == null)
+//             if (pred is null)
 //                 first = newNode;
 //             else
 //                 pred.next = newNode;
 //             pred = newNode;
 //         }
 
-//         if (succ == null) {
+//         if (succ is null) {
 //             last = pred;
 //         } else {
 //             pred.next = succ;
@@ -755,15 +755,15 @@ bool addAll(int index, Collection!E c) {
      */
     // bool removeLastOccurrence(E o) {
 
-    //     // if (o == null) {
-    //     //     for (Node!E x = last; x != null; x = x.prev) {
-    //     //         if (x.item == null) {
+    //     // if (o is null) {
+    //     //     for (Node!E x = last; x !is null; x = x.prev) {
+    //     //         if (x.item is null) {
     //     //             unlink(x);
     //     //             return true;
     //     //         }
     //     //     }
     //     // } else {
-    //     //     for (Node!E x = last; x != null; x = x.prev) {
+    //     //     for (Node!E x = last; x !is null; x = x.prev) {
     //     //         if (o.equals(x.item)) {
     //     //             unlink(x);
     //     //             return true;
@@ -798,7 +798,7 @@ bool addAll(int index, Collection!E c) {
 //     //     clone.modCount = 0;
 
 //     //     // Initialize clone with our elements
-//     //     for (Node!E x = first; x != null; x = x.next)
+//     //     for (Node!E x = first; x !is null; x = x.next)
 //     //         clone.add(x.item);
 
 //     //     return clone;
@@ -821,7 +821,7 @@ bool addAll(int index, Collection!E c) {
     override E[] toArray() {
         // E[] result = new E[_size];
         // int i = 0;
-        // for (Node!E x = first; x != null; x = x.next)
+        // for (Node!E x = first; x !is null; x = x.next)
         //     result[i++] = x.item;
         return _dlist[].array;
     }
@@ -871,7 +871,7 @@ bool addAll(int index, Collection!E c) {
 //                                 a.getClass().getComponentType(), _size);
 //         int i = 0;
 //         Object[] result = a;
-//         for (Node!E x = first; x != null; x = x.next)
+//         for (Node!E x = first; x !is null; x = x.next)
 //             result[i++] = x.item;
 
 //         if (a.length > _size)
@@ -899,7 +899,7 @@ bool addAll(int index, Collection!E c) {
 //         s.writeInt(_size);
 
 //         // Write out all elements in the proper order.
-//         for (Node!E x = first; x != null; x = x.next)
+//         for (Node!E x = first; x !is null; x = x.next)
 //             s.writeObject(x.item);
 //     }
 

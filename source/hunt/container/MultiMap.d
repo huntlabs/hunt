@@ -346,7 +346,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 
 	// 	for (MapEntry!(string, List!(V)) entry : entrySet()) {
 	// 		string[] a = null;
-	// 		if (entry.getValue() != null) {
+	// 		if (entry.getValue() !is null) {
 	// 			a = new string[entry.getValue().size()];
 	// 			a = entry.getValue().toArray(a);
 	// 		}
