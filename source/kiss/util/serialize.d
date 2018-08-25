@@ -614,7 +614,7 @@ byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == class))
 		id = t.toHash() in stack.map;
 	}
 
-	if (id == null)
+	if (id is null)
 	{
 		header[0] = 11;
 		byte[] data;
@@ -678,7 +678,7 @@ size_t getsize(T)(T t, RefClass stack, uint level) if (is(T == class))
 		id = t.toHash() in stack.map;
 	}
 
-	if (id == null)
+	if (id is null)
 	{
 		if (t !is null)
 		{
@@ -974,7 +974,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 	}
 
 	auto id = t.toHash() in stack.map;
-	if (id == null)
+	if (id is null)
 	{
 		stack.map[t.toHash()] = stack.map.length;
 		JSONValue j;

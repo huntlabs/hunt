@@ -177,7 +177,7 @@ pragma(inline, false):
 			nodesize += (void*).sizeof;
 
 		raxNode *n = cast(raxNode*)malloc(cast(size_t)nodesize);
-		if( n == null) return null;
+		if( n is null) return null;
 
 		n.iskey = false;
 		n.isnull = false;
@@ -195,7 +195,7 @@ pragma(inline, false):
 			nodesize += (void *).sizeof;
 
 		raxNode *n = cast(raxNode*)malloc(cast(size_t)nodesize);
-		if( n == null) return null;
+		if( n is null) return null;
 
 		n.iskey = false;
 		n.isnull = false;
@@ -216,7 +216,7 @@ pragma(inline, false):
 
 
 		auto node = cast(raxNode*)realloc(n ,cast(size_t) nodesize);
-		if(node == null) return null;
+		if(node is null) return null;
 		node.iscompr = false;
 		return node;
 	}
@@ -230,7 +230,7 @@ pragma(inline, false):
 			nodesize += (void *).sizeof;
 	
 		auto node = cast(raxNode*) realloc(n , cast(size_t)nodesize);
-		if( node == null) return null;
+		if( node is null) return null;
 		node.iscompr = true;
 		return node;
 	}
@@ -266,13 +266,13 @@ struct rax
 	static rax * New()
 	{
 		rax *r = cast(rax *)malloc(rax.sizeof);
-		if (r == null) return null;
+		if (r is null) return null;
 		
 		r.numele = 0;
 		r.numnodes = 1;
 		r.head = raxNode.NewComp(0 , false);
 
-		if (r.head == null)
+		if (r.head is null)
 		{
 			Free(r);
 			return null;
@@ -1330,7 +1330,7 @@ private:
 	{
 		//find it
 
-		if ( s == null)
+		if ( s is null)
 		{	
 			return 0;
 		}

@@ -69,7 +69,7 @@ class StringUtils
      */
     static string normalizeCharset(string s) {
         string n = CHARSETS.get(s, null);
-        return (n == null) ? s : n;
+        return (n is null) ? s : n;
     }
 
     /**
@@ -266,7 +266,7 @@ class StringUtils
         // Direct code is quicker than StringTokenizer.
         // Also, StringTokenizer uses isSpace() not isWhitespace()
 
-        if (str == null) {
+        if (str is null) {
             return null;
         }
         int len = cast(int)str.length;
@@ -274,12 +274,12 @@ class StringUtils
             return EMPTY_STRING_ARRAY;
         }
 
-        string[] list; // = new ArrayList<string>();
+        string[] list; // = new ArrayList!(string)();
         int sizePlus1 = 1;
         int i = 0, start = 0;
         bool match = false;
         bool lastMatch = false;
-        if (separatorChars == null) {
+        if (separatorChars is null) {
             // Null separator means use whitespace
             while (i < len) {                
                 if (std.ascii.isWhite(str[i])) {
@@ -363,14 +363,14 @@ class StringUtils
     private static string[] splitWorker(string str, char separatorChar, bool preserveAllTokens) {
         // Performance tuned for 2.0 (JDK1.4)
 
-        if (str == null) {
+        if (str is null) {
             return null;
         }
         int len = cast(int)str.length;
         if (len == 0) {
             return EMPTY_STRING_ARRAY;
         }
-        string[] list; // = new ArrayList<string>();
+        string[] list; // = new ArrayList!(string)();
         int i = 0, start = 0;
         bool match = false;
         bool lastMatch = false;
@@ -437,8 +437,12 @@ class StringBuilder : Appendable
         _buffer.clear();
     }
 
-    StringBuilder append(char s)
-    {
+    StringBuilder setCharAt(int index, char c) {
+        _buffer.data[index] = c;
+        return this;
+    }
+
+    StringBuilder append(char s)    {
         _buffer.put(s);
         return this;
     }

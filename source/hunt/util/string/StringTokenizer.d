@@ -121,7 +121,7 @@ class StringTokenizer : Iterable!string {
      * Set maxDelimCodePoint to the highest char in the delimiter set.
      */
     // private void setMaxDelimCodePoint() {
-    //     if (delimiters == null) {
+    //     if (delimiters is null) {
     //         maxDelimCodePoint = 0;
     //         return;
     //     }
@@ -223,7 +223,7 @@ class StringTokenizer : Iterable!string {
      * after startPos. If retDelims is true, startPos is returned.
      */
     private int skipDelimiters(int startPos) {
-        if (delimiters == null)
+        if (delimiters is null)
             throw new NullPointerException("");
 
 // TODO: Tasks pending completion -@zxp at 6/21/2018, 2:23:48 PM

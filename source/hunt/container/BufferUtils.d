@@ -15,8 +15,8 @@ import std.range;
 
 class BufferUtils {
 
-    __gshared ByteBuffer EMPTY_BUFFER; // = ByteBuffer.wrap(new byte[0]);
-    __gshared ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY; // = new ByteBuffer[0];
+    __gshared ByteBuffer EMPTY_BUFFER; 
+    __gshared ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY;
 
     enum int TEMP_BUFFER_SIZE = 4096;
     enum  byte SPACE = 0x20;
@@ -434,7 +434,7 @@ class BufferUtils {
             return null;
 
         byte[] array = buffer.hasArray() ? buffer.array() : null;
-        if (array == null)
+        if (array is null)
             return cast(string) buffer.array[0..buffer.remaining()];
         else
         {
@@ -468,10 +468,10 @@ class BufferUtils {
     //  * @return The buffer as a string.
     //  */
     // static string toString(ByteBuffer buffer, Charset charset) {
-    //     if (buffer == null)
+    //     if (buffer is null)
     //         return null;
     //     byte[] array = buffer.hasArray() ? buffer.array() : null;
-    //     if (array == null) {
+    //     if (array is null) {
     //         byte[] to = new byte[buffer.remaining()];
     //         buffer.slice().get(to);
     //         return new string(to, 0, to.length, charset);
@@ -491,10 +491,10 @@ class BufferUtils {
     //  * @return The buffer as a string.
     //  */
     // static string toString(ByteBuffer buffer, int position, int length, Charset charset) {
-    //     if (buffer == null)
+    //     if (buffer is null)
     //         return null;
     //     byte[] array = buffer.hasArray() ? buffer.array() : null;
-    //     if (array == null) {
+    //     if (array is null) {
     //         ByteBuffer ro = buffer.asReadOnlyBuffer();
     //         ro.position(position);
     //         ro.limit(position + length);
@@ -741,43 +741,52 @@ class BufferUtils {
     }
 
     // static ByteBuffer toBuffer(string s, Charset charset) {
-    //     if (s == null)
+    //     if (s is null)
     //         return EMPTY_BUFFER;
     //     return toBuffer(s.getBytes(charset));
     // }
 
-    // /**
-    //  * Create a new ByteBuffer using provided byte array.
-    //  *
-    //  * @param array the byte array to back buffer with.
-    //  * @return ByteBuffer with provided byte array, in flush mode
-    //  */
+    /**
+     * Create a new ByteBuffer using provided byte array.
+     *
+     * @param array the byte array to back buffer with.
+     * @return ByteBuffer with provided byte array, in flush mode
+     */
     static ByteBuffer toBuffer(byte[] array) {
         if (array is null)
             return EMPTY_BUFFER;
         return toBuffer(array, 0, cast(int)array.length);
     }
 
-    // /**
-    //  * Create a new ByteBuffer using the provided byte array.
-    //  *
-    //  * @param array  the byte array to use.
-    //  * @param offset the offset within the byte array to use from
-    //  * @param length the length in bytes of the array to use
-    //  * @return ByteBuffer with provided byte array, in flush mode
-    //  */
+    /**
+     * Create a new ByteBuffer using the provided byte array.
+     *
+     * @param array  the byte array to use.
+     * @param offset the offset within the byte array to use from
+     * @param length the length in bytes of the array to use
+     * @return ByteBuffer with provided byte array, in flush mode
+     */
     static ByteBuffer toBuffer(byte[] array, int offset, int length) {
         if (array is null)
             return EMPTY_BUFFER;
         return ByteBuffer.wrap(array, offset, length);
     }
 
-    // static ByteBuffer toDirectBuffer(string s) {
-    //     return toDirectBuffer(s, StandardCharsets.ISO_8859_1);
-    // }
+    static ByteBuffer toDirectBuffer(string s) {
+        if (s.empty)
+            return EMPTY_BUFFER;
+        byte[] bytes = cast(byte[])s.dup;
+        // TODO: Tasks pending completion -@zxp at 8/25/2018, 3:11:29 PM
+        // 
+        ByteBuffer buf = new HeapByteBuffer(cast(int)bytes.length, cast(int)bytes.length); // ByteBuffer.allocateDirect(bytes.length);
+        buf.put(bytes);
+        buf.flip();
+        return buf;
+        // return toDirectBuffer(s, "StandardCharsets.ISO_8859_1");
+    }
 
     // static ByteBuffer toDirectBuffer(string s, Charset charset) {
-    //     if (s == null)
+    //     if (s is null)
     //         return EMPTY_BUFFER;
     //     byte[] bytes = s.getBytes(charset);
     //     ByteBuffer buf = ByteBuffer.allocateDirect(bytes.length);
@@ -1014,7 +1023,7 @@ class BufferUtils {
     // }
 
     // static ByteBuffer ensureCapacity(ByteBuffer buffer, int capacity) {
-    //     if (buffer == null)
+    //     if (buffer is null)
     //         return allocate(capacity);
 
     //     if (buffer.capacity() >= capacity)

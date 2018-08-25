@@ -296,7 +296,7 @@ enum SpliteratorCharacteristic {
  *         action.accept((T) array[origin]);
  *     }
  *
- *     public boolean tryAdvance(Consumer<? super T> action) {
+ *     public bool tryAdvance(Consumer<? super T> action) {
  *       if (origin < fence) {
  *         action.accept((T) array[origin]);
  *         origin += 2;
@@ -360,7 +360,7 @@ enum SpliteratorCharacteristic {
  *   public void compute() {
  *     Spliterator<T> sub;
  *     while (spliterator.estimateSize() > targetBatchSize &&
- *            (sub = spliterator.trySplit()) != null) {
+ *            (sub = spliterator.trySplit()) !is null) {
  *       addToPendingCount(1);
  *       new ParEach<>(this, sub, action, targetBatchSize).fork();
  *     }
@@ -370,7 +370,7 @@ enum SpliteratorCharacteristic {
  * }}</pre>
  *
  * @implNote
- * If the boolean system property {@code org.openjdk.java.util.stream.tripwire}
+ * If the bool system property {@code org.openjdk.java.util.stream.tripwire}
  * is set to {@code true} then diagnostic warnings are reported if boxing of
  * primitive values occur when operating on primitive subtype specializations.
  *
@@ -392,7 +392,7 @@ interface Spliterator(T) {
 //      * upon entry to this method, else {@code true}.
 //      * @throws NullPointerException if the specified action is null
 //      */
-//     boolean tryAdvance(Consumer<? super T> action);
+//     bool tryAdvance(Consumer<? super T> action);
 
 //     /**
 //      * Performs the given action for each remaining element, sequentially in
@@ -529,7 +529,7 @@ interface Spliterator(T) {
 //      * @return {@code true} if all the specified characteristics are present,
 //      * else {@code false}
 //      */
-//     default boolean hasCharacteristics(int characteristics) {
+//     default bool hasCharacteristics(int characteristics) {
 //         return (characteristics() & characteristics) == characteristics;
 //     }
 
@@ -590,7 +590,7 @@ interface Spliterator(T) {
 //          * @throws NullPointerException if the specified action is null
 //          */
 //         @SuppressWarnings("overloads")
-//         boolean tryAdvance(T_CONS action);
+//         bool tryAdvance(T_CONS action);
 
 //         /**
 //          * Performs the given action for each remaining element, sequentially in
@@ -623,7 +623,7 @@ interface Spliterator(T) {
 //         OfInt trySplit();
 
 //         @Override
-//         boolean tryAdvance(IntConsumer action);
+//         bool tryAdvance(IntConsumer action);
 
 //         @Override
 //         default void forEachRemaining(IntConsumer action) {
@@ -641,7 +641,7 @@ interface Spliterator(T) {
 //          * {@link #tryAdvance(java.util.function.IntConsumer)}.
 //          */
 //         @Override
-//         default boolean tryAdvance(Consumer<? super Integer> action) {
+//         default bool tryAdvance(Consumer<? super Integer> action) {
 //             if (action instanceof IntConsumer) {
 //                 return tryAdvance((IntConsumer) action);
 //             }
@@ -687,7 +687,7 @@ interface Spliterator(T) {
 //         OfLong trySplit();
 
 //         @Override
-//         boolean tryAdvance(LongConsumer action);
+//         bool tryAdvance(LongConsumer action);
 
 //         @Override
 //         default void forEachRemaining(LongConsumer action) {
@@ -705,7 +705,7 @@ interface Spliterator(T) {
 //          * {@link #tryAdvance(java.util.function.LongConsumer)}.
 //          */
 //         @Override
-//         default boolean tryAdvance(Consumer<? super Long> action) {
+//         default bool tryAdvance(Consumer<? super Long> action) {
 //             if (action instanceof LongConsumer) {
 //                 return tryAdvance((LongConsumer) action);
 //             }
@@ -751,7 +751,7 @@ interface Spliterator(T) {
 //         OfDouble trySplit();
 
 //         @Override
-//         boolean tryAdvance(DoubleConsumer action);
+//         bool tryAdvance(DoubleConsumer action);
 
 //         @Override
 //         default void forEachRemaining(DoubleConsumer action) {
@@ -769,7 +769,7 @@ interface Spliterator(T) {
 //          * {@link #tryAdvance(java.util.function.DoubleConsumer)}.
 //          */
 //         @Override
-//         default boolean tryAdvance(Consumer<? super Double> action) {
+//         default bool tryAdvance(Consumer<? super Double> action) {
 //             if (action instanceof DoubleConsumer) {
 //                 return tryAdvance((DoubleConsumer) action);
 //             }

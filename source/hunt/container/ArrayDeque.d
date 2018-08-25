@@ -187,7 +187,7 @@ module hunt.container.ArrayDeque;
 //      * @throws NullPointerException if the specified element is null
 //      */
 //     void addFirst(E e) {
-//         if (e == null)
+//         if (e is null)
 //             throw new NullPointerException();
 //         elements[head = (head - 1) & (elements.length - 1)] = e;
 //         if (head == tail)
@@ -203,7 +203,7 @@ module hunt.container.ArrayDeque;
 //      * @throws NullPointerException if the specified element is null
 //      */
 //     void addLast(E e) {
-//         if (e == null)
+//         if (e is null)
 //             throw new NullPointerException();
 //         elements[tail] = e;
 //         if ( (tail = (tail + 1) & (elements.length - 1)) == head)
@@ -239,7 +239,7 @@ module hunt.container.ArrayDeque;
 //      */
 //     E removeFirst() {
 //         E x = pollFirst();
-//         if (x == null)
+//         if (x is null)
 //             throw new NoSuchElementException();
 //         return x;
 //     }
@@ -249,7 +249,7 @@ module hunt.container.ArrayDeque;
 //      */
 //     E removeLast() {
 //         E x = pollLast();
-//         if (x == null)
+//         if (x is null)
 //             throw new NoSuchElementException();
 //         return x;
 //     }
@@ -259,7 +259,7 @@ module hunt.container.ArrayDeque;
 //         @SuppressWarnings("unchecked")
 //         E result = (E) elements[h];
 //         // Element is null if deque empty
-//         if (result == null)
+//         if (result is null)
 //             return null;
 //         elements[h] = null;     // Must null out slot
 //         head = (h + 1) & (elements.length - 1);
@@ -270,7 +270,7 @@ module hunt.container.ArrayDeque;
 //         int t = (tail - 1) & (elements.length - 1);
 //         @SuppressWarnings("unchecked")
 //         E result = (E) elements[t];
-//         if (result == null)
+//         if (result is null)
 //             return null;
 //         elements[t] = null;
 //         tail = t;
@@ -283,7 +283,7 @@ module hunt.container.ArrayDeque;
 //     E getFirst() {
 //         @SuppressWarnings("unchecked")
 //         E result = (E) elements[head];
-//         if (result == null)
+//         if (result is null)
 //             throw new NoSuchElementException();
 //         return result;
 //     }
@@ -294,7 +294,7 @@ module hunt.container.ArrayDeque;
 //     E getLast() {
 //         @SuppressWarnings("unchecked")
 //         E result = (E) elements[(tail - 1) & (elements.length - 1)];
-//         if (result == null)
+//         if (result is null)
 //             throw new NoSuchElementException();
 //         return result;
 //     }
@@ -323,12 +323,12 @@ module hunt.container.ArrayDeque;
 //      * @return {@code true} if the deque contained the specified element
 //      */
 //     bool removeFirstOccurrence(Object o) {
-//         if (o == null)
+//         if (o is null)
 //             return false;
 //         int mask = elements.length - 1;
 //         int i = head;
 //         Object x;
-//         while ( (x = elements[i]) != null) {
+//         while ( (x = elements[i]) !is null) {
 //             if (o.equals(x)) {
 //                 delete(i);
 //                 return true;
@@ -351,12 +351,12 @@ module hunt.container.ArrayDeque;
 //      * @return {@code true} if the deque contained the specified element
 //      */
 //     bool removeLastOccurrence(Object o) {
-//         if (o == null)
+//         if (o is null)
 //             return false;
 //         int mask = elements.length - 1;
 //         int i = (tail - 1) & mask;
 //         Object x;
-//         while ( (x = elements[i]) != null) {
+//         while ( (x = elements[i]) !is null) {
 //             if (o.equals(x)) {
 //                 delete(i);
 //                 return true;
@@ -481,11 +481,11 @@ module hunt.container.ArrayDeque;
 //     }
 
 //     private void checkInvariants() {
-//         assert elements[tail] == null;
-//         assert head == tail ? elements[head] == null :
-//             (elements[head] != null &&
-//              elements[(tail - 1) & (elements.length - 1)] != null);
-//         assert elements[(head - 1) & (elements.length - 1)] == null;
+//         assert elements[tail] is null;
+//         assert head == tail ? elements[head] is null :
+//             (elements[head] !is null &&
+//              elements[(tail - 1) & (elements.length - 1)] !is null);
+//         assert elements[(head - 1) & (elements.length - 1)] is null;
 //     }
 
 //     /**
@@ -602,7 +602,7 @@ module hunt.container.ArrayDeque;
 //             E result = (E) elements[cursor];
 //             // This check doesn't catch all possible comodifications,
 //             // but does catch the ones that corrupt traversal
-//             if (tail != fence || result == null)
+//             if (tail != fence || result is null)
 //                 throw new ConcurrentModificationException();
 //             lastRet = cursor;
 //             cursor = (cursor + 1) & (elements.length - 1);
@@ -627,7 +627,7 @@ module hunt.container.ArrayDeque;
 //             while (i != f) {
 //                 @SuppressWarnings("unchecked") E e = (E)a[i];
 //                 i = (i + 1) & m;
-//                 if (e == null)
+//                 if (e is null)
 //                     throw new ConcurrentModificationException();
 //                 action.accept(e);
 //             }
@@ -654,7 +654,7 @@ module hunt.container.ArrayDeque;
 //             cursor = (cursor - 1) & (elements.length - 1);
 //             @SuppressWarnings("unchecked")
 //             E result = (E) elements[cursor];
-//             if (head != fence || result == null)
+//             if (head != fence || result is null)
 //                 throw new ConcurrentModificationException();
 //             lastRet = cursor;
 //             return result;
@@ -680,12 +680,12 @@ module hunt.container.ArrayDeque;
 //      * @return {@code true} if this deque contains the specified element
 //      */
 //     bool contains(Object o) {
-//         if (o == null)
+//         if (o is null)
 //             return false;
 //         int mask = elements.length - 1;
 //         int i = head;
 //         Object x;
-//         while ( (x = elements[i]) != null) {
+//         while ( (x = elements[i]) !is null) {
 //             if (o.equals(x))
 //                 return true;
 //             i = (i + 1) & mask;
@@ -901,7 +901,7 @@ module hunt.container.ArrayDeque;
 //         }
 
 //         void forEachRemaining(Consumer<? super E> consumer) {
-//             if (consumer == null)
+//             if (consumer is null)
 //                 throw new NullPointerException();
 //             Object[] a = deq.elements;
 //             int m = a.length - 1, f = getFence(), i = index;
@@ -909,21 +909,21 @@ module hunt.container.ArrayDeque;
 //             while (i != f) {
 //                 @SuppressWarnings("unchecked") E e = (E)a[i];
 //                 i = (i + 1) & m;
-//                 if (e == null)
+//                 if (e is null)
 //                     throw new ConcurrentModificationException();
 //                 consumer.accept(e);
 //             }
 //         }
 
 //         bool tryAdvance(Consumer<? super E> consumer) {
-//             if (consumer == null)
+//             if (consumer is null)
 //                 throw new NullPointerException();
 //             Object[] a = deq.elements;
 //             int m = a.length - 1, f = getFence(), i = index;
 //             if (i != fence) {
 //                 @SuppressWarnings("unchecked") E e = (E)a[i];
 //                 index = (i + 1) & m;
-//                 if (e == null)
+//                 if (e is null)
 //                     throw new ConcurrentModificationException();
 //                 consumer.accept(e);
 //                 return true;

@@ -77,7 +77,7 @@ class Collections {
      * <p>This example illustrates the type-safe way to obtain an empty
      * navigable set:
      * <pre> {@code
-     *     NavigableSet<String> s = Collections.emptyNavigableSet();
+     *     NavigableSet!(string) s = Collections.emptyNavigableSet();
      * }</pre>
      *
      * @implNote Implementations of this method need not

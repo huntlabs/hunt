@@ -312,7 +312,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
         //     TreeMap!(E, Object) map = (TreeMap<E, Object>) m;
         //     Comparator<?> cc = set.comparator();
         //     Comparator<? super E> mc = map.comparator();
-        //     if (cc==mc || (cc != null && cc.equals(mc))) {
+        //     if (cc==mc || (cc !is null && cc.equals(mc))) {
         //         map.addAllForTreeSet(set, PRESENT);
         //         return true;
         //     }

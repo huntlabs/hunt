@@ -47,7 +47,7 @@ class Locker {
     //     while (true) {
     //         // Using test-and-test-and-set for better performance.
     //         Thread locker = _spinLockState.get();
-    //         if (locker != null || !_spinLockState.compareAndSet(null, current)) {
+    //         if (locker !is null || !_spinLockState.compareAndSet(null, current)) {
     //             if (locker == current)
     //                 throw new IllegalStateException("Locker is not reentrant");
     //             continue;
@@ -64,7 +64,7 @@ class Locker {
 
     bool isLocked() {
         // if (_spin)
-        //     return _spinLockState.get() != null;
+        //     return _spinLockState.get() !is null;
         // else
         //     return _lock.isLocked();
         // implementationMissing();

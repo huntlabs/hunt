@@ -1,6 +1,8 @@
 module hunt.container.DirectByteBuffer;
 
 import hunt.container.ByteBuffer;
+import hunt.container.DirectBuffer;
+import hunt.container.MappedByteBuffer;
 
 /+
 class DirectByteBuffer  : MappedByteBuffer,     DirectBuffer
@@ -293,7 +295,7 @@ class DirectByteBuffer  : MappedByteBuffer,     DirectBuffer
             unsafe.copyMemory(sb.ix(spos), ix(pos), (long)srem << 0);
             sb.position(spos + srem);
             position(pos + srem);
-        } else if (src.hb != null) {
+        } else if (src.hb !is null) {
 
             int spos = src.position();
             int slim = src.limit();

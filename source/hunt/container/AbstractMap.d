@@ -296,7 +296,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * <pre> {@code
      * public Set!K keySet() {
      *   Set!K ks = keySet;  // single racy read
-     *   if (ks == null) {
+     *   if (ks is null) {
      *     ks = new KeySet();
      *     keySet = ks;
      *   }
@@ -392,7 +392,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //             Entry!(K,V) e = i.next();
     //             K key = e.getKey();
     //             V value = e.getValue();
-    //             if (value == null) {
+    //             if (value is null) {
     //                 if (!(m.get(key)==null && m.containsKey(key)))
     //                     return false;
     //             } else {
@@ -496,7 +496,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * NB: Do not replace with Object.equals until JDK-8015417 is resolved.
      */
     // private static bool eq(Object o1, Object o2) {
-    //     return o1 == null ? o2 == null : o1.equals(o2);
+    //     return o1 is null ? o2 is null : o1.equals(o2);
     // }
 
     // Implementation Note: SimpleEntry and SimpleImmutableEntry
@@ -621,8 +621,8 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      * @see    #equals
     //      */
     //     size_t toHash() @trusted nothrow {
-    //         return (key   == null ? 0 :   key.toHash()) ^
-    //                (value == null ? 0 : value.toHash());
+    //         return (key   is null ? 0 :   key.toHash()) ^
+    //                (value is null ? 0 : value.toHash());
     //     }
 
     //     /**
