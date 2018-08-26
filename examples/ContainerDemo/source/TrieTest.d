@@ -21,16 +21,6 @@ import std.conv;
 https://www.programcreek.com/java-api-examples/index.php?source_dir=jetty.project-master/jetty-jaspi/src/test/java/org/eclipse/jetty/security/jaspi/JaspiTest.java#
 */
 class TrieTest { 
-    // static Object[][] data() 
-    // { 
-    //     Object[][] data = [ 
-    //         [cast(Object)new ArrayTrie!int(128)], 
-    //         [cast(Object)new TreeTrie!int()], 
-    //         [cast(Object)new ArrayTernaryTrie!int(128)] 
-    //     ]; 
-    //     return data; 
-    // } 
- 
     Trie!int trie; 
 
     this() {
@@ -56,6 +46,9 @@ class TrieTest {
         trie.put("foo+bar",7); 
         trie.put("HELL4",8); 
         trie.put("",9); 
+
+        // ArrayTernaryTrie!int d = cast(ArrayTernaryTrie!int)trie;
+        // d.dump();
     } 
  
     
@@ -78,8 +71,6 @@ class TrieTest {
     
     void testKeySet()
     { 
-        // trace(trie.keySet().toString());
-
         assert(trie.keySet().contains("hello")); 
         assert(trie.keySet().contains("He")); 
         assert(trie.keySet().contains("HELL")); 
@@ -87,19 +78,13 @@ class TrieTest {
         assert(trie.keySet().contains("Wobble")); 
         assert(trie.keySet().contains("foo-bar")); 
         assert(trie.keySet().contains("foo+bar")); 
-        // assert(trie.keySet().contains("HELL4")); 
-        
-        // TODO: Tasks pending completion -@zxp at 8/25/2018, 9:23:50 PM
-        // 
-        // assert(trie.keySet().contains(""));         
+        assert(trie.keySet().contains("HELL4")); 
+ 
+        assert(trie.keySet().contains(""));         
     } 
      
     void testGetString()
     { 
-        trace(trie.get("hello"));
-        trace(trie.get("He"));
-        trace(trie.get("HELL"));
-        trace(trie.get("wibble"));
         Assert.assertEquals(1,trie.get("hello")); 
         Assert.assertEquals(2,trie.get("He")); 
         Assert.assertEquals(3,trie.get("HELL")); 
