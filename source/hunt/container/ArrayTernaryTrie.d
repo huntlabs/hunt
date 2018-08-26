@@ -78,7 +78,7 @@ class ArrayTernaryTrie(V) : AbstractTrie!(V) {
     /**
      * The number of rows allocated
      */
-    private char _rows;
+    private byte _rows;
 
     /* ------------------------------------------------------------ */
 
@@ -179,7 +179,7 @@ class ArrayTernaryTrie(V) : AbstractTrie!(V) {
         size_t limit = s.length;
         int last = 0;
         for (size_t k = 0; k < limit; k++) {
-            char c = s[k];
+            byte c = s[k];
             if (isCaseInsensitive() && c < 128)
                 c = toLower(c);
 
@@ -243,7 +243,7 @@ class ArrayTernaryTrie(V) : AbstractTrie!(V) {
     V get(string s, int offset, int len) {
         int t = 0;
         for (int i = 0; i < len; ) {
-            char c = s.charAt(offset + i++);
+            byte c = s.charAt(offset + i++);
             if (isCaseInsensitive() && c < 128)
                 c = toLower(c);
 
@@ -318,7 +318,7 @@ class ArrayTernaryTrie(V) : AbstractTrie!(V) {
         int end = offset + len;
         loop:
         while (offset < end) {
-            char c = s.charAt(offset++);
+            byte c = s.charAt(offset++);
             len--;
             if (isCaseInsensitive() && c < 128)
                 c = toLower(c);
@@ -552,8 +552,8 @@ class ArrayTernaryTrie(V) : AbstractTrie!(V) {
     void dump() {
         import std.stdio;
         for (int r = 0; r < _rows; r++) {
-            char c = _tree[r * ROW_SIZE + 0];
-            writefln("%4d [%s,%d,%d,%d] '%s':%s%n",
+            byte c = _tree[r * ROW_SIZE + 0];
+            writefln("%4d [%s,%d,%d,%d] '%s':%s",
                     r,
                     (c < ' ' || c > 127) ? to!string(cast(int) c) : "'" ~ c ~ "'",
                     cast(int) _tree[r * ROW_SIZE + LO],

@@ -78,7 +78,7 @@ class TreeTrie(V) : AbstractTrie!(V) {
         TreeTrie!(V) t = this;
         size_t limit = s.length;
         for (size_t k = 0; k < limit; k++) {
-            char c = s[k];
+            byte c = s[k];
 
             int index = c >= 0 && c < 0x7f ? __lookup[c] : -1;
             if (index >= 0) {
@@ -114,7 +114,7 @@ class TreeTrie(V) : AbstractTrie!(V) {
     V get(string s, int offset, int len) {
         TreeTrie!(V) t = this;
         for (int i = 0; i < len; i++) {
-            char c = s.charAt(offset + i);
+            byte c = s.charAt(offset + i);
             int index = c >= 0 && c < 0x7f ? __lookup[c] : -1;
             if (index >= 0) {
                 if (t._nextIndex[index] is null)

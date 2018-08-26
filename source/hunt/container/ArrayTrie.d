@@ -92,12 +92,12 @@ class ArrayTrie(V) : AbstractTrie!(V) {
      * then a big index will be created for the row, with
      * 256 entries, one for each possible byte.
      */
-    private char[][] _bigIndex;
+    private byte[][] _bigIndex;
 
     /**
      * The number of rows allocated
      */
-    private char _rows;
+    private byte _rows;
 
     this() {
         this(128);
@@ -136,7 +136,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
         size_t k;
         size_t limit = s.length;
         for (k = 0; k < limit; k++) {
-            char c = s[k];
+            byte c = s[k];
 
             int index = __lookup[c & 0x7f];
             if (index >= 0) {
@@ -151,12 +151,12 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                 throw new IllegalArgumentException("non ascii character");
             else {
                 if (_bigIndex is null)
-                    _bigIndex = new char[][_value.length];
+                    _bigIndex = new byte[][_value.length];
                 if (t >= _bigIndex.length)
                     return false;
-                char[] big = _bigIndex[t];
+                byte[] big = _bigIndex[t];
                 if (big is null)
-                    big = _bigIndex[t] = new char[128];
+                    big = _bigIndex[t] = new byte[128];
                 t = big[c];
                 if (t == 0) {
                     if (_rows == _value.length)
@@ -167,14 +167,15 @@ class ArrayTrie(V) : AbstractTrie!(V) {
         }
 
         if (t >= _key.length) {
-            _rows = cast(char) _key.length;
+            _rows = cast(byte) _key.length;
             return false;
         }
 
-// FIXME: Needing refactor or cleanup -@zxp at 8/25/2018, 3:30:11 PM
-// 
-        // _key[t] = v is null ? null : s;
-        _key[t] = s;
+        static if(is(V == class)) {
+            _key[t] = v is null ? null : s;
+        } else {
+            _key[t] = v == V.init ? null : s;
+        }
         _value[t] = v;
         return true;
     }
@@ -184,7 +185,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
     V get(string s, int offset, int len) {
         int t = 0;
         for (int i = 0; i < len; i++) {
-            char c = s[offset + i];
+            byte c = s[offset + i];
             int index = __lookup[c & 0x7f];
             if (index >= 0) {
                 int idx = t * ROW_SIZE + index;
@@ -192,7 +193,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                 if (t == 0)
                     return V.init;
             } else {
-                char[] big = _bigIndex is null ? null : _bigIndex[t];
+                byte[] big = _bigIndex is null ? null : _bigIndex[t];
                 if (big is null)
                     return V.init;
                 t = big[c];
@@ -216,7 +217,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                 if (t == 0)
                     return V.init;
             } else {
-                char[] big = _bigIndex is null ? null : _bigIndex[t];
+                byte[] big = _bigIndex is null ? null : _bigIndex[t];
                 if (big is null)
                     return V.init;
                 t = big[c];
@@ -251,7 +252,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
     private V getBest(int t, string s, int offset, int len) {
         int pos = offset;
         for (int i = 0; i < len; i++) {
-            char c = s[pos++];
+            byte c = s[pos++];
             int index = __lookup[c & 0x7f];
             if (index >= 0) {
                 int idx = t * ROW_SIZE + index;
@@ -260,7 +261,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                     break;
                 t = nt;
             } else {
-                char[] big = _bigIndex is null ? null : _bigIndex[t];
+                byte[] big = _bigIndex is null ? null : _bigIndex[t];
                 if (big is null)
                     return V.init;
                 int nt = big[c];
@@ -300,7 +301,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                     break;
                 t = nt;
             } else {
-                char[] big = _bigIndex is null ? null : _bigIndex[t];
+                byte[] big = _bigIndex is null ? null : _bigIndex[t];
                 if (big is null)
                     return V.init;
                 int nt = big[c];
@@ -339,7 +340,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                     break;
                 t = nt;
             } else {
-                char[] big = _bigIndex is null ? null : _bigIndex[t];
+                byte[] big = _bigIndex is null ? null : _bigIndex[t];
                 if (big is null)
                     return V.init;
                 int nt = big[c];
@@ -408,7 +409,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                 toString(ot, _rowIndex[idx]);
         }
 
-        char[] big = _bigIndex is null ? null : _bigIndex[t];
+        byte[] big = _bigIndex is null ? null : _bigIndex[t];
         if (big !is null) {
             foreach (int i ; big)
                 if (i != 0)
@@ -439,7 +440,7 @@ class ArrayTrie(V) : AbstractTrie!(V) {
                 keySet(set, _rowIndex[idx]);
         }
 
-        char[] big = _bigIndex is null || t >= _bigIndex.length ? null : _bigIndex[t];
+        byte[] big = _bigIndex is null || t >= _bigIndex.length ? null : _bigIndex[t];
         // if (big !is null) {
             foreach (int i ; big)
                 if (i != 0)
