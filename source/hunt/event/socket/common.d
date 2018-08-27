@@ -18,7 +18,7 @@ import hunt.event.core;
 import hunt.container.ByteBuffer;
 
 import std.socket;
-import hunt.logger;
+import hunt.logging;
 
 
 alias ConnectionHandler = void delegate(bool isSucceeded);

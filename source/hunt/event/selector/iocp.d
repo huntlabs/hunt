@@ -23,7 +23,7 @@ import hunt.event.timer;
 
 import core.sys.windows.windows;
 import std.conv;
-import hunt.logger;
+import hunt.logging;
 
 /**
 */

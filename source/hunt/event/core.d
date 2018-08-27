@@ -12,7 +12,7 @@
 module hunt.event.core;
 
 import hunt.common;
-import hunt.logger;
+import hunt.logging;
 
 import std.socket;
 import std.exception;

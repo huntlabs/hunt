@@ -35,12 +35,10 @@ A refined core library for D programming language.
 For details, see [here](docs/benchmark.md).
 
 ## TODO
-- [x] Publish v0.4
-- [x] Clean up all the deprecated code
 - [ ] Performance improvement
 - [ ] Stablize APIs
 - [ ] More friendly APIs
 - [ ] More examples
-- [x] Use hunt.logger for inner debugging
+- [ ] More common utils
 - [x] Benchmark test
 - [x] Improving supports on Mac OS

@@ -16,7 +16,7 @@ import hunt.io.core;
 
 import std.socket;
 import std.exception;
-import hunt.logger;
+import hunt.logging;
 import core.thread;
 import core.time;
 

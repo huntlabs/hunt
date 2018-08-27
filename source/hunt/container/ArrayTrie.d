@@ -10,7 +10,7 @@ import hunt.container.Trie;
 import hunt.util.exception;
 import hunt.util.string;
 
-import hunt.logger;
+import hunt.logging;
 import std.conv;
 
 /**

@@ -9,7 +9,7 @@ import hunt.common;
 
 import std.getopt;
 import std.exception;
-import hunt.logger;
+import hunt.logging;
 import std.datetime;
 import std.parallelism;
 

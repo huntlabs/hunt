@@ -19,7 +19,7 @@ version(linux):
 import std.exception;
 import std.socket;
 import std.string;
-import hunt.logger;
+import hunt.logging;
 
 import core.time;
 import core.stdc.string;

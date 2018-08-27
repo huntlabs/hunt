@@ -21,7 +21,7 @@ import std.socket;
 import std.functional;
 import std.getopt;
 import std.exception;
-import hunt.logger;
+import hunt.logging;
 import std.datetime;
 
 import datefmt;

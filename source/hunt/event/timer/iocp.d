@@ -22,7 +22,7 @@ import hunt.event.timer.common;
 import core.time;
 import std.datetime;
 import std.exception;
-import hunt.logger;
+import hunt.logging;
 
 
 /**

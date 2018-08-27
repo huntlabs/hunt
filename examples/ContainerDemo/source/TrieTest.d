@@ -14,7 +14,7 @@ import hunt.util.UnitTest;
 import hunt.util.Assert;
 import hunt.util.string;
 
-import hunt.logger;
+import hunt.logging;
 import std.conv;
 
 /**

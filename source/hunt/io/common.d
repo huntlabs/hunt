@@ -6,7 +6,7 @@ import hunt.util.exception;
 
 import hunt.container.ByteBuffer;
 
-import hunt.logger;
+import hunt.logging;
 import std.algorithm;
 
 
