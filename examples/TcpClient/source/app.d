@@ -1,7 +1,7 @@
 import std.stdio;
 
-import hunt.io.event;
-import hunt.io.net.TcpStream;
+import hunt.event;
+import hunt.io.TcpStream;
 // import hunt.exception;
 
 void main()
