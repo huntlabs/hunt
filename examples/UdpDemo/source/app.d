@@ -11,8 +11,8 @@
 
 import std.stdio;
 
-import kiss.event;
-import kiss.net.UdpSocket : UdpSocket;
+import hunt.io.event;
+import hunt.io.net.UdpSocket : UdpSocket;
 
 import std.socket;
 import std.functional;

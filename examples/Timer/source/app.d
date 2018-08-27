@@ -11,12 +11,12 @@
  
 import std.stdio;
 
-import kiss.core;
+import hunt.common;
 
-import kiss.logger;
+import hunt.logger;
 import core.thread;
 import core.time;
-import kiss.util.timer;
+import hunt.util.timer;
 
 version (NativeTimer)
 {
@@ -60,7 +60,7 @@ version (NativeTimer)
 else
 {
 
-	import kiss.event;
+	import hunt.io.event;
 
 	void main()
 	{

@@ -14,7 +14,7 @@ import hunt.util.UnitTest;
 import hunt.util.Assert;
 import hunt.util.string;
 
-import kiss.logger;
+import hunt.logger;
 import std.conv;
 
 /**

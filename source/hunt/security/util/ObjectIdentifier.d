@@ -13,7 +13,7 @@ import std.conv;
 import std.string;
 import std.bigint;
 
-import kiss.logger;
+import hunt.logger;
 
 alias BigInteger = BigInt;
 

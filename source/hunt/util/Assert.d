@@ -10,7 +10,7 @@ import std.range;
 import std.range;
 import std.traits;
 
-import kiss.logger;
+import hunt.logger;
 import hunt.util.exception;
 
 
