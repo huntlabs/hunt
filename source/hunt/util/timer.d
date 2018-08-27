@@ -18,7 +18,7 @@ import hunt.event.timer;
 
 import core.time;
 import std.datetime;
-import hunt.logger;
+import hunt.logging;
 
 alias  KissTimer = Timer; 
 
@@ -42,7 +42,7 @@ class Timer : AbstractTimer
     this(Selector loop, Duration duration)
     {
         super(loop);
-        this.interval = interval;
+        this.interval = duration;
     }
 
 protected:
@@ -83,7 +83,7 @@ import std.datetime;
 import std.exception;
 import std.process;
 
-import hunt.logger;
+import hunt.logging;
 import core.sys.windows.windows;
 import core.thread;
 import core.time;

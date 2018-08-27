@@ -10,7 +10,7 @@
  */
  
 import std.stdio;
-import hunt.logger;
+import hunt.logging;
 
 void main()
 {

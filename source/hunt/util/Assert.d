@@ -10,7 +10,7 @@ import std.range;
 import std.range;
 import std.traits;
 
-import hunt.logger;
+import hunt.logging;
 import hunt.util.exception;
 
 

@@ -54,7 +54,7 @@ final class EventLoop : AbstractSelector
 
     EventLoop postTask(AbstractTask task)
     {
-        import hunt.logger;
+        import hunt.logging;
 
         synchronized (this)
         {

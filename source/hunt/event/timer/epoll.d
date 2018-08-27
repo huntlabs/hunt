@@ -24,7 +24,7 @@ import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
 import core.time;
 import std.datetime;
 import std.exception;
-import hunt.logger;
+import hunt.logging;
 import std.socket;
 
 /**

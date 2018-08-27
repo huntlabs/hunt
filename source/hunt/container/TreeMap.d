@@ -26,7 +26,7 @@ import std.range;
 import std.traits;
 
 
-                import hunt.logger;
+                import hunt.logging;
 // Red-black mechanics
 
 private enum bool RED   = false;

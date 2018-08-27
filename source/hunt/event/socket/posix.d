@@ -27,7 +27,7 @@ import std.format;
 import std.process;
 import std.socket;
 import std.string;
-import hunt.logger;
+import hunt.logging;
 
 import core.stdc.errno;
 import core.stdc.string;

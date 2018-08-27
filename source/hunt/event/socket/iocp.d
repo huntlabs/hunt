@@ -31,7 +31,7 @@ import std.format;
 import std.conv;
 import std.socket;
 import std.exception;
-import hunt.logger;
+import hunt.logging;
 
 import std.process;
 

@@ -13,7 +13,7 @@ import std.stdio;
 
 import hunt.common;
 
-import hunt.logger;
+import hunt.logging;
 import core.thread;
 import core.time;
 import hunt.util.timer;

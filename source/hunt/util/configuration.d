@@ -22,7 +22,7 @@ import std.stdio;
 import std.string;
 import std.traits;
 
-import hunt.logger;
+import hunt.logging;
 
 /**
 */
@@ -311,7 +311,7 @@ class ConfigBuilder
     {
         import std.format;
 
-        string str = "import hunt.logger;";
+        string str = "import hunt.logging;";
         foreach (memberName; __traits(allMembers, T)) // TODO: // foreach (memberName; __traits(derivedMembers, T))
         {
             enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
