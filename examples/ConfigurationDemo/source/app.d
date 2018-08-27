@@ -5,7 +5,7 @@ import std.stdio;
 import std.file;
 import std.exception;
 
-import kiss.util.configuration;
+import hunt.util.configuration;
 
 import settings;
 

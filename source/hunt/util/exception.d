@@ -4,7 +4,7 @@ import std.exception;
 import core.exception;
 
 import std.stdio;
-import kiss.logger;
+import hunt.logger;
 
 void implementationMissing(string name = __FUNCTION__, string file = __FILE__, int line = __LINE__ )(bool canThrow=true)
 {

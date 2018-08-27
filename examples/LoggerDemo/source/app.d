@@ -10,7 +10,7 @@
  */
  
 import std.stdio;
-import kiss.logger;
+import hunt.logger;
 
 void main()
 {

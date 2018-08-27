@@ -1,6 +1,6 @@
 module settings;
 
-import kiss.util.configuration;
+import hunt.util.configuration;
 
 @Configuration("http")
 struct TestHttpConfig

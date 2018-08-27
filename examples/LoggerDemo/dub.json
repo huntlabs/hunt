@@ -3,7 +3,7 @@
 	"authors": [
 		"Putao"
 	],
-	"description": "A simple demo for kiss.util.logger.",
+	"description": "A simple demo for hunt.util.logger.",
 	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
 	"dependencies": {

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/huntlabs/kiss.svg?branch=master)](https://travis-ci.org/huntlabs/kiss)
+[![Build Status](https://travis-ci.org/huntlabs/hunt.svg?branch=master)](https://travis-ci.org/huntlabs/kiss)
 
 # Kiss library
 A refined core library for D programming language.
@@ -41,6 +41,6 @@ For details, see [here](docs/benchmark.md).
 - [ ] Stablize APIs
 - [ ] More friendly APIs
 - [ ] More examples
-- [x] Use kiss.logger for inner debugging
+- [x] Use hunt.logger for inner debugging
 - [x] Benchmark test
 - [x] Improving supports on Mac OS

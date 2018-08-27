@@ -8,7 +8,7 @@ import hunt.util.memory;
 import std.conv;
 import std.datetime;
 
-import kiss.logger;
+import hunt.logger;
 
 /**
  * Abstract base class and factory for caches. A cache is a key-value mapping.
