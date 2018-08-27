@@ -12,9 +12,9 @@
 module hunt.util.timer;
 
 import hunt.common;
-import hunt.io.net.core;
-import hunt.io.event;
-import hunt.io.event.timer;
+import hunt.io.core;
+import hunt.event;
+import hunt.event.timer;
 
 import core.time;
 import std.datetime;

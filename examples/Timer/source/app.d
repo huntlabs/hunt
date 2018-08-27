@@ -60,7 +60,7 @@ version (NativeTimer)
 else
 {
 
-	import hunt.io.event;
+	import hunt.event;
 
 	void main()
 	{

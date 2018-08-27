@@ -1,9 +1,9 @@
 import std.stdio;
 
-import hunt.io.event.socket;
+import hunt.event.socket;
 import hunt.util.thread;
-import hunt.io.event;
-import hunt.io.net;
+import hunt.event;
+import hunt.io;
 import hunt.util.thread;
 import hunt.common;
 

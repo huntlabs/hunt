@@ -11,9 +11,9 @@
  
 import std.stdio;
 
-import hunt.io.event;
-import hunt.io.net.TcpListener;
-import hunt.io.net.TcpStream;
+import hunt.event;
+import hunt.io.TcpListener;
+import hunt.io.TcpStream;
 import hunt.util.timer;
 import hunt.util.thread;
 

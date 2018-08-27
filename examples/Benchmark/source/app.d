@@ -11,8 +11,8 @@
  
 import std.stdio;
 
-import hunt.io.event;
-import hunt.io.net;
+import hunt.event;
+import hunt.io;
 import hunt.util.timer;
 import hunt.util.thread;
 
