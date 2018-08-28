@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -20,7 +20,7 @@ import core.time;
 import std.datetime;
 import hunt.logging;
 
-alias  KissTimer = Timer; 
+alias  HuntTimer = Timer; 
 
 /**
 */
@@ -186,7 +186,7 @@ alias NativeTimerBase = AbstractNativeTimer;
 *	https://www.codeproject.com/articles/146617/simple-c-timer-wrapper
 *	https://msdn.microsoft.com/en-us/library/ms687003(v=vs.85)
 */
-class KissNativeTimer : AbstractNativeTimer
+class HuntNativeTimer : AbstractNativeTimer
 {
     protected HANDLE _handle = null;
 
@@ -209,7 +209,7 @@ class KissNativeTimer : AbstractNativeTimer
     /// once: true to call timed event only once
     override void start(bool immediately = false, bool once = false)
     {
-        version(KissDebugMode) trace("main thread id: ", thisThreadID());
+        version(HuntDebugMode) trace("main thread id: ", thisThreadID());
         if (_isActive)
             return;
         BOOL r = CreateTimerQueueTimer(&_handle, null, &timerProc,
@@ -240,7 +240,7 @@ class KissNativeTimer : AbstractNativeTimer
     /// https://msdn.microsoft.com/en-us/library/ms687066(v=vs.85)
     extern (Windows) static private void timerProc(PVOID param, bool timerCalled)
     {
-        version(KissDebugMode) trace("handler thread id: ", thisThreadID());
+        version(HuntDebugMode) trace("handler thread id: ", thisThreadID());
         AbstractNativeTimer timer = cast(AbstractNativeTimer)(param);
         assert(timer !is null);
         timer.onTick();

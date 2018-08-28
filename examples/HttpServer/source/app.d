@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -47,7 +47,7 @@ void main(string[] args)
 		client.onDataReceived((in ubyte[] data) {
 			debug writeln("received: ", cast(string) data);
 
-			//string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+			//string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 			
 			string writeData = buildResponse("Hello, World!");
 			client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
@@ -72,7 +72,7 @@ string buildResponse(string content)
 {
 	Appender!string sb;
 	sb.put("HTTP/1.1 200 OK\r\n");
-	sb.put("Server: Kiss/0.3\r\n");
+	sb.put("Server: Hunt/0.3\r\n");
 	sb.put("Connection: Keep-Alive\r\n");
 	sb.put("Content-Type: text/plain\r\n");
 	sb.put("Content-Length: " ~ to!string(content.length) ~ "\r\n");

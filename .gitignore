@@ -1,35 +1,36 @@
-/build
-/obj
-/bin
-/trace.*
-dub.userprefs
-dub.selections.json
-docs.json
-performance_test
-__dummy.html
-.directory
-.idea
-.dub
-*.a
-*.tar.gz
-*.dll
-*.exe
-*.kdev4
-*.log
-*.lib
+# Visual Studio Code
+#.vscode/
+
+# Compiled Object files
 *.o
 *.obj
-*.suo
+
+# Compiled Dynamic libraries
 *.so
-*.swp
-*.userprefs
-*.zip
-*-test-*
-__test__*__
-test.config
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+
+# DUB
+.dub
+dub.selections.json
+docs.json
+__dummy.html
+docs/
+
+# Code coverage
+*.lst
+
+# Examples
 
 examples/*/log.txt
-examples/Benchmark/kiss-benchmark
+examples/Benchmark/hunt-benchmark
 examples/TcpClient/tcp-client
 examples/Timer/timer
 examples/UdpDemo/udp-demo
@@ -39,3 +40,6 @@ examples/EventGroupDemo/http-server-powered
 examples/PerformanceTest/performance
 examples/ConfigurationDemo/configuration
 examples/ContainerDemo/container-demo
+
+# others
+

@@ -30,7 +30,7 @@ class PackageSettings
 @Configuration("app")
 class TestConfig
 {
-    string name = "Kiss";
+    string name = "Hunt";
 
     @Value("time")
     double time;
@@ -70,7 +70,7 @@ class TestConfig
 
 class BuilderTest1Config
 {
-    string name = "Kiss";
+    string name = "Hunt";
 
     @Value("time")
     double time;

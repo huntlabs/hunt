@@ -50,8 +50,8 @@ void testConfig1()
 
 	assertThrown!(EmptyValueException)(conf.app.node1.node2.node3.node4.value());
 
-    assert(conf.app.subItem("package").name.value() == "Kiss package"); // use keyword as a node name
-    assert(conf["app"]["package"]["name"].value() == "Kiss package"); // use keyword as a node name
+    assert(conf.app.subItem("package").name.value() == "Hunt package"); // use keyword as a node name
+    assert(conf["app"]["package"]["name"].value() == "Hunt package"); // use keyword as a node name
 	
     assert(conf.app.node1.node2.node3.value() == "nothing");
     assert(conf.http.listen.value.as!long() == 100);
@@ -107,11 +107,11 @@ void testConfigBuilder2()
 	TestConfig config = manager.build!(TestConfig, "app")();
 
 	assert(config.package1 !is null);
-	assert(config.package1.name == "Kiss package", config.package1.name);
+	assert(config.package1.name == "Hunt package", config.package1.name);
 	assert(config.package2 !is null);
-	assert(config.package2.name == "Kiss pkg", config.package2.name);
+	assert(config.package2.name == "Hunt pkg", config.package2.name);
 	
-	assert(config.name == "Kiss-dev", config.name);
+	assert(config.name == "Hunt-dev", config.name);
 	assert(config.time == 0.25, to!string(config.time));
 
 	assert(config.interval1 == 550, to!string(config.time));

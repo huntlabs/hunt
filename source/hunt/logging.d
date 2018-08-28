@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -249,13 +249,13 @@ class SizeBaseRollover
 
 }
 
-__gshared KissLogger g_logger = null;
+__gshared HuntLogger g_logger = null;
 __gshared LogLevel g_logLevel = LogLevel.LOG_DEBUG;
 
 
 /**
 */
-class KissLogger
+class HuntLogger
 {
 	/*void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
@@ -303,14 +303,14 @@ class KissLogger
 		}
 
 		immutable void* data = cast(immutable void*) this;
-		_tid = spawn(&KissLogger.worker, data);
+		_tid = spawn(&HuntLogger.worker, data);
 	}
 
 protected:
 
 	static void worker(immutable void* ptr)
 	{
-		KissLogger logger = cast(KissLogger) ptr;
+		HuntLogger logger = cast(HuntLogger) ptr;
 		bool flag = true;
 		while (flag)
 		{
@@ -542,12 +542,12 @@ string code(string func, LogLevel level, bool f = false)()
 		~ `(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		if(g_logger is null)
-			KissLogger.writeFormatColor(`
-		~ level.stringof ~ ` , KissLogger.toFormat(func , KissLogger.logFormat` ~ (f
+			HuntLogger.writeFormatColor(`
+		~ level.stringof ~ ` , HuntLogger.toFormat(func , HuntLogger.logFormat` ~ (f
 				? "f" : "") ~ `(args) , file , line , ` ~ level.stringof ~ `));
 		else
 			g_logger.write(`
-		~ level.stringof ~ ` , KissLogger.toFormat(func , KissLogger.logFormat` ~ (f
+		~ level.stringof ~ ` , HuntLogger.toFormat(func , HuntLogger.logFormat` ~ (f
 				? "f" : "") ~ `(args) , file , line ,` ~ level.stringof ~ ` ));
 	}`;
 }
@@ -581,7 +581,7 @@ struct LogConf
 
 void logLoadConf(LogConf conf)
 {
-	g_logger = new KissLogger(conf);	
+	g_logger = new HuntLogger(conf);	
 }
 
 mixin(code!("logDebug", LogLevel.LOG_DEBUG));

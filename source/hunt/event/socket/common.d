@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -145,7 +145,7 @@ abstract class AbstractSocketChannel : AbstractChannel
         version (Posix)
             s.blocking = false;
         _socket = s;
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("new socket fd: ", this.handle);
     }
 

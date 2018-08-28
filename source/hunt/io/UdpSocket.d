@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -82,7 +82,7 @@ protected:
             bool canRead = true;
             while (canRead && _isRegistered)
             {
-                version (KissDebugMode)
+                version (HuntDebugMode)
                     trace("reading data...");
                 canRead = tryRead((Object obj) nothrow{
                     collectException(() {

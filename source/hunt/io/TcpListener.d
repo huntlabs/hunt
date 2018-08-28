@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -139,15 +139,15 @@ class TcpListener : AbstractListener
     protected override void onRead()
     {
         bool canRead = true;
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("start to listen");
         // while(canRead && this.isRegistered) // why??
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 trace("listening...");
             canRead = onAccept((Socket socket) {
 
-                version (KissDebugMode)
+                version (HuntDebugMode)
                     infof("new connection from %s, fd=%d",
                         socket.remoteAddress.toString(), socket.handle());
 

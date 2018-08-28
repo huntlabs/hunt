@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -59,23 +59,23 @@ abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
         _clientSocket = new Socket(_family, SocketType.STREAM, ProtocolType.TCP);
         DWORD dwBytesReceived = 0;
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("client socket:accept=%s  inner socket=%s", this.handle,
                     _clientSocket.handle());
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("AcceptEx is :  ", AcceptEx);
         int nRet = AcceptEx(this.handle, cast(SOCKET) _clientSocket.handle,
                 _buffer.ptr, 0, sockaddr_in.sizeof + 16, sockaddr_in.sizeof + 16,
                 &dwBytesReceived, &_iocp.overlapped);
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("do AcceptEx : the return is : ", nRet);
         checkErro(nRet);
     }
 
     protected bool onAccept(scope AcceptHandler handler)
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("new connection coming...");
         this.clearError();
         SOCKET slisten = cast(SOCKET) this.handle;
@@ -83,13 +83,13 @@ abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
         // void[] value = (&slisten)[0..1];
         // setsockopt(slink, SocketOptionLevel.SOCKET, 0x700B, value.ptr,
         //                    cast(uint) value.length);
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("slisten=%s, slink=%s", slisten, slink);
         setsockopt(slink, SocketOptionLevel.SOCKET, 0x700B, cast(void*)&slisten, slisten.sizeof);
         if (handler !is null)
             handler(this._clientSocket);
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("accept next connection...");
         if (this.isRegistered)
             this.doAccept();
@@ -124,7 +124,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         setFlag(WatchFlag.Read, true);
         setFlag(WatchFlag.Write, true);
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("Buffer size for read: ", bufferSize);
         _readBuffer = new ubyte[bufferSize];
         this.socket = new TcpSocket(family);
@@ -134,7 +134,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     override void onRead()
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("ready to read");
         _inRead = false;
         super.onRead();
@@ -156,7 +156,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         DWORD dwReceived = 0;
         DWORD dwFlags = 0;
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("start receiving handle=%d ", this.socket.handle);
 
         int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
@@ -182,7 +182,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         DWORD dwSent = 0;
         _iocpwrite.watcher = this;
         _iocpwrite.operation = IocpOperation.write;
-        version (KissDebugMode)
+        version (HuntDebugMode)
         {
             size_t bufferLength = sendDataBuffer.length;
             trace("writing...handle=", this.socket.handle());
@@ -197,7 +197,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
                 dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
         {
             if (dwSent != _dataWriteBuffer.len)
                 warningf("dwSent=%d, BufferLength=%d", dwSent, _dataWriteBuffer.len);
@@ -218,7 +218,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected void doRead()
     {
         this.clearError();
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("data reading...%d nbytes", this.readLen);
 
         if (readLen > 0)
@@ -228,7 +228,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
             if (dataReceivedHandler !is null)
                 dataReceivedHandler(this._readBuffer[0 .. readLen]);
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 tracef("done with data reading...%d nbytes", this.readLen);
 
             // continue reading
@@ -236,7 +236,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else if (readLen == 0)
         {
-            version (KissDebugMode) {
+            version (HuntDebugMode) {
                 if (_remoteAddress !is null)
                     warningf("connection broken: %s", _remoteAddress.toString());
             }
@@ -246,7 +246,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
             {
                 warningf("undefined behavior on thread %d", getTid());
             }
@@ -270,7 +270,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             warning("Busy in writting on thread: ");
             return 0;
         }
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("start to write");
         _isWritting = true;
 
@@ -285,7 +285,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     {
         if (_isWritting)
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 warning("Busy in writting on thread: ");
             return;
         }
@@ -293,7 +293,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         if (_writeQueue.empty)
             return;
 
-        version (KissDebugMode) trace("start to write");
+        version (HuntDebugMode) trace("start to write");
         _isWritting = true;
 
         clearError();
@@ -304,7 +304,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         size_t nBytes = doWrite();
 
         if(nBytes < data.length) { // to fix the corrupted data 
-            version (KissDebugMode) warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
+            version (HuntDebugMode) warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
             sendDataBuffer = data.dup;
         }
     }
@@ -313,7 +313,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     private void setWriteBuffer(in ubyte[] data)
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
         trace("buffer content length: ", data.length);
         // trace(cast(string) data);
         // tracef("%(%02X %)", data);
@@ -329,7 +329,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     */
     void onWriteDone(size_t nBytes)
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("finishing data writting %d nbytes) ", nBytes);
         if (isWriteCancelling)
         {
@@ -347,14 +347,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             writeBuffer.doFinish();
             _isWritting = false;
 
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 tracef("done with data writting %d nbytes) ", nBytes);
 
             tryWrite();
         }
         else // if (sendDataBuffer.length > nBytes) 
         {
-            // version (KissDebugMode)
+            // version (HuntDebugMode)
                 tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
             // sendDataBuffer corrupted
@@ -462,7 +462,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
 
         void doRead()
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 trace("Receiving......");
 
             _dataReadBuffer.len = cast(uint) _readBuffer.data.length;
@@ -537,7 +537,7 @@ mixin template CheckIocpError()
         if (ret != 0 || dwLastError == 0)
             return;
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("erro=%d, dwLastError=%d", erro, dwLastError);
 
         if (ERROR_IO_PENDING != dwLastError)

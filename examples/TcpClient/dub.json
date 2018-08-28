@@ -7,11 +7,11 @@
 	"copyright": "Copyright © 2018, 渡世白玉",
 	"license": "proprietary",
 	"dependencies": {
-		"kiss" : {
+		"hunt" : {
 			"path" : "../../"
 		}
 	},
 	"subConfigurations": {
-		"kiss" : "debug"
+		"hunt" : "debug"
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -189,7 +189,7 @@ class AbstractSelector : Selector
                 if ((events[i].filter & EVFILT_WRITE) && watch.isRegistered)
                 {
                     // import hunt.logging;
-                    // version(KissDebugMode) trace("The channel socket is: ", typeid(watch));
+                    // version(HuntDebugMode) trace("The channel socket is: ", typeid(watch));
                     AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
                     assert(wt !is null);
                     wt.onWriteDone();

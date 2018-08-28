@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -57,13 +57,13 @@ class AbstractSelector : Selector
                 || watcher.type == WatcherType.Accept 
                 || watcher.type == WatcherType.UDP)
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 trace("Run CreateIoCompletionPort on socket: ", watcher.handle);
             CreateIoCompletionPort(cast(HANDLE) watcher.handle, _iocpHandle,
                     cast(size_t)(cast(void*) watcher), 0);
         }
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             infof("register, watcher(fd=%d, type=%s)", watcher.handle, watcher.type);
         _event.setNext(watcher);
         return true;
@@ -156,7 +156,7 @@ class AbstractSelector : Selector
 
     private void handleIocpOperation(IocpOperation op, AbstractChannel channel, DWORD bytes) {
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("ev.operation: ", op);
 
         switch (op)
@@ -209,7 +209,7 @@ class AbstractSelector : Selector
         }
 
         if(len == 0 || wt.isClosed) {
-            version (KissDebugMode) info("channel closed");
+            version (HuntDebugMode) info("channel closed");
             return;
         }
 

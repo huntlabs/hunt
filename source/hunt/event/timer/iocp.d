@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -33,7 +33,7 @@ class AbstractTimer : TimerChannelBase
     {
         super(loop);
         setFlag(WatchFlag.Read, true);
-        _timer = new KissWheelTimer();
+        _timer = new HuntWheelTimer();
         _timer.timeout = &onTimerTimeout;
         _readBuffer = new UintObject();
     }
@@ -83,10 +83,10 @@ class AbstractTimer : TimerChannelBase
     }
 
 
-    @property KissWheelTimer timer() { return _timer; }
+    @property HuntWheelTimer timer() { return _timer; }
     // mixin OverrideErro;
 
     UintObject _readBuffer;
 
-    private KissWheelTimer _timer;
+    private HuntWheelTimer _timer;
 }
