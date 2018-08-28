@@ -4,7 +4,7 @@
 	"authors": [
 		"Putao"
 	],
-	"description": "A performance tester for KISS.",
+	"description": "A performance tester for Hunt.",
 	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
 	"dependencies": {

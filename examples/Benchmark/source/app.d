@@ -194,7 +194,7 @@ void main(string[] args)
 	GetoptResult o = getopt(args, "port|p", "Port (default 8080)", &port);
 	if (o.helpWanted)
 	{
-		defaultGetoptPrinter("A simple http server powered by KISS!", o.options);
+		defaultGetoptPrinter("A simple http server powered by Hunt!", o.options);
 		return;
 	}
 

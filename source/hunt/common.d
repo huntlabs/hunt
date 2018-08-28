@@ -14,9 +14,9 @@ module hunt.common;
 import core.time;
 
 // define hunt versions
-enum KISS_MAJOR_VERSION = 0;
-enum KISS_MINOR_VERSION = 4;
-enum KISS_PATCH_VERSION = 5;
+enum Hunt_MAJOR_VERSION = 1;
+enum Hunt_MINOR_VERSION = 0;
+enum Hunt_PATCH_VERSION = 0;
 
 /**
 */
