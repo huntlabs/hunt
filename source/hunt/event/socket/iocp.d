@@ -157,7 +157,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         DWORD dwFlags = 0;
 
         version (KissDebugMode)
-            tracef("receiving on thread(%d), handle=%d ", getTid(), this.socket.handle);
+            tracef("start receiving handle=%d ", this.socket.handle);
 
         int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
                 &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
@@ -184,10 +184,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         _iocpwrite.operation = IocpOperation.write;
         version (KissDebugMode)
         {
+            size_t bufferLength = sendDataBuffer.length;
             trace("writing...handle=", this.socket.handle());
-            trace("buffer content length: ", sendDataBuffer.length);
+            trace("buffer content length: ", bufferLength);
             // trace(cast(string) data);
-            tracef("%(%02X %)", sendDataBuffer);
+            if(bufferLength>64)
+                tracef("%(%02X %) ...", sendDataBuffer[0..64]);
+            else
+                tracef("%(%02X %)", sendDataBuffer[0..$]);
         }
 
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
@@ -232,16 +236,13 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else if (readLen == 0)
         {
-            version (KissDebugMode)
-            {
+            version (KissDebugMode) {
                 if (_remoteAddress !is null)
                     warningf("connection broken: %s", _remoteAddress.toString());
             }
             onDisconnected();
-            if (_isClosed)
-                this.socket.close(); // release the sources
-            else
-                this.close();
+            // if (_isClosed)
+            //     this.close();
         }
         else
         {
@@ -266,7 +267,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     {
         if (_isWritting)
         {
-            warning("Busy in writting on thread: ", thisThreadID());
+            warning("Busy in writting on thread: ");
             return 0;
         }
         version (KissDebugMode)
@@ -285,15 +286,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         if (_isWritting)
         {
             version (KissDebugMode)
-                warning("Busy in writting on thread: ", thisThreadID());
+                warning("Busy in writting on thread: ");
             return;
         }
 
         if (_writeQueue.empty)
             return;
 
-        version (KissDebugMode)
-            trace("start to write");
+        version (KissDebugMode) trace("start to write");
         _isWritting = true;
 
         clearError();
@@ -303,8 +303,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         setWriteBuffer(data);
         size_t nBytes = doWrite();
 
-        if(nBytes < data.length) // to fix the corrupted data 
+        if(nBytes < data.length) { // to fix the corrupted data 
+            version (KissDebugMode) warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
             sendDataBuffer = data.dup;
+        }
     }
 
     private bool _isWritting = false;
@@ -328,7 +330,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     void onWriteDone(size_t nBytes)
     {
         version (KissDebugMode)
-            tracef("finishing data writing, thread: %d,  nbytes: %d) ", thisThreadID(), nBytes);
+            tracef("finishing data writting %d nbytes) ", nBytes);
         if (isWriteCancelling)
         {
             _isWritting = false;
@@ -346,13 +348,13 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             _isWritting = false;
 
             version (KissDebugMode)
-                tracef("done with data writing, thread: %d,  nbytes: %d) ", thisThreadID(), nBytes);
+                tracef("done with data writting %d nbytes) ", nBytes);
 
             tryWrite();
         }
         else // if (sendDataBuffer.length > nBytes) 
         {
-            version (KissDebugMode)
+            // version (KissDebugMode)
                 tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
             // sendDataBuffer corrupted

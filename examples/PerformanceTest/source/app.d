@@ -56,9 +56,11 @@ void launchClient()
 
     size_t middleIndex = totalSize / 2;
     ubyte[] sendingBuffer = new ubyte[totalSize];
-    sendingBuffer[0] = WatchedValue1;
-    sendingBuffer[middleIndex] = WatchedValue2;
-    sendingBuffer[$ - 1] = WatchedValue3;
+    for(size_t i=0; i<totalSize; i++) 
+        sendingBuffer[i] = cast(ubyte)(i % 512);
+    // sendingBuffer[0] = WatchedValue1;
+    // sendingBuffer[middleIndex] = WatchedValue2;
+    // sendingBuffer[$ - 1] = WatchedValue3;
 
     TcpSocket socket = new TcpSocket();
     socket.blocking = true;
@@ -68,6 +70,7 @@ void launchClient()
     for (size_t len = 0; offset < sendingBuffer.length; offset += len)
     {
         len = socket.send(sendingBuffer[offset .. $]);
+        debug writefln ("[Client] sending: offset=%d, lenght=%d", offset, len);
     }
 
     ubyte[] receivedBuffer = new ubyte[totalSize];
@@ -80,19 +83,25 @@ void launchClient()
             break;
 
         if (clientCounter % (totalSize / 10 / bufferSize) == 0)
-            writefln("[client] Current=%d, Accumulated=%d", len, offset + len);
+            writefln("[Client] Current=%d, Accumulated=%d", len, offset + len);
         clientCounter++;
     }
 
-    writefln("[client] received on thread (%d): counter=%d, length=%d, buffer[0]=%d, buffer[$/2]=%d, buffer[$-1]=%d", getTid(),
+    writefln("[Client] received: counter=%d, length=%d, buffer[0]=%d, buffer[$/2]=%d, buffer[$-1]=%d", 
             clientCounter, offset, receivedBuffer[0], receivedBuffer[middleIndex], receivedBuffer[$ - 1]);
     socket.shutdown(SocketShutdown.BOTH);
     socket.close();
 
-    if (receivedBuffer[middleIndex] == WatchedValue2 && receivedBuffer[$ - 1] == WatchedValue3)
-        writeln("[client] test succeeded");
-    else
-        writefln("[client] test failed");
+    debug writefln("[Client]Peeking received buffer[0 .. 1024]: %(%02X %)", receivedBuffer[0..1024]);
+    import std.format;
+    for(size_t i=0; i<totalSize; i++) 
+        assert(receivedBuffer[i] == cast(ubyte)(i % 512), format("data[%d]=%d, should be: %d", i, 
+            receivedBuffer[i], cast(ubyte)(i % 512)));
+
+    // if (receivedBuffer[middleIndex] == WatchedValue2 && receivedBuffer[$ - 1] == WatchedValue3)
+        writeln("[Client] test succeeded");
+    // else
+    //     writefln("[Client] test failed");
 }
 
 void workerFunc()
@@ -107,12 +116,12 @@ void workerFunc()
             {
                 // Thread.sleep(500.msecs);
                 launchClient();
-                writeln("[client] done.");
+                writeln("[Client] done.");
                 isDone = true;
             }
             else if (m == 0)
             {
-                writeln("[client] exiting.");
+                writeln("[Client] exiting.");
                 isDone = true;
             }
         }
@@ -123,7 +132,7 @@ void workerFunc()
         }
         catch (Exception ex)
         {
-            writeln("[client] Exception thrown", ex.message);
+            writeln("[Client] Exception thrown", ex.message);
             isDone = true;
         }
     }
@@ -215,8 +224,8 @@ class TestTcpServer : AbstractTcpServer
 
     protected void handleReceivedData(TcpStream client, in ubyte[] data)
     {
-        queue[client] ~= data;
-        ubyte[] buffer = queue[client];
+        queue[Client] ~= data;
+        ubyte[] buffer = queue[Client];
 
         totalReceived += data.length;
         if (serverCounter % (totalSize / 10 / bufferSize) == 0)

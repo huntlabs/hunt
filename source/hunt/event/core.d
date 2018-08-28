@@ -122,10 +122,12 @@ abstract class AbstractChannel : Channel
 
     protected void onClose()
     {
-        _inLoop.deregister(this);
-        //  _inLoop = null;
         _isRegistered = false;
         _isClosed = true;
+        version(Windows) {} else {
+            _inLoop.deregister(this);
+        }
+        //  _inLoop = null;
         clear();
     }
 
@@ -165,10 +167,10 @@ abstract class AbstractChannel : Channel
         if (!_isClosed)
         {
             version (KissDebugMode)
-                trace("channel closing...");
+                trace("channel closing...", this.handle);
             onClose();
             version (KissDebugMode)
-                trace("channel closed...");
+                trace("channel closed...", this.handle);
         }
         else
         {
