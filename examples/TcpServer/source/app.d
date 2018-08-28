@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -65,7 +65,7 @@ void main()
 
 	writeln("Listening on: ", listener.bindingAddress.toString());
 
-	// KissTimer timer = new KissTimer(loop);
+	// HuntTimer timer = new HuntTimer(loop);
 	// timer.onTick((Object sender) {
 	// 	writeln("The time now is: ", Clock.currTime.toString());
 	// }).start(1000);

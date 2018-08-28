@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -182,14 +182,14 @@ protected:
 
     override void onRead()
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("start to read");
 
         version (Posix)
         {
             while (_isRegistered && !tryRead())
             {
-                version (KissDebugMode)
+                version (HuntDebugMode)
                 {
                     trace("continue reading...");
                 }
@@ -211,7 +211,7 @@ protected:
 
     override void onClose()
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
         {
             if (!_writeQueue.empty)
             {
@@ -242,12 +242,12 @@ protected:
         }
 
         // bool canWrite = true;
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("start to write");
 
         while (_isRegistered && !isWriteCancelling && !_writeQueue.empty)
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 trace("writting...");
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
@@ -262,7 +262,7 @@ protected:
             size_t nBytes = tryWrite(data);
             if (nBytes > 0 && writeBuffer.popSize(nBytes))
             {
-                version (KissDebugMode)
+                version (HuntDebugMode)
                     trace("finishing data writing...nBytes", nBytes);
                 _writeQueue.deQueue().doFinish();
             }

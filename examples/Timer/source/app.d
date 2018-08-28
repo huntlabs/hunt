@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -41,9 +41,9 @@ version (NativeTimer)
 			}
 		}
 
-		new KissNativeTimer(1.seconds).onTick(&onTimerTick).start();
+		new HuntNativeTimer(1.seconds).onTick(&onTimerTick).start();
 
-		new KissNativeTimer().interval(2.seconds).onTick(delegate void(Object sender) {
+		new HuntNativeTimer().interval(2.seconds).onTick(delegate void(Object sender) {
 			trace("Countdown[2]: ", count2--);
 			if (count2 == 0)
 			{
@@ -101,10 +101,10 @@ else
 			}
 		}
 
-		new KissTimer(loop, 1.seconds).onTick(&onTimerTick).start();
+		new HuntTimer(loop, 1.seconds).onTick(&onTimerTick).start();
 
 		int count2 = 5;
-		new KissTimer(loop).interval(2.seconds).onTick(delegate void(Object sender) {
+		new HuntTimer(loop).interval(2.seconds).onTick(delegate void(Object sender) {
 			trace("Countdown[2]: ", count2--);
 			if (count2 == 0)
 			{

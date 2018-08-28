@@ -1,5 +1,5 @@
 {
-	"name": "kiss-benchmark",
+	"name": "hunt-benchmark",
 	"targetType": "executable",
 	"authors": [
 		"Putao"
@@ -8,7 +8,7 @@
 	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
 	"dependencies": {
-		"kiss" : {
+		"hunt" : {
 			"path" : "../../"
 		}
 	}

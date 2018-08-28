@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -13,7 +13,7 @@ import std.stdio;
 
 import hunt.event;
 import hunt.io;
-import hunt.util.KissTimer;
+import hunt.util.HuntTimer;
 import hunt.util.thread;
 
 import std.socket;
@@ -104,7 +104,7 @@ class HttpServer : AbstractTcpServer
 	protected void notifyDataReceived(TcpStream client, in ubyte[] data)
 	{
 		debug writefln("on thread:%s, data received: %s", getTid(), cast(string) data);
-		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
 			// client.close(); // comment out for Keep-Alive

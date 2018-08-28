@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -47,14 +47,14 @@ abstract class AbstractListener : AbstractSocketChannel
 
     protected bool onAccept(scope AcceptHandler handler)
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("new connection coming...");
         this.clearError();
         socket_t clientFd = cast(socket_t)(accept(this.handle, null, null));
         if (clientFd == socket_t.init)
             return false;
 
-        version (KissDebugMode)
+        version (HuntDebugMode)
             infof("Listener fd=%d, client fd=%d", this.handle, clientFd);
 
         if (handler !is null)
@@ -64,7 +64,7 @@ abstract class AbstractListener : AbstractSocketChannel
 
     override void onWriteDone()
     {
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("a new connection created, thread: %s", getTid());
     }
 }
@@ -83,7 +83,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2)
     {
         // _readBuffer = new UbyteArrayObject();
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("The size of buffer for read is: %d bytes", bufferSize);
         _readBuffer = new ubyte[bufferSize];
         super(loop, WatcherType.TCP);
@@ -99,7 +99,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         bool isDone = true;
         this.clearError();
         ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
-        version (KissDebugMode)
+        version (HuntDebugMode)
             trace("read nbytes...", len);
 
         if (len > 0)
@@ -125,7 +125,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
                 warningf("connection broken: %s", _remoteAddress.toString());
             onDisconnected();
             if (_isClosed)
@@ -156,14 +156,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected void tryWriteAll(in ubyte[] data)
     {
         const nBytes = this.socket.send(data);
-        // version (KissDebugMode)
+        // version (HuntDebugMode)
         tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
         if (nBytes > 0)
         {
             if (canWriteAgain && nBytes < data.length) //  && writeRetries < writeRetryLimit
             {
-                // version (KissDebugMode)
+                // version (HuntDebugMode)
                 writeRetries++;
                 tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
                         writeRetries, nBytes, data.length - nBytes, data.length);
@@ -189,7 +189,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             }
             else
             {
-                // version (KissDebugMode)
+                // version (HuntDebugMode)
                 warningf("errno=%d, message: %s", errno, lastSocketError());
                 if (canWriteAgain)
                 {
@@ -209,7 +209,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
             {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
@@ -228,7 +228,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     protected size_t tryWrite(in ubyte[] data)
     {
         const nBytes = this.socket.send(data);
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
         if (nBytes > 0)
@@ -237,7 +237,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else if (nBytes == Socket.ERROR)
         {
-            // version (KissDebugMode)
+            // version (HuntDebugMode)
             //     warningf("errno=%d, message: %s", errno, lastSocketError());
 
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
@@ -251,7 +251,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else
         {
-            version (KissDebugMode)
+            version (HuntDebugMode)
             {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
@@ -279,7 +279,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     override void onWriteDone()
     {
         // notified by kqueue selector when data writing done
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("done with data writing, thread: %s", getTid());
     }
 
@@ -373,7 +373,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
     override void onWriteDone()
     {
         // notified by kqueue selector when data writing done
-        version (KissDebugMode)
+        version (HuntDebugMode)
             tracef("done with data writing, thread: %s", getTid());
     }
 }

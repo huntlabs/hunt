@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -20,13 +20,13 @@ version (linux)
 {
     public import hunt.event.selector.epoll;
 
-    // alias KissSelector = AbstractSelector;
+    // alias HuntSelector = AbstractSelector;
 
 }
 else version (Kqueue)
 {
 
-    // alias KissSelector = KqueueLoop;
+    // alias HuntSelector = KqueueLoop;
 
     public import hunt.event.selector.kqueue;
 
@@ -35,7 +35,7 @@ else version (Windows)
 {
     public import hunt.event.selector.iocp;
 
-    // alias KissSelector = IocpSelector;
+    // alias HuntSelector = IocpSelector;
 
 }
 else

@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -132,8 +132,8 @@ class HttpServer : AbstractTcpServer
 	{
 		// string currentTime = Clock.currTime.toString();
 		string currentTime = "Wed, 17 Apr 2013 12:00:00 GMT";
-		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
-		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Kiss/0.3\r\nDate: " ~ currentTime ~ "\r\n\r\nHello, World!";
+		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/0.3\r\nDate: " ~ currentTime ~ "\r\n\r\nHello, World!";
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
 			if (!keepAlive)
@@ -149,7 +149,7 @@ class HttpServer : AbstractTcpServer
 
 		string writeData = "HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: " ~ to!string(
 				content.length)
-			~ "\r\nServer: Kiss/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\n";
+			~ "\r\nServer: Hunt/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\n";
 		writeData ~= content;
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
@@ -160,9 +160,9 @@ class HttpServer : AbstractTcpServer
 
 	private void badRequest(TcpStream client)
 	{
-		// string writeData = "HTTP/1.1 404 Not Found\r\nServer: Kiss/0.3\r\nConnection: close\r\n\r\n";
+		// string writeData = "HTTP/1.1 404 Not Found\r\nServer: Hunt/0.3\r\nConnection: close\r\n\r\n";
 		string writeData = `HTTP/1.1 404 Not Found
-Server: Kiss/0.3
+Server: Hunt/0.3
 Content-Type: text/html
 Content-Length: 165
 Connection: keep-alive
@@ -171,7 +171,7 @@ Connection: keep-alive
 <head><title>404 Not Found</title></head>
 <body bgcolor="white">
 <center><h1>404 Not Found</h1></center>
-<hr><center>Kiss/0.3</center>
+<hr><center>Hunt/0.3</center>
 </body>
 </html>
 `;

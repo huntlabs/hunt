@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -73,7 +73,7 @@ class AbstractSelector : Selector
                 wt.setTimer();
         }
 
-        // version(KissDebugMode) infof("register, watcher(fd=%d)", watcher.handle);
+        // version(HuntDebugMode) infof("register, watcher(fd=%d)", watcher.handle);
         const fd = watcher.handle;
         assert(fd >= 0, "The watcher.handle is not initilized!");
 
@@ -102,7 +102,7 @@ class AbstractSelector : Selector
     override bool deregister(AbstractChannel watcher)
     {
         assert(watcher !is null);
-        // version(KissDebugMode) infof("unregister watcher(fd=%d)", watcher.handle);
+        // version(HuntDebugMode) infof("unregister watcher(fd=%d)", watcher.handle);
 
         const int fd = watcher.handle;
         if (fd < 0)
@@ -139,13 +139,13 @@ class AbstractSelector : Selector
             AbstractChannel watch = cast(AbstractChannel)(events[i].data.ptr);
             if (watch is null)
             {
-                version(KissDebugMode) warningf("watcher is null");
+                version(HuntDebugMode) warningf("watcher is null");
                 continue;
             }
 
             if (isErro(events[i].events))
             {
-                version(KissDebugMode) info("close event: ", watch.handle);
+                version(HuntDebugMode) info("close event: ", watch.handle);
                 watch.close();
                 continue;
             }

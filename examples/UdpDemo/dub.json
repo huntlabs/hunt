@@ -7,11 +7,11 @@
 		"BitWorld"
 	],
 	"dependencies": {
-		"kiss" : {
+		"hunt" : {
 			"path" : "../../"
 		}
 	},
 	"subConfigurations": {
-		"kiss" : "debug"
+		"hunt" : "debug"
 	}
 }

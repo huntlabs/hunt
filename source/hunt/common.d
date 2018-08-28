@@ -1,5 +1,5 @@
 /*
- * Kiss - A refined core library for D programming language.
+ * Hunt - A refined core library for D programming language.
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
@@ -13,7 +13,7 @@ module hunt.common;
 
 import core.time;
 
-// define kiss versions
+// define hunt versions
 enum KISS_MAJOR_VERSION = 0;
 enum KISS_MINOR_VERSION = 4;
 enum KISS_PATCH_VERSION = 5;
