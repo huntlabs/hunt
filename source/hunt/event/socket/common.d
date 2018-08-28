@@ -70,7 +70,7 @@ mixin template ChannelSocketOption() {
         return  this.socket.getOption(level, option, result);
     }
 
-    /// Common case of getting integer and bool options.
+    /// Common case of getting integer and boolean options.
     pragma(inline) final int getOption(SocketOptionLevel level,
         SocketOption option, ref int32_t result) @trusted {
         return  this.socket.getOption(level, option, result);
@@ -94,7 +94,7 @@ mixin template ChannelSocketOption() {
         return  this.socket.setOption(forward!(level, option, value));
     }
 
-    /// Common case for setting integer and bool options.
+    /// Common case for setting integer and boolean options.
     pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
         int32_t value) @trusted {
         return  this.socket.setOption(forward!(level, option, value));
@@ -142,9 +142,8 @@ abstract class AbstractSocketChannel : AbstractChannel
     {
         this.handle = s.handle();
         this._family = s.addressFamily;
-        // _localAddress = s.localAddress();
-        // version (Posix)
-        //     s.blocking = false;
+        version (Posix)
+            s.blocking = false;
         _socket = s;
         version (KissDebugMode)
             trace("new socket fd: ", this.handle);
@@ -172,7 +171,7 @@ abstract class AbstractSocketChannel : AbstractChannel
 
     void onWriteDone() 
     {
-        assert(false, "not implemented");
+        assert(false, "unimplemented");
     }
 
 protected:

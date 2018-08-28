@@ -114,7 +114,6 @@ class AbstractSelector : Selector
             return false;
         }
         // TODO: check this
-        // watcher.currtLoop = null;
         // watcher.clear();
         return true;
     }

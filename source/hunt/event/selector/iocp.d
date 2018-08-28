@@ -54,7 +54,8 @@ class AbstractSelector : Selector
             _timer.timeWheel().addNewTimer(wt.timer, wt.wheelSize());
         }
         else if (watcher.type == WatcherType.TCP
-                || watcher.type == WatcherType.Accept || watcher.type == WatcherType.UDP)
+                || watcher.type == WatcherType.Accept 
+                || watcher.type == WatcherType.UDP)
         {
             version (KissDebugMode)
                 trace("Run CreateIoCompletionPort on socket: ", watcher.handle);
@@ -75,6 +76,9 @@ class AbstractSelector : Selector
 
     override bool deregister(AbstractChannel watcher)
     {
+        // FIXME: Needing refactor or cleanup -@Administrator at 8/28/2018, 3:28:18 PM
+        // https://stackoverflow.com/questions/6573218/removing-a-handle-from-a-i-o-completion-port-and-other-questions-about-iocp
+        //tracef("deregister (fd=%d)", watcher.handle);
 
         // IocpContext _data;
         // _data.watcher = watcher;
@@ -128,6 +132,7 @@ class AbstractSelector : Selector
                     &key, &overlapped, timeout);
         }
 
+        IocpContext* ev = cast(IocpContext*) overlapped;
         if (ret == 0)
         {
             const auto erro = GetLastError();
@@ -135,44 +140,47 @@ class AbstractSelector : Selector
                 return;
 
             error("error occurred, code=", erro);
-            auto ev = cast(IocpContext*) overlapped;
-            if (ev && ev.watcher)
-                ev.watcher.close();
+            if (ev !is null) {
+                AbstractChannel channel = ev.watcher;
+                if(channel !is null && !channel.isClosed())
+                    channel.close();
+            } 
             return;
         }
 
-        auto ev = cast(IocpContext*) overlapped;
         if (ev is null || ev.watcher is null)
-        {
-            warning("ev is null: ", ev is null);
-            return;
-        }
+            warning("ev is null or ev.watche is null");
+        else
+            handleIocpOperation(ev.operation, ev.watcher, bytes);
+    }
+
+    private void handleIocpOperation(IocpOperation op, AbstractChannel channel, DWORD bytes) {
 
         version (KissDebugMode)
-            trace("ev.operation: ", ev.operation);
+            trace("ev.operation: ", op);
 
-        switch (ev.operation)
+        switch (op)
         {
         case IocpOperation.accept:
-            ev.watcher.onRead();
+            channel.onRead();
             break;
         case IocpOperation.connect:
-            onSocketRead(ev.watcher, 0);
+            onSocketRead(channel, 0);
             break;
         case IocpOperation.read:
-            onSocketRead(ev.watcher, bytes);
+            onSocketRead(channel, bytes);
             break;
         case IocpOperation.write:
-            onSocketWrite(ev.watcher, bytes);
+            onSocketWrite(channel, bytes);
             break;
         case IocpOperation.event:
-            ev.watcher.onRead();
+            channel.onRead();
             break;
         case IocpOperation.close:
-            warning("close: ");
+            warning("close: ", );
             break;
         default:
-            warning("unsupported operation type: ", ev.operation);
+            warning("unsupported operation type: ", op);
             break;
         }
     }
@@ -195,11 +203,20 @@ class AbstractSelector : Selector
 
     private void onSocketRead(AbstractChannel wt, size_t len)
     {
+        debug if(wt is null) {
+            warning("channel is null");
+            return;
+        }
+
+        if(len == 0 || wt.isClosed) {
+            version (KissDebugMode) info("channel closed");
+            return;
+        }
+
         AbstractSocketChannel io = cast(AbstractSocketChannel) wt;
-        assert(io !is null, "The type of channel is: " ~ to!string(typeid(wt)));
-        if (io is null)
-        {
-            warning("The channel socket is null: ", typeid(wt));
+        // assert(io !is null, "The type of channel is: " ~ typeid(wt).name);
+        if (io is null) {
+            warning("The channel socket is null: ");
             return;
         }
         io.setRead(len);
@@ -208,9 +225,16 @@ class AbstractSelector : Selector
 
     private void onSocketWrite(AbstractChannel wt, size_t len)
     {
+        debug if(wt is null) {
+            warning("channel is null");
+            return;
+        }
         AbstractStream client = cast(AbstractStream) wt;
-        assert(client !is null, "The type of channel is: " ~ to!string(typeid(wt)));
-
+        // assert(client !is null, "The type of channel is: " ~ typeid(wt).name);
+        if (client is null) {
+            warning("The channel socket is null: ");
+            return;
+        }
         client.onWriteDone(len); // Notify the client about how many bytes actually sent.
     }
 
