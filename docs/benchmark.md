@@ -1,4 +1,4 @@
-## Kiss Benchmark
+## Hunt Benchmark
 
 ### Environment
 - **Server 1** (virtual machine / 4 cores): Ubuntu SMP x86_64 GNU/Linux
@@ -14,7 +14,7 @@
 ### Tools
 - **wrk:** v4.1.0
 - **bash script:** [../examples/Benchmark/bench.sh](../examples/Benchmark/bench.sh)
-- **command line:** `$ ./bench.sh Kiss plaintext 10.1.x.x 8080`
+- **command line:** `$ ./bench.sh Hunt plaintext 10.1.x.x 8080`
 
 ### Benchmarking (plaintext)
 
