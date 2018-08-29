@@ -11,10 +11,9 @@
  
 module hunt.event.socket.common;
 
-import hunt.common;
+import hunt.util.common;
 import hunt.event.EventLoop;
 import hunt.event.core;
-// import hunt.exception;
 import hunt.container.ByteBuffer;
 
 import std.socket;

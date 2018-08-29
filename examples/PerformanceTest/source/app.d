@@ -5,7 +5,7 @@ import hunt.util.thread;
 import hunt.event;
 import hunt.io;
 import hunt.util.thread;
-import hunt.common;
+import hunt.util.common;
 
 import std.getopt;
 import std.exception;

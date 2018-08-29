@@ -182,7 +182,7 @@ unittest {
 
     void finish(AbstractTask task) nothrow @trusted
     {
-        import hunt.exception;
+        import hunt.logging;
         catchAndLogException((){
                     import std.stdio;
                     int a = task.returnValue.get!int();

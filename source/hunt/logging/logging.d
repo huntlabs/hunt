@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
-module hunt.logging;
+module hunt.logging.logging;
 
 import std.exception;
 
@@ -527,7 +527,7 @@ protected:
 
 			SetConsoleTextAttribute(g_hout, color);
 			writeln(msg);
-			SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+			// SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
 		}
 	}

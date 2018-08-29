@@ -11,7 +11,7 @@
  
 import std.stdio;
 
-import hunt.common;
+import hunt.util.common;
 
 import hunt.logging;
 import core.thread;
