@@ -20,7 +20,6 @@ import core.time;
 import std.datetime;
 import hunt.logging;
 
-alias  HuntTimer = Timer; 
 
 /**
 */
@@ -179,14 +178,13 @@ abstract class AbstractNativeTimer : ITimer
     }
 }
 
-alias NativeTimerBase = AbstractNativeTimer;
 
 /**
 * See_also:
 *	https://www.codeproject.com/articles/146617/simple-c-timer-wrapper
 *	https://msdn.microsoft.com/en-us/library/ms687003(v=vs.85)
 */
-class HuntNativeTimer : AbstractNativeTimer
+class NativeTimer : AbstractNativeTimer
 {
     protected HANDLE _handle = null;
 

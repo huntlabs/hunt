@@ -41,9 +41,9 @@ version (NativeTimer)
 			}
 		}
 
-		new HuntNativeTimer(1.seconds).onTick(&onTimerTick).start();
+		new NativeTimer(1.seconds).onTick(&onTimerTick).start();
 
-		new HuntNativeTimer().interval(2.seconds).onTick(delegate void(Object sender) {
+		new NativeTimer().interval(2.seconds).onTick(delegate void(Object sender) {
 			trace("Countdown[2]: ", count2--);
 			if (count2 == 0)
 			{
@@ -101,10 +101,10 @@ else
 			}
 		}
 
-		new HuntTimer(loop, 1.seconds).onTick(&onTimerTick).start();
+		new Timer(loop, 1.seconds).onTick(&onTimerTick).start();
 
 		int count2 = 5;
-		new HuntTimer(loop).interval(2.seconds).onTick(delegate void(Object sender) {
+		new Timer(loop).interval(2.seconds).onTick(delegate void(Object sender) {
 			trace("Countdown[2]: ", count2--);
 			if (count2 == 0)
 			{

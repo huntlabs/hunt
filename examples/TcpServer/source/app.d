@@ -65,7 +65,7 @@ void main()
 
 	writeln("Listening on: ", listener.bindingAddress.toString());
 
-	// HuntTimer timer = new HuntTimer(loop);
+	// Timer timer = new Timer(loop);
 	// timer.onTick((Object sender) {
 	// 	writeln("The time now is: ", Clock.currTime.toString());
 	// }).start(1000);
