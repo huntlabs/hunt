@@ -176,6 +176,16 @@ class TcpStream : AbstractStream
         write(new SocketStreamBuffer(data, handler));
     }
 
+    void shutdownInput()
+    {
+        this.socket.shutdown(SocketShutdown.RECEIVE);
+    }
+
+    void shutdownOutput()
+    {
+        this.socket.shutdown(SocketShutdown.SEND);
+    }    
+
 protected:
     bool _isClientSide;
     ConnectionHandler _connectionHandler;
