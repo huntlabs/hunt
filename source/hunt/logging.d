@@ -464,10 +464,10 @@ protected:
 	SizeBaseRollover _rollover;
 	version (Posix)
 	{
-		static string PRINT_COLOR_NONE = "\033[m";
-		static string PRINT_COLOR_RED = "\033[0;32;31m";
-		static string PRINT_COLOR_GREEN = "\033[0;32;32m";
-		static string PRINT_COLOR_YELLOW = "\033[1;33m";
+		enum PRINT_COLOR_NONE = "\033[m";
+		enum PRINT_COLOR_RED = "\033[0;32;31m";
+		enum PRINT_COLOR_GREEN = "\033[0;32;32m";
+		enum PRINT_COLOR_YELLOW = "\033[1;33m";
 	}
 
 	static void writeFormatColor(LogLevel level, string msg)
@@ -480,19 +480,18 @@ protected:
 			string prior_color;
 			switch (level) with (LogLevel)
 			{
-
-			case LOG_ERROR:
-			case LOG_FATAL:
-				prior_color = PRINT_COLOR_RED;
-				break;
-			case LOG_WARNING:
-				prior_color = PRINT_COLOR_YELLOW;
-				break;
-			case LOG_INFO:
-				prior_color = PRINT_COLOR_GREEN;
-				break;
-			default:
-				prior_color = string.init;
+				case LOG_ERROR:
+				case LOG_FATAL:
+					prior_color = PRINT_COLOR_RED;
+					break;
+				case LOG_WARNING:
+					prior_color = PRINT_COLOR_YELLOW;
+					break;
+				case LOG_INFO:
+					prior_color = PRINT_COLOR_GREEN;
+					break;
+				default:
+					prior_color = string.init;
 			}
 
 			writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
@@ -501,13 +500,12 @@ protected:
 		{
 			version (Windows)
 			{
-
 				import core.sys.windows.wincon;
 				import core.sys.windows.winbase;
 				import core.sys.windows.windef;
 
 				__gshared HANDLE g_hout;
-				if (g_hout !is null)
+				if (g_hout is null)
 					g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
 			}
 			ushort color;
@@ -533,7 +531,6 @@ protected:
 
 		}
 	}
-
 }
 
 string code(string func, LogLevel level, bool f = false)()

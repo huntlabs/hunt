@@ -17,11 +17,14 @@ void main()
 	setLoggingLevel(LogLevel.LOG_DEBUG);
 	LogConf conf;
 	conf.disableConsole = true;
-	conf.level = LogLevel.LOG_WARNING;
-	conf.fileName = "test.log";
+	conf.level = LogLevel.LOG_DEBUG;
+	// conf.fileName = "test.log";
 	logLoadConf(conf);
 
 	logDebug("test" , " test1 " , "test2" , conf);
 	logDebugf("%s %s %d %d " , "test" , "test1" , 12 ,13);
+	trace("trace");
 	logInfo("info");
+	warning("warning");
+	error("error");
 }
