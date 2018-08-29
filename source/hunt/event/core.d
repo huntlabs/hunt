@@ -11,7 +11,8 @@
 
 module hunt.event.core;
 
-import hunt.common;
+import hunt.util.common;
+import hunt.init;
 import hunt.logging;
 
 import std.socket;

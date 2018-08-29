@@ -23,7 +23,7 @@ import core.thread;
 import core.time;
 
 import hunt.container.ByteBuffer;
-import hunt.common;
+import hunt.util.common;
 
 
 /**

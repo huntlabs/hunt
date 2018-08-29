@@ -15,7 +15,6 @@ import hunt.event.core;
 import hunt.event.selector;
 import core.thread;
 import hunt.event.task;
-// import hunt.exception;
 
 /**
 

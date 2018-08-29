@@ -18,7 +18,7 @@ pragma(lib, "Ws2_32");
 // dfmt on
 
 import hunt.container.ByteBuffer;
-import hunt.common;
+import hunt.util.common;
 import hunt.event.socket.common;
 import hunt.event.core;
 import hunt.util.thread;

@@ -11,7 +11,7 @@
  
 module hunt.util.timer;
 
-import hunt.common;
+import hunt.util.common;
 import hunt.io.core;
 import hunt.event;
 import hunt.event.timer;

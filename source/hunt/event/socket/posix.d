@@ -18,7 +18,7 @@ version(Posix):
 
 import hunt.event.socket.common;
 import hunt.event.core;
-import hunt.common;
+import hunt.util.common;
 import hunt.util.thread;
 
 import std.conv;
