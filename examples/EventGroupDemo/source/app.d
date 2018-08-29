@@ -13,7 +13,7 @@ import std.stdio;
 
 import hunt.event;
 import hunt.io;
-import hunt.util.HuntTimer;
+import hunt.util.Timer;
 import hunt.util.thread;
 
 import std.socket;
