@@ -249,13 +249,13 @@ class SizeBaseRollover
 
 }
 
-__gshared HuntLogger g_logger = null;
+__gshared Logger g_logger = null;
 __gshared LogLevel g_logLevel = LogLevel.LOG_DEBUG;
 
 
 /**
 */
-class HuntLogger
+class Logger
 {
 	/*void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
@@ -303,14 +303,14 @@ class HuntLogger
 		}
 
 		immutable void* data = cast(immutable void*) this;
-		_tid = spawn(&HuntLogger.worker, data);
+		_tid = spawn(&Logger.worker, data);
 	}
 
 protected:
 
 	static void worker(immutable void* ptr)
 	{
-		HuntLogger logger = cast(HuntLogger) ptr;
+		Logger logger = cast(Logger) ptr;
 		bool flag = true;
 		while (flag)
 		{
@@ -539,12 +539,12 @@ string code(string func, LogLevel level, bool f = false)()
 		~ `(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		if(g_logger is null)
-			HuntLogger.writeFormatColor(`
-		~ level.stringof ~ ` , HuntLogger.toFormat(func , HuntLogger.logFormat` ~ (f
+			Logger.writeFormatColor(`
+		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
 				? "f" : "") ~ `(args) , file , line , ` ~ level.stringof ~ `));
 		else
 			g_logger.write(`
-		~ level.stringof ~ ` , HuntLogger.toFormat(func , HuntLogger.logFormat` ~ (f
+		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
 				? "f" : "") ~ `(args) , file , line ,` ~ level.stringof ~ ` ));
 	}`;
 }
@@ -578,7 +578,7 @@ struct LogConf
 
 void logLoadConf(LogConf conf)
 {
-	g_logger = new HuntLogger(conf);	
+	g_logger = new Logger(conf);	
 }
 
 mixin(code!("logDebug", LogLevel.LOG_DEBUG));
