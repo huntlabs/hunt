@@ -4,7 +4,7 @@ module hunt.util.string.StringTokenizer;
 import std.string;
 
 import hunt.util.exception;
-import hunt.util.Character;
+import hunt.util.character;
 import hunt.util.string.common;
 import hunt.container.Iterable;
 

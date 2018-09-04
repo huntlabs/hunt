@@ -191,6 +191,21 @@ class EofException : RuntimeException
     mixin BasicExceptionCtors;
 }
 
+class SecureNetException: RuntimeException
+{
+    mixin BasicExceptionCtors;
+}
+
+class ArithmeticException: RuntimeException
+{
+    mixin BasicExceptionCtors;
+}
+
+class ArrayIndexOutOfBoundsException: IndexOutOfBoundsException
+{
+    mixin BasicExceptionCtors;
+}
+
 class ClosedChannelException : IOException
 {
     mixin BasicExceptionCtors;
@@ -201,11 +216,6 @@ class EOFException : IOException
     mixin BasicExceptionCtors;
 }
 
-
-class SecureNetException: RuntimeException
-{
-    mixin BasicExceptionCtors;
-}
 
 
 class IllegalStateException : Exception
