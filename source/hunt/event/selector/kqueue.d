@@ -305,22 +305,20 @@ enum
     /* returned values */
     EV_EOF = 0x8000, /* EOF detected */
     EV_ERROR = 0x4000, /* error, data contains errno */
-
-
-
 }
+
 
 enum
 {
     /*
-        * data/hint flags/masks for EVFILT_USER, shared with userspace
-        *
-        * On input, the top two bits of fflags specifies how the lower twenty four
-        * bits should be applied to the stored value of fflags.
-        *
-        * On output, the top two bits will always be set to NOTE_FFNOP and the
-        * remaining twenty four bits will contain the stored fflags value.
-        */
+    * data/hint flags/masks for EVFILT_USER, shared with userspace
+    *
+    * On input, the top two bits of fflags specifies how the lower twenty four
+    * bits should be applied to the stored value of fflags.
+    *
+    * On output, the top two bits will always be set to NOTE_FFNOP and the
+    * remaining twenty four bits will contain the stored fflags value.
+    */
     NOTE_FFNOP = 0x00000000, /* ignore input fflags */
     NOTE_FFAND = 0x40000000, /* AND fflags */
     NOTE_FFOR = 0x80000000, /* OR fflags */
@@ -332,13 +330,13 @@ enum
                                     triggered for output. */
 
     /*
-        * data/hint flags for EVFILT_{READ|WRITE}, shared with userspace
-        */
+    * data/hint flags for EVFILT_{READ|WRITE}, shared with userspace
+    */
     NOTE_LOWAT = 0x0001, /* low water mark */
 
     /*
-        * data/hint flags for EVFILT_VNODE, shared with userspace
-        */
+    * data/hint flags for EVFILT_VNODE, shared with userspace
+    */
     NOTE_DELETE = 0x0001, /* vnode was removed */
     NOTE_WRITE = 0x0002, /* data contents changed */
     NOTE_EXTEND = 0x0004, /* size increased */
@@ -348,8 +346,8 @@ enum
     NOTE_REVOKE = 0x0040, /* vnode access was revoked */
 
     /*
-        * data/hint flags for EVFILT_PROC, shared with userspace
-        */
+    * data/hint flags for EVFILT_PROC, shared with userspace
+    */
     NOTE_EXIT = 0x80000000, /* process exited */
     NOTE_FORK = 0x40000000, /* process forked */
     NOTE_EXEC = 0x20000000, /* process exec'd */
@@ -360,9 +358,6 @@ enum
     NOTE_TRACK = 0x00000001, /* follow across forks */
     NOTE_TRACKERR = 0x00000002, /* could not track child */
     NOTE_CHILD = 0x00000004, /* am a child process */
-
-
-
 }
 
 extern (C)

@@ -13,17 +13,15 @@ module hunt.io.TcpStream;
 
 import hunt.event;
 import hunt.io.core;
+import hunt.logging;
+import hunt.util.common;
 
 import std.format;
 import std.socket;
 import std.exception;
-import hunt.logging;
 import std.socket;
 import core.thread;
 import core.time;
-
-import hunt.container.ByteBuffer;
-import hunt.util.common;
 
 
 /**
