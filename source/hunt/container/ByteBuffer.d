@@ -17,9 +17,8 @@ abstract class ByteBuffer : Buffer
     
     protected int offset;
 
-
-    bool bigEndian                                   // package-private
-        = true;
+    bool bigEndian = true;                                  // package-private
+        
     // bool nativeByteOrder                             // package-private
     //     = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
 
@@ -34,7 +33,7 @@ abstract class ByteBuffer : Buffer
      * @return  This buffer's byte order
      */
     final ByteOrder order() {
-        return bigEndian ? ByteOrder.BitEndian : ByteOrder.LittleEndian;
+        return bigEndian ? ByteOrder.BigEndian : ByteOrder.LittleEndian;
     }
 
     /**
@@ -48,9 +47,9 @@ abstract class ByteBuffer : Buffer
      * @return  This buffer
      */
     final ByteBuffer order(ByteOrder bo) {
-        bigEndian = (bo == ByteOrder.BitEndian);
+        bigEndian = (bo == ByteOrder.BigEndian);
         // nativeByteOrder =
-        //     (bigEndian == (Bits.byteOrder() == ByteOrder.BitEndian));
+        //     (bigEndian == (Bits.byteOrder() == ByteOrder.BigEndian));
         return this;
     }
 
@@ -632,6 +631,86 @@ abstract class ByteBuffer : Buffer
      */
     abstract ByteBuffer putShort(int index, short value);
 
+    /**
+     * Relative <i>get</i> method for reading an int value.
+     *
+     * <p> Reads the next four bytes at this buffer's current position,
+     * composing them into an int value according to the current byte order,
+     * and then increments the position by four.  </p>
+     *
+     * @return  The int value at the buffer's current position
+     *
+     * @throws  BufferUnderflowException
+     *          If there are fewer than four bytes
+     *          remaining in this buffer
+     */
+    abstract int getInt();
+
+    /**
+     * Relative <i>put</i> method for writing an int
+     * value&nbsp;&nbsp;<i>(optional operation)</i>.
+     *
+     * <p> Writes four bytes containing the given int value, in the
+     * current byte order, into this buffer at the current position, and then
+     * increments the position by four.  </p>
+     *
+     * @param  value
+     *         The int value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     *          If there are fewer than four bytes
+     *          remaining in this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     *          If this buffer is read-only
+     */
+    abstract ByteBuffer putInt(int value);
+
+    /**
+     * Absolute <i>get</i> method for reading an int value.
+     *
+     * <p> Reads four bytes at the given index, composing them into a
+     * int value according to the current byte order.  </p>
+     *
+     * @param  index
+     *         The index from which the bytes will be read
+     *
+     * @return  The int value at the given index
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If {@code index} is negative
+     *          or not smaller than the buffer's limit,
+     *          minus three
+     */
+    abstract int getInt(int index);
+
+    /**
+     * Absolute <i>put</i> method for writing an int
+     * value&nbsp;&nbsp;<i>(optional operation)</i>.
+     *
+     * <p> Writes four bytes containing the given int value, in the
+     * current byte order, into this buffer at the given index.  </p>
+     *
+     * @param  index
+     *         The index at which the bytes will be written
+     *
+     * @param  value
+     *         The int value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If {@code index} is negative
+     *          or not smaller than the buffer's limit,
+     *          minus three
+     *
+     * @throws  ReadOnlyBufferException
+     *          If this buffer is read-only
+     */
+    abstract ByteBuffer putInt(int index, int value);
+
 
     // -- Other stuff --
 
@@ -875,6 +954,10 @@ abstract class ByteBuffer : Buffer
     protected int ix(int i)
     {
         return i + offset;
+    }
+
+    protected long byteOffset(long i) {
+        return address + i;
     }
 
     string getString(size_t offset, size_t len)
@@ -1131,6 +1214,61 @@ class HeapByteBuffer : ByteBuffer
         return this;
     }
 
+
+    // int
+    override int getInt() {
+        auto index = byteOffset(nextGetIndex(4));
+        return _getInt(index);
+    }
+
+    override int getInt(int i) {
+        auto index = byteOffset(checkIndex(i, 4));
+        return _getInt(index);
+    }
+
+    private int _getInt(long index) {
+        if(bigEndian)
+            return makeInt(hb[index], hb[index+1], hb[index+2], hb[index+3]);
+        else
+            return makeInt(hb[index+3], hb[index+2],hb[index+1], hb[index]);
+    }
+
+    private static int makeInt(byte b3, byte b2, byte b1, byte b0) {
+        return  ((b3       ) << 24) | ((b2 & 0xff) << 16) |
+                ((b1 & 0xff) <<  8) | (b0 & 0xff      );
+    }
+
+    override ByteBuffer putInt(int x) {
+        putIntUnaligned(hb, byteOffset(nextPutIndex(4)), x, bigEndian);
+        return this;
+    }
+
+    override ByteBuffer putInt(int i, int x) {
+        putIntUnaligned(hb, byteOffset(checkIndex(i, 4)), x, bigEndian);
+        return this;
+    }
+
+    private static void putIntUnaligned(byte[] hb, long offset, int x, bool bigEndian) {
+        if(bigEndian)
+        {
+            hb[offset] = int3(x);
+            hb[offset+1] = int2(x);
+            hb[offset+2] = int1(x);
+            hb[offset+3] = int0(x);
+        }
+        else
+        {
+            hb[offset] = int0(x);
+            hb[offset+1] = int1(x);
+            hb[offset+2] = int2(x);
+            hb[offset+3] = int3(x);
+        }
+    }
+
+    private static byte int3(int x) { return cast(byte)(x >> 24); }
+    private static byte int2(int x) { return cast(byte)(x >> 16); }
+    private static byte int1(int x) { return cast(byte)(x >>  8); }
+    private static byte int0(int x) { return cast(byte)(x      ); }
 
     override ByteBuffer compact()
     {
