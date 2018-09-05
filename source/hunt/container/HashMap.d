@@ -764,19 +764,16 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
     /* ------------------------------------------------------------ */
     // iterators
 
-    override int opApply(scope int delegate(ref K, ref V) dg)    {
+    override int opApply(scope int delegate(ref K, ref V) dg) {
         if(dg is null)
             throw new NullPointerException();
         HashMapNode!(K, V)[] tab = table;
 
         int result = 0;
-        if(_size > 0 && tab !is null) 
-        {
+        if(_size > 0 && tab !is null) {
             int mc = modCount;
-            for(size_t i=0; i<tab.length; i++)
-            {
-                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
-                {
+            for(size_t i=0; i<tab.length; i++) {
+                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next) {
                     result = dg(e.key, e.value);
                     if(result != 0) return result;
                 }
@@ -789,7 +786,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
         return result;
     }
 
-    override int opApply(scope int delegate(MapEntry!(K, V) entry) dg)    {
+    override int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
         if(dg is null)
             throw new NullPointerException("");
         HashMapNode!(K, V)[] tab = table;
@@ -799,10 +796,8 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
         
         int result = 0;
         int mc = modCount;
-        for(size_t i=0; i<tab.length; i++)
-        {
-            for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
-            {
+        for(size_t i=0; i<tab.length; i++) {
+            for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next) {
                 result = dg(e);
                 if(result != 0) return result;
             }
@@ -814,13 +809,11 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
         return result;
     }
 
-    override InputRange!K byKey()
-    {
+    override InputRange!K byKey() {
         return new KeyInputRange();
     }
 
-    override InputRange!V byValue()
-    {
+    override InputRange!V byValue() {
         return new ValueInputRange();
     }
     
@@ -846,8 +839,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             return next is null;
         }
 
-        void popFront()
-        {
+        void popFront() {
             HashMapNode!(K, V)[] t;
             HashMapNode!(K, V) e = next;
             if (modCount != expectedModCount)
@@ -869,8 +861,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
         // https://issues.dlang.org/show_bug.cgi?id=18036
         final K moveFront() @property { throw new NotSupportedException(); }
         
-        int opApply(scope int delegate(K) dg)
-        {
+        int opApply(scope int delegate(K) dg) {
             if(dg is null)
                 throw new NullPointerException("");
 
@@ -880,10 +871,8 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             HashMapNode!(K, V)[] tab = table;
             int result = 0;
             int mc = modCount;
-            for(size_t i=0; i<tab.length; i++)
-            {
-                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
-                {
+            for(size_t i=0; i<tab.length; i++) {
+                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next) {
                     result = dg(e.key);
                     if(result != 0) return result;
                 }
@@ -895,8 +884,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             return result;
         }
 
-        int opApply(scope int delegate(size_t, K) dg)
-        {
+        int opApply(scope int delegate(size_t, K) dg) {
             if(dg is null)
                 throw new NullPointerException("");
                 
@@ -908,10 +896,8 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             int mc = modCount;            
             size_t index = 0;
 
-            for(size_t i=0; i<tab.length; i++)
-            {
-                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
-                {
+            for(size_t i=0; i<tab.length; i++) {
+                for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next) {
                     result = dg(index++, e.key);
                     if(result != 0) return result;
                 }
@@ -957,8 +943,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             return result;
         }
 
-        int opApply(scope int delegate(size_t, V) dg)
-        {
+        int opApply(scope int delegate(size_t, V) dg) {
             if(dg is null)
                 throw new NullPointerException("");
                 
@@ -969,8 +954,7 @@ class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
             int result = 0;
             int mc = modCount;
             size_t index = 0;
-            for(size_t i=0; i<tab.length; i++)
-            {
+            for(size_t i=0; i<tab.length; i++) {
                 for(HashMapNode!(K, V) e = tab[i]; e !is null; e = e.next)
                 {
                     result = dg(index++, e.value);
