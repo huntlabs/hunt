@@ -113,6 +113,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
         else if (len < 0)
         {
+            // https://stackoverflow.com/questions/14595269/errno-35-eagain-returned-on-recv-call
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
             // check more error status
             if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
