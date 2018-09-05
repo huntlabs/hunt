@@ -177,7 +177,7 @@ public interface Appendable {
      * @throws  IOException
      *          If an I/O error occurs
      */
-    // Appendable append(CharSequence csq);
+    Appendable append(string csq);
 
     /**
      * Appends a subsequence of the specified character sequence to this

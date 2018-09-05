@@ -213,10 +213,8 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
 }
 
 
-class EmptyList(E): AbstractList!E
-        // implements RandomAccess, Serializable 
-    {
-    private static long serialVersionUID = 8842843931221139166L;
+class EmptyList(E): AbstractList!E {
+    // private static long serialVersionUID = 8842843931221139166L;
 
     override int size() {return 0;}
     override bool isEmpty() {return true;}

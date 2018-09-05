@@ -956,9 +956,9 @@ abstract class ByteBuffer : Buffer
         return i + offset;
     }
 
-    protected long byteOffset(long i) {
-        return address + i;
-    }
+    // protected long byteOffset(long i) {
+    //     return offset + i;
+    // }
 
     string getString(size_t offset, size_t len)
     {
@@ -1217,12 +1217,12 @@ class HeapByteBuffer : ByteBuffer
 
     // int
     override int getInt() {
-        auto index = byteOffset(nextGetIndex(4));
+        auto index = ix(nextGetIndex(4));
         return _getInt(index);
     }
 
     override int getInt(int i) {
-        auto index = byteOffset(checkIndex(i, 4));
+        auto index = ix(checkIndex(i, 4));
         return _getInt(index);
     }
 
@@ -1239,12 +1239,12 @@ class HeapByteBuffer : ByteBuffer
     }
 
     override ByteBuffer putInt(int x) {
-        putIntUnaligned(hb, byteOffset(nextPutIndex(4)), x, bigEndian);
+        putIntUnaligned(hb, ix(nextPutIndex(4)), x, bigEndian);
         return this;
     }
 
     override ByteBuffer putInt(int i, int x) {
-        putIntUnaligned(hb, byteOffset(checkIndex(i, 4)), x, bigEndian);
+        putIntUnaligned(hb, ix(checkIndex(i, 4)), x, bigEndian);
         return this;
     }
 
