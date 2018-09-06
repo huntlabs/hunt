@@ -160,8 +160,8 @@ class Assert {
         }
         else
         {
-            trace("expected: ", expected);
-            trace("actual: ", actual);
+            // trace("expected: ", expected);
+            // trace("actual: ", actual);
             assert(expected == actual, message);
         }
     }
