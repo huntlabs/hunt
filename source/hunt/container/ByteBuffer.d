@@ -1226,6 +1226,7 @@ class HeapByteBuffer : ByteBuffer
         return _getInt(index);
     }
 
+    version(LittleEndian)
     private int _getInt(long index) {
         if(bigEndian)
             return makeInt(hb[index], hb[index+1], hb[index+2], hb[index+3]);
@@ -1248,7 +1249,8 @@ class HeapByteBuffer : ByteBuffer
         return this;
     }
 
-    private static void putIntUnaligned(byte[] hb, long offset, int x, bool bigEndian) {
+    version(LittleEndian)
+    private static void putIntUnaligned(byte[] hb, int offset, int x, bool bigEndian) {
         if(bigEndian)
         {
             hb[offset] = int3(x);

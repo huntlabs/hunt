@@ -590,5 +590,4 @@ class Character
     //                                    - MIN_LOW_SURROGATE);
     // }
 
-
 }
