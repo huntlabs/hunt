@@ -59,7 +59,7 @@ abstract class AbstractLifeCycle : LifeCycle {
             if (isStarted())
                 return;
 
-            init();
+            initilize();
             _isStarted = true;
         }
     }
@@ -78,7 +78,7 @@ abstract class AbstractLifeCycle : LifeCycle {
         }
     }
 
-    abstract protected void init();
+    abstract protected void initilize();
 
     abstract protected void destroy();
 

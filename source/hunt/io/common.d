@@ -369,7 +369,7 @@ abstract class InputStream : Closeable {
  * @see     java.io.OutputStream#write(int)
  * @since   JDK1.0
  */
-abstract class OutputStream  { // implements Closeable, Flushable
+abstract class OutputStream : Closeable  { // implements  Flushable
     /**
      * Writes the specified byte to this output stream. The general
      * contract for <code>write</code> is that one byte is written

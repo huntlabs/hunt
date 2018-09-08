@@ -21,10 +21,7 @@ template Action1(T)
 /**
  * A two-argument action.
  */
-template Action2(T1, T2)
-{
-    alias Action2 = void delegate(T1 t1, T2 t2);
-}
+alias Action2(T1, T2) = void delegate(T1 t1, T2 t2);
 
 /**
  * A three-argument action.
