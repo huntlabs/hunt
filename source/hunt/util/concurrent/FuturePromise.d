@@ -7,35 +7,33 @@ import hunt.util.exception;
 import std.format;
 import std.datetime;
 
-class FuturePromise(C) : Future!C, Promise!C
-{
-	private static Exception COMPLETED;
+import core.thread;
+import hunt.logging;
+
+/**
+*/
+class FuturePromise(T) : Future!T, Promise!T {
+	private __gshared static Exception COMPLETED;
     private bool _done;	
     private Exception _cause;
-	private C _result;
+	private T _result;
 	private string _id;
 
-    static this()
-    {
+    shared static this() {
         COMPLETED = new Exception("");
     }
 
-    this()
-    {
-		// FIXME: Needing refactor or cleanup -@zxp at 7/18/2018, 5:43:37 PM
-		// 
-        // _cause = COMPLETED;
+    this() {
     }
 
     string id() { return _id; }
 	void id(string id) { _id = id; }
     
-	void succeeded(C result) {
+	void succeeded(T result) {
 		if (!_done) {
             _done = true;
 			_result = result;
 			_cause = COMPLETED;
-			// _latch.countDown();
 		}
 	}
 
@@ -44,17 +42,14 @@ class FuturePromise(C) : Future!C, Promise!C
         if (!_done) {
             _done = true;
 			_cause = cause;
-			// _latch.countDown();
 		}
 	}
-
 	
 	bool cancel(bool mayInterruptIfRunning) {
         if (!_done) {
             _done = true;
-			_result = C.init;
+			_result = T.init;
 			_cause = new CancellationException("");
-			// _latch.countDown();
 			return true;
 		}
 		return false;
@@ -74,35 +69,59 @@ class FuturePromise(C) : Future!C, Promise!C
 	}
 	
 	bool isDone() {
-		return _done; // && _latch.getCount() == 0;
+		return _done; 
 	}
 
-    C get(){
-		// _latch.await();
-		if(!_done)
-			throw new ExecutionException("Not done yet.");
-			
+    T get() {
+		// if(!_done)
+		// 	throw new ExecutionException("Not done yet.");
+		while(!_done) {
+			version(HuntDebugMode) warning("Waiting for a promise...");
+			// FIXME: Needing refactor or cleanup -@zxp at 9/10/2018, 2:11:03 PM
+			// 
+			Thread.sleep(20.msecs);
+		}
+		version(HuntDebugMode) info("Got a promise");
+		
+		if(_cause is null) {
+			warning("no cause!");
+			new ExecutionException("no cause!");
+		}
+
 		if (_cause is COMPLETED)
 			return _result;
-		if (typeid(_cause) == typeid(CancellationException))
-			throw cast(CancellationException) _cause;
+		CancellationException c = cast(CancellationException) _cause;
+		if (c !is null)
+			throw c;
 		throw new ExecutionException(_cause.msg);
 	}
 
-
-    C get(long timeout, Duration unit)
-    {
-		// if (!_latch.await(timeout, unit))
-		// 	throw new TimeoutException();
+    T get(Duration timeout) {
+		MonoTime before = MonoTime.currTime;
+		while(!_done) {
+			version(HuntDebugMode) warning("Waiting for a promise...");
+			// FIXME: Needing refactor or cleanup -@zxp at 9/10/2018, 2:15:52 PM
+			// 
+			Thread.sleep(20.msecs);
+			Duration timeElapsed = MonoTime.currTime - before;
+			if(timeElapsed > timeout)
+				break;
+		}
+		version(HuntDebugMode) infof("promise status: isDone=%s", _done);
 		if(!_done)
-			throw new ExecutionException("Not done yet.");
+			throw new TimeoutException();
 
 		if (_cause == COMPLETED)
 			return _result;
-        if (typeid(_cause) == typeid(TimeoutException))
-			throw cast(TimeoutException) _cause;
-		if (typeid(_cause) == typeid(CancellationException))
-			throw cast(CancellationException) _cause;
+		
+		TimeoutException t = cast(TimeoutException) _cause;
+		if (t !is null)
+			throw t;
+			
+		CancellationException c = cast(CancellationException) _cause;
+		if (c !is null)
+			throw c;
+
 		throw new ExecutionException(_cause.msg);        
     }
 	

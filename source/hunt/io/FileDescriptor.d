@@ -36,7 +36,7 @@ final class FileDescriptor {
     }
 
     shared static this() {
-        initIDs();
+        // initIDs();
     }
 
     // Set up JavaIOFileDescriptorAccess in SharedSecrets

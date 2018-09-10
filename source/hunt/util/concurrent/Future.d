@@ -122,7 +122,6 @@ interface Future(V) {
      * to complete, and then retrieves its result, if available.
      *
      * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
      * @return the computed result
      * @throws CancellationException if the computation was cancelled
      * @throws ExecutionException if the computation threw an
@@ -131,5 +130,5 @@ interface Future(V) {
      * while waiting
      * @throws TimeoutException if the wait timed out
      */
-    V get(long timeout, Duration unit);
+    V get(Duration timeout);
 }

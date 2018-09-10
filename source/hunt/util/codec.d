@@ -60,7 +60,7 @@ class B64Code {
      * @param b byte array to encode.
      * @return char array containing the encoded form of the input.
      */
-    static char[] encode(byte[] b) {
+    static const(char)[] encode(byte[] b) {
         if (b is null)
             return null;
 

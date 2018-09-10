@@ -7,10 +7,10 @@ import hunt.util.functional;
 import hunt.util.exception;
 
 /**
-    * <p>A CompletableFuture that is also a Promise.</p>
-    *
-    * @param <S> the type of the result
-    */
+* <p>A CompletableFuture that is also a Promise.</p>
+*
+* @param <S> the type of the result
+*/
 class Completable(S) : CompletableFuture!S , Promise!S {
     override
     void succeeded(S result) {
@@ -28,8 +28,7 @@ class Completable(S) : CompletableFuture!S , Promise!S {
 
     void id(string id) { _id = id;}
 
-    this()
-    {
+    this() {
         _id = "undefined";
         super();
     }
@@ -61,12 +60,9 @@ class CompletableFuture(T)
     private T result; 
     private bool m_isDone;
 
-    this()
-    {
-    }
+    this() { }
 
-    this(T r)
-    {
+    this(T r) {
         completeValue(r);
     }
 
@@ -77,13 +73,11 @@ class CompletableFuture(T)
     //    m_isDone = false;
     //}
 
-    bool isDone()
-    {
+    bool isDone() {
         return m_isDone;
     }
 
-    T get()
-    {
+    T get() {
         return result;
     }    
 
@@ -94,8 +88,7 @@ class CompletableFuture(T)
         postComplete();
     }
 
-    bool isCancelled()
-    {
+    bool isCancelled() {
         return m_cancelled;
     }
     private bool m_cancelled;
@@ -110,8 +103,7 @@ class CompletableFuture(T)
 
     private Throwable altResult;
 
-    private void completeValue(T r)
-    {
+    private void completeValue(T r) {
         result = r;
         m_isDone = true;
     }
@@ -129,21 +121,15 @@ class CompletableFuture(T)
         // debug writeln("postComplete in thread ", Thread.getThis().id);
         // m_isDone = true;
         foreach(Consumer!T a;  acceptList)
-        {
             a(result);
-        }
     }
 
-    CompletableFuture!T thenAccept(Consumer!T action)
-    {
+    CompletableFuture!T thenAccept(Consumer!T action) {
         // CompletableFuture!void d = new CompletableFuture!void();
-        if(m_isDone)
-        {
+        if(m_isDone) {
             // d.completeValue(result);
             action(result);
-        }
-        else
-        {
+        } else {
             acceptList ~= action;
         }
 
