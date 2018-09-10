@@ -448,6 +448,12 @@ class StringBuilder : Appendable
     }
 
 
+    StringBuilder append(bool s)    {
+        append(s.to!string());
+        return this;
+    }
+
+
     StringBuilder append(int i)
     {
         _buffer.put(cast(byte[])(to!(string)(i)));
