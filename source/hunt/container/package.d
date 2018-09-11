@@ -6,6 +6,7 @@ public import hunt.container.AbstractMap;
 public import hunt.container.ArrayDeque;
 public import hunt.container.ArrayList;
 public import hunt.container.AbstractSequentialList;
+public import hunt.container.Appendable;
 public import hunt.container.Buffer;
 public import hunt.container.BufferUtils;
 public import hunt.container.ByteBuffer;
