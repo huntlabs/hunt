@@ -378,7 +378,7 @@ class BigInteger : Number {
         if (this.mag.length == 0) {
             this._signum = 0;
         } else {
-            if (_signum == 0)
+            if (signum == 0)
                 throw(new NumberFormatException("signum-magnitude mismatch"));
             this._signum = signum;
         }
@@ -662,11 +662,11 @@ class BigInteger : Number {
      * @throws IllegalArgumentException {@code numBits} is negative.
      * @see #bitLength()
      */
-    this(int numBits, ref Random rnd) {
+    this(int numBits, Random* rnd) {
         this(1, randomBits(numBits, rnd));
     }
 
-    private static byte[] randomBits(int numBits, ref Random rnd) {
+    private static byte[] randomBits(int numBits, Random* rnd) {
         if (numBits < 0)
             throw new IllegalArgumentException("numBits must be non-negative");
         int numBytes = cast(int)((cast(long)numBits+7)/8); // avoid overflow
@@ -702,17 +702,17 @@ class BigInteger : Number {
      * @throws ArithmeticException {@code bitLength < 2} or {@code bitLength} is too large.
      * @see    #bitLength()
      */
-    // this(int bitLength, int certainty, ref Random rnd) {
-    //     BigInteger prime;
+    this(int bitLength, int certainty, Random* rnd) {
+        BigInteger prime;
 
-    //     if (bitLength < 2)
-    //         throw new ArithmeticException("bitLength < 2");
-    //     prime = (bitLength < SMALL_PRIME_THRESHOLD
-    //                             ? smallPrime(bitLength, certainty, rnd)
-    //                             : largePrime(bitLength, certainty, rnd));
-    //     _signum = 1;
-    //     mag = prime.mag;
-    // }
+        if (bitLength < 2)
+            throw new ArithmeticException("bitLength < 2");
+        prime = (bitLength < SMALL_PRIME_THRESHOLD
+                                ? smallPrime(bitLength, certainty, rnd)
+                                : largePrime(bitLength, certainty, rnd));
+        _signum = 1;
+        mag = prime.mag;
+    }
 
     // Minimum size in bits that the requested prime number has
     // before we use the large prime number generating algorithms.
@@ -735,7 +735,7 @@ class BigInteger : Number {
      * @see    #bitLength()
      * @since 1.4
      */
-    // static BigInteger probablePrime(int bitLength, ref Random rnd) {
+    // static BigInteger probablePrime(int bitLength, Random* rnd) {
     //     if (bitLength < 2)
     //         throw new ArithmeticException("bitLength < 2");
 
@@ -751,7 +751,7 @@ class BigInteger : Number {
      *
      * This method assumes bitLength > 1.
      */
-    private static BigInteger smallPrime(int bitLength, int certainty, ref Random rnd) {
+    private static BigInteger smallPrime(int bitLength, int certainty, Random* rnd) {
         int magLen = (bitLength + 31) >>> 5;
         int[] temp = new int[magLen];
         int highBit = 1 << ((bitLength+31) & 0x1f);  // High bit of high int
@@ -798,26 +798,26 @@ class BigInteger : Number {
      * a sieve to eliminate most composites before using a more expensive
      * test.
      */
-    // private static BigInteger largePrime(int bitLength, int certainty, ref Random rnd) {
-    //     BigInteger p;
-    //     p = new BigInteger(bitLength, rnd).setBit(bitLength-1);
-    //     p.mag[p.mag.length-1] &= 0xfffffffe;
+    private static BigInteger largePrime(int bitLength, int certainty, Random* rnd) {
+        BigInteger p;
+        p = new BigInteger(bitLength, rnd).setBit(bitLength-1);
+        p.mag[$-1] &= 0xfffffffe;
 
-    //     // Use a sieve length likely to contain the next prime number
-    //     int searchLen = getPrimeSearchLen(bitLength);
-    //     BitSieve searchSieve = new BitSieve(p, searchLen);
-    //     BigInteger candidate = searchSieve.retrieve(p, certainty, rnd);
+        // Use a sieve length likely to contain the next prime number
+        int searchLen = getPrimeSearchLen(bitLength);
+        BitSieve searchSieve = new BitSieve(p, searchLen);
+        BigInteger candidate = searchSieve.retrieve(p, certainty, rnd);
 
-    //     while ((candidate is null) || (candidate.bitLength() != bitLength)) {
-    //         p = p.add(BigInteger.valueOf(2*searchLen));
-    //         if (p.bitLength() != bitLength)
-    //             p = new BigInteger(bitLength, rnd).setBit(bitLength-1);
-    //         p.mag[p.mag.length-1] &= 0xfffffffe;
-    //         searchSieve = new BitSieve(p, searchLen);
-    //         candidate = searchSieve.retrieve(p, certainty, rnd);
-    //     }
-    //     return candidate;
-    // }
+        while ((candidate is null) || (candidate.bitLength() != bitLength)) {
+            p = p.add(BigInteger.valueOf(2*searchLen));
+            if (p.bitLength() != bitLength)
+                p = new BigInteger(bitLength, rnd).setBit(bitLength-1);
+            p.mag[$-1] &= 0xfffffffe;
+            searchSieve = new BitSieve(p, searchLen);
+            candidate = searchSieve.retrieve(p, certainty, rnd);
+        }
+        return candidate;
+    }
 
    /**
     * Returns the first integer greater than this {@code BigInteger} that
@@ -831,63 +831,63 @@ class BigInteger : Number {
     * @throws ArithmeticException {@code this < 0} or {@code this} is too large.
     * @since 1.5
     */
-    // BigInteger nextProbablePrime() {
-    //     if (this._signum < 0)
-    //         throw new ArithmeticException("start < 0: " ~ this.toString());
+    BigInteger nextProbablePrime() {
+        if (this._signum < 0)
+            throw new ArithmeticException("start < 0: " ~ this.toString());
 
-    //     // Handle trivial cases
-    //     if ((this._signum == 0) || this.equals(ONE))
-    //         return TWO;
+        // Handle trivial cases
+        if ((this._signum == 0) || this.equals(ONE))
+            return TWO;
 
-    //     BigInteger result = this.add(ONE);
+        BigInteger result = this.add(ONE);
 
-    //     // Fastpath for small numbers
-    //     if (result.bitLength() < SMALL_PRIME_THRESHOLD) {
+        // Fastpath for small numbers
+        if (result.bitLength() < SMALL_PRIME_THRESHOLD) {
 
-    //         // Ensure an odd number
-    //         if (!result.testBit(0))
-    //             result = result.add(ONE);
+            // Ensure an odd number
+            if (!result.testBit(0))
+                result = result.add(ONE);
 
-    //         while (true) {
-    //             // Do cheap "pre-test" if applicable
-    //             if (result.bitLength() > 6) {
-    //                 long r = result.remainder(SMALL_PRIME_PRODUCT).longValue();
-    //                 if ((r%3==0)  || (r%5==0)  || (r%7==0)  || (r%11==0) ||
-    //                     (r%13==0) || (r%17==0) || (r%19==0) || (r%23==0) ||
-    //                     (r%29==0) || (r%31==0) || (r%37==0) || (r%41==0)) {
-    //                     result = result.add(TWO);
-    //                     continue; // Candidate is composite; try another
-    //                 }
-    //             }
+            while (true) {
+                // Do cheap "pre-test" if applicable
+                if (result.bitLength() > 6) {
+                    long r = result.remainder(SMALL_PRIME_PRODUCT).longValue();
+                    if ((r%3==0)  || (r%5==0)  || (r%7==0)  || (r%11==0) ||
+                        (r%13==0) || (r%17==0) || (r%19==0) || (r%23==0) ||
+                        (r%29==0) || (r%31==0) || (r%37==0) || (r%41==0)) {
+                        result = result.add(TWO);
+                        continue; // Candidate is composite; try another
+                    }
+                }
 
-    //             // All candidates of bitLength 2 and 3 are prime by this point
-    //             if (result.bitLength() < 4)
-    //                 return result;
+                // All candidates of bitLength 2 and 3 are prime by this point
+                if (result.bitLength() < 4)
+                    return result;
 
-    //             // The expensive test
-    //             if (result.primeToCertainty(DEFAULT_PRIME_CERTAINTY, Random()))
-    //                 return result;
+                // The expensive test
+                if (result.primeToCertainty(DEFAULT_PRIME_CERTAINTY, null))
+                    return result;
 
-    //             result = result.add(TWO);
-    //         }
-    //     }
+                result = result.add(TWO);
+            }
+        }
 
-    //     // Start at previous even number
-    //     if (result.testBit(0))
-    //         result = result.subtract(ONE);
+        // Start at previous even number
+        if (result.testBit(0))
+            result = result.subtract(ONE);
 
-    //     // Looking for the next large prime
-    //     int searchLen = getPrimeSearchLen(result.bitLength());
+        // Looking for the next large prime
+        int searchLen = getPrimeSearchLen(result.bitLength());
 
-    //     while (true) {
-    //        BitSieve searchSieve = new BitSieve(result, searchLen);
-    //        BigInteger candidate = searchSieve.retrieve(result,
-    //                                              DEFAULT_PRIME_CERTAINTY, null);
-    //        if (candidate !is null)
-    //            return candidate;
-    //        result = result.add(BigInteger.valueOf(2 * searchLen));
-    //     }
-    // }
+        while (true) {
+           BitSieve searchSieve = new BitSieve(result, searchLen);
+           BigInteger candidate = searchSieve.retrieve(result,
+                                                 DEFAULT_PRIME_CERTAINTY, null);
+           if (candidate !is null)
+               return candidate;
+           result = result.add(BigInteger.valueOf(2 * searchLen));
+        }
+    }
 
     private static int getPrimeSearchLen(int bitLength) {
         if (bitLength > PRIME_SEARCH_BIT_LENGTH_LIMIT + 1) {
@@ -910,7 +910,7 @@ class BigInteger : Number {
      * @return {@code true} if this BigInteger is probably prime,
      *         {@code false} if it's definitely composite.
      */
-    bool primeToCertainty(int certainty, Random random) {
+    bool primeToCertainty(int certainty, Random* random) {
         int rounds = 0;
         int n = (std.algorithm.min(certainty, int.max-1)+1)/2;
 
@@ -1062,7 +1062,7 @@ class BigInteger : Number {
      * This BigInteger is a positive, odd number greater than 2.
      * iterations<=50.
      */
-    private bool passesMillerRabin(int iterations, ref Random rnd) {
+    private bool passesMillerRabin(int iterations, Random* rnd) {
         // Find a and m such that m is odd and this == 1 + 2**a * m
         BigInteger thisMinusOne = this.subtract(ONE);
         BigInteger m = thisMinusOne;
@@ -1217,8 +1217,7 @@ class BigInteger : Number {
         negConst = new BigInteger[MAX_CONSTANT+1];
 
         for (int i = 1; i <= MAX_CONSTANT; i++) {
-            int[] magnitude = new int[1];
-            magnitude[0] = i;
+            int[] magnitude = [i];
             posConst[i] = new BigInteger(magnitude,  1);
             negConst[i] = new BigInteger(magnitude, -1);
         }
@@ -1271,7 +1270,7 @@ class BigInteger : Number {
     __gshared static BigInteger TEN;
 
     shared static this() {
-        ZERO = new BigInteger(new int[0], 0);
+        ZERO = new BigInteger(cast(byte[])[], 0);
         ONE = valueOf(1);
         TWO = valueOf(2);
         NEGATIVE_ONE = valueOf(-1);
@@ -3648,7 +3647,7 @@ class BigInteger : Number {
         if (!w.testBit(0) || w.equals(ONE))
             return false;
 
-        return w.primeToCertainty(certainty, Random());
+        return w.primeToCertainty(certainty, null);
     }
 
     // Comparison Operations
@@ -4001,11 +4000,10 @@ class BigInteger : Number {
     /* zero[i] is a string of i consecutive zeros. */
     private __gshared static string[] zeros;
     shared static this() {
-        zeros[] = new string[64];
-        zeros[63] =
-            "000000000000000000000000000000000000000000000000000000000000000";
+        zeros = new string[64];
+        zeros[63] = "000000000000000000000000000000000000000000000000000000000000000";
         for (int i=0; i < 63; i++)
-            zeros[i] = zeros[63].substring(0, i);
+            zeros[i] = zeros[63][0 .. i];
     }
 
     /**
@@ -5339,7 +5337,7 @@ class MutableBigInteger {
     private int divadd(int[] a, int[] result, int offset) {
         long carry = 0;
 
-        for (size_t j=a.length-1; j >= 0; j--) {
+        for (int j=cast(int)a.length-1; j >= 0; j--) {
             long sum = (a[j] & LONG_MASK) +
                        (result[j+offset] & LONG_MASK) + carry;
             result[j+offset] = cast(int)sum;
@@ -7356,7 +7354,7 @@ class BitSieve {
     /**
      * Test probable primes in the sieve and return successful candidates.
      */
-    BigInteger retrieve(BigInteger initValue, int certainty, Random random) {
+    BigInteger retrieve(BigInteger initValue, int certainty, Random* random) {
         // Examine the sieve one long at a time to find possible primes
         int offset = 1;
         for (int i=0; i<bits.length; i++) {
@@ -7374,4 +7372,5 @@ class BitSieve {
         }
         return null;
     }
+
 }
