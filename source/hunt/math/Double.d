@@ -2,8 +2,10 @@ module hunt.math.Double;
 
 
 import hunt.util.exception;
+import hunt.math.Number;
 
-class Double {
+class Double : Number{
+    
     /**
      * A constant holding the positive infinity of type
      * {@code double}. It is equal to the value returned by
@@ -153,6 +155,147 @@ class Double {
         implementationMissing(false);
         return 0;
     }
+
+    /**
+     * The value of the Double.
+     *
+     * @serial
+     */
+    private  double value;
+
+    /**
+     * Constructs a newly allocated {@code Double} object that
+     * represents the primitive {@code double} argument.
+     *
+     * @param   value   the value to be represented by the {@code Double}.
+     */
+    public this(double value) {
+        this.value = value;
+    }
+
+    /**
+     * Constructs a newly allocated {@code Double} object that
+     * represents the floating-point value of type {@code double}
+     * represented by the string. The string is converted to a
+     * {@code double} value as if by the {@code valueOf} method.
+     *
+     * @param  s  a string to be converted to a {@code Double}.
+     * @throws    NumberFormatException  if the string does not contain a
+     *            parsable number.
+     * @see       java.lang.Double#valueOf(java.lang.String)
+     */
+    // public Double(String s) throws NumberFormatException {
+    //     value = parseDouble(s);
+    // }
+
+    /**
+     * Returns {@code true} if this {@code Double} value is
+     * a Not-a-Number (NaN), {@code false} otherwise.
+     *
+     * @return  {@code true} if the value represented by this object is
+     *          NaN; {@code false} otherwise.
+     */
+    // public boolean isNaN() {
+    //     return isNaN(value);
+    // }
+
+    /**
+     * Returns {@code true} if this {@code Double} value is
+     * infinitely large in magnitude, {@code false} otherwise.
+     *
+     * @return  {@code true} if the value represented by this object is
+     *          positive infinity or negative infinity;
+     *          {@code false} otherwise.
+     */
+    // public boolean isInfinite() {
+    //     return isInfinite(value);
+    // }
+
+    /**
+     * Returns a string representation of this {@code Double} object.
+     * The primitive {@code double} value represented by this
+     * object is converted to a string exactly as if by the method
+     * {@code toString} of one argument.
+     *
+     * @return  a {@code String} representation of this object.
+     * @see java.lang.Double#toString(double)
+     */
+    // public String toString() {
+    //     return toString(value);
+    // }
+
+    /**
+     * Returns the value of this {@code Double} as a {@code byte}
+     * after a narrowing primitive conversion.
+     *
+     * @return  the {@code double} value represented by this object
+     *          converted to type {@code byte}
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     * @since JDK1.1
+     */
+    override public byte byteValue() {
+        return cast(byte)value;
+    }
+
+    /**
+     * Returns the value of this {@code Double} as a {@code short}
+     * after a narrowing primitive conversion.
+     *
+     * @return  the {@code double} value represented by this object
+     *          converted to type {@code short}
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     * @since JDK1.1
+     */
+    override public short shortValue() {
+        return cast(short)value;
+    }
+
+    /**
+     * Returns the value of this {@code Double} as an {@code int}
+     * after a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     *
+     * @return  the {@code double} value represented by this object
+     *          converted to type {@code int}
+     */
+    override public int intValue() {
+        return cast(int)value;
+    }
+
+    /**
+     * Returns the value of this {@code Double} as a {@code long}
+     * after a narrowing primitive conversion.
+     *
+     * @return  the {@code double} value represented by this object
+     *          converted to type {@code long}
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
+    override public long longValue() {
+        return cast(long)value;
+    }
+
+    /**
+     * Returns the value of this {@code Double} as a {@code float}
+     * after a narrowing primitive conversion.
+     *
+     * @return  the {@code double} value represented by this object
+     *          converted to type {@code float}
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     * @since JDK1.0
+     */
+    override public float floatValue() {
+        return cast(float)value;
+    }
+
+    /**
+     * Returns the {@code double} value of this {@code Double} object.
+     *
+     * @return the {@code double} value represented by this object
+     */
+    override public double doubleValue() {
+        return value;
+    }
+
 }
 
 

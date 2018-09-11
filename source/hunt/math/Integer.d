@@ -1,6 +1,7 @@
 module hunt.math.Integer;
+import hunt.math.Number;
 
-class Integer {
+class Integer : Number{
 
     /**
      * Returns the number of one-bits in the two's complement binary
@@ -12,6 +13,14 @@ class Integer {
      *     representation of the specified {@code int} value.
      * @since 1.5
      */
+     public static  int   MIN_VALUE = 0x80000000;
+
+    /**
+     * A constant holding the maximum value an {@code int} can
+     * have, 2<sup>31</sup>-1.
+     */
+    public static  int   MAX_VALUE = 0x7fffffff;
+
     public static int bitCount(int i) {
         // HD, Figure 5-2
         i = i - ((i >>> 1) & 0x55555555);
@@ -82,4 +91,72 @@ class Integer {
         y = i << 2; if (y != 0) { n = n - 2; i = y; }
         return n - ((i << 1) >>> 31);
     }
+
+    /**
+     * The value of the {@code Integer}.
+     *
+     * @serial
+     */
+    private  int value;
+
+    /**
+     * Constructs a newly allocated {@code Integer} object that
+     * represents the specified {@code int} value.
+     *
+     * @param   value   the value to be represented by the
+     *                  {@code Integer} object.
+     */
+    public this(int value) {
+        this.value = value;
+    }
+
+    override public byte byteValue() {
+        return cast(byte)value;
+    }
+
+    /**
+     * Returns the value of this {@code Integer} as a {@code short}
+     * after a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
+    override public short shortValue() {
+        return cast(short)value;
+    }
+
+    /**
+     * Returns the value of this {@code Integer} as an
+     * {@code int}.
+     */
+    override public int intValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this {@code Integer} as a {@code long}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     * @see Integer#toUnsignedLong(int)
+     */
+    override public long longValue() {
+        return cast(long)value;
+    }
+
+    /**
+     * Returns the value of this {@code Integer} as a {@code float}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    override public float floatValue() {
+        return cast(float)value;
+    }
+
+    /**
+     * Returns the value of this {@code Integer} as a {@code double}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    override public double doubleValue() {
+        return cast(double)value;
+    }
+
 }

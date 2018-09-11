@@ -1,8 +1,21 @@
 module hunt.math.Long;
+import hunt.math.Number;
 
-class Long {
+class Long : Number{
 
      // Bit Twiddling
+
+      /**
+     * A constant holding the minimum value a {@code long} can
+     * have, -2<sup>63</sup>.
+     */
+   public static  long MIN_VALUE = 0x8000000000000000L;
+
+    /**
+     * A constant holding the maximum value a {@code long} can
+     * have, 2<sup>63</sup>-1.
+     */
+    public static  long MAX_VALUE = 0x7fffffffffffffffL;
 
     /**
      * The number of bits used to represent a {@code long} value in two's
@@ -69,6 +82,94 @@ class Long {
         if (x >>> 30 == 0) { n +=  2; x <<=  2; }
         n -= x >>> 31;
         return n;
+    }
+
+    /**
+     * The value of the {@code Long}.
+     *
+     * @serial
+     */
+    private  long value;
+
+    /**
+     * Constructs a newly allocated {@code Long} object that
+     * represents the specified {@code long} argument.
+     *
+     * @param   value   the value to be represented by the
+     *          {@code Long} object.
+     */
+    public this(long value) {
+        this.value = value;
+    }
+
+    /**
+     * Constructs a newly allocated {@code Long} object that
+     * represents the {@code long} value indicated by the
+     * {@code String} parameter. The string is converted to a
+     * {@code long} value in exactly the manner used by the
+     * {@code parseLong} method for radix 10.
+     *
+     * @param      s   the {@code String} to be converted to a
+     *             {@code Long}.
+     * @throws     NumberFormatException  if the {@code String} does not
+     *             contain a parsable {@code long}.
+     * @see        java.lang.Long#parseLong(java.lang.String, int)
+     */
+    // public Long(String s) throws NumberFormatException {
+    //     this.value = parseLong(s, 10);
+    // }
+
+    /**
+     * Returns the value of this {@code Long} as a {@code byte} after
+     * a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
+    override public byte byteValue() {
+        return cast(byte)value;
+    }
+
+    /**
+     * Returns the value of this {@code Long} as a {@code short} after
+     * a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
+    override public short shortValue() {
+        return cast(short)value;
+    }
+
+    /**
+     * Returns the value of this {@code Long} as an {@code int} after
+     * a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
+    override public int intValue() {
+        return cast(int)value;
+    }
+
+    /**
+     * Returns the value of this {@code Long} as a
+     * {@code long} value.
+     */
+    override public long longValue() {
+        return value;
+    }
+
+    /**
+     * Returns the value of this {@code Long} as a {@code float} after
+     * a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    override public float floatValue() {
+        return cast(float)value;
+    }
+
+    /**
+     * Returns the value of this {@code Long} as a {@code double}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    override public double doubleValue() {
+        return cast(double)value;
     }
 
 }
