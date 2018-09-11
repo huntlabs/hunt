@@ -4,16 +4,12 @@
 A refined core library for D programming language.
 
 ## Modules
- * event ( kqueue / epoll / iocp )
- * net ( TcpListener / TcpStream )
- * serialize
- * radix-tree
- * timer
- * container
- * memory
- * buffer
- * configration
- * logger
+ * hunt.io ( TcpListener / TcpStream )
+ * hunt.container (Java alike)
+ * hunt.event ( kqueue / epoll / iocp )
+ * hunt.logging
+ * hunt.math (BigIngeger etc.)
+ * hunt.util (buffer configration memory radix-tree serialize string timer etc.)
 
 ## Platforms
  * FreeBSD
@@ -35,10 +31,10 @@ A refined core library for D programming language.
 For details, see [here](docs/benchmark.md).
 
 ## TODO
-- [ ] Performance improvement
+- [ ] Improve performance
 - [ ] Stablize APIs
 - [ ] More friendly APIs
 - [ ] More examples
 - [ ] More common utils
 - [x] Benchmark test
-- [x] Improving supports on Mac OS
+- [x] Improve supports on Mac OS
