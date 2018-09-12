@@ -39,7 +39,7 @@ class ArrayList(E) : AbstractList!E {
      * Constructs an empty list with the specified initial capacity.
      *
      * @param  initialCapacity  the initial capacity of the list
-     * @throws IllegalArgumentException if the specified initial capacity
+     * @throws Exception if the specified initial capacity
      *         is negative
      */
     this(int initialCapacity) {
@@ -50,7 +50,7 @@ class ArrayList(E) : AbstractList!E {
         // } else if (initialCapacity == 0) {
         //     this._array = EMPTY_ELEMENTDATA;
         // } else {
-        //     throw new IllegalArgumentException("Illegal Capacity: "+
+        //     throw new Exception("Illegal Capacity: "+
         //                                        initialCapacity);
         // }
     }
@@ -356,6 +356,7 @@ class ArrayList(E) : AbstractList!E {
         return result;
     }
 
+
     /*
      * Private remove method that skips bounds checking and does not
      * return the value removed.
@@ -631,7 +632,7 @@ class ArrayList(E) : AbstractList!E {
      * a fashion that iterations in progress may yield incorrect results.)
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws Exception {@inheritDoc}
      */
     // List<E> subList(int fromIndex, int toIndex) {
     //     subListRangeCheck(fromIndex, toIndex, size);
@@ -644,7 +645,7 @@ class ArrayList(E) : AbstractList!E {
     //     if (toIndex > size)
     //         throw new IndexOutOfBoundsException("toIndex = " + toIndex);
     //     if (fromIndex > toIndex)
-    //         throw new IllegalArgumentException("fromIndex(" + fromIndex +
+    //         throw new Exception("fromIndex(" + fromIndex +
     //                                            ") > toIndex(" + toIndex + ")");
     // }
 

@@ -119,6 +119,11 @@ class Collections {
     static List!T singletonList(T)(T o) {
         return new SingletonList!T(o);
     }
+
+    static List!T emptyList(T)()
+    {
+        return new EmptyList!T();
+    }
     
 }
 
@@ -529,4 +534,5 @@ private class UnmodifiableNavigableSet(E) :
     // alias subSet = UnmodifiableSortedSet!(E).subSet;
     // alias headSet = UnmodifiableSortedSet!(E).headSet;
     // alias tailSet = UnmodifiableSortedSet!(E).tailSet;
+
 }

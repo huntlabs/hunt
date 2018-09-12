@@ -239,8 +239,9 @@ abstract class AbstractCollection(E) : Collection!E {
 
     void clear() { throw new NotImplementedException(); }
 
-    int opApply(scope int delegate(ref E) dg)  {
-        throw new NotImplementedException();
+    int opApply(scope int delegate(ref E) dg) {
+        //throw new NotImplementedException();
+        return 0;
     }
     
     // int opApply(scope int delegate(MapEntry!(E) entry) dg) {
