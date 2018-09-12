@@ -408,6 +408,11 @@ char charAt(string s, int i) nothrow
     return s[i];
 }
 
+char charAt(string s, ulong i) nothrow
+{
+    return s[i];
+}
+
 bool contains(string[] items, string item)
 {
     return items.canFind(item);

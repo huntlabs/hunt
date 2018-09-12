@@ -282,7 +282,7 @@ interface List(E) : Collection!E {
      */
     int lastIndexOf(E o);
 
-
+    
     // List Iterators
 
     /**
@@ -373,4 +373,41 @@ interface List(E) : Collection!E {
     // final Spliterator<E> spliterator() {
     //     return Spliterators.spliterator(this, Spliterator.ORDERED);
     // }
+
+     // Comparison and hashing
+
+    /**
+     * Compares the specified object with this list for equality.  Returns
+     * <tt>true</tt> if and only if the specified object is also a list, both
+     * lists have the same size, and all corresponding pairs of elements in
+     * the two lists are <i>equal</i>.  (Two elements <tt>e1</tt> and
+     * <tt>e2</tt> are <i>equal</i> if <tt>(e1==null ? e2==null :
+     * e1.equals(e2))</tt>.)  In other words, two lists are defined to be
+     * equal if they contain the same elements in the same order.  This
+     * definition ensures that the equals method works properly across
+     * different implementations of the <tt>List</tt> interface.
+     *
+     * @param o the object to be compared for equality with this list
+     * @return <tt>true</tt> if the specified object is equal to this list
+     */
+    // bool opEquals(Object o);
+
+    /**
+     * Returns the hash code value for this list.  The hash code of a list
+     * is defined to be the result of the following calculation:
+     * <pre>{@code
+     *     int hashCode = 1;
+     *     for (E e : list)
+     *         hashCode = 31*hashCode + (e==null ? 0 : e.hashCode());
+     * }</pre>
+     * This ensures that <tt>list1.equals(list2)</tt> implies that
+     * <tt>list1.hashCode()==list2.hashCode()</tt> for any two lists,
+     * <tt>list1</tt> and <tt>list2</tt>, as required by the general
+     * contract of {@link Object#hashCode}.
+     *
+     * @return the hash code value for this list
+     * @see Object#equals(Object)
+     * @see #equals(Object)
+     */
+    // size_t toHash() @trusted nothrow ;
 }

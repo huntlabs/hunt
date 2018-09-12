@@ -182,6 +182,83 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      */
     // void clear() { throw new UnsupportedOperationException(""); }
 
+      // Comparison and hashing
+
+    /**
+     * Compares the specified object with this list for equality.  Returns
+     * {@code true} if and only if the specified object is also a list, both
+     * lists have the same size, and all corresponding pairs of elements in
+     * the two lists are <i>equal</i>.  (Two elements {@code e1} and
+     * {@code e2} are <i>equal</i> if {@code (e1==null ? e2==null :
+     * e1.equals(e2))}.)  In other words, two lists are defined to be
+     * equal if they contain the same elements in the same order.<p>
+     *
+     * This implementation first checks if the specified object is this
+     * list. If so, it returns {@code true}; if not, it checks if the
+     * specified object is a list. If not, it returns {@code false}; if so,
+     * it iterates over both lists, comparing corresponding pairs of elements.
+     * If any comparison returns {@code false}, this method returns
+     * {@code false}.  If either iterator runs out of elements before the
+     * other it returns {@code false} (as the lists are of unequal length);
+     * otherwise it returns {@code true} when the iterations complete.
+     *
+     * @param o the object to be compared for equality with this list
+     * @return {@code true} if the specified object is equal to this list
+     */
+    override public bool opEquals(Object o) {
+        if (o is this)
+            return true;
+        List!E e2 = cast(List!E)o;
+        if (e2 is null)
+            return false;
+        
+        if(this.size() != e2.size())
+            return false;
+
+        for(int i= 0 ; i < this.size();i++)
+        {
+            if(this.get(i)  != e2.get(i))
+                return false;
+        }
+ 
+        return true;
+    }
+
+    /**
+     * Returns the hash code value for this list.
+     *
+     * <p>This implementation uses exactly the code that is used to define the
+     * list hash function in the documentation for the {@link List#hashCode}
+     * method.
+     *
+     * @return the hash code value for this list
+     */
+    override size_t toHash() @trusted nothrow {
+        size_t hashCode = 1;
+        try
+        {
+            static if(is(E == class)) {
+            foreach (E e ; this)
+                hashCode = 31*hashCode + (e is null ? 0 : (cast(Object)e).toHash());
+            } else {
+                foreach (E e ; this)
+                    hashCode = 31*hashCode + hashOf(e);
+            }
+        }
+        catch(Exception e)
+        {
+
+        }
+        
+    
+        return hashCode;
+    }
+
+    override int opApply(scope int delegate(ref E) dg)
+    {
+        return 0;
+    }
+
     /**
      * {@inheritDoc}
      *
