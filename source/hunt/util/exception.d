@@ -17,6 +17,14 @@ void implementationMissing(string name = __FUNCTION__, string file = __FILE__, i
     }
 }
 
+
+mixin template ExceptionBuild(string name, string parent = "")
+{
+    import std.exception;
+	enum buildStr = "class " ~ name ~ "Exception : " ~ parent ~ "Exception { \n\t" ~ "mixin basicExceptionCtors;\n }";
+	mixin(buildStr);
+}
+
 mixin template BasicExceptionCtors()
 {
     this(size_t line = __LINE__, string file = __FILE__) @nogc @safe pure nothrow
