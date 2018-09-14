@@ -260,7 +260,7 @@ class ConfigBuilder
     {
         static if (!nodeName.empty)
         {
-            version(HuntDebugMode) pragma(msg, "node name: " ~ nodeName);
+            // version(HuntDebugMode) pragma(msg, "node name: " ~ nodeName);
             return buildItem!(T)(this.subItem(nodeName));
         }
         else static if (hasUDA!(T, Configuration))
@@ -318,15 +318,15 @@ class ConfigBuilder
             static if (memberProtection == "private"
                     || memberProtection == "protected" || memberProtection == "export")
             {
-                version (HuntDebugMode) pragma(msg, "skip private member: " ~ memberName);
+                // version (HuntDebugMode) pragma(msg, "skip private member: " ~ memberName);
             }
             else static if (isType!(__traits(getMember, T, memberName)))
             {
-                version (HuntDebugMode) pragma(msg, "skip inner type member: " ~ memberName);
+                // version (HuntDebugMode) pragma(msg, "skip inner type member: " ~ memberName);
             }
             else static if (__traits(isStaticFunction, __traits(getMember, T, memberName)))
             {
-                version (HuntDebugMode) pragma(msg, "skip static member: " ~ memberName);
+                // version (HuntDebugMode) pragma(msg, "skip static member: " ~ memberName);
             }
             else
             {
@@ -362,8 +362,9 @@ class ConfigBuilder
                 }
                 else
                 {
-                    version (HuntDebugMode) pragma(msg,
-                            "setting " ~ memberName ~ " with item " ~ settingItemName);
+                    // version (HuntDebugMode) pragma(msg,
+                    //         "setting " ~ memberName ~ " with item " ~ settingItemName);
+
                     str ~= q{
                         if(%5$s.exists("%1$s")) {
                             %4$s.%2$s = %5$s.subItem("%1$s").as!(%3$s)();
@@ -372,7 +373,7 @@ class ConfigBuilder
                             version (HuntDebugMode) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                         }
                         
-                        version (HuntDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                        // version (HuntDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
                     }.format(settingItemName, memberName,
                             memberTypeString, returnParameter, incomingParameter);
                 }
@@ -393,11 +394,11 @@ class ConfigBuilder
             static if (is(parameterType == struct) || is(parameterType == class)
                     || is(parameterType == interface))
             {
-                version (HuntDebugMode) pragma(msg, "skip method with class: " ~ memberName);
+                // version (HuntDebugMode) pragma(msg, "skip method with class: " ~ memberName);
             }
             else
             {
-                version (HuntDebugMode) pragma(msg, "method: " ~ memberName);
+                // version (HuntDebugMode) pragma(msg, "method: " ~ memberName);
 
                 r = q{
                             if(%5$s.exists("%1$s")) {
@@ -407,14 +408,14 @@ class ConfigBuilder
                                 version (HuntDebugMode) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                             }
                             
-                            version (HuntDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                            // version (HuntDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
                             }.format(settingItemName, memberName,
                         parameterType.stringof, returnParameter, incomingParameter);
             }
         }
         else
         {
-            version (HuntDebugMode) pragma(msg, "skip method: " ~ memberName);
+            // version (HuntDebugMode) pragma(msg, "skip method: " ~ memberName);
         }
 
         return r;
@@ -435,17 +436,17 @@ class ConfigBuilder
             enum newSettingItemName = settingItemName;
         }
 
-        version (HuntDebugMode)
-        {
-            pragma(msg, "module name: " ~ memberModuleName);
-            pragma(msg, "full type name: " ~ fullTypeName);
-            pragma(msg, "setting " ~ memberName ~ " with item " ~ newSettingItemName);
-        }
+        // version (HuntDebugMode)
+        // {
+        //     pragma(msg, "module name: " ~ memberModuleName);
+        //     pragma(msg, "full type name: " ~ fullTypeName);
+        //     pragma(msg, "setting " ~ memberName ~ " with item " ~ newSettingItemName);
+        // }
 
         string r = q{
             import %1$s;
             
-            tracef("%5$s.%3$s is a class/struct.");
+            // tracef("%5$s.%3$s is a class/struct.");
             if(%6$s.exists("%2$s")) {
                 %5$s.%3$s = buildItem!(%4$s)(%6$s.subItem("%2$s"));
             }
@@ -522,7 +523,7 @@ private:
 
             if (canFind(reservedWords, str))
             {
-                warningf("Found a reserved word: %s. It may cause some errors to use it.", str);
+                warningf("Found a reserved word: %s. It may cause some errors.", str);
             }
 
             if (currentPath.empty)
