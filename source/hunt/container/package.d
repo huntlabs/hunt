@@ -33,3 +33,4 @@ public import hunt.container.SortedSet;
 public import hunt.container.StringBuffer;
 public import hunt.container.TreeMap;
 public import hunt.container.TreeSet;
+public import hunt.container.LinkedHashSet;

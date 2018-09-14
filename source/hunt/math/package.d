@@ -13,6 +13,7 @@ public import hunt.math.Number;
 public import hunt.math.MutableBigInteger;
 public import hunt.math.Byte;
 public import hunt.math.Short;
+public import hunt.math.Boolean;
 
 
 
