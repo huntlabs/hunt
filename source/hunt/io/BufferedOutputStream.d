@@ -1,4 +1,4 @@
-module hunt.io.BufferedNetOutputStream;
+module hunt.io.BufferedOutputStream;
 
 import hunt.io.common;
 import hunt.util.exception;
@@ -6,7 +6,7 @@ import hunt.util.exception;
 /**
  * 
  */
-class BufferedNetOutputStream : OutputStream {
+class BufferedOutputStream : OutputStream {
     protected  OutputStream output;
     protected  int bufferSize;
     private byte[] buf;
@@ -57,6 +57,13 @@ class BufferedNetOutputStream : OutputStream {
 
     override
     void flush()  {
+        version(HuntDebugMode) {
+            import hunt.logging;
+            if(count == 0)
+                warning("count=0");
+            else
+                trace("count=", count);
+        }
         if (count > 0) {
             output.write(buf, 0, count);
             count = 0;
