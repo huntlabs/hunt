@@ -259,6 +259,11 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
         return 0;
     }
 
+    // List!(E) opCast(C)(C c) nothrow
+    //     //if(is(C == immutable (E)[]))
+    // {
+    //     return cast(List!(E))c;
+    // }
     /**
      * {@inheritDoc}
      *
