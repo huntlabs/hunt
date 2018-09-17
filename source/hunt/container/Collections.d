@@ -247,7 +247,7 @@ private static class SingletonSet(E) : AbstractSet!E
 
     bool contains(Object o) {return o == element;}
 
-    // override
+    override
     int opApply(scope int delegate(ref E) dg)
     {
         dg(element);

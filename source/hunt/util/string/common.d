@@ -403,6 +403,11 @@ string substring(string s, int beginIndex, int endIndex=-1)
     return s[beginIndex .. endIndex];
 }
 
+string substring(string s, ulong beginIndex, ulong endIndex=-1)
+{
+    return substring(s,cast(int)beginIndex,cast(int)endIndex);
+}
+
 char charAt(string s, int i) nothrow
 {
     return s[i];
@@ -462,6 +467,12 @@ class StringBuilder : Appendable
     StringBuilder append(int i)
     {
         _buffer.put(cast(byte[])(to!(string)(i)));
+        return this;
+    }
+
+    StringBuilder append(float f)
+    {
+        _buffer.put(cast(byte[])(to!(string)(f)));
         return this;
     }
 

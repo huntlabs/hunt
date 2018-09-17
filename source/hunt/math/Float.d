@@ -2,6 +2,7 @@ module hunt.math.Float;
 
 import hunt.util.exception;
 import hunt.math.Number;
+import std.conv;
 
 class Float : Number{
     /**
@@ -174,6 +175,11 @@ class Float : Number{
      */
     public this(double value) {
         this.value = cast(float)value;
+    }
+
+
+    public static float parseFloat(string s) {
+        return to!float(s);
     }
 
     /**

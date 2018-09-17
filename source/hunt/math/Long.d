@@ -1,5 +1,6 @@
 module hunt.math.Long;
 import hunt.math.Number;
+import std.conv;
 
 class Long : Number{
 
@@ -115,9 +116,9 @@ class Long : Number{
      *             contain a parsable {@code long}.
      * @see        java.lang.Long#parseLong(java.lang.String, int)
      */
-    // public Long(String s) throws NumberFormatException {
-    //     this.value = parseLong(s, 10);
-    // }
+    public this(string s) {
+        this.value = to!long(s);
+    }
 
     /**
      * Returns the value of this {@code Long} as a {@code byte} after

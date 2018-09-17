@@ -271,7 +271,9 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
 
         _size--;
         modCount++;
+        // list.stableLinearRemove(take(range, 1));
         return _dlist.linearRemoveElement(o);
+        // return true;
     }
 
     /**
@@ -454,7 +456,7 @@ bool addAll(int index, Collection!E c) {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    override E remove(int index) {
+     E removeAt(int index) {
         checkElementIndex(index);
         auto range = _dlist[];
         range.popFrontN(index);
@@ -933,4 +935,10 @@ bool addAll(int index, Collection!E c) {
             }
             return result;
         }
+}
+
+unittest{
+        LinkedList!(string) arrl = new LinkedList!(string)();
+        arrl.add("2");
+        arrl.add("1");
 }
