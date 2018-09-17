@@ -406,7 +406,5 @@ unittest{
     // }
 
     // func(false);
-    import std.json;
-    bool fv= false;
-    Boolean b = fv;
+
 }
