@@ -69,6 +69,8 @@ import std.range;
 
 class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
 {
+    // alias remove = AbstractSequentialList!E.remove;
+
     DList!E _dlist;
     int _size = 0;
 

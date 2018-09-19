@@ -423,7 +423,26 @@ bool contains(string[] items, string item)
     return items.canFind(item);
 }
 
+ int compareTo(string value , string another)
+ {  
+        import std.algorithm.comparison;
+        int len1 = cast(int)value.length;
+        int len2 = cast(int)another.length;
+        int lim = min(len1, len2);
+        // char v1[] = value;
+        // char v2[] = another.value;
 
+        int k = 0;
+        while (k < lim) {
+            char c1 = value[k];
+            char c2 = another[k];
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            k++;
+        }
+        return len1 - len2;
+}
 
 /**
 */

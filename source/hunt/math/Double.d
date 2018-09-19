@@ -195,9 +195,9 @@ class Double : Number{
      * @return  {@code true} if the value represented by this object is
      *          NaN; {@code false} otherwise.
      */
-    // public boolean isNaN() {
-    //     return isNaN(value);
-    // }
+    public static bool isNaN(double v) {
+        return isNaN(v);
+    }
 
     /**
      * Returns {@code true} if this {@code Double} value is

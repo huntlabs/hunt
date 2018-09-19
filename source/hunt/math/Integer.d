@@ -1,5 +1,6 @@
 module hunt.math.Integer;
 import hunt.math.Number;
+import std.conv;
 
 class Integer : Number{
 
@@ -31,6 +32,14 @@ class Integer : Number{
         return i & 0x3f;
     }
 
+     enum static char[] digits = [
+        '0' , '1' , '2' , '3' , '4' , '5' ,
+        '6' , '7' , '8' , '9' , 'a' , 'b' ,
+        'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
+        'i' , 'j' , 'k' , 'l' , 'm' , 'n' ,
+        'o' , 'p' , 'q' , 'r' , 's' , 't' ,
+        'u' , 'v' , 'w' , 'x' , 'y' , 'z'
+     ];
 
     /**
      * Returns the number of zero bits preceding the highest-order
@@ -159,6 +168,16 @@ class Integer : Number{
         return cast(double)value;
     }
 
+    public static int parseInt(string s)  {
+        auto i = to!long(s);
+        if (i < MIN_VALUE || i > MAX_VALUE)
+        {
+            throw new Exception(
+                    "Value " ~s ~ " out of range from input ");
+        }
+
+         return cast(int)i;
+    }
 
     /**
      * Cache to support the object identity semantics of autoboxing for values between

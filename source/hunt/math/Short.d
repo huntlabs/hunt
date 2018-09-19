@@ -536,4 +536,15 @@ public  class Short : Number /*implements Comparable<Short> */{
 
     /** use serialVersionUID from JDK 1.1. for interoperability */
     private static  long serialVersionUID = 7515723908773894738L;
+
+    public static short parseShort(string s)  {
+        auto i = to!int(s);
+        if (i < MIN_VALUE || i > MAX_VALUE)
+        {
+            throw new Exception(
+                    "Value " ~s ~ " out of range from input ");
+        }
+
+         return cast(short)i;
+    }
 }

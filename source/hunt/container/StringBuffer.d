@@ -75,6 +75,14 @@ class StringBuffer : Appendable
         return this;
     }
 
+    Appendable append(float c) 
+    {
+        string s = to!string(c);
+        _buffer.put(s);
+        // len += cast(int)s.length;
+        return this;
+    }
+
     override string toString()
     {
         // return _buffer.data[0..len];
