@@ -2174,14 +2174,15 @@ class BigInteger : Number {
      * @return {@code this / val}
      * @throws ArithmeticException if {@code val} is zero.
      */
-    // BigInteger divide(BigInteger val) {
-    //     if (val.mag.length < BURNIKEL_ZIEGLER_THRESHOLD ||
-    //             mag.length - val.mag.length < BURNIKEL_ZIEGLER_OFFSET) {
-    //         return divideKnuth(val);
-    //     } else {
-    //         return divideBurnikelZiegler(val);
-    //     }
-    // }
+    BigInteger divide(BigInteger val) {
+        // if (val.mag.length < BURNIKEL_ZIEGLER_THRESHOLD ||
+        //         mag.length - val.mag.length < BURNIKEL_ZIEGLER_OFFSET) {
+        //     return divideKnuth(val);
+        // } else {
+        //     return divideBurnikelZiegler(val);
+        // }
+        return null;
+    }
 
     /**
      * Returns a BigInteger whose value is {@code (this / val)} using an O(n^2) algorithm from Knuth.

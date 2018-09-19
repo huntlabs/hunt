@@ -1,6 +1,8 @@
 module hunt.math.BigDecimal;
 
 import hunt.math.Number;
+import hunt.math.BigInteger;
+import hunt.math.Integer;
 
 /**
  * Immutable, arbitrary-precision signed decimal numbers.  A
@@ -194,35 +196,35 @@ import hunt.math.Number;
  * @author  Sergey V. Kuksenko
  * @since 1.1
  */
-public class BigDecimal { // : Number 
-//     /**
-//      * The unscaled value of this BigDecimal, as returned by {@link
-//      * #unscaledValue}.
-//      *
-//      * @serial
-//      * @see #unscaledValue
-//      */
-//     private final BigInteger intVal;
+public class BigDecimal : Number {
+    /**
+     * The unscaled value of this BigDecimal, as returned by {@link
+     * #unscaledValue}.
+     *
+     * @serial
+     * @see #unscaledValue
+     */
+    private  BigInteger intVal;
 
-//     /**
-//      * The scale of this BigDecimal, as returned by {@link #scale}.
-//      *
-//      * @serial
-//      * @see #scale
-//      */
-//     private final int scale;  // Note: this may have any value, so
-//                               // calculations must be done in longs
+    /**
+     * The scale of this BigDecimal, as returned by {@link #scale}.
+     *
+     * @serial
+     * @see #scale
+     */
+    private  int _scale;  // Note: this may have any value, so
+                              // calculations must be done in longs
 
-//     /**
-//      * The number of decimal digits in this BigDecimal, or 0 if the
-//      * number of digits are not known (lookaside information).  If
-//      * nonzero, the value is guaranteed correct.  Use the precision()
-//      * method to obtain and set the value if it might be 0.  This
-//      * field is mutable until set nonzero.
-//      *
-//      * @since  1.5
-//      */
-//     private transient int precision;
+    /**
+     * The number of decimal digits in this BigDecimal, or 0 if the
+     * number of digits are not known (lookaside information).  If
+     * nonzero, the value is guaranteed correct.  Use the precision()
+     * method to obtain and set the value if it might be 0.  This
+     * field is mutable until set nonzero.
+     *
+     * @since  1.5
+     */
+    private  int precision;
 
 //     /**
 //      * Used to store the canonical string representation, if computed.
@@ -237,16 +239,16 @@ public class BigDecimal { // : Number
 
 //     private static final BigInteger INFLATED_BIGINT = BigInteger.valueOf(INFLATED);
 
-//     /**
-//      * If the absolute value of the significand of this BigDecimal is
-//      * less than or equal to {@code Long.MAX_VALUE}, the value can be
-//      * compactly stored in this field and used in computations.
-//      */
-//     private final transient long intCompact;
+    /**
+     * If the absolute value of the significand of this BigDecimal is
+     * less than or equal to {@code Long.MAX_VALUE}, the value can be
+     * compactly stored in this field and used in computations.
+     */
+    private   long intCompact;
 
-//     // All 18-digit base ten strings fit into a long; not all 19-digit
-//     // strings will
-//     private static final int MAX_COMPACT_DIGITS = 18;
+    // All 18-digit base ten strings fit into a long; not all 19-digit
+    // strings will
+    private static  int MAX_COMPACT_DIGITS = 18;
 
 //     /* Appease the serialization gods */
 //     private static final long serialVersionUID = 6108874887143696463L;
@@ -335,17 +337,17 @@ public class BigDecimal { // : Number
 
 //     // Constructors
 
-//     /**
-//      * Trusted package private constructor.
-//      * Trusted simply means if val is INFLATED, intVal could not be null and
-//      * if intVal is null, val could not be INFLATED.
-//      */
-//     BigDecimal(BigInteger intVal, long val, int scale, int prec) {
-//         this.scale = scale;
-//         this.precision = prec;
-//         this.intCompact = val;
-//         this.intVal = intVal;
-//     }
+    /**
+     * Trusted package private constructor.
+     * Trusted simply means if val is INFLATED, intVal could not be null and
+     * if intVal is null, val could not be INFLATED.
+     */
+    this(BigInteger intVal, long val, int scale, int prec) {
+        this._scale = scale;
+        this.precision = prec;
+        this.intCompact = val;
+        this.intVal = intVal;
+    }
 
 //     /**
 //      * Translates a character array representation of a
@@ -595,13 +597,13 @@ public class BigDecimal { // : Number
 //         this.intVal = rb;
 //     }
 
-//     private int adjustScale(int scl, long exp) {
-//         long adjustedScale = scl - exp;
-//         if (adjustedScale > Integer.MAX_VALUE || adjustedScale < Integer.MIN_VALUE)
-//             throw new NumberFormatException("Scale out of range.");
-//         scl = (int) adjustedScale;
-//         return scl;
-//     }
+    private int adjustScale(int scl, long exp) {
+        long adjustedScale = scl - exp;
+        if (adjustedScale > Integer.MAX_VALUE || adjustedScale < Integer.MIN_VALUE)
+            throw new Exception("NumberFormat : Scale out of range.");
+        scl = cast(int) adjustedScale;
+        return scl;
+    }
 
 //     /*
 //      * parse exponent
@@ -665,9 +667,9 @@ public class BigDecimal { // : Number
 //      *         representation of a {@code BigDecimal}.
 //      * @since  1.5
 //      */
-//     public BigDecimal(char[] in) {
-//         this(in, 0, in.length);
-//     }
+    public this(char[] inp) {
+        //this(in, 0, in.length);
+    }
 
 //     /**
 //      * Translates a character array representation of a
@@ -689,9 +691,9 @@ public class BigDecimal { // : Number
 //      *         representation of a {@code BigDecimal}.
 //      * @since  1.5
 //      */
-//     public BigDecimal(char[] in, MathContext mc) {
-//         this(in, 0, in.length, mc);
-//     }
+    // public BigDecimal(char[] in, MathContext mc) {
+    //     this(in, 0, in.length, mc);
+    // }
 
 //     /**
 //      * Translates the string representation of a {@code BigDecimal}
@@ -794,9 +796,9 @@ public class BigDecimal { // : Number
 //      * @throws NumberFormatException if {@code val} is not a valid
 //      *         representation of a {@code BigDecimal}.
 //      */
-//     public BigDecimal(String val) {
-//         this(val.toCharArray(), 0, val.length());
-//     }
+    public this(string val) {
+        // this(val.toCharArray(), 0, val.length());
+    }
 
 //     /**
 //      * Translates the string representation of a {@code BigDecimal}
@@ -860,9 +862,9 @@ public class BigDecimal { // : Number
 //      *        {@code BigDecimal}.
 //      * @throws NumberFormatException if {@code val} is infinite or NaN.
 //      */
-//     public BigDecimal(double val) {
-//         this(val,MathContext.UNLIMITED);
-//     }
+    public this(double val) {
+        // this(val,MathContext.UNLIMITED);
+    }
 
 //     /**
 //      * Translates a {@code double} into a {@code BigDecimal}, with
@@ -971,11 +973,11 @@ public class BigDecimal { // : Number
 //      * @param val {@code BigInteger} value to be converted to
 //      *            {@code BigDecimal}.
 //      */
-//     public BigDecimal(BigInteger val) {
-//         scale = 0;
-//         intVal = val;
-//         intCompact = compactValFor(val);
-//     }
+    public this(BigInteger val) {
+        _scale = 0;
+        intVal = val;
+        // intCompact = compactValFor(val);
+    }
 
 //     /**
 //      * Translates a {@code BigInteger} into a {@code BigDecimal}
@@ -1062,19 +1064,19 @@ public class BigDecimal { // : Number
 //         this.precision = prec;
 //     }
 
-//     /**
-//      * Translates an {@code int} into a {@code BigDecimal}.  The
-//      * scale of the {@code BigDecimal} is zero.
-//      *
-//      * @param val {@code int} value to be converted to
-//      *            {@code BigDecimal}.
-//      * @since  1.5
-//      */
-//     public BigDecimal(int val) {
-//         this.intCompact = val;
-//         this.scale = 0;
-//         this.intVal = null;
-//     }
+    /**
+     * Translates an {@code int} into a {@code BigDecimal}.  The
+     * scale of the {@code BigDecimal} is zero.
+     *
+     * @param val {@code int} value to be converted to
+     *            {@code BigDecimal}.
+     * @since  1.5
+     */
+    public this(int val) {
+        this.intCompact = val;
+        this._scale = 0;
+        this.intVal = null;
+    }
 
 //     /**
 //      * Translates an {@code int} into a {@code BigDecimal}, with
@@ -1108,18 +1110,18 @@ public class BigDecimal { // : Number
 //         this.precision = prec;
 //     }
 
-//     /**
-//      * Translates a {@code long} into a {@code BigDecimal}.  The
-//      * scale of the {@code BigDecimal} is zero.
-//      *
-//      * @param val {@code long} value to be converted to {@code BigDecimal}.
-//      * @since  1.5
-//      */
-//     public BigDecimal(long val) {
-//         this.intCompact = val;
-//         this.intVal = (val == INFLATED) ? INFLATED_BIGINT : null;
-//         this.scale = 0;
-//     }
+    /**
+     * Translates a {@code long} into a {@code BigDecimal}.  The
+     * scale of the {@code BigDecimal} is zero.
+     *
+     * @param val {@code long} value to be converted to {@code BigDecimal}.
+     * @since  1.5
+     */
+    public this(long val) {
+        this.intCompact = val;
+        // this.intVal = (val == INFLATED) ? INFLATED_BIGINT : null;
+        this._scale = 0;
+    }
 
 //     /**
 //      * Translates a {@code long} into a {@code BigDecimal}, with
@@ -1186,35 +1188,37 @@ public class BigDecimal { // : Number
 //      * @return a {@code BigDecimal} whose value is
 //      *         <code>(unscaledVal &times; 10<sup>-scale</sup>)</code>.
 //      */
-//     public static BigDecimal valueOf(long unscaledVal, int scale) {
-//         if (scale == 0)
-//             return valueOf(unscaledVal);
-//         else if (unscaledVal == 0) {
-//             return zeroValueOf(scale);
-//         }
-//         return new BigDecimal(unscaledVal == INFLATED ?
-//                               INFLATED_BIGINT : null,
-//                               unscaledVal, scale, 0);
-//     }
+    public static BigDecimal valueOf(long unscaledVal, int scale) {
+        // if (scale == 0)
+        //     return valueOf(unscaledVal);
+        // else if (unscaledVal == 0) {
+        //     return zeroValueOf(scale);
+        // }
+        // return new BigDecimal(unscaledVal == INFLATED ?
+        //                       INFLATED_BIGINT : null,
+        //                       unscaledVal, scale, 0);
+        return null;
+    }
 
-//     /**
-//      * Translates a {@code long} value into a {@code BigDecimal}
-//      * with a scale of zero.
-//      *
-//      * @apiNote This static factory method is provided in preference
-//      * to a ({@code long}) constructor because it allows for reuse of
-//      * frequently used {@code BigDecimal} values.
-//      *
-//      * @param val value of the {@code BigDecimal}.
-//      * @return a {@code BigDecimal} whose value is {@code val}.
-//      */
-//     public static BigDecimal valueOf(long val) {
-//         if (val >= 0 && val < ZERO_THROUGH_TEN.length)
-//             return ZERO_THROUGH_TEN[(int)val];
-//         else if (val != INFLATED)
-//             return new BigDecimal(null, val, 0, 0);
-//         return new BigDecimal(INFLATED_BIGINT, val, 0, 0);
-//     }
+    /**
+     * Translates a {@code long} value into a {@code BigDecimal}
+     * with a scale of zero.
+     *
+     * @apiNote This static factory method is provided in preference
+     * to a ({@code long}) constructor because it allows for reuse of
+     * frequently used {@code BigDecimal} values.
+     *
+     * @param val value of the {@code BigDecimal}.
+     * @return a {@code BigDecimal} whose value is {@code val}.
+     */
+    public static BigDecimal valueOf(long val) {
+        // if (val >= 0 && val < ZERO_THROUGH_TEN.length)
+        //     return ZERO_THROUGH_TEN[(int)val];
+        // else if (val != INFLATED)
+        //     return new BigDecimal(null, val, 0, 0);
+        // return new BigDecimal(INFLATED_BIGINT, val, 0, 0);
+        return null;
+    }
 
 //     static BigDecimal valueOf(long unscaledVal, int scale, int prec) {
 //         if (scale == 0 && unscaledVal >= 0 && unscaledVal < ZERO_THROUGH_TEN.length) {
@@ -1277,21 +1281,22 @@ public class BigDecimal { // : Number
 //      * @param  augend value to be added to this {@code BigDecimal}.
 //      * @return {@code this + augend}
 //      */
-//     public BigDecimal add(BigDecimal augend) {
-//         if (this.intCompact != INFLATED) {
-//             if ((augend.intCompact != INFLATED)) {
-//                 return add(this.intCompact, this.scale, augend.intCompact, augend.scale);
-//             } else {
-//                 return add(this.intCompact, this.scale, augend.intVal, augend.scale);
-//             }
-//         } else {
-//             if ((augend.intCompact != INFLATED)) {
-//                 return add(augend.intCompact, augend.scale, this.intVal, this.scale);
-//             } else {
-//                 return add(this.intVal, this.scale, augend.intVal, augend.scale);
-//             }
-//         }
-//     }
+    public BigDecimal add(BigDecimal augend) {
+        // if (this.intCompact != INFLATED) {
+        //     if ((augend.intCompact != INFLATED)) {
+        //         return add(this.intCompact, this.scale, augend.intCompact, augend.scale);
+        //     } else {
+        //         return add(this.intCompact, this.scale, augend.intVal, augend.scale);
+        //     }
+        // } else {
+        //     if ((augend.intCompact != INFLATED)) {
+        //         return add(augend.intCompact, augend.scale, this.intVal, this.scale);
+        //     } else {
+        //         return add(this.intVal, this.scale, augend.intVal, augend.scale);
+        //     }
+        // }
+        return null;
+    }
 
 //     /**
 //      * Returns a {@code BigDecimal} whose value is {@code (this + augend)},
@@ -1416,32 +1421,33 @@ public class BigDecimal { // : Number
 //         return result;
 //     }
 
-//     /**
-//      * Returns a {@code BigDecimal} whose value is {@code (this -
-//      * subtrahend)}, and whose scale is {@code max(this.scale(),
-//      * subtrahend.scale())}.
-//      *
-//      * @param  subtrahend value to be subtracted from this {@code BigDecimal}.
-//      * @return {@code this - subtrahend}
-//      */
-//     public BigDecimal subtract(BigDecimal subtrahend) {
-//         if (this.intCompact != INFLATED) {
-//             if ((subtrahend.intCompact != INFLATED)) {
-//                 return add(this.intCompact, this.scale, -subtrahend.intCompact, subtrahend.scale);
-//             } else {
-//                 return add(this.intCompact, this.scale, subtrahend.intVal.negate(), subtrahend.scale);
-//             }
-//         } else {
-//             if ((subtrahend.intCompact != INFLATED)) {
-//                 // Pair of subtrahend values given before pair of
-//                 // values from this BigDecimal to avoid need for
-//                 // method overloading on the specialized add method
-//                 return add(-subtrahend.intCompact, subtrahend.scale, this.intVal, this.scale);
-//             } else {
-//                 return add(this.intVal, this.scale, subtrahend.intVal.negate(), subtrahend.scale);
-//             }
-//         }
-//     }
+    /**
+     * Returns a {@code BigDecimal} whose value is {@code (this -
+     * subtrahend)}, and whose scale is {@code max(this.scale(),
+     * subtrahend.scale())}.
+     *
+     * @param  subtrahend value to be subtracted from this {@code BigDecimal}.
+     * @return {@code this - subtrahend}
+     */
+    public BigDecimal subtract(BigDecimal subtrahend) {
+        // if (this.intCompact != INFLATED) {
+        //     if ((subtrahend.intCompact != INFLATED)) {
+        //         return add(this.intCompact, this.scale, -subtrahend.intCompact, subtrahend.scale);
+        //     } else {
+        //         return add(this.intCompact, this.scale, subtrahend.intVal.negate(), subtrahend.scale);
+        //     }
+        // } else {
+        //     if ((subtrahend.intCompact != INFLATED)) {
+        //         // Pair of subtrahend values given before pair of
+        //         // values from this BigDecimal to avoid need for
+        //         // method overloading on the specialized add method
+        //         return add(-subtrahend.intCompact, subtrahend.scale, this.intVal, this.scale);
+        //     } else {
+        //         return add(this.intVal, this.scale, subtrahend.intVal.negate(), subtrahend.scale);
+        //     }
+        // }
+        return null;
+    }
 
 //     /**
 //      * Returns a {@code BigDecimal} whose value is {@code (this - subtrahend)},
@@ -1464,30 +1470,31 @@ public class BigDecimal { // : Number
 //         return add(subtrahend.negate(), mc);
 //     }
 
-//     /**
-//      * Returns a {@code BigDecimal} whose value is <code>(this &times;
-//      * multiplicand)</code>, and whose scale is {@code (this.scale() +
-//      * multiplicand.scale())}.
-//      *
-//      * @param  multiplicand value to be multiplied by this {@code BigDecimal}.
-//      * @return {@code this * multiplicand}
-//      */
-//     public BigDecimal multiply(BigDecimal multiplicand) {
-//         int productScale = checkScale((long) scale + multiplicand.scale);
-//         if (this.intCompact != INFLATED) {
-//             if ((multiplicand.intCompact != INFLATED)) {
-//                 return multiply(this.intCompact, multiplicand.intCompact, productScale);
-//             } else {
-//                 return multiply(this.intCompact, multiplicand.intVal, productScale);
-//             }
-//         } else {
-//             if ((multiplicand.intCompact != INFLATED)) {
-//                 return multiply(multiplicand.intCompact, this.intVal, productScale);
-//             } else {
-//                 return multiply(this.intVal, multiplicand.intVal, productScale);
-//             }
-//         }
-//     }
+    /**
+     * Returns a {@code BigDecimal} whose value is <code>(this &times;
+     * multiplicand)</code>, and whose scale is {@code (this.scale() +
+     * multiplicand.scale())}.
+     *
+     * @param  multiplicand value to be multiplied by this {@code BigDecimal}.
+     * @return {@code this * multiplicand}
+     */
+    public BigDecimal multiply(BigDecimal multiplicand) {
+        // int productScale = checkScale((long) scale + multiplicand.scale);
+        // if (this.intCompact != INFLATED) {
+        //     if ((multiplicand.intCompact != INFLATED)) {
+        //         return multiply(this.intCompact, multiplicand.intCompact, productScale);
+        //     } else {
+        //         return multiply(this.intCompact, multiplicand.intVal, productScale);
+        //     }
+        // } else {
+        //     if ((multiplicand.intCompact != INFLATED)) {
+        //         return multiply(multiplicand.intCompact, this.intVal, productScale);
+        //     } else {
+        //         return multiply(this.intVal, multiplicand.intVal, productScale);
+        //     }
+        // }
+        return null;
+    }
 
 //     /**
 //      * Returns a {@code BigDecimal} whose value is <code>(this &times;
@@ -1614,9 +1621,10 @@ public class BigDecimal { // : Number
 //      * @see    #ROUND_UNNECESSARY
 //      */
 //     @Deprecated(since="9")
-//     public BigDecimal divide(BigDecimal divisor, int roundingMode) {
-//         return this.divide(divisor, scale, roundingMode);
-//     }
+    public BigDecimal divide(BigDecimal divisor, int roundingMode) {
+        // return this.divide(divisor, scale, roundingMode);
+        return null;
+    }
 
 //     /**
 //      * Returns a {@code BigDecimal} whose value is {@code (this /
@@ -1651,54 +1659,55 @@ public class BigDecimal { // : Number
 //      * @since 1.5
 //      * @author Joseph D. Darcy
 //      */
-//     public BigDecimal divide(BigDecimal divisor) {
-//         /*
-//          * Handle zero cases first.
-//          */
-//         if (divisor.signum() == 0) {   // x/0
-//             if (this.signum() == 0)    // 0/0
-//                 throw new ArithmeticException("Division undefined");  // NaN
-//             throw new ArithmeticException("Division by zero");
-//         }
+    public BigDecimal divide(BigDecimal divisor) {
+        /*
+         * Handle zero cases first.
+         */
+        // if (divisor.signum() == 0) {   // x/0
+        //     if (this.signum() == 0)    // 0/0
+        //         throw new ArithmeticException("Division undefined");  // NaN
+        //     throw new ArithmeticException("Division by zero");
+        // }
 
-//         // Calculate preferred scale
-//         int preferredScale = saturateLong((long) this.scale - divisor.scale);
+        // // Calculate preferred scale
+        // int preferredScale = saturateLong((long) this.scale - divisor.scale);
 
-//         if (this.signum() == 0) // 0/y
-//             return zeroValueOf(preferredScale);
-//         else {
-//             /*
-//              * If the quotient this/divisor has a terminating decimal
-//              * expansion, the expansion can have no more than
-//              * (a.precision() + ceil(10*b.precision)/3) digits.
-//              * Therefore, create a MathContext object with this
-//              * precision and do a divide with the UNNECESSARY rounding
-//              * mode.
-//              */
-//             MathContext mc = new MathContext( (int)Math.min(this.precision() +
-//                                                             (long)Math.ceil(10.0*divisor.precision()/3.0),
-//                                                             Integer.MAX_VALUE),
-//                                               RoundingMode.UNNECESSARY);
-//             BigDecimal quotient;
-//             try {
-//                 quotient = this.divide(divisor, mc);
-//             } catch (ArithmeticException e) {
-//                 throw new ArithmeticException("Non-terminating decimal expansion; " +
-//                                               "no exact representable decimal result.");
-//             }
+        // if (this.signum() == 0) // 0/y
+        //     return zeroValueOf(preferredScale);
+        // else {
+        //     /*
+        //      * If the quotient this/divisor has a terminating decimal
+        //      * expansion, the expansion can have no more than
+        //      * (a.precision() + ceil(10*b.precision)/3) digits.
+        //      * Therefore, create a MathContext object with this
+        //      * precision and do a divide with the UNNECESSARY rounding
+        //      * mode.
+        //      */
+        //     MathContext mc = new MathContext( (int)Math.min(this.precision() +
+        //                                                     (long)Math.ceil(10.0*divisor.precision()/3.0),
+        //                                                     Integer.MAX_VALUE),
+        //                                       RoundingMode.UNNECESSARY);
+        //     BigDecimal quotient;
+        //     try {
+        //         quotient = this.divide(divisor, mc);
+        //     } catch (ArithmeticException e) {
+        //         throw new ArithmeticException("Non-terminating decimal expansion; " +
+        //                                       "no exact representable decimal result.");
+        //     }
 
-//             int quotientScale = quotient.scale();
+        //     int quotientScale = quotient.scale();
 
-//             // divide(BigDecimal, mc) tries to adjust the quotient to
-//             // the desired one by removing trailing zeros; since the
-//             // exact divide method does not have an explicit digit
-//             // limit, we can add zeros too.
-//             if (preferredScale > quotientScale)
-//                 return quotient.setScale(preferredScale, ROUND_UNNECESSARY);
+        //     // divide(BigDecimal, mc) tries to adjust the quotient to
+        //     // the desired one by removing trailing zeros; since the
+        //     // exact divide method does not have an explicit digit
+        //     // limit, we can add zeros too.
+        //     if (preferredScale > quotientScale)
+        //         return quotient.setScale(preferredScale, ROUND_UNNECESSARY);
 
-//             return quotient;
-//         }
-//     }
+        //     return quotient;
+        // }
+        return null;
+    }
 
 //     /**
 //      * Returns a {@code BigDecimal} whose value is {@code (this /
@@ -2493,19 +2502,19 @@ public class BigDecimal { // : Number
 //             intVal.signum();
 //     }
 
-//     /**
-//      * Returns the <i>scale</i> of this {@code BigDecimal}.  If zero
-//      * or positive, the scale is the number of digits to the right of
-//      * the decimal point.  If negative, the unscaled value of the
-//      * number is multiplied by ten to the power of the negation of the
-//      * scale.  For example, a scale of {@code -3} means the unscaled
-//      * value is multiplied by 1000.
-//      *
-//      * @return the scale of this {@code BigDecimal}.
-//      */
-//     public int scale() {
-//         return scale;
-//     }
+    /**
+     * Returns the <i>scale</i> of this {@code BigDecimal}.  If zero
+     * or positive, the scale is the number of digits to the right of
+     * the decimal point.  If negative, the unscaled value of the
+     * number is multiplied by ten to the power of the negation of the
+     * scale.  For example, a scale of {@code -3} means the unscaled
+     * value is multiplied by 1000.
+     *
+     * @return the scale of this {@code BigDecimal}.
+     */
+    public int scale() {
+        return _scale;
+    }
 
 //     /**
 //      * Returns the <i>precision</i> of this {@code BigDecimal}.  (The
@@ -2552,7 +2561,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#UP} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_UP =           0;
+    public static  int ROUND_UP =           0;
 
 //     /**
 //      * Rounding mode to round towards zero.  Never increments the digit
@@ -2562,7 +2571,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#DOWN} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_DOWN =         1;
+    public static  int ROUND_DOWN =         1;
 
 //     /**
 //      * Rounding mode to round towards positive infinity.  If the
@@ -2574,7 +2583,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#CEILING} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_CEILING =      2;
+    public static  int ROUND_CEILING =      2;
 
 //     /**
 //      * Rounding mode to round towards negative infinity.  If the
@@ -2586,7 +2595,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#FLOOR} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_FLOOR =        3;
+    public static  int ROUND_FLOOR =        3;
 
 //     /**
 //      * Rounding mode to round towards {@literal "nearest neighbor"}
@@ -2599,7 +2608,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#HALF_UP} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_HALF_UP =      4;
+    public static  int ROUND_HALF_UP =      4;
 
 //     /**
 //      * Rounding mode to round towards {@literal "nearest neighbor"}
@@ -2611,7 +2620,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#HALF_DOWN} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_HALF_DOWN =    5;
+    public static  int ROUND_HALF_DOWN =    5;
 
 //     /**
 //      * Rounding mode to round towards the {@literal "nearest neighbor"}
@@ -2626,7 +2635,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#HALF_EVEN} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_HALF_EVEN =    6;
+    public static  int ROUND_HALF_EVEN =    6;
 
 //     /**
 //      * Rounding mode to assert that the requested operation has an exact
@@ -2637,7 +2646,7 @@ public class BigDecimal { // : Number
 //      * @deprecated Use {@link RoundingMode#UNNECESSARY} instead.
 //      */
 //     @Deprecated(since="9")
-//     public static final int ROUND_UNNECESSARY =  7;
+    public static  int ROUND_UNNECESSARY =  7;
 
 
 //     // Scaling/Rounding Operations
@@ -2819,9 +2828,17 @@ public class BigDecimal { // : Number
 //      * @see    #setScale(int, int)
 //      * @see    #setScale(int, RoundingMode)
 //      */
-//     public BigDecimal setScale(int newScale) {
-//         return setScale(newScale, ROUND_UNNECESSARY);
-//     }
+    public BigDecimal setScale(int newScale ,int t) {
+        // return setScale(newScale, ROUND_UNNECESSARY);
+        _scale = newScale;
+        return this;
+    }
+    
+    public BigDecimal setScale(int newScale) {
+        // return setScale(newScale, ROUND_UNNECESSARY);
+        _scale = newScale;
+        return this;
+    }
 
 //     // Decimal Point Motion Operations
 
@@ -3317,28 +3334,28 @@ public class BigDecimal { // : Number
 //         return buf.toString();
 //     }
 
-//     /**
-//      * Converts this {@code BigDecimal} to a {@code BigInteger}.
-//      * This conversion is analogous to the
-//      * <i>narrowing primitive conversion</i> from {@code double} to
-//      * {@code long} as defined in
-//      * <cite>The Java&trade; Language Specification</cite>:
-//      * any fractional part of this
-//      * {@code BigDecimal} will be discarded.  Note that this
-//      * conversion can lose information about the precision of the
-//      * {@code BigDecimal} value.
-//      * <p>
-//      * To have an exception thrown if the conversion is inexact (in
-//      * other words if a nonzero fractional part is discarded), use the
-//      * {@link #toBigIntegerExact()} method.
-//      *
-//      * @return this {@code BigDecimal} converted to a {@code BigInteger}.
-//      * @jls 5.1.3 Narrowing Primitive Conversion
-//      */
-//     public BigInteger toBigInteger() {
-//         // force to an integer, quietly
-//         return this.setScale(0, ROUND_DOWN).inflated();
-//     }
+    /**
+     * Converts this {@code BigDecimal} to a {@code BigInteger}.
+     * This conversion is analogous to the
+     * <i>narrowing primitive conversion</i> from {@code double} to
+     * {@code long} as defined in
+     * <cite>The Java&trade; Language Specification</cite>:
+     * any fractional part of this
+     * {@code BigDecimal} will be discarded.  Note that this
+     * conversion can lose information about the precision of the
+     * {@code BigDecimal} value.
+     * <p>
+     * To have an exception thrown if the conversion is inexact (in
+     * other words if a nonzero fractional part is discarded), use the
+     * {@link #toBigIntegerExact()} method.
+     *
+     * @return this {@code BigDecimal} converted to a {@code BigInteger}.
+     * @jls 5.1.3 Narrowing Primitive Conversion
+     */
+    public BigInteger toBigInteger() {
+        // force to an integer, quietly
+        return this.setScale(0, ROUND_DOWN).inflated();
+    }
 
 //     /**
 //      * Converts this {@code BigDecimal} to a {@code BigInteger},
@@ -4004,16 +4021,16 @@ public class BigDecimal { // : Number
 //             return intVal.multiply(bigTenToThe(n));
 //     }
 
-//     /**
-//      * Returns appropriate BigInteger from intVal field if intVal is
-//      * null, i.e. the compact representation is in use.
-//      */
-//     private BigInteger inflated() {
-//         if (intVal == null) {
-//             return BigInteger.valueOf(intCompact);
-//         }
-//         return intVal;
-//     }
+    /**
+     * Returns appropriate BigInteger from intVal field if intVal is
+     * null, i.e. the compact representation is in use.
+     */
+    private BigInteger inflated() {
+        if (intVal is null) {
+            return BigInteger.valueOf(intCompact);
+        }
+        return intVal;
+    }
 
 //     /**
 //      * Match the scales of two {@code BigDecimal}s to align their
@@ -5567,5 +5584,79 @@ public class BigDecimal { // : Number
 //             return divideAndRound(dividend, scaledDivisor, scale, roundingMode, scale);
 //         }
 //     }
+
+
+    /**
+     * Returns the value of the specified number as an {@code int}.
+     *
+     * @return  the numeric value represented by this object after conversion
+     *          to type {@code int}.
+     */
+    override int intValue()
+    {
+        return int.init;
+    }
+
+    /**
+     * Returns the value of the specified number as a {@code long}.
+     *
+     * @return  the numeric value represented by this object after conversion
+     *          to type {@code long}.
+     */
+    override  long longValue()
+    {
+        return long.init;
+    }
+
+    /**
+     * Returns the value of the specified number as a {@code float}.
+     *
+     * @return  the numeric value represented by this object after conversion
+     *          to type {@code float}.
+     */
+    override  float floatValue()
+    {
+        return float.init;
+    }
+
+    /**
+     * Returns the value of the specified number as a {@code double}.
+     *
+     * @return  the numeric value represented by this object after conversion
+     *          to type {@code double}.
+     */
+    override  double doubleValue()
+    {
+        return double.init;
+    }
+
+    /**
+     * Returns the value of the specified number as a {@code byte}.
+     *
+     * <p>This implementation returns the result of {@link #intValue} cast
+     * to a {@code byte}.
+     *
+     * @return  the numeric value represented by this object after conversion
+     *          to type {@code byte}.
+     * @since   1.1
+     */
+    override byte byteValue() {
+        return byte.init;
+    }
+
+    /**
+     * Returns the value of the specified number as a {@code short}.
+     *
+     * <p>This implementation returns the result of {@link #intValue} cast
+     * to a {@code short}.
+     *
+     * @return  the numeric value represented by this object after conversion
+     *          to type {@code short}.
+     * @since   1.1
+     */
+    override short shortValue() {
+        return short.init;
+    }
+
 
 }

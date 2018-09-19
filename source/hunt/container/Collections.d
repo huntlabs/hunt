@@ -233,6 +233,7 @@ private class EmptyMap(K,V) : AbstractMap!(K,V) {
 private static class SingletonSet(E) : AbstractSet!E
 {
     // private enum long serialVersionUID = 3193687207550431679L;
+    // alias remove = AbstractList.remove; 
 
     private E element;
 
@@ -241,11 +242,14 @@ private static class SingletonSet(E) : AbstractSet!E
     // Iterator!E iterator() {
     //     return singletonIterator(element);
     // }
-
+    bool remove(E o)
+    {
+        return true;
+    }
     override
     int size() {return 1;}
 
-    bool contains(Object o) {return o == element;}
+    bool contains(E)(E o) {return o == element;}
 
     override
     int opApply(scope int delegate(ref E) dg)

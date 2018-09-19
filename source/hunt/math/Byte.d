@@ -26,6 +26,8 @@
 module hunt.math.Byte;
 
 import hunt.math.Number;
+import std.conv;
+
 /**
  *
  * The {@code Byte} class wraps a value of primitive type {@code byte}
@@ -518,4 +520,16 @@ public  class Byte : Number /*implements Comparable<Byte> */{
 
     /** use serialVersionUID from JDK 1.1. for interoperability */
     private static  long serialVersionUID = -7183698231559129828L;
+
+     public static byte parseByte(string s)  {
+        auto i = to!int(s);
+        if (i < MIN_VALUE || i > MAX_VALUE)
+        {
+            throw new Exception(
+                    "Value " ~s ~ " out of range from input ");
+        }
+
+         return cast(byte)i;
+    }
+
 }
