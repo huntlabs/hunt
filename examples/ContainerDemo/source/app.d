@@ -9,12 +9,13 @@ import LinkedListDemo;
 import LinkedHashSetDemo;
 import LinkedHashMapDemo;
 import MapDemo;
+import MultiMapDemo;
 import SetDemo;
 import TrieTest;
 
 void main()
 {
-    testUnits!(TrieTest)();
+    // testUnits!(TrieTest)();
     // testUnits!(ArrayListDemo)();
     // testUnits!HashMapDemo();
     // testUnits!HashSetDemo();
@@ -22,6 +23,7 @@ void main()
     // testUnits!LinkedHashSetDemo();
     // testUnits!LinkedHashMapDemo();
     // testUnits!MapDemo();
+    testUnits!(MultiMapDemo)();
     // testUnits!SetDemo();
 
 }

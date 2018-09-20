@@ -14,7 +14,7 @@ import hunt.util.string;
  *            the entry type for multimap values
  */
 class MultiMap(V) : HashMap!(string, List!(V)) {
-	private enum serialVersionUID = -1127515104096783129L;
+	// private enum serialVersionUID = -1127515104096783129L;
 
 	this() {
 		super();
@@ -57,10 +57,10 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	V getValue(string name, int i) {
 		List!(V) vals = getValues(name);
 		if (vals is null) {
-			return null;
+			return V.init;
 		}
 		if (i == 0 && vals.isEmpty()) {
-			return null;
+			return V.init;
 		}
 		return vals.get(i);
 	}
@@ -129,11 +129,11 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	 * @param input
 	 *            the input map
 	 */
-	// void putAllValues(Map!(string, V) input) {
-	// 	foreach (MapEntry!(string, V) entry ; input.entrySet()) {
-	// 		put(entry.getKey(), entry.getValue());
-	// 	}
-	// }
+	void putAllValues(Map!(string, V) input) {
+		foreach (string key, V value ; input) {
+			put(key, value);
+		}
+	}
 
 	/**
 	 * Put multi valued entry.
@@ -285,7 +285,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	 * @return true if contains simple value
 	 */
 	bool containsSimpleValue(V value) {
-		foreach (List!(V) vals ; values()) {
+		foreach (List!(V) vals ; byValue()) {
 			if ((vals.size() == 1) && vals.contains(value)) {
 				return true;
 			}
@@ -293,39 +293,39 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 		return false;
 	}
 
-	// override
-	// string toString() {
-	// 	Iterator<MapEntry!(string, List!(V))> iter = entrySet().iterator();
-	// 	StringBuilder sb = new StringBuilder();
-	// 	sb.append('{');
-	// 	bool delim = false;
-	// 	while (iter.hasNext()) {
-	// 		MapEntry!(string, List!(V)) e = iter.next();
-	// 		if (delim) {
-	// 			sb.append(", ");
-	// 		}
-	// 		string key = e.getKey();
-	// 		List!(V) vals = e.getValue();
-	// 		sb.append(key);
-	// 		sb.append('=');
-	// 		if (vals.size() == 1) {
-	// 			sb.append(vals.get(0));
-	// 		} else {
-	// 			sb.append(vals);
-	// 		}
-	// 		delim = true;
-	// 	}
-	// 	sb.append('}');
-	// 	return sb.toString();
-	// }
+	override
+	string toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		bool delim = false;
+		foreach(string key, List!(V) vals; this) {
+			if (delim) {
+				sb.append(", ");
+			}
+			sb.append(key);
+			sb.append('=');
+			if (vals.size() == 1) {
+				sb.append(vals.get(0));
+			} else {
+				sb.append(vals.toString());
+			}
+			delim = true;
+		}
+		sb.append('}');
+		return sb.toString();
+	}
 
 	/**
 	 * @return Map of string arrays
 	 */
 	// Map!(string, string[]) toStringArrayMap() {
-	// 	HashMap!(string, string[]) map = new HashMap!(string, string[])(size() * 3 / 2) {
+	// 	int s = size();
+	// 	HashMap!(string, string[]) map = new (s * 3 / 2) class HashMap!(string, string[]) {
 
-	// 		private static final long serialVersionUID = -6129887569971781626L;
+	// 		// private enum long serialVersionUID = -6129887569971781626L;
+	// 		this(int initialCapacity) {
+	// 			super(initialCapacity)
+	// 		}
 
 	// 		override
 	// 		string toString() {
@@ -344,13 +344,13 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	// 		}
 	// 	};
 
-	// 	for (MapEntry!(string, List!(V)) entry : entrySet()) {
+	// 	foreach (string key, List!(V) vals; this) {
 	// 		string[] a = null;
-	// 		if (entry.getValue() !is null) {
-	// 			a = new string[entry.getValue().size()];
-	// 			a = entry.getValue().toArray(a);
+	// 		if (vals !is null) {
+	// 			a = new string[vals.size()];
+	// 			a = vals.toArray(a);
 	// 		}
-	// 		map.put(entry.getKey(), a);
+	// 		map.put(key, a);
 	// 	}
 	// 	return map;
 	// }
