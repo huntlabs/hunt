@@ -1,7 +1,5 @@
 module MapDemo;
 
-import std.stdio;
-
 import hunt.container.HashMap;
 import hunt.container.TreeMap;
 import hunt.container.Map;
@@ -11,11 +9,9 @@ import std.stdio;
 import std.conv;
 import std.range;
 
-class MapDemo
-{
-    
-    void testHashMapForeach()
-    {
+class MapDemo {
+
+    void testHashMapForeach() {
         // https://stackoverflow.com/questions/4234985/how-to-for-each-the-hashmap
         // HashMap Declaration
         writeln("Testing HashMap...");
@@ -31,14 +27,12 @@ class MapDemo
         writeln(hmap.toString());
 
         writeln("\nTesting HashMap foreach1...");
-        foreach (int key, string v; hmap)
-        {
+        foreach (int key, string v; hmap) {
             writeln("Key is: " ~ key.to!string ~ " & Value is: " ~ v);
         }
 
         writeln("\nTesting HashMap foreach2...");
-        foreach (MapEntry!(int, string) entry; hmap)
-        {
+        foreach (MapEntry!(int, string) entry; hmap) {
             writeln("Key is: " ~ entry.getKey().to!string ~ " & Value is: " ~ entry.getValue());
         }
 
@@ -50,48 +44,41 @@ class MapDemo
         // }
 
         InputRange!int keyIterator = hmap.byKey();
-        while (!keyIterator.empty)
-        {
+        while (!keyIterator.empty) {
             writeln("Key is: " ~ keyIterator.front.to!string());
             keyIterator.popFront();
         }
 
         writeln("\nTesting HashMap byKey2...");
-        foreach (int key; hmap.byKey)
-        {
+        foreach (int key; hmap.byKey) {
             writeln("Key is: " ~ key.to!string());
         }
 
         writeln("\nTesting HashMap byKey3...");
-        foreach (size_t index, int key; hmap.byKey)
-        {
+        foreach (size_t index, int key; hmap.byKey) {
             writefln("Key[%d] is: %d ", index, key);
         }
 
         writeln("\nTesting HashMap byValue1...");
         InputRange!string valueIterator = hmap.byValue();
-        while (!valueIterator.empty)
-        {
+        while (!valueIterator.empty) {
             writeln("value is: " ~ valueIterator.front.to!string());
             valueIterator.popFront();
         }
 
         writeln("\nTesting HashMap byValue2...");
-        foreach (string value; hmap.byValue)
-        {
+        foreach (string value; hmap.byValue) {
             writeln("value is: " ~ value);
         }
 
         writeln("\nTesting HashMap byValue3...");
-        foreach (size_t index, string value; hmap.byValue)
-        {
+        foreach (size_t index, string value; hmap.byValue) {
             writefln("value[%d] is: %s ", index, value);
         }
 
     }
 
-    void testHashMapRemove()
-    {
+    void testHashMapRemove() {
         HashMap!(int, string) hmap = new HashMap!(int, string)();
 
         //Adding elements to LinkedHashMap
@@ -107,14 +94,13 @@ class MapDemo
 
         assert(hmap.size() == 5);
         hmap.remove(1);
-        
+
         writeln(hmap.toString());
         assert(hmap.size() == 4);
 
     }
 
-    void testTreeMap()
-    {
+    void testTreeMap() {
         /* This is how to declare TreeMap */
         TreeMap!(int, string) tmap = new TreeMap!(int, string)();
 
@@ -137,26 +123,22 @@ class MapDemo
         //      writeln(mentry.getValue());
         //   }
         writeln("\nTesting TreeMap foreach1...");
-        foreach (int key, string value; tmap)
-        {
+        foreach (int key, string value; tmap) {
             writeln("key is: " ~ key.to!string ~ " & Value is: " ~ value);
         }
 
         writeln("\nTesting TreeMap foreach2...");
-        foreach (MapEntry!(int, string) entry; tmap)
-        {
+        foreach (MapEntry!(int, string) entry; tmap) {
             writeln("Key is: " ~ entry.getKey().to!string ~ " & Value is: " ~ entry.getValue());
         }
 
         writeln("\nTesting TreeMap byKey...");
-        foreach (size_t index, int key; tmap.byKey)
-        {
+        foreach (size_t index, int key; tmap.byKey) {
             writefln("Key[%d] is: %d ", index, key);
         }
 
         writeln("\nTesting TreeMap byValue...");
-        foreach (size_t index, string value; tmap.byValue)
-        {
+        foreach (size_t index, string value; tmap.byValue) {
             writefln("value[%d] is: %s ", index, value);
         }
     }

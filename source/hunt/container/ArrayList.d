@@ -733,18 +733,34 @@ class LazyList
 	 * @param <E>
 	 *            the list entry type
 	 */
-	public static List!E getList(E)(Object list, bool nullForEmpty) {
+	static List!E getList(E)(Object list, bool nullForEmpty) {
 		if (list is null) {
 			if (nullForEmpty)
 				return null;
 			return  new EmptyList!E(); // Collections.emptyList();
 		}
-		if (typeid(list) == typeid(List!E))
-			return cast(List!E) list;
+        List!E r = cast(List!E) list;
+		if (r !is null)
+			return r;
 
 		// return (List<E>) Collections.singletonList(list);
         auto l = new ArrayList!E();
         l.add(cast(E)list);
         return l;
 	}
+
+
+	/**
+	 * The size of a lazy List
+	 * 
+	 * @param list
+	 *            A LazyList returned from LazyList.add(Object) or null
+	 * @return the size of the list.
+	 */
+	static int size(T)(List!(T) list) {
+		if (list is null)
+			return 0;
+		return list.size();
+	}
+
 }

@@ -7,6 +7,8 @@ import hunt.container.Set;
 
 import hunt.util.exception;
 
+import std.array;
+import std.container.array;
 import std.conv;
 import std.exception;
 import std.range;
@@ -324,7 +326,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same set.
      */
     K[] keySet() {
-        throw new UnsupportedOperationException();
+        Array!K arr;
+        foreach(K key; byKey()) {
+            arr.insertBack(key);
+        }
+        return arr.array();
     }
 
     /**
@@ -344,7 +350,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same collection.
      */
     V[] values() {
-        throw new UnsupportedOperationException();
+        Array!V arr;
+        foreach(V value; byValue()) {
+            arr.insertBack(value);
+        }
+        return arr.array();
     }
 
 

@@ -13,9 +13,7 @@ import std.traits;
 import hunt.logging;
 import hunt.util.exception;
 
-
-class AssertionError : Error
-{
+class AssertionError : Error {
     // this(string file = __FILE__, size_t line = __LINE__,
     //      Throwable next = null) @nogc @safe pure nothrow
     // {
@@ -25,15 +23,13 @@ class AssertionError : Error
     mixin basicExceptionCtors;
 }
 
-class Matchers
-{
-	static T[] contains(T)(T[] items...)
-	{
-		T[] r;
-        foreach(T item; items)
-		r ~= item;
-		return r;
-	}
+class Matchers {
+    static T[] contains(T)(T[] items...) {
+        T[] r;
+        foreach (T item; items)
+            r ~= item;
+        return r;
+    }
 
     // bool containsString(string source, string item)
     // {
@@ -41,8 +37,6 @@ class Matchers
     // }
 
 }
-
-
 
 /**
  * A set of assertion methods useful for writing tests. Only failed assertions
@@ -74,7 +68,8 @@ class Assert {
      * okay)
      * @param condition condition to be checked
      */
-    static void assertTrue(size_t line = __LINE__ , string file = __FILE__ )(string message, bool condition) {
+    static void assertTrue(size_t line = __LINE__, string file = __FILE__)(
+            string message, bool condition) {
         if (!condition) {
             fail!(line, file)(message);
         }
@@ -86,7 +81,7 @@ class Assert {
      *
      * @param condition condition to be checked
      */
-    static void assertTrue(size_t line = __LINE__ , string file = __FILE__ )(bool condition) {
+    static void assertTrue(size_t line = __LINE__, string file = __FILE__)(bool condition) {
         assertTrue!(line, file)(null, condition);
     }
 
@@ -98,7 +93,8 @@ class Assert {
      * okay)
      * @param condition condition to be checked
      */
-    static void assertFalse(size_t line = __LINE__ , string file = __FILE__ )(string message, bool condition) {
+    static void assertFalse(size_t line = __LINE__, string file = __FILE__)(
+            string message, bool condition) {
         assertTrue!(line, file)(message, !condition);
     }
 
@@ -108,7 +104,7 @@ class Assert {
      *
      * @param condition condition to be checked
      */
-    static void assertFalse(size_t line = __LINE__ , string file = __FILE__ )(bool condition) {
+    static void assertFalse(size_t line = __LINE__, string file = __FILE__)(bool condition) {
         assertFalse!(line, file)(null, condition);
     }
 
@@ -119,20 +115,20 @@ class Assert {
      * okay)
      * @see AssertionError
      */
-    static void fail(size_t line = __LINE__ , string file = __FILE__ )(string message) {
+    static void fail(size_t line = __LINE__, string file = __FILE__)(string message) {
 
-        if(message.empty)
-            message = std.format.format("raised in %s:%s", file,line);
+        if (message.empty)
+            message = std.format.format("raised in %s:%s", file, line);
         else
-            message = std.format.format("raised in %s:%s, message: %s",file, line,  message);
+            message = std.format.format("raised in %s:%s, message: %s", file, line, message);
 
-        throw new AssertionError(message, file, line, cast(Throwable)null);
+        throw new AssertionError(message, file, line, cast(Throwable) null);
     }
 
     /**
      * Fails a test with no message.
      */
-    static void fail(size_t line = __LINE__ , string file = __FILE__ )() {
+    static void fail(size_t line = __LINE__, string file = __FILE__)() {
         fail!(line, file)(null);
     }
 
@@ -147,19 +143,17 @@ class Assert {
      * @param expected expected value
      * @param actual actual value
      */
-    static void assertEquals(T, size_t line = __LINE__ , string file = __FILE__ )(string message, T expected,
-            T actual) {
-        if(!message.empty)
-            message = std.format.format("raised in %s:%s, message: %s",file, line,  message);
+    static void assertEquals(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T expected, T actual) {
+        if (!message.empty)
+            message = std.format.format("raised in %s:%s, message: %s", file, line, message);
         else
-            message = std.format.format("raised in %s:%s", file,line);
+            message = std.format.format("raised in %s:%s", file, line);
 
-        static if(is(T == class))
-        {
+        static if (is(T == class)) {
             assert(expected == actual, message);
         }
-        else
-        {
+        else {
             // trace("expected: ", expected);
             // trace("actual: ", actual);
             assert(expected == actual, message);
@@ -187,7 +181,7 @@ class Assert {
      * @param expected expected value
      * @param actual the value to check against <code>expected</code>
      */
-    static void assertEquals(T, size_t line = __LINE__ , string file = __FILE__ )(T expected, T actual) {
+    static void assertEquals(T, size_t line = __LINE__, string file = __FILE__)(T expected, T actual) {
         assertEquals!(T, line, file)(null, expected, actual);
     }
 
@@ -202,8 +196,7 @@ class Assert {
      * @param unexpected unexpected value to check
      * @param actual the value to check against <code>unexpected</code>
      */
-    static void assertNotEquals(string message, Object unexpected,
-            Object actual) {
+    static void assertNotEquals(string message, Object unexpected, Object actual) {
         if (equalsRegardingNull(unexpected, actual)) {
             failEquals(message, actual);
         }
@@ -232,8 +225,7 @@ class Assert {
         fail(formatted);
     }
 
-
-    private static void failEquals(T)(string message, T actual) if(isNumeric!T) {
+    private static void failEquals(T)(string message, T actual) if (isNumeric!T) {
         string formatted = "Values should be different. ";
         if (message !is null) {
             formatted = message ~ ". ";
@@ -284,8 +276,7 @@ class Assert {
      * <code>actual</code> for which both numbers are still
      * considered equal.
      */
-    static void assertNotEquals(string message, double unexpected,
-            double actual, double delta) {
+    static void assertNotEquals(string message, double unexpected, double actual, double delta) {
         if (!doubleIsDifferent(unexpected, actual, delta)) {
             failEquals(message, actual);
         }
@@ -336,8 +327,7 @@ class Assert {
      * @param actuals Object array or array of arrays (multi-dimensional array) with
      * actual values
      */
-    static void assertArrayEquals(string message, Object[] expecteds,
-            Object[] actuals){
+    static void assertArrayEquals(string message, Object[] expecteds, Object[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
     }
 
@@ -355,7 +345,7 @@ class Assert {
     static void assertArrayEquals(Object[] expecteds, Object[] actuals) {
         assertArrayEquals(null, expecteds, actuals);
     }
-    
+
     /**
      * Asserts that two bool arrays are equal. If they are not, an
      * {@link AssertionError} is thrown with the given message. If
@@ -367,11 +357,10 @@ class Assert {
      * @param expecteds bool array with expected values.
      * @param actuals bool array with expected values.
      */
-    static void assertArrayEquals(string message, bool[] expecteds,
-            bool[] actuals){
+    static void assertArrayEquals(string message, bool[] expecteds, bool[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
-    }    
-    
+    }
+
     /**
      * Asserts that two bool arrays are equal. If they are not, an
      * {@link AssertionError} is thrown. If <code>expected</code> and
@@ -394,8 +383,7 @@ class Assert {
      * @param expecteds byte array with expected values.
      * @param actuals byte array with actual values
      */
-    static void assertArrayEquals(string message, byte[] expecteds,
-            byte[] actuals){
+    static void assertArrayEquals(string message, byte[] expecteds, byte[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
     }
 
@@ -419,8 +407,7 @@ class Assert {
      * @param expecteds char array with expected values.
      * @param actuals char array with actual values
      */
-    static void assertArrayEquals(string message, char[] expecteds,
-            char[] actuals){
+    static void assertArrayEquals(string message, char[] expecteds, char[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
     }
 
@@ -444,8 +431,7 @@ class Assert {
      * @param expecteds short array with expected values.
      * @param actuals short array with actual values
      */
-    static void assertArrayEquals(string message, short[] expecteds,
-            short[] actuals){
+    static void assertArrayEquals(string message, short[] expecteds, short[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
     }
 
@@ -469,8 +455,7 @@ class Assert {
      * @param expecteds int array with expected values.
      * @param actuals int array with actual values
      */
-    static void assertArrayEquals(string message, int[] expecteds,
-            int[] actuals){
+    static void assertArrayEquals(string message, int[] expecteds, int[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
     }
 
@@ -494,8 +479,7 @@ class Assert {
      * @param expecteds long array with expected values.
      * @param actuals long array with actual values
      */
-    static void assertArrayEquals(string message, long[] expecteds,
-            long[] actuals){
+    static void assertArrayEquals(string message, long[] expecteds, long[] actuals) {
         internalArrayEquals(message, expecteds, actuals);
     }
 
@@ -585,12 +569,10 @@ class Assert {
      * @param actuals Object array or array of arrays (multi-dimensional array) with
      * actual values
      */
-    private static void internalArrayEquals(T)(string message, T[] expecteds,
-            T[] actuals){
+    private static void internalArrayEquals(T)(string message, T[] expecteds, T[] actuals) {
         // new ExactComparisonCriteria().arrayEquals(message, expecteds, actuals);
         assert(expecteds.length == actuals.length, message);
-        for(int i=0; i<expecteds.length; i++)
-        {
+        for (int i = 0; i < expecteds.length; i++) {
             assertEquals(message, expecteds[i], actuals[i]);
         }
     }
@@ -610,8 +592,7 @@ class Assert {
      * <code>actual</code> for which both numbers are still
      * considered equal.
      */
-    static void assertEquals(string message, double expected,
-            double actual, double delta) {
+    static void assertEquals(string message, double expected, double actual, double delta) {
         if (doubleIsDifferent(expected, actual, delta)) {
             failNotEquals(message, expected, actual);
         }
@@ -632,8 +613,7 @@ class Assert {
      * <code>actual</code> for which both numbers are still
      * considered equal.
      */
-    static void assertEquals(string message, float expected,
-            float actual, float delta) {
+    static void assertEquals(string message, float expected, float actual, float delta) {
         if (floatIsDifferent(expected, actual, delta)) {
             failNotEquals(message, expected, actual);
         }
@@ -654,8 +634,7 @@ class Assert {
      * <code>actual</code> for which both numbers are still
      * considered equal.
      */
-    static void assertNotEquals(string message, float unexpected,
-            float actual, float delta) {
+    static void assertNotEquals(string message, float unexpected, float actual, float delta) {
         if (!floatIsDifferent(unexpected, actual, delta)) {
             failEquals(message, actual);
         }
@@ -763,7 +742,6 @@ class Assert {
         assertEquals(null, expected, actual, delta);
     }
 
-
     /**
      * Asserts that an object isn't null. If it is an {@link AssertionError} is
      * thrown with the given message.
@@ -772,7 +750,7 @@ class Assert {
      * okay)
      * @param object Object to check or <code>null</code>
      */
-    static void assertNotNull(T)(string message, T object)  {
+    static void assertNotNull(T)(string message, T object) {
         assertTrue(message, object !is null);
     }
 
@@ -794,18 +772,18 @@ class Assert {
      * okay)
      * @param object Object to check or <code>null</code>
      */
-    static void assertNull(T, size_t line = __LINE__ , string file = __FILE__ )(string message, T object) {
-        static if(is(T == class)){
-            if (object is null) 
+    static void assertNull(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T object) {
+        static if (is(T == class) || is(T == interface)) {
+            if (object is null)
                 return;
         }
-        else static if(is(T == struct)){
-            if(object == T.Null)            
+        else static if (is(T == struct)) {
+            if (object == T.Null)
                 return;
         }
-        else
-        {
-            if(object.empty)            
+        else {
+            if (object.empty)
                 return;
         }
         failNotNull!(T, line, file)(message, object);
@@ -817,21 +795,20 @@ class Assert {
      *
      * @param object Object to check or <code>null</code>
      */
-    static void assertNull(T, size_t line = __LINE__ , string file = __FILE__ )(T object) {
+    static void assertNull(T, size_t line = __LINE__, string file = __FILE__)(T object) {
         assertNull!(T, line, file)(null, object);
     }
 
-    static private void failNotNull(T, size_t line = __LINE__ , string file = __FILE__ )(string message, T actual) {
+    static private void failNotNull(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T actual) {
         string formatted = "";
         if (message !is null) {
             formatted = message ~ " ";
         }
-        static if(is(T == class))
-        {
+        static if (is(T == class)) {
             fail!(line, file)(formatted ~ "expected null, but was:<" ~ actual.toString() ~ ">");
         }
-        else
-        {
+        else {
             fail!(line, file)(formatted ~ "expected null, but was:<" ~ to!string(actual) ~ ">");
         }
     }
@@ -873,8 +850,7 @@ class Assert {
      * @param unexpected the object you don't expect
      * @param actual the object to compare to <code>unexpected</code>
      */
-    static void assertNotSame(string message, Object unexpected,
-            Object actual) {
+    static void assertNotSame(string message, Object unexpected, Object actual) {
         if (unexpected == actual) {
             failSame(message);
         }
@@ -900,18 +876,16 @@ class Assert {
         fail(formatted ~ "expected not same");
     }
 
-    static private void failNotSame(string message, Object expected,
-            Object actual) {
+    static private void failNotSame(string message, Object expected, Object actual) {
         string formatted = "";
         if (!message.empty) {
             formatted = message ~ " ";
         }
-        fail(formatted ~ "expected same:<" ~  typeid(expected).toString() ~ "> was not:<" ~ typeid(actual).toString()
-                ~ ">");
+        fail(formatted ~ "expected same:<" ~ typeid(expected)
+                .toString() ~ "> was not:<" ~ typeid(actual).toString() ~ ">");
     }
 
-    static private void failNotEquals(string message, Object expected,
-            Object actual) {
+    static private void failNotEquals(string message, Object expected, Object actual) {
         fail(format(message, expected, actual));
     }
 
@@ -923,22 +897,20 @@ class Assert {
         string expectedString = expected.toString();
         string actualString = actual.toString();
         if (expectedString == actualString) {
-            return formatted ~ "expected: "
-                    ~ formatClassAndValue(expected, expectedString)
-                    ~ " but was: " ~ formatClassAndValue(actual, actualString);
-        } else {
-            return formatted ~ "expected:<" ~ expectedString ~ "> but was:<"
-                    ~ actualString ~ ">";
+            return formatted ~ "expected: " ~ formatClassAndValue(expected,
+                    expectedString) ~ " but was: " ~ formatClassAndValue(actual, actualString);
+        }
+        else {
+            return formatted ~ "expected:<" ~ expectedString ~ "> but was:<" ~ actualString ~ ">";
         }
     }
 
-
-    static private void failNotEquals(T)(string message, T expected,
-            T actual) if(isNumeric!T) {
+    static private void failNotEquals(T)(string message, T expected, T actual)
+            if (isNumeric!T) {
         fail(format(message, expected, actual));
     }
 
-    static string format(T)(string message, T expected, T actual) if(isNumeric!T) {
+    static string format(T)(string message, T expected, T actual) if (isNumeric!T) {
         string formatted = "";
         if (!message.empty) {
             formatted = message ~ " ";
@@ -946,10 +918,9 @@ class Assert {
         string expectedString = to!string(expected);
         string actualString = to!string(actual);
         if (expected != actual) {
-            return formatted ~ "expected: "
-                    ~ expectedString
-                    ~ " but was: " ~ actualString;
-        } else {
+            return formatted ~ "expected: " ~ expectedString ~ " but was: " ~ actualString;
+        }
+        else {
             return formatted;
         }
     }
@@ -1022,7 +993,7 @@ class Assert {
      * @see org.hamcrest.CoreMatchers
      * @see org.hamcrest.MatcherAssert
      */
-    static void assertThat(T, size_t line = __LINE__ , string file = __FILE__ )(T actual, T matcher) {
+    static void assertThat(T, size_t line = __LINE__, string file = __FILE__)(T actual, T matcher) {
         assertThat!(T, line, file)("", actual, matcher);
     }
 
@@ -1054,24 +1025,22 @@ class Assert {
      * @see org.hamcrest.CoreMatchers
      * @see org.hamcrest.MatcherAssert
      */
-    static void assertThat(T, size_t line = __LINE__ , string file = __FILE__ )(string message, T actual,
-            T matcher) {
-                // trace("actual=>", actual);
-                // trace("matcher=>", matcher);
-        if(message.empty)
+    static void assertThat(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T actual, T matcher) {
+        // trace("actual=>", actual);
+        // trace("matcher=>", matcher);
+        if (message.empty)
             message = std.format.format("raised in %s:%s", file, line);
         else
-            message = std.format.format("raised in %s:%s, reason: %s", file, line,  message);
+            message = std.format.format("raised in %s:%s, reason: %s", file, line, message);
         assert(actual == matcher, message);
     }
 
-    static void assertContain(T)(T source, T substring )
-    {
+    static void assertContain(T)(T source, T substring) {
         assert(source.canFind(substring), source);
     }
 
-    static void assertStartsWith(T)(T source, T substring )
-    {
+    static void assertStartsWith(T)(T source, T substring) {
         assert(source.startsWith(substring));
     }
 
@@ -1091,9 +1060,9 @@ class Assert {
 	 * @throws IllegalStateException
 	 *             if expression is {@code false}
 	 */
-	 static void state(bool expression, string message) {
-		if (!expression) {
-			throw new IllegalStateException(message);
-		}
-	}
+    static void state(bool expression, string message) {
+        if (!expression) {
+            throw new IllegalStateException(message);
+        }
+    }
 }
