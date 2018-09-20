@@ -49,7 +49,7 @@ class ArrayListDemo
         writeln("Size of the arraylist is: " ~ al.size().to!string());
 
         writeln("\nRemoving...");
-        al.remove(2);
+        al.removeAt(2);
         assert(al.size() == 4);
         assert(al[2] != "PLAY");
         writeln(al);

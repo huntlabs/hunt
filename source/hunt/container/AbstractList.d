@@ -129,7 +129,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws UnsupportedOperationException {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    E remove(int index) { throw new UnsupportedOperationException("");  }
+    E removeAt(int index) { throw new UnsupportedOperationException("");  }
 
     bool remove(E o) { throw new UnsupportedOperationException(""); }
 
@@ -320,7 +320,7 @@ class EmptyList(E): AbstractList!E {
         throw new UnsupportedOperationException("");
     }
 
-    override E remove(int index) { throw new IndexOutOfBoundsException("Index: " ~ index.to!string); }
+    override E removeAt(int index) { throw new IndexOutOfBoundsException("Index: " ~ index.to!string); }
 
     override bool remove(E o) { return false; }
 

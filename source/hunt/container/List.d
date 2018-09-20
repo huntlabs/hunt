@@ -238,7 +238,7 @@ interface List(E) : Collection!E {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    E remove(int index);
+    E removeAt(int index);
 
     alias remove = Collection!E.remove;
 

@@ -292,7 +292,7 @@ class ArrayList(E) : AbstractList!E {
      * @return the element that was removed from the list
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    override E remove(int index) {
+    override E removeAt(int index) {
         E oldValue = _array[index];
         _array.linearRemove(_array[index .. index+1]);
         return oldValue;
