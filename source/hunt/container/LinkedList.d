@@ -458,7 +458,7 @@ bool addAll(int index, Collection!E c) {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-     E removeAt(int index) {
+     override E removeAt(int index) {
         checkElementIndex(index);
         auto range = _dlist[];
         range.popFrontN(index);

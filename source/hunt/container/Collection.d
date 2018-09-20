@@ -272,14 +272,12 @@ interface Collection(E) : Iterable!E {
     final bool removeIf(Predicate!E filter) {
         assert(filter !is null);
         E[] items;
-        foreach(E item; this)
-        {
+        foreach(E item; this) {
             if(filter(item))
                 items ~= item;
         }
 
-        foreach(E item; items)
-        {
+        foreach(E item; items) {
             remove(item);
         }
 
