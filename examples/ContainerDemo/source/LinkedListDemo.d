@@ -84,7 +84,7 @@ class LinkedListDemo
         writeln(arrl);
         assert(arrl.size == 9);
 
-        writeln("\nremove(index) method:" ~ arrl.remove(2).to!string());
+        writeln("\nremove(index) method:" ~ arrl.removeAt(2).to!string());
         writeln("After remove(index) method call:");
         writeln(arrl);
         assert(arrl.size == 8);
