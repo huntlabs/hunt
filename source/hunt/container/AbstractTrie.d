@@ -16,7 +16,7 @@ abstract class AbstractTrie(V) : Trie!(V) {
 
     bool put(string s, V v) {
         implementationMissing(false);
-        return V.init;
+        return false;
     }
     
     bool put(V v) {
