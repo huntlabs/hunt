@@ -242,7 +242,7 @@ abstract class ByteBuffer : Buffer
      *
      * @return  The new, read-only byte buffer
      */
-    // abstract ByteBuffer asReadOnlyBuffer();
+    abstract ByteBuffer asReadOnlyBuffer();
 
 
     // -- Singleton get/put methods --
@@ -1052,11 +1052,11 @@ class HeapByteBuffer : ByteBuffer
                 this.limit(), this.capacity(), offset);
     }
 
-    // ByteBuffer asReadOnlyBuffer()
-    // {
-    //     return new HeapByteBufferR(hb, this.markValue(), this.position(),
-    //             this.limit(), this.capacity(), offset);
-    // }
+    override ByteBuffer asReadOnlyBuffer()
+    {
+        return new HeapByteBuffer(hb, this.markValue(), this.position(),
+                this.limit(), this.capacity(), offset);
+    }
 
 
     override byte get()
