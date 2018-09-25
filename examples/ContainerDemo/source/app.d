@@ -8,9 +8,9 @@ import HashMapDemo;
 import LinkedListDemo;
 import LinkedHashSetDemo;
 import LinkedHashMapDemo;
-import MapDemo;
 import MultiMapDemo;
 import SetDemo;
+import TreeMapDemo;
 import TrieTest;
 
 void main()
@@ -22,7 +22,7 @@ void main()
     // testUnits!(LinkedListDemo)();
     // testUnits!LinkedHashSetDemo();
     // testUnits!LinkedHashMapDemo();
-    // testUnits!MapDemo();
+    // testUnits!TreeMapDemo();
     testUnits!(MultiMapDemo)();
     // testUnits!SetDemo();
 
