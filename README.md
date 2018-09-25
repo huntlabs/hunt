@@ -20,7 +20,7 @@ A refined core library for D programming language.
  * OpenBSD
 
 ## Libraries
- * [hunt-net](https://github.com/huntlabs/hunt-net) – An asynchronous event-driven network framework written in D.
+ * [hunt-net](https://github.com/huntlabs/hunt-net) – An asynchronous event-driven network library written in D.
 
 ## Frameworks
  * [hunt-framework](https://github.com/huntlabs/hunt-framework) – Hunt is a high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
