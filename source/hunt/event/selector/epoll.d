@@ -73,7 +73,7 @@ class AbstractSelector : Selector
                 wt.setTimer();
         }
 
-        // version(HuntDebugMode) infof("register, watcher(fd=%d)", watcher.handle);
+        // version(HUNT_DEBUG) infof("register, watcher(fd=%d)", watcher.handle);
         const fd = watcher.handle;
         assert(fd >= 0, "The watcher.handle is not initilized!");
 
@@ -102,7 +102,7 @@ class AbstractSelector : Selector
     override bool deregister(AbstractChannel watcher)
     {
         assert(watcher !is null);
-        // version(HuntDebugMode) infof("unregister watcher(fd=%d)", watcher.handle);
+        // version(HUNT_DEBUG) infof("unregister watcher(fd=%d)", watcher.handle);
 
         const int fd = watcher.handle;
         if (fd < 0)
@@ -139,13 +139,13 @@ class AbstractSelector : Selector
             AbstractChannel watch = cast(AbstractChannel)(events[i].data.ptr);
             if (watch is null)
             {
-                version(HuntDebugMode) warningf("watcher is null");
+                version(HUNT_DEBUG) warningf("watcher is null");
                 continue;
             }
 
             if (isErro(events[i].events))
             {
-                version(HuntDebugMode) info("close event: ", watch.handle);
+                version(HUNT_DEBUG) info("close event: ", watch.handle);
                 watch.close();
                 continue;
             }

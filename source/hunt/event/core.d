@@ -167,10 +167,10 @@ abstract class AbstractChannel : Channel
     {
         if (!_isClosed)
         {
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 trace("channel closing...", this.handle);
             onClose();
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 trace("channel closed...", this.handle);
         }
         else

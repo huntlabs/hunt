@@ -190,14 +190,14 @@ protected:
 
     override void onRead()
     {
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             trace("start to read");
 
         version (Posix)
         {
             while (_isRegistered && !tryRead())
             {
-                version (HuntDebugMode)
+                version (HUNT_DEBUG)
                 {
                     trace("continue reading...");
                 }
@@ -219,7 +219,7 @@ protected:
 
     override void onClose()
     {
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
         {
             if (!_writeQueue.empty)
             {
@@ -250,12 +250,12 @@ protected:
         }
 
         // bool canWrite = true;
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             trace("start to write");
 
         while (_isRegistered && !isWriteCancelling && !_writeQueue.empty)
         {
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 trace("writting...");
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
@@ -270,7 +270,7 @@ protected:
             size_t nBytes = tryWrite(data);
             if (nBytes > 0 && writeBuffer.popSize(nBytes))
             {
-                version (HuntDebugMode)
+                version (HUNT_DEBUG)
                     tracef("finishing data writing...%d nBytes", nBytes);
                 _writeQueue.deQueue().doFinish();
             }

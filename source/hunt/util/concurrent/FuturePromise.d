@@ -76,12 +76,12 @@ class FuturePromise(T) : Future!T, Promise!T {
 		// if(!_done)
 		// 	throw new ExecutionException("Not done yet.");
 		while(!_done) {
-			version(HuntDebugMode) warning("Waiting for a promise...");
+			version(HUNT_DEBUG) warning("Waiting for a promise...");
 			// FIXME: Needing refactor or cleanup -@zxp at 9/10/2018, 2:11:03 PM
 			// 
 			Thread.sleep(20.msecs);
 		}
-		version(HuntDebugMode) info("Got a promise");
+		version(HUNT_DEBUG) info("Got a promise");
 		
 		if(_cause is null) {
 			warning("no cause!");
@@ -99,7 +99,7 @@ class FuturePromise(T) : Future!T, Promise!T {
     T get(Duration timeout) {
 		MonoTime before = MonoTime.currTime;
 		while(!_done) {
-			version(HuntDebugMode) warning("Waiting for a promise...");
+			version(HUNT_DEBUG) warning("Waiting for a promise...");
 			// FIXME: Needing refactor or cleanup -@zxp at 9/10/2018, 2:15:52 PM
 			// 
 			Thread.sleep(20.msecs);
@@ -107,7 +107,7 @@ class FuturePromise(T) : Future!T, Promise!T {
 			if(timeElapsed > timeout)
 				break;
 		}
-		version(HuntDebugMode) infof("promise status: isDone=%s", _done);
+		version(HUNT_DEBUG) infof("promise status: isDone=%s", _done);
 		if(!_done)
 			throw new TimeoutException();
 
