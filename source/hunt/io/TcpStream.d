@@ -271,7 +271,7 @@ protected:
             if (nBytes > 0 && writeBuffer.popSize(nBytes))
             {
                 version (HUNT_DEBUG)
-                    tracef("finishing data writing...%d nBytes", nBytes);
+                    tracef("finishing data writing...%d bytes", nBytes);
                 _writeQueue.deQueue().doFinish();
             }
 

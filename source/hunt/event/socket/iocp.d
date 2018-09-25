@@ -327,10 +327,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
      * Called by selector after data sent
      * Note: It's only for IOCP selector: 
     */
-    void onWriteDone(size_t nBytes)
+    package(hunt.event) void onWriteDone(size_t nBytes)
     {
         version (HUNT_DEBUG)
-            tracef("finishing data writting %d nbytes) ", nBytes);
+            tracef("finishing data writting %d bytes) ", nBytes);
         if (isWriteCancelling)
         {
             _isWritting = false;
@@ -341,14 +341,15 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
         if (writeBuffer.popSize(nBytes))
         {
-            if (_writeQueue.deQueue() is null)
-                warning("_writeQueue is empty!");
+            if (_writeQueue.deQueue() is null) {
+               version (HUNT_DEBUG) warning("_writeQueue is empty!");
+            }
 
             writeBuffer.doFinish();
             _isWritting = false;
 
             version (HUNT_DEBUG)
-                tracef("done with data writting %d nbytes) ", nBytes);
+                tracef("done with data writting %d bytes) ", nBytes);
 
             tryWrite();
         }
