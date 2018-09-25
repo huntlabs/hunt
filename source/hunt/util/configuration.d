@@ -260,7 +260,7 @@ class ConfigBuilder
     {
         static if (!nodeName.empty)
         {
-            // version(HuntDebugMode) pragma(msg, "node name: " ~ nodeName);
+            // version(HUNT_DEBUG) pragma(msg, "node name: " ~ nodeName);
             return buildItem!(T)(this.subItem(nodeName));
         }
         else static if (hasUDA!(T, Configuration))
@@ -318,15 +318,15 @@ class ConfigBuilder
             static if (memberProtection == "private"
                     || memberProtection == "protected" || memberProtection == "export")
             {
-                // version (HuntDebugMode) pragma(msg, "skip private member: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
             }
             else static if (isType!(__traits(getMember, T, memberName)))
             {
-                // version (HuntDebugMode) pragma(msg, "skip inner type member: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "skip inner type member: " ~ memberName);
             }
             else static if (__traits(isStaticFunction, __traits(getMember, T, memberName)))
             {
-                // version (HuntDebugMode) pragma(msg, "skip static member: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "skip static member: " ~ memberName);
             }
             else
             {
@@ -362,7 +362,7 @@ class ConfigBuilder
                 }
                 else
                 {
-                    // version (HuntDebugMode) pragma(msg,
+                    // version (HUNT_DEBUG) pragma(msg,
                     //         "setting " ~ memberName ~ " with item " ~ settingItemName);
 
                     str ~= q{
@@ -370,10 +370,10 @@ class ConfigBuilder
                             %4$s.%2$s = %5$s.subItem("%1$s").as!(%3$s)();
                         }
                         else {
-                            version (HuntDebugMode) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
+                            version (HUNT_DEBUG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                         }
                         
-                        // version (HuntDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                        // version (HUNT_DEBUG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
                     }.format(settingItemName, memberName,
                             memberTypeString, returnParameter, incomingParameter);
                 }
@@ -394,28 +394,28 @@ class ConfigBuilder
             static if (is(parameterType == struct) || is(parameterType == class)
                     || is(parameterType == interface))
             {
-                // version (HuntDebugMode) pragma(msg, "skip method with class: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "skip method with class: " ~ memberName);
             }
             else
             {
-                // version (HuntDebugMode) pragma(msg, "method: " ~ memberName);
+                // version (HUNT_DEBUG) pragma(msg, "method: " ~ memberName);
 
                 r = q{
                             if(%5$s.exists("%1$s")) {
                                 %4$s.%2$s(%5$s.subItem("%1$s").as!(%3$s)());
                             }
                             else {
-                                version (HuntDebugMode) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
+                                version (HUNT_DEBUG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                             }
                             
-                            // version (HuntDebugMode) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                            // version (HUNT_DEBUG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
                             }.format(settingItemName, memberName,
                         parameterType.stringof, returnParameter, incomingParameter);
             }
         }
         else
         {
-            // version (HuntDebugMode) pragma(msg, "skip method: " ~ memberName);
+            // version (HUNT_DEBUG) pragma(msg, "skip method: " ~ memberName);
         }
 
         return r;
@@ -436,7 +436,7 @@ class ConfigBuilder
             enum newSettingItemName = settingItemName;
         }
 
-        // version (HuntDebugMode)
+        // version (HUNT_DEBUG)
         // {
         //     pragma(msg, "module name: " ~ memberModuleName);
         //     pragma(msg, "full type name: " ~ fullTypeName);
@@ -451,7 +451,7 @@ class ConfigBuilder
                 %5$s.%3$s = buildItem!(%4$s)(%6$s.subItem("%2$s"));
             }
             else {
-                version (HuntDebugMode) warningf("Undefined item: %%s.%2$s" , %6$s.fullPath);
+                version (HUNT_DEBUG) warningf("Undefined item: %%s.%2$s" , %6$s.fullPath);
             }
         }.format(memberModuleName, newSettingItemName,
                 memberName, fullTypeName, returnParameter, incomingParameter);
@@ -531,7 +531,7 @@ private:
             else
                 currentPath = currentPath ~ "." ~ str;
 
-            // version (HuntDebugMode)
+            // version (HUNT_DEBUG)
             //     tracef("checking node: path=%s", currentPath);
             auto tvalue = cvalue._map.get(str, null);
             if (tvalue is null)
@@ -539,7 +539,7 @@ private:
                 tvalue = new ConfigurationItem(str);
                 tvalue._fullPath = currentPath;
                 cvalue.apppendChildNode(str, tvalue);
-                // version (HuntDebugMode)
+                // version (HUNT_DEBUG)
                 //     tracef("new node: parent=%s, node=%s, value=%s", cvalue.fullPath, str, value);
             }
             cvalue = tvalue;

@@ -57,13 +57,13 @@ class AbstractSelector : Selector
                 || watcher.type == WatcherType.Accept 
                 || watcher.type == WatcherType.UDP)
         {
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 trace("Run CreateIoCompletionPort on socket: ", watcher.handle);
             CreateIoCompletionPort(cast(HANDLE) watcher.handle, _iocpHandle,
                     cast(size_t)(cast(void*) watcher), 0);
         }
 
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             infof("register, watcher(fd=%d, type=%s)", watcher.handle, watcher.type);
         _event.setNext(watcher);
         return true;
@@ -156,7 +156,7 @@ class AbstractSelector : Selector
 
     private void handleIocpOperation(IocpOperation op, AbstractChannel channel, DWORD bytes) {
 
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             trace("ev.operation: ", op);
 
         switch (op)
@@ -209,7 +209,7 @@ class AbstractSelector : Selector
         }
 
         if(len == 0 || wt.isClosed) {
-            version (HuntDebugMode) info("channel closed");
+            version (HUNT_DEBUG) info("channel closed");
             return;
         }
 

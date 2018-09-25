@@ -47,14 +47,14 @@ abstract class AbstractListener : AbstractSocketChannel
 
     protected bool onAccept(scope AcceptHandler handler)
     {
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             trace("new connection coming...");
         this.clearError();
         socket_t clientFd = cast(socket_t)(accept(this.handle, null, null));
         if (clientFd == socket_t.init)
             return false;
 
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             infof("Listener fd=%d, client fd=%d", this.handle, clientFd);
 
         if (handler !is null)

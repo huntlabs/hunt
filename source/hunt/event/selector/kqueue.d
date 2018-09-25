@@ -189,7 +189,7 @@ class AbstractSelector : Selector
                 if ((events[i].filter & EVFILT_WRITE) && watch.isRegistered)
                 {
                     // import hunt.logging;
-                    // version(HuntDebugMode) trace("The channel socket is: ", typeid(watch));
+                    // version(HUNT_DEBUG) trace("The channel socket is: ", typeid(watch));
                     AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
                     assert(wt !is null);
                     wt.onWriteDone();

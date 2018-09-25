@@ -82,7 +82,7 @@ protected:
             bool canRead = true;
             while (canRead && _isRegistered)
             {
-                version (HuntDebugMode)
+                version (HUNT_DEBUG)
                     trace("reading data...");
                 canRead = tryRead((Object obj) nothrow{
                     collectException(() {

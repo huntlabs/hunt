@@ -207,7 +207,7 @@ class NativeTimer : AbstractNativeTimer
     /// once: true to call timed event only once
     override void start(bool immediately = false, bool once = false)
     {
-        version(HuntDebugMode) trace("main thread id: ", thisThreadID());
+        version(HUNT_DEBUG) trace("main thread id: ", thisThreadID());
         if (_isActive)
             return;
         BOOL r = CreateTimerQueueTimer(&_handle, null, &timerProc,
@@ -238,7 +238,7 @@ class NativeTimer : AbstractNativeTimer
     /// https://msdn.microsoft.com/en-us/library/ms687066(v=vs.85)
     extern (Windows) static private void timerProc(PVOID param, bool timerCalled)
     {
-        version(HuntDebugMode) trace("handler thread id: ", thisThreadID());
+        version(HUNT_DEBUG) trace("handler thread id: ", thisThreadID());
         AbstractNativeTimer timer = cast(AbstractNativeTimer)(param);
         assert(timer !is null);
         timer.onTick();

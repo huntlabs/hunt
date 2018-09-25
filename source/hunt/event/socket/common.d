@@ -144,7 +144,7 @@ abstract class AbstractSocketChannel : AbstractChannel
         version (Posix)
             s.blocking = false;
         _socket = s;
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             trace("new socket fd: ", this.handle);
     }
 

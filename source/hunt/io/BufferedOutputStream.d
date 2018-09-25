@@ -51,13 +51,13 @@ class BufferedOutputStream : OutputStream {
         buf[count .. count+length] = array[offset .. offset+length];
         count += length;
 
-        // version(HuntDebugMode)
+        // version(HUNT_DEBUG)
         //     tracef("%(%02X %)", buf[0 .. count]);
     }
 
     override
     void flush()  {
-        version(HuntDebugMode) {
+        version(HUNT_DEBUG) {
             import hunt.logging;
             if(count == 0)
                 warning("count=0");

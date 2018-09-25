@@ -139,15 +139,15 @@ class TcpListener : AbstractListener
     protected override void onRead()
     {
         bool canRead = true;
-        version (HuntDebugMode)
+        version (HUNT_DEBUG)
             trace("start to listen");
         // while(canRead && this.isRegistered) // why??
         {
-            version (HuntDebugMode)
+            version (HUNT_DEBUG)
                 trace("listening...");
             canRead = onAccept((Socket socket) {
 
-                version (HuntDebugMode)
+                version (HUNT_DEBUG)
                     infof("new connection from %s, fd=%d",
                         socket.remoteAddress.toString(), socket.handle());
 

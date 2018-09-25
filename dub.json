@@ -15,7 +15,7 @@
         {
             "name": "debug",
             "versions": [
-                "HuntDebugMode"
+                "HUNT_DEBUG"
             ]
         }
     ],
