@@ -1,5 +1,8 @@
 module hunt.container.BufferUtils;
 
+import hunt.util.string.common;
+import hunt.util.string.StringBuilder;
+
 import hunt.container.Appendable;
 import hunt.container.ByteBuffer;
 import hunt.container.Collection;

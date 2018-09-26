@@ -10,6 +10,7 @@ import hunt.container.StringBuffer;
 import hunt.util.exception;
 import hunt.util.string.StringTokenizer;
 import hunt.util.string.common;
+import hunt.util.string.StringBuilder;
 import hunt.util.TypeUtils;
 
 
