@@ -1,4 +1,4 @@
-module hunt.util.string.StringBuilder;
+module hunt.string.StringBuilder;
 
 import hunt.container.Appendable;
 

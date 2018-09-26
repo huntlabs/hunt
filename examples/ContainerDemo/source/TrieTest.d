@@ -12,7 +12,7 @@ import hunt.container.BufferUtils;
 
 import hunt.util.UnitTest;
 import hunt.util.Assert;
-import hunt.util.string;
+import hunt.string;
 
 import hunt.logging;
 import std.conv;

@@ -352,3 +352,8 @@ class KeyManagementException : Exception
 {
     mixin BasicExceptionCtors;
 }
+
+class StringIndexOutOfBoundsException : Exception
+{
+    mixin basicExceptionCtors;
+}

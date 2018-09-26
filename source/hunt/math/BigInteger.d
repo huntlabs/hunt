@@ -8,7 +8,7 @@ import hunt.math.Number;
 
 import hunt.util.character;
 import hunt.util.exception;
-import hunt.util.string;
+import hunt.string;
 
 import std.algorithm;
 import std.conv;

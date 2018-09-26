@@ -1,7 +1,7 @@
 module hunt.container.BufferUtils;
 
-import hunt.util.string.common;
-import hunt.util.string.StringBuilder;
+import hunt.string.common;
+import hunt.string.StringBuilder;
 
 import hunt.container.Appendable;
 import hunt.container.ByteBuffer;
@@ -10,7 +10,7 @@ import hunt.container.Enumeration;
 import hunt.container.List;
 
 import hunt.util.exception;
-import hunt.util.string.common;
+import hunt.string.common;
 import hunt.util.TypeUtils;
 
 import std.conv;

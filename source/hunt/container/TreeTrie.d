@@ -9,7 +9,7 @@ import hunt.container.List;
 import hunt.container.Set;
 
 import hunt.util.exception;
-import hunt.util.string;
+import hunt.string;
 
 import std.conv;
 

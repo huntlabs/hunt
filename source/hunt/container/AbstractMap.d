@@ -350,11 +350,18 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * method will not all return the same collection.
      */
     V[] values() {
-        Array!V arr;
+        // FIXME: Needing refactor or cleanup -@zxp at 9/26/2018, 6:00:54 PM
+        // 
+        // Array!V arr;
+        // foreach(V value; byValue()) {
+        //     arr.insertBack(value);
+        // }
+        // return arr.array();
+        V[] arr;
         foreach(V value; byValue()) {
-            arr.insertBack(value);
+            arr ~= value;
         }
-        return arr.array();
+        return arr;
     }
 
 
