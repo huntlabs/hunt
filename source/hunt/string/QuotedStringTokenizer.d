@@ -1,4 +1,4 @@
-module hunt.util.string.QuotedStringTokenizer;
+module hunt.string.QuotedStringTokenizer;
 
 import std.conv;
 import std.ascii;
@@ -6,11 +6,10 @@ import std.string;
 
 import hunt.container.Appendable;
 import hunt.container.StringBuffer;
-
+import hunt.string.StringTokenizer;
+import hunt.string.common;
+import hunt.string.StringBuilder;
 import hunt.util.exception;
-import hunt.util.string.StringTokenizer;
-import hunt.util.string.common;
-import hunt.util.string.StringBuilder;
 import hunt.util.TypeUtils;
 
 

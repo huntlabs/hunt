@@ -26,7 +26,7 @@
 module hunt.math.Boolean;
 
 import hunt.math.Number;
-import hunt.util.string;
+import hunt.string;
 import std.traits;
 /**
  * The Boolean class wraps a value of the primitive type

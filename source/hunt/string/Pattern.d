@@ -1,7 +1,7 @@
-module hunt.util.string.Pattern;
+module hunt.string.Pattern;
 
-import hunt.util.string.common;
-import hunt.util.string.StringUtils;
+import hunt.string.common;
+import hunt.string.StringUtils;
 
 import std.string;
 

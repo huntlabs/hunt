@@ -1,16 +1,13 @@
-module hunt.util.string.StringUtils;
+module hunt.string.StringUtils;
 
 import std.ascii;
-import std.algorithm;
-import std.array;
-import std.exception;
 import std.conv;
 import std.string;
 import std.uni;
 
 import hunt.container.ArrayTrie;
 import hunt.container.Trie;
-import hunt.util.string.common;
+import hunt.string.common;
 
 
 /**

@@ -6,7 +6,7 @@ import hunt.container.Map;
 import hunt.container.Iterator;
 
 import hunt.util.exception;
-import hunt.util.string.StringBuilder;
+import hunt.string.StringBuilder;
 
 import std.algorithm;
 import std.conv;
@@ -17,7 +17,7 @@ import std.traits;
 
 /**
 */
-class HashMap(K,V) : AbstractMap!(K,V) // , Cloneable
+class HashMap(K,V) : AbstractMap!(K,V)
 {
 
     // private enum long serialVersionUID = 362498820763181265L;

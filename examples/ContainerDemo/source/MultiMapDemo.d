@@ -11,7 +11,7 @@ import hunt.container.Map;
 import hunt.container.MultiMap;
 
 import hunt.util.Assert;
-import hunt.util.string;
+import hunt.string;
 import hunt.util.TypeUtils;
 
 // alias assertTrue = Assert.assertTrue;

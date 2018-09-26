@@ -1,20 +1,10 @@
-module hunt.util.string.common;
+module hunt.string.common;
 
+import hunt.util.exception;
 
-import std.ascii;
 import std.algorithm;
-import std.array;
 import std.exception;
-import std.conv;
 import std.string;
-import std.uni;
-
-
-class StringIndexOutOfBoundsException: Exception
-{
-    mixin basicExceptionCtors;
-}
-
 
 bool equalsIgnoreCase(string s1, string s2)
 {

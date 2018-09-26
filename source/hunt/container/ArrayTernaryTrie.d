@@ -8,7 +8,7 @@ import hunt.container.Set;
 import hunt.container.Trie;
 
 import hunt.util.exception;
-import hunt.util.string;
+import hunt.string;
 
 import std.ascii;
 import std.conv;

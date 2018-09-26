@@ -5,7 +5,7 @@ import hunt.container.HashMap;
 import hunt.container.List;
 import hunt.container.Map;
 
-import hunt.util.string;
+import hunt.string;
 
 /**
  * A multi valued Map.

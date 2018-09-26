@@ -1,11 +1,11 @@
-module hunt.util.string.StringTokenizer;
+module hunt.string.StringTokenizer;
 
 
 import std.string;
 
 import hunt.util.exception;
 import hunt.util.character;
-import hunt.util.string.common;
+import hunt.string.common;
 import hunt.container.Iterable;
 
 /**
