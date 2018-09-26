@@ -1027,8 +1027,8 @@ class Assert {
      */
     static void assertThat(T, size_t line = __LINE__, string file = __FILE__)(
             string message, T actual, T matcher) {
-        trace("actual=>", actual);
-        trace("matcher=>", matcher);
+        // trace("actual=>", actual);
+        // trace("matcher=>", matcher);
         if (message.empty)
             message = std.format.format("raised in %s:%s", file, line);
         else
