@@ -6,7 +6,7 @@ import hunt.container.Map;
 import hunt.container.Iterator;
 
 import hunt.util.exception;
-import hunt.util.string;
+import hunt.util.string.StringBuilder;
 
 import std.algorithm;
 import std.conv;
