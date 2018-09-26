@@ -101,6 +101,69 @@ class Integer : Number{
         return n - ((i << 1) >>> 31);
     }
 
+
+
+    /**
+     * Returns a hash code for a {@code double} value; compatible with
+     * {@code Double.hashCode()}.
+     *
+     * @param value the value to hash
+     * @return a hash code value for a {@code double} value.
+     * @since 1.8
+     */
+    override public size_t toHash() @safe nothrow {
+        return value;
+    }
+
+    /**
+     * Compares this object against the specified object.  The result
+     * is {@code true} if and only if the argument is not
+     * {@code null} and is a {@code Double} object that
+     * represents a {@code double} that has the same value as the
+     * {@code double} represented by this object. For this
+     * purpose, two {@code double} values are considered to be
+     * the same if and only if the method {@link
+     * #doubleToLongBits(double)} returns the identical
+     * {@code long} value when applied to each.
+     *
+     * <p>Note that in most cases, for two instances of class
+     * {@code Double}, {@code d1} and {@code d2}, the
+     * value of {@code d1.equals(d2)} is {@code true} if and
+     * only if
+     *
+     * <blockquote>
+     *  {@code d1.doubleValue() == d2.doubleValue()}
+     * </blockquote>
+     *
+     * <p>also has the value {@code true}. However, there are two
+     * exceptions:
+     * <ul>
+     * <li>If {@code d1} and {@code d2} both represent
+     *     {@code Double.NaN}, then the {@code equals} method
+     *     returns {@code true}, even though
+     *     {@code Double.NaN==Double.NaN} has the value
+     *     {@code false}.
+     * <li>If {@code d1} represents {@code +0.0} while
+     *     {@code d2} represents {@code -0.0}, or vice versa,
+     *     the {@code equal} test has the value {@code false},
+     *     even though {@code +0.0==-0.0} has the value {@code true}.
+     * </ul>
+     * This definition allows hash tables to operate properly.
+     * @param   obj   the object to compare with.
+     * @return  {@code true} if the objects are the same;
+     *          {@code false} otherwise.
+     * @see java.lang.Double#doubleToLongBits(double)
+     */
+    override public bool opEquals(Object obj) {
+        auto dl = cast(Integer)obj;
+        if(dl !is null)
+        {
+            return value == dl.intValue;
+        }
+
+        return false;
+    }
+
     /**
      * The value of the {@code Integer}.
      *
@@ -243,6 +306,11 @@ class Integer : Number{
         if (i >= IntegerCache.low && i <= IntegerCache.high)
             return IntegerCache.cache[i + (-IntegerCache.low)];
         return new Integer(i);
+    }
+
+    override string toString()
+    {
+        return to!string(value);
     }
 
 }
