@@ -18,29 +18,26 @@ pragma(lib, "Ws2_32");
 // dfmt on
 
 import hunt.container.ByteBuffer;
-import hunt.util.common;
 import hunt.event.socket.common;
 import hunt.event.core;
+import hunt.logging;
+import hunt.util.common;
 import hunt.util.thread;
 
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
 import core.sys.windows.mswsock;
 
-import std.format;
 import std.conv;
-import std.socket;
 import std.exception;
-import hunt.logging;
-
+import std.format;
+import std.socket;
 import std.process;
-
-// import core.thread;
 
 /**
 TCP Server
 */
-abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
+abstract class AbstractListener : AbstractSocketChannel
 {
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
     {
@@ -56,7 +53,7 @@ abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
     {
         _iocp.watcher = this;
         _iocp.operation = IocpOperation.accept;
-        _clientSocket = new Socket(_family, SocketType.STREAM, ProtocolType.TCP);
+        _clientSocket = new Socket(this.localAddress.addressFamily, SocketType.STREAM, ProtocolType.TCP);
         DWORD dwBytesReceived = 0;
 
         version (HUNT_DEBUG)
@@ -89,8 +86,7 @@ abstract class AbstractListener : AbstractSocketChannel // , IAcceptor
         if (handler !is null)
             handler(this._clientSocket);
 
-        version (HUNT_DEBUG)
-            trace("accept next connection...");
+        version (HUNT_DEBUG) trace("accepting next connection...");
         if (this.isRegistered)
             this.doAccept();
         return true;

@@ -11,14 +11,21 @@
  
 module hunt.event.socket.common;
 
-import hunt.util.common;
+import hunt.container.ByteBuffer;
 import hunt.event.EventLoop;
 import hunt.event.core;
-import hunt.container.ByteBuffer;
+import hunt.logging;
+import hunt.util.common;
 
 import std.socket;
-import hunt.logging;
+import std.functional;
+import std.datetime;
+import core.stdc.stdint;
+import std.socket;
 
+version (Windows) import SOCKETOPTIONS = core.sys.windows.winsock2;
+
+version (Posix) import SOCKETOPTIONS = core.sys.posix.sys.socket;
 
 alias ConnectionHandler = void delegate(bool isSucceeded);
 
@@ -47,90 +54,12 @@ interface Stream
 
 }
 
-// alias IStreamSocket = Stream;
-
-// dfmt off
-mixin template ChannelSocketOption() {
-    import std.functional;
-    import std.datetime;
-    import core.stdc.stdint;
-    import std.socket;
-
-    version (Windows) import SOCKETOPTIONS = core.sys.windows.winsock2;
-
-    version (Posix) import SOCKETOPTIONS = core.sys.posix.sys.socket;
-
-    /// Get a socket option.
-    /// Returns: The number of bytes written to $(D result).
-    //returns the length, in bytes, of the actual result - very different from getsockopt()
-    pragma(inline) final int getOption(SocketOptionLevel level, SocketOption option,
-        void[] result) @trusted {
-
-        return  this.socket.getOption(level, option, result);
-    }
-
-    /// Common case of getting integer and boolean options.
-    pragma(inline) final int getOption(SocketOptionLevel level,
-        SocketOption option, ref int32_t result) @trusted {
-        return  this.socket.getOption(level, option, result);
-    }
-
-    /// Get the linger option.
-    pragma(inline) final int getOption(SocketOptionLevel level, SocketOption option,
-        ref Linger result) @trusted {
-        return  this.socket.getOption(level, option, result);
-    }
-
-    /// Get a timeout (duration) option.
-    pragma(inline) final void getOption(SocketOptionLevel level,
-        SocketOption option, ref Duration result) @trusted {
-         this.socket.getOption(level, option, result);
-    }
-
-    /// Set a socket option.
-    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
-        void[] value) @trusted {
-        return  this.socket.setOption(forward!(level, option, value));
-    }
-
-    /// Common case for setting integer and boolean options.
-    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
-        int32_t value) @trusted {
-        return  this.socket.setOption(forward!(level, option, value));
-    }
-
-    /// Set the linger option.
-    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
-        Linger value) @trusted {
-        return  this.socket.setOption(forward!(level, option, value));
-    }
-
-    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
-        Duration value) @trusted {
-        return  this.socket.setOption(forward!(level, option, value));
-    }
-
-    final @property @trusted Address remoteAddress() {
-        return _remoteAddress;
-    }
-    protected Address _remoteAddress;
-
-    final @property @trusted Socket socket(){
-        return this.socket;
-    }
-
-    final @property @trusted Address localAddress() {
-        return _localAddress;
-    }
-    protected Address _localAddress;
-}
-// dfmt on
 
 /**
 */
 abstract class AbstractSocketChannel : AbstractChannel
 {
-    protected AddressFamily _family;
+    // protected AddressFamily _family;
 
     this(Selector loop, WatcherType type)
     {
@@ -140,24 +69,82 @@ abstract class AbstractSocketChannel : AbstractChannel
     protected @property void socket(Socket s)
     {
         this.handle = s.handle();
-        this._family = s.addressFamily;
+        // this._family = s.addressFamily;
+        // this._localAddress = s.addressFamily;
         version (Posix)
             s.blocking = false;
         _socket = s;
-        version (HUNT_DEBUG)
-            trace("new socket fd: ", this.handle);
+        version (HUNT_DEBUG) info("new socket fd: ", this.handle);
     }
 
     protected @property Socket socket()
     {
         return _socket;
     }
+    protected Socket _socket;
 
-    mixin ChannelSocketOption;
+    
+    /// Get a socket option.
+    /// Returns: The number of bytes written to $(D result).
+    //returns the length, in bytes, of the actual result - very different from getsockopt()
+    pragma(inline) final int getOption(SocketOptionLevel level, SocketOption option,
+        void[] result) @trusted {
+        return  this._socket.getOption(level, option, result);
+    }
+
+    /// Common case of getting integer and boolean options.
+    pragma(inline) final int getOption(SocketOptionLevel level,
+        SocketOption option, ref int32_t result) @trusted {
+        return  this._socket.getOption(level, option, result);
+    }
+
+    /// Get the linger option.
+    pragma(inline) final int getOption(SocketOptionLevel level, SocketOption option,
+        ref Linger result) @trusted {
+        return  this._socket.getOption(level, option, result);
+    }
+
+    /// Get a timeout (duration) option.
+    pragma(inline) final void getOption(SocketOptionLevel level,
+        SocketOption option, ref Duration result) @trusted {
+         this._socket.getOption(level, option, result);
+    }
+
+    /// Set a socket option.
+    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
+        void[] value) @trusted {
+        this._socket.setOption(forward!(level, option, value));
+    }
+
+    /// Common case for setting integer and boolean options.
+    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
+        int32_t value) @trusted {
+        this._socket.setOption(forward!(level, option, value));
+    }
+
+    /// Set the linger option.
+    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
+        Linger value) @trusted {
+        this._socket.setOption(forward!(level, option, value));
+    }
+
+    pragma(inline) final void setOption(SocketOptionLevel level, SocketOption option,
+        Duration value) @trusted {
+        this._socket.setOption(forward!(level, option, value));
+    }
+
+    final @property @trusted Address remoteAddress() {
+        return _remoteAddress;
+    }
+    protected Address _remoteAddress;
+
+    final @property @trusted Address localAddress() {
+        return _localAddress;
+    }
+    protected Address _localAddress;
 
     version (Windows)
     {
-
         void setRead(size_t bytes)
         {
             readLen = bytes;
@@ -173,8 +160,6 @@ abstract class AbstractSocketChannel : AbstractChannel
         assert(false, "unimplemented");
     }
 
-protected:
-    Socket _socket;
 }
 
 /**

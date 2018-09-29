@@ -58,7 +58,7 @@ abstract class AbstractListener : AbstractSocketChannel
             infof("Listener fd=%d, client fd=%d", this.handle, clientFd);
 
         if (handler !is null)
-            handler(new Socket(clientFd, this._family));
+            handler(new Socket(clientFd, this.localAddress.addressFamily));
         return true;
     }
 

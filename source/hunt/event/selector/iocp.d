@@ -116,21 +116,13 @@ class AbstractSelector : Selector
         ULONG_PTR key = 0;
         DWORD bytes = 0;
 
-        debug
-        {
-            // const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes,
-            //         &key, &overlapped, INFINITE);
-            // tracef("GetQueuedCompletionStatus, ret=%d", ret);
+        // const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes,
+        //         &key, &overlapped, INFINITE);
+        // tracef("GetQueuedCompletionStatus, ret=%d", ret);
 
-            // trace("timeout=", timeout);
-            const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes,
-                    &key, &overlapped, timeout);
-        }
-        else
-        {
-            const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes,
-                    &key, &overlapped, timeout);
-        }
+        // trace("timeout=", timeout);
+        const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes,
+                &key, &overlapped, timeout);
 
         IocpContext* ev = cast(IocpContext*) overlapped;
         if (ret == 0)
@@ -145,10 +137,8 @@ class AbstractSelector : Selector
                 if(channel !is null && !channel.isClosed())
                     channel.close();
             } 
-            return;
         }
-
-        if (ev is null || ev.watcher is null)
+        else if (ev is null || ev.watcher is null)
             warning("ev is null or ev.watche is null");
         else
             handleIocpOperation(ev.operation, ev.watcher, bytes);
@@ -217,10 +207,10 @@ class AbstractSelector : Selector
         // assert(io !is null, "The type of channel is: " ~ typeid(wt).name);
         if (io is null) {
             warning("The channel socket is null: ");
-            return;
+        } else {
+            io.setRead(len);
+            wt.onRead();
         }
-        io.setRead(len);
-        wt.onRead();
     }
 
     private void onSocketWrite(AbstractChannel wt, size_t len)
