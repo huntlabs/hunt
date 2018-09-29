@@ -229,6 +229,8 @@ protected:
             {
                 warning("Some data has not been sent yet.");
             }
+
+            infof("connection closed: %s", this.remoteAddress);
         }
 
         _writeQueue.clear();

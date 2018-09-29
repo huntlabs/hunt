@@ -3,11 +3,14 @@ import std.stdio;
 import hunt.event;
 import hunt.io.TcpStream;
 // import hunt.logging;
+import std.socket;
 
 void main()
 {
 	EventLoop loop = new EventLoop();
-	TcpStream client = new TcpStream(loop);
+	// TcpStream client = new TcpStream(loop, AddressFamily.INET6);
+	TcpStream client = new TcpStream(loop, AddressFamily.INET);
+	int count = 10;
 	client.onConnected((bool isSucceeded) {
 		if (isSucceeded)
 		{
@@ -28,17 +31,22 @@ void main()
 		}
 	}).onDataReceived((in ubyte[] data) {
 		writeln("received data: ", cast(string) data);
-		client.write(data, (in ubyte[] wdata, size_t size) {
-			debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
-		});
+		if(--count > 0) {
+			client.write(data, (in ubyte[] wdata, size_t size) {
+				debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
+			});
 		// client.write(new SocketStreamBuffer(data.dup, (in ubyte[] wdata, size_t size) {
 		// 		debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 		// 	}));
+		}
 	}).onClosed(() {
 		writeln("The connection is closed!");
 		// loop.stop(); // It's will raise a exception: Invalid memory operation
-	// }).connect("127.0.0.1", 8090);
-	}).connect("10.1.222.120", 8090);
+	}).connect("127.0.0.1", 8090);
+	// }).connect("::1", 8090);
+	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8090);
+	// }).connect("fe80::2435:c2f0:4a2e:ba11%ens33", 8090);
+	
 
 	loop.run();
 }
