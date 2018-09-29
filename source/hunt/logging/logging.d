@@ -10,16 +10,17 @@
  */
 module hunt.logging.logging;
 
-import std.exception;
 
 import core.stdc.stdlib;
 import core.runtime;
+import core.thread;
 
-import std.concurrency;
-import std.parallelism;
-import std.traits;
+import std.algorithm.iteration;
 import std.array;
-import std.string;
+import std.concurrency;
+import std.exception;
+import std.file;
+import std.parallelism;
 import std.stdio;
 import std.datetime;
 import std.format;
@@ -28,10 +29,8 @@ import std.conv;
 import std.regex;
 import std.path;
 import std.typecons;
-import std.file;
-import std.algorithm.iteration;
-import core.thread;
-
+import std.traits;
+import std.string;
 import hunt.util.thread;
 
 void catchAndLogException(E)(lazy E runer) @trusted nothrow
@@ -252,6 +251,18 @@ class SizeBaseRollover
 __gshared Logger g_logger = null;
 __gshared LogLevel g_logLevel = LogLevel.LOG_DEBUG;
 
+version (Windows)
+{
+	import core.sys.windows.wincon;
+	import core.sys.windows.winbase;
+	import core.sys.windows.windef;
+
+	private __gshared HANDLE g_hout;
+	shared static this() {
+		g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
+		SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+	}
+}
 
 /**
 */
@@ -496,18 +507,10 @@ protected:
 
 			writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
 		}
-		else
+		else version (Windows)
 		{
-			version (Windows)
-			{
-				import core.sys.windows.wincon;
-				import core.sys.windows.winbase;
-				import core.sys.windows.windef;
+			enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
 
-				__gshared HANDLE g_hout;
-				if (g_hout is null)
-					g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
-			}
 			ushort color;
 			switch (level) with (LogLevel)
 			{
@@ -522,13 +525,13 @@ protected:
 				color = FOREGROUND_GREEN;
 				break;
 			default:
-				color = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+				color = defaultColor;
 			}
 
 			SetConsoleTextAttribute(g_hout, color);
 			writeln(msg);
-			// SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-
+			if(color != defaultColor)
+			SetConsoleTextAttribute(g_hout, defaultColor);
 		}
 	}
 }
@@ -551,6 +554,11 @@ string code(string func, LogLevel level, bool f = false)()
 
 public:
 
+version(Windows) {
+	void resetConsoleColor() {
+		SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+	}
+}
 
 void setLoggingLevel(LogLevel level)
 {

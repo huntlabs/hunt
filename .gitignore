@@ -1,5 +1,6 @@
 # Visual Studio Code
 #.vscode/
+.suo
 
 # Compiled Object files
 *.o
@@ -45,3 +46,4 @@ examples/ContainerDemo/container-demo
 
 hunt-test-default
 examples/UnitTest/unittest
+
