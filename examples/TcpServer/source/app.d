@@ -27,7 +27,7 @@ import std.process;
 void main()
 {
 	debug writefln("Main thread: %s", getTid());
-	globalLogLevel(LogLevel.warning);
+	// globalLogLevel(LogLevel.warning);
 
 	// to test big block data sending
 	int bufferSize = 8192 * 2 + 1;
@@ -36,6 +36,7 @@ void main()
 	bigData[$ - 1] = 2;
 
 	EventLoop loop = new EventLoop();
+	// TcpListener listener = new TcpListener(loop, AddressFamily.INET6, 512);
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
 
 	listener.bind(8090).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {

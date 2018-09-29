@@ -145,7 +145,7 @@ class AbstractSelector : Selector
 
             if (isErro(events[i].events))
             {
-                version(HUNT_DEBUG) info("close event: ", watch.handle);
+                version(HUNT_DEBUG) info("closing watcher for error: ", watch.handle);
                 watch.close();
                 continue;
             }
