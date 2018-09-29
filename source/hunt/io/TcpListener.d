@@ -143,13 +143,14 @@ class TcpListener : AbstractListener
             trace("start to listen");
         // while(canRead && this.isRegistered) // why??
         {
-            version (HUNT_DEBUG)
-                trace("listening...");
+            version (HUNT_DEBUG) trace("listening...");
+
             canRead = onAccept((Socket socket) {
 
-                version (HUNT_DEBUG)
-                    infof("new connection from %s, fd=%d",
+                version (HUNT_DEBUG) {
+                    infof("new connection from %s, fd=%d", 
                         socket.remoteAddress.toString(), socket.handle());
+                }
 
                 if (acceptHandler !is null)
                 {

@@ -30,7 +30,7 @@ class TcpStream : AbstractStream
 {
     SimpleEventHandler closeHandler;
 
-    // for client side
+    // for client
     this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
     {
         super(loop, family, bufferSize);
@@ -40,7 +40,7 @@ class TcpStream : AbstractStream
         _isConnected = false;
     }
 
-    // for server side
+    // for server
     this(Selector loop, Socket socket, size_t bufferSize = 4096 * 2)
     {
         super(loop, socket.addressFamily, bufferSize);
@@ -74,7 +74,14 @@ class TcpStream : AbstractStream
         }
         catch (Exception ex)
         {
-            error(ex.message);
+            version(Windows) {
+                import std.windows.charset;
+                import core.stdc.stdio;
+                auto msg = toMBSz(ex.message);
+                printf("%d %s", __LINE__, msg);
+            } else {
+                error(ex.message);
+            }
         }
 
         if (_connectionHandler !is null)
@@ -197,10 +204,7 @@ protected:
         {
             while (_isRegistered && !tryRead())
             {
-                version (HUNT_DEBUG)
-                {
-                    trace("continue reading...");
-                }
+                version (HUNT_DEBUG) trace("continue reading...");
             }
         }
         else
