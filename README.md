@@ -36,5 +36,4 @@ For details, see [here](docs/benchmark.md).
 - [ ] More friendly APIs
 - [ ] More examples
 - [ ] More common utils
-- [x] Benchmark test
 - [x] Improve supports on Mac OS

@@ -1,0 +1,33 @@
+{
+	"name": "tcp-demo",
+    "authors": [
+        "Hunt Labs"
+    ],
+	"description": "A demo for TCP server/client with Hunt.",
+	"copyright": "Copyright (C) 2018, HuntLabs.cn",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"hunt" :{"path": "../../"}
+	},
+	"versions": [
+		"HUNT_DEBUG"
+	],
+	"configurations": [
+		{
+			"name": "client",
+			"targetName": "tcp-client",
+			"targetType": "executable",
+			"excludedSourceFiles": [
+				"source/server.d"
+			]
+		},
+		{
+			"name": "server",
+			"targetName": "tcp-server",
+			"targetType": "executable",
+			"excludedSourceFiles": [
+				"source/client.d"
+			]
+		}
+	]
+}

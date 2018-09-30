@@ -32,18 +32,17 @@ docs/
 
 examples/*/log.txt
 examples/Benchmark/hunt-benchmark
-examples/TcpClient/tcp-client
-examples/Timer/timer
-examples/UdpDemo/udp-demo
-examples/HttpServer/http-server
-examples/TcpServer/tcp-server
-examples/EventGroupDemo/http-server-powered
-examples/PerformanceTest/performance
 examples/ConfigurationDemo/configuration
 examples/ContainerDemo/container-demo
+examples/UdpDemo/udp-demo
+examples/HttpServer/http-server
+examples/EventGroupDemo/http-server-powered
+examples/PerformanceTest/performance
+examples/TcpDemo/tcp-client
+examples/TcpDemo/tcp-server
+examples/Timer/timer
+examples/UnitTest/unittest
 
 # others
 
 hunt-test-default
-examples/UnitTest/unittest
-
