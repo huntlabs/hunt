@@ -31,8 +31,9 @@ import core.sys.windows.mswsock;
 import std.conv;
 import std.exception;
 import std.format;
-import std.socket;
 import std.process;
+import std.socket;
+import std.stdio;
 
 /**
 TCP Server
@@ -45,6 +46,8 @@ abstract class AbstractListener : AbstractSocketChannel
         setFlag(WatchFlag.Read, true);
         _buffer = new ubyte[bufferSize];
         this.socket = new TcpSocket(family);
+
+        loadWinsockExtension(this.handle);
     }
 
     mixin CheckIocpError;
@@ -56,13 +59,14 @@ abstract class AbstractListener : AbstractSocketChannel
         _clientSocket = new Socket(this.localAddress.addressFamily, SocketType.STREAM, ProtocolType.TCP);
         DWORD dwBytesReceived = 0;
 
-        version (HUNT_DEBUG)
-            tracef("client socket:accept=%s  inner socket=%s", this.handle,
+        version (HUNT_DEBUG) {
+            tracef("client socket: acceptor=%s  inner socket=%s", this.handle,
                     _clientSocket.handle());
-        version (HUNT_DEBUG)
-            trace("AcceptEx is :  ", AcceptEx);
+            // info("AcceptEx@", AcceptEx);
+        }
+        uint sockaddrSize = cast(uint)sockaddr_storage.sizeof;
         int nRet = AcceptEx(this.handle, cast(SOCKET) _clientSocket.handle,
-                _buffer.ptr, 0, sockaddr_in.sizeof + 16, sockaddr_in.sizeof + 16,
+                _buffer.ptr, 0, sockaddrSize + 16, sockaddrSize + 16,
                 &dwBytesReceived, &_iocp.overlapped);
 
         version (HUNT_DEBUG)
@@ -72,8 +76,7 @@ abstract class AbstractListener : AbstractSocketChannel
 
     protected bool onAccept(scope AcceptHandler handler)
     {
-        version (HUNT_DEBUG)
-            trace("new connection coming...");
+        version (HUNT_DEBUG) trace("a new connection coming...");
         this.clearError();
         SOCKET slisten = cast(SOCKET) this.handle;
         SOCKET slink = cast(SOCKET) this._clientSocket.handle;
@@ -578,18 +581,9 @@ shared static this()
 {
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-    SOCKET ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    scope (exit)
-        closesocket(ListenSocket);
-    GUID guid;
-    mixin(GET_FUNC_POINTER("WSAID_ACCEPTEX", "AcceptEx"));
-    mixin(GET_FUNC_POINTER("WSAID_CONNECTEX", "ConnectEx"));
-    /* mixin(GET_FUNC_POINTER("WSAID_DISCONNECTEX", "DisconnectEx"));
-     mixin(GET_FUNC_POINTER("WSAID_GETACCEPTEXSOCKADDRS", "GetAcceptexSockAddrs"));
-     mixin(GET_FUNC_POINTER("WSAID_TRANSMITFILE", "TransmitFile"));
-     mixin(GET_FUNC_POINTER("WSAID_TRANSMITPACKETS", "TransmitPackets"));
-     mixin(GET_FUNC_POINTER("WSAID_WSARECVMSG", "WSARecvMsg"));*/
+    if(iResult != 0) {
+        stderr.writeln("unable to load Winsock!");
+    }
 }
 
 shared static ~this()
@@ -597,28 +591,44 @@ shared static ~this()
     WSACleanup();
 }
 
-private
+void loadWinsockExtension(SOCKET socket)
 {
-    bool GetFunctionPointer(FuncPointer)(SOCKET sock, ref FuncPointer pfn, ref GUID guid)
-    {
-        DWORD dwBytesReturned = 0;
-        if (WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, guid.sizeof,
-                &pfn, pfn.sizeof, &dwBytesReturned, null, null) == SOCKET_ERROR)
-        {
-            error("Get function failed with error:", GetLastError());
-            return false;
-        }
+    if(isApiLoaded) return;
+    isApiLoaded = true;
 
-        return true;
+    // SOCKET ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    // scope (exit)
+    //     closesocket(ListenSocket);
+    GUID guid;
+    mixin(GET_FUNC_POINTER("WSAID_ACCEPTEX", "AcceptEx", socket.stringof));
+    mixin(GET_FUNC_POINTER("WSAID_CONNECTEX", "ConnectEx"));
+    /* mixin(GET_FUNC_POINTER("WSAID_DISCONNECTEX", "DisconnectEx"));
+     mixin(GET_FUNC_POINTER("WSAID_GETACCEPTEXSOCKADDRS", "GetAcceptexSockAddrs"));
+     mixin(GET_FUNC_POINTER("WSAID_TRANSMITFILE", "TransmitFile"));
+     mixin(GET_FUNC_POINTER("WSAID_TRANSMITPACKETS", "TransmitPackets"));
+     mixin(GET_FUNC_POINTER("WSAID_WSARECVMSG", "WSARecvMsg"));*/
+}
+private __gshared bool isApiLoaded = false;
+
+private bool GetFunctionPointer(FuncPointer)(SOCKET sock, ref FuncPointer pfn, ref GUID guid)
+{
+    DWORD dwBytesReturned = 0;
+    if (WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, guid.sizeof,
+            &pfn, pfn.sizeof, &dwBytesReturned, null, null) == SOCKET_ERROR)
+    {
+        error("Get function failed with error:", GetLastError());
+        return false;
     }
 
-    string GET_FUNC_POINTER(string GuidValue, string pft)
-    {
-        string str = " guid = " ~ GuidValue ~ ";";
-        str ~= "if( !GetFunctionPointer( ListenSocket, " ~ pft
-            ~ ", guid ) ) { errnoEnforce(false,\"get function error!\"); } ";
-        return str;
-    }
+    return true;
+}
+
+private string GET_FUNC_POINTER(string GuidValue, string pft, string socket = "socket")
+{
+    string str = " guid = " ~ GuidValue ~ ";";
+    str ~= "if( !GetFunctionPointer( " ~ socket ~ ", " ~ pft
+        ~ ", guid ) ) { errnoEnforce(false,\"get function error!\"); } ";
+    return str;
 }
 
 enum : DWORD

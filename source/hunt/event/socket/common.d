@@ -59,8 +59,6 @@ interface Stream
 */
 abstract class AbstractSocketChannel : AbstractChannel
 {
-    // protected AddressFamily _family;
-
     this(Selector loop, WatcherType type)
     {
         super(loop, type);
@@ -69,8 +67,6 @@ abstract class AbstractSocketChannel : AbstractChannel
     protected @property void socket(Socket s)
     {
         this.handle = s.handle();
-        // this._family = s.addressFamily;
-        // this._localAddress = s.addressFamily;
         version (Posix)
             s.blocking = false;
         _socket = s;
