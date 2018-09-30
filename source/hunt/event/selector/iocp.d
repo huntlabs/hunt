@@ -32,13 +32,16 @@ class AbstractSelector : Selector
     this()
     {
         _iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 0);
+        if(_iocpHandle is null)
+            errorf("CreateIoCompletionPort failed: %d\n", GetLastError());
         _event = new EventChannel(this);
         _timer.init();
     }
 
     ~this()
     {
-        // .close(_iocpHandle);
+        // import std.socket;
+        // std.socket.close(_iocpHandle);
     }
 
     override bool register(AbstractChannel watcher)
@@ -64,14 +67,14 @@ class AbstractSelector : Selector
         }
 
         version (HUNT_DEBUG)
-            infof("register, watcher(fd=%d, type=%s)", watcher.handle, watcher.type);
+            tracef("register, watcher(fd=%d, type=%s)", watcher.handle, watcher.type);
         _event.setNext(watcher);
         return true;
     }
 
     override bool reregister(AbstractChannel watcher)
     {
-        throw new LoopException("The IOCP does not support reregister!");
+        throw new LoopException("IOCP does not support reregister!");
     }
 
     override bool deregister(AbstractChannel watcher)
