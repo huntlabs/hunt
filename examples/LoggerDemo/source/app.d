@@ -27,4 +27,5 @@ void main()
 	logInfo("info");
 	warning("warning");
 	error("error");
+	error("Chinese message: 错误");
 }

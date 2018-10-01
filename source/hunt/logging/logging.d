@@ -509,6 +509,9 @@ protected:
 		}
 		else version (Windows)
 		{
+			import std.windows.charset;
+            import core.stdc.stdio;
+
 			enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
 
 			ushort color;
@@ -529,9 +532,9 @@ protected:
 			}
 
 			SetConsoleTextAttribute(g_hout, color);
-			writeln(msg);
+            printf("%s\n", toMBSz(msg));
 			if(color != defaultColor)
-			SetConsoleTextAttribute(g_hout, defaultColor);
+				SetConsoleTextAttribute(g_hout, defaultColor);
 		}
 	}
 }
