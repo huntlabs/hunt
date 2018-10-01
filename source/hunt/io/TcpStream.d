@@ -74,14 +74,7 @@ class TcpStream : AbstractStream
         }
         catch (Exception ex)
         {
-            version(Windows) {
-                import std.windows.charset;
-                import core.stdc.stdio;
-                auto msg = toMBSz(ex.message);
-                printf("%d %s", __LINE__, msg);
-            } else {
-                error(ex.message);
-            }
+            error(ex.message);
         }
 
         if (_connectionHandler !is null)
