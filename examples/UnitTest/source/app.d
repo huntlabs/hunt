@@ -5,8 +5,10 @@ import hunt.util.UnitTest;
 import hunt.logging;
 
 import test.BigIntegerTest;
+import test.TaskTest;
 
 void main()
 {
-	testUnits!(BigIntegerTest);
+	// testUnits!(BigIntegerTest);
+	testTask();
 }
