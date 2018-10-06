@@ -1,4 +1,4 @@
-module test.TaskTest;
+module parallelism_3;
 
 import std.stdio;
 import hunt.concurrent.parallelism;
@@ -57,8 +57,9 @@ void testTask()
 
     // theTask.job();
     theTask.then(
-    (int r) {
+    delegate string (int r) {
         ConsoleLogger.trace("success with: ", r); 
+        return "success";
     }, 
     
     (err) {
@@ -92,15 +93,14 @@ void testTask()
      * the task function, i.e. anOperation(). */
     
 
-    writeln("\n");
     try {
         immutable taskResult = theTask.yieldForce();
-        writefln("All finished; the result is: result=%d, taskResult=%d.", result, taskResult);
+        writefln("\nAll finished; the result is: result=%d, taskResult=%d.", result, taskResult);
     } 
     catch (TaskCancelledException t) {
-        writefln("All finished with cancellation: %s.", t.msg);
+        writefln("\nAll finished with cancellation: %s.", t.msg);
     }
     catch (Throwable t) {
-        writefln("All finished with exception: %s.", t.msg);
+        writefln("\nAll finished with exception: %s.", t.msg);
     }
 }
