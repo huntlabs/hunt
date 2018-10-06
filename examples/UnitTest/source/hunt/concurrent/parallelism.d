@@ -611,9 +611,25 @@ struct Task(alias fun, Args...)
         }
     }
 
-    void then(TaskFulfilledHandler fulfilledHandler, TaskRejectedHandler rejectedHandler = null) {
-        _fulfilledHandler = fulfilledHandler;
-        _rejectedHandler = rejectedHandler;
+    void then(V)(V delegate(ReturnType) fulfilledHandler, TaskRejectedHandler rejectedHandler = null) {
+
+        if(done) {
+            auto nextTask = task(fulfilledHandler, returnVal);
+        } else {
+            // auto nextTask = task(() {});
+            // ConsoleLogger.warning(typeid(nextTask));
+            _fulfilledHandler = (ReturnType v) {
+                // nextTask.resolve(fulfilledHandler(v));  
+                auto nextTask = task(fulfilledHandler, v);  
+                ConsoleLogger.warning(typeid(nextTask));
+                taskPool.put(nextTask);      
+            };        
+
+            _rejectedHandler = rejectedHandler;
+// TODO: Tasks pending completion -@zxp at 10/5/2018, 10:33:19 PM
+// 
+            // return nextTask;
+        }
     }
     private TaskFulfilledHandler _fulfilledHandler;
     private TaskRejectedHandler _rejectedHandler;
