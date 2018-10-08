@@ -11,20 +11,53 @@
  
 module hunt.event.timer.common;
 
-import hunt.util.common;
 import hunt.event.core;
-
 import hunt.logging;
+import hunt.util.common;
+
 import std.datetime;
 import std.exception;
 
-import hunt.util.timer;
 
 enum CustomTimerMinTimeOut = 50; // in ms
 enum CustomTimerWheelSize = 500;
 enum CustomTimer_Next_TimeOut = cast(long)(CustomTimerMinTimeOut * (2.0 / 3.0));
 
 alias UintObject = BaseTypeObject!uint;
+
+
+/**
+*/
+interface ITimer {
+    
+    /// 
+	bool isActive();
+
+	/// in ms
+	size_t interval();
+
+	/// ditto
+	ITimer interval(size_t v);
+	
+	/// ditto
+	ITimer interval(Duration duration);
+
+	///
+	ITimer onTick(TickedEventHandler handler);
+
+	/// immediately: true to call first event immediately
+	/// once: true to call timed event only once
+	void start(bool immediately = false, bool once = false);
+	
+	void stop();
+
+	void reset(bool immediately = false, bool once = false);
+
+	void reset(size_t interval);
+
+	void reset(Duration duration);
+}
+
 
 /**
     Timing Wheel manger Class

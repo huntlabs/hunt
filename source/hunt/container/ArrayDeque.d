@@ -132,7 +132,7 @@ module hunt.container.ArrayDeque;
 //      *
 //      * @return its argument
 //      */
-//     private <T> T[] copyElements(T[] a) {
+//     private !(T) T[] copyElements(T[] a) {
 //         if (head < tail) {
 //             System.arraycopy(elements, head, a, 0, size());
 //         } else if (head > tail) {
@@ -256,7 +256,7 @@ module hunt.container.ArrayDeque;
 
 //     E pollFirst() {
 //         int h = head;
-//         @SuppressWarnings("unchecked")
+//     
 //         E result = (E) elements[h];
 //         // Element is null if deque empty
 //         if (result is null)
@@ -268,7 +268,7 @@ module hunt.container.ArrayDeque;
 
 //     E pollLast() {
 //         int t = (tail - 1) & (elements.length - 1);
-//         @SuppressWarnings("unchecked")
+//     
 //         E result = (E) elements[t];
 //         if (result is null)
 //             return null;
@@ -281,7 +281,7 @@ module hunt.container.ArrayDeque;
 //      * @throws NoSuchElementException {@inheritDoc}
 //      */
 //     E getFirst() {
-//         @SuppressWarnings("unchecked")
+//     
 //         E result = (E) elements[head];
 //         if (result is null)
 //             throw new NoSuchElementException();
@@ -292,20 +292,20 @@ module hunt.container.ArrayDeque;
 //      * @throws NoSuchElementException {@inheritDoc}
 //      */
 //     E getLast() {
-//         @SuppressWarnings("unchecked")
+//     
 //         E result = (E) elements[(tail - 1) & (elements.length - 1)];
 //         if (result is null)
 //             throw new NoSuchElementException();
 //         return result;
 //     }
 
-//     @SuppressWarnings("unchecked")
+// 
 //     E peekFirst() {
 //         // elements[head] is null if deque empty
 //         return (E) elements[head];
 //     }
 
-//     @SuppressWarnings("unchecked")
+// 
 //     E peekLast() {
 //         return (E) elements[(tail - 1) & (elements.length - 1)];
 //     }
@@ -598,7 +598,7 @@ module hunt.container.ArrayDeque;
 //         E next() {
 //             if (cursor == fence)
 //                 throw new NoSuchElementException();
-//             @SuppressWarnings("unchecked")
+//         
 //             E result = (E) elements[cursor];
 //             // This check doesn't catch all possible comodifications,
 //             // but does catch the ones that corrupt traversal
@@ -625,7 +625,7 @@ module hunt.container.ArrayDeque;
 //             int m = a.length - 1, f = fence, i = cursor;
 //             cursor = f;
 //             while (i != f) {
-//                 @SuppressWarnings("unchecked") E e = (E)a[i];
+//             E e = (E)a[i];
 //                 i = (i + 1) & m;
 //                 if (e is null)
 //                     throw new ConcurrentModificationException();
@@ -652,7 +652,7 @@ module hunt.container.ArrayDeque;
 //             if (cursor == fence)
 //                 throw new NoSuchElementException();
 //             cursor = (cursor - 1) & (elements.length - 1);
-//             @SuppressWarnings("unchecked")
+//         
 //             E result = (E) elements[cursor];
 //             if (head != fence || result is null)
 //                 throw new ConcurrentModificationException();
@@ -781,8 +781,8 @@ module hunt.container.ArrayDeque;
 //      *         this deque
 //      * @throws NullPointerException if the specified array is null
 //      */
-//     @SuppressWarnings("unchecked")
-//     <T> T[] toArray(T[] a) {
+// 
+//     !(T) T[] toArray(T[] a) {
 //         int size = size();
 //         if (a.length < size)
 //             a = (T[])java.lang.reflect.Array.newInstance(
@@ -802,7 +802,7 @@ module hunt.container.ArrayDeque;
 //      */
 //     ArrayDeque!E clone() {
 //         try {
-//             @SuppressWarnings("unchecked")
+//         
 //             ArrayDeque!E result = (ArrayDeque!E) super.clone();
 //             result.elements = Arrays.copyOf(elements, elements.length);
 //             return result;
@@ -907,7 +907,7 @@ module hunt.container.ArrayDeque;
 //             int m = a.length - 1, f = getFence(), i = index;
 //             index = f;
 //             while (i != f) {
-//                 @SuppressWarnings("unchecked") E e = (E)a[i];
+//             E e = (E)a[i];
 //                 i = (i + 1) & m;
 //                 if (e is null)
 //                     throw new ConcurrentModificationException();
@@ -921,7 +921,7 @@ module hunt.container.ArrayDeque;
 //             Object[] a = deq.elements;
 //             int m = a.length - 1, f = getFence(), i = index;
 //             if (i != fence) {
-//                 @SuppressWarnings("unchecked") E e = (E)a[i];
+//             E e = (E)a[i];
 //                 index = (i + 1) & m;
 //                 if (e is null)
 //                     throw new ConcurrentModificationException();

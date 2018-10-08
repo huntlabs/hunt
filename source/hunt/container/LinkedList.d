@@ -338,7 +338,7 @@ bool addAll(int index, Collection!E c) {
 //         }
 
 //         for (Object o : a) {
-//             @SuppressWarnings("unchecked") E e = (E) o;
+//         E e = (E) o;
 //             Node!E newNode = new Node<>(pred, e, null);
 //             if (pred is null)
 //                 first = newNode;
@@ -778,7 +778,7 @@ bool addAll(int index, Collection!E c) {
     // }
 
 
-//     @SuppressWarnings("unchecked")
+// 
 //     private LinkedList!E superClone() {
 //         try {
 //             return (LinkedList!E) super.clone();
@@ -868,8 +868,8 @@ bool addAll(int index, Collection!E c) {
 //      *         this list
 //      * @throws NullPointerException if the specified array is null
 //      */
-//     @SuppressWarnings("unchecked")
-//     <T> T[] toArray(T[] a) {
+// 
+//     !(T) T[] toArray(T[] a) {
 //         if (a.length < _size)
 //             a = (T[])java.lang.reflect.Array.newInstance(
 //                                 a.getClass().getComponentType(), _size);
@@ -911,7 +911,7 @@ bool addAll(int index, Collection!E c) {
 //      * Reconstitutes this {@code LinkedList} instance from a stream
 //      * (that is, deserializes it).
 //      */
-//     @SuppressWarnings("unchecked")
+// 
 //     private void readObject(java.io.ObjectInputStream s)
 //         throws java.io.IOException, ClassNotFoundException {
 //         // Read in any hidden serialization magic

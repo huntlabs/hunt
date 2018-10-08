@@ -527,7 +527,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
     //     s.defaultReadObject();
 
     //     // Read in Comparator
-    //     @SuppressWarnings("unchecked")
+    // 
     //         Comparator<? super E> c = (Comparator<? super E>) s.readObject();
 
     //     // Create backing TreeMap

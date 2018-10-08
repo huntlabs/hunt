@@ -229,7 +229,7 @@ public class BigDecimal : Number {
 //     /**
 //      * Used to store the canonical string representation, if computed.
 //      */
-//     private transient String stringCache;
+//     private transient string stringCache;
 
 //     /**
 //      * Sentinel value for {@link #intCompact} indicating the
@@ -352,13 +352,13 @@ public class BigDecimal : Number {
 //     /**
 //      * Translates a character array representation of a
 //      * {@code BigDecimal} into a {@code BigDecimal}, accepting the
-//      * same sequence of characters as the {@link #BigDecimal(String)}
+//      * same sequence of characters as the {@link #BigDecimal(string)}
 //      * constructor, while allowing a sub-array to be specified.
 //      *
 //      * @implNote If the sequence of characters is already available
 //      * within a character array, using this constructor is faster than
 //      * converting the {@code char} array to string and using the
-//      * {@code BigDecimal(String)} constructor.
+//      * {@code BigDecimal(string)} constructor.
 //      *
 //      * @param  in {@code char} array that is the source of characters.
 //      * @param  offset first character in the array to inspect.
@@ -375,14 +375,14 @@ public class BigDecimal : Number {
 //     /**
 //      * Translates a character array representation of a
 //      * {@code BigDecimal} into a {@code BigDecimal}, accepting the
-//      * same sequence of characters as the {@link #BigDecimal(String)}
+//      * same sequence of characters as the {@link #BigDecimal(string)}
 //      * constructor, while allowing a sub-array to be specified and
 //      * with rounding according to the context settings.
 //      *
 //      * @implNote If the sequence of characters is already available
 //      * within a character array, using this constructor is faster than
 //      * converting the {@code char} array to string and using the
-//      * {@code BigDecimal(String)} constructor.
+//      * {@code BigDecimal(string)} constructor.
 //      *
 //      * @param  in {@code char} array that is the source of characters.
 //      * @param  offset first character in the array to inspect.
@@ -413,7 +413,7 @@ public class BigDecimal : Number {
 //         // bad offset, etc.
 //         try {
 //             // handle the sign
-//             boolean isneg = false;          // assume positive
+//             bool isneg = false;          // assume positive
 //             if (in[offset] == '-') {
 //                 isneg = true;               // leading minus means negative
 //                 offset++;
@@ -424,10 +424,10 @@ public class BigDecimal : Number {
 //             }
 
 //             // should now be at numeric part of the significand
-//             boolean dot = false;             // true when there is a '.'
+//             bool dot = false;             // true when there is a '.'
 //             long exp = 0;                    // exponent
 //             char c;                          // current character
-//             boolean isCompact = (len <= MAX_COMPACT_DIGITS);
+//             bool isCompact = (len <= MAX_COMPACT_DIGITS);
 //             // integer significand array & idx is the index to it. The array
 //             // is ONLY used when we can't use a compact representation.
 //             int idx = 0;
@@ -613,7 +613,7 @@ public class BigDecimal : Number {
 //         offset++;
 //         char c = in[offset];
 //         len--;
-//         boolean negexp = (c == '-');
+//         bool negexp = (c == '-');
 //         // optional sign
 //         if (negexp || c == '+') {
 //             offset++;
@@ -654,13 +654,13 @@ public class BigDecimal : Number {
 //     /**
 //      * Translates a character array representation of a
 //      * {@code BigDecimal} into a {@code BigDecimal}, accepting the
-//      * same sequence of characters as the {@link #BigDecimal(String)}
+//      * same sequence of characters as the {@link #BigDecimal(string)}
 //      * constructor.
 //      *
 //      * @implNote If the sequence of characters is already available
 //      * as a character array, using this constructor is faster than
 //      * converting the {@code char} array to string and using the
-//      * {@code BigDecimal(String)} constructor.
+//      * {@code BigDecimal(string)} constructor.
 //      *
 //      * @param in {@code char} array that is the source of characters.
 //      * @throws NumberFormatException if {@code in} is not a valid
@@ -674,14 +674,14 @@ public class BigDecimal : Number {
 //     /**
 //      * Translates a character array representation of a
 //      * {@code BigDecimal} into a {@code BigDecimal}, accepting the
-//      * same sequence of characters as the {@link #BigDecimal(String)}
+//      * same sequence of characters as the {@link #BigDecimal(string)}
 //      * constructor and with rounding according to the context
 //      * settings.
 //      *
 //      * @implNote If the sequence of characters is already available
 //      * as a character array, using this constructor is faster than
 //      * converting the {@code char} array to string and using the
-//      * {@code BigDecimal(String)} constructor.
+//      * {@code BigDecimal(string)} constructor.
 //      *
 //      * @param  in {@code char} array that is the source of characters.
 //      * @param  mc the context to use.
@@ -758,7 +758,7 @@ public class BigDecimal : Number {
 //      *
 //      * <p>The character-to-digit mapping is provided by {@link
 //      * java.lang.Character#digit} set to convert to radix 10.  The
-//      * String may not contain any extraneous characters (whitespace,
+//      * string may not contain any extraneous characters (whitespace,
 //      * for example).
 //      *
 //      * <p><b>Examples:</b><br>
@@ -791,7 +791,7 @@ public class BigDecimal : Number {
 //      * BigDecimal, as it doesn't suffer from the unpredictability of
 //      * the {@link #BigDecimal(double)} constructor.
 //      *
-//      * @param val String representation of {@code BigDecimal}.
+//      * @param val string representation of {@code BigDecimal}.
 //      *
 //      * @throws NumberFormatException if {@code val} is not a valid
 //      *         representation of a {@code BigDecimal}.
@@ -803,7 +803,7 @@ public class BigDecimal : Number {
 //     /**
 //      * Translates the string representation of a {@code BigDecimal}
 //      * into a {@code BigDecimal}, accepting the same strings as the
-//      * {@link #BigDecimal(String)} constructor, with rounding
+//      * {@link #BigDecimal(string)} constructor, with rounding
 //      * according to the context settings.
 //      *
 //      * @param  val string representation of a {@code BigDecimal}.
@@ -814,7 +814,7 @@ public class BigDecimal : Number {
 //      *         representation of a BigDecimal.
 //      * @since  1.5
 //      */
-//     public BigDecimal(String val, MathContext mc) {
+//     public BigDecimal(string val, MathContext mc) {
 //         this(val.toCharArray(), 0, val.length(), mc);
 //     }
 
@@ -841,20 +841,20 @@ public class BigDecimal : Number {
 //      * appearances notwithstanding.
 //      *
 //      * <li>
-//      * The {@code String} constructor, on the other hand, is
+//      * The {@code string} constructor, on the other hand, is
 //      * perfectly predictable: writing {@code new BigDecimal("0.1")}
 //      * creates a {@code BigDecimal} which is <em>exactly</em> equal to
 //      * 0.1, as one would expect.  Therefore, it is generally
-//      * recommended that the {@linkplain #BigDecimal(String)
-//      * String constructor} be used in preference to this one.
+//      * recommended that the {@linkplain #BigDecimal(string)
+//      * string constructor} be used in preference to this one.
 //      *
 //      * <li>
 //      * When a {@code double} must be used as a source for a
 //      * {@code BigDecimal}, note that this constructor provides an
 //      * exact conversion; it does not give the same result as
-//      * converting the {@code double} to a {@code String} using the
+//      * converting the {@code double} to a {@code string} using the
 //      * {@link Double#toString(double)} method and then using the
-//      * {@link #BigDecimal(String)} constructor.  To get that result,
+//      * {@link #BigDecimal(string)} constructor.  To get that result,
 //      * use the {@code static} {@link #valueOf(double)} method.
 //      * </ol>
 //      *
@@ -1320,8 +1320,8 @@ public class BigDecimal : Number {
 //         // If either number is zero then the other number, rounded and
 //         // scaled if necessary, is used as the result.
 //         {
-//             boolean lhsIsZero = lhs.signum() == 0;
-//             boolean augendIsZero = augend.signum() == 0;
+//             bool lhsIsZero = lhs.signum() == 0;
+//             bool augendIsZero = augend.signum() == 0;
 
 //             if (lhsIsZero || augendIsZero) {
 //                 int preferredScale = Math.max(lhs.scale(), augend.scale());
@@ -2205,7 +2205,7 @@ public class BigDecimal : Number {
 //         }
 //     }
 
-//     private boolean isPowerOfTen() {
+//     private bool isPowerOfTen() {
 //         return BigInteger.ONE.equals(this.unscaledValue());
 //     }
 
@@ -2218,7 +2218,7 @@ public class BigDecimal : Number {
 //      * input. Conversely, for UP and CEIL, result^2 must be {@code >=} the
 //      * input and (result-ulp)^2 must be {@code <} the input.
 //      */
-//     private boolean squareRootResultAssertions(BigDecimal result, MathContext mc) {
+//     private bool squareRootResultAssertions(BigDecimal result, MathContext mc) {
 //         if (result.signum() == 0) {
 //             return squareRootZeroResultAssertions(result, mc);
 //         } else {
@@ -2279,7 +2279,7 @@ public class BigDecimal : Number {
 //         }
 //     }
 
-//     private boolean squareRootZeroResultAssertions(BigDecimal result, MathContext mc) {
+//     private bool squareRootZeroResultAssertions(BigDecimal result, MathContext mc) {
 //         return this.compareTo(ZERO) == 0;
 //     }
 
@@ -2379,7 +2379,7 @@ public class BigDecimal : Number {
 //         }
 //         // ready to carry out power calculation...
 //         BigDecimal acc = ONE;           // accumulator
-//         boolean seenbit = false;        // set once we've seen a 1-bit
+//         bool seenbit = false;        // set once we've seen a 1-bit
 //         for (int i=1;;i++) {            // for each bit [top bit ignored]
 //             mag += mag;                 // shift left 1 bit
 //             if (mag < 0) {              // top bit is set
@@ -2936,7 +2936,7 @@ public class BigDecimal : Number {
 //      * {@code BigDecimal}.  Two {@code BigDecimal} objects that are
 //      * equal in value but have a different scale (like 2.0 and 2.00)
 //      * are considered equal by this method.  This method is provided
-//      * in preference to individual methods for each of the six boolean
+//      * in preference to individual methods for each of the six bool
 //      * comparison operators ({@literal <}, ==,
 //      * {@literal >}, {@literal >=}, !=, {@literal <=}).  The
 //      * suggested idiom for performing these comparisons is:
@@ -3033,7 +3033,7 @@ public class BigDecimal : Number {
 //      * @see    #hashCode
 //      */
 //     @Override
-//     public boolean equals(Object x) {
+//     public bool equals(Object x) {
 //         if (!(x instanceof BigDecimal))
 //             return false;
 //         BigDecimal xDec = (BigDecimal) x;
@@ -3180,7 +3180,7 @@ public class BigDecimal : Number {
 //      * (unscaled value and scale) has a unique string representation
 //      * as a result of using {@code toString}.  If that string
 //      * representation is converted back to a {@code BigDecimal} using
-//      * the {@link #BigDecimal(String)} constructor, then the original
+//      * the {@link #BigDecimal(string)} constructor, then the original
 //      * value will be recovered.
 //      *
 //      * <li>The string produced for a given number is always the same;
@@ -3203,11 +3203,11 @@ public class BigDecimal : Number {
 //      *
 //      * @return string representation of this {@code BigDecimal}.
 //      * @see    Character#forDigit
-//      * @see    #BigDecimal(java.lang.String)
+//      * @see    #BigDecimal(java.lang.string)
 //      */
 //     @Override
-//     public String toString() {
-//         String sc = stringCache;
+//     public string toString() {
+//         string sc = stringCache;
 //         if (sc == null) {
 //             stringCache = sc = layoutChars(true);
 //         }
@@ -3230,7 +3230,7 @@ public class BigDecimal : Number {
 //      * method is <em>not</em> guaranteed to recover the same [integer,
 //      * scale] pair of this {@code BigDecimal} if the output string is
 //      * converting back to a {@code BigDecimal} using the {@linkplain
-//      * #BigDecimal(String) string constructor}.  The result of this method meets
+//      * #BigDecimal(string) string constructor}.  The result of this method meets
 //      * the weaker constraint of always producing a numerically equal
 //      * result from applying the string constructor to the method's output.
 //      *
@@ -3238,7 +3238,7 @@ public class BigDecimal : Number {
 //      *         engineering notation if an exponent is needed.
 //      * @since  1.5
 //      */
-//     public String toEngineeringString() {
+//     public string toEngineeringString() {
 //         return layoutChars(false);
 //     }
 
@@ -3258,7 +3258,7 @@ public class BigDecimal : Number {
 //      * zero or positive.
 //      *
 //      * Note that if the result of this method is passed to the
-//      * {@linkplain #BigDecimal(String) string constructor}, only the
+//      * {@linkplain #BigDecimal(string) string constructor}, only the
 //      * numerical value of this {@code BigDecimal} will necessarily be
 //      * recovered; the representation of the new {@code BigDecimal}
 //      * may have a different scale.  In particular, if this
@@ -3275,7 +3275,7 @@ public class BigDecimal : Number {
 //      * @see #toString()
 //      * @see #toEngineeringString()
 //      */
-//     public String toPlainString() {
+//     public string toPlainString() {
 //         if(scale==0) {
 //             if(intCompact!=INFLATED) {
 //                 return Long.toString(intCompact);
@@ -3293,7 +3293,7 @@ public class BigDecimal : Number {
 //                 buf = new StringBuilder(20+trailingZeros);
 //                 buf.append(intCompact);
 //             } else {
-//                 String str = intVal.toString();
+//                 string str = intVal.toString();
 //                 buf = new StringBuilder(str.length()+trailingZeros);
 //                 buf.append(str);
 //             }
@@ -3302,7 +3302,7 @@ public class BigDecimal : Number {
 //             }
 //             return buf.toString();
 //         }
-//         String str ;
+//         string str ;
 //         if(intCompact!=INFLATED) {
 //             str = Long.toString(Math.abs(intCompact));
 //         } else {
@@ -3312,7 +3312,7 @@ public class BigDecimal : Number {
 //     }
 
 //     /* Returns a digit.digit string */
-//     private String getValueString(int signum, String intString, int scale) {
+//     private string getValueString(int signum, string intString, int scale) {
 //         /* Insert decimal point */
 //         StringBuilder buf;
 //         int insertionPoint = intString.length() - scale;
@@ -3762,7 +3762,7 @@ public class BigDecimal : Number {
 //      * @return string with canonical string representation of this
 //      *         {@code BigDecimal}
 //      */
-//     private String layoutChars(boolean sci) {
+//     private string layoutChars(bool sci) {
 //         if (scale == 0)                      // zero scale is trivial
 //             return (intCompact != INFLATED) ?
 //                 Long.toString(intCompact):
@@ -4082,7 +4082,7 @@ public class BigDecimal : Number {
 //         s.defaultReadObject();
 //         // validate possibly bad fields
 //         if (intVal == null) {
-//             String message = "BigDecimal: null intVal in stream";
+//             string message = "BigDecimal: null intVal in stream";
 //             throw new java.io.StreamCorruptedException(message);
 //         // [all values of scale are now allowed]
 //         }
@@ -4213,7 +4213,7 @@ public class BigDecimal : Number {
 //     /*
 //      * Internal printing routine
 //      */
-//     private static void print(String name, BigDecimal bd) {
+//     private static void print(string name, BigDecimal bd) {
 //         System.err.format("%s:\tintCompact %d\tintVal %d\tscale %d\tprecision %d%n",
 //                           name,
 //                           bd.intCompact,
@@ -4314,7 +4314,7 @@ public class BigDecimal : Number {
 //      */
 //     private static BigDecimal doRound(BigDecimal val, MathContext mc) {
 //         int mcp = mc.precision;
-//         boolean wasDivided = false;
+//         bool wasDivided = false;
 //         if (mcp > 0) {
 //             BigInteger intVal = val.intVal;
 //             long compactVal = val.intCompact;
@@ -4443,7 +4443,7 @@ public class BigDecimal : Number {
 //         long r = ldividend % ldivisor; // store remainder in long
 //         qsign = ((ldividend < 0) == (ldivisor < 0)) ? 1 : -1;
 //         if (r != 0) {
-//             boolean increment = needIncrement(ldivisor, roundingMode, qsign, q, r);
+//             bool increment = needIncrement(ldivisor, roundingMode, qsign, q, r);
 //             return valueOf((increment ? q + qsign : q), scale);
 //         } else {
 //             if (preferredScale != scale)
@@ -4465,7 +4465,7 @@ public class BigDecimal : Number {
 //         long r = ldividend % ldivisor; // store remainder in long
 //         qsign = ((ldividend < 0) == (ldivisor < 0)) ? 1 : -1;
 //         if (r != 0) {
-//             boolean increment = needIncrement(ldivisor, roundingMode, qsign, q,     r);
+//             bool increment = needIncrement(ldivisor, roundingMode, qsign, q,     r);
 //             return increment ? q + qsign : q;
 //         } else {
 //             return q;
@@ -4475,8 +4475,8 @@ public class BigDecimal : Number {
 //     /**
 //      * Shared logic of need increment computation.
 //      */
-//     private static boolean commonNeedIncrement(int roundingMode, int qsign,
-//                                         int cmpFracHalf, boolean oddQuot) {
+//     private static bool commonNeedIncrement(int roundingMode, int qsign,
+//                                         int cmpFracHalf, bool oddQuot) {
 //         switch(roundingMode) {
 //         case ROUND_UNNECESSARY:
 //             throw new ArithmeticException("Rounding necessary");
@@ -4524,7 +4524,7 @@ public class BigDecimal : Number {
 //     /**
 //      * Tests if quotient has to be incremented according the roundingMode
 //      */
-//     private static boolean needIncrement(long ldivisor, int roundingMode,
+//     private static bool needIncrement(long ldivisor, int roundingMode,
 //                                          int qsign, long q, long r) {
 //         assert r != 0L;
 
@@ -4550,7 +4550,7 @@ public class BigDecimal : Number {
 //         // store quotient & remainder in long
 //         long r = mdividend.divide(ldivisor, mq);
 //         // record remainder is zero or not
-//         boolean isRemainderZero = (r == 0);
+//         bool isRemainderZero = (r == 0);
 //         // quotient sign
 //         int qsign = (ldivisor < 0) ? -bdividend.signum : bdividend.signum;
 //         if (!isRemainderZero) {
@@ -4579,7 +4579,7 @@ public class BigDecimal : Number {
 //         // store quotient & remainder in long
 //         long r = mdividend.divide(ldivisor, mq);
 //         // record remainder is zero or not
-//         boolean isRemainderZero = (r == 0);
+//         bool isRemainderZero = (r == 0);
 //         // quotient sign
 //         int qsign = (ldivisor < 0) ? -bdividend.signum : bdividend.signum;
 //         if (!isRemainderZero) {
@@ -4604,7 +4604,7 @@ public class BigDecimal : Number {
 //     /**
 //      * Tests if quotient has to be incremented according the roundingMode
 //      */
-//     private static boolean needIncrement(long ldivisor, int roundingMode,
+//     private static bool needIncrement(long ldivisor, int roundingMode,
 //                                          int qsign, MutableBigInteger mq, long r) {
 //         assert r != 0L;
 
@@ -4623,7 +4623,7 @@ public class BigDecimal : Number {
 //      * do rounding based on the passed in roundingMode.
 //      */
 //     private static BigInteger divideAndRound(BigInteger bdividend, BigInteger bdivisor, int roundingMode) {
-//         boolean isRemainderZero; // record remainder is zero or not
+//         bool isRemainderZero; // record remainder is zero or not
 //         int qsign; // quotient sign
 //         // Descend into mutables for faster remainder checks
 //         MutableBigInteger mdividend = new MutableBigInteger(bdividend.mag);
@@ -4651,7 +4651,7 @@ public class BigDecimal : Number {
 //      */
 //     private static BigDecimal divideAndRound(BigInteger bdividend, BigInteger bdivisor, int scale, int roundingMode,
 //                                              int preferredScale) {
-//         boolean isRemainderZero; // record remainder is zero or not
+//         bool isRemainderZero; // record remainder is zero or not
 //         int qsign; // quotient sign
 //         // Descend into mutables for faster remainder checks
 //         MutableBigInteger mdividend = new MutableBigInteger(bdividend.mag);
@@ -4682,7 +4682,7 @@ public class BigDecimal : Number {
 //     /**
 //      * Tests if quotient has to be incremented according the roundingMode
 //      */
-//     private static boolean needIncrement(MutableBigInteger mdivisor, int roundingMode,
+//     private static bool needIncrement(MutableBigInteger mdivisor, int roundingMode,
 //                                          int qsign, MutableBigInteger mq, MutableBigInteger mr) {
 //         assert !mr.isZero();
 //         int cmpFracHalf = mr.compareHalf(mdivisor);
@@ -4796,7 +4796,7 @@ public class BigDecimal : Number {
 //     private static BigDecimal add(final long xs, int scale1, BigInteger snd, int scale2) {
 //         int rscale = scale1;
 //         long sdiff = (long)rscale - scale2;
-//         boolean sameSigns =  (Long.signum(xs) == snd.signum);
+//         bool sameSigns =  (Long.signum(xs) == snd.signum);
 //         BigInteger sum;
 //         if (sdiff < 0) {
 //             int raise = checkScale(xs,-sdiff);
@@ -5221,7 +5221,7 @@ public class BigDecimal : Number {
 
 //         long r = mulsub(u1, u0, v1, v0, q0) >>> shift;
 //         if (r != 0) {
-//             boolean increment = needIncrement(divisor >>> shift, roundingMode, sign, q, r);
+//             bool increment = needIncrement(divisor >>> shift, roundingMode, sign, q, r);
 //             return valueOf((increment ? q + sign : q), scale);
 //         } else {
 //             if (preferredScale != scale) {
@@ -5301,11 +5301,11 @@ public class BigDecimal : Number {
 //         return make64(u1 + (tmp>>>32) - q0*v1,tmp & LONG_MASK);
 //     }
 
-//     private static boolean unsignedLongCompare(long one, long two) {
+//     private static bool unsignedLongCompare(long one, long two) {
 //         return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE);
 //     }
 
-//     private static boolean unsignedLongCompareEq(long one, long two) {
+//     private static bool unsignedLongCompareEq(long one, long two) {
 //         return (one+Long.MIN_VALUE) >= (two+Long.MIN_VALUE);
 //     }
 
@@ -5500,7 +5500,7 @@ public class BigDecimal : Number {
 //      * returns true if 128 bit number <hi0,lo0> is less than <hi1,lo1>
 //      * hi0 & hi1 should be non-negative
 //      */
-//     private static boolean longLongCompareMagnitude(long hi0, long lo0, long hi1, long lo1) {
+//     private static bool longLongCompareMagnitude(long hi0, long lo0, long hi1, long lo1) {
 //         if(hi0!=hi1) {
 //             return hi0<hi1;
 //         }

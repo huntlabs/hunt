@@ -183,9 +183,9 @@ class Double : Number{
      * @param  s  a string to be converted to a {@code Double}.
      * @throws    NumberFormatException  if the string does not contain a
      *            parsable number.
-     * @see       java.lang.Double#valueOf(java.lang.String)
+     * @see       java.lang.Double#valueOf(java.lang.string)
      */
-    // public Double(String s) throws NumberFormatException {
+    // public Double(string s) throws NumberFormatException {
     //     value = parseDouble(s);
     // }
 
@@ -208,7 +208,7 @@ class Double : Number{
      *          positive infinity or negative infinity;
      *          {@code false} otherwise.
      */
-    // public boolean isInfinite() {
+    // public bool isInfinite() {
     //     return isInfinite(value);
     // }
 
@@ -218,7 +218,7 @@ class Double : Number{
      * object is converted to a string exactly as if by the method
      * {@code toString} of one argument.
      *
-     * @return  a {@code String} representation of this object.
+     * @return  a {@code string} representation of this object.
      * @see java.lang.Double#toString(double)
      */
     override string toString() {

@@ -102,7 +102,7 @@ interface Collection(E) : Iterable!E {
      * Note that <tt>toArray(new Object[0])</tt> is identical in function to
      * <tt>toArray()</tt>.
      *
-     * @param <T> the runtime type of the array to contain the collection
+     * @param !(T) the runtime type of the array to contain the collection
      * @param a the array into which the elements of this collection are to be
      *        stored, if it is big enough; otherwise, a new array of the same
      *        runtime type is allocated for this purpose.

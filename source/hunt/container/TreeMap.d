@@ -1980,21 +1980,21 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      */
     // static !K Spliterator!K keySpliteratorFor(NavigableMap<K,?> m) {
     //     if (m instanceof TreeMap) {
-    //         @SuppressWarnings("unchecked") TreeMap<K,Object> t =
+    //     TreeMap<K,Object> t =
     //             (TreeMap<K,Object>) m;
     //         return t.keySpliterator();
     //     }
     //     if (m instanceof DescendingSubMap) {
-    //         @SuppressWarnings("unchecked") DescendingSubMap<K,?> dm =
+    //     DescendingSubMap<K,?> dm =
     //             (DescendingSubMap<K,?>) m;
     //         TreeMap<K,?> tm = dm.m;
     //         if (dm == tm.descendingMap) {
-    //             @SuppressWarnings("unchecked") TreeMap<K,Object> t =
+    //         TreeMap<K,Object> t =
     //                 (TreeMap<K,Object>) tm;
     //             return t.descendingKeySpliterator();
     //         }
     //     }
-    //     @SuppressWarnings("unchecked") NavigableSubMap<K,?> sm =
+    // NavigableSubMap<K,?> sm =
     //         (NavigableSubMap<K,?>) m;
     //     return sm.keySpliterator();
     // }
@@ -2373,7 +2373,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //         }
     //         else {
     //             return (Comparator<MapEntry!(K, V)> & Serializable) (e1, e2) -> {
-    //                 @SuppressWarnings("unchecked")
+    //             
     //                 Comparable!K k1 = (Comparable!K) e1.getKey();
     //                 return k1.compareTo(e2.getKey());
     //             };

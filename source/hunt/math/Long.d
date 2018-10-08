@@ -109,15 +109,15 @@ class Long : Number{
     /**
      * Constructs a newly allocated {@code Long} object that
      * represents the {@code long} value indicated by the
-     * {@code String} parameter. The string is converted to a
+     * {@code string} parameter. The string is converted to a
      * {@code long} value in exactly the manner used by the
      * {@code parseLong} method for radix 10.
      *
-     * @param      s   the {@code String} to be converted to a
+     * @param      s   the {@code string} to be converted to a
      *             {@code Long}.
-     * @throws     NumberFormatException  if the {@code String} does not
+     * @throws     NumberFormatException  if the {@code string} does not
      *             contain a parsable {@code long}.
-     * @see        java.lang.Long#parseLong(java.lang.String, int)
+     * @see        java.lang.Long#parseLong(java.lang.string, int)
      */
     public this(string s) {
         this.value = to!long(s);
@@ -258,7 +258,7 @@ class Long : Number{
      * are used as radix-<var>N</var> digits in the order shown. Thus,
      * the digits for hexadecimal (radix 16) are
      * {@code 0123456789abcdef}. If uppercase letters are
-     * desired, the {@link java.lang.String#toUpperCase()} method may
+     * desired, the {@link java.lang.string#toUpperCase()} method may
      * be called on the result:
      *
      * <blockquote>
@@ -294,7 +294,7 @@ class Long : Number{
             buf[--charPos] = '-';
         }
 
-        //return new String(buf, charPos, (65 - charPos));
+        //return new string(buf, charPos, (65 - charPos));
         return to!string(buf[charPos..(65 - charPos)]);
     }
 
@@ -393,7 +393,7 @@ class Long : Number{
      *
      * <p>The value of the argument can be recovered from the returned
      * string {@code s} by calling {@link
-     * Long#parseUnsignedLong(String, int) Long.parseUnsignedLong(s,
+     * Long#parseUnsignedLong(string, int) Long.parseUnsignedLong(s,
      * 16)}.
      *
      * <p>If the unsigned magnitude is zero, it is represented by a
@@ -409,7 +409,7 @@ class Long : Number{
      * These are the characters {@code '\u005Cu0030'} through
      * {@code '\u005Cu0039'} and  {@code '\u005Cu0061'} through
      * {@code '\u005Cu0066'}.  If uppercase letters are desired,
-     * the {@link java.lang.String#toUpperCase()} method may be called
+     * the {@link java.lang.string#toUpperCase()} method may be called
      * on the result:
      *
      * <blockquote>
@@ -420,7 +420,7 @@ class Long : Number{
      * @return  the string representation of the unsigned {@code long}
      *          value represented by the argument in hexadecimal
      *          (base&nbsp;16).
-     * @see #parseUnsignedLong(String, int)
+     * @see #parseUnsignedLong(string, int)
      * @see #toUnsignedString(long, int)
      * @since   JDK 1.0.2
      */
@@ -440,7 +440,7 @@ class Long : Number{
      *
      * <p>The value of the argument can be recovered from the returned
      * string {@code s} by calling {@link
-     * Long#parseUnsignedLong(String, int) Long.parseUnsignedLong(s,
+     * Long#parseUnsignedLong(string, int) Long.parseUnsignedLong(s,
      * 8)}.
      *
      * <p>If the unsigned magnitude is zero, it is represented by a
@@ -459,7 +459,7 @@ class Long : Number{
      * @param   i   a {@code long} to be converted to a string.
      * @return  the string representation of the unsigned {@code long}
      *          value represented by the argument in octal (base&nbsp;8).
-     * @see #parseUnsignedLong(String, int)
+     * @see #parseUnsignedLong(string, int)
      * @see #toUnsignedString(long, int)
      * @since   JDK 1.0.2
      */
@@ -479,7 +479,7 @@ class Long : Number{
      *
      * <p>The value of the argument can be recovered from the returned
      * string {@code s} by calling {@link
-     * Long#parseUnsignedLong(String, int) Long.parseUnsignedLong(s,
+     * Long#parseUnsignedLong(string, int) Long.parseUnsignedLong(s,
      * 2)}.
      *
      * <p>If the unsigned magnitude is zero, it is represented by a
@@ -492,7 +492,7 @@ class Long : Number{
      * @param   i   a {@code long} to be converted to a string.
      * @return  the string representation of the unsigned {@code long}
      *          value represented by the argument in binary (base&nbsp;2).
-     * @see #parseUnsignedLong(String, int)
+     * @see #parseUnsignedLong(string, int)
      * @see #toUnsignedString(long, int)
      * @since   JDK 1.0.2
      */
@@ -501,7 +501,7 @@ class Long : Number{
     }
 
     /**
-     * Format a long (treated as unsigned) into a String.
+     * Format a long (treated as unsigned) into a string.
      * @param val the value to format
      * @param shift the log2 of the base to format in (4 for hex, 3 for octal, 1 for binary)
      */
