@@ -292,12 +292,12 @@ class BigIntegerTest {
     //     report("square for " + order + " bits", failCount1);
     // }
 
-    // private static void printErr(String msg) {
+    // private static void printErr(string msg) {
     //     System.err.println(msg);
     // }
 
     // private static int checkResult(BigInteger expected, BigInteger actual,
-    //     String failureMessage) {
+    //     string failureMessage) {
     //     if (expected.compareTo(actual) != 0) {
     //         printErr(failureMessage + " - expected: " + expected
     //             + ", actual: " + actual);
@@ -842,7 +842,7 @@ class BigIntegerTest {
     //         BigInteger x = new BigInteger(xBytes);
 
     //         for (int radix=Character.MIN_RADIX; radix < Character.MAX_RADIX; radix++) {
-    //             String result = x.toString(radix);
+    //             string result = x.toString(radix);
     //             BigInteger test = new BigInteger(result, radix);
     //             if (!test.equals(x)) {
     //                 failCount++;
@@ -853,7 +853,7 @@ class BigIntegerTest {
     //         }
     //     }
 
-    //     // String conversion straddling the Schoenhage algorithm crossover
+    //     // string conversion straddling the Schoenhage algorithm crossover
     //     // threshold, and at twice and four times the threshold.
     //     for (int k = 0; k <= 2; k++) {
     //         int factor = 1 << k;
@@ -865,7 +865,7 @@ class BigIntegerTest {
     //                 BigInteger x = BigInteger.ONE.shiftLeft(bits - 1).or(new BigInteger(bits - 2, random));
 
     //                 for (int radix = Character.MIN_RADIX; radix < Character.MAX_RADIX; radix++) {
-    //                     String result = x.toString(radix);
+    //                     string result = x.toString(radix);
     //                     BigInteger test = new BigInteger(result, radix);
     //                     if (!test.equals(x)) {
     //                         failCount++;
@@ -878,7 +878,7 @@ class BigIntegerTest {
     //         }
     //     }
 
-    //     report("String Conversion", failCount);
+    //     report("string Conversion", failCount);
     // }
 
     // static void byteArrayConv(int order) {
@@ -996,7 +996,7 @@ class BigIntegerTest {
     // // Note: this constant used for computed Carmichaels, not the array above
     // private static final int NUM_CARMICHAELS_TO_TEST = 5;
 
-    // private static final String[] customer_primes = {
+    // private static final string[] customer_primes = {
     //     "120000000000000000000000000000000019",
     //     "633825300114114700748351603131",
     //     "1461501637330902918203684832716283019651637554291",
@@ -1176,7 +1176,7 @@ class BigIntegerTest {
     // static void serialize() {
     //     int failCount = 0;
 
-    //     String bitPatterns[] = {
+    //     string bitPatterns[] = {
     //          "ffffffff00000000ffffffff00000000ffffffff00000000",
     //          "ffffffffffffffffffffffff000000000000000000000000",
     //          "ffffffff0000000000000000000000000000000000000000",
@@ -1253,7 +1253,7 @@ class BigIntegerTest {
     //  * If order is less than 2, order is changed to 2.
     //  */
     // private static BigInteger fetchNumber(int order) {
-    //     boolean negative = random.nextBoolean();
+    //     bool negative = random.nextBoolean();
     //     int numType = random.nextInt(7);
     //     BigInteger result = null;
     //     if (order < 2) order = 2;

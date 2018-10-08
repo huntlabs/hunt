@@ -98,7 +98,7 @@ class Collections {
      * Returns an immutable set containing only the specified object.
      * The returned set is serializable.
      *
-     * @param  <T> the class of the objects in the set
+     * @param  !(T) the class of the objects in the set
      * @param o the sole object to be stored in the returned set.
      * @return an immutable set containing only the specified object.
      */
@@ -111,7 +111,7 @@ class Collections {
      * Returns an immutable list containing only the specified object.
      * The returned list is serializable.
      *
-     * @param  <T> the class of the objects in the list
+     * @param  !(T) the class of the objects in the list
      * @param o the sole object to be stored in the returned list.
      * @return an immutable list containing only the specified object.
      * @since 1.3
@@ -350,7 +350,7 @@ private class UnmodifiableCollection(E) : Collection!(E) {
     bool isEmpty()            {return c.isEmpty();}
     bool contains(E o)   {return c.contains(o);}
     E[] toArray()           {return c.toArray();}
-    // <T> T[] toArray(T[] a)       {return c.toArray(a);}
+    // !(T) T[] toArray(T[] a)       {return c.toArray(a);}
     override string toString()            {return c.toString();}
     
     override size_t toHash() @trusted nothrow { return super.toHash(); }

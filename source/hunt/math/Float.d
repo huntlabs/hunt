@@ -191,9 +191,9 @@ class Float : Number{
      * @param      s   a string to be converted to a {@code Float}.
      * @throws  NumberFormatException  if the string does not contain a
      *               parsable number.
-     * @see        java.lang.Float#valueOf(java.lang.String)
+     * @see        java.lang.Float#valueOf(java.lang.string)
      */
-    // public Float(String s) throws NumberFormatException {
+    // public Float(string s) throws NumberFormatException {
     //     value = parseFloat(s);
     // }
 
@@ -204,7 +204,7 @@ class Float : Number{
      * @return  {@code true} if the value represented by this object is
      *          NaN; {@code false} otherwise.
      */
-    // public boolean isNaN() {
+    // public bool isNaN() {
     //     return isNaN(value);
     // }
 
@@ -216,17 +216,17 @@ class Float : Number{
      *          positive infinity or negative infinity;
      *          {@code false} otherwise.
      */
-    // public boolean isInfinite() {
+    // public bool isInfinite() {
     //     return isInfinite(value);
     // }
 
     /**
      * Returns a string representation of this {@code Float} object.
      * The primitive {@code float} value represented by this object
-     * is converted to a {@code String} exactly as if by the method
+     * is converted to a {@code string} exactly as if by the method
      * {@code toString} of one argument.
      *
-     * @return  a {@code String} representation of this object.
+     * @return  a {@code string} representation of this object.
      * @see java.lang.Float#toString(float)
      */
     override  string toString() {

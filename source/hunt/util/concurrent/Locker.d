@@ -87,7 +87,7 @@ class Locker {
     //     }
     // }
 
-    // <T> T lock(Func0<T> func0) {
+    // !(T) T lock(Func0!(T) func0) {
     //     try (Lock lock = lock()) {
     //         return func0.call();
     //     }

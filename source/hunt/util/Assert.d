@@ -985,7 +985,7 @@ class Assert {
      * typed as <code>Matcher&lt;T&gt;</code> can be meaningfully applied only
      * to values that could be assigned to a variable of type <code>T</code>.
      *
-     * @param <T> the static type accepted by the matcher (this can flag obvious
+     * @param !(T) the static type accepted by the matcher (this can flag obvious
      * compile-time problems such as {@code assertThat(1, is("a"))}
      * @param actual the computed value being compared
      * @param matcher an expression, built of {@link Matcher}s, specifying allowed
@@ -1017,7 +1017,7 @@ class Assert {
      * to values that could be assigned to a variable of type <code>T</code>.
      *
      * @param reason additional information about the error
-     * @param <T> the static type accepted by the matcher (this can flag obvious
+     * @param !(T) the static type accepted by the matcher (this can flag obvious
      * compile-time problems such as {@code assertThat(1, is("a"))}
      * @param actual the computed value being compared
      * @param matcher an expression, built of {@link Matcher}s, specifying allowed

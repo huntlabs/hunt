@@ -35,8 +35,8 @@ import std.traits;
  * {@code bool}.
  * <p>
  * In addition, this class provides many methods for
- * converting a {@code bool} to a {@code String} and a
- * {@code String} to a {@code bool}, as well as other
+ * converting a {@code bool} to a {@code string} and a
+ * {@code string} to a {@code bool}, as well as other
  * constants and methods useful when dealing with a
  * {@code bool}.
  *
@@ -165,7 +165,7 @@ public  class Boolean
      * Example: {@code Boolean.parseBoolean("True")} returns {@code true}.<br>
      * Example: {@code Boolean.parseBoolean("yes")} returns {@code false}.
      *
-     * @param      s   the {@code String} containing the bool
+     * @param      s   the {@code string} containing the bool
      *                 representation to be parsed
      * @return     the bool represented by the string argument
      * @since 1.5
@@ -216,7 +216,7 @@ public  class Boolean
     }
 
     /**
-     * Returns a {@code String} object representing the specified
+     * Returns a {@code string} object representing the specified
      * bool.  If the specified bool is {@code true}, then
      * the string {@code "true"} will be returned, otherwise the
      * string {@code "false"} will be returned.
@@ -230,7 +230,7 @@ public  class Boolean
     }
 
     /**
-     * Returns a {@code String} object representing this Boolean's
+     * Returns a {@code string} object representing this Boolean's
      * value.  If this object represents the value {@code true},
      * a string equal to {@code "true"} is returned. Otherwise, a
      * string equal to {@code "false"} is returned.
@@ -307,9 +307,9 @@ public  class Boolean
      * @param   name   the system property name.
      * @return  the {@code bool} value of the system property.
      * @throws  SecurityException for the same reasons as
-     *          {@link System#getProperty(String) System.getProperty}
-     * @see     java.lang.System#getProperty(java.lang.String)
-     * @see     java.lang.System#getProperty(java.lang.String, java.lang.String)
+     *          {@link System#getProperty(string) System.getProperty}
+     * @see     java.lang.System#getProperty(java.lang.string)
+     * @see     java.lang.System#getProperty(java.lang.string, java.lang.string)
      */
     // public static bool getBoolean(string name) {
     //     bool result = false;
@@ -361,7 +361,7 @@ public  class Boolean
      * @param a the first operand
      * @param b the second operand
      * @return the logical AND of {@code a} and {@code b}
-     * @see java.util.function.BinaryOperator
+     * @see hunt.util.functional.BinaryOperator
      * @since 1.8
      */
     public static bool logicalAnd(bool a, bool b) {
@@ -375,7 +375,7 @@ public  class Boolean
      * @param a the first operand
      * @param b the second operand
      * @return the logical OR of {@code a} and {@code b}
-     * @see java.util.function.BinaryOperator
+     * @see hunt.util.functional.BinaryOperator
      * @since 1.8
      */
     public static bool logicalOr(bool a, bool b) {
@@ -389,7 +389,7 @@ public  class Boolean
      * @param a the first operand
      * @param b the second operand
      * @return  the logical XOR of {@code a} and {@code b}
-     * @see java.util.function.BinaryOperator
+     * @see hunt.util.functional.BinaryOperator
      * @since 1.8
      */
     public static bool logicalXor(bool a, bool b) {

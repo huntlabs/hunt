@@ -58,7 +58,7 @@ import std.datetime;
  * @see Executor
  * @since 1.5
  * @author Doug Lea
- * @param <V> The result type returned by this Future's {@code get} method
+ * @param !(V) The result type returned by this Future's {@code get} method
  */
 interface Future(V) {
 

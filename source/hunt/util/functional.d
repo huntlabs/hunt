@@ -9,6 +9,29 @@ import std.typetuple;
 */
 alias Function(T, U) = U delegate(T);
 
+
+/**
+ * Represents a supplier of results.
+ *
+ * <p>There is no requirement that a new or distinct result be returned each
+ * time the supplier is invoked.
+ *
+ */
+alias Supplier(T) = T delegate();
+
+/**
+ * Represents an operation that accepts a single input argument and returns no
+ * result. Unlike most other functional interfaces, {@code Consumer} is expected
+ * to operate via side-effects.
+ *
+ */
+alias Consumer(T) = void delegate(T t);
+
+/**
+*/
+alias Predicate(T) = bool delegate(T t);
+
+
 /**
  * A one-argument action.
  */
@@ -57,7 +80,6 @@ template Action6(T1, T2, T3, T4, T5, T6)
 }
 
 
-
 /**
  * A vector-argument action.
  */
@@ -97,28 +119,6 @@ template Func6(T1, T2, T3, T4, T5, T6, R)
 {
     alias Func6 = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
 }
-
-
-
-
-/**
- * Represents a supplier of results.
- *
- * <p>There is no requirement that a new or distinct result be returned each
- * time the supplier is invoked.
- *
- */
-alias Supplier(T) = T delegate();
-
-/**
- * Represents an operation that accepts a single input argument and returns no
- * result. Unlike most other functional interfaces, {@code Consumer} is expected
- * to operate via side-effects.
- *
- */
-alias Consumer(T) = void delegate(T t);
-
-alias Predicate(T) = bool delegate(T t);
 
   
 /**

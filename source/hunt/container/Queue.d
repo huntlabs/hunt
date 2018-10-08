@@ -73,7 +73,7 @@ import hunt.container.Collection;
  * <p>The {@code Queue} interface does not define the <i>blocking queue
  * methods</i>, which are common in concurrent programming.  These methods,
  * which wait for elements to appear or for space to become available, are
- * defined in the {@link java.util.concurrent.BlockingQueue} interface, which
+ * defined in the {@link hunt.concurrent.BlockingQueue} interface, which
  * extends this interface.
  *
  * <p>{@code Queue} implementations generally do not allow insertion
@@ -99,11 +99,11 @@ import hunt.container.Collection;
  * @see java.util.Collection
  * @see LinkedList
  * @see PriorityQueue
- * @see java.util.concurrent.LinkedBlockingQueue
- * @see java.util.concurrent.BlockingQueue
- * @see java.util.concurrent.ArrayBlockingQueue
- * @see java.util.concurrent.LinkedBlockingQueue
- * @see java.util.concurrent.PriorityBlockingQueue
+ * @see hunt.concurrent.LinkedBlockingQueue
+ * @see hunt.concurrent.BlockingQueue
+ * @see hunt.concurrent.ArrayBlockingQueue
+ * @see hunt.concurrent.LinkedBlockingQueue
+ * @see hunt.concurrent.PriorityBlockingQueue
  * @since 1.5
  * @author Doug Lea
  * @param !E the type of elements held in this collection

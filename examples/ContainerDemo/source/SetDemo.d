@@ -65,10 +65,10 @@ class SetDemo
 
 }
 
-// class MyStrComp : Comparator<String>{
+// class MyStrComp : Comparator<string>{
  
 //     @Override
-//     public int compare(String str1, String str2) {
+//     public int compare(string str1, string str2) {
 //         return str1.compareTo(str2);
 //     }
      

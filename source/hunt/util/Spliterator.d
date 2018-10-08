@@ -193,20 +193,20 @@ enum SpliteratorCharacteristic {
  * <p>Primitive subtype specializations of {@code Spliterator} are provided for
  * {@link OfInt int}, {@link OfLong long}, and {@link OfDouble double} values.
  * The subtype default implementations of
- * {@link Spliterator#tryAdvance(java.util.function.Consumer)}
- * and {@link Spliterator#forEachRemaining(java.util.function.Consumer)} box
+ * {@link Spliterator#tryAdvance(hunt.util.functional.Consumer)}
+ * and {@link Spliterator#forEachRemaining(hunt.util.functional.Consumer)} box
  * primitive values to instances of their corresponding wrapper class.  Such
  * boxing may undermine any performance advantages gained by using the primitive
  * specializations.  To avoid boxing, the corresponding primitive-based methods
  * should be used.  For example,
- * {@link Spliterator.OfInt#tryAdvance(java.util.function.IntConsumer)}
- * and {@link Spliterator.OfInt#forEachRemaining(java.util.function.IntConsumer)}
+ * {@link Spliterator.OfInt#tryAdvance(hunt.util.functional.IntConsumer)}
+ * and {@link Spliterator.OfInt#forEachRemaining(hunt.util.functional.IntConsumer)}
  * should be used in preference to
- * {@link Spliterator.OfInt#tryAdvance(java.util.function.Consumer)} and
- * {@link Spliterator.OfInt#forEachRemaining(java.util.function.Consumer)}.
+ * {@link Spliterator.OfInt#tryAdvance(hunt.util.functional.Consumer)} and
+ * {@link Spliterator.OfInt#forEachRemaining(hunt.util.functional.Consumer)}.
  * Traversal of primitive values using boxing-based methods
  * {@link #tryAdvance tryAdvance()} and
- * {@link #forEachRemaining(java.util.function.Consumer) forEachRemaining()}
+ * {@link #forEachRemaining(hunt.util.functional.Consumer) forEachRemaining()}
  * does not affect the order in which the values, transformed to boxed values,
  * are encountered.
  *
@@ -231,11 +231,11 @@ enum SpliteratorCharacteristic {
  * <ul>
  * <li>The source cannot be structurally interfered with.
  * <br>For example, an instance of
- * {@link java.util.concurrent.CopyOnWriteArrayList} is an immutable source.
+ * {@link hunt.concurrent.CopyOnWriteArrayList} is an immutable source.
  * A Spliterator created from the source reports a characteristic of
  * {@code IMMUTABLE}.</li>
  * <li>The source manages concurrent modifications.
- * <br>For example, a key set of a {@link java.util.concurrent.ConcurrentHashMap}
+ * <br>For example, a key set of a {@link hunt.concurrent.ConcurrentHashMap}
  * is a concurrent source.  A Spliterator created from the source reports a
  * characteristic of {@code CONCURRENT}.</li>
  * <li>The mutable source provides a late-binding and fail-fast Spliterator.
@@ -266,7 +266,7 @@ enum SpliteratorCharacteristic {
  * locations. Its Spliterator ignores the tags.
  *
  * <pre> {@code
- * class TaggedArray<T> {
+ * class TaggedArray!(T) {
  *   private final Object[] elements; // immutable after construction
  *   TaggedArray(T[] data, Object[] tags) {
  *     int size = data.length;
@@ -278,11 +278,11 @@ enum SpliteratorCharacteristic {
  *     }
  *   }
  *
- *   public Spliterator<T> spliterator() {
+ *   public Spliterator!(T) spliterator() {
  *     return new TaggedArraySpliterator<>(elements, 0, elements.length);
  *   }
  *
- *   static class TaggedArraySpliterator<T> implements Spliterator<T> {
+ *   static class TaggedArraySpliterator!(T) : Spliterator!(T) {
  *     private final Object[] array;
  *     private int origin; // current index, advanced on split or traversal
  *     private final int fence; // one past the greatest index
@@ -291,12 +291,12 @@ enum SpliteratorCharacteristic {
  *       this.array = array; this.origin = origin; this.fence = fence;
  *     }
  *
- *     public void forEachRemaining(Consumer<? super T> action) {
+ *     public void forEachRemaining(Consumer!(T) action) {
  *       for (; origin < fence; origin += 2)
  *         action.accept((T) array[origin]);
  *     }
  *
- *     public bool tryAdvance(Consumer<? super T> action) {
+ *     public bool tryAdvance(Consumer!(T) action) {
  *       if (origin < fence) {
  *         action.accept((T) array[origin]);
  *         origin += 2;
@@ -306,7 +306,7 @@ enum SpliteratorCharacteristic {
  *         return false;
  *     }
  *
- *     public Spliterator<T> trySplit() {
+ *     public Spliterator!(T) trySplit() {
  *       int lo = origin; // divide range in half
  *       int mid = ((lo + fence) >>> 1) & ~1; // force midpoint to be even
  *       if (lo < mid) { // split out left half
@@ -335,30 +335,30 @@ enum SpliteratorCharacteristic {
  * sequentially. Here we assume that the order of processing across
  * subtasks doesn't matter; different (forked) tasks may further split
  * and process elements concurrently in undetermined order.  This
- * example uses a {@link java.util.concurrent.CountedCompleter};
+ * example uses a {@link hunt.concurrent.CountedCompleter};
  * similar usages apply to other parallel task constructions.
  *
  * <pre>{@code
- * static <T> void parEach(TaggedArray<T> a, Consumer<T> action) {
- *   Spliterator<T> s = a.spliterator();
+ * static !(T) void parEach(TaggedArray!(T) a, Consumer!(T) action) {
+ *   Spliterator!(T) s = a.spliterator();
  *   long targetBatchSize = s.estimateSize() / (ForkJoinPool.getCommonPoolParallelism() * 8);
  *   new ParEach(null, s, action, targetBatchSize).invoke();
  * }
  *
- * static class ParEach<T> extends CountedCompleter<Void> {
- *   final Spliterator<T> spliterator;
- *   final Consumer<T> action;
+ * static class ParEach!(T) extends CountedCompleter!(void) {
+ *   final Spliterator!(T) spliterator;
+ *   final Consumer!(T) action;
  *   final long targetBatchSize;
  *
- *   ParEach(ParEach<T> parent, Spliterator<T> spliterator,
- *           Consumer<T> action, long targetBatchSize) {
+ *   ParEach(ParEach!(T) parent, Spliterator!(T) spliterator,
+ *           Consumer!(T) action, long targetBatchSize) {
  *     super(parent);
  *     this.spliterator = spliterator; this.action = action;
  *     this.targetBatchSize = targetBatchSize;
  *   }
  *
  *   public void compute() {
- *     Spliterator<T> sub;
+ *     Spliterator!(T) sub;
  *     while (spliterator.estimateSize() > targetBatchSize &&
  *            (sub = spliterator.trySplit()) !is null) {
  *       addToPendingCount(1);
@@ -374,7 +374,7 @@ enum SpliteratorCharacteristic {
  * is set to {@code true} then diagnostic warnings are reported if boxing of
  * primitive values occur when operating on primitive subtype specializations.
  *
- * @param <T> the type of elements returned by this Spliterator
+ * @param !(T) the type of elements returned by this Spliterator
  *
  * @see Collection
  * @since 1.8
@@ -392,7 +392,7 @@ interface Spliterator(T) {
 //      * upon entry to this method, else {@code true}.
 //      * @throws NullPointerException if the specified action is null
 //      */
-//     bool tryAdvance(Consumer<? super T> action);
+//     bool tryAdvance(Consumer!(T) action);
 
 //     /**
 //      * Performs the given action for each remaining element, sequentially in
@@ -408,7 +408,7 @@ interface Spliterator(T) {
 //      * @param action The action
 //      * @throws NullPointerException if the specified action is null
 //      */
-//     default void forEachRemaining(Consumer<? super T> action) {
+//     default void forEachRemaining(Consumer!(T) action) {
 //         do { } while (tryAdvance(action));
 //     }
 
@@ -453,7 +453,7 @@ interface Spliterator(T) {
 //      * @return a {@code Spliterator} covering some portion of the
 //      * elements, or {@code null} if this spliterator cannot be split
 //      */
-//     Spliterator<T> trySplit();
+//     Spliterator!(T) trySplit();
 
 //     /**
 //      * Returns an estimate of the number of elements that would be
@@ -556,12 +556,12 @@ interface Spliterator(T) {
 //     /**
 //      * A Spliterator specialized for primitive values.
 //      *
-//      * @param <T> the type of elements returned by this Spliterator.  The
+//      * @param !(T) the type of elements returned by this Spliterator.  The
 //      * type must be a wrapper type for a primitive type, such as {@code Integer}
 //      * for the primitive {@code int} type.
 //      * @param <T_CONS> the type of primitive consumer.  The type must be a
-//      * primitive specialization of {@link java.util.function.Consumer} for
-//      * {@code T}, such as {@link java.util.function.IntConsumer} for
+//      * primitive specialization of {@link hunt.util.functional.Consumer} for
+//      * {@code T}, such as {@link hunt.util.functional.IntConsumer} for
 //      * {@code Integer}.
 //      * @param <T_SPLITR> the type of primitive Spliterator.  The type must be
 //      * a primitive specialization of Spliterator for {@code T}, such as
@@ -573,7 +573,7 @@ interface Spliterator(T) {
 //      * @since 1.8
 //      */
 //     public interface OfPrimitive<T, T_CONS, T_SPLITR extends Spliterator.OfPrimitive<T, T_CONS, T_SPLITR>>
-//             extends Spliterator<T> {
+//             extends Spliterator!(T) {
 //         @Override
 //         T_SPLITR trySplit();
 
@@ -589,7 +589,7 @@ interface Spliterator(T) {
 //          * upon entry to this method, else {@code true}.
 //          * @throws NullPointerException if the specified action is null
 //          */
-//         @SuppressWarnings("overloads")
+//     
 //         bool tryAdvance(T_CONS action);
 
 //         /**
@@ -607,7 +607,7 @@ interface Spliterator(T) {
 //          * @param action The action
 //          * @throws NullPointerException if the specified action is null
 //          */
-//         @SuppressWarnings("overloads")
+//     
 //         default void forEachRemaining(T_CONS action) {
 //             do { } while (tryAdvance(action));
 //         }
@@ -635,10 +635,10 @@ interface Spliterator(T) {
 //          * @implSpec
 //          * If the action is an instance of {@code IntConsumer} then it is cast
 //          * to {@code IntConsumer} and passed to
-//          * {@link #tryAdvance(java.util.function.IntConsumer)}; otherwise
+//          * {@link #tryAdvance(hunt.util.functional.IntConsumer)}; otherwise
 //          * the action is adapted to an instance of {@code IntConsumer}, by
 //          * boxing the argument of {@code IntConsumer}, and then passed to
-//          * {@link #tryAdvance(java.util.function.IntConsumer)}.
+//          * {@link #tryAdvance(hunt.util.functional.IntConsumer)}.
 //          */
 //         @Override
 //         default bool tryAdvance(Consumer<? super Integer> action) {
@@ -658,10 +658,10 @@ interface Spliterator(T) {
 //          * @implSpec
 //          * If the action is an instance of {@code IntConsumer} then it is cast
 //          * to {@code IntConsumer} and passed to
-//          * {@link #forEachRemaining(java.util.function.IntConsumer)}; otherwise
+//          * {@link #forEachRemaining(hunt.util.functional.IntConsumer)}; otherwise
 //          * the action is adapted to an instance of {@code IntConsumer}, by
 //          * boxing the argument of {@code IntConsumer}, and then passed to
-//          * {@link #forEachRemaining(java.util.function.IntConsumer)}.
+//          * {@link #forEachRemaining(hunt.util.functional.IntConsumer)}.
 //          */
 //         @Override
 //         default void forEachRemaining(Consumer<? super Integer> action) {
@@ -699,10 +699,10 @@ interface Spliterator(T) {
 //          * @implSpec
 //          * If the action is an instance of {@code LongConsumer} then it is cast
 //          * to {@code LongConsumer} and passed to
-//          * {@link #tryAdvance(java.util.function.LongConsumer)}; otherwise
+//          * {@link #tryAdvance(hunt.util.functional.LongConsumer)}; otherwise
 //          * the action is adapted to an instance of {@code LongConsumer}, by
 //          * boxing the argument of {@code LongConsumer}, and then passed to
-//          * {@link #tryAdvance(java.util.function.LongConsumer)}.
+//          * {@link #tryAdvance(hunt.util.functional.LongConsumer)}.
 //          */
 //         @Override
 //         default bool tryAdvance(Consumer<? super Long> action) {
@@ -722,10 +722,10 @@ interface Spliterator(T) {
 //          * @implSpec
 //          * If the action is an instance of {@code LongConsumer} then it is cast
 //          * to {@code LongConsumer} and passed to
-//          * {@link #forEachRemaining(java.util.function.LongConsumer)}; otherwise
+//          * {@link #forEachRemaining(hunt.util.functional.LongConsumer)}; otherwise
 //          * the action is adapted to an instance of {@code LongConsumer}, by
 //          * boxing the argument of {@code LongConsumer}, and then passed to
-//          * {@link #forEachRemaining(java.util.function.LongConsumer)}.
+//          * {@link #forEachRemaining(hunt.util.functional.LongConsumer)}.
 //          */
 //         @Override
 //         default void forEachRemaining(Consumer<? super Long> action) {
@@ -763,10 +763,10 @@ interface Spliterator(T) {
 //          * @implSpec
 //          * If the action is an instance of {@code DoubleConsumer} then it is
 //          * cast to {@code DoubleConsumer} and passed to
-//          * {@link #tryAdvance(java.util.function.DoubleConsumer)}; otherwise
+//          * {@link #tryAdvance(hunt.util.functional.DoubleConsumer)}; otherwise
 //          * the action is adapted to an instance of {@code DoubleConsumer}, by
 //          * boxing the argument of {@code DoubleConsumer}, and then passed to
-//          * {@link #tryAdvance(java.util.function.DoubleConsumer)}.
+//          * {@link #tryAdvance(hunt.util.functional.DoubleConsumer)}.
 //          */
 //         @Override
 //         default bool tryAdvance(Consumer<? super Double> action) {
@@ -786,11 +786,11 @@ interface Spliterator(T) {
 //          * @implSpec
 //          * If the action is an instance of {@code DoubleConsumer} then it is
 //          * cast to {@code DoubleConsumer} and passed to
-//          * {@link #forEachRemaining(java.util.function.DoubleConsumer)};
+//          * {@link #forEachRemaining(hunt.util.functional.DoubleConsumer)};
 //          * otherwise the action is adapted to an instance of
 //          * {@code DoubleConsumer}, by boxing the argument of
 //          * {@code DoubleConsumer}, and then passed to
-//          * {@link #forEachRemaining(java.util.function.DoubleConsumer)}.
+//          * {@link #forEachRemaining(hunt.util.functional.DoubleConsumer)}.
 //          */
 //         @Override
 //         default void forEachRemaining(Consumer<? super Double> action) {

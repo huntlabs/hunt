@@ -44,7 +44,7 @@ module hunt.util.character.Character;
  * <a id="supplementary">Characters</a> whose code points are greater
  * than U+FFFF are called <em>supplementary character</em>s.  The Java
  * platform uses the UTF-16 representation in {@code char} arrays and
- * in the {@code String} and {@code StringBuffer} classes. In
+ * in the {@code string} and {@code StringBuffer} classes. In
  * this representation, supplementary characters are represented as a pair
  * of {@code char} values, the first from the <em>high-surrogates</em>
  * range, (&#92;uD800-&#92;uDBFF), the second from the

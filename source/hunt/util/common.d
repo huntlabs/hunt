@@ -1,9 +1,5 @@
 module hunt.util.common;
 
-import hunt.util.exception;
-
-import core.time;
-
 /**
  * A class implements the <code>Cloneable</code> interface to
  * indicate to the {@link java.lang.Object#clone()} method that it
@@ -23,11 +19,6 @@ import core.time;
  * Therefore, it is not possible to clone an object merely by virtue of the
  * fact that it implements this interface.  Even if the clone method is invoked
  * reflectively, there is no guarantee that it will succeed.
- *
- * @author  unascribed
- * @see     java.lang.CloneNotSupportedException
- * @see     java.lang.Object#clone()
- * @since   JDK1.0
  */
 interface Cloneable {
 }
@@ -49,8 +40,6 @@ interface Runnable {
      * <p>
      * The general contract of the method <code>run</code> is that it may
      * take any action whatsoever.
-     *
-     * @see     java.lang.Thread#run()
      */
     void run();
 }
@@ -157,7 +146,7 @@ interface Closeable : AutoCloseable
  *
  * @since 1.5
  */
-public interface Appendable {
+interface Appendable {
 
     /**
      * Appends the specified character sequence to this {@code Appendable}.
@@ -238,58 +227,6 @@ interface EventListener {
 }
 
 
-/**
- * <p>
- * The root class from which all event state objects shall be derived.
- * <p>
- * All Events are constructed with a reference to the object, the "source",
- * that is logically deemed to be the object upon which the Event in question
- * initially occurred upon.
- *
- * @since JDK1.1
- */
-
-class EventObject {
-
-    // private enum long serialVersionUID = 5516075349620653480L;
-
-    /**
-     * The object on which the Event initially occurred.
-     */
-    protected Object  source;
-
-    /**
-     * Constructs a prototypical Event.
-     *
-     * @param    source    The object on which the Event initially occurred.
-     * @exception  IllegalArgumentException  if source is null.
-     */
-    this(Object source) {
-        if (source is null)
-            throw new IllegalArgumentException("null source");
-
-        this.source = source;
-    }
-
-    /**
-     * The object on which the Event initially occurred.
-     *
-     * @return   The object on which the Event initially occurred.
-     */
-    Object getSource() {
-        return source;
-    }
-
-    /**
-     * Returns a string representation of this EventObject.
-     *
-     * @return  A a string representation of this EventObject.
-     */
-    override
-    string toString() {
-        return typeid(this).name ~ "[source=" ~ source.toString() ~ "]";
-    }
-}
 
 enum ByteOrder
 {
@@ -324,35 +261,3 @@ alias EventHandler = void delegate(Object sender, EventArgs args);
 alias SimpleEventHandler = void delegate();
 alias ErrorEventHandler = void delegate(string message);
 alias TickedEventHandler = void delegate(Object sender);
-
-/**
-*/
-interface ITimer {
-    
-    /// 
-	bool isActive();
-
-	/// in ms
-	size_t interval();
-
-	/// ditto
-	ITimer interval(size_t v);
-	
-	/// ditto
-	ITimer interval(Duration duration);
-
-	///
-	ITimer onTick(TickedEventHandler handler);
-
-	/// immediately: true to call first event immediately
-	/// once: true to call timed event only once
-	void start(bool immediately = false, bool once = false);
-	
-	void stop();
-
-	void reset(bool immediately = false, bool once = false);
-
-	void reset(size_t interval);
-
-	void reset(Duration duration);
-}

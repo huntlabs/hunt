@@ -33,7 +33,7 @@ import hunt.math.Number;
  * single field whose type is {@code short}.
  *
  * <p>In addition, this class provides several methods for converting
- * a {@code short} to a {@code String} and a {@code String} to a
+ * a {@code short} to a {@code string} and a {@code string} to a
  * {@code short}, as well as other constants and methods useful when
  * dealing with a {@code short}.
  *
@@ -64,7 +64,7 @@ public  class Short : Number /*implements Comparable<Short> */{
     // public static  Class<Short>    TYPE = (Class<Short>) Class.getPrimitiveClass("short");
 
     /**
-     * Returns a new {@code String} object representing the
+     * Returns a new {@code string} object representing the
      * specified {@code short}. The radix is assumed to be 10.
      *
      * @param s the {@code short} to be converted
@@ -107,15 +107,15 @@ public  class Short : Number /*implements Comparable<Short> */{
      * {@code short}.
      * </ul>
      *
-     * @param s         the {@code String} containing the
+     * @param s         the {@code string} containing the
      *                  {@code short} representation to be parsed
      * @param radix     the radix to be used while parsing {@code s}
      * @return          the {@code short} represented by the string
      *                  argument in the specified radix.
-     * @throws          NumberFormatException If the {@code String}
+     * @throws          NumberFormatException If the {@code string}
      *                  does not contain a parsable {@code short}.
      */
-    // public static short parseShort(String s, int radix)
+    // public static short parseShort(string s, int radix)
     //     throws NumberFormatException {
     //     int i = Integer.parseInt(s, radix);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
@@ -133,26 +133,26 @@ public  class Short : Number /*implements Comparable<Short> */{
      * ({@code '\u005Cu002B'}) to indicate a positive value.  The
      * resulting {@code short} value is returned, exactly as if the
      * argument and the radix 10 were given as arguments to the {@link
-     * #parseShort(java.lang.String, int)} method.
+     * #parseShort(java.lang.string, int)} method.
      *
-     * @param s a {@code String} containing the {@code short}
+     * @param s a {@code string} containing the {@code short}
      *          representation to be parsed
      * @return  the {@code short} value represented by the
      *          argument in decimal.
      * @throws  NumberFormatException If the string does not
      *          contain a parsable {@code short}.
      */
-    // public static short parseShort(String s) throws NumberFormatException {
+    // public static short parseShort(string s) throws NumberFormatException {
     //     return parseShort(s, 10);
     // }
 
     /**
      * Returns a {@code Short} object holding the value
-     * extracted from the specified {@code String} when parsed
+     * extracted from the specified {@code string} when parsed
      * with the radix given by the second argument. The first argument
      * is interpreted as representing a signed {@code short} in
      * the radix specified by the second argument, exactly as if the
-     * argument were given to the {@link #parseShort(java.lang.String,
+     * argument were given to the {@link #parseShort(java.lang.string,
      * int)} method. The result is a {@code Short} object that
      * represents the {@code short} value specified by the string.
      *
@@ -168,20 +168,20 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return          a {@code Short} object holding the value
      *                  represented by the string argument in the
      *                  specified radix.
-     * @throws          NumberFormatException If the {@code String} does
+     * @throws          NumberFormatException If the {@code string} does
      *                  not contain a parsable {@code short}.
      */
-    // public static Short valueOf(String s, int radix)
+    // public static Short valueOf(string s, int radix)
     //     throws NumberFormatException {
     //     return valueOf(parseShort(s, radix));
     // }
 
     /**
      * Returns a {@code Short} object holding the
-     * value given by the specified {@code String}. The argument
+     * value given by the specified {@code string}. The argument
      * is interpreted as representing a signed decimal
      * {@code short}, exactly as if the argument were given to
-     * the {@link #parseShort(java.lang.String)} method. The result is
+     * the {@link #parseShort(java.lang.string)} method. The result is
      * a {@code Short} object that represents the
      * {@code short} value specified by the string.
      *
@@ -195,10 +195,10 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @param s the string to be parsed
      * @return  a {@code Short} object holding the value
      *          represented by the string argument
-     * @throws  NumberFormatException If the {@code String} does
+     * @throws  NumberFormatException If the {@code string} does
      *          not contain a parsable {@code short}.
      */
-    // public static Short valueOf(String s) throws NumberFormatException {
+    // public static Short valueOf(string s) throws NumberFormatException {
     //     return valueOf(s, 10);
     // }
 
@@ -239,7 +239,7 @@ public  class Short : Number /*implements Comparable<Short> */{
     // }
 
     /**
-     * Decodes a {@code String} into a {@code Short}.
+     * Decodes a {@code string} into a {@code Short}.
      * Accepts decimal, hexadecimal, and octal numbers given by
      * the following grammar:
      *
@@ -270,17 +270,17 @@ public  class Short : Number /*implements Comparable<Short> */{
      * 8).  This sequence of characters must represent a positive
      * value or a {@link NumberFormatException} will be thrown.  The
      * result is negated if first character of the specified {@code
-     * String} is the minus sign.  No whitespace characters are
-     * permitted in the {@code String}.
+     * string} is the minus sign.  No whitespace characters are
+     * permitted in the {@code string}.
      *
-     * @param     nm the {@code String} to decode.
+     * @param     nm the {@code string} to decode.
      * @return    a {@code Short} object holding the {@code short}
      *            value represented by {@code nm}
-     * @throws    NumberFormatException  if the {@code String} does not
+     * @throws    NumberFormatException  if the {@code string} does not
      *            contain a parsable {@code short}.
-     * @see java.lang.Short#parseShort(java.lang.String, int)
+     * @see java.lang.Short#parseShort(java.lang.string, int)
      */
-    // public static Short decode(String nm) throws NumberFormatException {
+    // public static Short decode(string nm) throws NumberFormatException {
     //     int i = Integer.decode(nm);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
     //         throw new NumberFormatException(
@@ -309,17 +309,17 @@ public  class Short : Number /*implements Comparable<Short> */{
     /**
      * Constructs a newly allocated {@code Short} object that
      * represents the {@code short} value indicated by the
-     * {@code String} parameter. The string is converted to a
+     * {@code string} parameter. The string is converted to a
      * {@code short} value in exactly the manner used by the
      * {@code parseShort} method for radix 10.
      *
-     * @param s the {@code String} to be converted to a
+     * @param s the {@code string} to be converted to a
      *          {@code Short}
-     * @throws  NumberFormatException If the {@code String}
+     * @throws  NumberFormatException If the {@code string}
      *          does not contain a parsable {@code short}.
-     * @see     java.lang.Short#parseShort(java.lang.String, int)
+     * @see     java.lang.Short#parseShort(java.lang.string, int)
      */
-    // public Short(String s) throws NumberFormatException {
+    // public Short(string s) throws NumberFormatException {
     //     this.value = parseShort(s, 10);
     // }
 
@@ -377,7 +377,7 @@ public  class Short : Number /*implements Comparable<Short> */{
     }
 
     /**
-     * Returns a {@code String} object representing this
+     * Returns a {@code string} object representing this
      * {@code Short}'s value.  The value is converted to signed
      * decimal representation and returned as a string, exactly as if
      * the {@code short} value were given as an argument to the
