@@ -24,7 +24,6 @@ import core.stdc.stdint;
 import std.socket;
 
 version (Windows) import SOCKETOPTIONS = core.sys.windows.winsock2;
-
 version (Posix) import SOCKETOPTIONS = core.sys.posix.sys.socket;
 
 alias ConnectionHandler = void delegate(bool isSucceeded);
@@ -39,13 +38,6 @@ alias SocketChannelBase = AbstractSocketChannel;
 // alias StreamSocketBase = AbstractStream;
 // alias DatagramSocketBase = AbstractDatagramSocket;
 
-/**
-*/
-interface IAcceptor
-{
-    void onClose();
-    void onRead();
-}
 
 /**
 */
@@ -158,12 +150,6 @@ abstract class AbstractSocketChannel : AbstractChannel
 
 }
 
-/**
-*/
-interface IDatagramSocket
-{
-
-}
 
 /**
 */
@@ -172,34 +158,31 @@ class SocketStreamBuffer : StreamWriteBuffer
 
     this(const(ubyte)[] data, DataWrittenHandler handler = null)
     {
-        _data = data;
-        _site = 0;
+        _buffer = data;
+        _pos = 0;
         _sentHandler = handler;
     }
 
-    const(ubyte)[] sendData()
+    const(ubyte)[] remaining()
     {
-        return _data[_site .. $];
+        return _buffer[_pos .. $];
     }
 
-    // add send offiset and return is empty
-    bool popSize(size_t size)
+    bool pop(size_t size)
     {
-        _site += size;
-        if (_site >= _data.length)
+        _pos += size;
+        if (_pos >= _buffer.length)
             return true;
         else
             return false;
     }
-    // do send finish
-    void doFinish()
+
+    void finish()
     {
         if (_sentHandler)
-        {
-            _sentHandler(_data, _site);
-        }
+            _sentHandler(_buffer, _pos);
         _sentHandler = null;
-        _data = null;
+        _buffer = null;
     }
 
     StreamWriteBuffer next()
@@ -212,10 +195,15 @@ class SocketStreamBuffer : StreamWriteBuffer
         _next = v;
     }
 
+    size_t capacity()
+    {
+        return _buffer.length;
+    }
+
 private:
     StreamWriteBuffer _next;
-    size_t _site = 0;
-    const(ubyte)[] _data;
+    size_t _pos = 0;
+    const(ubyte)[] _buffer;
     DataWrittenHandler _sentHandler;
 }
 
