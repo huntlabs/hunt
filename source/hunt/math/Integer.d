@@ -263,7 +263,7 @@ class Integer : Number{
             int h = 127;
             // string integerCacheHighPropValue =
             //     sun.misc.VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
-            // if (integerCacheHighPropValue != null) {
+            // if (integerCacheHighPropValue !is null) {
             //     try {
             //         int i = parseInt(integerCacheHighPropValue);
             //         i = Math.max(i, 127);

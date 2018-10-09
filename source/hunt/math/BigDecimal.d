@@ -2920,7 +2920,7 @@ public class BigDecimal : Number {
 //      * @since 1.5
 //      */
 //     public BigDecimal stripTrailingZeros() {
-//         if (intCompact == 0 || (intVal != null && intVal.signum() == 0)) {
+//         if (intCompact == 0 || (intVal !is null && intVal.signum() == 0)) {
 //             return BigDecimal.ZERO;
 //         } else if (intCompact != INFLATED) {
 //             return createAndStripZerosToMatchScale(intCompact, scale, Long.MIN_VALUE);
@@ -3208,7 +3208,7 @@ public class BigDecimal : Number {
 //     @Override
 //     public string toString() {
 //         string sc = stringCache;
-//         if (sc == null) {
+//         if (sc is null) {
 //             stringCache = sc = layoutChars(true);
 //         }
 //         return sc;
@@ -4081,7 +4081,7 @@ public class BigDecimal : Number {
 //         // Read in all fields
 //         s.defaultReadObject();
 //         // validate possibly bad fields
-//         if (intVal == null) {
+//         if (intVal is null) {
 //             string message = "BigDecimal: null intVal in stream";
 //             throw new java.io.StreamCorruptedException(message);
 //         // [all values of scale are now allowed]
@@ -4097,7 +4097,7 @@ public class BigDecimal : Number {
 //    private void writeObject(java.io.ObjectOutputStream s)
 //        throws java.io.IOException {
 //        // Must inflate to maintain compatible serial form.
-//        if (this.intVal == null)
+//        if (this.intVal is null)
 //            UnsafeHolder.setIntValVolatile(this, BigInteger.valueOf(this.intCompact));
 //        // Could reset intVal back to null if it has to be set.
 //        s.defaultWriteObject();
@@ -4171,7 +4171,7 @@ public class BigDecimal : Number {
 //             asInt = val>Integer.MAX_VALUE ? Integer.MAX_VALUE : Integer.MIN_VALUE;
 //             BigInteger b;
 //             if (intCompact != 0 &&
-//                 ((b = intVal) == null || b.signum() != 0))
+//                 ((b = intVal) is null || b.signum() != 0))
 //                 throw new ArithmeticException(asInt>0 ? "Underflow":"Overflow");
 //         }
 //         return asInt;
@@ -4243,7 +4243,7 @@ public class BigDecimal : Number {
 //      */
 //     private BigDecimal audit() {
 //         if (intCompact == INFLATED) {
-//             if (intVal == null) {
+//             if (intVal is null) {
 //                 print("audit", this);
 //                 throw new AssertionError("null intVal");
 //             }
@@ -4253,7 +4253,7 @@ public class BigDecimal : Number {
 //                 throw new AssertionError("precision mismatch");
 //             }
 //         } else {
-//             if (intVal != null) {
+//             if (intVal !is null) {
 //                 long val = intVal.longValue();
 //                 if (val != intCompact) {
 //                     print("audit", this);
