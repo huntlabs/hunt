@@ -651,7 +651,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //      * @return a string representation of this map entry
     //      */
     //     string toString() {
-    //         return key + "=" + value;
+    //         return key ~ "=" ~ value;
     //     }
 
     // }

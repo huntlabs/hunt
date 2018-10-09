@@ -119,7 +119,7 @@ module hunt.util.concurrent.IdleTimeout;
 //                     // System.out.println("{} idle timeout expired", this);
 //                     try {
 //                         onIdleExpired(new TimeoutException(
-//                                 "Idle timeout expired: " + idleElapsed + "/" + idleTimeout + " ms"));
+//                                 "Idle timeout expired: " ~ idleElapsed ~ "/" ~ idleTimeout ~ " ms"));
 //                     } finally {
 //                         notIdle();
 //                     }

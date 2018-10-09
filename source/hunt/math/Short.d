@@ -120,7 +120,7 @@ public  class Short : Number /*implements Comparable<Short> */{
     //     int i = Integer.parseInt(s, radix);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
     //         throw new NumberFormatException(
-    //             "Value out of range. Value:\"" + s + "\" Radix:" + radix);
+    //             "Value out of range. Value:\"" ~ s ~ "\" Radix:" ~ radix);
     //     return (short)i;
     // }
 
@@ -284,7 +284,7 @@ public  class Short : Number /*implements Comparable<Short> */{
     //     int i = Integer.decode(nm);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
     //         throw new NumberFormatException(
-    //                 "Value " + i + " out of range from input " + nm);
+    //                 "Value " ~ i ~ " out of range from input " ~ nm);
     //     return valueOf((short)i);
     // }
 

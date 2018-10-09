@@ -274,7 +274,7 @@ class BigIntegerTest {
     //         if (!y.equals(z))
     //             failCount1++;
     //     }
-    //     report("pow for " + order + " bits", failCount1);
+    //     report("pow for " ~ order ~ " bits", failCount1);
     // }
 
     // static void square(int order) {
@@ -289,7 +289,7 @@ class BigIntegerTest {
     //         if (!x2.equals(xx))
     //             failCount1++;
     //     }
-    //     report("square for " + order + " bits", failCount1);
+    //     report("square for " ~ order ~ " bits", failCount1);
     // }
 
     // private static void printErr(string msg) {
@@ -299,8 +299,8 @@ class BigIntegerTest {
     // private static int checkResult(BigInteger expected, BigInteger actual,
     //     string failureMessage) {
     //     if (expected.compareTo(actual) != 0) {
-    //         printErr(failureMessage + " - expected: " + expected
-    //             + ", actual: " + actual);
+    //         printErr(failureMessage ~ " - expected: " ~ expected
+    //             ~ ", actual: " ~ actual);
     //         return 1;
     //     }
     //     return 0;
@@ -358,13 +358,13 @@ class BigIntegerTest {
     //         BigInteger s = n.sqrt();
     //         if (s.multiply(s).compareTo(n) > 0) {
     //             failCount++;
-    //             printErr("sqrt(n)^2 > n for n = " + n);
+    //             printErr("sqrt(n)^2 > n for n = " ~ n);
     //         }
 
     //         // (sqrt(n) + 1)^2 > n
     //         if (s.add(BigInteger.ONE).pow(2).compareTo(n) <= 0) {
     //             failCount++;
-    //             printErr("(sqrt(n) + 1)^2 <= n for n = " + n);
+    //             printErr("(sqrt(n) + 1)^2 <= n for n = " ~ n);
     //         }
 
     //         return failCount;
@@ -454,7 +454,7 @@ class BigIntegerTest {
     //         if (!baz.equals(BigInteger.ZERO))
     //             failCount++;
     //     }
-    //     report("Arithmetic I for " + order + " bits", failCount);
+    //     report("Arithmetic I for " ~ order ~ " bits", failCount);
 
     //     failCount = 0;
     //     for (int i=0; i<100; i++) {
@@ -476,7 +476,7 @@ class BigIntegerTest {
     //         if (!baz[0].equals(BigInteger.ZERO))
     //             failCount++;
     //     }
-    //     report("Arithmetic II for " + order + " bits", failCount);
+    //     report("Arithmetic II for " ~ order ~ " bits", failCount);
     // }
 
     // /**
@@ -713,8 +713,8 @@ class BigIntegerTest {
     //         if (!x.equals(y))
     //             failCount2++;
     //     }
-    //     report("clearBit/testBit for " + order + " bits", failCount1);
-    //     report("flipBit/testBit for " + order + " bits", failCount2);
+    //     report("clearBit/testBit for " ~ order ~ " bits", failCount1);
+    //     report("flipBit/testBit for " ~ order ~ " bits", failCount2);
 
     //     for (int i=0; i<SIZE*5; i++) {
     //         BigInteger x = fetchNumber(order);
@@ -733,7 +733,7 @@ class BigIntegerTest {
     //                 failCount3++;
     //         }
     //     }
-    //     report("getLowestSetBit for " + order + " bits", failCount3);
+    //     report("getLowestSetBit for " ~ order ~ " bits", failCount3);
     // }
 
     // static void bitwise(int order) {
@@ -748,7 +748,7 @@ class BigIntegerTest {
     //         if (!z.equals(w))
     //             failCount++;
     //     }
-    //     report("Logic (^ | & ~) for " + order + " bits", failCount);
+    //     report("Logic (^ | & ~) for " ~ order ~ " bits", failCount);
 
     //     // Test identity x &~ y == ~(~x | y)
     //     failCount = 0;
@@ -760,7 +760,7 @@ class BigIntegerTest {
     //         if (!z.equals(w))
     //             failCount++;
     //     }
-    //     report("Logic (&~ | ~) for " + order + " bits", failCount);
+    //     report("Logic (&~ | ~) for " ~ order ~ " bits", failCount);
     // }
 
     // static void shift(int order) {
@@ -797,9 +797,9 @@ class BigIntegerTest {
     //         if (!x.shiftLeft(n).shiftRight(n).equals(x))
     //             failCount3++;
     //     }
-    //     report("baz shiftLeft for " + order + " bits", failCount1);
-    //     report("baz shiftRight for " + order + " bits", failCount2);
-    //     report("baz shiftLeft/Right for " + order + " bits", failCount3);
+    //     report("baz shiftLeft for " ~ order ~ " bits", failCount1);
+    //     report("baz shiftRight for " ~ order ~ " bits", failCount2);
+    //     report("baz shiftLeft/Right for " ~ order ~ " bits", failCount3);
     // }
 
     // static void divideAndRemainder(int order) {
@@ -829,7 +829,7 @@ class BigIntegerTest {
     //             System.err.println("      y :"+y);
     //         }
     //     }
-    //     report("divideAndRemainder for " + order + " bits", failCount1);
+    //     report("divideAndRemainder for " ~ order ~ " bits", failCount1);
     // }
 
     // static void stringConv() {
@@ -869,8 +869,8 @@ class BigIntegerTest {
     //                     BigInteger test = new BigInteger(result, radix);
     //                     if (!test.equals(x)) {
     //                         failCount++;
-    //                         System.err.println("BigInteger toString: " + x);
-    //                         System.err.println("Test: " + test);
+    //                         System.err.println("BigInteger toString: " ~ x);
+    //                         System.err.println("Test: " ~ test);
     //                         System.err.println(radix);
     //                     }
     //                 }
@@ -895,7 +895,7 @@ class BigIntegerTest {
     //             System.err.println("new is "+y);
     //         }
     //     }
-    //     report("Array Conversion for " + order + " bits", failCount);
+    //     report("Array Conversion for " ~ order ~ " bits", failCount);
     // }
 
     // static void modInv(int order) {
@@ -924,7 +924,7 @@ class BigIntegerTest {
     //             nonInvCount++;
     //         }
     //     }
-    //     report("Modular Inverse for " + order + " bits", failCount);
+    //     report("Modular Inverse for " ~ order ~ " bits", failCount);
     // }
 
     // static void modExp(int order1, int order2) {
@@ -948,8 +948,8 @@ class BigIntegerTest {
     //             failCount++;
     //         }
     //     }
-    //     report("Exponentiation I for " + order1 + " and " +
-    //            order2 + " bits", failCount);
+    //     report("Exponentiation I for " ~ order1 ~ " and " ~
+    //            order2 ~ " bits", failCount);
     // }
 
     // // This test is based on Fermat's theorem
@@ -977,7 +977,7 @@ class BigIntegerTest {
     //             failCount++;
     //         }
     //     }
-    //     report("Exponentiation II for " + order + " bits", failCount);
+    //     report("Exponentiation II for " ~ order ~ " bits", failCount);
     // }
 
     // private static final int[] mersenne_powers = {
@@ -1035,7 +1035,7 @@ class BigIntegerTest {
     //         p1 = p1.pow(mersenne_powers[i]);
     //         p1 = p1.subtract(BigInteger.ONE);
     //         if (!p1.isProbablePrime(100)) {
-    //             System.err.println("Mersenne prime "+i+ " failed.");
+    //             System.err.println("Mersenne prime "+i~ " failed.");
     //             failCount++;
     //         }
     //     }
@@ -1044,7 +1044,7 @@ class BigIntegerTest {
     //     for (int i=0; i<customer_primes.length; i++) {
     //         p1 = new BigInteger(customer_primes[i]);
     //         if (!p1.isProbablePrime(100)) {
-    //             System.err.println("Customer prime "+i+ " failed.");
+    //             System.err.println("Customer prime "+i~ " failed.");
     //             failCount++;
     //         }
     //     }
@@ -1053,7 +1053,7 @@ class BigIntegerTest {
     //     for (int i=0; i<carmichaels.length; i++) {
     //         c1 = BigInteger.valueOf(carmichaels[i]);
     //         if(c1.isProbablePrime(100)) {
-    //             System.err.println("Carmichael "+i+ " reported as prime.");
+    //             System.err.println("Carmichael "+i~ " reported as prime.");
     //             failCount++;
     //         }
     //     }
@@ -1212,7 +1212,7 @@ class BigIntegerTest {
     //             if (!b1.equals(b2) ||
     //                 !b1.equals(b1.or(b2))) {
     //                 failCount++;
-    //                 System.err.println("Serialized failed for hex " +
+    //                 System.err.println("Serialized failed for hex " ~
     //                                    b1.toString(16));
     //             }
     //         }

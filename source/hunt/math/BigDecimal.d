@@ -456,7 +456,7 @@ public class BigDecimal : Number {
 //                         // have dot
 //                         if (dot) // two dots
 //                             throw new NumberFormatException("Character array"
-//                                 + " contains more than one decimal point.");
+//                                 ~ " contains more than one decimal point.");
 //                         dot = true;
 //                     } else if (Character.isDigit(c)) { // slow path
 //                         int digit = Character.digit(c, 10);
@@ -481,9 +481,9 @@ public class BigDecimal : Number {
 //                             throw new NumberFormatException("Exponent overflow.");
 //                         break; // [saves a test]
 //                     } else {
-//                         throw new NumberFormatException("Character " + c
-//                             + " is neither a decimal digit number, decimal point, nor"
-//                             + " \"e\" notation exponential mark.");
+//                         throw new NumberFormatException("Character " ~ c
+//                             ~ " is neither a decimal digit number, decimal point, nor"
+//                             ~ " \"e\" notation exponential mark.");
 //                     }
 //                 }
 //                 if (prec == 0) // no digits found
@@ -534,14 +534,14 @@ public class BigDecimal : Number {
 //                         // have dot
 //                         if (dot) // two dots
 //                             throw new NumberFormatException("Character array"
-//                                 + " contains more than one decimal point.");
+//                                 ~ " contains more than one decimal point.");
 //                         dot = true;
 //                         continue;
 //                     }
 //                     // exponent expected
 //                     if ((c != 'e') && (c != 'E'))
 //                         throw new NumberFormatException("Character array"
-//                             + " is missing \"e\" notation exponential mark.");
+//                             ~ " is missing \"e\" notation exponential mark.");
 //                     exp = parseExp(in, offset, len);
 //                     // Next test is required for backwards compatibility
 //                     if ((int) exp != exp) // overflow
@@ -1691,7 +1691,7 @@ public class BigDecimal : Number {
         //     try {
         //         quotient = this.divide(divisor, mc);
         //     } catch (ArithmeticException e) {
-        //         throw new ArithmeticException("Non-terminating decimal expansion; " +
+        //         throw new ArithmeticException("Non-terminating decimal expansion; " ~
         //                                       "no exact representable decimal result.");
         //     }
 
@@ -2194,7 +2194,7 @@ public class BigDecimal : Number {
 //         } else {
 //             switch (signum) {
 //             case -1:
-//                 throw new ArithmeticException("Attempted square root " +
+//                 throw new ArithmeticException("Attempted square root " ~
 //                                               "of negative BigDecimal");
 //             case 0:
 //                 return valueOf(0L, scale()/2);
@@ -3839,7 +3839,7 @@ public class BigDecimal : Number {
 //                         adjusted += 3;
 //                         break;
 //                     default:
-//                         throw new AssertionError("Unexpected sig value " + sig);
+//                         throw new AssertionError("Unexpected sig value " ~ sig);
 //                     }
 //                 } else if (sig >= coeffLen) {   // significand all in integer
 //                     buf.append(coeff, offset, coeffLen);
@@ -4257,8 +4257,8 @@ public class BigDecimal : Number {
 //                 long val = intVal.longValue();
 //                 if (val != intCompact) {
 //                     print("audit", this);
-//                     throw new AssertionError("Inconsistent state, intCompact=" +
-//                                              intCompact + "\t intVal=" + val);
+//                     throw new AssertionError("Inconsistent state, intCompact=" ~
+//                                              intCompact ~ "\t intVal=" ~ val);
 //                 }
 //             }
 //             // Check precision
@@ -4495,7 +4495,7 @@ public class BigDecimal : Number {
 
 //         default: // Some kind of half-way rounding
 //             assert roundingMode >= ROUND_HALF_UP &&
-//                 roundingMode <= ROUND_HALF_EVEN: "Unexpected rounding mode" + RoundingMode.valueOf(roundingMode);
+//                 roundingMode <= ROUND_HALF_EVEN: "Unexpected rounding mode" ~ RoundingMode.valueOf(roundingMode);
 
 //             if (cmpFracHalf < 0 ) // We're closer to higher digit
 //                 return false;
@@ -4515,7 +4515,7 @@ public class BigDecimal : Number {
 //                     return oddQuot;
 
 //                 default:
-//                     throw new AssertionError("Unexpected rounding mode" + roundingMode);
+//                     throw new AssertionError("Unexpected rounding mode" ~ roundingMode);
 //                 }
 //             }
 //         }
@@ -5271,7 +5271,7 @@ public class BigDecimal : Number {
 //      *         the initial and final elements, respectively
 //      */
 //     private static long[] divRemNegativeLong(long n, long d) {
-//         assert n < 0 : "Non-negative numerator " + n;
+//         assert n < 0 : "Non-negative numerator " ~ n;
 //         assert d != 1 : "Unity denominator";
 
 //         // Approximate the quotient and remainder
