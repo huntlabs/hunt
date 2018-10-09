@@ -24,44 +24,23 @@ alias ReadCallBack = void delegate(Object obj);
 alias DataReceivedHandler = void delegate(in ubyte[] data);
 alias DataWrittenHandler = void delegate(in ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
-
-@trusted interface ReadTransport : Channel
-{
-
-    void close();
-
-    void onRead(AbstractChannel watcher) nothrow;
-
-    void onClose(AbstractChannel watcher) nothrow;
-}
-
-@trusted interface WriteTransport : Channel
-{
-
-    void onWrite(AbstractChannel watcher) nothrow;
-
-    void onClose(AbstractChannel watcher) nothrow;
-}
-
-@trusted interface Transport : ReadTransport, WriteTransport
-{
-}
-
 // dfmt on
 
 interface StreamWriteBuffer
 {
     // todo Write Data;
-    const(ubyte)[] sendData();
+    const(ubyte)[] remaining();
 
     // add send offiset and return is empty
-    bool popSize(size_t size);
+    bool pop(size_t size);
 
     // do send finish
-    void doFinish();
+    void finish();
 
     StreamWriteBuffer next();
     void next(StreamWriteBuffer);
+
+    size_t capacity();
 }
 
 alias ChannelBase = AbstractChannel;
