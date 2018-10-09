@@ -82,7 +82,7 @@ class ArrayList(E) : AbstractList!E {
          _array.insertBack(arr);
      }
 
-    // this(Collection<? extends E> c) {
+    // this(Collection<E> c) {
     //     _array = c.toArray();
     //     if ((size = _array.length) != 0) {
     //         // c.toArray might (incorrectly) not return Object[] (see 6260652)
@@ -391,7 +391,7 @@ class ArrayList(E) : AbstractList!E {
      * @return <tt>true</tt> if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    // bool addAll(Collection<? extends E> c) {
+    // bool addAll(Collection<E> c) {
     //     Object[] a = c.toArray();
     //     int numNew = a.length;
     //     ensureCapacityInternal(size + numNew);  // Increments modCount
@@ -415,7 +415,7 @@ class ArrayList(E) : AbstractList!E {
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @throws NullPointerException if the specified collection is null
      */
-    // bool addAll(int index, Collection<? extends E> c) {
+    // bool addAll(int index, Collection<E> c) {
     //     rangeCheckForAdd(index);
 
     //     Object[] a = c.toArray();

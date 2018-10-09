@@ -1084,7 +1084,7 @@ class HashMap(K,V) : AbstractMap!(K,V)
 
     // override
     // V computeIfAbsent(K key,
-    //                          Function<? super K, ? extends V> mappingFunction) {
+    //                          Function<K, V> mappingFunction) {
     //     if (mappingFunction is null)
     //         throw new NullPointerException();
     //     int hash = hash(key);
@@ -1137,7 +1137,7 @@ class HashMap(K,V) : AbstractMap!(K,V)
     // }
 
     // V computeIfPresent(K key,
-    //                           BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    //                           BiFunction<K, V, V> remappingFunction) {
     //     if (remappingFunction is null)
     //         throw new NullPointerException();
     //     HashMapNode!(K,V) e; V oldValue;
@@ -1158,7 +1158,7 @@ class HashMap(K,V) : AbstractMap!(K,V)
 
     // override
     // V compute(K key,
-    //                  BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    //                  BiFunction<K, V, V> remappingFunction) {
     //     if (remappingFunction is null)
     //         throw new NullPointerException();
     //     int hash = hash(key);
@@ -1211,7 +1211,7 @@ class HashMap(K,V) : AbstractMap!(K,V)
 
     // override
     // V merge(K key, V value,
-    //                BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    //                BiFunction<V, V, V> remappingFunction) {
     //     if (value is null)
     //         throw new NullPointerException();
     //     if (remappingFunction is null)

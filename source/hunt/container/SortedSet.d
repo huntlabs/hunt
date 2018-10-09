@@ -90,7 +90,7 @@ interface SortedSet(E) : Set!(E) {
      *         or <tt>null</tt> if this set uses the natural ordering
      *         of its elements
      */
-    // Comparator<? super E> comparator();
+    // Comparator<E> comparator();
 
     /**
      * Returns a view of the portion of this set whose elements range
@@ -231,7 +231,7 @@ interface SortedSet(E) : Set!(E) {
     //     return new Spliterators.IteratorSpliterator!(E)(
     //             this, Spliterator.DISTINCT | Spliterator.SORTED | Spliterator.ORDERED) {
     //         override
-    //         Comparator<? super E> getComparator() {
+    //         Comparator<E> getComparator() {
     //             return SortedSet.this.comparator();
     //         }
     //     };

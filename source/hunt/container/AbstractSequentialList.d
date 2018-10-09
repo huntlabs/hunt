@@ -191,11 +191,11 @@ abstract class AbstractSequentialList(E) : AbstractList!E {
 //      * @throws IllegalArgumentException      {@inheritDoc}
 //      * @throws IndexOutOfBoundsException     {@inheritDoc}
 //      */
-//     // bool addAll(int index, Collection<? extends E> c) {
+//     // bool addAll(int index, Collection<E> c) {
 //     //     try {
 //     //         bool modified = false;
 //     //         ListIterator!E e1 = listIterator(index);
-//     //         Iterator<? extends E> e2 = c.iterator();
+//     //         Iterator<E> e2 = c.iterator();
 //     //         while (e2.hasNext()) {
 //     //             e1.add(e2.next());
 //     //             modified = true;

@@ -156,7 +156,7 @@ interface List(E) : Collection!E {
      * @since 1.8
      */
     // 
-    // final void sort(Comparator<? super E> c) {
+    // final void sort(Comparator<E> c) {
     //     Object[] a = this.toArray();
     //     Arrays.sort(a, (Comparator) c);
     //     ListIterator<E> i = this.listIterator();

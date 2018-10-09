@@ -1015,7 +1015,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     }
 
     // override
-    // void replaceAll(BiFunction<? super K, ? super V, ? : V> function) {
+    // void replaceAll(BiFunction<K, V, ? : V> function) {
     //     Objects.requireNonNull(function);
     //     int expectedModCount = modCount;
 
@@ -2249,7 +2249,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //         return null;
     //     }
 
-    //     void forEachRemaining(Consumer<? super V> action) {
+    //     void forEachRemaining(Consumer<V> action) {
     //         if (action is null)
     //             throw new NullPointerException();
     //         if (est < 0)
@@ -2273,7 +2273,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //         }
     //     }
 
-    //     bool tryAdvance(Consumer<? super V> action) {
+    //     bool tryAdvance(Consumer<V> action) {
     //         TreeMapEntry!(K,V) e;
     //         if (action is null)
     //             throw new NullPointerException();
@@ -2321,7 +2321,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //         return null;
     //     }
 
-    //     void forEachRemaining(Consumer<? super MapEntry!(K, V)> action) {
+    //     void forEachRemaining(Consumer<MapEntry!(K, V)> action) {
     //         if (action is null)
     //             throw new NullPointerException();
     //         if (est < 0)
@@ -2345,7 +2345,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //         }
     //     }
 
-    //     bool tryAdvance(Consumer<? super MapEntry!(K,V)> action) {
+    //     bool tryAdvance(Consumer<MapEntry!(K,V)> action) {
     //         TreeMapEntry!(K,V) e;
     //         if (action is null)
     //             throw new NullPointerException();

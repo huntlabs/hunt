@@ -354,7 +354,7 @@ interface Map(K,V) : Iterable!(K,V){
      * removed during iteration
      * @since 1.8
      */
-    // final void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    // final void replaceAll(BiFunction<K, V, V> function) {
     //     Objects.requireNonNull(function);
     //     for (MapEntry<K, V> entry : entrySet()) {
     //         K k;
@@ -678,7 +678,7 @@ interface Map(K,V) : Iterable!(K,V){
      * @since 1.8
      */
     // final V computeIfPresent(K key,
-    //         BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    //         BiFunction<K, V, V> remappingFunction) {
     //     Objects.requireNonNull(remappingFunction);
     //     V oldValue;
     //     if ((oldValue = get(key)) !is null) {
@@ -754,7 +754,7 @@ interface Map(K,V) : Iterable!(K,V){
      * @since 1.8
      */
     // final V compute(K key,
-    //         BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    //         BiFunction<K, V, V> remappingFunction) {
     //     Objects.requireNonNull(remappingFunction);
     //     V oldValue = get(key);
 
@@ -835,7 +835,7 @@ interface Map(K,V) : Iterable!(K,V){
      * @since 1.8
      */
     // final V merge(K key, V value,
-    //         BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    //         BiFunction<V, V, V> remappingFunction) {
     //     Objects.requireNonNull(remappingFunction);
     //     Objects.requireNonNull(value);
     //     V oldValue = get(key);
@@ -958,7 +958,7 @@ interface MapEntry(K,V) {
      * @see Comparable
      * @since 1.8
      */
-    // public static <K extends Comparable<? super K>, V> Comparator<MapEntry!(K,V)> comparingByKey() {
+    // public static <K extends Comparable<K>, V> Comparator<MapEntry!(K,V)> comparingByKey() {
     //     return (Comparator<MapEntry<K, V>> & Serializable)
     //         (c1, c2) -> c1.getKey().compareTo(c2.getKey());
     // }
@@ -975,7 +975,7 @@ interface MapEntry(K,V) {
      * @see Comparable
      * @since 1.8
      */
-    // public static <K, V extends Comparable<? super V>> Comparator<MapEntry!(K,V)> comparingByValue() {
+    // public static <K, V extends Comparable<V>> Comparator<MapEntry!(K,V)> comparingByValue() {
     //     return (Comparator<MapEntry<K, V>> & Serializable)
     //         (c1, c2) -> c1.getValue().compareTo(c2.getValue());
     // }
@@ -993,7 +993,7 @@ interface MapEntry(K,V) {
      * @return a comparator that compares {@link MapEntry} by the key.
      * @since 1.8
      */
-    // public static <K, V> Comparator<MapEntry<K, V>> comparingByKey(Comparator<? super K> cmp) {
+    // public static <K, V> Comparator<MapEntry<K, V>> comparingByKey(Comparator<K> cmp) {
     //     Objects.requireNonNull(cmp);
     //     return (Comparator<MapEntry<K, V>> & Serializable)
     //         (c1, c2) -> cmp.compare(c1.getKey(), c2.getKey());
@@ -1012,7 +1012,7 @@ interface MapEntry(K,V) {
      * @return a comparator that compares {@link MapEntry} by the value.
      * @since 1.8
      */
-    // public static <K, V> Comparator<MapEntry<K, V>> comparingByValue(Comparator<? super V> cmp) {
+    // public static <K, V> Comparator<MapEntry<K, V>> comparingByValue(Comparator<V> cmp) {
     //     Objects.requireNonNull(cmp);
     //     return (Comparator<MapEntry<K, V>> & Serializable)
     //         (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());

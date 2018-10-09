@@ -516,7 +516,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //                                         Spliterator.ORDERED |
     //                                         Spliterator.DISTINCT);
     //     }
-    //     final void forEach(Consumer<? super K> action) {
+    //     final void forEach(Consumer<K> action) {
     //         if (action is null)
     //             throw new NullPointerException();
     //         int mc = modCount;
@@ -565,7 +565,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //     //     return Spliterators.spliterator(this, Spliterator.SIZED |
     //     //                                     Spliterator.ORDERED);
     //     // }
-    //     // final void forEach(Consumer<? super V> action) {
+    //     // final void forEach(Consumer<V> action) {
     //     //     if (action is null)
     //     //         throw new NullPointerException();
     //     //     int mc = modCount;
@@ -628,7 +628,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //     //                                     Spliterator.ORDERED |
     //     //                                     Spliterator.DISTINCT);
     //     // }
-    //     // final void forEach(Consumer<? super MapEntry!(K, V)> action) {
+    //     // final void forEach(Consumer<MapEntry!(K, V)> action) {
     //     //     if (action is null)
     //     //         throw new NullPointerException();
     //     //     int mc = modCount;
@@ -641,7 +641,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
 
     // Map overrides
 
-    // void replaceAll(BiFunction<? super K, ? super V, ? : V> function) {
+    // void replaceAll(BiFunction<K, V, ? : V> function) {
     //     if (function is null)
     //         throw new NullPointerException();
     //     int mc = modCount;
