@@ -157,8 +157,15 @@ class TcpStream : AbstractStream
 
         _writeQueue.enQueue(buffer);
 
-        version (Windows)
-            tryWrite();
+        version (Windows) {
+            if (_isWritting)
+            {
+                version (HUNT_DEBUG)
+                    infof("Busy in writting, data buffered (%d bytes)", buffer.capacity);
+            } 
+            else
+                tryWrite();
+        }
         else
         {
             onWrite();
@@ -258,20 +265,20 @@ protected:
                 trace("writting...");
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
-            const(ubyte[]) data = writeBuffer.sendData();
+            const(ubyte[]) data = writeBuffer.remaining();
             if (data.length == 0)
             {
-                _writeQueue.deQueue().doFinish();
+                _writeQueue.deQueue().finish();
                 continue;
             }
 
             this.clearError();
             size_t nBytes = tryWrite(data);
-            if (nBytes > 0 && writeBuffer.popSize(nBytes))
+            if (nBytes > 0 && writeBuffer.pop(nBytes))
             {
                 version (HUNT_DEBUG)
                     tracef("finishing data writing...%d bytes", nBytes);
-                _writeQueue.deQueue().doFinish();
+                _writeQueue.deQueue().finish();
             }
 
             if (this.isError)

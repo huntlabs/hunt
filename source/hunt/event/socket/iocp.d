@@ -282,23 +282,22 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     protected void tryWrite()
     {
-        if (_isWritting)
-        {
-            version (HUNT_DEBUG)
-                warning("Busy in writting on thread: ");
-            return;
-        }
+        // if (_isWritting)
+        // {
+        //     version (HUNT_DEBUG)
+        //         warning("Busy in writting (data buffered)");
+        //     return;
+        // }
 
         if (_writeQueue.empty)
             return;
 
-        version (HUNT_DEBUG) trace("start to write");
+        version (HUNT_DEBUG) trace("start writting...");
         _isWritting = true;
-
         clearError();
 
         writeBuffer = _writeQueue.front();
-        const(ubyte)[] data = writeBuffer.sendData();
+        const(ubyte)[] data = writeBuffer.remaining();
         setWriteBuffer(data);
         size_t nBytes = doWrite();
 
@@ -308,7 +307,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
     }
 
-    private bool _isWritting = false;
+    protected bool _isWritting = false;
 
     private void setWriteBuffer(in ubyte[] data)
     {
@@ -338,13 +337,13 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             return;
         }
 
-        if (writeBuffer.popSize(nBytes))
+        if (writeBuffer.pop(nBytes))
         {
             if (_writeQueue.deQueue() is null) {
                version (HUNT_DEBUG) warning("_writeQueue is empty!");
             }
 
-            writeBuffer.doFinish();
+            writeBuffer.finish();
             _isWritting = false;
 
             version (HUNT_DEBUG)
@@ -358,7 +357,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
                 tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
             // sendDataBuffer corrupted
-            // const(ubyte)[] data = writeBuffer.sendData();
+            // const(ubyte)[] data = writeBuffer.remaining();
             // tracef("%(%02X %)", data);
             // tracef("%(%02X %)", sendDataBuffer);
             setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
@@ -401,7 +400,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 /**
 UDP Socket
 */
-abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
+abstract class AbstractDatagramSocket : AbstractSocketChannel
 {
     /// Constructs a blocking IPv4 UDP Socket.
     this(Selector loop, AddressFamily family = AddressFamily.INET)
