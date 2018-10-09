@@ -547,7 +547,7 @@ interface Spliterator(T) {
 //      * @throws IllegalStateException if the spliterator does not report
 //      *         a characteristic of {@code SORTED}.
 //      */
-//     default Comparator<? super T> getComparator() {
+//     default Comparator<T> getComparator() {
 //         throw new IllegalStateException();
 //     }
 
@@ -641,7 +641,7 @@ interface Spliterator(T) {
 //          * {@link #tryAdvance(hunt.util.functional.IntConsumer)}.
 //          */
 //         @Override
-//         default bool tryAdvance(Consumer<? super Integer> action) {
+//         default bool tryAdvance(Consumer<Integer> action) {
 //             if (action instanceof IntConsumer) {
 //                 return tryAdvance((IntConsumer) action);
 //             }
@@ -664,7 +664,7 @@ interface Spliterator(T) {
 //          * {@link #forEachRemaining(hunt.util.functional.IntConsumer)}.
 //          */
 //         @Override
-//         default void forEachRemaining(Consumer<? super Integer> action) {
+//         default void forEachRemaining(Consumer<Integer> action) {
 //             if (action instanceof IntConsumer) {
 //                 forEachRemaining((IntConsumer) action);
 //             }
@@ -705,7 +705,7 @@ interface Spliterator(T) {
 //          * {@link #tryAdvance(hunt.util.functional.LongConsumer)}.
 //          */
 //         @Override
-//         default bool tryAdvance(Consumer<? super Long> action) {
+//         default bool tryAdvance(Consumer<Long> action) {
 //             if (action instanceof LongConsumer) {
 //                 return tryAdvance((LongConsumer) action);
 //             }
@@ -728,7 +728,7 @@ interface Spliterator(T) {
 //          * {@link #forEachRemaining(hunt.util.functional.LongConsumer)}.
 //          */
 //         @Override
-//         default void forEachRemaining(Consumer<? super Long> action) {
+//         default void forEachRemaining(Consumer<Long> action) {
 //             if (action instanceof LongConsumer) {
 //                 forEachRemaining((LongConsumer) action);
 //             }
@@ -769,7 +769,7 @@ interface Spliterator(T) {
 //          * {@link #tryAdvance(hunt.util.functional.DoubleConsumer)}.
 //          */
 //         @Override
-//         default bool tryAdvance(Consumer<? super Double> action) {
+//         default bool tryAdvance(Consumer<Double> action) {
 //             if (action instanceof DoubleConsumer) {
 //                 return tryAdvance((DoubleConsumer) action);
 //             }
@@ -793,7 +793,7 @@ interface Spliterator(T) {
 //          * {@link #forEachRemaining(hunt.util.functional.DoubleConsumer)}.
 //          */
 //         @Override
-//         default void forEachRemaining(Consumer<? super Double> action) {
+//         default void forEachRemaining(Consumer<Double> action) {
 //             if (action instanceof DoubleConsumer) {
 //                 forEachRemaining((DoubleConsumer) action);
 //             }

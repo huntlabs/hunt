@@ -283,7 +283,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    // bool addAll(int index, Collection<? extends E> c) {
+    // bool addAll(int index, Collection<E> c) {
     //     rangeCheckForAdd(index);
     //     bool modified = false;
     //     for (E e : c) {
@@ -352,7 +352,7 @@ class EmptyList(E): AbstractList!E {
     //     Objects.requireNonNull(operator);
     // }
     // override
-    // void sort(Comparator<? super E> c) {
+    // void sort(Comparator<E> c) {
     // }
 
     // Override default methods in Collection

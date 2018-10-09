@@ -178,7 +178,7 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null.
     //  * @since 1.8
     //  */
-    // Comparator!(T) thenComparing(Comparator<? super T> other) {
+    // Comparator!(T) thenComparing(Comparator<T> other) {
     //     Objects.requireNonNull(other);
     //     return (Comparator!(T) & Serializable) (c1, c2) -> {
     //         int res = compare(c1, c2);
@@ -204,8 +204,8 @@ interface Comparator(T) {
     //  * @since 1.8
     //  */
     // !(U) Comparator!(T) thenComparing(
-    //         Function<? super T, ? extends U> keyExtractor,
-    //         Comparator<? super U> keyComparator)
+    //         Function<T, U> keyExtractor,
+    //         Comparator<U> keyComparator)
     // {
     //     return thenComparing(comparing(keyExtractor, keyComparator));
     // }
@@ -227,8 +227,8 @@ interface Comparator(T) {
     //  * @see #thenComparing(Comparator)
     //  * @since 1.8
     //  */
-    // <U extends Comparable<? super U>> Comparator!(T) thenComparing(
-    //         Function<? super T, ? extends U> keyExtractor)
+    // <U extends Comparable<U>> Comparator!(T) thenComparing(
+    //         Function<T, U> keyExtractor)
     // {
     //     return thenComparing(comparing(keyExtractor));
     // }
@@ -248,7 +248,7 @@ interface Comparator(T) {
     //  * @see #thenComparing(Comparator)
     //  * @since 1.8
     //  */
-    // Comparator!(T) thenComparingInt(ToIntFunction<? super T> keyExtractor) {
+    // Comparator!(T) thenComparingInt(ToIntFunction<T> keyExtractor) {
     //     return thenComparing(comparingInt(keyExtractor));
     // }
 
@@ -267,7 +267,7 @@ interface Comparator(T) {
     //  * @see #thenComparing(Comparator)
     //  * @since 1.8
     //  */
-    // Comparator!(T) thenComparingLong(ToLongFunction<? super T> keyExtractor) {
+    // Comparator!(T) thenComparingLong(ToLongFunction<T> keyExtractor) {
     //     return thenComparing(comparingLong(keyExtractor));
     // }
 
@@ -286,7 +286,7 @@ interface Comparator(T) {
     //  * @see #thenComparing(Comparator)
     //  * @since 1.8
     //  */
-    // Comparator!(T) thenComparingDouble(ToDoubleFunction<? super T> keyExtractor) {
+    // Comparator!(T) thenComparingDouble(ToDoubleFunction<T> keyExtractor) {
     //     return thenComparing(comparingDouble(keyExtractor));
     // }
 
@@ -303,7 +303,7 @@ interface Comparator(T) {
     //  * @see Comparable
     //  * @since 1.8
     //  */
-    // static <T extends Comparable<? super T>> Comparator!(T) reverseOrder() {
+    // static <T extends Comparable<T>> Comparator!(T) reverseOrder() {
     //     return Collections.reverseOrder();
     // }
 
@@ -321,7 +321,7 @@ interface Comparator(T) {
     //  * @since 1.8
     //  */
     // @SuppressWarnings("unchecked")
-    // static <T extends Comparable<? super T>> Comparator!(T) naturalOrder() {
+    // static <T extends Comparable<T>> Comparator!(T) naturalOrder() {
     //     return (Comparator!(T)) Comparators.NaturalOrderComparator.INSTANCE;
     // }
 
@@ -342,7 +342,7 @@ interface Comparator(T) {
     //  *         {@code Comparator}.
     //  * @since 1.8
     //  */
-    // static !(T) Comparator!(T) nullsFirst(Comparator<? super T> comparator) {
+    // static !(T) Comparator!(T) nullsFirst(Comparator<T> comparator) {
     //     return new Comparators.NullComparator<>(true, comparator);
     // }
 
@@ -363,7 +363,7 @@ interface Comparator(T) {
     //  *         {@code Comparator}.
     //  * @since 1.8
     //  */
-    // static !(T) Comparator!(T) nullsLast(Comparator<? super T> comparator) {
+    // static !(T) Comparator!(T) nullsLast(Comparator<T> comparator) {
     //     return new Comparators.NullComparator<>(false, comparator);
     // }
 
@@ -395,8 +395,8 @@ interface Comparator(T) {
     //  * @since 1.8
     //  */
     // static <T, U> Comparator!(T) comparing(
-    //         Function<? super T, ? extends U> keyExtractor,
-    //         Comparator<? super U> keyComparator)
+    //         Function<T, U> keyExtractor,
+    //         Comparator<U> keyComparator)
     // {
     //     Objects.requireNonNull(keyExtractor);
     //     Objects.requireNonNull(keyComparator);
@@ -429,8 +429,8 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null
     //  * @since 1.8
     //  */
-    // static <T, U extends Comparable<? super U>> Comparator!(T) comparing(
-    //         Function<? super T, ? extends U> keyExtractor)
+    // static <T, U extends Comparable<U>> Comparator!(T) comparing(
+    //         Function<T, U> keyExtractor)
     // {
     //     Objects.requireNonNull(keyExtractor);
     //     return (Comparator!(T) & Serializable)
@@ -452,7 +452,7 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null
     //  * @since 1.8
     //  */
-    // static !(T) Comparator!(T) comparingInt(ToIntFunction<? super T> keyExtractor) {
+    // static !(T) Comparator!(T) comparingInt(ToIntFunction<T> keyExtractor) {
     //     Objects.requireNonNull(keyExtractor);
     //     return (Comparator!(T) & Serializable)
     //         (c1, c2) -> Integer.compare(keyExtractor.applyAsInt(c1), keyExtractor.applyAsInt(c2));
@@ -473,7 +473,7 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null
     //  * @since 1.8
     //  */
-    // static !(T) Comparator!(T) comparingLong(ToLongFunction<? super T> keyExtractor) {
+    // static !(T) Comparator!(T) comparingLong(ToLongFunction<T> keyExtractor) {
     //     Objects.requireNonNull(keyExtractor);
     //     return (Comparator!(T) & Serializable)
     //         (c1, c2) -> Long.compare(keyExtractor.applyAsLong(c1), keyExtractor.applyAsLong(c2));
@@ -494,7 +494,7 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null
     //  * @since 1.8
     //  */
-    // static!(T) Comparator!(T) comparingDouble(ToDoubleFunction<? super T> keyExtractor) {
+    // static!(T) Comparator!(T) comparingDouble(ToDoubleFunction<T> keyExtractor) {
     //     Objects.requireNonNull(keyExtractor);
     //     return (Comparator!(T) & Serializable)
     //         (c1, c2) -> Double.compare(keyExtractor.applyAsDouble(c1), keyExtractor.applyAsDouble(c2));

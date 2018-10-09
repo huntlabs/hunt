@@ -171,7 +171,7 @@ module hunt.container.ArrayDeque;
 //      * @param c the collection whose elements are to be placed into the deque
 //      * @throws NullPointerException if the specified collection is null
 //      */
-//     ArrayDeque(Collection<? extends E> c) {
+//     ArrayDeque(Collection<E> c) {
 //         allocateElements(c.size());
 //         addAll(c);
 //     }
@@ -619,7 +619,7 @@ module hunt.container.ArrayDeque;
 //             lastRet = -1;
 //         }
 
-//         void forEachRemaining(Consumer<? super E> action) {
+//         void forEachRemaining(Consumer<E> action) {
 //             Objects.requireNonNull(action);
 //             Object[] a = elements;
 //             int m = a.length - 1, f = fence, i = cursor;
@@ -900,7 +900,7 @@ module hunt.container.ArrayDeque;
 //             return null;
 //         }
 
-//         void forEachRemaining(Consumer<? super E> consumer) {
+//         void forEachRemaining(Consumer<E> consumer) {
 //             if (consumer is null)
 //                 throw new NullPointerException();
 //             Object[] a = deq.elements;
@@ -915,7 +915,7 @@ module hunt.container.ArrayDeque;
 //             }
 //         }
 
-//         bool tryAdvance(Consumer<? super E> consumer) {
+//         bool tryAdvance(Consumer<E> consumer) {
 //             if (consumer is null)
 //                 throw new NullPointerException();
 //             Object[] a = deq.elements;

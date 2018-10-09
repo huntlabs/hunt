@@ -19,7 +19,7 @@ class ReferenceQueue(T) {
     this() { }
 
     // private static class Null<S> extends ReferenceQueue<S> {
-    //     bool enqueue(Reference<? extends S> r) {
+    //     bool enqueue(Reference<S> r) {
     //         return false;
     //     }
     // }
@@ -29,10 +29,10 @@ class ReferenceQueue(T) {
 
     // static private class Lock { };
     // private Lock lock = new Lock();
-    // private volatile Reference<? extends T> head = null;
+    // private volatile Reference<T> head = null;
     // private long queueLength = 0;
 
-    // bool enqueue(Reference<? extends T> r) { /* Called only by Reference class */
+    // bool enqueue(Reference<T> r) { /* Called only by Reference class */
     //     synchronized (lock) {
     //         // Check that since getting the lock this reference hasn't already been
     //         // enqueued (and even then removed)
@@ -54,8 +54,8 @@ class ReferenceQueue(T) {
     // }
 
     // @SuppressWarnings("unchecked")
-    // private Reference<? extends T> reallyPoll() {       /* Must hold lock */
-    //     Reference<? extends T> r = head;
+    // private Reference<T> reallyPoll() {       /* Must hold lock */
+    //     Reference<T> r = head;
     //     if (r !is null) {
     //         head = (r.next == r) ?
     //             null :
@@ -79,7 +79,7 @@ class ReferenceQueue(T) {
     //  * @return  A reference object, if one was immediately available,
     //  *          otherwise <code>null</code>
     //  */
-    // Reference<? extends T> poll() {
+    // Reference<T> poll() {
     //     if (head is null)
     //         return null;
     //     synchronized (lock) {
@@ -107,14 +107,14 @@ class ReferenceQueue(T) {
     //  * @throws  InterruptedException
     //  *          If the timeout wait is interrupted
     //  */
-    // Reference<? extends T> remove(long timeout)
+    // Reference<T> remove(long timeout)
     //     throws IllegalArgumentException, InterruptedException
     // {
     //     if (timeout < 0) {
     //         throw new IllegalArgumentException("Negative timeout value");
     //     }
     //     synchronized (lock) {
-    //         Reference<? extends T> r = reallyPoll();
+    //         Reference<T> r = reallyPoll();
     //         if (r !is null) return r;
     //         long start = (timeout == 0) ? 0 : System.nanoTime();
     //         for (;;) {
@@ -138,7 +138,7 @@ class ReferenceQueue(T) {
     //  * @return A reference object, blocking until one becomes available
     //  * @throws  InterruptedException  If the wait is interrupted
     //  */
-    // Reference<? extends T> remove() throws InterruptedException {
+    // Reference<T> remove() throws InterruptedException {
     //     return remove(0);
     // }
 

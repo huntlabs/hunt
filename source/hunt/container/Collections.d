@@ -172,7 +172,7 @@ private class EmptyMap(K,V) : AbstractMap!(K,V) {
     }
 
     // override
-    // void replaceAll(BiFunction!(? super K, ? super V, ? extends V) function) {
+    // void replaceAll(BiFunction!(K, V, V) function) {
     //     Objects.requireNonNull(function);
     // }
 
@@ -198,25 +198,25 @@ private class EmptyMap(K,V) : AbstractMap!(K,V) {
 
     // override
     // V computeIfAbsent(K key,
-    //         Function!(? super K, ? extends V) mappingFunction) {
+    //         Function!(K, V) mappingFunction) {
     //     throw new UnsupportedOperationException();
     // }
 
     // override
     // V computeIfPresent(K key,
-    //         BiFunction!(? super K, ? super V, ? extends V) remappingFunction) {
+    //         BiFunction!(K, V, V) remappingFunction) {
     //     throw new UnsupportedOperationException();
     // }
 
     // override
     // V compute(K key,
-    //         BiFunction!(? super K, ? super V, ? extends V) remappingFunction) {
+    //         BiFunction!(K, V, V) remappingFunction) {
     //     throw new UnsupportedOperationException();
     // }
 
     // override
     // V merge(K key, V value,
-    //         BiFunction!(? super V, ? super V, ? extends V) remappingFunction) {
+    //         BiFunction!(V, V, V) remappingFunction) {
     //     throw new UnsupportedOperationException();
     // }
 
@@ -260,7 +260,7 @@ private static class SingletonSet(E) : AbstractSet!E
 
     // Override default methods for Collection
     // override
-    // void forEach(Consumer<? super E> action) {
+    // void forEach(Consumer<E> action) {
     //     action.accept(element);
     // }
 
@@ -270,7 +270,7 @@ private static class SingletonSet(E) : AbstractSet!E
     // }
 
     // override
-    // bool removeIf(Predicate<? super E> filter) {
+    // bool removeIf(Predicate<E> filter) {
     //     throw new UnsupportedOperationException();
     // }
 }
@@ -323,7 +323,7 @@ private static class SingletonList(E)  : AbstractList!E    {
     //     throw new UnsupportedOperationException();
     // }
     // override
-    // void sort(Comparator!(? super E) c) {
+    // void sort(Comparator!(E) c) {
     // }
     // override
     // Spliterator!E spliterator() {
@@ -365,7 +365,7 @@ private class UnmodifiableCollection(E) : Collection!(E) {
     //             throw new UnsupportedOperationException();
     //         }
     //         override
-    //         void forEachRemaining(Consumer<? super E> action) {
+    //         void forEachRemaining(Consumer<E> action) {
     //             // Use backing collection version
     //             i.forEachRemaining(action);
     //         }
@@ -466,7 +466,7 @@ private class UnmodifiableSortedSet(E) : UnmodifiableSet!(E), SortedSet!(E) {
 
     this(SortedSet!(E) s) {super(s); ss = s;}
 
-    // Comparator<? super E> comparator() {return ss.comparator();}
+    // Comparator<E> comparator() {return ss.comparator();}
 
     SortedSet!(E) subSet(E fromElement, E toElement) {
         return new UnmodifiableSortedSet!(E)(ss.subSet(fromElement,toElement));

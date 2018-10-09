@@ -320,7 +320,7 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
 bool addAll(int index, Collection!E c) {
     throw new NotImplementedException();
 }
-//     bool addAll(int index, Collection<? extends E> c) {
+//     bool addAll(int index, Collection<E> c) {
 //         checkPositionIndex(index);
 
 //         Object[] a = c.toArray();
