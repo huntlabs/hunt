@@ -1,6 +1,59 @@
-module hunt.util.EventObject;
+module hunt.util.object;
 
 import hunt.util.exception;
+
+interface IObject {
+    bool opEquals(Object o);
+    string toString();
+    size_t toHash() @trusted nothrow;
+}
+
+/**
+*/
+class NullableObject(T) : IObject {
+    T payload;
+
+    private bool _isNull = true;
+
+    this() {
+        payload = T.init;
+    }
+
+    this(T v) {
+        payload = v;
+        _isNull = false;
+    }
+
+    bool isNull() {
+        return _isNull;
+    }
+
+    override bool opEquals(Object o) {
+        NullableObject!(T) that = cast(NullableObject!(T))o;
+        if(that is null)
+            return false;
+
+        if(_isNull) return that._isNull;
+        if(that._isNull) return false;
+
+        static if(is(T == class)) {
+            if(this.payload is that.payload)
+                return true;
+        }
+
+        if(this.payload == that.payload)
+            return true;
+        return false;
+    }
+
+    string toString() {
+        return super.toString();
+    }
+
+    size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+}
 
 
 /**
@@ -12,8 +65,6 @@ import hunt.util.exception;
  * initially occurred upon.
  */
 class EventObject {
-
-    // private enum long serialVersionUID = 5516075349620653480L;
 
     /**
      * The object on which the Event initially occurred.
