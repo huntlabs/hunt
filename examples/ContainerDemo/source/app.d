@@ -13,6 +13,8 @@ import SetDemo;
 import TreeMapDemo;
 import TrieTest;
 
+import hunt.datetime;
+
 void main()
 {
     // testUnits!(TrieTest)();
@@ -23,7 +25,7 @@ void main()
     // testUnits!LinkedHashSetDemo();
     // testUnits!LinkedHashMapDemo();
     // testUnits!TreeMapDemo();
-    testUnits!(MultiMapDemo)();
+    // testUnits!(MultiMapDemo)();
     // testUnits!SetDemo();
-
+    // writeln(DateTimeHelper.currentTimeMillis);
 }

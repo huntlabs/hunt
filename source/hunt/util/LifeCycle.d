@@ -26,7 +26,7 @@ abstract class AbstractLifeCycle : LifeCycle {
     //                     System.err.println(e.getMessage());
     //                 }
     //             });
-    //             System.out.println("Shutdown instance: " + stopActions.size());
+    //             System.out.println("Shutdown instance: " ~ stopActions.size());
     //             stopActions.clear();
     //         }, "the firefly shutdown thread"));
     //     } catch (Exception e) {

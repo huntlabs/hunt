@@ -286,21 +286,21 @@ class HashSet(E) : AbstractSet!E, Set!E
     //     // Read capacity and verify non-negative.
     //     int capacity = s.readInt();
     //     if (capacity < 0) {
-    //         throw new InvalidObjectException("Illegal capacity: " +
+    //         throw new InvalidObjectException("Illegal capacity: " ~
     //                                          capacity);
     //     }
 
     //     // Read load factor and verify positive and non NaN.
     //     float loadFactor = s.readFloat();
     //     if (loadFactor <= 0 || Float.isNaN(loadFactor)) {
-    //         throw new InvalidObjectException("Illegal load factor: " +
+    //         throw new InvalidObjectException("Illegal load factor: " ~
     //                                          loadFactor);
     //     }
 
     //     // Read size and verify non-negative.
     //     int size = s.readInt();
     //     if (size < 0) {
-    //         throw new InvalidObjectException("Illegal size: " +
+    //         throw new InvalidObjectException("Illegal size: " ~
     //                                          size);
     //     }
 

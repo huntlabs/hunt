@@ -30,7 +30,7 @@ class TreeMapDemo {
         //   Iterator!(MapEntry!(K,V)) iterator = set.iterator();
         //   while(iterator.hasNext()) {
         //      Map.Entry mentry = (Map.Entry)iterator.next();
-        //      System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
+        //      System.out.print("key is: "+ mentry.getKey() ~ " & Value is: ");
         //      writeln(mentry.getValue());
         //   }
         writeln("\nTesting TreeMap foreach1...");
