@@ -65,7 +65,7 @@ import hunt.util.exception;
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @param !(E) the type of elements maintained by this set
+ * @param (E) the type of elements maintained by this set
  *
  * @author  Josh Bloch
  * @see     Collection

@@ -5,10 +5,13 @@ import hunt.util.UnitTest;
 import hunt.logging;
 
 import test.BigIntegerTest;
+import test.LinkedBlockingQueueTest;
 import test.TaskTest;
 
 void main()
 {
 	// testUnits!(BigIntegerTest);
-	testTask();
+	// testTask();
+	testUnits!(LinkedBlockingQueueTest);
+	
 }

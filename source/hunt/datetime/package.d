@@ -5,25 +5,24 @@ public import hunt.datetime.format;
 
 import std.datetime;
 
-class TimeUnits
+enum TimeUnit : string
 {
-    enum  Year =  "years";
-    enum  Month =  "months";
-    enum  Week =  "weeks";
-    enum  Day =  "days";
-    enum  Hour =  "hours";
-    enum  Second =  "seconds";
-    enum  Millisecond =  "msecs";
-    enum  Microsecond =  "usecs";
-    enum  HectoNanosecond =  "hnsecs";
-    enum  Nanosecond =  "nsecs";
-
+    Year =  "years",
+    Month =  "months",
+    Week =  "weeks",
+    Day =  "days",
+    Hour =  "hours",
+    Second =  "seconds",
+    Millisecond =  "msecs",
+    Microsecond =  "usecs",
+    HectoNanosecond =  "hnsecs",
+    Nanosecond =  "nsecs"
 }
 
 class DateTimeHelper
 {
     static long currentTimeMillis()
     {
-        return convert!(TimeUnits.HectoNanosecond, TimeUnits.Millisecond)(Clock.currStdTime);
+        return convert!(TimeUnit.HectoNanosecond, TimeUnit.Millisecond)(Clock.currStdTime);
     }
 }

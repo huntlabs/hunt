@@ -1,7 +1,9 @@
 module hunt.container.AbstractCollection;
 
-import hunt.util.exception;
 import hunt.container.Collection;
+
+import hunt.util.exception;
+import hunt.util.functional;
 
 import std.array;
 import std.conv;
@@ -181,6 +183,21 @@ abstract class AbstractCollection(E) : Collection!E {
         }
 
         return modified;
+    }
+
+    bool removeIf(Predicate!E filter) {
+        assert(filter !is null);
+        E[] items;
+        foreach(E item; this) {
+            if(filter(item))
+                items ~= item;
+        }
+
+        foreach(E item; items) {
+            remove(item);
+        }
+
+        return items.length > 0;
     }
 
     /**

@@ -43,7 +43,7 @@ import std.conv;
  * Trie is required external locks need to be applied.
  * </p>
  *
- * @param !(V) the Entry type
+ * @param (V) the Entry type
  */
 class ArrayTernaryTrie(V) : AbstractTrie!(V) {
     private enum int LO = 1;

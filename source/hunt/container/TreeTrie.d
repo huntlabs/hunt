@@ -33,7 +33,7 @@ import std.conv;
  * need to be applied.
  * </p>
  *
- * @param !(V) the entry type
+ * @param (V) the entry type
  */
 class TreeTrie(V) : AbstractTrie!(V) {
     private enum int[] __lookup =

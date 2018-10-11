@@ -29,7 +29,7 @@ interface Promise(C) {
     /**
      * <p>Empty implementation of {@link Promise}.</p>
      *
-     * @param !(U) the type of the result
+     * @param (U) the type of the result
      */
     class Adapter(U) : Promise!U {
 

@@ -8,7 +8,7 @@ import hunt.container.Set;
 /**
  * A Trie string lookup data structure.
  *
- * @param !(V) the Trie entry type
+ * @param (V) the Trie entry type
  */
 interface Trie(V) {
     /* ------------------------------------------------------------ */

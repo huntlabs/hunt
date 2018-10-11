@@ -127,8 +127,8 @@ import std.range;
  * returned by all of this class's collection view methods are created from
  * the iterators of the corresponding collections.
  *
- * @param !(K) the type of keys maintained by this map
- * @param !(V) the type of mapped values
+ * @param (K) the type of keys maintained by this map
+ * @param (V) the type of mapped values
  *
  * @author  Josh Bloch
  * @see     Object#hashCode()

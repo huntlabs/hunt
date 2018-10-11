@@ -374,7 +374,7 @@ enum SpliteratorCharacteristic {
  * is set to {@code true} then diagnostic warnings are reported if boxing of
  * primitive values occur when operating on primitive subtype specializations.
  *
- * @param !(T) the type of elements returned by this Spliterator
+ * @param (T) the type of elements returned by this Spliterator
  *
  * @see Collection
  * @since 1.8
@@ -556,7 +556,7 @@ interface Spliterator(T) {
 //     /**
 //      * A Spliterator specialized for primitive values.
 //      *
-//      * @param !(T) the type of elements returned by this Spliterator.  The
+//      * @param (T) the type of elements returned by this Spliterator.  The
 //      * type must be a wrapper type for a primitive type, such as {@code Integer}
 //      * for the primitive {@code int} type.
 //      * @param <T_CONS> the type of primitive consumer.  The type must be a

@@ -4,7 +4,7 @@ import hunt.container.Collection;
 
 /**
  * A collection designed for holding elements prior to processing.
- * Besides basic {@link java.util.Collection Collection} operations,
+ * Besides basic {@link hunt.container.Collection Collection} operations,
  * queues provide additional insertion, extraction, and inspection
  * operations.  Each of these methods exists in two forms: one throws
  * an exception if the operation fails, the other returns a special
@@ -52,7 +52,7 @@ import hunt.container.Collection;
  *
  * <p>The {@link #offer offer} method inserts an element if possible,
  * otherwise returning {@code false}.  This differs from the {@link
- * java.util.Collection#add Collection.add} method, which can fail to
+ * hunt.container.Collection#add Collection.add} method, which can fail to
  * add an element only by throwing an unchecked exception.  The
  * {@code offer} method is designed for use when failure is a normal,
  * rather than exceptional occurrence, for example, in fixed-capacity
@@ -96,7 +96,7 @@ import hunt.container.Collection;
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @see java.util.Collection
+ * @see hunt.container.Collection
  * @see LinkedList
  * @see PriorityQueue
  * @see hunt.concurrent.LinkedBlockingQueue
