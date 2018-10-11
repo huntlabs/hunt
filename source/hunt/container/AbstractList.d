@@ -164,8 +164,6 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
 
     // Bulk Operations
 
-    // int opApply(scope int delegate(ref E) dg) { throw new UnsupportedOperationException(""); }
-
     /**
      * Removes all of the elements from this list (optional operation).
      * The list will be empty after this call returns.

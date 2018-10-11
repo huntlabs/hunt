@@ -61,8 +61,8 @@ class Collections {
      * comparable cost to using the like-named field.  (Unlike this method, the
      * field does not provide type safety.)
      *
-     * @param !(K) the class of the map keys
-     * @param !(V) the class of the map values
+     * @param (K) the class of the map keys
+     * @param (V) the class of the map values
      * @return an empty map
      * @see #EMPTY_MAP
      * @since 1.5
@@ -445,7 +445,7 @@ private class UnmodifiableSet(E) : UnmodifiableCollection!(E), Set!(E) {
 * A singleton empty unmodifiable navigable set used for
 * {@link #emptyNavigableSet()}.
 *
-* @param !(E) type of elements, if there were any, and bounds
+* @param (E) type of elements, if there were any, and bounds
 */
 private class EmptyNavigableSet(E) : UnmodifiableNavigableSet!(E) {
     // private static final long serialVersionUID = -6291252904449939134L;
@@ -486,7 +486,7 @@ private class UnmodifiableSortedSet(E) : UnmodifiableSet!(E), SortedSet!(E) {
 /**
 * Wraps a navigable set and disables all of the mutative operations.
 *
-* @param !(E) type of elements
+* @param (E) type of elements
 * @serial include
 */
 private class UnmodifiableNavigableSet(E) : 

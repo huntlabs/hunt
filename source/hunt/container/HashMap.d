@@ -2,7 +2,6 @@ module hunt.container.HashMap;
 
 import hunt.container.AbstractMap;
 import hunt.container.Map;
-
 import hunt.container.Iterator;
 
 import hunt.util.exception;

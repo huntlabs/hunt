@@ -345,11 +345,12 @@ class ArrayList(E) : AbstractList!E {
     }
 
 
-    override int opApply(scope int delegate(ref E) dg)
-    {
+    override int opApply(scope int delegate(ref E) dg) {
+        if(dg is null)
+            throw new NullPointerException();
+            
         int result = 0;
-        foreach(E v; _array)
-        {
+        foreach(E v; _array) {
             result = dg(v);
             if(result != 0) return result;
         }

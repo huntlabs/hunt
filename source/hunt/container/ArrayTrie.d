@@ -34,7 +34,7 @@ import std.conv;
  * Trie is required external locks need to be applied.
  * </p>
  *
- * @param !(V) the element of entry
+ * @param (V) the element of entry
  */
 class ArrayTrie(V) : AbstractTrie!(V) {
     /**

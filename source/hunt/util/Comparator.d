@@ -66,7 +66,7 @@ module hunt.util.Comparator;
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @param !(T) the type of objects that may be compared by this comparator
+ * @param (T) the type of objects that may be compared by this comparator
  *
  * @author  Josh Bloch
  * @author  Neal Gafter

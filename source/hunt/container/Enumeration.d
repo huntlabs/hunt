@@ -23,7 +23,7 @@ import std.range;
  * has shorter method names.  New implementations should consider using
  * Iterator in preference to Enumeration.
  *
- * @see     java.util.Iterator
+ * @see     hunt.container.Iterator
  * @see     java.io.SequenceInputStream
  * @see     java.util.Enumeration#nextElement()
  * @see     java.util.Hashtable

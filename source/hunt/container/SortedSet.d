@@ -69,7 +69,7 @@ import hunt.container.Set;
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @param !(E) the type of elements maintained by this set
+ * @param (E) the type of elements maintained by this set
  *
  * @see Set
  * @see TreeSet

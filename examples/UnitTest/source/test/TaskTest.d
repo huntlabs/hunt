@@ -1,4 +1,4 @@
-module parallelism_3;
+module test.TaskTest;
 
 import std.stdio;
 import hunt.concurrent.parallelism;
