@@ -301,7 +301,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 /**
 UDP Socket
 */
-abstract class AbstractDatagramSocket : AbstractSocketChannel, IDatagramSocket
+abstract class AbstractDatagramSocket : AbstractSocketChannel
 {
     this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
     {

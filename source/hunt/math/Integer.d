@@ -2,7 +2,7 @@ module hunt.math.Integer;
 import hunt.math.Number;
 import std.conv;
 
-class Integer : Number{
+class Integer : Number {
 
     /**
      * Returns the number of one-bits in the two's complement binary
@@ -14,15 +14,15 @@ class Integer : Number{
      *     representation of the specified {@code int} value.
      * @since 1.5
      */
-     public static  int   MIN_VALUE = 0x80000000;
+    enum  int   MIN_VALUE = 0x80000000;
 
     /**
      * A constant holding the maximum value an {@code int} can
      * have, 2<sup>31</sup>-1.
      */
-    public static  int   MAX_VALUE = 0x7fffffff;
+    enum  int   MAX_VALUE = 0x7fffffff;
 
-    public static int bitCount(int i) {
+    static int bitCount(int i) {
         // HD, Figure 5-2
         i = i - ((i >>> 1) & 0x55555555);
         i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
@@ -32,7 +32,7 @@ class Integer : Number{
         return i & 0x3f;
     }
 
-     enum static char[] digits = [
+     enum char[] digits = [
         '0' , '1' , '2' , '3' , '4' , '5' ,
         '6' , '7' , '8' , '9' , 'a' , 'b' ,
         'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
@@ -62,7 +62,7 @@ class Integer : Number{
      *     is equal to zero.
      * @since 1.5
      */
-    public static int numberOfLeadingZeros(int i) {
+    static int numberOfLeadingZeros(int i) {
         // HD, Figure 5-6
         if (i == 0)
             return 32;
@@ -89,7 +89,7 @@ class Integer : Number{
      *     to zero.
      * @since 1.5
      */
-    public static int numberOfTrailingZeros(int i) {
+    static int numberOfTrailingZeros(int i) {
         // HD, Figure 5-14
         int y;
         if (i == 0) return 32;
@@ -111,7 +111,7 @@ class Integer : Number{
      * @return a hash code value for a {@code double} value.
      * @since 1.8
      */
-    override public size_t toHash() @safe nothrow {
+    override size_t toHash() @safe nothrow {
         return value;
     }
 
@@ -154,12 +154,10 @@ class Integer : Number{
      *          {@code false} otherwise.
      * @see java.lang.Double#doubleToLongBits(double)
      */
-    override public bool opEquals(Object obj) {
+    override bool opEquals(Object obj) {
         auto dl = cast(Integer)obj;
         if(dl !is null)
-        {
             return value == dl.intValue;
-        }
 
         return false;
     }
@@ -178,11 +176,11 @@ class Integer : Number{
      * @param   value   the value to be represented by the
      *                  {@code Integer} object.
      */
-    public this(int value) {
+    this(int value) {
         this.value = value;
     }
 
-    override public byte byteValue() {
+    override byte byteValue() {
         return cast(byte)value;
     }
 
@@ -191,7 +189,7 @@ class Integer : Number{
      * after a narrowing primitive conversion.
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public short shortValue() {
+    override short shortValue() {
         return cast(short)value;
     }
 
@@ -199,7 +197,7 @@ class Integer : Number{
      * Returns the value of this {@code Integer} as an
      * {@code int}.
      */
-    override public int intValue() {
+    override int intValue() {
         return value;
     }
 
@@ -209,7 +207,7 @@ class Integer : Number{
      * @jls 5.1.2 Widening Primitive Conversions
      * @see Integer#toUnsignedLong(int)
      */
-    override public long longValue() {
+    override long longValue() {
         return cast(long)value;
     }
 
@@ -218,7 +216,7 @@ class Integer : Number{
      * after a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public float floatValue() {
+    override float floatValue() {
         return cast(float)value;
     }
 
@@ -227,11 +225,11 @@ class Integer : Number{
      * after a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public double doubleValue() {
+    override double doubleValue() {
         return cast(double)value;
     }
 
-    public static int parseInt(string s)  {
+    static int parseInt(string s)  {
         auto i = to!long(s);
         if (i < MIN_VALUE || i > MAX_VALUE)
         {
@@ -302,7 +300,7 @@ class Integer : Number{
      * @return an {@code Integer} instance representing {@code i}.
      * @since  1.5
      */
-    public static Integer valueOf(int i) {
+    static Integer valueOf(int i) {
         if (i >= IntegerCache.low && i <= IntegerCache.high)
             return IntegerCache.cache[i + (-IntegerCache.low)];
         return new Integer(i);
