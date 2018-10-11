@@ -145,7 +145,7 @@ class Float : Number{
      * @return  the {@code float} floating-point value with the same bit
      *          pattern.
      */
-    public static float intBitsToFloat(int bits) {
+    static float intBitsToFloat(int bits) {
         implementationMissing(false);
         return 0;
     }
@@ -163,7 +163,7 @@ class Float : Number{
      *
      * @param   value   the value to be represented by the {@code Float}.
      */
-    public this(float value) {
+    this(float value) {
         this.value = value;
     }
 
@@ -173,12 +173,12 @@ class Float : Number{
      *
      * @param   value   the value to be represented by the {@code Float}.
      */
-    public this(double value) {
+    this(double value) {
         this.value = cast(float)value;
     }
 
 
-    public static float parseFloat(string s) {
+    static float parseFloat(string s) {
         return to!float(s);
     }
 
@@ -193,7 +193,7 @@ class Float : Number{
      *               parsable number.
      * @see        java.lang.Float#valueOf(java.lang.string)
      */
-    // public Float(string s) throws NumberFormatException {
+    // Float(string s) throws NumberFormatException {
     //     value = parseFloat(s);
     // }
 
@@ -204,7 +204,7 @@ class Float : Number{
      * @return  {@code true} if the value represented by this object is
      *          NaN; {@code false} otherwise.
      */
-    // public bool isNaN() {
+    // bool isNaN() {
     //     return isNaN(value);
     // }
 
@@ -216,7 +216,7 @@ class Float : Number{
      *          positive infinity or negative infinity;
      *          {@code false} otherwise.
      */
-    // public bool isInfinite() {
+    // bool isInfinite() {
     //     return isInfinite(value);
     // }
 
@@ -241,7 +241,7 @@ class Float : Number{
      *          converted to type {@code byte}
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public byte byteValue() {
+    override byte byteValue() {
         return cast(byte)value;
     }
 
@@ -254,7 +254,7 @@ class Float : Number{
      * @jls 5.1.3 Narrowing Primitive Conversions
      * @since JDK1.1
      */
-    override public short shortValue() {
+    override short shortValue() {
         return cast(short)value;
     }
 
@@ -266,7 +266,7 @@ class Float : Number{
      *          converted to type {@code int}
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public int intValue() {
+    override int intValue() {
         return cast(int)value;
     }
 
@@ -278,7 +278,7 @@ class Float : Number{
      *          converted to type {@code long}
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public long longValue() {
+    override long longValue() {
         return cast(long)value;
     }
 
@@ -287,7 +287,7 @@ class Float : Number{
      *
      * @return the {@code float} value represented by this object
      */
-    override public float floatValue() {
+    override float floatValue() {
         return value;
     }
 
@@ -299,7 +299,7 @@ class Float : Number{
      *         object converted to type {@code double}
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public double doubleValue() {
+    override double doubleValue() {
         return cast(double)value;
     }
 
@@ -311,7 +311,7 @@ class Float : Number{
      * @return a hash code value for a {@code double} value.
      * @since 1.8
      */
-    override public size_t toHash() @safe nothrow {
+    override size_t toHash() @safe nothrow {
         return hashOf(value);
     }
 
@@ -354,7 +354,7 @@ class Float : Number{
      *          {@code false} otherwise.
      * @see java.lang.Double#doubleToLongBits(double)
      */
-    override public bool opEquals(Object obj) {
+    override bool opEquals(Object obj) {
         auto dl = cast(Float)obj;
         if(dl !is null)
         {
@@ -374,7 +374,7 @@ class Float : Number{
  * @author Joseph D. Darcy
  */
 
-public class FloatConsts {
+class FloatConsts {
     /**
      * Don't let anyone instantiate this class.
      */
