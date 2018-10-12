@@ -4,15 +4,15 @@ import core.exception;
 import std.exception;
 import std.stdio;
 
-void implementationMissing(string name = __FUNCTION__, string file = __FILE__, int line = __LINE__ )(bool canThrow=true)
+void implementationMissing(string name = __FUNCTION__, 
+    string file = __FILE__, int line = __LINE__ )
+    (bool canThrow=true)
 {
     if(canThrow)
         throw new Exception("Implementation missing: " ~ name, file, line);
     else
     {
-
         import hunt.logging;
-        // writefln("Implementation missing, in %s:%d", file, line);
         warningf("Implementation missing %s, in %s:%d", name, file, line);
     }
 }
@@ -21,7 +21,8 @@ void implementationMissing(string name = __FUNCTION__, string file = __FILE__, i
 mixin template ExceptionBuild(string name, string parent = "")
 {
     import std.exception;
-	enum buildStr = "class " ~ name ~ "Exception : " ~ parent ~ "Exception { \n\t" ~ "mixin basicExceptionCtors;\n }";
+	enum buildStr = "class " ~ name ~ "Exception : " ~ parent 
+        ~ "Exception { \n\t" ~ "mixin basicExceptionCtors;\n }";
 	mixin(buildStr);
 }
 

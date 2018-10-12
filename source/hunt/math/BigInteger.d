@@ -3975,7 +3975,7 @@ class BigInteger : Number {
      * {@code Future}.
      */
     private static BigInteger getRadixConversionCache(int radix, int exponent) {
-        BigInteger[] cacheLine = powerCache[radix]; // volatile read
+        BigInteger[] cacheLine = powerCache[radix]; // read
         if (exponent < cacheLine.length) {
             return cacheLine[exponent];
         }
@@ -3989,11 +3989,11 @@ class BigInteger : Number {
             cacheLine[i] = cacheLine[i - 1].pow(2);
         }
 
-        BigInteger[][] pc = powerCache; // volatile read again
+        BigInteger[][] pc = powerCache; // read again
         if (exponent >= pc[radix].length) {
             pc = pc.dup;
             pc[radix] = cacheLine;
-            powerCache = pc; // volatile write, publish
+            powerCache = pc; // write, publish
         }
         return cacheLine[exponent];
     }
