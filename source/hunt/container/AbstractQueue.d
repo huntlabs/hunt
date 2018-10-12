@@ -149,10 +149,13 @@ abstract class AbstractQueue(E) : AbstractCollection!(E), Queue!(E) {
      * returns {@code null}.
      */
     override void clear() {
-        // TODO: Tasks pending completion -@zxp at 10/10/2018, 11:12:15 AM
-        // 
-        // while (poll() !is null)
-        //     ;
+        static if(is(E == class) || is(E == string)) {
+            while (poll() !is null) {}
+        } else {
+            while(size()>0) {
+                poll();
+            }
+        }
     }
 
     /**

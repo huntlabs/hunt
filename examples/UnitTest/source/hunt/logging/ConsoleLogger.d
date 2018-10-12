@@ -191,7 +191,17 @@ class ConsoleLogger
         string time_prior = Clock.currTime.toString();
         string tid = std.conv.to!string(getTid());
 
-        return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ func ~ " | " ~ msg
+        string fun = func;
+        ptrdiff_t index = lastIndexOf(func, '.');
+        if(index != -1) {
+            ptrdiff_t idx = lastIndexOf(func, '.', index);
+            if(idx == -1) 
+                fun = func[index+1 .. $];
+            else
+                fun = func[idx+1 .. $];
+        }
+
+        return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
             ~ " | " ~ file ~ ":" ~ lineNum;
     }
 
