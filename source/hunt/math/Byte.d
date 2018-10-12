@@ -44,26 +44,26 @@ import std.conv;
  * @see     java.lang.Number
  * @since   JDK1.1
  */
-public  class Byte : Number /*implements Comparable<Byte> */{
+class Byte : Number /*implements Comparable<Byte> */{
 
     /**
      * A constant holding the minimum value a {@code byte} can
      * have, -2<sup>7</sup>.
      */
-    public static  byte   MIN_VALUE = -128;
+    static  byte   MIN_VALUE = -128;
 
     /**
      * A constant holding the maximum value a {@code byte} can
      * have, 2<sup>7</sup>-1.
      */
-    public static  byte   MAX_VALUE = 127;
+    static  byte   MAX_VALUE = 127;
 
     /**
      * The {@code Class} instance representing the primitive type
      * {@code byte}.
      */
     //@SuppressWarnings("unchecked")
-    // public static  Class<Byte>     TYPE = (Class<Byte>) Class.getPrimitiveClass("byte");
+    // static  Class<Byte>     TYPE = (Class<Byte>) Class.getPrimitiveClass("byte");
 
     /**
      * Returns a new {@code string} object representing the
@@ -73,7 +73,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @return the string representation of the specified {@code byte}
      * @see java.lang.Integer#toString(int)
      */
-    // public static string toString(byte b) {
+    // static string toString(byte b) {
     //     return Integer.toString((int)b, 10);
     // }
 
@@ -101,7 +101,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @return a {@code Byte} instance representing {@code b}.
      * @since  1.5
      */
-    // public static Byte valueOf(byte b) {
+    // static Byte valueOf(byte b) {
     //      int offset = 128;
     //     return ByteCache.cache[(int)b + offset];
     // }
@@ -147,7 +147,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @throws          NumberFormatException If the string does
      *                  not contain a parsable {@code byte}.
      */
-    // public static byte parseByte(string s, int radix)
+    // static byte parseByte(string s, int radix)
     //     throws NumberFormatException {
     //     int i = Integer.parseInt(s, radix);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
@@ -174,7 +174,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @throws          NumberFormatException if the string does not
      *                  contain a parsable {@code byte}.
      */
-    // public static byte parseByte(string s) throws NumberFormatException {
+    // static byte parseByte(string s) throws NumberFormatException {
     //     return parseByte(s, 10);
     // }
 
@@ -203,7 +203,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @throws          NumberFormatException If the {@code string} does
      *                  not contain a parsable {@code byte}.
      */
-    // public static Byte valueOf(string s, int radix)
+    // static Byte valueOf(string s, int radix)
     //     throws NumberFormatException {
     //     return valueOf(parseByte(s, radix));
     // }
@@ -230,7 +230,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @throws          NumberFormatException If the {@code string} does
      *                  not contain a parsable {@code byte}.
      */
-    // public static Byte valueOf(string s) throws NumberFormatException {
+    // static Byte valueOf(string s) throws NumberFormatException {
     //     return valueOf(s, 10);
     // }
 
@@ -276,7 +276,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *            contain a parsable {@code byte}.
      * @see java.lang.Byte#parseByte(java.lang.string, int)
      */
-    // public static Byte decode(string nm) throws NumberFormatException {
+    // static Byte decode(string nm) throws NumberFormatException {
     //     int i = Integer.decode(nm);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
     //         throw new NumberFormatException(
@@ -298,7 +298,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @param value     the value to be represented by the
      *                  {@code Byte}.
      */
-    public this(byte value) {
+    this(byte value) {
         this.value = value;
     }
 
@@ -315,7 +315,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *                  does not contain a parsable {@code byte}.
      * @see        java.lang.Byte#parseByte(java.lang.string, int)
      */
-    // public Byte(string s) throws NumberFormatException {
+    // Byte(string s) throws NumberFormatException {
     //     this.value = parseByte(s, 10);
     // }
 
@@ -323,7 +323,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * Returns the value of this {@code Byte} as a
      * {@code byte}.
      */
-    override public byte byteValue() {
+    override byte byteValue() {
         return value;
     }
 
@@ -332,7 +332,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public short shortValue() {
+    override short shortValue() {
         return cast(short)value;
     }
 
@@ -341,7 +341,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public int intValue() {
+    override int intValue() {
         return cast(int)value;
     }
 
@@ -350,7 +350,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public long longValue() {
+    override long longValue() {
         return cast(long)value;
     }
 
@@ -359,7 +359,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public float floatValue() {
+    override float floatValue() {
         return cast(float)value;
     }
 
@@ -368,7 +368,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * after a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public double doubleValue() {
+    override double doubleValue() {
         return cast(double)value;
     }
 
@@ -382,7 +382,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
-    // public string toString() {
+    // string toString() {
     //     return Integer.toString((int)value);
     // }
 
@@ -393,7 +393,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @return a hash code value for this {@code Byte}
      */
     // @Override
-    // public int hashCode() {
+    // int hashCode() {
     //     return Byte.hashCode(value);
     // }
 
@@ -405,7 +405,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @return a hash code value for a {@code byte} value.
      * @since 1.8
      */
-    override public size_t toHash() {
+    override size_t toHash() {
         return cast(size_t)value;
     }
 
@@ -419,7 +419,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      * @return          {@code true} if the objects are the same;
      *                  {@code false} otherwise.
      */
-    override public bool opEquals(Object obj) {
+    override bool opEquals(Object obj) {
         if ( cast(Byte)obj !is null) {
             return value == (cast(Byte)obj).byteValue();
         }
@@ -439,7 +439,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *           comparison).
      * @since   1.2
      */
-    // public int compareTo(Byte anotherByte) {
+    // int compareTo(Byte anotherByte) {
     //     return compare(this.value, anotherByte.value);
     // }
 
@@ -457,7 +457,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *         a value greater than {@code 0} if {@code x > y}
      * @since 1.7
      */
-    public static int compare(byte x, byte y) {
+    static int compare(byte x, byte y) {
         return x - y;
     }
 
@@ -477,7 +477,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *         conversion
      * @since 1.8
      */
-    public static int toUnsignedInt(byte x) {
+    static int toUnsignedInt(byte x) {
         return (cast(int) x) & 0xff;
     }
 
@@ -497,7 +497,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *         conversion
      * @since 1.8
      */
-    public static long toUnsignedLong(byte x) {
+    static long toUnsignedLong(byte x) {
         return (cast(long) x) & 0xffL;
     }
 
@@ -508,7 +508,7 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *
      * @since 1.5
      */
-    public static const int SIZE = 8;
+    static enum int SIZE = 8;
 
     /**
      * The number of bytes used to represent a {@code byte} value in two's
@@ -516,12 +516,9 @@ public  class Byte : Number /*implements Comparable<Byte> */{
      *
      * @since 1.8
      */
-    public static  int BYTES = SIZE / Byte.SIZE;
+    static enum int BYTES = byte.sizeof;
 
-    /** use serialVersionUID from JDK 1.1. for interoperability */
-    private static  long serialVersionUID = -7183698231559129828L;
-
-     public static byte parseByte(string s)  {
+    static byte parseByte(string s)  {
         auto i = to!int(s);
         if (i < MIN_VALUE || i > MAX_VALUE)
         {

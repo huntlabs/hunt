@@ -1554,7 +1554,7 @@ public class BigDecimal : Number {
 //      * @see    #ROUND_HALF_EVEN
 //      * @see    #ROUND_UNNECESSARY
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
 //     public BigDecimal divide(BigDecimal divisor, int scale, int roundingMode) {
 //         if (roundingMode < ROUND_UP || roundingMode > ROUND_UNNECESSARY)
 //             throw new IllegalArgumentException("Invalid rounding mode");
@@ -1620,7 +1620,7 @@ public class BigDecimal : Number {
 //      * @see    #ROUND_HALF_EVEN
 //      * @see    #ROUND_UNNECESSARY
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public BigDecimal divide(BigDecimal divisor, int roundingMode) {
         // return this.divide(divisor, scale, roundingMode);
         return null;
@@ -2560,7 +2560,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#UP} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_UP =           0;
 
 //     /**
@@ -2570,7 +2570,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#DOWN} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_DOWN =         1;
 
 //     /**
@@ -2582,7 +2582,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#CEILING} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_CEILING =      2;
 
 //     /**
@@ -2594,7 +2594,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#FLOOR} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_FLOOR =        3;
 
 //     /**
@@ -2607,7 +2607,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#HALF_UP} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_HALF_UP =      4;
 
 //     /**
@@ -2619,7 +2619,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#HALF_DOWN} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_HALF_DOWN =    5;
 
 //     /**
@@ -2634,7 +2634,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#HALF_EVEN} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_HALF_EVEN =    6;
 
 //     /**
@@ -2645,7 +2645,7 @@ public class BigDecimal : Number {
 //      *
 //      * @deprecated Use {@link RoundingMode#UNNECESSARY} instead.
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
     public static  int ROUND_UNNECESSARY =  7;
 
 
@@ -2745,7 +2745,7 @@ public class BigDecimal : Number {
 //      * @see    #ROUND_HALF_EVEN
 //      * @see    #ROUND_UNNECESSARY
 //      */
-//     @Deprecated(since="9")
+//     //@Deprecated(since="9")
 //     public BigDecimal setScale(int newScale, int roundingMode) {
 //         if (roundingMode < ROUND_UP || roundingMode > ROUND_UNNECESSARY)
 //             throw new IllegalArgumentException("Invalid rounding mode");
@@ -3909,7 +3909,7 @@ public class BigDecimal : Number {
 //                 }
 //                 // Based on the following facts:
 //                 // 1. pows is a private local varible;
-//                 // 2. the following store is a volatile store.
+//                 // 2. the following store is a store.
 //                 // the newly created array elements can be safely published.
 //                 BIG_TEN_POWERS_TABLE = pows;
 //             }
@@ -3939,7 +3939,7 @@ public class BigDecimal : Number {
 //         1000000000000000000L   // 18 / 10^18
 //     };
 
-//     private static volatile BigInteger BIG_TEN_POWERS_TABLE[] = {
+//     private static BigInteger BIG_TEN_POWERS_TABLE[] = {
 //         BigInteger.ONE,
 //         BigInteger.valueOf(10),
 //         BigInteger.valueOf(100),

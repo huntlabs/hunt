@@ -29,7 +29,7 @@ class ReferenceQueue(T) {
 
     // static private class Lock { };
     // private Lock lock = new Lock();
-    // private volatile Reference<T> head = null;
+    // private Reference<T> head = null;
     // private long queueLength = 0;
 
     // bool enqueue(Reference<T> r) { /* Called only by Reference class */

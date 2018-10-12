@@ -1,5 +1,8 @@
 module hunt.math.Integer;
+
+import hunt.math.Byte;
 import hunt.math.Number;
+
 import std.conv;
 
 class Integer : Number {
@@ -310,5 +313,23 @@ class Integer : Number {
     {
         return to!string(value);
     }
+
+    // Bit twiddling
+
+    /**
+     * The number of bits used to represent an {@code int} value in two's
+     * complement binary form.
+     *
+     * @since 1.5
+     */
+    enum int SIZE = int.sizeof * Byte.SIZE; // 32;
+
+    /**
+     * The number of bytes used to represent an {@code int} value in two's
+     * complement binary form.
+     *
+     * @since 1.8
+     */
+    enum int BYTES = int.sizeof; // SIZE / Byte.SIZE;
 
 }

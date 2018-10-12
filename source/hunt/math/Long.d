@@ -1,10 +1,17 @@
 module hunt.math.Long;
+
+import hunt.math.Byte;
+import hunt.math.Integer;
 import hunt.math.Number;
+import hunt.util.Comparator;
+import hunt.util.exception;
+
+import std.algorithm.comparison;
 import std.conv;
 import std.exception;
-import hunt.math.Integer;
-import std.algorithm.comparison;
 
+/**
+*/
 class Long : Number{
 
      // Bit Twiddling
@@ -13,13 +20,13 @@ class Long : Number{
      * A constant holding the minimum value a {@code long} can
      * have, -2<sup>63</sup>.
      */
-   public static  long MIN_VALUE = 0x8000000000000000L;
+    static  long MIN_VALUE = long.min; //  0x8000000000000000L;
 
     /**
      * A constant holding the maximum value a {@code long} can
      * have, 2<sup>63</sup>-1.
      */
-    public static  long MAX_VALUE = 0x7fffffffffffffffL;
+    static  long MAX_VALUE = long.max; //  0x7fffffffffffffffL;
 
     /**
      * The number of bits used to represent a {@code long} value in two's
@@ -27,7 +34,7 @@ class Long : Number{
      *
      * @since 1.5
      */
-    enum int SIZE = 64;
+    enum int SIZE = BYTES * Byte.SIZE; // 64;
 
     /**
      * The number of bytes used to represent a {@code long} value in two's
@@ -35,7 +42,7 @@ class Long : Number{
      *
      * @since 1.8
      */
-    enum BYTES = SIZE / 8;
+    enum BYTES = long.sizeof; //  SIZE / 8;
 
     /**
      * Returns the signum function of the specified {@code long} value.  (The
@@ -73,7 +80,7 @@ class Long : Number{
      *     is equal to zero.
      * @since 1.5
      */
-    public static int numberOfLeadingZeros(long i) {
+    static int numberOfLeadingZeros(long i) {
         // HD, Figure 5-6
          if (i == 0)
             return 64;
@@ -102,7 +109,7 @@ class Long : Number{
      * @param   value   the value to be represented by the
      *          {@code Long} object.
      */
-    public this(long value) {
+    this(long value) {
         this.value = value;
     }
 
@@ -119,7 +126,7 @@ class Long : Number{
      *             contain a parsable {@code long}.
      * @see        java.lang.Long#parseLong(java.lang.string, int)
      */
-    public this(string s) {
+    this(string s) {
         this.value = to!long(s);
     }
 
@@ -128,7 +135,7 @@ class Long : Number{
      * a narrowing primitive conversion.
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public byte byteValue() {
+    override byte byteValue() {
         return cast(byte)value;
     }
 
@@ -137,7 +144,7 @@ class Long : Number{
      * a narrowing primitive conversion.
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public short shortValue() {
+    override short shortValue() {
         return cast(short)value;
     }
 
@@ -146,7 +153,7 @@ class Long : Number{
      * a narrowing primitive conversion.
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public int intValue() {
+    override int intValue() {
         return cast(int)value;
     }
 
@@ -154,7 +161,7 @@ class Long : Number{
      * Returns the value of this {@code Long} as a
      * {@code long} value.
      */
-    override public long longValue() {
+    override long longValue() {
         return value;
     }
 
@@ -163,7 +170,7 @@ class Long : Number{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public float floatValue() {
+    override float floatValue() {
         return cast(float)value;
     }
 
@@ -172,11 +179,11 @@ class Long : Number{
      * after a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public double doubleValue() {
+    override double doubleValue() {
         return cast(double)value;
     }
 
-    public static long parseLong(string s)  {
+    static long parseLong(string s)  {
         try
         {
             auto i = to!long(s);
@@ -219,7 +226,7 @@ class Long : Number{
      * @return a {@code Long} instance representing {@code l}.
      * @since  1.5
      */
-    public static Long valueOf(long l) {
+    static Long valueOf(long l) {
         int offset = 128;
         if (l >= -128 && l <= 127) { // will cache
             return LongCache.cache[cast(int)l + offset];
@@ -271,7 +278,7 @@ class Long : Number{
      * @see     java.lang.Character#MAX_RADIX
      * @see     java.lang.Character#MIN_RADIX
      */
-    public static string toStr(long i, int radix) {
+    static string toStr(long i, int radix) {
         if (radix < 2 || radix > 36)
             radix = 10;
         if (radix == 10)
@@ -325,7 +332,7 @@ class Long : Number{
      * @see     #toString(long, int)
      * @since 1.8
      */
-    public static string toUnsignedString(long i, int radix) {
+    static string toUnsignedString(long i, int radix) {
         if (i >= 0)
             return toStr(i, radix);
         else {
@@ -424,7 +431,7 @@ class Long : Number{
      * @see #toUnsignedString(long, int)
      * @since   JDK 1.0.2
      */
-    public static string toHexString(long i) {
+    static string toHexString(long i) {
         return toUnsignedString0(i, 4);
     }
 
@@ -463,7 +470,7 @@ class Long : Number{
      * @see #toUnsignedString(long, int)
      * @since   JDK 1.0.2
      */
-    public static string toOctalString(long i) {
+    static string toOctalString(long i) {
         return toUnsignedString0(i, 3);
     }
 
@@ -496,7 +503,7 @@ class Long : Number{
      * @see #toUnsignedString(long, int)
      * @since   JDK 1.0.2
      */
-    public static string toBinaryString(long i) {
+    static string toBinaryString(long i) {
         return toUnsignedString0(i, 1);
     }
 
@@ -546,7 +553,7 @@ class Long : Number{
      *     representation of the specified {@code long} value.
      * @since 1.5
      */
-     public static int bitCount(long i) {
+     static int bitCount(long i) {
         // HD, Figure 5-14
         i = i - ((i >>> 1) & 0x5555555555555555L);
         i = (i & 0x3333333333333333L) + ((i >>> 2) & 0x3333333333333333L);
@@ -555,10 +562,21 @@ class Long : Number{
         i = i + (i >>> 16);
         i = i + (i >>> 32);
         return cast(int)i & 0x7f;
-     }
+    }
 
-    override string toString()
-    {
+    override int opCmp(Object o) {
+        if(o is null) throw new NullPointerException();
+        Number n = cast(Number)o;
+        if(n is null) throw new Exception("Number needed.");
+        return compare(this.value, n.longValue());
+    }
+
+    int opCmp(long n) {
+        return compare(this.value, n);
+    }
+    
+
+    override string toString() {
         return to!string(value);
     }
 
@@ -570,7 +588,7 @@ class Long : Number{
      * @return a hash code value for a {@code long} value.
      * @since 1.8
      */
-    override public size_t toHash() @safe nothrow {
+    override size_t toHash() @safe nothrow {
         return cast(int)(value ^ (value >>> 32));
     }
 
@@ -584,11 +602,15 @@ class Long : Number{
      * @return  {@code true} if the objects are the same;
      *          {@code false} otherwise.
      */
-    override public bool opEquals(Object obj) {
-        auto lg = cast(Long)obj;
+    override bool opEquals(Object obj) {
+        auto lg = cast(Number)obj;
         if (lg !is null) {
             return value == lg.longValue();
         }
         return false;
+    }
+
+    bool opEquals(long v) {
+        return value == v;
     }
 }

@@ -502,12 +502,13 @@ interface Comparator(T) {
 }
 
 import std.traits;
-int compare(T)(T v1, T v2) if(isOrderingComparable!(T))
+int compare(T)(T x, T y) if(isOrderingComparable!(T))
 {
-    if(v1 > v2)
-        return 1;
-    else if(v1 < v2)
-        return -1;
-    else
-        return 0;
+    return (x < y) ? -1 : ((x == y) ? 0 : 1);
+    // if(v1 > v2)
+    //     return 1;
+    // else if(v1 < v2)
+    //     return -1;
+    // else
+    //     return 0;
 }

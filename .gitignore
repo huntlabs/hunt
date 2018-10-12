@@ -44,5 +44,6 @@ examples/Timer/timer
 examples/UnitTest/unittest
 
 # others
-
+*.zip
 hunt-test-default
+test.config
