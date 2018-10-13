@@ -5,48 +5,6 @@ import std.traits;
 import std.typecons;
 import std.typetuple;
 
-
-/**
- * Represents an operation that accepts a single input argument and returns no
- * result. Unlike most other functional interfaces, {@code Consumer} is expected
- * to operate via side-effects.
- *
- */
-alias Consumer(T) = void delegate(T t);
-
-/**
-*/
-alias Function(T, U) = U delegate(T);
-
-/**
- * Represents a supplier of results.
- *
- * <p>There is no requirement that a new or distinct result be returned each
- * time the supplier is invoked.
- *
- */
-alias Supplier(T) = T delegate();
-
-/**
-*/
-alias Predicate(T) = bool delegate(T t);
-
-/**
- * Represents an operation that accepts two input arguments and returns no
- * result.  This is the two-arity specialization of {@link Consumer}.
- * Unlike most other functional interfaces, {@code BiConsumer} is expected
- * to operate via side-effects.
- *
- * <p>This is a <a href="package-summary.html">functional interface</a>
- * whose functional method is {@link #accept(Object, Object)}.
- *
- * @param <T> the type of the first argument to the operation
- * @param <U> the type of the second argument to the operation
- *
- * @see Consumer
- * @since 1.8
- */
-alias BiConsumer(T, U) = void delegate(T t, U u);
 // interface BiConsumer(T, U) {
 
 //     /**
@@ -80,22 +38,6 @@ alias BiConsumer(T, U) = void delegate(T t, U u);
 // }
 
 
-
-/**
- * Represents a function that accepts two arguments and produces a result.
- * This is the two-arity specialization of {@link Function}.
- *
- * <p>This is a <a href="package-summary.html">functional interface</a>
- * whose functional method is {@link #apply(Object, Object)}.
- *
- * @param <T> the type of the first argument to the function
- * @param <U> the type of the second argument to the function
- * @param <R> the type of the result of the function
- *
- * @see Function
- * @since 1.8
- */
- alias BiFunction(T, U, R) = R delegate(T t, U u);
 // interface BiFunction(T, U, R) {
 
 //     /**
@@ -126,94 +68,6 @@ alias BiConsumer(T, U) = void delegate(T t, U u);
 //     // }
 // }
 
-
-/**
- * A one-argument action.
- */
-template Action1(T)
-{
-    alias Action1 = void delegate(T t);
-}
-
-
-/**
- * A two-argument action.
- */
-alias Action2(T1, T2) = void delegate(T1 t1, T2 t2);
-
-/**
- * A three-argument action.
- */
-template Action3(T1, T2, T3)
-{
-    alias Action3 = void delegate(T1 t1, T2 t2, T3 t3);
-}
-
-/**
- * A four-argument action.
- */
-template Action4(T1, T2, T3, T4)
-{
-    alias Action4 = void delegate(T1 t1, T2 t2, T3 t3, T4 t4);
-}
-
-/**
- * A five-argument action.
- */
-template Action5(T1, T2, T3, T4, T5)
-{
-    alias Action5 = void delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5);
-}
-
-
-/**
- * A six-argument action.
- */
-template Action6(T1, T2, T3, T4, T5, T6)
-{
-    alias Action6 = void delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
-}
-
-
-/**
- * A vector-argument action.
- */
-template ActionN(T)
-{
-    alias ActionN = void delegate(T[] args...);
-}
-
-/**
- *  Represents a function with one argument.
- */
-template Func1(T1, R)
-{
-    alias Func1 = R delegate(T1 t1);
-}
-
-/**
- *  Represents a function with four arguments.
- */
-template Func4(T1, T2, T3, T4, R)
-{
-    alias Func4 = R delegate(T1 t1, T2 t2, T3 t3, T4 t4);
-}
-
-/**
- * Represents a function with five arguments.
- */
-template Func5(T1, T2, T3, T4, T5, R)
-{
-    alias Func5 = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5);
-}
-
-/**
- * Represents a function with six arguments.
- */
-template Func6(T1, T2, T3, T4, T5, T6, R)
-{
-    alias Func6 = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
-}
 
   
 /**

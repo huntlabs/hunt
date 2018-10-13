@@ -12,15 +12,18 @@ class BufferedOutputStream : OutputStream {
     private byte[] buf;
     private int count;
 
-    this(OutputStream output, int bufferSize) {
+    this(OutputStream output, int bufferSize = 1024) {
         this.output = output;
-        this.bufferSize = bufferSize;
         if (bufferSize > 1024) {
+            this.bufferSize = bufferSize;
             this.buf = new byte[bufferSize];
         } else {
+            this.bufferSize = 1024;
             this.buf = new byte[1024];
         }
     }
+
+    alias write = OutputStream.write;
 
     override
     void write(int b)  {

@@ -489,7 +489,7 @@ class IO {
 
 	enum string CRLF = "\015\012";
 
-	enum byte[] CRLF_BYTES = [ cast(byte) '\015', cast(byte) '\012' ];
+	enum byte[] CRLF_BYTES = [ '\015', '\012' ];
 
 	enum int bufferSize = 64 * 1024;
 

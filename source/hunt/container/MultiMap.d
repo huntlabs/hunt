@@ -14,7 +14,6 @@ import hunt.string;
  *            the entry type for multimap values
  */
 class MultiMap(V) : HashMap!(string, List!(V)) {
-	// private enum serialVersionUID = -1127515104096783129L;
 
 	this() {
 		super();

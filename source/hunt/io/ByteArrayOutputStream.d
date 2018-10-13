@@ -1,8 +1,6 @@
 module hunt.io.ByteArrayOutputStream;
 
 import hunt.io.common;
-
-// import hunt.util.common;
 import hunt.util.exception;
 
 import std.algorithm;
@@ -156,7 +154,7 @@ class ByteArrayOutputStream : OutputStream {
      * output stream is discarded. The output stream can be used again,
      * reusing the already allocated buffer space.
      *
-     * @see     java.io.ByteArrayInputStream#count
+     * @see     hunt.io.ByteArrayInputStream#count
      */
     void reset() {
         count = 0;
@@ -168,7 +166,7 @@ class ByteArrayOutputStream : OutputStream {
      * have been copied into it.
      *
      * @return  the current contents of this output stream, as a byte array.
-     * @see     java.io.ByteArrayOutputStream#size()
+     * @see     hunt.io.ByteArrayOutputStream#size()
      */
     byte[] toByteArray() {
         // FIXME: Needing refactor or cleanup -@zxp at 7/25/2018, 10:02:15 AM
@@ -181,7 +179,7 @@ class ByteArrayOutputStream : OutputStream {
      *
      * @return  the value of the <code>count</code> field, which is the number
      *          of valid bytes in this output stream.
-     * @see     java.io.ByteArrayOutputStream#count
+     * @see     hunt.io.ByteArrayOutputStream#count
      */
     int size() {
         return count;
@@ -247,9 +245,9 @@ class ByteArrayOutputStream : OutputStream {
      *
      * @param      hibyte    the high byte of each resulting Unicode character.
      * @return     the current contents of the output stream, as a string.
-     * @see        java.io.ByteArrayOutputStream#size()
-     * @see        java.io.ByteArrayOutputStream#toString(string)
-     * @see        java.io.ByteArrayOutputStream#toString()
+     * @see        hunt.io.ByteArrayOutputStream#size()
+     * @see        hunt.io.ByteArrayOutputStream#toString(string)
+     * @see        hunt.io.ByteArrayOutputStream#toString()
      */
     // @Deprecated
     // string toString(int hibyte) {
