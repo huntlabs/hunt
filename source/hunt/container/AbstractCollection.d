@@ -1,9 +1,8 @@
 module hunt.container.AbstractCollection;
 
 import hunt.container.Collection;
-
+import hunt.util.common;
 import hunt.util.exception;
-import hunt.util.functional;
 
 import std.array;
 import std.conv;

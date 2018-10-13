@@ -3,8 +3,8 @@ module hunt.container.Map;
 import hunt.container.Collection;
 import hunt.container.Iterable;
 import hunt.container.Set;
+import hunt.util.common;
 
-import hunt.util.functional;
 import std.range.interfaces : InputRange;
 
 /**
