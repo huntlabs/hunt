@@ -12,3 +12,4 @@ unittest-test-*
 *.o
 *.obj
 *.lst
+/java/

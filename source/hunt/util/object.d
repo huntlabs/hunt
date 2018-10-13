@@ -10,17 +10,16 @@ interface IObject {
 
 /**
 */
-class NullableObject(T) : IObject {
-    T payload;
-
+class Nullable(T) : IObject {
+    private T _value;
     private bool _isNull = true;
 
     this() {
-        payload = T.init;
+        _value = T.init;
     }
 
     this(T v) {
-        payload = v;
+        _value = v;
         _isNull = false;
     }
 
@@ -28,8 +27,12 @@ class NullableObject(T) : IObject {
         return _isNull;
     }
 
+    T value() {
+        return _value;
+    }
+
     override bool opEquals(Object o) {
-        NullableObject!(T) that = cast(NullableObject!(T))o;
+        Nullable!(T) that = cast(Nullable!(T))o;
         if(that is null)
             return false;
 
@@ -37,11 +40,11 @@ class NullableObject(T) : IObject {
         if(that._isNull) return false;
 
         static if(is(T == class)) {
-            if(this.payload is that.payload)
+            if(this._value is that._value)
                 return true;
         }
 
-        if(this.payload == that.payload)
+        if(this._value == that._value)
             return true;
         return false;
     }
