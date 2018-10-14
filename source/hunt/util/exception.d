@@ -356,5 +356,13 @@ class KeyManagementException : Exception
 
 class StringIndexOutOfBoundsException : Exception
 {
-    mixin basicExceptionCtors;
+    mixin BasicExceptionCtors;
 }
+
+
+class IllegalThreadStateException : IllegalArgumentException
+{
+    mixin BasicExceptionCtors;
+}
+
+

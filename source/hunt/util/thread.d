@@ -11,7 +11,11 @@
  
 module hunt.util.thread;
 
+import hunt.util.exception;
+
 import core.thread;
+import std.algorithm;
+import std.conv;
 import std.stdio;
 
 version (Posix)
@@ -133,10 +137,10 @@ class ThreadGroupEx : UncaughtExceptionHandler {
 
     private int nUnstartedThreads = 0;
     private int nthreads;
-    private Thread threads[];
+    private Thread[] threads;
 
     private int ngroups;
-    private ThreadGroupEx groups[];
+    private ThreadGroupEx[] groups;
 
     /**
      * Creates an empty Thread group that is not in any Thread group.
@@ -302,8 +306,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * called with no arguments; this may result in a security exception.
      * <p>
      * If the {@code pri} argument is less than
-     * {@link Thread#MIN_PRIORITY} or greater than
-     * {@link Thread#MAX_PRIORITY}, the maximum priority of the group
+     * {@link Thread#PRIORITY_MIN} or greater than
+     * {@link Thread#PRIORITY_MAX}, the maximum priority of the group
      * remains unchanged.
      * <p>
      * Otherwise, the priority of this ThreadGroupEx object is set to the
@@ -327,10 +331,10 @@ class ThreadGroupEx : UncaughtExceptionHandler {
         ThreadGroupEx[] groupsSnapshot;
         synchronized (this) {
             checkAccess();
-            if (pri < Thread.MIN_PRIORITY || pri > Thread.MAX_PRIORITY) {
+            if (pri < Thread.PRIORITY_MIN || pri > Thread.PRIORITY_MAX) {
                 return;
             }
-            maxPriority = (parent !is null) ? Math.min(pri, parent.maxPriority) : pri;
+            maxPriority = (parent !is null) ? min(pri, parent.maxPriority) : pri;
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
                 groupsSnapshot = groups[0..ngroupsSnapshot]; // Arrays.copyOf(groups, ngroupsSnapshot);
@@ -449,7 +453,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @since   1.0
      */
-    int enumerate(Thread list[]) {
+    int enumerate(Thread[] list) {
         checkAccess();
         return enumerate(list, 0, true);
     }
@@ -487,26 +491,29 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @since   1.0
      */
-    int enumerate(Thread list[], bool recurse) {
+    int enumerate(Thread[] list, bool recurse) {
         checkAccess();
         return enumerate(list, 0, recurse);
     }
 
-    private int enumerate(Thread list[], int n, bool recurse) {
+    private int enumerate(Thread[] list, int n, bool recurse) {
         int ngroupsSnapshot = 0;
         ThreadGroupEx[] groupsSnapshot = null;
         synchronized (this) {
             if (destroyed) {
                 return 0;
             }
-            int nt = nthreads;
+            size_t nt = nthreads;
             if (nt > list.length - n) {
                 nt = list.length - n;
             }
-            for (int i = 0; i < nt; i++) {
-                if (threads[i].isAlive()) {
-                    list[n++] = threads[i];
-                }
+            for (size_t i = 0; i < nt; i++) {
+                // TODO: Tasks pending completion -@zxp at 10/14/2018, 9:11:46 AM
+                // 
+                implementationMissing(false);
+                // if (threads[i].isAlive()) {
+                //     list[n++] = threads[i];
+                // }
             }
             if (recurse) {
                 ngroupsSnapshot = ngroups;
@@ -587,7 +594,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @since   1.0
      */
-    int enumerate(ThreadGroupEx list[]) {
+    int enumerate(ThreadGroupEx[] list) {
         checkAccess();
         return enumerate(list, 0, true);
     }
@@ -625,19 +632,19 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @since   1.0
      */
-    int enumerate(ThreadGroupEx list[], bool recurse) {
+    int enumerate(ThreadGroupEx[] list, bool recurse) {
         checkAccess();
         return enumerate(list, 0, recurse);
     }
 
-    private int enumerate(ThreadGroupEx list[], int n, bool recurse) {
+    private int enumerate(ThreadGroupEx[] list, int n, bool recurse) {
         int ngroupsSnapshot = 0;
         ThreadGroupEx[] groupsSnapshot = null;
         synchronized (this) {
             if (destroyed) {
                 return 0;
             }
-            int ng = ngroups;
+            size_t ng = ngroups;
             if (ng > list.length - n) {
                 ng = list.length - n;
             }
@@ -712,9 +719,12 @@ class ThreadGroupEx : UncaughtExceptionHandler {
         ThreadGroupEx[] groupsSnapshot;
         synchronized (this) {
             checkAccess();
-            for (int i = 0 ; i < nthreads ; i++) {
-                threads[i].interrupt();
-            }
+            // for (int i = 0 ; i < nthreads ; i++) {
+            //     threads[i].interrupt();
+            // }
+            // TODO: Tasks pending completion -@zxp at 10/14/2018, 9:13:18 AM
+            // 
+            implementationMissing(false);
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
                 groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
@@ -897,7 +907,10 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (groups is null) {
                 groups = new ThreadGroupEx[4];
             } else if (ngroups == groups.length) {
-                groups = Arrays.copyOf(groups, ngroups * 2);
+                // groups = Arrays.copyOf(groups, ngroups * 2);
+                ThreadGroupEx[] th = new ThreadGroupEx[ngroups * 2];
+                th[0..groups.length] = groups[0..$];
+                groups = th;
             }
             groups[ngroups] = g;
 
@@ -920,7 +933,9 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             for (int i = 0 ; i < ngroups ; i++) {
                 if (groups[i] == g) {
                     ngroups -= 1;
-                    System.arraycopy(groups, i + 1, groups, i, ngroups - i);
+                    // System.arraycopy(groups, i + 1, groups, i, ngroups - i);
+                    for(int j=i; j<ngroups; j++)
+                        groups[j] = groups[j+1];
                     // Zap dangling reference to the dead group so that
                     // the garbage collector will collect it.
                     groups[ngroups] = null;
@@ -928,7 +943,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
                 }
             }
             if (nthreads == 0) {
-                notifyAll();
+                // notifyAll();
             }
             if (daemon && (nthreads == 0) &&
                 (nUnstartedThreads == 0) && (ngroups == 0))
@@ -976,7 +991,10 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (threads is null) {
                 threads = new Thread[4];
             } else if (nthreads == threads.length) {
-                threads = Arrays.copyOf(threads, nthreads * 2);
+                Thread[] th = new Thread[nthreads * 2];
+                th[0..threads.length] = threads[0..$];
+                threads = th;
+                // threads = Arrays.copyOf(threads, nthreads * 2);
             }
             threads[nthreads] = t;
 
@@ -1027,7 +1045,10 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             remove(t);
 
             if (nthreads == 0) {
-                notifyAll();
+                // TODO: Tasks pending completion -@zxp at 10/14/2018, 9:04:08 AM
+                // 
+                implementationMissing(false);
+                // notifyAll();
             }
             if (daemon && (nthreads == 0) &&
                 (nUnstartedThreads == 0) && (ngroups == 0))
@@ -1051,7 +1072,11 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             }
             for (int i = 0 ; i < nthreads ; i++) {
                 if (threads[i] == t) {
-                    System.arraycopy(threads, i + 1, threads, i, --nthreads - i);
+                    //System.arraycopy(threads, i + 1, threads, i, --nthreads - i);
+                    --nthreads;
+                    for(int j=i; j<nthreads; j++)
+                        threads[j] = threads[j+1];
+
                     // Zap dangling reference to the dead thread so that
                     // the garbage collector will collect it.
                     threads[nthreads] = null;
@@ -1141,8 +1166,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             UncaughtExceptionHandler ueh = getDefaultUncaughtExceptionHandler();
             if (ueh !is null) {
                 ueh.uncaughtException(t, e);
-            } elses {
-                stderr.writeln("Exception in thread \"" ~ t.getName() ~ "\" ");
+            } else {
+                stderr.writeln("Exception in thread \"" ~ t.name() ~ "\" ");
                 stderr.writeln(e.toString());
             }
         }
@@ -1154,7 +1179,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @return  a string representation of this thread group.
      * @since   1.0
      */
-    string toString() {
-        return typeid(this).name ~ "[name=" ~ getName() ~ ",maxpri=" ~ maxPriority ~ "]";
+    override string toString() {
+        return typeid(this).name ~ "[name=" ~ getName() ~ 
+            ",maxpri=" ~ maxPriority.to!string() ~ "]";
     }
 }
