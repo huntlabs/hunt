@@ -15,7 +15,7 @@ import hunt.event;
 import hunt.event.timer;
 import hunt.io.core;
 import hunt.logging;
-import hunt.util.common;
+import hunt.lang.common;
 
 import core.time;
 import std.datetime;

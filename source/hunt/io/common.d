@@ -1,7 +1,7 @@
 module hunt.io.common;
 
 import hunt.util.concurrent.CountingCallback;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.exception;
 
 import hunt.container.ByteBuffer;

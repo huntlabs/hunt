@@ -21,7 +21,7 @@ import hunt.container.ByteBuffer;
 import hunt.event.socket.common;
 import hunt.event.core;
 import hunt.logging;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.thread;
 
 import core.sys.windows.windows;

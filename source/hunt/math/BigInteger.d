@@ -6,7 +6,7 @@ import hunt.math.Integer;
 import hunt.math.Long;
 import hunt.math.Number;
 
-import hunt.util.character;
+import hunt.lang.character;
 import hunt.util.exception;
 import hunt.string;
 

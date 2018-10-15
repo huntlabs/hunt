@@ -1,4 +1,4 @@
-module hunt.util.character.CharacterData;
+module hunt.lang.character.CharacterData;
 
 abstract class CharacterData {
     abstract int getProperties(int ch);

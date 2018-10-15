@@ -11,7 +11,7 @@
  
 module hunt.event.selector;
 
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.event.core;
 import std.conv;
 

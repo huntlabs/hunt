@@ -3,7 +3,7 @@ module hunt.io.PipedStream;
 import hunt.io.common;
 import hunt.io.ByteArrayInputStream;
 import hunt.io.ByteArrayOutputStream;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.exception;
 
 // import hunt.logging;

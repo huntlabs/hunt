@@ -3,18 +3,18 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
+ * under the terms of the GNU General License version 2 only, as
  * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
  * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General License
  * version 2 for more details (a copy is included in the LICENSE file that
  * accompanied this code).
  *
- * You should have received a copy of the GNU General Public License version
+ * You should have received a copy of the GNU General License version
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
@@ -25,9 +25,10 @@
 
 module hunt.math.Boolean;
 
-import hunt.math.Number;
+// import hunt.math.Number;
 import hunt.string;
 import std.traits;
+
 /**
  * The Boolean class wraps a value of the primitive type
  * {@code bool} in an object. An object of type
@@ -43,22 +44,20 @@ import std.traits;
  * @author  Arthur van Hoff
  * @since   JDK1.0
  */
-public  class Boolean 
-{
+class Boolean {
     /**
      * The {@code Boolean} object corresponding to the primitive
      * value {@code true}.
      */
-    public static  Boolean TRUE;
+    __gshared const Boolean TRUE ;
 
     /**
      * The {@code Boolean} object corresponding to the primitive
      * value {@code false}.
      */
-    public static  Boolean FALSE;
+    __gshared const Boolean FALSE;
 
-    static this()
-    {
+    shared static this() {
         TRUE = new Boolean(true);
         FALSE = new Boolean(false);
     }
@@ -69,17 +68,14 @@ public  class Boolean
      * @since   JDK1.1
     //  */
     // @SuppressWarnings("unchecked")
-    // public static  Class<Boolean> TYPE = (Class<Boolean>) Class.getPrimitiveClass("bool");
+    // static  Class<Boolean> TYPE = (Class<Boolean>) Class.getPrimitiveClass("bool");
 
     /**
      * The value of the Boolean.
      *
      * @serial
      */
-    private  bool value;
-
-    /** use serialVersionUID from JDK 1.0.2 for interoperability */
-    private static  long serialVersionUID = -3665804199014368530L;
+    private bool value;
 
     /**
      * Allocates a {@code Boolean} object representing the
@@ -92,51 +88,41 @@ public  class Boolean
      *
      * @param   value   the value of the {@code Boolean}.
      */
-     private void assign(T)(T arg) @safe
-    {
-        static if (is(T : typeof(null)))
-        {
+    private void assign(T)(T arg) @safe {
+        static if (is(T : typeof(null))) {
             value = false;
         }
-        else static if (is(T : string))
-        {
+        else static if (is(T : string)) {
             string t = arg;
-            if(t.length != 0)
+            if (t.length != 0)
                 value = true;
             else
                 value = false;
         }
-        else static if (is(T : bool))
-        {
-           value = arg;
+        else static if (is(T : bool)) {
+            value = arg;
         }
-        else static if (is(T : ulong) && isUnsigned!T)
-        {
+        else static if (is(T : ulong) && isUnsigned!T) {
             value = (arg != 0 ? true : false);
         }
-        else static if (is(T : long))
-        {
+        else static if (is(T : long)) {
             value = (arg != 0 ? true : false);
         }
-        else
-        {
+        else {
             static assert(false, text(`unable to convert type "`, T.stringof, `" to Boolean`));
         }
     }
 
-    public this(T)(T value) if (!isStaticArray!T)
-    {
+    this(T)(T value) if (!isStaticArray!T) {
         assign(value);
     }
 
     /// Ditto
-    this(T)(ref T arg) if (isStaticArray!T)
-    {
+    this(T)(ref T arg) if (isStaticArray!T) {
         value = arg.booleanValue();
     }
     /// Ditto
-    this(T : Boolean)(inout T arg) inout
-    {
+    this(T : Boolean)(inout T arg) inout {
         value = arg.booleanValue();
     }
 
@@ -153,7 +139,7 @@ public  class Boolean
      *
      * @param   s   the string to be converted to a {@code Boolean}.
      */
-    public this(string s) {
+    this(string s) {
         this(parseBoolean(s));
     }
 
@@ -170,8 +156,8 @@ public  class Boolean
      * @return     the bool represented by the string argument
      * @since 1.5
      */
-    public static bool parseBoolean(string s) {
-        return ((s.length != 0) && equalsIgnoreCase(s,"true"));
+    static bool parseBoolean(string s) {
+        return ((s.length != 0) && equalsIgnoreCase(s, "true"));
     }
 
     /**
@@ -180,7 +166,7 @@ public  class Boolean
      *
      * @return  the primitive {@code bool} value of this object.
      */
-    public bool booleanValue() {
+    bool booleanValue() {
         return value;
     }
 
@@ -198,7 +184,7 @@ public  class Boolean
      * @return a {@code Boolean} instance representing {@code b}.
      * @since  1.4
      */
-    public static Boolean valueOf(bool b) {
+    static Boolean valueOf(bool b) {
         return (b ? TRUE : FALSE);
     }
 
@@ -211,7 +197,7 @@ public  class Boolean
      * @param   s   a string.
      * @return  the {@code Boolean} value represented by the string.
      */
-    public static Boolean valueOf(string s) {
+    static Boolean valueOf(string s) {
         return parseBoolean(s) ? TRUE : FALSE;
     }
 
@@ -225,7 +211,7 @@ public  class Boolean
      * @return the string representation of the specified {@code bool}
      * @since 1.4
      */
-    public static string toString(bool b) {
+    static string toString(bool b) {
         return b ? "true" : "false";
     }
 
@@ -237,7 +223,7 @@ public  class Boolean
      *
      * @return  a string representation of this object.
      */
-    override public string toString() {
+    override string toString() {
         return value ? "true" : "false";
     }
 
@@ -248,8 +234,7 @@ public  class Boolean
      * {@code true}; returns the integer {@code 1237} if this
      * object represents {@code false}.
      */
-    override 
-    public size_t toHash() @safe nothrow {
+    override size_t toHash() @safe nothrow {
         return value ? 1231 : 1237;
     }
 
@@ -261,11 +246,11 @@ public  class Boolean
      * @return a hash code value for a {@code bool} value.
      * @since 1.8
      */
-    // public static size_t hashCode(bool value) {
+    // static size_t hashCode(bool value) {
     //     return value ? 1231 : 1237;
     // }
 
-   /**
+    /**
      * Returns {@code true} if and only if the argument is not
      * {@code null} and is a {@code Boolean} object that
      * represents the same {@code bool} value as this object.
@@ -274,21 +259,18 @@ public  class Boolean
      * @return  {@code true} if the Boolean objects represent the
      *          same value; {@code false} otherwise.
      */
-    override public bool opEquals(Object obj) {
-        if (cast(Boolean)obj !is null) {
-            return value == (cast(Boolean)obj).booleanValue();
+    override bool opEquals(Object obj) {
+        if (cast(Boolean) obj !is null) {
+            return value == (cast(Boolean) obj).booleanValue();
         }
         return false;
     }
 
-
-    void opAssign(T)(T arg) if (!isStaticArray!T && !is(T : Boolean))
-    {
+    void opAssign(T)(T arg) if (!isStaticArray!T && !is(T : Boolean)) {
         assign(arg);
     }
 
-    void opAssign(T)(ref T arg) if (isStaticArray!T)
-    {
+    void opAssign(T)(ref T arg) if (isStaticArray!T) {
         value = arg.booleanValue;
     }
 
@@ -311,7 +293,7 @@ public  class Boolean
      * @see     java.lang.System#getProperty(java.lang.string)
      * @see     java.lang.System#getProperty(java.lang.string, java.lang.string)
      */
-    // public static bool getBoolean(string name) {
+    // static bool getBoolean(string name) {
     //     bool result = false;
     //     try {
     //         result = parseBoolean(System.getProperty(name));
@@ -332,7 +314,7 @@ public  class Boolean
      * @see     Comparable
      * @since  1.5
      */
-    public int compareTo(Boolean b) {
+    int compareTo(Boolean b) {
         return compare(this.value, b.value);
     }
 
@@ -350,7 +332,7 @@ public  class Boolean
      *         a value greater than {@code 0} if {@code x && !y}
      * @since 1.7
      */
-    public static int compare(bool x, bool y) {
+    static int compare(bool x, bool y) {
         return (x == y) ? 0 : (x ? 1 : -1);
     }
 
@@ -364,7 +346,7 @@ public  class Boolean
      * @see hunt.util.functional.BinaryOperator
      * @since 1.8
      */
-    public static bool logicalAnd(bool a, bool b) {
+    static bool logicalAnd(bool a, bool b) {
         return a && b;
     }
 
@@ -378,7 +360,7 @@ public  class Boolean
      * @see hunt.util.functional.BinaryOperator
      * @since 1.8
      */
-    public static bool logicalOr(bool a, bool b) {
+    static bool logicalOr(bool a, bool b) {
         return a || b;
     }
 
@@ -392,19 +374,8 @@ public  class Boolean
      * @see hunt.util.functional.BinaryOperator
      * @since 1.8
      */
-    public static bool logicalXor(bool a, bool b) {
+    static bool logicalXor(bool a, bool b) {
         return a ^ b;
     }
 }
 
-unittest{
-    import std.stdio;
-
-    // void func(Boolean b)
-    // {
-    //     writeln("Boolean : ",b.booleanValue());
-    // }
-
-    // func(false);
-
-}

@@ -5,7 +5,7 @@ import std.container.array;
 import hunt.container.Buffer;
 import hunt.container.StringBuffer;
 
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.string.StringBuilder;
 import hunt.util.exception;
 

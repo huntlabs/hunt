@@ -1,4 +1,4 @@
-module hunt.util.character.Character;
+module hunt.lang.character.Character;
 
 
 /**

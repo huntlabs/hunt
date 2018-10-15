@@ -1,4 +1,4 @@
-module hunt.util.Charset;
+module hunt.lang.Charset;
 
 
 class StandardCharsets {
