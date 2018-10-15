@@ -15,6 +15,9 @@ import hunt.string;
  */
 class MultiMap(V) : HashMap!(string, List!(V)) {
 
+	// TODO: Tasks pending completion -@zxp at 10/15/2018, 6:24:35 PM
+	// replace this with hunt.container.MultiValueMap
+
 	this() {
 		super();
 	}
