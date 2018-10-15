@@ -12,8 +12,6 @@ import hunt.container.ArrayTrie;
 import hunt.container.Trie;
 import hunt.string.common;
 
-
-
 /**
 */
 class StringUtils
