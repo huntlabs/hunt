@@ -49,13 +49,13 @@ class Boolean {
      * The {@code Boolean} object corresponding to the primitive
      * value {@code true}.
      */
-    __gshared const Boolean TRUE ;
+    __gshared Boolean TRUE ;
 
     /**
      * The {@code Boolean} object corresponding to the primitive
      * value {@code false}.
      */
-    __gshared const Boolean FALSE;
+    __gshared Boolean FALSE;
 
     shared static this() {
         TRUE = new Boolean(true);

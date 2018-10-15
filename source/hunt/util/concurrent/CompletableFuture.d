@@ -3,7 +3,7 @@ module hunt.util.concurrent.CompletableFuture;
 import hunt.util.concurrent.Future;
 import hunt.util.concurrent.Promise;
 
-import hunt.util.functional;
+import hunt.lang.common;
 import hunt.util.exception;
 
 /**
