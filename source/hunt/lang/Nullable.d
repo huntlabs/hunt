@@ -5,6 +5,7 @@ import hunt.lang.object;
 /**
 */
 class Nullable(T) : IObject {
+    
     private T _value;
     private bool _isNull = true;
 

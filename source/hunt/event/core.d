@@ -11,8 +11,8 @@
 
 module hunt.event.core;
 
-import hunt.lang.common;
 import hunt.init;
+import hunt.lang.common;
 import hunt.logging;
 
 import std.socket;
@@ -274,7 +274,7 @@ class LoopException : Exception
 // dfmt off
 version(linux):
 // dfmt on
-static if (isCompilerVersionBelow(2078))
+static if (CompilerHelper.isSmaller(2078))
 {
     version (X86)
     {
