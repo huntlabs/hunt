@@ -16,15 +16,3 @@ module hunt.init;
 enum Hunt_MAJOR_VERSION = 1;
 enum Hunt_MINOR_VERSION = 0;
 enum Hunt_PATCH_VERSION = 0;
-
-
-
-bool isCompilerVersionAbove(int ver)
-{
-    return __VERSION__ >= ver;
-}
-
-bool isCompilerVersionBelow(int ver)
-{
-    return __VERSION__ <= ver;
-}

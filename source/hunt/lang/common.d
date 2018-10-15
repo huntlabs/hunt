@@ -174,7 +174,6 @@ interface Comparable(T) {
 }
 
 
-
 interface Runnable {
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -204,7 +203,6 @@ interface Runnable {
  * convert from other common forms to {@code Callable} classes.
  *
  * @see Executor
- * @since 1.5
  * @author Doug Lea
  * @param <V> the result type of method {@code call}
  */
@@ -240,7 +238,6 @@ interface Callable(V) {
  * general unnecessary when using non-I/O-based forms.
  *
  * @author Josh Bloch
- * @since 1.7
  */
 interface AutoCloseable {
     /**
@@ -318,7 +315,6 @@ interface Closeable : AutoCloseable
  * with different styles of error handling there is no guarantee that
  * errors will be propagated to the invoker.
  *
- * @since 1.5
  */
 interface Appendable {
 
@@ -395,7 +391,6 @@ interface Appendable {
 
 /**
  * A tagging interface that all event listener interfaces must extend.
- * @since JDK1.1
  */
 interface EventListener {
 }
@@ -422,6 +417,20 @@ size_t hashCode(T)(T[] a...) {
 }
 
 
+/**
+*/
+class CompilerHelper {
+
+    static bool isGreater(int ver)
+    {
+        return __VERSION__ >= ver;
+    }
+
+    static bool isSmaller(int ver)
+    {
+        return __VERSION__ <= ver;
+    }
+}
 
 
 /**

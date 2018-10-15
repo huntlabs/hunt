@@ -1,6 +1,28 @@
 module hunt.util.memory;
 
+size_t getPageSize() {
+    return _pageSize;
+}
 
+static immutable size_t _pageSize;
+
+shared static this() {
+    version (Windows) {
+        import core.sys.windows.winbase;
+        SYSTEM_INFO info;
+        GetSystemInfo(&info);
+
+        _pageSize = info.dwPageSize;
+        assert(_pageSize < int.max);
+    }
+    else version (Posix) {
+        import core.sys.posix.unistd;
+        _pageSize = cast(size_t) sysconf(_SC_PAGESIZE);
+    }
+    else {
+        static assert(0, "unimplemented");
+    }
+}
 
 /**
  * Reference queues, to which registered reference objects are appended by the
@@ -11,12 +33,13 @@ module hunt.util.memory;
  */
 
 class ReferenceQueue(T) {
-// TODO: Tasks pending completion -@zxp at 8/10/2018, 4:15:28 PM
-// 
+    // TODO: Tasks pending completion -@zxp at 8/10/2018, 4:15:28 PM
+    // 
     /**
      * Constructs a new reference-object queue.
      */
-    this() { }
+    this() {
+    }
 
     // private static class Null<S> extends ReferenceQueue<S> {
     //     bool enqueue(Reference<S> r) {
