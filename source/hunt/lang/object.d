@@ -1,4 +1,4 @@
-module hunt.util.object;
+module hunt.lang.object;
 
 import hunt.util.exception;
 

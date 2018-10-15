@@ -43,7 +43,7 @@ import hunt.container.AbstractQueue;
 import hunt.container.Collection;
 import hunt.container.Iterator;
 import hunt.datetime;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.exception;
 
 // import core.atomic;

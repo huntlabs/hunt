@@ -1,7 +1,7 @@
 module hunt.container.Collection;
 
 import hunt.container.Iterable;
-import hunt.util.common;
+import hunt.lang.common;
 import std.range;
 
 interface Collection(E) : Iterable!E {

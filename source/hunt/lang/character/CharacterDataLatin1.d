@@ -1,7 +1,7 @@
-module hunt.util.character.CharacterDataLatin1;
+module hunt.lang.character.CharacterDataLatin1;
 
-import hunt.util.character.Character;
-import hunt.util.character.CharacterData;
+import hunt.lang.character.Character;
+import hunt.lang.character.CharacterData;
 
 
 /** The CharacterData class encapsulates the large tables found in

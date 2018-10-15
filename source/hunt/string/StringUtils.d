@@ -1,13 +1,17 @@
 module hunt.string.StringUtils;
 
+import std.array;
 import std.ascii;
+import std.container.array;
 import std.conv;
+import std.range;
 import std.string;
 import std.uni;
 
 import hunt.container.ArrayTrie;
 import hunt.container.Trie;
 import hunt.string.common;
+
 
 
 /**
@@ -389,4 +393,20 @@ class StringUtils
         }
         return list;
     }
+
+
+
+	/**
+	 * Copy the given Enumeration into a {@code String} array.
+	 * The Enumeration must contain {@code String} elements only.
+	 * @param enumeration the Enumeration to copy
+	 * @return the {@code String} array
+	 */
+	static string[] toStringArray(InputRange!string range) {
+        Array!string buffer;
+        foreach(string s; range) {
+            buffer.insertBack(s);
+        }
+		return buffer.array;
+	}
 }

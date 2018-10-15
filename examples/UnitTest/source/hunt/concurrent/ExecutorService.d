@@ -38,7 +38,7 @@ module hunt.concurrent.ExecutorService;
 import hunt.concurrent.Executor;
 import hunt.container.Collection;
 import hunt.container.List;
-import hunt.util.common;
+import hunt.lang.common;
 
 import std.datetime;
 

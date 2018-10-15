@@ -35,7 +35,7 @@
 
 module hunt.concurrent.ThreadFactory;
 
-import hunt.util.common;
+import hunt.lang.common;
 import core.thread;
 
 /**

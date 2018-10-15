@@ -1,6 +1,6 @@
 module hunt.util.concurrent.Locker;
 
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.exception;
 
 /**

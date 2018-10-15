@@ -15,7 +15,7 @@ import hunt.container.ByteBuffer;
 import hunt.event.EventLoop;
 import hunt.event.core;
 import hunt.logging;
-import hunt.util.common;
+import hunt.lang.common;
 
 import std.socket;
 import std.functional;

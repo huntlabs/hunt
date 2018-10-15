@@ -1,4 +1,4 @@
-module hunt.util.common;
+module hunt.lang.common;
 
 
 

@@ -1,10 +1,13 @@
-module hunt.util.character;
+module hunt.lang.character;
 
 
-public import hunt.util.character.Character;
-public import hunt.util.character.CharacterData;
-public import hunt.util.character.CharacterDataLatin1;
+public import hunt.lang.character.Character;
+public import hunt.lang.character.CharacterData;
+public import hunt.lang.character.CharacterDataLatin1;
 
+
+/**
+*/
 class CharacterHelper {
     static CharacterData getCharacterData(int ch) {
         if (ch >>> 8 == 0) {     // fast-path

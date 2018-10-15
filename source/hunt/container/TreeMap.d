@@ -12,7 +12,7 @@ import hunt.container.Set;
 import hunt.container.SortedMap;
 import hunt.container.SortedSet;
 
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.Comparator;
 import hunt.util.exception;
 import hunt.util.functional;

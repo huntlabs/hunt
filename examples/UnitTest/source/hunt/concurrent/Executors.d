@@ -42,7 +42,7 @@ import hunt.concurrent.ThreadFactory;
 import hunt.concurrent.ThreadPoolExecutor;
 
 import hunt.datetime;
-import hunt.util.common;
+import hunt.lang.common;
 import hunt.util.exception;
 import hunt.util.thread;
 

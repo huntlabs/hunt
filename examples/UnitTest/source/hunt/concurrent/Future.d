@@ -35,7 +35,7 @@
 
 module hunt.concurrent.Future;
 
-import hunt.util.common;
+import hunt.lang.common;
 import std.datetime;
 
 /**

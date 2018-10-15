@@ -5,7 +5,7 @@ import hunt.container.Map;
 import hunt.container.Set;
 
 import hunt.util.Comparator;
-import hunt.util.common;
+import hunt.lang.common;
 
 /**
  * A {@link Map} that further provides a <em>total ordering</em> on its keys.
