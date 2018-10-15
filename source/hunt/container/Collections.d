@@ -13,9 +13,8 @@ import hunt.container.Set;
 import hunt.container.SortedSet;
 import hunt.container.TreeSet;
 
-
+import hunt.lang.common;
 import hunt.util.exception;
-import hunt.util.functional;
 
 import std.conv;
 import std.range;
@@ -83,7 +82,7 @@ class Collections {
      * @implNote Implementations of this method need not
      * create a separate {@code NavigableSet} object for each call.
      *
-     * @param <E> type of elements, if there were any, in the set
+     * @param !E type of elements, if there were any, in the set
      * @return the empty navigable set
      * @since 1.8
      */
@@ -260,19 +259,19 @@ private static class SingletonSet(E) : AbstractSet!E
 
     // Override default methods for Collection
     // override
-    // void forEach(Consumer<E> action) {
+    // void forEach(Consumer!E action) {
     //     action.accept(element);
     // }
 
     // override
-    // Spliterator<E> spliterator() {
+    // Spliterator!E spliterator() {
     //     return singletonSpliterator(element);
     // }
 
-    // override
-    // bool removeIf(Predicate<E> filter) {
-    //     throw new UnsupportedOperationException();
-    // }
+    override
+    bool removeIf(Predicate!E filter) {
+        throw new UnsupportedOperationException();
+    }
 }
 
 
@@ -365,7 +364,7 @@ private class UnmodifiableCollection(E) : Collection!(E) {
     //             throw new UnsupportedOperationException();
     //         }
     //         override
-    //         void forEachRemaining(Consumer<E> action) {
+    //         void forEachRemaining(Consumer!E action) {
     //             // Use backing collection version
     //             i.forEachRemaining(action);
     //         }
@@ -409,10 +408,10 @@ private class UnmodifiableCollection(E) : Collection!(E) {
         return r;
     }
 
-    // override
-    // bool removeIf(Predicate!(E) filter) {
-    //     throw new UnsupportedOperationException();
-    // }
+    override
+    bool removeIf(Predicate!(E) filter) {
+        throw new UnsupportedOperationException();
+    }
     
     // override
     // Spliterator!(E) spliterator() {
@@ -466,7 +465,7 @@ private class UnmodifiableSortedSet(E) : UnmodifiableSet!(E), SortedSet!(E) {
 
     this(SortedSet!(E) s) {super(s); ss = s;}
 
-    // Comparator<E> comparator() {return ss.comparator();}
+    // Comparator!E comparator() {return ss.comparator();}
 
     SortedSet!(E) subSet(E fromElement, E toElement) {
         return new UnmodifiableSortedSet!(E)(ss.subSet(fromElement,toElement));
