@@ -35,7 +35,10 @@
 
 module hunt.concurrent.ThreadFactory;
 
+import hunt.concurrent.AtomicHelper;
+
 import hunt.lang.common;
+import hunt.util.thread;
 import core.thread;
 
 /**
@@ -61,6 +64,26 @@ import core.thread;
 interface ThreadFactory {
 
     /**
+     * Returns a default thread factory used to create new threads.
+     * This factory creates all new threads used by an Executor in the
+     * same {@link ThreadGroupEx}. If there is a {@link
+     * java.lang.SecurityManager}, it uses the group of {@link
+     * System#getSecurityManager}, else the group of the thread
+     * invoking this {@code defaultThreadFactory} method. Each new
+     * thread is created as a non-daemon thread with priority set to
+     * the smaller of {@code Thread.PRIORITY_DEFAULT} and the maximum
+     * priority permitted in the thread group.  New threads have names
+     * accessible via {@link Thread#getName} of
+     * <em>pool-N-thread-M</em>, where <em>N</em> is the sequence
+     * number of this factory, and <em>M</em> is the sequence number
+     * of the thread created by this factory.
+     * @return a thread factory
+     */
+    static ThreadFactory defaultThreadFactory() {
+        return new DefaultThreadFactory();
+    }
+
+    /**
      * Constructs a new {@code Thread}.  Implementations may also initialize
      * priority, name, daemon status, {@code ThreadGroupEx}, etc.
      *
@@ -75,3 +98,73 @@ interface ThreadFactory {
 
     Thread newThread(Action dg );
 }
+
+
+/**
+ * The default thread factory.
+ */
+private class DefaultThreadFactory : ThreadFactory {
+    private __gshared int poolNumber = 1;
+    private ThreadGroupEx group;
+    private shared(int) threadNumber = 1;
+    private string namePrefix;
+
+    this() {
+        // SecurityManager s = System.getSecurityManager();
+        // group = (s !is null) ? s.getThreadGroup() :
+        //                       Thread.getThis().getThreadGroup();
+        int n = AtomicHelper.getAndIncrement(poolNumber);
+        namePrefix = "pool-" ~ n.to!string() ~ "-thread-";
+    }
+
+    
+    Thread newThread(Action dg ) {
+        int n = AtomicHelper.getAndIncrement(threadNumber);
+
+        Thread t = new Thread(dg);
+        t.name = namePrefix ~ n.to!string();
+        t.isDaemon = false;
+        t.priority = Thread.PRIORITY_DEFAULT;
+
+        return t;
+    }
+}
+
+
+/**
+ * Thread factory capturing access control context and class loader.
+ */
+// private class PrivilegedThreadFactory : DefaultThreadFactory {
+//     // AccessControlContext acc;
+//     // ClassLoader ccl;
+
+//     this() {
+//         super();
+//         SecurityManager sm = System.getSecurityManager();
+//         if (sm !is null) {
+//             // Calls to getContextClassLoader from this class
+//             // never trigger a security check, but we check
+//             // whether our callers have this permission anyways.
+//             sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
+
+//             // Fail fast
+//             sm.checkPermission(new RuntimePermission("setContextClassLoader"));
+//         }
+//         this.acc = AccessController.getContext();
+//         this.ccl = Thread.getThis().getContextClassLoader();
+//     }
+
+//     Thread newThread(Runnable r) {
+//         return super.newThread(new Runnable() {
+//             void run() {
+//                 AccessController.doPrivileged(new PrivilegedAction<>() {
+//                     Void run() {
+//                         Thread.getThis().setContextClassLoader(ccl);
+//                         r.run();
+//                         return null;
+//                     }
+//                 }, acc);
+//             }
+//         });
+//     }
+// }

@@ -11,3 +11,8 @@ class ConcurrentModificationException : RuntimeException
 {
     mixin BasicExceptionCtors;
 }
+
+class RejectedExecutionException : RuntimeException
+{
+    mixin BasicExceptionCtors;
+}

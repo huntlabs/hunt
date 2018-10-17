@@ -42,7 +42,6 @@ import hunt.concurrent.AtomicHelper;
 import hunt.concurrent.BlockingQueue;
 import hunt.concurrent.ExecutorService;
 import hunt.concurrent.Executor;
-import hunt.concurrent.Executors;
 import hunt.concurrent.ThreadFactory;
 
 import hunt.container;
@@ -657,11 +656,11 @@ class ThreadPoolExecutor : AbstractExecutorService {
         // The value 0 represents the unlocked state.
         // The value 1 represents the locked state.
 
-        protected bool isHeldExclusively() {
+        override protected bool isHeldExclusively() {
             return getState() != 0;
         }
 
-        protected bool tryAcquire(int unused) {
+        override protected bool tryAcquire(int unused) {
             if (compareAndSetState(0, 1)) { 
                 setExclusiveOwnerThread(Thread.getThis());
                 return true;
@@ -669,7 +668,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
             return false;
         }
 
-        protected bool tryRelease(int unused) {
+        override protected bool tryRelease(int unused) {
             setExclusiveOwnerThread(null);
             setState(0);
             return true;
@@ -1187,7 +1186,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @param keepAliveTime when the number of threads is greater than
      *        the core, this is the maximum time that excess idle threads
      *        will wait for new tasks before terminating.
-     * @param unit the time unit for the {@code keepAliveTime} argument
      * @param workQueue the queue to use for holding tasks before they are
      *        executed.  This queue will hold only the {@code Runnable}
      *        tasks submitted by the {@code execute} method.
@@ -1200,8 +1198,8 @@ class ThreadPoolExecutor : AbstractExecutorService {
      */
     this(int corePoolSize, int maximumPoolSize, Duration keepAliveTime,
         BlockingQueue!(Runnable) workQueue) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-             Executors.defaultThreadFactory(), defaultHandler);
+        this(corePoolSize, maximumPoolSize, keepAliveTime, workQueue,
+             ThreadFactory.defaultThreadFactory(), defaultHandler);
     }
 
     /**
@@ -1216,7 +1214,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @param keepAliveTime when the number of threads is greater than
      *        the core, this is the maximum time that excess idle threads
      *        will wait for new tasks before terminating.
-     * @param unit the time unit for the {@code keepAliveTime} argument
      * @param workQueue the queue to use for holding tasks before they are
      *        executed.  This queue will hold only the {@code Runnable}
      *        tasks submitted by the {@code execute} method.
@@ -1232,14 +1229,14 @@ class ThreadPoolExecutor : AbstractExecutorService {
      */
     this(int corePoolSize, int maximumPoolSize, Duration keepAliveTime, 
          BlockingQueue!(Runnable) workQueue, ThreadFactory threadFactory) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+        this(corePoolSize, maximumPoolSize, keepAliveTime, workQueue,
              threadFactory, defaultHandler);
     }
 
     /**
      * Creates a new {@code ThreadPoolExecutor} with the given initial
      * parameters and
-     * {@linkplain Executors#defaultThreadFactory default thread factory}.
+     * {@linkplain ThreadFactory#defaultThreadFactory default thread factory}.
      *
      * @param corePoolSize the number of threads to keep in the pool, even
      *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
@@ -1248,7 +1245,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @param keepAliveTime when the number of threads is greater than
      *        the core, this is the maximum time that excess idle threads
      *        will wait for new tasks before terminating.
-     * @param unit the time unit for the {@code keepAliveTime} argument
      * @param workQueue the queue to use for holding tasks before they are
      *        executed.  This queue will hold only the {@code Runnable}
      *        tasks submitted by the {@code execute} method.
@@ -1264,8 +1260,8 @@ class ThreadPoolExecutor : AbstractExecutorService {
      */
     this(int corePoolSize, int maximumPoolSize, Duration keepAliveTime, 
         BlockingQueue!(Runnable) workQueue, RejectedExecutionHandler handler) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-             Executors.defaultThreadFactory(), handler);
+        this(corePoolSize, maximumPoolSize, keepAliveTime, workQueue,
+             ThreadFactory.defaultThreadFactory(), handler);
     }
 
     /**
@@ -1279,7 +1275,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @param keepAliveTime when the number of threads is greater than
      *        the core, this is the maximum time that excess idle threads
      *        will wait for new tasks before terminating.
-     * @param unit the time unit for the {@code keepAliveTime} argument
      * @param workQueue the queue to use for holding tasks before they are
      *        executed.  This queue will hold only the {@code Runnable}
      *        tasks submitted by the {@code execute} method.

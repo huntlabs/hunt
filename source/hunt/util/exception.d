@@ -226,7 +226,6 @@ class EOFException : IOException
 }
 
 
-
 class IllegalStateException : Exception
 {
     mixin BasicExceptionCtors;
@@ -242,7 +241,6 @@ class WritePendingException : IllegalStateException
 {
     mixin BasicExceptionCtors;
 }
-
 
 class CancellationException : IllegalStateException
 {
@@ -359,8 +357,13 @@ class StringIndexOutOfBoundsException : Exception
     mixin BasicExceptionCtors;
 }
 
-
 class IllegalThreadStateException : IllegalArgumentException
+{
+    mixin BasicExceptionCtors;
+}
+
+
+class IllegalMonitorStateException : RuntimeException
 {
     mixin BasicExceptionCtors;
 }

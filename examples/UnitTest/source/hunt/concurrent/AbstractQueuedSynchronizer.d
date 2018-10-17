@@ -510,7 +510,7 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
          *
          * @return the predecessor of this node
          */
-        final Node predecessor() {
+        Node predecessor() {
             Node p = prev;
             if (p is null)
                 throw new NullPointerException();
@@ -699,8 +699,9 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
                 if (p.waitStatus <= 0)
                     s = p;
         }
-        if (s !is null)
-            LockSupport.unpark(s.thread);
+        implementationMissing(false);
+        // if (s !is null)
+        //     LockSupport.unpark(s.thread);
     }
 
     /**
@@ -900,11 +901,11 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @param arg the acquire argument
      * @return {@code true} if interrupted while waiting
      */
-    final bool acquireQueued(final Node node, int arg) {
+    final bool acquireQueued(Node node, int arg) {
         bool interrupted = false;
         try {
             for (;;) {
-                final Node p = node.predecessor();
+                Node p = node.predecessor();
                 if (p == head && tryAcquire(arg)) {
                     setHead(node);
                     p.next = null; // help GC
@@ -926,10 +927,10 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @param arg the acquire argument
      */
     private void doAcquireInterruptibly(int arg) {
-        final Node node = addWaiter(Node.EXCLUSIVE);
+        Node node = addWaiter(Node.EXCLUSIVE);
         try {
             for (;;) {
-                final Node p = node.predecessor();
+                Node p = node.predecessor();
                 if (p == head && tryAcquire(arg)) {
                     setHead(node);
                     p.next = null; // help GC
@@ -955,11 +956,11 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
     private bool doAcquireNanos(int arg, long nanosTimeout) {
         if (nanosTimeout <= 0L)
             return false;
-        final long deadline = Clock.currStdTime() + nanosTimeout;
-        final Node node = addWaiter(Node.EXCLUSIVE);
+        long deadline = Clock.currStdTime() + nanosTimeout;
+        Node node = addWaiter(Node.EXCLUSIVE);
         try {
             for (;;) {
-                final Node p = node.predecessor();
+                Node p = node.predecessor();
                 if (p == head && tryAcquire(arg)) {
                     setHead(node);
                     p.next = null; // help GC
@@ -970,11 +971,12 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
                     cancelAcquire(node);
                     return false;
                 }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                    nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
-                    LockSupport.parkNanos(this, nanosTimeout);
-                if (Thread.interrupted())
-                    throw new InterruptedException();
+                implementationMissing(false);
+                // if (shouldParkAfterFailedAcquire(p, node) &&
+                //     nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
+                //     LockSupport.parkNanos(this, nanosTimeout);
+                // if (Thread.interrupted())
+                //     throw new InterruptedException();
             }
         } catch (Throwable t) {
             cancelAcquire(node);
@@ -1017,10 +1019,10 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @param arg the acquire argument
      */
     private void doAcquireSharedInterruptibly(int arg) {
-        final Node node = addWaiter(Node.SHARED);
+        Node node = addWaiter(Node.SHARED);
         try {
             for (;;) {
-                final Node p = node.predecessor();
+                Node p = node.predecessor();
                 if (p == head) {
                     int r = tryAcquireShared(arg);
                     if (r >= 0) {
@@ -1049,11 +1051,11 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
     private bool doAcquireSharedNanos(int arg, long nanosTimeout) {
         if (nanosTimeout <= 0L)
             return false;
-        final long deadline = Clock.currStdTime() + nanosTimeout;
-        final Node node = addWaiter(Node.SHARED);
+        long deadline = Clock.currStdTime() + nanosTimeout;
+        Node node = addWaiter(Node.SHARED);
         try {
             for (;;) {
-                final Node p = node.predecessor();
+                Node p = node.predecessor();
                 if (p == head) {
                     int r = tryAcquireShared(arg);
                     if (r >= 0) {
@@ -1067,11 +1069,12 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
                     cancelAcquire(node);
                     return false;
                 }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                    nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
-                    LockSupport.parkNanos(this, nanosTimeout);
-                if (Thread.interrupted())
-                    throw new InterruptedException();
+                implementationMissing(false);
+                // if (shouldParkAfterFailedAcquire(p, node) &&
+                //     nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
+                //     LockSupport.parkNanos(this, nanosTimeout);
+                // if (Thread.interrupted())
+                //     throw new InterruptedException();
             }
         } catch (Throwable t) {
             cancelAcquire(node);
@@ -1329,8 +1332,8 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @throws InterruptedException if the current thread is interrupted
      */
     final void acquireSharedInterruptibly(int arg) {
-        if (Thread.interrupted())
-            throw new InterruptedException();
+        // if (Thread.interrupted())
+        //     throw new InterruptedException();
         if (tryAcquireShared(arg) < 0)
             doAcquireSharedInterruptibly(arg);
     }
@@ -1352,8 +1355,8 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @throws InterruptedException if the current thread is interrupted
      */
     final bool tryAcquireSharedNanos(int arg, long nanosTimeout) {
-        if (Thread.interrupted())
-            throw new InterruptedException();
+        // if (Thread.interrupted())
+        //     throw new InterruptedException();
         return tryAcquireShared(arg) >= 0 ||
             doAcquireSharedNanos(arg, nanosTimeout);
     }
@@ -1603,7 +1606,7 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @return the collection of threads
      */
     final Collection!(Thread) getExclusiveQueuedThreads() {
-        ArrayList!(Thread) list = new ArrayLis!(Thread)();
+        ArrayList!(Thread) list = new ArrayList!(Thread)();
         for (Node p = tail; p !is null; p = p.prev) {
             if (!p.isShared()) {
                 Thread t = p.thread;
@@ -2096,8 +2099,9 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
          * </ol>
          */
         final long awaitNanos(long nanosTimeout) {
-            if (Thread.interrupted())
-                throw new InterruptedException();
+            // if (Thread.interrupted())
+            //     throw new InterruptedException();
+
             // We don't check for nanosTimeout <= 0L here, to allow
             // awaitNanos(0) as a way to "yield the lock".
             long deadline = Clock.currStdTime() + nanosTimeout;

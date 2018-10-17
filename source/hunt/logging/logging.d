@@ -10,6 +10,7 @@
  */
 module hunt.logging.logging;
 
+import hunt.util.thread;
 
 import core.stdc.stdlib;
 import core.runtime;
@@ -31,7 +32,6 @@ import std.path;
 import std.typecons;
 import std.traits;
 import std.string;
-import hunt.util.thread;
 
 void catchAndLogException(E)(lazy E runer) @trusted nothrow
 {
