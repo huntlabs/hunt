@@ -1,8 +1,10 @@
 module hunt.lang.Number;
 
+import hunt.lang.Nullable;
+import std.traits;
 
 /**
- * The abstract class {@code Number} is the superclass of platform
+ * The class {@code Number} is the superclass of platform
  * classes representing numeric values that are convertible to the
  * primitive types {@code byte}, {@code double}, {@code float}, {@code
  * int}, {@code long}, and {@code short}.
@@ -28,14 +30,16 @@ module hunt.lang.Number;
  * @jls 5.1.3 Narrowing Primitive Conversions
  * @since   1.0
  */
-abstract class Number {
+// class Number(T) : Nullable!(T) if(isNumeric!T) {
+interface Number {
+
     /**
      * Returns the value of the specified number as an {@code int}.
      *
      * @return  the numeric value represented by this object after conversion
      *          to type {@code int}.
      */
-    abstract int intValue();
+    int intValue();
 
     /**
      * Returns the value of the specified number as a {@code long}.
@@ -43,7 +47,7 @@ abstract class Number {
      * @return  the numeric value represented by this object after conversion
      *          to type {@code long}.
      */
-    abstract long longValue();
+    long longValue();
 
     /**
      * Returns the value of the specified number as a {@code float}.
@@ -51,7 +55,7 @@ abstract class Number {
      * @return  the numeric value represented by this object after conversion
      *          to type {@code float}.
      */
-    abstract float floatValue();
+    float floatValue();
 
     /**
      * Returns the value of the specified number as a {@code double}.
@@ -59,7 +63,7 @@ abstract class Number {
      * @return  the numeric value represented by this object after conversion
      *          to type {@code double}.
      */
-    abstract double doubleValue();
+    double doubleValue();
 
     /**
      * Returns the value of the specified number as a {@code byte}.
@@ -71,9 +75,7 @@ abstract class Number {
      *          to type {@code byte}.
      * @since   1.1
      */
-    byte byteValue() {
-        return cast(byte)intValue();
-    }
+    byte byteValue();
 
     /**
      * Returns the value of the specified number as a {@code short}.
@@ -85,10 +87,19 @@ abstract class Number {
      *          to type {@code short}.
      * @since   1.1
      */
-    short shortValue() {
-        return cast(short)intValue();
+    short shortValue();
+}
+
+
+/**
+*/
+abstract class AbstractNumber : Number {
+
+    byte byteValue() {
+        return cast(byte) intValue();
     }
 
-    /** use serialVersionUID from JDK 1.0.2 for interoperability */
-    // private static final long serialVersionUID = -8742448824652078965L;
+    short shortValue() {
+        return cast(short) intValue();
+    }
 }

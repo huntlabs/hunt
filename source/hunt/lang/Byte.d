@@ -25,7 +25,9 @@
 
 module hunt.lang.Byte;
 
+import hunt.lang.Nullable;
 import hunt.lang.Number;
+
 import std.conv;
 
 /**
@@ -44,7 +46,7 @@ import std.conv;
  * @see     java.lang.Number
  * @since   JDK1.1
  */
-class Byte : Number /*implements Comparable<Byte> */{
+class Byte : Nullable!(byte), Number /*implements Comparable<Byte> */{
 
     /**
      * A constant holding the minimum value a {@code byte} can
@@ -289,7 +291,7 @@ class Byte : Number /*implements Comparable<Byte> */{
      *
      * @serial
      */
-    private  byte value;
+    // private  byte value;
 
     /**
      * Constructs a newly allocated {@code Byte} object that
@@ -299,7 +301,8 @@ class Byte : Number /*implements Comparable<Byte> */{
      *                  {@code Byte}.
      */
     this(byte value) {
-        this.value = value;
+        // this.value = value;
+        super(value);
     }
 
     /**
@@ -405,7 +408,7 @@ class Byte : Number /*implements Comparable<Byte> */{
      * @return a hash code value for a {@code byte} value.
      * @since 1.8
      */
-    override size_t toHash() {
+    override size_t toHash() @trusted nothrow {
         return cast(size_t)value;
     }
 

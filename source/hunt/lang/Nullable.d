@@ -6,7 +6,7 @@ import hunt.lang.object;
 */
 class Nullable(T) : IObject {
     
-    private T _value;
+    protected T _value;
     private bool _isNull = true;
 
     this() {
@@ -22,7 +22,7 @@ class Nullable(T) : IObject {
         return _isNull;
     }
 
-    T value() {
+    T value() @trusted nothrow {
         return _value;
     }
 
@@ -39,16 +39,14 @@ class Nullable(T) : IObject {
                 return true;
         }
 
-        if(this._value == that._value)
-            return true;
-        return false;
+        return this._value == that._value;
     }
 
-    string toString() {
+    override string toString() {
         return super.toString();
     }
 
-    size_t toHash() @trusted nothrow {
+    override size_t toHash() @trusted nothrow {
         return super.toHash();
     }
 }

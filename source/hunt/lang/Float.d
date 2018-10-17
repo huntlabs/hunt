@@ -1,10 +1,11 @@
 module hunt.lang.Float;
 
 import hunt.lang.exception;
+import hunt.lang.Nullable;
 import hunt.lang.Number;
 import std.conv;
 
-class Float : Number{
+class Float : Nullable!float, Number {
     /**
      * A constant holding the positive infinity of type
      * {@code float}. It is equal to the value returned by
@@ -155,7 +156,7 @@ class Float : Number{
      *
      * @serial
      */
-    private  float value;
+    // private  float value;
 
     /**
      * Constructs a newly allocated {@code Float} object that
@@ -164,7 +165,8 @@ class Float : Number{
      * @param   value   the value to be represented by the {@code Float}.
      */
     this(float value) {
-        this.value = value;
+        // this.value = value;
+        super(value);
     }
 
     /**
@@ -174,7 +176,8 @@ class Float : Number{
      * @param   value   the value to be represented by the {@code Float}.
      */
     this(double value) {
-        this.value = cast(float)value;
+        // this.value = cast(float)value;
+        super(cast(float)value);
     }
 
 
