@@ -2,7 +2,7 @@ module hunt.container.AbstractCollection;
 
 import hunt.container.Collection;
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.array;
 import std.conv;

@@ -3,7 +3,7 @@ module test.LinkedBlockingQueueTest;
 import hunt.concurrent.LinkedBlockingQueue;
 import hunt.datetime;
 import hunt.logging.ConsoleLogger;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import core.thread;
 import core.time;

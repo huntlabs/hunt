@@ -5,7 +5,7 @@ import hunt.container.AbstractMap;
 import hunt.container.HashMap;
 import hunt.container.Map;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.range;
 

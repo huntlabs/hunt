@@ -1,6 +1,6 @@
 module hunt.util.ObjectUtils;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import std.format;
 
 

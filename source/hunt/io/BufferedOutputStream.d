@@ -1,7 +1,7 @@
 module hunt.io.BufferedOutputStream;
 
 import hunt.io.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 /**
  * 

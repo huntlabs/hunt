@@ -4,7 +4,7 @@ import hunt.io.common;
 import hunt.io.ByteArrayInputStream;
 import hunt.io.ByteArrayOutputStream;
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 // import hunt.logging;
 import std.algorithm;

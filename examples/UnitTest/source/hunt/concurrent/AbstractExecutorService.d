@@ -46,7 +46,7 @@ import hunt.container.Iterator;
 import hunt.container.List;
 import hunt.datetime;
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.datetime;
 

@@ -7,7 +7,7 @@ import hunt.math.Long;
 import hunt.math.Number;
 
 import hunt.lang.character;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.string;
 
 import std.algorithm;

@@ -39,7 +39,7 @@ import hunt.concurrent.AtomicHelper;
 import hunt.concurrent.Executors;
 import hunt.concurrent.Future;
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import core.thread;
 import std.datetime;

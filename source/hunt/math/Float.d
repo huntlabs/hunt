@@ -1,6 +1,6 @@
 module hunt.math.Float;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.math.Number;
 import std.conv;
 

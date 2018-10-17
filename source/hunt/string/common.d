@@ -1,6 +1,6 @@
 module hunt.string.common;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.algorithm;
 import std.exception;

@@ -1,6 +1,6 @@
 import std.stdio;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.util.UnitTest;
 import hunt.logging;
 

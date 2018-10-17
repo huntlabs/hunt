@@ -42,7 +42,7 @@ import hunt.concurrent.AtomicHelper;
 import hunt.container.ArrayList;
 import hunt.container.Collection;
 import hunt.datetime;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import core.thread;
 import core.sync.mutex;

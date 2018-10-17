@@ -7,7 +7,7 @@ import std.container.array;
 import hunt.container.AbstractCollection;
 import hunt.container.List;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.util.functional;
 
 

@@ -11,7 +11,7 @@ import hunt.container.SortedSet;
 import hunt.container.TreeMap;
 
 import hunt.util.Comparator;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 /**
  * A {@link NavigableSet} implementation based on a {@link TreeMap}.

@@ -4,7 +4,7 @@ import hunt.math.Byte;
 import hunt.math.Integer;
 import hunt.math.Number;
 import hunt.util.Comparator;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.algorithm.comparison;
 import std.conv;

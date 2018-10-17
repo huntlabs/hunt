@@ -1,8 +1,7 @@
-module hunt.util.exception;
+module hunt.lang.exception;
 
 import core.exception;
 import std.exception;
-import std.stdio;
 
 void implementationMissing(string name = __FUNCTION__, 
     string file = __FILE__, int line = __LINE__ )
@@ -12,8 +11,10 @@ void implementationMissing(string name = __FUNCTION__,
         throw new Exception("Implementation missing: " ~ name, file, line);
     else
     {
-        import hunt.logging;
-        warningf("Implementation missing %s, in %s:%d", name, file, line);
+        // import hunt.logging;
+        // warningf("Implementation missing %s, in %s:%d", name, file, line);
+        import std.stdio;
+        stderr.writeln("Implementation missing %s, in %s:%d", name, file, line);
     }
 }
 
