@@ -1,11 +1,11 @@
 module hunt.lang.Double;
 
-
 import hunt.lang.exception;
+import hunt.lang.Nullable;
 import hunt.lang.Number;
 import std.conv;
 
-class Double : Number{
+class Double : Nullable!double, Number {
     
     /**
      * A constant holding the positive infinity of type
@@ -152,7 +152,7 @@ class Double : Number{
      * @return  the {@code double} floating-point value with the same
      *          bit pattern.
      */
-    public static double longBitsToDouble(long bits) {
+    static double longBitsToDouble(long bits) {
         implementationMissing(false);
         return 0;
     }
@@ -162,7 +162,7 @@ class Double : Number{
      *
      * @serial
      */
-    private  double value;
+    // private  double value;
 
     /**
      * Constructs a newly allocated {@code Double} object that
@@ -170,8 +170,9 @@ class Double : Number{
      *
      * @param   value   the value to be represented by the {@code Double}.
      */
-    public this(double value) {
-        this.value = value;
+    this(double value) {
+        // this.value = value;
+        super(value);
     }
 
     /**
@@ -185,7 +186,7 @@ class Double : Number{
      *            parsable number.
      * @see       java.lang.Double#valueOf(java.lang.string)
      */
-    // public Double(string s) throws NumberFormatException {
+    // Double(string s) throws NumberFormatException {
     //     value = parseDouble(s);
     // }
 
@@ -196,7 +197,7 @@ class Double : Number{
      * @return  {@code true} if the value represented by this object is
      *          NaN; {@code false} otherwise.
      */
-    public static bool isNaN(double v) {
+    static bool isNaN(double v) {
         return isNaN(v);
     }
 
@@ -208,7 +209,7 @@ class Double : Number{
      *          positive infinity or negative infinity;
      *          {@code false} otherwise.
      */
-    // public bool isInfinite() {
+    // bool isInfinite() {
     //     return isInfinite(value);
     // }
 
@@ -234,7 +235,7 @@ class Double : Number{
      * @jls 5.1.3 Narrowing Primitive Conversions
      * @since JDK1.1
      */
-    override public byte byteValue() {
+    override byte byteValue() {
         return cast(byte)value;
     }
 
@@ -247,7 +248,7 @@ class Double : Number{
      * @jls 5.1.3 Narrowing Primitive Conversions
      * @since JDK1.1
      */
-    override public short shortValue() {
+    override short shortValue() {
         return cast(short)value;
     }
 
@@ -259,7 +260,7 @@ class Double : Number{
      * @return  the {@code double} value represented by this object
      *          converted to type {@code int}
      */
-    override public int intValue() {
+    override int intValue() {
         return cast(int)value;
     }
 
@@ -271,7 +272,7 @@ class Double : Number{
      *          converted to type {@code long}
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public long longValue() {
+    override long longValue() {
         return cast(long)value;
     }
 
@@ -284,7 +285,7 @@ class Double : Number{
      * @jls 5.1.3 Narrowing Primitive Conversions
      * @since JDK1.0
      */
-    override public float floatValue() {
+    override float floatValue() {
         return cast(float)value;
     }
 
@@ -293,7 +294,7 @@ class Double : Number{
      *
      * @return the {@code double} value represented by this object
      */
-    override public double doubleValue() {
+    override double doubleValue() {
         return value;
     }
 
@@ -305,7 +306,7 @@ class Double : Number{
      * @return a hash code value for a {@code double} value.
      * @since 1.8
      */
-    override public size_t toHash() @safe nothrow {
+    override size_t toHash() @safe nothrow {
         return hashOf(value);
     }
 
@@ -348,7 +349,7 @@ class Double : Number{
      *          {@code false} otherwise.
      * @see java.lang.Double#doubleToLongBits(double)
      */
-    override public bool opEquals(Object obj) {
+    override bool opEquals(Object obj) {
         auto dl = cast(Double)obj;
         if(dl !is null)
         {
@@ -369,7 +370,7 @@ class Double : Number{
  * @author Joseph D. Darcy
  */
 
-public class DoubleConsts {
+class DoubleConsts {
     /**
      * Don't let anyone instantiate this class.
      */
@@ -385,30 +386,30 @@ public class DoubleConsts {
      * The exponent the smallest positive {@code double}
      * subnormal value would have if it could be normalized..
      */
-    enum int     MIN_SUB_EXPONENT = Double.MIN_EXPONENT -
+    enum int MIN_SUB_EXPONENT = Double.MIN_EXPONENT -
                                                    (SIGNIFICAND_WIDTH - 1);
 
     /**
      * Bias used in representing a {@code double} exponent.
      */
-    enum int     EXP_BIAS        = 1023;
+    enum int EXP_BIAS        = 1023;
 
     /**
      * Bit mask to isolate the sign bit of a {@code double}.
      */
-    enum long    SIGN_BIT_MASK   = 0x8000000000000000L;
+    enum long SIGN_BIT_MASK   = 0x8000000000000000L;
 
     /**
      * Bit mask to isolate the exponent field of a
      * {@code double}.
      */
-    enum long    EXP_BIT_MASK    = 0x7FF0000000000000L;
+    enum long EXP_BIT_MASK    = 0x7FF0000000000000L;
 
     /**
      * Bit mask to isolate the significand field of a
      * {@code double}.
      */
-    enum long    SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
+    enum long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
 
     // static {
     //     // verify bit masks cover all bit positions and that the bit

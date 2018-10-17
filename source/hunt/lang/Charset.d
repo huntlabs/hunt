@@ -1,5 +1,6 @@
 module hunt.lang.Charset;
 
+alias Charset = string;
 
 class StandardCharsets {
 

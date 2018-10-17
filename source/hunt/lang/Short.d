@@ -24,9 +24,11 @@
  */
 
 module hunt.lang.Short;
+
 import hunt.lang.Byte;
-import std.conv;
+import hunt.lang.Nullable;
 import hunt.lang.Number;
+import std.conv;
 /**
  * The {@code Short} class wraps a value of primitive type {@code
  * short} in an object.  An object of type {@code Short} contains a
@@ -42,26 +44,26 @@ import hunt.lang.Number;
  * @see     java.lang.Number
  * @since   JDK1.1
  */
-public  class Short : Number /*implements Comparable<Short> */{
+class Short : Nullable!short, Number /*implements Comparable<Short> */{
 
     /**
      * A constant holding the minimum value a {@code short} can
      * have, -2<sup>15</sup>.
      */
-    public static  short   MIN_VALUE = -32768;
+    enum  short   MIN_VALUE = -32768;
 
     /**
      * A constant holding the maximum value a {@code short} can
      * have, 2<sup>15</sup>-1.
      */
-    public static  short   MAX_VALUE = 32767;
+    enum  short   MAX_VALUE = 32767;
 
     /**
      * The {@code Class} instance representing the primitive type
      * {@code short}.
      */
     // @SuppressWarnings("unchecked")
-    // public static  Class<Short>    TYPE = (Class<Short>) Class.getPrimitiveClass("short");
+    // static  Class<Short>    TYPE = (Class<Short>) Class.getPrimitiveClass("short");
 
     /**
      * Returns a new {@code string} object representing the
@@ -71,7 +73,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return the string representation of the specified {@code short}
      * @see java.lang.Integer#toString(int)
      */
-    public static string toString(short s) {
+    static string toString(short s) {
         return to!string(s);
     }
 
@@ -115,7 +117,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @throws          NumberFormatException If the {@code string}
      *                  does not contain a parsable {@code short}.
      */
-    // public static short parseShort(string s, int radix)
+    // static short parseShort(string s, int radix)
     //     throws NumberFormatException {
     //     int i = Integer.parseInt(s, radix);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
@@ -142,7 +144,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @throws  NumberFormatException If the string does not
      *          contain a parsable {@code short}.
      */
-    // public static short parseShort(string s) throws NumberFormatException {
+    // static short parseShort(string s) throws NumberFormatException {
     //     return parseShort(s, 10);
     // }
 
@@ -171,7 +173,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @throws          NumberFormatException If the {@code string} does
      *                  not contain a parsable {@code short}.
      */
-    // public static Short valueOf(string s, int radix)
+    // static Short valueOf(string s, int radix)
     //     throws NumberFormatException {
     //     return valueOf(parseShort(s, radix));
     // }
@@ -198,7 +200,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @throws  NumberFormatException If the {@code string} does
      *          not contain a parsable {@code short}.
      */
-    // public static Short valueOf(string s) throws NumberFormatException {
+    // static Short valueOf(string s) throws NumberFormatException {
     //     return valueOf(s, 10);
     // }
 
@@ -229,7 +231,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return a {@code Short} instance representing {@code s}.
      * @since  1.5
      */
-    // public static Short valueOf(short s) {
+    // static Short valueOf(short s) {
     //      int offset = 128;
     //     int sAsInt = s;
     //     if (sAsInt >= -128 && sAsInt <= 127) { // must cache
@@ -280,7 +282,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *            contain a parsable {@code short}.
      * @see java.lang.Short#parseShort(java.lang.string, int)
      */
-    // public static Short decode(string nm) throws NumberFormatException {
+    // static Short decode(string nm) throws NumberFormatException {
     //     int i = Integer.decode(nm);
     //     if (i < MIN_VALUE || i > MAX_VALUE)
     //         throw new NumberFormatException(
@@ -293,7 +295,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *
      * @serial
      */
-    private  short value;
+    // private  short value;
 
     /**
      * Constructs a newly allocated {@code Short} object that
@@ -302,8 +304,9 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @param value     the value to be represented by the
      *                  {@code Short}.
      */
-    public this(short value) {
-        this.value = value;
+    this(short value) {
+        // this.value = value;
+        super(value);
     }
 
     /**
@@ -319,7 +322,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *          does not contain a parsable {@code short}.
      * @see     java.lang.Short#parseShort(java.lang.string, int)
      */
-    // public Short(string s) throws NumberFormatException {
+    // Short(string s) throws NumberFormatException {
     //     this.value = parseShort(s, 10);
     // }
 
@@ -328,7 +331,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * a narrowing primitive conversion.
      * @jls 5.1.3 Narrowing Primitive Conversions
      */
-    override public byte byteValue() {
+    override byte byteValue() {
         return cast(byte)value;
     }
 
@@ -336,7 +339,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * Returns the value of this {@code Short} as a
      * {@code short}.
      */
-    override public short shortValue() {
+    override short shortValue() {
         return value;
     }
 
@@ -345,7 +348,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public int intValue() {
+    override int intValue() {
         return cast(int)value;
     }
 
@@ -354,7 +357,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public long longValue() {
+    override long longValue() {
         return cast(long)value;
     }
 
@@ -363,7 +366,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * after a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public float floatValue() {
+    override float floatValue() {
         return cast(float)value;
     }
 
@@ -372,7 +375,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * after a widening primitive conversion.
      * @jls 5.1.2 Widening Primitive Conversions
      */
-    override public double doubleValue() {
+    override double doubleValue() {
         return cast(double)value;
     }
 
@@ -386,7 +389,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
-    override public string toString() {
+    override string toString() {
         return to!string(value);
     }
 
@@ -397,7 +400,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return a hash code value for this {@code Short}
      */
     override 
-    public size_t toHash() {
+    size_t toHash() @trusted nothrow {
         return cast(int)(value);
     }
 
@@ -409,7 +412,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return a hash code value for a {@code short} value.
      * @since 1.8
      */
-    // public static int hashCode(short value) {
+    // static int hashCode(short value) {
     //     return (int)value;
     // }
 
@@ -423,7 +426,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * @return          {@code true} if the objects are the same;
      *                  {@code false} otherwise.
      */
-    override public bool opEquals(Object obj) {
+    override bool opEquals(Object obj) {
         if (cast(Short)obj !is null) {
             return value == (cast(Short)obj).shortValue();
         }
@@ -443,7 +446,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *           comparison).
      * @since   1.2
      */
-    // public int compareTo(Short anotherShort) {
+    // int compareTo(Short anotherShort) {
     //     return compare(this.value, anotherShort.value);
     // }
 
@@ -461,7 +464,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *         a value greater than {@code 0} if {@code x > y}
      * @since 1.7
      */
-    public static int compare(short x, short y) {
+    static int compare(short x, short y) {
         return x - y;
     }
 
@@ -470,7 +473,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      * complement binary form.
      * @since 1.5
      */
-    public static const int SIZE = 16;
+    static const int SIZE = 16;
 
     /**
      * The number of bytes used to represent a {@code short} value in two's
@@ -478,7 +481,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *
      * @since 1.8
      */
-    public static  int BYTES = SIZE / Byte.SIZE;
+    static  int BYTES = SIZE / Byte.SIZE;
 
     /**
      * Returns the value obtained by reversing the order of the bytes in the
@@ -489,7 +492,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *     the bytes in the specified {@code short} value.
      * @since 1.5
      */
-    public static short reverseBytes(short i) {
+    static short reverseBytes(short i) {
         return cast(short) (((i & 0xFF00) >> 8) | (i << 8));
     }
 
@@ -510,7 +513,7 @@ public  class Short : Number /*implements Comparable<Short> */{
      *         conversion
      * @since 1.8
      */
-    public static int toUnsignedInt(short x) {
+    static int toUnsignedInt(short x) {
         return (cast(int) x) & 0xffff;
     }
 
@@ -530,14 +533,14 @@ public  class Short : Number /*implements Comparable<Short> */{
      *         conversion
      * @since 1.8
      */
-    public static long toUnsignedLong(short x) {
+    static long toUnsignedLong(short x) {
         return (cast(long) x) & 0xffffL;
     }
 
     /** use serialVersionUID from JDK 1.1. for interoperability */
     private static  long serialVersionUID = 7515723908773894738L;
 
-    public static short parseShort(string s)  {
+    static short parseShort(string s)  {
         auto i = to!int(s);
         if (i < MIN_VALUE || i > MAX_VALUE)
         {

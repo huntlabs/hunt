@@ -98,7 +98,7 @@ import std.string;
  * @since 1.1
  */
 
-class BigInteger : Number {
+class BigInteger : AbstractNumber {
     /**
      * The signum of this BigInteger: -1 for negative, 0 for zero, or
      * 1 for positive.  Note that the BigInteger zero <em>must</em> have
@@ -4070,7 +4070,7 @@ class BigInteger : Number {
      * @see #intValueExact()
      * @jls 5.1.3 Narrowing Primitive Conversion
      */
-    override int intValue() {
+    int intValue() {
         int result = 0;
         result = getInt(0);
         return result;
@@ -4092,7 +4092,7 @@ class BigInteger : Number {
      * @see #longValueExact()
      * @jls 5.1.3 Narrowing Primitive Conversion
      */
-    override long longValue() {
+    long longValue() {
         long result = 0;
 
         for (int i=1; i >= 0; i--)
@@ -4116,7 +4116,7 @@ class BigInteger : Number {
      * @return this BigInteger converted to a {@code float}.
      * @jls 5.1.3 Narrowing Primitive Conversion
      */
-    override float floatValue() {
+    float floatValue() {
         if (_signum == 0) {
             return 0.0f;
         }
@@ -4201,7 +4201,7 @@ class BigInteger : Number {
      * @return this BigInteger converted to a {@code double}.
      * @jls 5.1.3 Narrowing Primitive Conversion
      */
-    override double doubleValue() {
+    double doubleValue() {
         if (_signum == 0) {
             return 0.0;
         }

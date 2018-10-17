@@ -1,11 +1,12 @@
 module hunt.lang.Integer;
 
 import hunt.lang.Byte;
+import hunt.lang.Nullable;
 import hunt.lang.Number;
 
 import std.conv;
 
-class Integer : Number {
+class Integer : Nullable!int, Number {
 
     /**
      * Returns the number of one-bits in the two's complement binary
@@ -115,7 +116,7 @@ class Integer : Number {
      * @since 1.8
      */
     override size_t toHash() @safe nothrow {
-        return value;
+        return cast(size_t)value;
     }
 
     /**
@@ -170,7 +171,7 @@ class Integer : Number {
      *
      * @serial
      */
-    private  int value;
+    // private  int value;
 
     /**
      * Constructs a newly allocated {@code Integer} object that
@@ -180,7 +181,8 @@ class Integer : Number {
      *                  {@code Integer} object.
      */
     this(int value) {
-        this.value = value;
+        // this.value = value;
+        super(value);
     }
 
     override byte byteValue() {

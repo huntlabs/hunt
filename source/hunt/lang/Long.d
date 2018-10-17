@@ -2,6 +2,7 @@ module hunt.lang.Long;
 
 import hunt.lang.Byte;
 import hunt.lang.Integer;
+import hunt.lang.Nullable;
 import hunt.lang.Number;
 import hunt.util.Comparator;
 import hunt.lang.exception;
@@ -12,7 +13,7 @@ import std.exception;
 
 /**
 */
-class Long : Number{
+class Long : Nullable!long, Number {
 
      // Bit Twiddling
 
@@ -100,7 +101,7 @@ class Long : Number{
      *
      * @serial
      */
-    private  long value;
+    // private  long value;
 
     /**
      * Constructs a newly allocated {@code Long} object that
@@ -110,7 +111,8 @@ class Long : Number{
      *          {@code Long} object.
      */
     this(long value) {
-        this.value = value;
+        // this.value = value;
+        super(value);
     }
 
     /**
@@ -127,7 +129,8 @@ class Long : Number{
      * @see        java.lang.Long#parseLong(java.lang.string, int)
      */
     this(string s) {
-        this.value = to!long(s);
+        // this.value = to!long(s);
+        super(to!long(s));
     }
 
     /**
