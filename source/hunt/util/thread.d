@@ -18,38 +18,26 @@ import std.algorithm;
 import std.conv;
 import std.stdio;
 
-version (Posix)
-{
+version (Posix) {
     import core.sys.posix.sys.types : pid_t;
     import hunt.sys.syscall;
 
-    pid_t getTid()
-    {
-        version(FreeBSD)
-        {
+    pid_t getTid() {
+        version(FreeBSD) {
             long tid;
             syscall(SYS_thr_self, &tid);
 
             return cast(pid_t)tid;
-        }
-        else version(OSX)
-        {
+        } else version(OSX) {
             return cast(pid_t)syscall(SYS_thread_selfid);
-        }
-        else version(linux)
-        {
+        } else version(linux) {
             return cast(pid_t)syscall(__NR_gettid);
-        }
-        else
-        {
+        } else {
             return 0;
         }
     }
-}
-else 
-{
-    ThreadID getTid()
-    {
+} else {
+    ThreadID getTid() {
         return Thread.getThis.id;
     }
 }

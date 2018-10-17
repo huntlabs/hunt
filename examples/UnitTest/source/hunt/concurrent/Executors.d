@@ -35,8 +35,12 @@
 
 module hunt.concurrent.Executors;
 
+import hunt.concurrent.AbstractExecutorService;
 import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.exception;
 import hunt.concurrent.ExecutorService;
+import hunt.concurrent.ForkJoinPool;
+import hunt.concurrent.Future;
 import hunt.concurrent.LinkedBlockingQueue;
 import hunt.concurrent.ThreadFactory;
 import hunt.concurrent.ThreadPoolExecutor;
@@ -58,7 +62,6 @@ import std.conv;
 // import java.security.PrivilegedExceptionAction;
 // import hunt.container.Collection;
 // import java.util.List;
-// import hunt.concurrent.AtomicHelper.AtomicInteger;
 // import sun.security.util.SecurityConstants;
 
 /**
@@ -103,8 +106,7 @@ class Executors {
      * @throws IllegalArgumentException if {@code nThreads <= 0}
      */
     static ThreadPoolExecutor newFixedThreadPool(int nThreads) {
-        return new ThreadPoolExecutor(nThreads, nThreads,
-                                      0L, TimeUnit.MILLISECONDS,
+        return new ThreadPoolExecutor(nThreads, nThreads, Duration(0),
                                       new LinkedBlockingQueue!(Runnable)());
     }
 
@@ -368,7 +370,7 @@ class Executors {
      * @return a thread factory
      */
     static ThreadFactory defaultThreadFactory() {
-        return new DefaultThreadFactory();
+        return ThreadFactory.defaultThreadFactory();
     }
 
     // /**
@@ -425,13 +427,13 @@ class Executors {
         return new RunnableAdapter!(T)(task, result);
     }
 
-    // /**
-    //  * Returns a {@link Callable} object that, when
-    //  * called, runs the given task and returns {@code null}.
-    //  * @param task the task to run
-    //  * @return a callable object
-    //  * @throws NullPointerException if task null
-    //  */
+    /**
+     * Returns a {@link Callable} object that, when
+     * called, runs the given task and returns {@code null}.
+     * @param task the task to run
+     * @return a callable object
+     * @throws NullPointerException if task null
+     */
     // static Callable<Object> callable(Runnable task) {
     //     if (task is null)
     //         throw new NullPointerException();
@@ -514,12 +516,246 @@ class Executors {
     // }
 
 
+    // Methods for ExecutorService
+
+    /**
+     * Submits a Runnable task for execution and returns a Future
+     * representing that task. The Future's {@code get} method will
+     * return {@code null} upon <em>successful</em> completion.
+     *
+     * @param task the task to submit
+     * @return a Future representing pending completion of the task
+     * @throws RejectedExecutionException if the task cannot be
+     *         scheduled for execution
+     * @throws NullPointerException if the task is null
+     */
+    Future!(void) submit(ExecutorService es, Runnable task) {
+
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else
+            return aes.submit(task);
+
+        // TypeInfo typeInfo = typeid(cast(Object)es);
+        // if(typeInfo == typeid(ThreadPoolExecutor)) {
+        //     AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        //     return aes.submit(task);
+        // } else {
+        //     implementationMissing(false);
+        // }
+    }
+
+    /**
+     * Submits a Runnable task for execution and returns a Future
+     * representing that task. The Future's {@code get} method will
+     * return the given result upon successful completion.
+     *
+     * @param task the task to submit
+     * @param result the result to return
+     * @param (T) the type of the result
+     * @return a Future representing pending completion of the task
+     * @throws RejectedExecutionException if the task cannot be
+     *         scheduled for execution
+     * @throws NullPointerException if the task is null
+     */
+    Future!(T) submit(T)(ExecutorService es, Runnable task, T result) {
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else
+            return aes.submit!T(task, result);
+                    
+        // TypeInfo typeInfo = typeid(cast(Object)es);
+        // if(typeInfo == typeid(ThreadPoolExecutor)) {
+        //     AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        //     if(aes is null) 
+        //         throw new RejectedExecutionException("ExecutorService is null");
+        //     else
+        //         return aes.submit!T(task, result);
+        // } else {
+        //     implementationMissing(false);
+        // }
+    }
+
+    /**
+     * Submits a value-returning task for execution and returns a
+     * Future representing the pending results of the task. The
+     * Future's {@code get} method will return the task's result upon
+     * successful completion.
+     *
+     * <p>
+     * If you would like to immediately block waiting
+     * for a task, you can use constructions of the form
+     * {@code result = exec.submit(aCallable).get();}
+     *
+     * <p>Note: The {@link Executors} class includes a set of methods
+     * that can convert some other common closure-like objects,
+     * for example, {@link java.security.PrivilegedAction} to
+     * {@link Callable} form so they can be submitted.
+     *
+     * @param task the task to submit
+     * @param (T) the type of the task's result
+     * @return a Future representing pending completion of the task
+     * @throws RejectedExecutionException if the task cannot be
+     *         scheduled for execution
+     * @throws NullPointerException if the task is null
+     */
+    Future!(T) submit(T)(ExecutorService es, Callable!(T) task) {
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else
+            return aes.submit!(T)(task);
+            
+        // TypeInfo typeInfo = typeid(cast(Object)es);
+        // if(typeInfo == typeid(ThreadPoolExecutor)) {
+        //     AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        //     if(aes is null) 
+        //         throw new RejectedExecutionException("ExecutorService is null");
+        //     else
+        //         return aes.submit!(T)(task);
+        // } else {
+        //     implementationMissing(false);
+        // }
+    }
+
+    /**
+     * Executes the given tasks, returning a list of Futures holding
+     * their status and results when all complete.
+     * {@link Future#isDone} is {@code true} for each
+     * element of the returned list.
+     * Note that a <em>completed</em> task could have
+     * terminated either normally or by throwing an exception.
+     * The results of this method are undefined if the given
+     * collection is modified while this operation is in progress.
+     *
+     * @param tasks the collection of tasks
+     * @param (T) the type of the values returned from the tasks
+     * @return a list of Futures representing the tasks, in the same
+     *         sequential order as produced by the iterator for the
+     *         given task list, each of which has completed
+     * @throws InterruptedException if interrupted while waiting, in
+     *         which case unfinished tasks are cancelled
+     * @throws NullPointerException if tasks or any of its elements are {@code null}
+     * @throws RejectedExecutionException if any task cannot be
+     *         scheduled for execution
+     */
+    List!(Future!(T)) invokeAll(T)(ExecutorService es, Collection!(Callable!(T)) tasks) {
+
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else {
+            aes.invokeAll!(T)(tasks);
+        }
+
+    }
+
+    /**
+     * Executes the given tasks, returning a list of Futures holding
+     * their status and results
+     * when all complete or the timeout expires, whichever happens first.
+     * {@link Future#isDone} is {@code true} for each
+     * element of the returned list.
+     * Upon return, tasks that have not completed are cancelled.
+     * Note that a <em>completed</em> task could have
+     * terminated either normally or by throwing an exception.
+     * The results of this method are undefined if the given
+     * collection is modified while this operation is in progress.
+     *
+     * @param tasks the collection of tasks
+     * @param timeout the maximum time to wait
+     * @param unit the time unit of the timeout argument
+     * @param (T) the type of the values returned from the tasks
+     * @return a list of Futures representing the tasks, in the same
+     *         sequential order as produced by the iterator for the
+     *         given task list. If the operation did not time out,
+     *         each task will have completed. If it did time out, some
+     *         of these tasks will not have completed.
+     * @throws InterruptedException if interrupted while waiting, in
+     *         which case unfinished tasks are cancelled
+     * @throws NullPointerException if tasks, any of its elements, or
+     *         unit are {@code null}
+     * @throws RejectedExecutionException if any task cannot be scheduled
+     *         for execution
+     */
+    List!(Future!(T)) invokeAll(T)(ExecutorService es, Collection!(Callable!(T)) tasks,
+                                  Duration timeout) {
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else {
+            aes.invokeAll!(T)(tasks, timeout);
+        }
+    }
+
+    /**
+     * Executes the given tasks, returning the result
+     * of one that has completed successfully (i.e., without throwing
+     * an exception), if any do. Upon normal or exceptional return,
+     * tasks that have not completed are cancelled.
+     * The results of this method are undefined if the given
+     * collection is modified while this operation is in progress.
+     *
+     * @param tasks the collection of tasks
+     * @param (T) the type of the values returned from the tasks
+     * @return the result returned by one of the tasks
+     * @throws InterruptedException if interrupted while waiting
+     * @throws NullPointerException if tasks or any element task
+     *         subject to execution is {@code null}
+     * @throws IllegalArgumentException if tasks is empty
+     * @throws ExecutionException if no task successfully completes
+     * @throws RejectedExecutionException if tasks cannot be scheduled
+     *         for execution
+     */
+    T invokeAny(T)(ExecutorService es, Collection!(Callable!(T)) tasks) {
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else {
+            aes.invokeAny!(T)(tasks);
+        }
+    }
+
+    /**
+     * Executes the given tasks, returning the result
+     * of one that has completed successfully (i.e., without throwing
+     * an exception), if any do before the given timeout elapses.
+     * Upon normal or exceptional return, tasks that have not
+     * completed are cancelled.
+     * The results of this method are undefined if the given
+     * collection is modified while this operation is in progress.
+     *
+     * @param tasks the collection of tasks
+     * @param timeout the maximum time to wait
+     * @param unit the time unit of the timeout argument
+     * @param (T) the type of the values returned from the tasks
+     * @return the result returned by one of the tasks
+     * @throws InterruptedException if interrupted while waiting
+     * @throws NullPointerException if tasks, or unit, or any element
+     *         task subject to execution is {@code null}
+     * @throws TimeoutException if the given timeout elapses before
+     *         any task successfully completes
+     * @throws ExecutionException if no task successfully completes
+     * @throws RejectedExecutionException if tasks cannot be scheduled
+     *         for execution
+     */
+    T invokeAny(T)(ExecutorService es, Collection!(Callable!(T)) tasks,
+                    Duration timeout)  {
+        AbstractExecutorService aes = cast(AbstractExecutorService)es;
+        if(aes is null) 
+            throw new RejectedExecutionException("ExecutorService is null");
+        else {
+            aes.invokeAny!(T)(tasks, timeout);
+        }
+    }
 
     /** Cannot instantiate. */
     private this() {}
 }
 
-  // // Non-classes supporting the methods
+// Non-classes supporting the methods
 
 /**
  * A callable that runs given task and returns given result.
@@ -626,73 +862,7 @@ private final class RunnableAdapter(T) : Callable!(T) {
 //     }
 // }
 
-/**
- * The default thread factory.
- */
-private class DefaultThreadFactory : ThreadFactory {
-    private __gshared int poolNumber = 1;
-    private ThreadGroupEx group;
-    private shared(int) threadNumber = 1;
-    private string namePrefix;
 
-    this() {
-        // SecurityManager s = System.getSecurityManager();
-        // group = (s !is null) ? s.getThreadGroup() :
-        //                       Thread.getThis().getThreadGroup();
-        int n = AtomicHelper.getAndIncrement(poolNumber);
-        namePrefix = "pool-" ~ t.to!string() ~ "-thread-";
-    }
-
-    
-    Thread newThread(Action dg ) {
-        int n = AtomicHelper.getAndIncrement(threadNumber);
-
-        Thread t = new Thread(dg);
-        t.name = namePrefix ~ n.to!string();
-        t.isDaemon = false;
-        t.priority = Thread.PRIORITY_DEFAULT;
-
-        return t;
-    }
-}
-
-// /**
-//  * Thread factory capturing access control context and class loader.
-//  */
-// private class PrivilegedThreadFactory extends DefaultThreadFactory {
-//     AccessControlContext acc;
-//     ClassLoader ccl;
-
-//     PrivilegedThreadFactory() {
-//         super();
-//         SecurityManager sm = System.getSecurityManager();
-//         if (sm !is null) {
-//             // Calls to getContextClassLoader from this class
-//             // never trigger a security check, but we check
-//             // whether our callers have this permission anyways.
-//             sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-
-//             // Fail fast
-//             sm.checkPermission(new RuntimePermission("setContextClassLoader"));
-//         }
-//         this.acc = AccessController.getContext();
-//         this.ccl = Thread.getThis().getContextClassLoader();
-//     }
-
-//     Thread newThread(Runnable r) {
-//         return super.newThread(new Runnable() {
-//             void run() {
-//                 AccessController.doPrivileged(new PrivilegedAction<>() {
-//                     Void run() {
-//                         Thread.getThis().setContextClassLoader(ccl);
-//                         r.run();
-//                         return null;
-//                     }
-//                 }, acc);
-//             }
-//         });
-//     }
-// }
 
 // /**
 //  * A wrapper class that exposes only the ExecutorService methods
