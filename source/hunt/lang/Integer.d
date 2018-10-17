@@ -1,7 +1,7 @@
-module hunt.math.Integer;
+module hunt.lang.Integer;
 
-import hunt.math.Byte;
-import hunt.math.Number;
+import hunt.lang.Byte;
+import hunt.lang.Number;
 
 import std.conv;
 

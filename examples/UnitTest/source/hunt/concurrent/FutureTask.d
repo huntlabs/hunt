@@ -158,7 +158,7 @@ class FutureTask(V) : RunnableFuture!(V) {
      */
 static if(is(V == void)) {
     this(Runnable runnable) {
-        this.callable = Executors.callable(runnable, result);
+        this.callable = Executors.callable(runnable);
         this.state = NEW;       // ensure visibility of callable
     }
 } else {
@@ -240,6 +240,16 @@ static if(is(V == void)) {
      *
      * @param v the value
      */
+
+static if(is(V == void)) {
+    protected void set() {
+        if (AtomicHelper.cas(state, NEW, COMPLETING)) {
+            // outcome = v;
+            AtomicHelper.store(state, NORMAL);  // final state
+            finishCompletion();
+        }
+    }
+} else {
     protected void set(V v) {
         if (AtomicHelper.cas(state, NEW, COMPLETING)) {
             outcome = v;
@@ -247,6 +257,7 @@ static if(is(V == void)) {
             finishCompletion();
         }
     }
+}
 
     /**
      * Causes this future to report an {@link ExecutionException}
@@ -510,7 +521,7 @@ static if(is(V == void)) {
      *
      * @return a string representation of this FutureTask
      */
-    string toString() {
+    override string toString() {
         string status;
         switch (state) {
         case NORMAL:

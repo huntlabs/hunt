@@ -1,8 +1,8 @@
 module hunt.math.BigDecimal;
 
-import hunt.math.Number;
+import hunt.lang.Number;
 import hunt.math.BigInteger;
-import hunt.math.Integer;
+import hunt.lang.Integer;
 
 /**
  * Immutable, arbitrary-precision signed decimal numbers.  A

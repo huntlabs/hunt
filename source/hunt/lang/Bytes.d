@@ -1,4 +1,4 @@
-module hunt.math.Bytes;
+module hunt.lang.Bytes;
 
 import std.conv;
 

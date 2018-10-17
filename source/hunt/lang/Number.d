@@ -1,4 +1,4 @@
-module hunt.math.Number;
+module hunt.lang.Number;
 
 
 /**

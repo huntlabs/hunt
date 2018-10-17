@@ -1,8 +1,8 @@
-module hunt.math.Double;
+module hunt.lang.Double;
 
 
 import hunt.lang.exception;
-import hunt.math.Number;
+import hunt.lang.Number;
 import std.conv;
 
 class Double : Number{

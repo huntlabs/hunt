@@ -1,7 +1,7 @@
-module hunt.math.Float;
+module hunt.lang.Float;
 
 import hunt.lang.exception;
-import hunt.math.Number;
+import hunt.lang.Number;
 import std.conv;
 
 class Float : Number{

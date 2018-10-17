@@ -1,8 +1,8 @@
-module hunt.math.Long;
+module hunt.lang.Long;
 
-import hunt.math.Byte;
-import hunt.math.Integer;
-import hunt.math.Number;
+import hunt.lang.Byte;
+import hunt.lang.Integer;
+import hunt.lang.Number;
 import hunt.util.Comparator;
 import hunt.lang.exception;
 

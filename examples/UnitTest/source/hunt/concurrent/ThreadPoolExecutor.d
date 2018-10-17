@@ -46,7 +46,7 @@ import hunt.concurrent.ThreadFactory;
 
 import hunt.container;
 import hunt.datetime;
-import hunt.math.Integer;
+import hunt.lang.Integer;
 import hunt.lang.common;
 import hunt.lang.exception;
 

@@ -23,9 +23,9 @@
  * questions.
  */
 
-module hunt.math.Boolean;
+module hunt.lang.Boolean;
 
-// import hunt.math.Number;
+// import hunt.lang.Number;
 import hunt.string;
 import std.traits;
 
