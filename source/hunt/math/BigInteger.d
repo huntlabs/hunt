@@ -1,10 +1,10 @@
 module hunt.math.BigInteger;
 
-import hunt.math.Double;
-import hunt.math.Float;
-import hunt.math.Integer;
-import hunt.math.Long;
-import hunt.math.Number;
+import hunt.lang.Double;
+import hunt.lang.Float;
+import hunt.lang.Integer;
+import hunt.lang.Long;
+import hunt.lang.Number;
 
 import hunt.lang.character;
 import hunt.lang.exception;

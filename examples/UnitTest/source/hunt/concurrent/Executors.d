@@ -421,7 +421,13 @@ class Executors {
      * @return a callable object
      * @throws NullPointerException if task null
      */
-    static Callable!(T) callable(T)(Runnable task, T result) {
+    static Callable!(T) callable(T)(Runnable task) if(is(T == void)) {
+        if (task is null)
+            throw new NullPointerException();
+        return new RunnableAdapter!(T)(task);
+    }
+
+    static Callable!(T) callable(T)(Runnable task, T result) if(!is(T == void)) {
         if (task is null)
             throw new NullPointerException();
         return new RunnableAdapter!(T)(task, result);
@@ -760,17 +766,35 @@ class Executors {
 /**
  * A callable that runs given task and returns given result.
  */
-private final class RunnableAdapter(T) : Callable!(T) {
+private final class RunnableAdapter(T) : Callable!(T) if(is(T == void)) {
+    private Runnable task;
+    this(Runnable task) {
+        this.task = task;
+    }
+
+    T call() {
+        task.run();
+    }
+
+    string toString() {
+        return super.toString() ~ "[Wrapped task = " ~ (cast(Object)task).toString() ~ "]";
+    }
+}
+
+private final class RunnableAdapter(T) : Callable!(T) if(!is(T == void)) {
     private Runnable task;
     private T result;
+
     this(Runnable task, T result) {
         this.task = task;
         this.result = result;
     }
+
     T call() {
         task.run();
         return result;
     }
+
     string toString() {
         return super.toString() ~ "[Wrapped task = " ~ (cast(Object)task).toString() ~ "]";
     }

@@ -23,10 +23,10 @@
  * questions.
  */
 
-module hunt.math.Short;
-import hunt.math.Byte;
+module hunt.lang.Short;
+import hunt.lang.Byte;
 import std.conv;
-import hunt.math.Number;
+import hunt.lang.Number;
 /**
  * The {@code Short} class wraps a value of primitive type {@code
  * short} in an object.  An object of type {@code Short} contains a

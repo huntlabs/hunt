@@ -1,8 +1,8 @@
 module test.NumberTest;
 
-import hunt.math.Integer;
-import hunt.math.Long;
-import hunt.math.Number;
+import hunt.lang.Integer;
+import hunt.lang.Long;
+import hunt.lang.Number;
 
 class NumberTest {
 

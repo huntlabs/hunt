@@ -23,9 +23,9 @@
  * questions.
  */
 
-module hunt.math.Byte;
+module hunt.lang.Byte;
 
-import hunt.math.Number;
+import hunt.lang.Number;
 import std.conv;
 
 /**
