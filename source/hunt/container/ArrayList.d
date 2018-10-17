@@ -5,7 +5,7 @@ import std.array;
 import std.conv;
 import std.container.array;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.container.AbstractList;
 import hunt.container.List;
 

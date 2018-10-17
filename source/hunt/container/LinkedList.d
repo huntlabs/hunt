@@ -6,7 +6,7 @@ import hunt.container.Collection;
 import hunt.container.Deque;
 import hunt.container.List;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.conv;
 import std.container;

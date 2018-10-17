@@ -3,7 +3,7 @@ module hunt.util.concurrent.FuturePromise;
 import hunt.util.concurrent.Future;
 import hunt.util.concurrent.Promise;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import std.format;
 import std.datetime;
 

@@ -3,7 +3,7 @@ module hunt.util.concurrent.IteratingCallback;
 import hunt.util.functional;
 import hunt.util.concurrent.Locker;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.format;
 

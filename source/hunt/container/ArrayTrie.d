@@ -7,7 +7,7 @@ import hunt.container.HashSet;
 import hunt.container.Set;
 import hunt.container.Trie;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.string.StringBuilder;
 
 import hunt.logging;

@@ -1,7 +1,7 @@
 module hunt.io.ByteArrayOutputStream;
 
 import hunt.io.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.algorithm;
 import std.conv;

@@ -14,7 +14,7 @@ import hunt.container.SortedSet;
 
 import hunt.lang.common;
 import hunt.util.Comparator;
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.util.functional;
 import hunt.util.Spliterator;
 

@@ -11,7 +11,7 @@
  
 module hunt.util.thread;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import core.thread;
 import std.algorithm;

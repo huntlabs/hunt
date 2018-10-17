@@ -44,7 +44,7 @@ import hunt.container.Collection;
 import hunt.container.Iterator;
 import hunt.datetime;
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 // import core.atomic;
 import core.sync.mutex;

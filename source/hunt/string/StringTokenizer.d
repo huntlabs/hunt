@@ -3,7 +3,7 @@ module hunt.string.StringTokenizer;
 
 import std.string;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.lang.character;
 import hunt.string.common;
 import hunt.container.Iterable;

@@ -4,7 +4,7 @@ import hunt.util.concurrent.Future;
 import hunt.util.concurrent.Promise;
 
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 /**
 * <p>A CompletableFuture that is also a Promise.</p>

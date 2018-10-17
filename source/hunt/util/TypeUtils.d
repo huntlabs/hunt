@@ -2,7 +2,7 @@ module hunt.util.TypeUtils;
 
 import hunt.container.Appendable;
 import hunt.string.StringBuilder;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.conv;
 

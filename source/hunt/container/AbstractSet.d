@@ -5,7 +5,7 @@ import hunt.container.AbstractCollection;
 import hunt.container.Collection;
 import hunt.container.Set;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 
 /**

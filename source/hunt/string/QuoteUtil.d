@@ -1,7 +1,7 @@
 module hunt.string.QuoteUtil;
 
 import hunt.string.StringBuilder;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.ascii;
 import std.conv;

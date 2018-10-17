@@ -2,7 +2,7 @@ module hunt.container.MappedByteBuffer;
 
 import hunt.container.ByteBuffer;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.io.FileDescriptor;
 
 /**

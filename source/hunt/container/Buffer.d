@@ -1,6 +1,6 @@
 module hunt.container.Buffer;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.conv;
 

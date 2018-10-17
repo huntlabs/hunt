@@ -7,7 +7,7 @@ import hunt.container.StringBuffer;
 
 import hunt.lang.common;
 import hunt.string.StringBuilder;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.bitmanip;
 

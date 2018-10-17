@@ -11,7 +11,7 @@ import std.range;
 import std.traits;
 
 import hunt.logging;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 class AssertionError : Error {
     // this(string file = __FILE__, size_t line = __LINE__,

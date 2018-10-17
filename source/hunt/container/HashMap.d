@@ -4,7 +4,7 @@ import hunt.container.AbstractMap;
 import hunt.container.Map;
 import hunt.container.Iterator;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.string.StringBuilder;
 
 import std.algorithm;

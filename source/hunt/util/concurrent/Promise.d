@@ -1,6 +1,6 @@
 module hunt.util.concurrent.Promise;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 /**
  * <p>A callback abstraction that handles completed/failed events of asynchronous operations.</p>

@@ -5,7 +5,7 @@ import hunt.container.Iterator;
 import hunt.container.Map;
 import hunt.container.Set;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.array;
 import std.container.array;

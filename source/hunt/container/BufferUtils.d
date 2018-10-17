@@ -9,7 +9,7 @@ import hunt.container.Collection;
 import hunt.container.Enumeration;
 import hunt.container.List;
 
-import hunt.util.exception;
+import hunt.lang.exception;
 import hunt.string.common;
 import hunt.util.TypeUtils;
 

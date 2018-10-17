@@ -14,7 +14,7 @@ import hunt.container.SortedSet;
 import hunt.container.TreeSet;
 
 import hunt.lang.common;
-import hunt.util.exception;
+import hunt.lang.exception;
 
 import std.conv;
 import std.range;
