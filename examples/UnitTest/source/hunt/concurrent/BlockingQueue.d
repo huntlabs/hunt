@@ -274,6 +274,8 @@ interface BlockingQueue(E) : Queue!(E) {
      */
     E poll(Duration timeout);
 
+    alias poll = Queue!E.poll;
+
     /**
      * Returns the number of additional elements that this queue can ideally
      * (in the absence of memory or resource constraints) accept without

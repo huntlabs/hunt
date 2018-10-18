@@ -124,7 +124,7 @@ abstract class AbstractExecutorService : ExecutorService {
      */
     Future!(void) submit(Runnable task) {
         if (task is null) throw new NullPointerException();
-        RunnableFuture!(void) ftask = new FutureTask!(void)(runnable);
+        RunnableFuture!(void) ftask = new FutureTask!(void)(task);
         execute(ftask);
         return ftask;
     }

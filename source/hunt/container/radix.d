@@ -19,15 +19,11 @@ import core.stdc.stdlib;
 
 private:
 
-version(DEBUG_LOG){
-	import zhang2018.common.Log;
-}else{
-	void debug_log( A ...)( A args){
-		return;
-	}
-	alias log_info = debug_log;
-	alias log_error = debug_log;
+void debug_log( A ...)( A args){
+	return;
 }
+alias log_info = debug_log;
+alias log_error = debug_log;
 
 struct raxNode
 {

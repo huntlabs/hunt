@@ -47,6 +47,8 @@ import hunt.lang.exception;
 import core.thread;
 import core.sync.mutex;
 import core.sync.condition;
+
+import std.conv;
 import std.datetime;
 
 
@@ -316,243 +318,6 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * with initial synchronization state of zero.
      */
     protected this() { }
-
-    /**
-     * Wait queue node class.
-     *
-     * <p>The wait queue is a variant of a "CLH" (Craig, Landin, and
-     * Hagersten) lock queue. CLH locks are normally used for
-     * spinlocks.  We instead use them for blocking synchronizers, but
-     * use the same basic tactic of holding some of the control
-     * information about a thread in the predecessor of its node.  A
-     * "status" field in each node keeps track of whether a thread
-     * should block.  A node is signalled when its predecessor
-     * releases.  Each node of the queue otherwise serves as a
-     * specific-notification-style monitor holding a single waiting
-     * thread. The status field does NOT control whether threads are
-     * granted locks etc though.  A thread may try to acquire if it is
-     * first in the queue. But being first does not guarantee success;
-     * it only gives the right to contend.  So the currently released
-     * contender thread may need to rewait.
-     *
-     * <p>To enqueue into a CLH lock, you atomically splice it in as new
-     * tail. To dequeue, you just set the head field.
-     * <pre>
-     *      +------+  prev +-----+       +-----+
-     * head |      | <---- |     | <---- |     |  tail
-     *      +------+       +-----+       +-----+
-     * </pre>
-     *
-     * <p>Insertion into a CLH queue requires only a single atomic
-     * operation on "tail", so there is a simple atomic point of
-     * demarcation from unqueued to queued. Similarly, dequeuing
-     * involves only updating the "head". However, it takes a bit
-     * more work for nodes to determine who their successors are,
-     * in part to deal with possible cancellation due to timeouts
-     * and interrupts.
-     *
-     * <p>The "prev" links (not used in original CLH locks), are mainly
-     * needed to handle cancellation. If a node is cancelled, its
-     * successor is (normally) relinked to a non-cancelled
-     * predecessor. For explanation of similar mechanics in the case
-     * of spin locks, see the papers by Scott and Scherer at
-     * http://www.cs.rochester.edu/u/scott/synchronization/
-     *
-     * <p>We also use "next" links to implement blocking mechanics.
-     * The thread id for each node is kept in its own node, so a
-     * predecessor signals the next node to wake up by traversing
-     * next link to determine which thread it is.  Determination of
-     * successor must avoid races with newly queued nodes to set
-     * the "next" fields of their predecessors.  This is solved
-     * when necessary by checking backwards from the atomically
-     * updated "tail" when a node's successor appears to be null.
-     * (Or, said differently, the next-links are an optimization
-     * so that we don't usually need a backward scan.)
-     *
-     * <p>Cancellation introduces some conservatism to the basic
-     * algorithms.  Since we must poll for cancellation of other
-     * nodes, we can miss noticing whether a cancelled node is
-     * ahead or behind us. This is dealt with by always unparking
-     * successors upon cancellation, allowing them to stabilize on
-     * a new predecessor, unless we can identify an uncancelled
-     * predecessor who will carry this responsibility.
-     *
-     * <p>CLH queues need a dummy header node to get started. But
-     * we don't create them on construction, because it would be wasted
-     * effort if there is never contention. Instead, the node
-     * is constructed and head and tail pointers are set upon first
-     * contention.
-     *
-     * <p>Threads waiting on Conditions use the same nodes, but
-     * use an additional link. Conditions only need to link nodes
-     * in simple (non-concurrent) linked queues because they are
-     * only accessed when exclusively held.  Upon await, a node is
-     * inserted into a condition queue.  Upon signal, the node is
-     * transferred to the main queue.  A special value of status
-     * field is used to mark which queue a node is on.
-     *
-     * <p>Thanks go to Dave Dice, Mark Moir, Victor Luchangco, Bill
-     * Scherer and Michael Scott, along with members of JSR-166
-     * expert group, for helpful ideas, discussions, and critiques
-     * on the design of this class.
-     */
-    static final class Node {
-        /** Marker to indicate a node is waiting in shared mode */
-        __gshared Node SHARED; // = new Node();
-        /** Marker to indicate a node is waiting in exclusive mode */
-        __gshared Node EXCLUSIVE = null;
-
-        /** waitStatus value to indicate thread has cancelled. */
-        enum int CANCELLED =  1;
-        /** waitStatus value to indicate successor's thread needs unparking. */
-        enum int SIGNAL    = -1;
-        /** waitStatus value to indicate thread is waiting on condition. */
-        enum int CONDITION = -2;
-        /**
-         * waitStatus value to indicate the next acquireShared should
-         * unconditionally propagate.
-         */
-        enum int PROPAGATE = -3;
-
-        /**
-         * Status field, taking on only the values:
-         *   SIGNAL:     The successor of this node is (or will soon be)
-         *               blocked (via park), so the current node must
-         *               unpark its successor when it releases or
-         *               cancels. To avoid races, acquire methods must
-         *               first indicate they need a signal,
-         *               then retry the atomic acquire, and then,
-         *               on failure, block.
-         *   CANCELLED:  This node is cancelled due to timeout or interrupt.
-         *               Nodes never leave this state. In particular,
-         *               a thread with cancelled node never again blocks.
-         *   CONDITION:  This node is currently on a condition queue.
-         *               It will not be used as a sync queue node
-         *               until transferred, at which time the status
-         *               will be set to 0. (Use of this value here has
-         *               nothing to do with the other uses of the
-         *               field, but simplifies mechanics.)
-         *   PROPAGATE:  A releaseShared should be propagated to other
-         *               nodes. This is set (for head node only) in
-         *               doReleaseShared to ensure propagation
-         *               continues, even if other operations have
-         *               since intervened.
-         *   0:          None of the above
-         *
-         * The values are arranged numerically to simplify use.
-         * Non-negative values mean that a node doesn't need to
-         * signal. So, most code doesn't need to check for particular
-         * values, just for sign.
-         *
-         * The field is initialized to 0 for normal sync nodes, and
-         * CONDITION for condition nodes.  It is modified using CAS
-         * (or when possible, unconditional writes).
-         */
-        int waitStatus;
-
-        /**
-         * Link to predecessor node that current node/thread relies on
-         * for checking waitStatus. Assigned during enqueuing, and nulled
-         * out (for sake of GC) only upon dequeuing.  Also, upon
-         * cancellation of a predecessor, we short-circuit while
-         * finding a non-cancelled one, which will always exist
-         * because the head node is never cancelled: A node becomes
-         * head only as a result of successful acquire. A
-         * cancelled thread never succeeds in acquiring, and a thread only
-         * cancels itself, not any other node.
-         */
-        Node prev;
-
-        /**
-         * Link to the successor node that the current node/thread
-         * unparks upon release. Assigned during enqueuing, adjusted
-         * when bypassing cancelled predecessors, and nulled out (for
-         * sake of GC) when dequeued.  The enq operation does not
-         * assign next field of a predecessor until after attachment,
-         * so seeing a null next field does not necessarily mean that
-         * node is at end of queue. However, if a next field appears
-         * to be null, we can scan prev's from the tail to
-         * double-check.  The next field of cancelled nodes is set to
-         * point to the node itself instead of null, to make life
-         * easier for isOnSyncQueue.
-         */
-        Node next;
-
-        /**
-         * The thread that enqueued this node.  Initialized on
-         * construction and nulled out after use.
-         */
-        Thread thread;
-
-        /**
-         * Link to next node waiting on condition, or the special
-         * value SHARED.  Because condition queues are accessed only
-         * when holding in exclusive mode, we just need a simple
-         * linked queue to hold nodes while they are waiting on
-         * conditions. They are then transferred to the queue to
-         * re-acquire. And because conditions can only be exclusive,
-         * we save a field by using special value to indicate shared
-         * mode.
-         */
-        Node nextWaiter;
-
-        /**
-         * Returns true if node is waiting in shared mode.
-         */
-        final bool isShared() {
-            return nextWaiter == SHARED;
-        }
-
-        /**
-         * Returns previous node, or throws NullPointerException if null.
-         * Use when predecessor cannot be null.  The null check could
-         * be elided, but is present to help the VM.
-         *
-         * @return the predecessor of this node
-         */
-        Node predecessor() {
-            Node p = prev;
-            if (p is null)
-                throw new NullPointerException();
-            else
-                return p;
-        }
-
-        shared static this() {
-            SHARED = new Node();
-        }
-
-        /** Establishes initial head or SHARED marker. */
-        this() {}
-
-        /** Constructor used by addWaiter. */
-        this(Node nextWaiter) {
-            this.nextWaiter = nextWaiter;
-            thread = Thread.getThis();
-        }
-
-        /** Constructor used by addConditionWaiter. */
-        this(int waitStatus) {
-            this.waitStatus = waitStatus;
-            thread = Thread.getThis();
-        }
-
-        /** CASes waitStatus field. */
-        final bool compareAndSetWaitStatus(int expect, int update) {
-            return AtomicHelper.cas(waitStatus, expect, update);
-        }
-
-        /** CASes next field. */
-        final bool compareAndSetNext(Node expect, Node update) {
-            return AtomicHelper.cas(next, expect, update);
-        }
-
-        final void setPrevRelaxed(Node p) {
-            this.prev = p;
-        }
-
-   
-    }
 
     /**
      * Head of the wait queue, lazily initialized.  Except for
@@ -1717,8 +1482,9 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
          */
         Node p = enq(node);
         int ws = p.waitStatus;
-        if (ws > 0 || !p.compareAndSetWaitStatus(ws, Node.SIGNAL))
-            LockSupport.unpark(node.thread);
+        implementationMissing(false);
+        // if (ws > 0 || !p.compareAndSetWaitStatus(ws, Node.SIGNAL))
+        //     LockSupport.unpark(node.thread);
         return true;
     }
 
@@ -1773,9 +1539,9 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @return {@code true} if owned
      * @throws NullPointerException if the condition is null
      */
-    final bool owns(ConditionObject condition) {
-        return condition.isOwnedBy(this);
-    }
+    // final bool owns(ConditionObject condition) {
+    //     return condition.isOwnedBy(this);
+    // }
 
     /**
      * Queries whether any threads are waiting on the given condition
@@ -1793,11 +1559,11 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      *         not associated with this synchronizer
      * @throws NullPointerException if the condition is null
      */
-    final bool hasWaiters(ConditionObject condition) {
-        if (!owns(condition))
-            throw new IllegalArgumentException("Not owner");
-        return condition.hasWaiters();
-    }
+    // final bool hasWaiters(ConditionObject condition) {
+    //     if (!owns(condition))
+    //         throw new IllegalArgumentException("Not owner");
+    //     return condition.hasWaiters();
+    // }
 
     /**
      * Returns an estimate of the number of threads waiting on the
@@ -1815,11 +1581,11 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      *         not associated with this synchronizer
      * @throws NullPointerException if the condition is null
      */
-    final int getWaitQueueLength(ConditionObject condition) {
-        if (!owns(condition))
-            throw new IllegalArgumentException("Not owner");
-        return condition.getWaitQueueLength();
-    }
+    // final int getWaitQueueLength(ConditionObject condition) {
+    //     if (!owns(condition))
+    //         throw new IllegalArgumentException("Not owner");
+    //     return condition.getWaitQueueLength();
+    // }
 
     /**
      * Returns a collection containing those threads that may be
@@ -1837,11 +1603,11 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      *         not associated with this synchronizer
      * @throws NullPointerException if the condition is null
      */
-    final Collection!(Thread) getWaitingThreads(ConditionObject condition) {
-        if (!owns(condition))
-            throw new IllegalArgumentException("Not owner");
-        return condition.getWaitingThreads();
-    }
+    // final Collection!(Thread) getWaitingThreads(ConditionObject condition) {
+    //     if (!owns(condition))
+    //         throw new IllegalArgumentException("Not owner");
+    //     return condition.getWaitingThreads();
+    // }
 
     /**
      * Condition implementation for a {@link AbstractQueuedSynchronizer}
@@ -1857,446 +1623,446 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * <p>This class is Serializable, but all fields are transient,
      * so deserialized conditions have no waiters.
      */
-    class ConditionObject : Condition {
-        /** First node of condition queue. */
-        private Node firstWaiter;
-        /** Last node of condition queue. */
-        private Node lastWaiter;
+    // class ConditionObject : Condition {
+    //     /** First node of condition queue. */
+    //     private Node firstWaiter;
+    //     /** Last node of condition queue. */
+    //     private Node lastWaiter;
 
-        /**
-         * Creates a new {@code ConditionObject} instance.
-         */
-        this() { }
+    //     /**
+    //      * Creates a new {@code ConditionObject} instance.
+    //      */
+    //     this() { }
 
-        // Internal methods
+    //     // Internal methods
 
-        /**
-         * Adds a new waiter to wait queue.
-         * @return its new wait node
-         */
-        private Node addConditionWaiter() {
-            if (!isHeldExclusively())
-                throw new IllegalMonitorStateException();
-            Node t = lastWaiter;
-            // If lastWaiter is cancelled, clean out.
-            if (t !is null && t.waitStatus != Node.CONDITION) {
-                unlinkCancelledWaiters();
-                t = lastWaiter;
-            }
+    //     /**
+    //      * Adds a new waiter to wait queue.
+    //      * @return its new wait node
+    //      */
+    //     private Node addConditionWaiter() {
+    //         if (!isHeldExclusively())
+    //             throw new IllegalMonitorStateException();
+    //         Node t = lastWaiter;
+    //         // If lastWaiter is cancelled, clean out.
+    //         if (t !is null && t.waitStatus != Node.CONDITION) {
+    //             unlinkCancelledWaiters();
+    //             t = lastWaiter;
+    //         }
 
-            Node node = new Node(Node.CONDITION);
+    //         Node node = new Node(Node.CONDITION);
 
-            if (t is null)
-                firstWaiter = node;
-            else
-                t.nextWaiter = node;
-            lastWaiter = node;
-            return node;
-        }
+    //         if (t is null)
+    //             firstWaiter = node;
+    //         else
+    //             t.nextWaiter = node;
+    //         lastWaiter = node;
+    //         return node;
+    //     }
 
-        /**
-         * Removes and transfers nodes until hit non-cancelled one or
-         * null. Split out from signal in part to encourage compilers
-         * to inline the case of no waiters.
-         * @param first (non-null) the first node on condition queue
-         */
-        private void doSignal(Node first) {
-            do {
-                if ( (firstWaiter = first.nextWaiter) is null)
-                    lastWaiter = null;
-                first.nextWaiter = null;
-            } while (!transferForSignal(first) &&
-                     (first = firstWaiter) !is null);
-        }
+    //     /**
+    //      * Removes and transfers nodes until hit non-cancelled one or
+    //      * null. Split out from signal in part to encourage compilers
+    //      * to inline the case of no waiters.
+    //      * @param first (non-null) the first node on condition queue
+    //      */
+    //     private void doSignal(Node first) {
+    //         do {
+    //             if ( (firstWaiter = first.nextWaiter) is null)
+    //                 lastWaiter = null;
+    //             first.nextWaiter = null;
+    //         } while (!transferForSignal(first) &&
+    //                  (first = firstWaiter) !is null);
+    //     }
 
-        /**
-         * Removes and transfers all nodes.
-         * @param first (non-null) the first node on condition queue
-         */
-        private void doSignalAll(Node first) {
-            lastWaiter = firstWaiter = null;
-            do {
-                Node next = first.nextWaiter;
-                first.nextWaiter = null;
-                transferForSignal(first);
-                first = next;
-            } while (first !is null);
-        }
+    //     /**
+    //      * Removes and transfers all nodes.
+    //      * @param first (non-null) the first node on condition queue
+    //      */
+    //     private void doSignalAll(Node first) {
+    //         lastWaiter = firstWaiter = null;
+    //         do {
+    //             Node next = first.nextWaiter;
+    //             first.nextWaiter = null;
+    //             transferForSignal(first);
+    //             first = next;
+    //         } while (first !is null);
+    //     }
 
-        /**
-         * Unlinks cancelled waiter nodes from condition queue.
-         * Called only while holding lock. This is called when
-         * cancellation occurred during condition wait, and upon
-         * insertion of a new waiter when lastWaiter is seen to have
-         * been cancelled. This method is needed to avoid garbage
-         * retention in the absence of signals. So even though it may
-         * require a full traversal, it comes into play only when
-         * timeouts or cancellations occur in the absence of
-         * signals. It traverses all nodes rather than stopping at a
-         * particular target to unlink all pointers to garbage nodes
-         * without requiring many re-traversals during cancellation
-         * storms.
-         */
-        private void unlinkCancelledWaiters() {
-            Node t = firstWaiter;
-            Node trail = null;
-            while (t !is null) {
-                Node next = t.nextWaiter;
-                if (t.waitStatus != Node.CONDITION) {
-                    t.nextWaiter = null;
-                    if (trail is null)
-                        firstWaiter = next;
-                    else
-                        trail.nextWaiter = next;
-                    if (next is null)
-                        lastWaiter = trail;
-                }
-                else
-                    trail = t;
-                t = next;
-            }
-        }
+    //     /**
+    //      * Unlinks cancelled waiter nodes from condition queue.
+    //      * Called only while holding lock. This is called when
+    //      * cancellation occurred during condition wait, and upon
+    //      * insertion of a new waiter when lastWaiter is seen to have
+    //      * been cancelled. This method is needed to avoid garbage
+    //      * retention in the absence of signals. So even though it may
+    //      * require a full traversal, it comes into play only when
+    //      * timeouts or cancellations occur in the absence of
+    //      * signals. It traverses all nodes rather than stopping at a
+    //      * particular target to unlink all pointers to garbage nodes
+    //      * without requiring many re-traversals during cancellation
+    //      * storms.
+    //      */
+    //     private void unlinkCancelledWaiters() {
+    //         Node t = firstWaiter;
+    //         Node trail = null;
+    //         while (t !is null) {
+    //             Node next = t.nextWaiter;
+    //             if (t.waitStatus != Node.CONDITION) {
+    //                 t.nextWaiter = null;
+    //                 if (trail is null)
+    //                     firstWaiter = next;
+    //                 else
+    //                     trail.nextWaiter = next;
+    //                 if (next is null)
+    //                     lastWaiter = trail;
+    //             }
+    //             else
+    //                 trail = t;
+    //             t = next;
+    //         }
+    //     }
 
-        // methods
+    //     // methods
 
-        /**
-         * Moves the longest-waiting thread, if one exists, from the
-         * wait queue for this condition to the wait queue for the
-         * owning lock.
-         *
-         * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
-         *         returns {@code false}
-         */
-        final void signal() {
-            if (!isHeldExclusively())
-                throw new IllegalMonitorStateException();
-            Node first = firstWaiter;
-            if (first !is null)
-                doSignal(first);
-        }
+    //     /**
+    //      * Moves the longest-waiting thread, if one exists, from the
+    //      * wait queue for this condition to the wait queue for the
+    //      * owning lock.
+    //      *
+    //      * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
+    //      *         returns {@code false}
+    //      */
+    //     final void signal() {
+    //         if (!isHeldExclusively())
+    //             throw new IllegalMonitorStateException();
+    //         Node first = firstWaiter;
+    //         if (first !is null)
+    //             doSignal(first);
+    //     }
 
-        /**
-         * Moves all threads from the wait queue for this condition to
-         * the wait queue for the owning lock.
-         *
-         * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
-         *         returns {@code false}
-         */
-        final void signalAll() {
-            if (!isHeldExclusively())
-                throw new IllegalMonitorStateException();
-            Node first = firstWaiter;
-            if (first !is null)
-                doSignalAll(first);
-        }
+    //     /**
+    //      * Moves all threads from the wait queue for this condition to
+    //      * the wait queue for the owning lock.
+    //      *
+    //      * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
+    //      *         returns {@code false}
+    //      */
+    //     final void signalAll() {
+    //         if (!isHeldExclusively())
+    //             throw new IllegalMonitorStateException();
+    //         Node first = firstWaiter;
+    //         if (first !is null)
+    //             doSignalAll(first);
+    //     }
 
-        /**
-         * Implements uninterruptible condition wait.
-         * <ol>
-         * <li>Save lock state returned by {@link #getState}.
-         * <li>Invoke {@link #release} with saved state as argument,
-         *     throwing IllegalMonitorStateException if it fails.
-         * <li>Block until signalled.
-         * <li>Reacquire by invoking specialized version of
-         *     {@link #acquire} with saved state as argument.
-         * </ol>
-         */
-        final void awaitUninterruptibly() {
-            Node node = addConditionWaiter();
-            int savedState = fullyRelease(node);
-            bool interrupted = false;
-            while (!isOnSyncQueue(node)) {
-                implementationMissing(false);
-                // LockSupport.park(this);
-                // if (Thread.interrupted())
-                //     interrupted = true;
-            }
-            if (acquireQueued(node, savedState) || interrupted)
-                selfInterrupt();
-        }
+    //     /**
+    //      * Implements uninterruptible condition wait.
+    //      * <ol>
+    //      * <li>Save lock state returned by {@link #getState}.
+    //      * <li>Invoke {@link #release} with saved state as argument,
+    //      *     throwing IllegalMonitorStateException if it fails.
+    //      * <li>Block until signalled.
+    //      * <li>Reacquire by invoking specialized version of
+    //      *     {@link #acquire} with saved state as argument.
+    //      * </ol>
+    //      */
+    //     final void awaitUninterruptibly() {
+    //         Node node = addConditionWaiter();
+    //         int savedState = fullyRelease(node);
+    //         bool interrupted = false;
+    //         while (!isOnSyncQueue(node)) {
+    //             implementationMissing(false);
+    //             // LockSupport.park(this);
+    //             // if (Thread.interrupted())
+    //             //     interrupted = true;
+    //         }
+    //         if (acquireQueued(node, savedState) || interrupted)
+    //             selfInterrupt();
+    //     }
 
-        /*
-         * For interruptible waits, we need to track whether to throw
-         * InterruptedException, if interrupted while blocked on
-         * condition, versus reinterrupt current thread, if
-         * interrupted while blocked waiting to re-acquire.
-         */
+    //     /*
+    //      * For interruptible waits, we need to track whether to throw
+    //      * InterruptedException, if interrupted while blocked on
+    //      * condition, versus reinterrupt current thread, if
+    //      * interrupted while blocked waiting to re-acquire.
+    //      */
 
-        /** Mode meaning to reinterrupt on exit from wait */
-        private enum int REINTERRUPT =  1;
-        /** Mode meaning to throw InterruptedException on exit from wait */
-        private enum int THROW_IE    = -1;
+    //     /** Mode meaning to reinterrupt on exit from wait */
+    //     private enum int REINTERRUPT =  1;
+    //     /** Mode meaning to throw InterruptedException on exit from wait */
+    //     private enum int THROW_IE    = -1;
 
-        /**
-         * Checks for interrupt, returning THROW_IE if interrupted
-         * before signalled, REINTERRUPT if after signalled, or
-         * 0 if not interrupted.
-         */
-        private int checkInterruptWhileWaiting(Node node) {
-            // return Thread.interrupted() ?
-            //     (transferAfterCancelledWait(node) ? THROW_IE : REINTERRUPT) :
-            //     0;
-            // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:41:57 PM
-            // 
-            return 0;
-        }
+    //     /**
+    //      * Checks for interrupt, returning THROW_IE if interrupted
+    //      * before signalled, REINTERRUPT if after signalled, or
+    //      * 0 if not interrupted.
+    //      */
+    //     private int checkInterruptWhileWaiting(Node node) {
+    //         // return Thread.interrupted() ?
+    //         //     (transferAfterCancelledWait(node) ? THROW_IE : REINTERRUPT) :
+    //         //     0;
+    //         // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:41:57 PM
+    //         // 
+    //         return 0;
+    //     }
 
-        /**
-         * Throws InterruptedException, reinterrupts current thread, or
-         * does nothing, depending on mode.
-         */
-        private void reportInterruptAfterWait(int interruptMode) {
-            if (interruptMode == THROW_IE)
-                throw new InterruptedException();
-            else if (interruptMode == REINTERRUPT)
-                selfInterrupt();
-        }
+    //     /**
+    //      * Throws InterruptedException, reinterrupts current thread, or
+    //      * does nothing, depending on mode.
+    //      */
+    //     private void reportInterruptAfterWait(int interruptMode) {
+    //         if (interruptMode == THROW_IE)
+    //             throw new InterruptedException();
+    //         else if (interruptMode == REINTERRUPT)
+    //             selfInterrupt();
+    //     }
 
-        /**
-         * Implements interruptible condition wait.
-         * <ol>
-         * <li>If current thread is interrupted, throw InterruptedException.
-         * <li>Save lock state returned by {@link #getState}.
-         * <li>Invoke {@link #release} with saved state as argument,
-         *     throwing IllegalMonitorStateException if it fails.
-         * <li>Block until signalled or interrupted.
-         * <li>Reacquire by invoking specialized version of
-         *     {@link #acquire} with saved state as argument.
-         * <li>If interrupted while blocked in step 4, throw InterruptedException.
-         * </ol>
-         */
-        final void await() {
-            // if (Thread.interrupted())
-            //     throw new InterruptedException();
-            Node node = addConditionWaiter();
-            int savedState = fullyRelease(node);
-            int interruptMode = 0;
-            while (!isOnSyncQueue(node)) {
-                // LockSupport.park(this);
-                implementationMissing(false);
-                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
-                    break;
-            }
-            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
-                interruptMode = REINTERRUPT;
-            if (node.nextWaiter !is null) // clean up if cancelled
-                unlinkCancelledWaiters();
-            if (interruptMode != 0)
-                reportInterruptAfterWait(interruptMode);
-        }
+    //     /**
+    //      * Implements interruptible condition wait.
+    //      * <ol>
+    //      * <li>If current thread is interrupted, throw InterruptedException.
+    //      * <li>Save lock state returned by {@link #getState}.
+    //      * <li>Invoke {@link #release} with saved state as argument,
+    //      *     throwing IllegalMonitorStateException if it fails.
+    //      * <li>Block until signalled or interrupted.
+    //      * <li>Reacquire by invoking specialized version of
+    //      *     {@link #acquire} with saved state as argument.
+    //      * <li>If interrupted while blocked in step 4, throw InterruptedException.
+    //      * </ol>
+    //      */
+    //     final void await() {
+    //         // if (Thread.interrupted())
+    //         //     throw new InterruptedException();
+    //         Node node = addConditionWaiter();
+    //         int savedState = fullyRelease(node);
+    //         int interruptMode = 0;
+    //         while (!isOnSyncQueue(node)) {
+    //             // LockSupport.park(this);
+    //             implementationMissing(false);
+    //             if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+    //                 break;
+    //         }
+    //         if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+    //             interruptMode = REINTERRUPT;
+    //         if (node.nextWaiter !is null) // clean up if cancelled
+    //             unlinkCancelledWaiters();
+    //         if (interruptMode != 0)
+    //             reportInterruptAfterWait(interruptMode);
+    //     }
 
-        /**
-         * Implements timed condition wait.
-         * <ol>
-         * <li>If current thread is interrupted, throw InterruptedException.
-         * <li>Save lock state returned by {@link #getState}.
-         * <li>Invoke {@link #release} with saved state as argument,
-         *     throwing IllegalMonitorStateException if it fails.
-         * <li>Block until signalled, interrupted, or timed out.
-         * <li>Reacquire by invoking specialized version of
-         *     {@link #acquire} with saved state as argument.
-         * <li>If interrupted while blocked in step 4, throw InterruptedException.
-         * </ol>
-         */
-        final long awaitNanos(long nanosTimeout) {
-            // if (Thread.interrupted())
-            //     throw new InterruptedException();
+    //     /**
+    //      * Implements timed condition wait.
+    //      * <ol>
+    //      * <li>If current thread is interrupted, throw InterruptedException.
+    //      * <li>Save lock state returned by {@link #getState}.
+    //      * <li>Invoke {@link #release} with saved state as argument,
+    //      *     throwing IllegalMonitorStateException if it fails.
+    //      * <li>Block until signalled, interrupted, or timed out.
+    //      * <li>Reacquire by invoking specialized version of
+    //      *     {@link #acquire} with saved state as argument.
+    //      * <li>If interrupted while blocked in step 4, throw InterruptedException.
+    //      * </ol>
+    //      */
+    //     final long awaitNanos(long nanosTimeout) {
+    //         // if (Thread.interrupted())
+    //         //     throw new InterruptedException();
 
-            // We don't check for nanosTimeout <= 0L here, to allow
-            // awaitNanos(0) as a way to "yield the lock".
-            long deadline = Clock.currStdTime() + nanosTimeout;
-            long initialNanos = nanosTimeout;
-            Node node = addConditionWaiter();
-            int savedState = fullyRelease(node);
-            int interruptMode = 0;
-            while (!isOnSyncQueue(node)) {
-                if (nanosTimeout <= 0L) {
-                    transferAfterCancelledWait(node);
-                    break;
-                }
-                // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:39:04 PM
-                // 
-                implementationMissing(false);
-                // if (nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
-                //     LockSupport.parkNanos(this, nanosTimeout);
-                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
-                    break;
-                nanosTimeout = deadline - Clock.currStdTime();
-            }
-            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
-                interruptMode = REINTERRUPT;
-            if (node.nextWaiter !is null)
-                unlinkCancelledWaiters();
-            if (interruptMode != 0)
-                reportInterruptAfterWait(interruptMode);
-            long remaining = deadline - Clock.currStdTime(); // avoid overflow
-            return (remaining <= initialNanos) ? remaining : long.min;
-        }
+    //         // We don't check for nanosTimeout <= 0L here, to allow
+    //         // awaitNanos(0) as a way to "yield the lock".
+    //         long deadline = Clock.currStdTime() + nanosTimeout;
+    //         long initialNanos = nanosTimeout;
+    //         Node node = addConditionWaiter();
+    //         int savedState = fullyRelease(node);
+    //         int interruptMode = 0;
+    //         while (!isOnSyncQueue(node)) {
+    //             if (nanosTimeout <= 0L) {
+    //                 transferAfterCancelledWait(node);
+    //                 break;
+    //             }
+    //             // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:39:04 PM
+    //             // 
+    //             implementationMissing(false);
+    //             // if (nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
+    //             //     LockSupport.parkNanos(this, nanosTimeout);
+    //             if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+    //                 break;
+    //             nanosTimeout = deadline - Clock.currStdTime();
+    //         }
+    //         if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+    //             interruptMode = REINTERRUPT;
+    //         if (node.nextWaiter !is null)
+    //             unlinkCancelledWaiters();
+    //         if (interruptMode != 0)
+    //             reportInterruptAfterWait(interruptMode);
+    //         long remaining = deadline - Clock.currStdTime(); // avoid overflow
+    //         return (remaining <= initialNanos) ? remaining : long.min;
+    //     }
 
-        /**
-         * Implements absolute timed condition wait.
-         * <ol>
-         * <li>If current thread is interrupted, throw InterruptedException.
-         * <li>Save lock state returned by {@link #getState}.
-         * <li>Invoke {@link #release} with saved state as argument,
-         *     throwing IllegalMonitorStateException if it fails.
-         * <li>Block until signalled, interrupted, or timed out.
-         * <li>Reacquire by invoking specialized version of
-         *     {@link #acquire} with saved state as argument.
-         * <li>If interrupted while blocked in step 4, throw InterruptedException.
-         * <li>If timed out while blocked in step 4, return false, else true.
-         * </ol>
-         */
-        final bool awaitUntil(Date deadline) {
-            long abstime = deadline.getTime();
-            // if (Thread.interrupted())
-            //     throw new InterruptedException();
-            Node node = addConditionWaiter();
-            int savedState = fullyRelease(node);
-            bool timedout = false;
-            int interruptMode = 0;
-            while (!isOnSyncQueue(node)) {
-                if (System.currentTimeMillis() >= abstime) {
-                    timedout = transferAfterCancelledWait(node);
-                    break;
-                }
-                // LockSupport.parkUntil(this, abstime);
-                // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:38:12 PM
-                // 
-                implementationMissing(false);
-                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
-                    break;
-            }
-            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
-                interruptMode = REINTERRUPT;
-            if (node.nextWaiter !is null)
-                unlinkCancelledWaiters();
-            if (interruptMode != 0)
-                reportInterruptAfterWait(interruptMode);
-            return !timedout;
-        }
+    //     /**
+    //      * Implements absolute timed condition wait.
+    //      * <ol>
+    //      * <li>If current thread is interrupted, throw InterruptedException.
+    //      * <li>Save lock state returned by {@link #getState}.
+    //      * <li>Invoke {@link #release} with saved state as argument,
+    //      *     throwing IllegalMonitorStateException if it fails.
+    //      * <li>Block until signalled, interrupted, or timed out.
+    //      * <li>Reacquire by invoking specialized version of
+    //      *     {@link #acquire} with saved state as argument.
+    //      * <li>If interrupted while blocked in step 4, throw InterruptedException.
+    //      * <li>If timed out while blocked in step 4, return false, else true.
+    //      * </ol>
+    //      */
+    //     final bool awaitUntil(SysTime deadline) {
+    //         long abstime = deadline.stdTime();
+    //         // if (Thread.interrupted())
+    //         //     throw new InterruptedException();
+    //         Node node = addConditionWaiter();
+    //         int savedState = fullyRelease(node);
+    //         bool timedout = false;
+    //         int interruptMode = 0;
+    //         while (!isOnSyncQueue(node)) {
+    //             if (Clock.currStdTime() >= abstime) {
+    //                 timedout = transferAfterCancelledWait(node);
+    //                 break;
+    //             }
+    //             // LockSupport.parkUntil(this, abstime);
+    //             // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:38:12 PM
+    //             // 
+    //             implementationMissing(false);
+    //             if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+    //                 break;
+    //         }
+    //         if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+    //             interruptMode = REINTERRUPT;
+    //         if (node.nextWaiter !is null)
+    //             unlinkCancelledWaiters();
+    //         if (interruptMode != 0)
+    //             reportInterruptAfterWait(interruptMode);
+    //         return !timedout;
+    //     }
 
-        /**
-         * Implements timed condition wait.
-         * <ol>
-         * <li>If current thread is interrupted, throw InterruptedException.
-         * <li>Save lock state returned by {@link #getState}.
-         * <li>Invoke {@link #release} with saved state as argument,
-         *     throwing IllegalMonitorStateException if it fails.
-         * <li>Block until signalled, interrupted, or timed out.
-         * <li>Reacquire by invoking specialized version of
-         *     {@link #acquire} with saved state as argument.
-         * <li>If interrupted while blocked in step 4, throw InterruptedException.
-         * <li>If timed out while blocked in step 4, return false, else true.
-         * </ol>
-         */
-        final bool await(Duration time) {
-            long nanosTimeout = time.total!(TimeUnit.HectoNanosecond)();
-            // if (Thread.interrupted())
-            //     throw new InterruptedException();
-            // We don't check for nanosTimeout <= 0L here, to allow
-            // await(0, unit) as a way to "yield the lock".
-            long deadline = Clock.currStdTime() + nanosTimeout;
-            Node node = addConditionWaiter();
-            int savedState = fullyRelease(node);
-            bool timedout = false;
-            int interruptMode = 0;
-            while (!isOnSyncQueue(node)) {
-                if (nanosTimeout <= 0L) {
-                    timedout = transferAfterCancelledWait(node);
-                    break;
-                }
-                // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:37:19 PM
-                // 
-                implementationMissing(false);
-                // if (nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
-                //     LockSupport.parkNanos(this, nanosTimeout);
-                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
-                    break;
-                nanosTimeout = deadline - Clock.currStdTime();
-            }
-            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
-                interruptMode = REINTERRUPT;
-            if (node.nextWaiter !is null)
-                unlinkCancelledWaiters();
-            if (interruptMode != 0)
-                reportInterruptAfterWait(interruptMode);
-            return !timedout;
-        }
+    //     /**
+    //      * Implements timed condition wait.
+    //      * <ol>
+    //      * <li>If current thread is interrupted, throw InterruptedException.
+    //      * <li>Save lock state returned by {@link #getState}.
+    //      * <li>Invoke {@link #release} with saved state as argument,
+    //      *     throwing IllegalMonitorStateException if it fails.
+    //      * <li>Block until signalled, interrupted, or timed out.
+    //      * <li>Reacquire by invoking specialized version of
+    //      *     {@link #acquire} with saved state as argument.
+    //      * <li>If interrupted while blocked in step 4, throw InterruptedException.
+    //      * <li>If timed out while blocked in step 4, return false, else true.
+    //      * </ol>
+    //      */
+    //     final bool await(Duration time) {
+    //         long nanosTimeout = time.total!(TimeUnit.HectoNanosecond)();
+    //         // if (Thread.interrupted())
+    //         //     throw new InterruptedException();
+    //         // We don't check for nanosTimeout <= 0L here, to allow
+    //         // await(0, unit) as a way to "yield the lock".
+    //         long deadline = Clock.currStdTime() + nanosTimeout;
+    //         Node node = addConditionWaiter();
+    //         int savedState = fullyRelease(node);
+    //         bool timedout = false;
+    //         int interruptMode = 0;
+    //         while (!isOnSyncQueue(node)) {
+    //             if (nanosTimeout <= 0L) {
+    //                 timedout = transferAfterCancelledWait(node);
+    //                 break;
+    //             }
+    //             // TODO: Tasks pending completion -@zxp at 10/14/2018, 3:37:19 PM
+    //             // 
+    //             implementationMissing(false);
+    //             // if (nanosTimeout > SPIN_FOR_TIMEOUT_THRESHOLD)
+    //             //     LockSupport.parkNanos(this, nanosTimeout);
+    //             if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+    //                 break;
+    //             nanosTimeout = deadline - Clock.currStdTime();
+    //         }
+    //         if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+    //             interruptMode = REINTERRUPT;
+    //         if (node.nextWaiter !is null)
+    //             unlinkCancelledWaiters();
+    //         if (interruptMode != 0)
+    //             reportInterruptAfterWait(interruptMode);
+    //         return !timedout;
+    //     }
 
-        //  support for instrumentation
+    //     //  support for instrumentation
 
-        /**
-         * Returns true if this condition was created by the given
-         * synchronization object.
-         *
-         * @return {@code true} if owned
-         */
-        final bool isOwnedBy(AbstractQueuedSynchronizer sync) {
-            return sync == this.outer; // AbstractQueuedSynchronizer.this;
-        }
+    //     /**
+    //      * Returns true if this condition was created by the given
+    //      * synchronization object.
+    //      *
+    //      * @return {@code true} if owned
+    //      */
+    //     final bool isOwnedBy(AbstractQueuedSynchronizer sync) {
+    //         return sync == this.outer; // AbstractQueuedSynchronizer.this;
+    //     }
 
-        /**
-         * Queries whether any threads are waiting on this condition.
-         * Implements {@link AbstractQueuedSynchronizer#hasWaiters(ConditionObject)}.
-         *
-         * @return {@code true} if there are any waiting threads
-         * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
-         *         returns {@code false}
-         */
-        protected final bool hasWaiters() {
-            if (!isHeldExclusively())
-                throw new IllegalMonitorStateException();
-            for (Node w = firstWaiter; w !is null; w = w.nextWaiter) {
-                if (w.waitStatus == Node.CONDITION)
-                    return true;
-            }
-            return false;
-        }
+    //     /**
+    //      * Queries whether any threads are waiting on this condition.
+    //      * Implements {@link AbstractQueuedSynchronizer#hasWaiters(ConditionObject)}.
+    //      *
+    //      * @return {@code true} if there are any waiting threads
+    //      * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
+    //      *         returns {@code false}
+    //      */
+    //     protected final bool hasWaiters() {
+    //         if (!isHeldExclusively())
+    //             throw new IllegalMonitorStateException();
+    //         for (Node w = firstWaiter; w !is null; w = w.nextWaiter) {
+    //             if (w.waitStatus == Node.CONDITION)
+    //                 return true;
+    //         }
+    //         return false;
+    //     }
 
-        /**
-         * Returns an estimate of the number of threads waiting on
-         * this condition.
-         * Implements {@link AbstractQueuedSynchronizer#getWaitQueueLength(ConditionObject)}.
-         *
-         * @return the estimated number of waiting threads
-         * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
-         *         returns {@code false}
-         */
-        protected final int getWaitQueueLength() {
-            if (!isHeldExclusively())
-                throw new IllegalMonitorStateException();
-            int n = 0;
-            for (Node w = firstWaiter; w !is null; w = w.nextWaiter) {
-                if (w.waitStatus == Node.CONDITION)
-                    ++n;
-            }
-            return n;
-        }
+    //     /**
+    //      * Returns an estimate of the number of threads waiting on
+    //      * this condition.
+    //      * Implements {@link AbstractQueuedSynchronizer#getWaitQueueLength(ConditionObject)}.
+    //      *
+    //      * @return the estimated number of waiting threads
+    //      * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
+    //      *         returns {@code false}
+    //      */
+    //     protected final int getWaitQueueLength() {
+    //         if (!isHeldExclusively())
+    //             throw new IllegalMonitorStateException();
+    //         int n = 0;
+    //         for (Node w = firstWaiter; w !is null; w = w.nextWaiter) {
+    //             if (w.waitStatus == Node.CONDITION)
+    //                 ++n;
+    //         }
+    //         return n;
+    //     }
 
-        /**
-         * Returns a collection containing those threads that may be
-         * waiting on this Condition.
-         * Implements {@link AbstractQueuedSynchronizer#getWaitingThreads(ConditionObject)}.
-         *
-         * @return the collection of threads
-         * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
-         *         returns {@code false}
-         */
-        protected final Collection!Thread getWaitingThreads() {
-            if (!isHeldExclusively())
-                throw new IllegalMonitorStateException();
-            ArrayList!Thread list = new ArrayList!Thread();
-            for (Node w = firstWaiter; w !is null; w = w.nextWaiter) {
-                if (w.waitStatus == Node.CONDITION) {
-                    Thread t = w.thread;
-                    if (t !is null)
-                        list.add(t);
-                }
-            }
-            return list;
-        }
-    }
+    //     /**
+    //      * Returns a collection containing those threads that may be
+    //      * waiting on this Condition.
+    //      * Implements {@link AbstractQueuedSynchronizer#getWaitingThreads(ConditionObject)}.
+    //      *
+    //      * @return the collection of threads
+    //      * @throws IllegalMonitorStateException if {@link #isHeldExclusively}
+    //      *         returns {@code false}
+    //      */
+    //     protected final Collection!Thread getWaitingThreads() {
+    //         if (!isHeldExclusively())
+    //             throw new IllegalMonitorStateException();
+    //         ArrayList!Thread list = new ArrayList!Thread();
+    //         for (Node w = firstWaiter; w !is null; w = w.nextWaiter) {
+    //             if (w.waitStatus == Node.CONDITION) {
+    //                 Thread t = w.thread;
+    //                 if (t !is null)
+    //                     list.add(t);
+    //             }
+    //         }
+    //         return list;
+    //     }
+    // }
 
     /**
      * Initializes head and tail fields on first contention.
@@ -2312,5 +2078,242 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      */
     private final bool compareAndSetTail(Node expect, Node update) {
         return AtomicHelper.cas(tail, expect, update);
+    }
+}
+
+
+
+/**
+ * Wait queue node class.
+ *
+ * <p>The wait queue is a variant of a "CLH" (Craig, Landin, and
+ * Hagersten) lock queue. CLH locks are normally used for
+ * spinlocks.  We instead use them for blocking synchronizers, but
+ * use the same basic tactic of holding some of the control
+ * information about a thread in the predecessor of its node.  A
+ * "status" field in each node keeps track of whether a thread
+ * should block.  A node is signalled when its predecessor
+ * releases.  Each node of the queue otherwise serves as a
+ * specific-notification-style monitor holding a single waiting
+ * thread. The status field does NOT control whether threads are
+ * granted locks etc though.  A thread may try to acquire if it is
+ * first in the queue. But being first does not guarantee success;
+ * it only gives the right to contend.  So the currently released
+ * contender thread may need to rewait.
+ *
+ * <p>To enqueue into a CLH lock, you atomically splice it in as new
+ * tail. To dequeue, you just set the head field.
+ * <pre>
+ *      +------+  prev +-----+       +-----+
+ * head |      | <---- |     | <---- |     |  tail
+ *      +------+       +-----+       +-----+
+ * </pre>
+ *
+ * <p>Insertion into a CLH queue requires only a single atomic
+ * operation on "tail", so there is a simple atomic point of
+ * demarcation from unqueued to queued. Similarly, dequeuing
+ * involves only updating the "head". However, it takes a bit
+ * more work for nodes to determine who their successors are,
+ * in part to deal with possible cancellation due to timeouts
+ * and interrupts.
+ *
+ * <p>The "prev" links (not used in original CLH locks), are mainly
+ * needed to handle cancellation. If a node is cancelled, its
+ * successor is (normally) relinked to a non-cancelled
+ * predecessor. For explanation of similar mechanics in the case
+ * of spin locks, see the papers by Scott and Scherer at
+ * http://www.cs.rochester.edu/u/scott/synchronization/
+ *
+ * <p>We also use "next" links to implement blocking mechanics.
+ * The thread id for each node is kept in its own node, so a
+ * predecessor signals the next node to wake up by traversing
+ * next link to determine which thread it is.  Determination of
+ * successor must avoid races with newly queued nodes to set
+ * the "next" fields of their predecessors.  This is solved
+ * when necessary by checking backwards from the atomically
+ * updated "tail" when a node's successor appears to be null.
+ * (Or, said differently, the next-links are an optimization
+ * so that we don't usually need a backward scan.)
+ *
+ * <p>Cancellation introduces some conservatism to the basic
+ * algorithms.  Since we must poll for cancellation of other
+ * nodes, we can miss noticing whether a cancelled node is
+ * ahead or behind us. This is dealt with by always unparking
+ * successors upon cancellation, allowing them to stabilize on
+ * a new predecessor, unless we can identify an uncancelled
+ * predecessor who will carry this responsibility.
+ *
+ * <p>CLH queues need a dummy header node to get started. But
+ * we don't create them on construction, because it would be wasted
+ * effort if there is never contention. Instead, the node
+ * is constructed and head and tail pointers are set upon first
+ * contention.
+ *
+ * <p>Threads waiting on Conditions use the same nodes, but
+ * use an additional link. Conditions only need to link nodes
+ * in simple (non-concurrent) linked queues because they are
+ * only accessed when exclusively held.  Upon await, a node is
+ * inserted into a condition queue.  Upon signal, the node is
+ * transferred to the main queue.  A special value of status
+ * field is used to mark which queue a node is on.
+ *
+ * <p>Thanks go to Dave Dice, Mark Moir, Victor Luchangco, Bill
+ * Scherer and Michael Scott, along with members of JSR-166
+ * expert group, for helpful ideas, discussions, and critiques
+ * on the design of this class.
+ */
+private final class Node {
+    /** Marker to indicate a node is waiting in shared mode */
+    __gshared Node SHARED; // = new Node();
+    /** Marker to indicate a node is waiting in exclusive mode */
+    __gshared Node EXCLUSIVE = null;
+
+    /** waitStatus value to indicate thread has cancelled. */
+    enum int CANCELLED =  1;
+    /** waitStatus value to indicate successor's thread needs unparking. */
+    enum int SIGNAL    = -1;
+    /** waitStatus value to indicate thread is waiting on condition. */
+    enum int CONDITION = -2;
+    /**
+     * waitStatus value to indicate the next acquireShared should
+     * unconditionally propagate.
+     */
+    enum int PROPAGATE = -3;
+
+    /**
+     * Status field, taking on only the values:
+     *   SIGNAL:     The successor of this node is (or will soon be)
+     *               blocked (via park), so the current node must
+     *               unpark its successor when it releases or
+     *               cancels. To avoid races, acquire methods must
+     *               first indicate they need a signal,
+     *               then retry the atomic acquire, and then,
+     *               on failure, block.
+     *   CANCELLED:  This node is cancelled due to timeout or interrupt.
+     *               Nodes never leave this state. In particular,
+     *               a thread with cancelled node never again blocks.
+     *   CONDITION:  This node is currently on a condition queue.
+     *               It will not be used as a sync queue node
+     *               until transferred, at which time the status
+     *               will be set to 0. (Use of this value here has
+     *               nothing to do with the other uses of the
+     *               field, but simplifies mechanics.)
+     *   PROPAGATE:  A releaseShared should be propagated to other
+     *               nodes. This is set (for head node only) in
+     *               doReleaseShared to ensure propagation
+     *               continues, even if other operations have
+     *               since intervened.
+     *   0:          None of the above
+     *
+     * The values are arranged numerically to simplify use.
+     * Non-negative values mean that a node doesn't need to
+     * signal. So, most code doesn't need to check for particular
+     * values, just for sign.
+     *
+     * The field is initialized to 0 for normal sync nodes, and
+     * CONDITION for condition nodes.  It is modified using CAS
+     * (or when possible, unconditional writes).
+     */
+    int waitStatus;
+
+    /**
+     * Link to predecessor node that current node/thread relies on
+     * for checking waitStatus. Assigned during enqueuing, and nulled
+     * out (for sake of GC) only upon dequeuing.  Also, upon
+     * cancellation of a predecessor, we short-circuit while
+     * finding a non-cancelled one, which will always exist
+     * because the head node is never cancelled: A node becomes
+     * head only as a result of successful acquire. A
+     * cancelled thread never succeeds in acquiring, and a thread only
+     * cancels itself, not any other node.
+     */
+    Node prev;
+
+    /**
+     * Link to the successor node that the current node/thread
+     * unparks upon release. Assigned during enqueuing, adjusted
+     * when bypassing cancelled predecessors, and nulled out (for
+     * sake of GC) when dequeued.  The enq operation does not
+     * assign next field of a predecessor until after attachment,
+     * so seeing a null next field does not necessarily mean that
+     * node is at end of queue. However, if a next field appears
+     * to be null, we can scan prev's from the tail to
+     * double-check.  The next field of cancelled nodes is set to
+     * point to the node itself instead of null, to make life
+     * easier for isOnSyncQueue.
+     */
+    Node next;
+
+    /**
+     * The thread that enqueued this node.  Initialized on
+     * construction and nulled out after use.
+     */
+    Thread thread;
+
+    /**
+     * Link to next node waiting on condition, or the special
+     * value SHARED.  Because condition queues are accessed only
+     * when holding in exclusive mode, we just need a simple
+     * linked queue to hold nodes while they are waiting on
+     * conditions. They are then transferred to the queue to
+     * re-acquire. And because conditions can only be exclusive,
+     * we save a field by using special value to indicate shared
+     * mode.
+     */
+    Node nextWaiter;
+
+    /**
+     * Returns true if node is waiting in shared mode.
+     */
+    final bool isShared() {
+        return nextWaiter == SHARED;
+    }
+
+    /**
+     * Returns previous node, or throws NullPointerException if null.
+     * Use when predecessor cannot be null.  The null check could
+     * be elided, but is present to help the VM.
+     *
+     * @return the predecessor of this node
+     */
+    Node predecessor() {
+        Node p = prev;
+        if (p is null)
+            throw new NullPointerException();
+        else
+            return p;
+    }
+
+    shared static this() {
+        SHARED = new Node();
+    }
+
+    /** Establishes initial head or SHARED marker. */
+    this() {}
+
+    /** Constructor used by addWaiter. */
+    this(Node nextWaiter) {
+        this.nextWaiter = nextWaiter;
+        thread = Thread.getThis();
+    }
+
+    /** Constructor used by addConditionWaiter. */
+    this(int waitStatus) {
+        this.waitStatus = waitStatus;
+        thread = Thread.getThis();
+    }
+
+    /** CASes waitStatus field. */
+    final bool compareAndSetWaitStatus(int expect, int update) {
+        return AtomicHelper.cas(waitStatus, expect, update);
+    }
+
+    /** CASes next field. */
+    final bool compareAndSetNext(Node expect, Node update) {
+        return AtomicHelper.cas(next, expect, update);
+    }
+
+    final void setPrevRelaxed(Node p) {
+        this.prev = p;
     }
 }

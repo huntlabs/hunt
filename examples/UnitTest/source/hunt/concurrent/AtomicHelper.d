@@ -12,18 +12,18 @@ class AtomicHelper {
     }
 
     static bool cas(T)(ref T stuff, T testVal, lazy T newVal) {
-        return core.atomic.cas(cast(shared)&stuff, testVal, newVal);
+        return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
     }
 
-    static T increment(T)(ref T stuff, T delta = 1) if (__traits(isIntegral, T)) {
+    static T increment(T, U)(ref T stuff, U delta = 1) if (__traits(isIntegral, T)) {
         return core.atomic.atomicOp!("+=")(stuff, delta);
     }
 
-    static T decrement(T)(ref T stuff, T delta = 1) if (__traits(isIntegral, T)) {
+    static T decrement(T, U)(ref T stuff, U delta = 1) if (__traits(isIntegral, T)) {
         return core.atomic.atomicOp!("-=")(stuff, delta);
     }
 
-    static T getAndAdd(T)(ref T stuff, T delta) {
+    static T getAndAdd(T, U)(ref T stuff, U delta) {
         T v = stuff;
         increment(stuff, delta);
         return v;

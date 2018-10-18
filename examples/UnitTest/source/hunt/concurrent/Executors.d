@@ -51,6 +51,7 @@ import hunt.lang.exception;
 import hunt.util.thread;
 
 import core.thread;
+import core.time;
 import std.conv;
 
 // import static java.lang.ref.Reference.reachabilityFence;
@@ -106,7 +107,7 @@ class Executors {
      * @throws IllegalArgumentException if {@code nThreads <= 0}
      */
     static ThreadPoolExecutor newFixedThreadPool(int nThreads) {
-        return new ThreadPoolExecutor(nThreads, nThreads, Duration(0),
+        return new ThreadPoolExecutor(nThreads, nThreads, dur!(TimeUnit.HectoNanosecond)(0) ,
                                       new LinkedBlockingQueue!(Runnable)());
     }
 
@@ -421,10 +422,10 @@ class Executors {
      * @return a callable object
      * @throws NullPointerException if task null
      */
-    static Callable!(T) callable(T)(Runnable task) if(is(T == void)) {
+    static Callable!(void) callable(Runnable task) {
         if (task is null)
             throw new NullPointerException();
-        return new RunnableAdapter!(T)(task);
+        return new RunnableAdapter!(void)(task);
     }
 
     static Callable!(T) callable(T)(Runnable task, T result) if(!is(T == void)) {
@@ -776,7 +777,7 @@ private final class RunnableAdapter(T) : Callable!(T) if(is(T == void)) {
         task.run();
     }
 
-    string toString() {
+    override string toString() {
         return super.toString() ~ "[Wrapped task = " ~ (cast(Object)task).toString() ~ "]";
     }
 }
