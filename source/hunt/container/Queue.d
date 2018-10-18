@@ -108,7 +108,7 @@ import hunt.container.Collection;
  * @author Doug Lea
  * @param !E the type of elements held in this collection
  */
-public interface Queue(E) : Collection!E {
+interface Queue(E) : Collection!E {
     /**
      * Inserts the specified element into this queue if it is possible to do so
      * immediately without violating capacity restrictions, returning

@@ -38,6 +38,7 @@ module hunt.concurrent.FutureTask;
 import hunt.concurrent.AtomicHelper;
 import hunt.concurrent.Executors;
 import hunt.concurrent.Future;
+import hunt.datetime;
 import hunt.lang.common;
 import hunt.lang.exception;
 
@@ -215,7 +216,7 @@ static if(is(V == void)) {
     V get(Duration timeout) {
         int s = state;
         if (s <= COMPLETING &&
-            (s = awaitDone(true, unit.toNanos(timeout))) <= COMPLETING)
+            (s = awaitDone(true, timeout.total!(TimeUnit.HectoNanosecond)())) <= COMPLETING)
             throw new TimeoutException();
         return report(s);
     }
@@ -249,30 +250,41 @@ static if(is(V == void)) {
             finishCompletion();
         }
     }
+
+    void run() {
+        if (state != NEW ||
+            !AtomicHelper.cas(runner, null, Thread.getThis()))
+            return;
+        try {
+            Callable!(V) c = callable;
+            if (c !is null && state == NEW) {
+                bool ran;
+                try {
+                    c.call();
+                    ran = true;
+                } catch (Throwable ex) {
+                    ran = false;
+                    setException(ex);
+                }
+                if (ran)
+                    set();
+            }
+        } finally {
+            // runner must be non-null until state is settled to
+            // prevent concurrent calls to run()
+            runner = null;
+            // state must be re-read after nulling runner to prevent
+            // leaked interrupts
+            int s = state;
+            if (s >= INTERRUPTING)
+                handlePossibleCancellationInterrupt(s);
+        }
+    }    
 } else {
     protected void set(V v) {
         if (AtomicHelper.cas(state, NEW, COMPLETING)) {
             outcome = v;
             AtomicHelper.store(state, NORMAL);  // final state
-            finishCompletion();
-        }
-    }
-}
-
-    /**
-     * Causes this future to report an {@link ExecutionException}
-     * with the given throwable as its cause, unless this future has
-     * already been set or has been cancelled.
-     *
-     * <p>This method is invoked internally by the {@link #run} method
-     * upon failure of the computation.
-     *
-     * @param t the cause of failure
-     */
-    protected void setException(Throwable t) {
-        if (AtomicHelper.cas(state, NEW, COMPLETING)) {
-            outcome = t;
-            AtomicHelper.store(state, EXCEPTIONAL); // final state
             finishCompletion();
         }
     }
@@ -306,6 +318,25 @@ static if(is(V == void)) {
             int s = state;
             if (s >= INTERRUPTING)
                 handlePossibleCancellationInterrupt(s);
+        }
+    }    
+}
+
+    /**
+     * Causes this future to report an {@link ExecutionException}
+     * with the given throwable as its cause, unless this future has
+     * already been set or has been cancelled.
+     *
+     * <p>This method is invoked internally by the {@link #run} method
+     * upon failure of the computation.
+     *
+     * @param t the cause of failure
+     */
+    protected void setException(Throwable t) {
+        if (AtomicHelper.cas(state, NEW, COMPLETING)) {
+            outcome = t;
+            AtomicHelper.store(state, EXCEPTIONAL); // final state
+            finishCompletion();
         }
     }
 
@@ -449,9 +480,9 @@ static if(is(V == void)) {
                 q = new WaitNode();
             }
             else if (!queued)
-                queued = AtomicHelper.cas(waiters, q.next = waiters, q);
+                queued = AtomicHelper.cas!(WaitNode)(waiters, q.next = waiters, q);
             else if (timed) {
-                final long parkNanos;
+                long parkNanos;
                 if (startTime == 0L) { // first time
                     startTime = Clock.currStdTime;
                     if (startTime == 0L)
@@ -528,7 +559,7 @@ static if(is(V == void)) {
             status = "[Completed normally]";
             break;
         case EXCEPTIONAL:
-            status = "[Completed exceptionally: " ~ outcome ~ "]";
+            status = "[Completed exceptionally: " ~ outcome.toString() ~ "]";
             break;
         case CANCELLED:
         case INTERRUPTING:
@@ -539,7 +570,7 @@ static if(is(V == void)) {
             Callable!V callable = this.callable;
             status = (callable is null)
                 ? "[Not completed]"
-                : "[Not completed, task = " ~ callable ~ "]";
+                : "[Not completed, task = " ~ (cast(Object)callable).toString() ~ "]";
         }
         return super.toString() ~ status;
     }

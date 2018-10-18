@@ -39,7 +39,9 @@ import hunt.concurrent.AtomicHelper;
 
 import hunt.lang.common;
 import hunt.util.thread;
+
 import core.thread;
+import std.conv;
 
 /**
  * An object that creates new threads on demand.  Using thread factories
@@ -104,7 +106,7 @@ interface ThreadFactory {
  * The default thread factory.
  */
 private class DefaultThreadFactory : ThreadFactory {
-    private __gshared int poolNumber = 1;
+    private static shared(int) poolNumber = 1;
     private ThreadGroupEx group;
     private shared(int) threadNumber = 1;
     private string namePrefix;

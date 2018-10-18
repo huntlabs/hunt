@@ -177,7 +177,7 @@ import hunt.concurrent.AbstractExecutorService;
  * @since 1.7
  * @author Doug Lea
  */
-class ForkJoinPool : AbstractExecutorService {
+class ForkJoinPool { // : AbstractExecutorService 
 
     /*
      * Implementation Overview

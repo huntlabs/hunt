@@ -7,10 +7,10 @@ class CompletionException : Exception
     mixin BasicExceptionCtors;
 }
 
-class ConcurrentModificationException : RuntimeException
-{
-    mixin BasicExceptionCtors;
-}
+// class ConcurrentModificationException : RuntimeException
+// {
+//     mixin BasicExceptionCtors;
+// }
 
 class RejectedExecutionException : RuntimeException
 {

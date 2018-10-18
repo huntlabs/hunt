@@ -277,7 +277,7 @@ class NoSuchAlgorithmException: GeneralSecurityException
 }
 
 
-class ConcurrentModificationException : Exception
+class ConcurrentModificationException : RuntimeException
 {
     mixin BasicExceptionCtors;
 }

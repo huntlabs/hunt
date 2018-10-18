@@ -40,8 +40,10 @@ import hunt.concurrent.AbstractOwnableSynchronizer;
 import hunt.concurrent.AbstractQueuedSynchronizer;
 import hunt.concurrent.AtomicHelper;
 import hunt.concurrent.BlockingQueue;
+import hunt.concurrent.exception;
 import hunt.concurrent.ExecutorService;
 import hunt.concurrent.Executor;
+import hunt.concurrent.Future;
 import hunt.concurrent.ThreadFactory;
 
 import hunt.container;
@@ -53,6 +55,8 @@ import hunt.lang.exception;
 import core.sync.mutex;
 import core.sync.condition;
 import core.thread;
+import std.algorithm;
+import std.conv;
 
 import hunt.logging.ConsoleLogger;
 
@@ -494,7 +498,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * present or if allowCoreThreadTimeOut. Otherwise they wait
      * forever for new work.
      */
-    private Duration keepAliveTime;
+    private long keepAliveTime;
 
     /**
      * If false (default), core threads stay alive even when idle.
@@ -552,13 +556,12 @@ class ThreadPoolExecutor : AbstractExecutorService {
 
 
     shared static this() {
-        mainLock = new Mutex();
-        termination = new Condition(mainLock);
         defaultHandler = new AbortPolicy();
-
     }
 
     private void initialize() {
+        mainLock = new Mutex();
+        termination = new Condition(mainLock);
         ctl = ctlOf(RUNNING, 0);
         workers = new HashSet!(Worker)();
     }
@@ -948,8 +951,11 @@ class ThreadPoolExecutor : AbstractExecutorService {
 
                     if (isRunning(c) ||
                         (runStateLessThan(c, STOP) && firstTask is null)) {
-                        if (t.isAlive()) // precheck that t is startable
-                            throw new IllegalThreadStateException();
+                        implementationMissing(false);
+                        // TODO: Tasks pending completion -@zxp at 10/18/2018, 9:14:13 AM
+                        // 
+                        // if (t.isAlive()) // precheck that t is startable
+                        //     throw new IllegalThreadStateException();
                         workers.add(w);
                         int s = workers.size();
                         if (s > largestPoolSize)
@@ -1076,7 +1082,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
 
             try {
                 Runnable r = timed ?
-                    workQueue.poll(Duration(keepAliveTime)) :
+                    workQueue.poll(dur!(TimeUnit.HectoNanosecond)(keepAliveTime)) :
                     workQueue.take();
                 if (r !is null)
                     return r;
@@ -1143,11 +1149,12 @@ class ThreadPoolExecutor : AbstractExecutorService {
                 // if not, ensure thread is not interrupted.  This
                 // requires a recheck in second case to deal with
                 // shutdownNow race while clearing interrupt
-                if ((runStateAtLeast(ctl, STOP) ||
-                     (Thread.interrupted() &&
-                      runStateAtLeast(ctl, STOP))) &&
-                    !wt.isInterrupted())
-                    wt.interrupt();
+                implementationMissing(false);
+                // if ((runStateAtLeast(ctl, STOP) ||
+                //      (Thread.interrupted() &&
+                //       runStateAtLeast(ctl, STOP))) &&
+                //     !wt.isInterrupted())
+                //     wt.interrupt();
                 try {
                     beforeExecute(wt, task);
                     try {
@@ -1293,18 +1300,19 @@ class ThreadPoolExecutor : AbstractExecutorService {
     this(int corePoolSize, int maximumPoolSize, Duration keepAliveTime,
             BlockingQueue!(Runnable) workQueue,
             ThreadFactory threadFactory, RejectedExecutionHandler handler) {
+
         initialize();
-        if (corePoolSize < 0 ||
-            maximumPoolSize <= 0 ||
-            maximumPoolSize < corePoolSize ||
-            keepAliveTime < 0)
+        this.keepAliveTime = keepAliveTime.total!(TimeUnit.HectoNanosecond)();
+        if (corePoolSize < 0 || maximumPoolSize <= 0 || 
+            maximumPoolSize < corePoolSize || this.keepAliveTime < 0)
             throw new IllegalArgumentException();
+
         if (workQueue is null || threadFactory is null || handler is null)
             throw new NullPointerException();
+
         this.corePoolSize = corePoolSize;
         this.maximumPoolSize = maximumPoolSize;
         this.workQueue = workQueue;
-        this.keepAliveTime = keepAliveTime;
         this.threadFactory = threadFactory;
         this.handler = handler;
     }
@@ -1451,14 +1459,18 @@ class ThreadPoolExecutor : AbstractExecutorService {
     }
 
     bool awaitTermination(Duration timeout) {
-        long nanos = unit.toNanos(timeout);
+        // long nanos = timeout.total!(TimeUnit.HectoNanosecond);
         Mutex mainLock = this.mainLock;
         mainLock.lock();
         try {
             while (runStateLessThan(ctl, TERMINATED)) {
-                if (nanos <= 0L)
+                // if (nanos <= 0L)
+                //     return false;
+                // nanos = termination.awaitNanos(nanos);
+                // FIXME: Needing refactor or cleanup -@zxp at 10/18/2018, 9:31:16 AM
+                // 
+                if(termination.wait(timeout))
                     return false;
-                nanos = termination.awaitNanos(nanos);
             }
             return true;
         } finally {
@@ -1549,7 +1561,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
             // As a heuristic, prestart enough new workers (up to new
             // core size) to handle the current number of tasks in
             // queue, but stop if queue becomes empty while doing so.
-            int k = Math.min(delta, workQueue.size());
+            int k = min(delta, workQueue.size());
             while (k-- > 0 && addWorker(null, true)) {
                 if (workQueue.isEmpty())
                     break;
@@ -1696,12 +1708,12 @@ class ThreadPoolExecutor : AbstractExecutorService {
      *         if {@code time} is zero and {@code allowsCoreThreadTimeOut}
      * @see #getKeepAliveTime(TimeUnit)
      */
-    void setKeepAliveTime(long time, TimeUnit unit) {
-        if (time < 0)
+    void setKeepAliveTime(Duration time) {
+        long keepAliveTime = time.total!(TimeUnit.HectoNanosecond)();
+        if (keepAliveTime < 0)
             throw new IllegalArgumentException();
-        if (time == 0 && allowsCoreThreadTimeOut())
+        if (keepAliveTime == 0 && allowsCoreThreadTimeOut())
             throw new IllegalArgumentException("Core threads must have nonzero keep alive times");
-        long keepAliveTime = unit.toNanos(time);
         long delta = keepAliveTime - this.keepAliveTime;
         this.keepAliveTime = keepAliveTime;
         if (delta < 0)
@@ -1720,8 +1732,9 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @return the time limit
      * @see #setKeepAliveTime(long, TimeUnit)
      */
-    long getKeepAliveTime(TimeUnit unit) {
-        return unit.convert(keepAliveTime, TimeUnit.NANOSECONDS);
+    long getKeepAliveTime() {
+        // return unit.convert(keepAliveTime, TimeUnit.NANOSECONDS);
+        return keepAliveTime;
     }
 
     /* User-level queue utilities */
@@ -2090,7 +2103,7 @@ class AbortPolicy : RejectedExecutionHandler {
      * @throws RejectedExecutionException always
      */
     void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-        throw new RejectedExecutionException("Task " ~ r.toString() ~
+        throw new RejectedExecutionException("Task " ~ (cast(Object)r).toString() ~
                                              " rejected from " ~
                                              e.toString());
     }
