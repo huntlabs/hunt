@@ -186,10 +186,9 @@ class Long : Nullable!long, Number {
         return cast(double)value;
     }
 
-    static long parseLong(string s)  {
-        try
-        {
-            auto i = to!long(s);
+    static long parseLong(string s, int radix=10)  {
+        try {
+            auto i = to!long(s, radix);
             return i;
         }
         catch(Exception e){
@@ -235,6 +234,64 @@ class Long : Nullable!long, Number {
             return LongCache.cache[cast(int)l + offset];
         }
         return new Long(l);
+    }
+
+
+
+    /**
+     * Returns a {@code Long} object holding the value
+     * extracted from the specified {@code String} when parsed
+     * with the radix given by the second argument.  The first
+     * argument is interpreted as representing a signed
+     * {@code long} in the radix specified by the second
+     * argument, exactly as if the arguments were given to the {@link
+     * #parseLong(java.lang.String, int)} method. The result is a
+     * {@code Long} object that represents the {@code long}
+     * value specified by the string.
+     *
+     * <p>In other words, this method returns a {@code Long} object equal
+     * to the value of:
+     *
+     * <blockquote>
+     *  {@code new Long(Long.parseLong(s, radix))}
+     * </blockquote>
+     *
+     * @param      s       the string to be parsed
+     * @param      radix   the radix to be used in interpreting {@code s}
+     * @return     a {@code Long} object holding the value
+     *             represented by the string argument in the specified
+     *             radix.
+     * @throws     NumberFormatException  If the {@code String} does not
+     *             contain a parsable {@code long}.
+     */
+    static Long valueOf(string s, int radix) {
+        return Long.valueOf(parseLong(s, radix));
+    }
+
+    /**
+     * Returns a {@code Long} object holding the value
+     * of the specified {@code String}. The argument is
+     * interpreted as representing a signed decimal {@code long},
+     * exactly as if the argument were given to the {@link
+     * #parseLong(java.lang.String)} method. The result is a
+     * {@code Long} object that represents the integer value
+     * specified by the string.
+     *
+     * <p>In other words, this method returns a {@code Long} object
+     * equal to the value of:
+     *
+     * <blockquote>
+     *  {@code new Long(Long.parseLong(s))}
+     * </blockquote>
+     *
+     * @param      s   the string to be parsed.
+     * @return     a {@code Long} object holding the value
+     *             represented by the string argument.
+     * @throws     NumberFormatException  If the string cannot be parsed
+     *             as a {@code long}.
+     */
+    static Long valueOf(string s) {
+        return Long.valueOf(parseLong(s, 10));
     }
 
     /**

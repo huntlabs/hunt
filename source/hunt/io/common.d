@@ -387,6 +387,10 @@ abstract class OutputStream : Closeable  { // implements  Flushable
      */
     abstract void write(int b) ;
 
+    void write(string b) {
+        write(cast(byte[])b, 0, cast(int)b.length);
+    }
+
     /**
      * Writes <code>b.length</code> bytes from the specified byte array
      * to this output stream. The general contract for <code>write(b)</code>

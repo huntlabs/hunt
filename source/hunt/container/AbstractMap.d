@@ -477,7 +477,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return a string representation of this map
      */
     override string toString() {
-        if(_size == 0)
+        if(isEmpty())
             return "{}";
 
         Appender!string sb;

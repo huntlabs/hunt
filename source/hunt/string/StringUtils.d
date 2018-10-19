@@ -395,10 +395,10 @@ class StringUtils
 
 
 	/**
-	 * Copy the given Enumeration into a {@code String} array.
-	 * The Enumeration must contain {@code String} elements only.
+	 * Copy the given Enumeration into a {@code string} array.
+	 * The Enumeration must contain {@code string} elements only.
 	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array
+	 * @return the {@code string} array
 	 */
 	static string[] toStringArray(InputRange!string range) {
         Array!string buffer;
@@ -407,4 +407,140 @@ class StringUtils
         }
 		return buffer.array;
 	}
+
+
+	/**
+	 * Convert a {@code string} array into a delimited {@code string} (e.g. CSV).
+	 * <p>Useful for {@code toString()} implementations.
+	 * @param arr the array to display (potentially {@code null} or empty)
+	 * @param delim the delimiter to use (typically a ",")
+	 * @return the delimited {@code string}
+	 */
+	static string arrayToDelimitedString(string[] arr, string delim) {
+		if (arr.length == 0) {
+			return "";
+		}
+		if (arr.length == 1) {
+			return arr[0];
+		}
+
+        Appender!string sb;
+		for (size_t i = 0; i < arr.length; i++) {
+			if (i > 0) {
+				sb.put(delim);
+			}
+			sb.put(arr[i]);
+		}
+		return sb.data;
+	}
+
+	/**
+	 * Convert a {@code string} array into a comma delimited {@code string}
+	 * (i.e., CSV).
+	 * <p>Useful for {@code toString()} implementations.
+	 * @param arr the array to display (potentially {@code null} or empty)
+	 * @return the delimited {@code string}
+	 */
+	static string arrayToCommaDelimitedString(string[] arr) {
+		return arrayToDelimitedString(arr, ",");
+	}
+
+
+	/**
+	 * Convert a comma delimited list (e.g., a row from a CSV file) into an
+	 * array of strings.
+	 * @param str the input {@code string} (potentially {@code null} or empty)
+	 * @return an array of strings, or the empty array in case of empty input
+	 */
+	static string[] commaDelimitedListToStringArray(string str) {
+		return delimitedListToStringArray(str, ",");
+	}
+
+
+	/**
+	 * Take a {@code string} that is a delimited list and convert it into a
+	 * {@code string} array.
+	 * <p>A single {@code delimiter} may consist of more than one character,
+	 * but it will still be considered as a single delimiter string, rather
+	 * than as bunch of potential delimiter characters, in contrast to
+	 * {@link #tokenizeToStringArray}.
+	 * @param str the input {@code string} (potentially {@code null} or empty)
+	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * rather than a bunch individual delimiter characters)
+	 * @return an array of the tokens in the list
+	 * @see #tokenizeToStringArray
+	 */
+	static string[] delimitedListToStringArray(string str, string delimiter) {
+		return delimitedListToStringArray(str, delimiter, null);
+	}
+
+	/**
+	 * Take a {@code string} that is a delimited list and convert it into
+	 * a {@code string} array.
+	 * <p>A single {@code delimiter} may consist of more than one character,
+	 * but it will still be considered as a single delimiter string, rather
+	 * than as bunch of potential delimiter characters, in contrast to
+	 * {@link #tokenizeToStringArray}.
+	 * @param str the input {@code string} (potentially {@code null} or empty)
+	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * rather than a bunch individual delimiter characters)
+	 * @param charsToDelete a set of characters to delete; useful for deleting unwanted
+	 * line breaks: e.g. "\r\n\f" will delete all new lines and line feeds in a {@code string}
+	 * @return an array of the tokens in the list
+	 * @see #tokenizeToStringArray
+	 */
+	static string[] delimitedListToStringArray(string str, 
+        string delimiter, string charsToDelete) {
+
+		if (str.empty()) {
+			return [];
+		}
+		if (delimiter is null) {
+			return [str];
+		}
+
+		Array!string result;
+		if ("" == delimiter) {
+			for (size_t i = 0; i < str.length; i++) {
+				result.insertBack(deleteAny(str[i .. i + 1], charsToDelete));
+			}
+		}
+		else {
+			size_t pos = 0;
+			ptrdiff_t delPos;
+			while ((delPos = str.indexOf(delimiter, pos)) != -1) {
+				result.insertBack(deleteAny(str[pos .. delPos], charsToDelete));
+				pos = delPos + delimiter.length;
+			}
+			if (str.length > 0 && pos <= str.length) {
+				// Add rest of string, but not in case of empty input.
+				result.insertBack(deleteAny(str[pos .. $], charsToDelete));
+			}
+		}
+		return result.array;
+	}
+
+
+	/**
+	 * Delete any character in a given {@code string}.
+	 * @param inString the original {@code string}
+	 * @param charsToDelete a set of characters to delete.
+	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
+	 * @return the resulting {@code string}
+	 */
+	static string deleteAny(string inString, string charsToDelete) {
+		if (inString.empty() || charsToDelete.empty()) {
+			return inString;
+		}
+
+        Appender!string sb;
+		for (size_t i = 0; i < inString.length; i++) {
+			char c = inString[i];
+			if (charsToDelete.indexOf(c) == -1) {
+				sb.put(c);
+			}
+		}
+		return sb.data;
+	}
+
 }
