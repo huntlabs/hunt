@@ -1,8 +1,10 @@
 module hunt.container.MultiValueMap;
 
-
 import hunt.container.List;
 import hunt.container.Map;
+
+alias MultiValuesMap(T) = Map!(string, List!(T));
+alias MultiStringsMap = MultiValuesMap!string;
 
 
 /**
@@ -40,7 +42,7 @@ interface MultiValueMap(K, V) : Map!(K, List!(V)) {
 	 * @param values the values to be added
 	 * @since 5.0
 	 */
-	void addAll(MultiValueMap!(K, V) values);
+	void addAll(Map!(K, V) values);
 
 	/**
 	 * Set the given single value under the given key.

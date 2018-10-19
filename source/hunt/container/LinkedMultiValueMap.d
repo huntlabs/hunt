@@ -4,9 +4,11 @@ import hunt.container.Collection;
 import hunt.container.LinkedHashMap;
 import hunt.container.LinkedList;
 import hunt.container.List;
+import hunt.container.MultiValueMap;
 import hunt.container.Map;
 import hunt.container.Set;
 
+import std.range;
 
 /**
  * Simple implementation of {@link MultiValueMap} that wraps a {@link LinkedHashMap},
@@ -116,18 +118,18 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	}
 
 	override
-	bool containsKey(Object key) {
+	bool containsKey(K key) {
 		return this.targetMap.containsKey(key);
 	}
 
 	override
-	bool containsValue(Object value) {
+	bool containsValue(List!(V) value) {
 		return this.targetMap.containsValue(value);
 	}
 
 	override
 	
-	List!(V) get(Object key) {
+	List!(V) get(string key) {
 		return this.targetMap.get(key);
 	}
 
@@ -139,7 +141,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 
 	override
 	
-	List!(V) remove(Object key) {
+	List!(V) remove(string key) {
 		return this.targetMap.remove(key);
 	}
 
