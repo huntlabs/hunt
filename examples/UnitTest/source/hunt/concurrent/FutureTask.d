@@ -110,7 +110,10 @@ class FutureTask(V) : RunnableFuture!(V) {
     /** The underlying callable; nulled out after running */
     private Callable!(V) callable;
     /** The result to return or exception to throw from get() */
-    private Object outcome; // non-volatile, protected by state reads/writes
+    static if(!is(V == void)) {
+        private V outcome; // non-volatile, protected by state reads/writes
+    }
+    private Throwable exception;
     /** The thread running the callable; CASed during run() */
     private Thread runner;
     /** Treiber stack of waiting threads */
@@ -123,12 +126,18 @@ class FutureTask(V) : RunnableFuture!(V) {
      */
 
     private V report(int s) {
-        Object x = outcome;
-        if (s == NORMAL)
-            return cast(V)x;
+        // Object x = outcome;
+        if (s == NORMAL) {
+            static if(!is(V == void)) {
+                return outcome; // cast(V)
+            } else {
+                return ; // cast(V)
+            }
+        }
+            
         if (s >= CANCELLED)
             throw new CancellationException();
-        throw new ExecutionException(cast(Throwable)x);
+        throw new ExecutionException(exception);
     }
 
     /**
@@ -302,7 +311,7 @@ static if(is(V == void)) {
                     result = c.call();
                     ran = true;
                 } catch (Throwable ex) {
-                    result = null;
+                    result = V.init;
                     ran = false;
                     setException(ex);
                 }
@@ -334,7 +343,7 @@ static if(is(V == void)) {
      */
     protected void setException(Throwable t) {
         if (AtomicHelper.cas(state, NEW, COMPLETING)) {
-            outcome = t;
+            exception = t;
             AtomicHelper.store(state, EXCEPTIONAL); // final state
             finishCompletion();
         }
@@ -499,7 +508,7 @@ static if(is(V == void)) {
                 // nanoTime may be slow; recheck before parking
                 if (state < COMPLETING) {
                     // LockSupport.parkNanos(this, parkNanos);
-                    implementationMissing(false);
+                    // implementationMissing(false);
                 }
             } else {
                 // LockSupport.park(this);
@@ -559,7 +568,7 @@ static if(is(V == void)) {
             status = "[Completed normally]";
             break;
         case EXCEPTIONAL:
-            status = "[Completed exceptionally: " ~ outcome.toString() ~ "]";
+            status = "[Completed exceptionally: " ~ exception.toString() ~ "]";
             break;
         case CANCELLED:
         case INTERRUPTING:
