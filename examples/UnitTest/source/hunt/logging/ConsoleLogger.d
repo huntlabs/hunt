@@ -1,5 +1,7 @@
 module hunt.logging.ConsoleLogger;
 
+import hunt.util.thread;
+
 import core.stdc.stdlib;
 import core.runtime;
 import core.thread;
@@ -14,41 +16,36 @@ import std.typecons;
 import std.traits;
 import std.string;
 
-ThreadID getTid()
-{
-    return Thread.getThis.id;
-}
+// ThreadID getTid()
+// {
+//     return Thread.getThis.id;
+// }
 
-version (Windows)
-{
+version (Windows) {
     import core.sys.windows.wincon;
     import core.sys.windows.winbase;
     import core.sys.windows.windef;
 
     private __gshared HANDLE g_hout;
-    shared static this()
-    {
+    
+    shared static this() {
         g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     }
 
-    void resetConsoleColor()
-    {
+    void resetConsoleColor() {
         SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     }
 }
 
-version (Posix)
-{
+version (Posix) {
     enum PRINT_COLOR_NONE = "\033[m";
     enum PRINT_COLOR_RED = "\033[0;32;31m";
     enum PRINT_COLOR_GREEN = "\033[0;32;32m";
     enum PRINT_COLOR_YELLOW = "\033[1;33m";
 }
 
-
-enum LogLevel
-{
+enum LogLevel {
     Trace = 0,
     Info = 1,
     Warning = 2,
@@ -57,11 +54,9 @@ enum LogLevel
     Off = 5
 }
 
-import std.experimental.logger.core;
 /**
 */
-class ConsoleLogger
-{
+class ConsoleLogger {
     private __gshared LogLevel g_logLevel = LogLevel.Trace;
     private enum traceLevel = toString(LogLevel.Trace);
     private enum infoLevel = toString(LogLevel.Info);
@@ -70,111 +65,92 @@ class ConsoleLogger
     private enum fatalLevel = toString(LogLevel.Fatal);
     private enum offlLevel = toString(LogLevel.Off);
 
-    static void setLogLevel(LogLevel level)
-    {
+    static void setLogLevel(LogLevel level) {
         g_logLevel = level;
     }
 
-
     static void trace(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Trace, layout!(file, line, func)(logFormat(args), traceLevel));
     }
 
     static void tracef(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Trace, layout!(file, line, func)(logFormatf(args), traceLevel));
     }
 
     static void info(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Info, layout!(file, line, func)(logFormat(args), infoLevel));
     }
 
     static void infof(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
-        writeFormatColor(LogLevel.Info, layout!(file, line, func)(logFormatf(args),infoLevel));
+            string func = __FUNCTION__, A...)(lazy A args) {
+        writeFormatColor(LogLevel.Info, layout!(file, line, func)(logFormatf(args), infoLevel));
     }
 
     static void warning(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
-        writeFormatColor(LogLevel.Warning, layout!(file, line, func)(logFormat(args), warningLevel));
+            string func = __FUNCTION__, A...)(lazy A args) {
+        writeFormatColor(LogLevel.Warning, layout!(file, line,
+                func)(logFormat(args), warningLevel));
     }
 
     static void warningf(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
-        writeFormatColor(LogLevel.Warning, layout!(file, line, func)(logFormatf(args), warningLevel));
+            string func = __FUNCTION__, A...)(lazy A args) {
+        writeFormatColor(LogLevel.Warning, layout!(file, line,
+                func)(logFormatf(args), warningLevel));
     }
 
     static void error(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Error, layout!(file, line, func)(logFormat(args), errorLevel));
     }
 
     static void errorf(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Error, layout!(file, line, func)(logFormatf(args), errorLevel));
     }
-    
+
     static void fatal(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Fatal, layout!(file, line, func)(logFormat(args), fatalLevel));
     }
 
     static void fatalf(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args)
-    {
+            string func = __FUNCTION__, A...)(lazy A args) {
         writeFormatColor(LogLevel.Fatal, layout!(file, line, func)(logFormatf(args), fatalLevel));
     }
 
-    private static string logFormatf(A...)(A args)
-    {
+    private static string logFormatf(A...)(A args) {
         Appender!string buffer;
         formattedWrite(buffer, args);
         return buffer.data;
     }
 
-    private static string logFormat(A...)(A args)
-    {
+    private static string logFormat(A...)(A args) {
         auto w = appender!string();
-        foreach (arg; args)
-        {
+        foreach (arg; args) {
             alias A = typeof(arg);
-            static if (isAggregateType!A || is(A == enum))
-            {
+            static if (isAggregateType!A || is(A == enum)) {
                 import std.format : formattedWrite;
 
                 formattedWrite(w, "%s", arg);
             }
-            else static if (isSomeString!A)
-            {
+            else static if (isSomeString!A) {
                 put(w, arg);
             }
-            else static if (isIntegral!A)
-            {
+            else static if (isIntegral!A) {
                 import std.conv : toTextRange;
 
                 toTextRange(arg, w);
             }
-            else static if (isBoolean!A)
-            {
+            else static if (isBoolean!A) {
                 put(w, arg ? "true" : "false");
             }
-            else static if (isSomeChar!A)
-            {
+            else static if (isSomeChar!A) {
                 put(w, arg);
             }
-            else
-            {
+            else {
                 import std.format : formattedWrite;
 
                 // Most general case
@@ -185,20 +161,19 @@ class ConsoleLogger
     }
 
     private static string layout(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__)(string msg, string level)
-    {
+            string func = __FUNCTION__)(string msg, string level) {
         enum lineNum = std.conv.to!string(line);
         string time_prior = Clock.currTime.toString();
         string tid = std.conv.to!string(getTid());
 
         string fun = func;
         ptrdiff_t index = lastIndexOf(func, '.');
-        if(index != -1) {
+        if (index != -1) {
             ptrdiff_t idx = lastIndexOf(func, '.', index);
-            if(idx == -1) 
-                fun = func[index+1 .. $];
+            if (idx == -1)
+                fun = func[index + 1 .. $];
             else
-                fun = func[idx+1 .. $];
+                fun = func[idx + 1 .. $];
         }
 
         return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
@@ -213,12 +188,9 @@ class ConsoleLogger
     //     return time_prior ~ " | " ~ tid ~ " | " ~ level ~ context ~ msg;
     // }
 
-
-    static string toString(LogLevel level)
-    {
+    static string toString(LogLevel level) {
         string r;
-        final switch (level) with (LogLevel)
-        {
+        final switch (level) with (LogLevel) {
         case Trace:
             r = "trace";
             break;
@@ -241,16 +213,13 @@ class ConsoleLogger
         return r;
     }
 
-    private static void writeFormatColor(LogLevel level, lazy string msg)
-    {
+    private static void writeFormatColor(LogLevel level, lazy string msg) {
         if (level < g_logLevel)
             return;
 
-        version (Posix)
-        {
+        version (Posix) {
             string prior_color;
-            switch (level) with (LogLevel)
-            {
+            switch (level) with (LogLevel) {
             case Error:
             case Fatal:
                 prior_color = PRINT_COLOR_RED;
@@ -267,16 +236,14 @@ class ConsoleLogger
 
             writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
         }
-        else version (Windows)
-        {
+        else version (Windows) {
             import std.windows.charset;
             import core.stdc.stdio;
 
             enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
 
             ushort color;
-            switch (level) with (LogLevel)
-            {
+            switch (level) with (LogLevel) {
             case Error:
             case Fatal:
                 color = FOREGROUND_RED;

@@ -536,7 +536,7 @@ class Executors {
      *         scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    Future!(void) submit(ExecutorService es, Runnable task) {
+    static Future!(void) submit(ExecutorService es, Runnable task) {
 
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
@@ -566,7 +566,7 @@ class Executors {
      *         scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    Future!(T) submit(T)(ExecutorService es, Runnable task, T result) {
+    static Future!(T) submit(T)(ExecutorService es, Runnable task, T result) {
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
             throw new RejectedExecutionException("ExecutorService is null");
@@ -608,7 +608,7 @@ class Executors {
      *         scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    Future!(T) submit(T)(ExecutorService es, Callable!(T) task) {
+    static Future!(T) submit(T)(ExecutorService es, Callable!(T) task) {
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
             throw new RejectedExecutionException("ExecutorService is null");
@@ -648,7 +648,7 @@ class Executors {
      * @throws RejectedExecutionException if any task cannot be
      *         scheduled for execution
      */
-    List!(Future!(T)) invokeAll(T)(ExecutorService es, Collection!(Callable!(T)) tasks) {
+    static List!(Future!(T)) invokeAll(T)(ExecutorService es, Collection!(Callable!(T)) tasks) {
 
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
@@ -687,7 +687,7 @@ class Executors {
      * @throws RejectedExecutionException if any task cannot be scheduled
      *         for execution
      */
-    List!(Future!(T)) invokeAll(T)(ExecutorService es, Collection!(Callable!(T)) tasks,
+    static List!(Future!(T)) invokeAll(T)(ExecutorService es, Collection!(Callable!(T)) tasks,
                                   Duration timeout) {
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
@@ -716,7 +716,7 @@ class Executors {
      * @throws RejectedExecutionException if tasks cannot be scheduled
      *         for execution
      */
-    T invokeAny(T)(ExecutorService es, Collection!(Callable!(T)) tasks) {
+    static T invokeAny(T)(ExecutorService es, Collection!(Callable!(T)) tasks) {
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
             throw new RejectedExecutionException("ExecutorService is null");
@@ -748,7 +748,7 @@ class Executors {
      * @throws RejectedExecutionException if tasks cannot be scheduled
      *         for execution
      */
-    T invokeAny(T)(ExecutorService es, Collection!(Callable!(T)) tasks,
+    static T invokeAny(T)(ExecutorService es, Collection!(Callable!(T)) tasks,
                     Duration timeout)  {
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
@@ -796,7 +796,7 @@ private final class RunnableAdapter(T) : Callable!(T) if(!is(T == void)) {
         return result;
     }
 
-    string toString() {
+    override string toString() {
         return super.toString() ~ "[Wrapped task = " ~ (cast(Object)task).toString() ~ "]";
     }
 }

@@ -14,7 +14,7 @@ void implementationMissing(string name = __FUNCTION__,
         // import hunt.logging;
         // warningf("Implementation missing %s, in %s:%d", name, file, line);
         import std.stdio;
-        stderr.writeln("Implementation missing %s, in %s:%d", name, file, line);
+        stderr.writefln("Implementation missing %s, in %s:%d", name, file, line);
     }
 }
 

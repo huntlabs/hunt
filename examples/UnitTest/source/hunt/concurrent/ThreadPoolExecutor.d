@@ -951,7 +951,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
 
                     if (isRunning(c) ||
                         (runStateLessThan(c, STOP) && firstTask is null)) {
-                        implementationMissing(false);
+                        // implementationMissing(false);
                         // TODO: Tasks pending completion -@zxp at 10/18/2018, 9:14:13 AM
                         // 
                         // if (t.isAlive()) // precheck that t is startable
@@ -1149,7 +1149,8 @@ class ThreadPoolExecutor : AbstractExecutorService {
                 // if not, ensure thread is not interrupted.  This
                 // requires a recheck in second case to deal with
                 // shutdownNow race while clearing interrupt
-                implementationMissing(false);
+
+                // implementationMissing(false);
                 // if ((runStateAtLeast(ctl, STOP) ||
                 //      (Thread.interrupted() &&
                 //       runStateAtLeast(ctl, STOP))) &&
