@@ -1,12 +1,14 @@
 module hunt.lang.Integer;
 
 import hunt.lang.Byte;
+import hunt.lang.exception;
 import hunt.lang.Nullable;
 import hunt.lang.Number;
+import hunt.util.Comparator;
 
 import std.conv;
 
-class Integer : Nullable!int, Number {
+class Integer : AbstractNumber!int {
 
     /**
      * Returns the number of one-bits in the two's complement binary
@@ -105,7 +107,17 @@ class Integer : Nullable!int, Number {
         return n - ((i << 1) >>> 31);
     }
 
+    override int opCmp(Object o) {
+        if(o is null) throw new NullPointerException();
+        Number n = cast(Number)o;
+        if(n is null) throw new Exception("Number needed.");
+        return compare(this.value, n.intValue());
+    }
 
+    int opCmp(long n) {
+        return compare(this.value, n);
+    }
+    
 
     /**
      * Returns a hash code for a {@code double} value; compatible with
@@ -158,13 +170,16 @@ class Integer : Nullable!int, Number {
      *          {@code false} otherwise.
      * @see java.lang.Double#doubleToLongBits(double)
      */
-    override bool opEquals(Object obj) {
-        auto dl = cast(Integer)obj;
-        if(dl !is null)
-            return value == dl.intValue;
+    // override bool opEquals(Object obj) {
+    //     auto dl = cast(Integer)obj;
+    //     if(dl !is null)
+    //         return value == dl.intValue;
 
-        return false;
-    }
+    //     return false;
+    // }
+
+
+    // alias opEquals = Nullable!int.opEquals;
 
     /**
      * The value of the {@code Integer}.
@@ -181,58 +196,9 @@ class Integer : Nullable!int, Number {
      *                  {@code Integer} object.
      */
     this(int value) {
-        // this.value = value;
         super(value);
     }
 
-    override byte byteValue() {
-        return cast(byte)value;
-    }
-
-    /**
-     * Returns the value of this {@code Integer} as a {@code short}
-     * after a narrowing primitive conversion.
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override short shortValue() {
-        return cast(short)value;
-    }
-
-    /**
-     * Returns the value of this {@code Integer} as an
-     * {@code int}.
-     */
-    override int intValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this {@code Integer} as a {@code long}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     * @see Integer#toUnsignedLong(int)
-     */
-    override long longValue() {
-        return cast(long)value;
-    }
-
-    /**
-     * Returns the value of this {@code Integer} as a {@code float}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override float floatValue() {
-        return cast(float)value;
-    }
-
-    /**
-     * Returns the value of this {@code Integer} as a {@code double}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override double doubleValue() {
-        return cast(double)value;
-    }
 
     static int parseInt(string s)  {
         auto i = to!long(s);

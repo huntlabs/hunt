@@ -46,7 +46,7 @@ import std.conv;
  * @see     java.lang.Number
  * @since   JDK1.1
  */
-class Byte : Nullable!(byte), Number /*implements Comparable<Byte> */{
+class Byte : AbstractNumber!(byte) {
 
     /**
      * A constant holding the minimum value a {@code byte} can
@@ -301,7 +301,6 @@ class Byte : Nullable!(byte), Number /*implements Comparable<Byte> */{
      *                  {@code Byte}.
      */
     this(byte value) {
-        // this.value = value;
         super(value);
     }
 
@@ -321,59 +320,6 @@ class Byte : Nullable!(byte), Number /*implements Comparable<Byte> */{
     // Byte(string s) throws NumberFormatException {
     //     this.value = parseByte(s, 10);
     // }
-
-    /**
-     * Returns the value of this {@code Byte} as a
-     * {@code byte}.
-     */
-    override byte byteValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this {@code Byte} as a {@code short} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override short shortValue() {
-        return cast(short)value;
-    }
-
-    /**
-     * Returns the value of this {@code Byte} as an {@code int} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override int intValue() {
-        return cast(int)value;
-    }
-
-    /**
-     * Returns the value of this {@code Byte} as a {@code long} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override long longValue() {
-        return cast(long)value;
-    }
-
-    /**
-     * Returns the value of this {@code Byte} as a {@code float} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override float floatValue() {
-        return cast(float)value;
-    }
-
-    /**
-     * Returns the value of this {@code Byte} as a {@code double}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override double doubleValue() {
-        return cast(double)value;
-    }
 
     /**
      * Returns a {@code string} object representing this
@@ -410,58 +356,6 @@ class Byte : Nullable!(byte), Number /*implements Comparable<Byte> */{
      */
     override size_t toHash() @trusted nothrow {
         return cast(size_t)value;
-    }
-
-    /**
-     * Compares this object to the specified object.  The result is
-     * {@code true} if and only if the argument is not
-     * {@code null} and is a {@code Byte} object that
-     * contains the same {@code byte} value as this object.
-     *
-     * @param obj       the object to compare with
-     * @return          {@code true} if the objects are the same;
-     *                  {@code false} otherwise.
-     */
-    override bool opEquals(Object obj) {
-        if ( cast(Byte)obj !is null) {
-            return value == (cast(Byte)obj).byteValue();
-        }
-        return false;
-    }
-
-    /**
-     * Compares two {@code Byte} objects numerically.
-     *
-     * @param   anotherByte   the {@code Byte} to be compared.
-     * @return  the value {@code 0} if this {@code Byte} is
-     *          equal to the argument {@code Byte}; a value less than
-     *          {@code 0} if this {@code Byte} is numerically less
-     *          than the argument {@code Byte}; and a value greater than
-     *           {@code 0} if this {@code Byte} is numerically
-     *           greater than the argument {@code Byte} (signed
-     *           comparison).
-     * @since   1.2
-     */
-    // int compareTo(Byte anotherByte) {
-    //     return compare(this.value, anotherByte.value);
-    // }
-
-    /**
-     * Compares two {@code byte} values numerically.
-     * The value returned is identical to what would be returned by:
-     * <pre>
-     *    Byte.valueOf(x).compareTo(Byte.valueOf(y))
-     * </pre>
-     *
-     * @param  x the first {@code byte} to compare
-     * @param  y the second {@code byte} to compare
-     * @return the value {@code 0} if {@code x == y};
-     *         a value less than {@code 0} if {@code x < y}; and
-     *         a value greater than {@code 0} if {@code x > y}
-     * @since 1.7
-     */
-    static int compare(byte x, byte y) {
-        return x - y;
     }
 
     /**

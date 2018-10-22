@@ -93,13 +93,64 @@ interface Number {
 
 /**
 */
-abstract class AbstractNumber : Number {
+abstract class AbstractNumber(T) : Nullable!T,  Number {
 
-    byte byteValue() {
-        return cast(byte) intValue();
+    this(T value) {
+        super(value);
     }
 
+    /**
+     * Returns the value of this {@code T} as an
+     * {@code int}.
+     */
+    int intValue() {
+        return cast(int)value;
+    }
+
+    /**
+     * Returns the value of this {@code T} as a {@code long}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     * @see T#toUnsignedLong(int)
+     */
+    long longValue() {
+        return cast(long)value;
+    }
+
+    /**
+     * Returns the value of this {@code T} as a {@code float}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    float floatValue() {
+        return cast(float)value;
+    }
+
+    /**
+     * Returns the value of this {@code T} as a {@code double}
+     * after a widening primitive conversion.
+     * @jls 5.1.2 Widening Primitive Conversions
+     */
+    double doubleValue() {
+        return cast(double)value;
+    }
+
+
+    /**
+     * Returns the value of this {@code T} as a {@code byte} after
+     * a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
+    byte byteValue() {
+        return cast(byte)value;
+    }
+
+    /**
+     * Returns the value of this {@code T} as a {@code short} after
+     * a narrowing primitive conversion.
+     * @jls 5.1.3 Narrowing Primitive Conversions
+     */
     short shortValue() {
-        return cast(short) intValue();
+        return cast(short)value;
     }
 }

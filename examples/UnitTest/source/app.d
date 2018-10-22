@@ -7,6 +7,7 @@ import hunt.logging;
 import test.BigIntegerTest;
 import test.LinkedBlockingQueueTest;
 import test.NullableTest;
+import test.NumberTest;
 import test.TaskTest;
 import test.ThreadPoolExecutorTest;
 
@@ -16,5 +17,6 @@ void main()
 	// testTask();
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(ThreadPoolExecutorTest);
-	testUnits!(NullableTest);
+	// testUnits!(NullableTest);
+	testUnits!(NumberTest);
 }

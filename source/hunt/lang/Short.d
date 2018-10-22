@@ -44,7 +44,7 @@ import std.conv;
  * @see     java.lang.Number
  * @since   JDK1.1
  */
-class Short : Nullable!short, Number /*implements Comparable<Short> */{
+class Short : AbstractNumber!short /*implements Comparable<Short> */{
 
     /**
      * A constant holding the minimum value a {@code short} can
@@ -305,7 +305,6 @@ class Short : Nullable!short, Number /*implements Comparable<Short> */{
      *                  {@code Short}.
      */
     this(short value) {
-        // this.value = value;
         super(value);
     }
 
@@ -326,72 +325,6 @@ class Short : Nullable!short, Number /*implements Comparable<Short> */{
     //     this.value = parseShort(s, 10);
     // }
 
-    /**
-     * Returns the value of this {@code Short} as a {@code byte} after
-     * a narrowing primitive conversion.
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override byte byteValue() {
-        return cast(byte)value;
-    }
-
-    /**
-     * Returns the value of this {@code Short} as a
-     * {@code short}.
-     */
-    override short shortValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this {@code Short} as an {@code int} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override int intValue() {
-        return cast(int)value;
-    }
-
-    /**
-     * Returns the value of this {@code Short} as a {@code long} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override long longValue() {
-        return cast(long)value;
-    }
-
-    /**
-     * Returns the value of this {@code Short} as a {@code float}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override float floatValue() {
-        return cast(float)value;
-    }
-
-    /**
-     * Returns the value of this {@code Short} as a {@code double}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override double doubleValue() {
-        return cast(double)value;
-    }
-
-    /**
-     * Returns a {@code string} object representing this
-     * {@code Short}'s value.  The value is converted to signed
-     * decimal representation and returned as a string, exactly as if
-     * the {@code short} value were given as an argument to the
-     * {@link java.lang.Short#toString(short)} method.
-     *
-     * @return  a string representation of the value of this object in
-     *          base&nbsp;10.
-     */
-    override string toString() {
-        return to!string(value);
-    }
 
     /**
      * Returns a hash code for this {@code Short}; equal to the result
@@ -404,69 +337,6 @@ class Short : Nullable!short, Number /*implements Comparable<Short> */{
         return cast(int)(value);
     }
 
-    /**
-     * Returns a hash code for a {@code short} value; compatible with
-     * {@code Short.hashCode()}.
-     *
-     * @param value the value to hash
-     * @return a hash code value for a {@code short} value.
-     * @since 1.8
-     */
-    // static int hashCode(short value) {
-    //     return (int)value;
-    // }
-
-    /**
-     * Compares this object to the specified object.  The result is
-     * {@code true} if and only if the argument is not
-     * {@code null} and is a {@code Short} object that
-     * contains the same {@code short} value as this object.
-     *
-     * @param obj       the object to compare with
-     * @return          {@code true} if the objects are the same;
-     *                  {@code false} otherwise.
-     */
-    override bool opEquals(Object obj) {
-        if (cast(Short)obj !is null) {
-            return value == (cast(Short)obj).shortValue();
-        }
-        return false;
-    }
-
-    /**
-     * Compares two {@code Short} objects numerically.
-     *
-     * @param   anotherShort   the {@code Short} to be compared.
-     * @return  the value {@code 0} if this {@code Short} is
-     *          equal to the argument {@code Short}; a value less than
-     *          {@code 0} if this {@code Short} is numerically less
-     *          than the argument {@code Short}; and a value greater than
-     *           {@code 0} if this {@code Short} is numerically
-     *           greater than the argument {@code Short} (signed
-     *           comparison).
-     * @since   1.2
-     */
-    // int compareTo(Short anotherShort) {
-    //     return compare(this.value, anotherShort.value);
-    // }
-
-    /**
-     * Compares two {@code short} values numerically.
-     * The value returned is identical to what would be returned by:
-     * <pre>
-     *    Short.valueOf(x).compareTo(Short.valueOf(y))
-     * </pre>
-     *
-     * @param  x the first {@code short} to compare
-     * @param  y the second {@code short} to compare
-     * @return the value {@code 0} if {@code x == y};
-     *         a value less than {@code 0} if {@code x < y}; and
-     *         a value greater than {@code 0} if {@code x > y}
-     * @since 1.7
-     */
-    static int compare(short x, short y) {
-        return x - y;
-    }
 
     /**
      * The number of bits used to represent a {@code short} value in two's

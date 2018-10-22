@@ -37,6 +37,9 @@ class NullableTest {
         assert(object.value == TestValue);
         string str = cast(string)object;
         assert(str == TestValue);
+
+        str = getAs!(string)(object);
+        assert(str == TestValue);
     }
 
     void testStruct() {
@@ -87,5 +90,13 @@ class NullableTest {
 
         Student s = cast(Student)sa;
         assert(s.getName() == "AAA");
+    }
+
+    T getAs(T)(Object obj) {
+        // FIXME: Needing refactor or cleanup -@zxp at 10/22/2018, 5:29:32 PM        
+        // 
+        // T r = cast(T)obj;
+        T r = cast(T)cast(Nullable!T)obj;
+        return r;
     }
 }

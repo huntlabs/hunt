@@ -98,7 +98,7 @@ import std.string;
  * @since 1.1
  */
 
-class BigInteger : AbstractNumber {
+class BigInteger : Number {
     /**
      * The signum of this BigInteger: -1 for negative, 0 for zero, or
      * 1 for positive.  Note that the BigInteger zero <em>must</em> have
@@ -4276,6 +4276,15 @@ class BigInteger : AbstractNumber {
          */
         bits |= signum & DoubleConsts.SIGN_BIT_MASK;
         return Double.longBitsToDouble(bits);
+    }
+
+
+    byte byteValue() {
+        return cast(byte) intValue();
+    }
+
+    short shortValue() {
+        return cast(short) intValue();
     }
 
     /**

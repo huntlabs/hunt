@@ -33,6 +33,10 @@ class Nullable(T) : IObject {
         _isNull = false;
     }
 
+    // U opCast(U)() {
+    //     return cast(U)_value;
+    // }
+
     bool opEquals(T v) {
         return this._value == v;
     }
