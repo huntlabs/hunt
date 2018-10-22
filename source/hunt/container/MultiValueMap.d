@@ -42,7 +42,7 @@ interface MultiValueMap(K, V) : Map!(K, List!(V)) {
 	 * @param values the values to be added
 	 * @since 5.0
 	 */
-	void addAll(Map!(K, V) values);
+	void addAll(Map!(K, List!V) values);
 
 	/**
 	 * Set the given single value under the given key.

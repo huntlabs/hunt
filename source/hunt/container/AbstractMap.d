@@ -84,8 +84,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         throw new UnsupportedOperationException();
     }
 
-    V opIndex(K key)
-    {
+    V opIndex(K key) {
         return get(key);
     }
 
@@ -199,12 +198,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
 
     bool remove(K key, V value){
         V curValue = get(key);
-        if(curValue !is value || !containsKey(key))
+        if(curValue != value || !containsKey(key))
             return false;
         remove(key);
         return true;
     }
-
 
     // Bulk Operations
 

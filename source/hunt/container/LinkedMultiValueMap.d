@@ -30,7 +30,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	 * Create a new LinkedMultiValueMap that wraps a {@link LinkedHashMap}.
 	 */
 	this() {
-		this.targetMap = new LinkedHashMap!(K, V)();
+		this.targetMap = new LinkedHashMap!(K, List!(V))();
 	}
 
 	/**
@@ -39,7 +39,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	 * @param initialCapacity the initial capacity
 	 */
 	this(int initialCapacity) {
-		this.targetMap = new LinkedHashMap!(K, V)(initialCapacity);
+		this.targetMap = new LinkedHashMap!(K, List!(V))(initialCapacity);
 	}
 
 	/**
@@ -51,7 +51,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	 * @see #deepCopy()
 	 */
 	this(Map!(K, List!(V)) otherMap) {
-		this.targetMap = new LinkedHashMap!(K, V)(otherMap);
+		this.targetMap = new LinkedHashMap!(K, List!(V))(otherMap);
 	}
 
 
@@ -65,26 +65,25 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 
 	override
 	void add(K key, V value) {
-		List!(V) values = this.targetMap.computeIfAbsent(key, k => new LinkedList!(K, V)());
+		List!(V) values = this.targetMap.computeIfAbsent(key, k => new LinkedList!(V)());
 		values.add(value);
 	}
 
 	override
 	void addAll(K key, List!(V) values) {
-		List!(V) currentValues = this.targetMap.computeIfAbsent(key, k => new LinkedList!(K, V)());
+		List!(V) currentValues = this.targetMap.computeIfAbsent(key, k => new LinkedList!(V)());
 		currentValues.addAll(values);
 	}
 
-	override
-	void addAll(MultiValueMap!(K, V) values) {
-		foreach (K key, V value ; values) {
+	void addAll(Map!(K, List!V) values) {
+		foreach (K key, List!V value ; values) {
 			addAll(key, value);
 		}
 	}
 
 	override
 	void set(K key, V value) {
-		List!(V) values = new LinkedList!(K, V)();
+		List!(V) values = new LinkedList!(V)();
 		values.add(value);
 		this.targetMap.put(key, values);
 	}
@@ -98,7 +97,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	override
 	Map!(K, V) toSingleValueMap() {
 		LinkedHashMap!(K, V) singleValueMap = new LinkedHashMap!(K, V)(this.targetMap.size());
-        foreach (K key, V value ; values)
+        foreach (K key, List!(V) value ; this.targetMap)
             singleValueMap.put(key, value.get(0));
 		
 		return singleValueMap;
@@ -127,23 +126,41 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 		return this.targetMap.containsValue(value);
 	}
 
-	override
-	
+    List!(V) opIndex(K key) {
+        return get(key);
+    }
+
+	override	
 	List!(V) get(string key) {
 		return this.targetMap.get(key);
 	}
 
 	override
-	
 	List!(V) put(K key, List!(V) value) {
 		return this.targetMap.put(key, value);
 	}
+	
+    List!(V) putIfAbsent(K key, List!(V) value) {
+        List!(V) v;
+
+        if(!containsKey(key))
+            v = put(key, value);
+
+        return v;
+    }
 
 	override
-	
 	List!(V) remove(string key) {
 		return this.targetMap.remove(key);
 	}
+	
+    bool remove(K key, List!(V) value){
+        List!(V) curValue = get(key);
+        if(curValue != value || !containsKey(key))
+            return false;
+        remove(key);
+        return true;
+    }
 
 	override
 	void putAll(Map!(K, List!(V)) map) {
@@ -154,12 +171,29 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	void clear() {
 		this.targetMap.clear();
 	}
+	
+    bool replace(K key, List!(V) oldValue, List!(V) newValue) {
+        List!(V) curValue = get(key);
+         if(curValue != oldValue || !containsKey(key)){
+            return false;
+        }
+        put(key, newValue);
+        return true;
+    }
 
-    int opApply(scope int delegate(ref K, ref V) dg)  {
+    List!(V) replace(K key, List!(V) value) {
+        List!(V) curValue;
+        if (containsKey(key)) {
+            curValue = put(key, value);
+        }
+        return curValue;
+    }
+
+    int opApply(scope int delegate(ref K, ref List!(V)) dg)  {
         return this.targetMap.opApply(dg);
     }
     
-    int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
+    int opApply(scope int delegate(MapEntry!(K, List!(V)) entry) dg) {
         return this.targetMap.opApply(dg);
     }
     
@@ -167,7 +201,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
         return this.targetMap.byKey();
     }
 
-    InputRange!V byValue() {
+    InputRange!(List!(V)) byValue() {
         return this.targetMap.byValue();
     }
 
@@ -177,9 +211,9 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	// }
 
 	// override
-	// Collection!(List!(V)) values() {
-	// 	return this.targetMap.values();
-	// }
+	List!(V)[] values() {
+		return this.targetMap.values();
+	}
 
 	// override
 	// Set<Entry!(K, List!(V))> entrySet() {
@@ -212,7 +246,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	// }
 
 	override bool opEquals(Object obj) {
-		return this.targetMap.equals(obj);
+		return this.targetMap == obj;
 	}
 
 	override size_t toHash() @trusted nothrow {
