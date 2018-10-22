@@ -9,6 +9,8 @@ class Nullable(T) : IObject {
     protected T _value;
     private bool _isNull = true;
 
+    alias value this;
+
     this() {
         _value = T.init;
     }
@@ -24,6 +26,15 @@ class Nullable(T) : IObject {
 
     T value() @trusted nothrow {
         return _value;
+    }
+
+    void opAssign(T v) {
+        _value = v;
+        _isNull = false;
+    }
+
+    bool opEquals(T v) {
+        return this._value == v;
     }
 
     override bool opEquals(Object o) {
@@ -43,7 +54,15 @@ class Nullable(T) : IObject {
     }
 
     override string toString() {
-        return super.toString();
+        import std.conv;
+        // static if(is(T == class)) {
+        //     return this._value.toString();
+        // } else static if(is(T == struct)) {
+        //     return this._value.toString();
+        // } else {
+        //     return super.toString();
+        // }
+        return to!string(_value);
     }
 
     override size_t toHash() @trusted nothrow {
