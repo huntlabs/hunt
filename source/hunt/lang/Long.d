@@ -4,8 +4,8 @@ import hunt.lang.Byte;
 import hunt.lang.Integer;
 import hunt.lang.Nullable;
 import hunt.lang.Number;
-import hunt.util.Comparator;
 import hunt.lang.exception;
+import hunt.util.Comparator;
 
 import std.algorithm.comparison;
 import std.conv;
@@ -13,7 +13,7 @@ import std.exception;
 
 /**
 */
-class Long : Nullable!long, Number {
+class Long : AbstractNumber!long {
 
      // Bit Twiddling
 
@@ -131,59 +131,6 @@ class Long : Nullable!long, Number {
     this(string s) {
         // this.value = to!long(s);
         super(to!long(s));
-    }
-
-    /**
-     * Returns the value of this {@code Long} as a {@code byte} after
-     * a narrowing primitive conversion.
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override byte byteValue() {
-        return cast(byte)value;
-    }
-
-    /**
-     * Returns the value of this {@code Long} as a {@code short} after
-     * a narrowing primitive conversion.
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override short shortValue() {
-        return cast(short)value;
-    }
-
-    /**
-     * Returns the value of this {@code Long} as an {@code int} after
-     * a narrowing primitive conversion.
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override int intValue() {
-        return cast(int)value;
-    }
-
-    /**
-     * Returns the value of this {@code Long} as a
-     * {@code long} value.
-     */
-    override long longValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this {@code Long} as a {@code float} after
-     * a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override float floatValue() {
-        return cast(float)value;
-    }
-
-    /**
-     * Returns the value of this {@code Long} as a {@code double}
-     * after a widening primitive conversion.
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override double doubleValue() {
-        return cast(double)value;
     }
 
     static long parseLong(string s, int radix=10)  {
@@ -634,11 +581,6 @@ class Long : Nullable!long, Number {
     int opCmp(long n) {
         return compare(this.value, n);
     }
-    
-
-    override string toString() {
-        return to!string(value);
-    }
 
     /**
      * Returns a hash code for a {@code long} value; compatible with
@@ -651,24 +593,4 @@ class Long : Nullable!long, Number {
     override size_t toHash() @safe nothrow {
         return cast(int)(value ^ (value >>> 32));
     }
-
-    /**
-     * Compares this object to the specified object.  The result is
-     * {@code true} if and only if the argument is not
-     * {@code null} and is a {@code Long} object that
-     * contains the same {@code long} value as this object.
-     *
-     * @param   obj   the object to compare with.
-     * @return  {@code true} if the objects are the same;
-     *          {@code false} otherwise.
-     */
-    override bool opEquals(Object obj) {
-        auto lg = cast(Number)obj;
-        if (lg !is null) {
-            return value == lg.longValue();
-        }
-        return false;
-    }
-
-    alias opEquals = Nullable!long.opEquals;
 }

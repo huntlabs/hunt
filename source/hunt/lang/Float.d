@@ -5,7 +5,7 @@ import hunt.lang.Nullable;
 import hunt.lang.Number;
 import std.conv;
 
-class Float : Nullable!float, Number {
+class Float : AbstractNumber!float {
     /**
      * A constant holding the positive infinity of type
      * {@code float}. It is equal to the value returned by
@@ -223,88 +223,6 @@ class Float : Nullable!float, Number {
     //     return isInfinite(value);
     // }
 
-    /**
-     * Returns a string representation of this {@code Float} object.
-     * The primitive {@code float} value represented by this object
-     * is converted to a {@code string} exactly as if by the method
-     * {@code toString} of one argument.
-     *
-     * @return  a {@code string} representation of this object.
-     * @see java.lang.Float#toString(float)
-     */
-    override  string toString() {
-        return to!string(value);
-    }
-
-    /**
-     * Returns the value of this {@code Float} as a {@code byte} after
-     * a narrowing primitive conversion.
-     *
-     * @return  the {@code float} value represented by this object
-     *          converted to type {@code byte}
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override byte byteValue() {
-        return cast(byte)value;
-    }
-
-    /**
-     * Returns the value of this {@code Float} as a {@code short}
-     * after a narrowing primitive conversion.
-     *
-     * @return  the {@code float} value represented by this object
-     *          converted to type {@code short}
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     * @since JDK1.1
-     */
-    override short shortValue() {
-        return cast(short)value;
-    }
-
-    /**
-     * Returns the value of this {@code Float} as an {@code int} after
-     * a narrowing primitive conversion.
-     *
-     * @return  the {@code float} value represented by this object
-     *          converted to type {@code int}
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override int intValue() {
-        return cast(int)value;
-    }
-
-    /**
-     * Returns value of this {@code Float} as a {@code long} after a
-     * narrowing primitive conversion.
-     *
-     * @return  the {@code float} value represented by this object
-     *          converted to type {@code long}
-     * @jls 5.1.3 Narrowing Primitive Conversions
-     */
-    override long longValue() {
-        return cast(long)value;
-    }
-
-    /**
-     * Returns the {@code float} value of this {@code Float} object.
-     *
-     * @return the {@code float} value represented by this object
-     */
-    override float floatValue() {
-        return value;
-    }
-
-    /**
-     * Returns the value of this {@code Float} as a {@code double}
-     * after a widening primitive conversion.
-     *
-     * @return the {@code float} value represented by this
-     *         object converted to type {@code double}
-     * @jls 5.1.2 Widening Primitive Conversions
-     */
-    override double doubleValue() {
-        return cast(double)value;
-    }
 
     /**
      * Returns a hash code for a {@code double} value; compatible with
@@ -316,55 +234,6 @@ class Float : Nullable!float, Number {
      */
     override size_t toHash() @safe nothrow {
         return hashOf(value);
-    }
-
-    /**
-     * Compares this object against the specified object.  The result
-     * is {@code true} if and only if the argument is not
-     * {@code null} and is a {@code Double} object that
-     * represents a {@code double} that has the same value as the
-     * {@code double} represented by this object. For this
-     * purpose, two {@code double} values are considered to be
-     * the same if and only if the method {@link
-     * #doubleToLongBits(double)} returns the identical
-     * {@code long} value when applied to each.
-     *
-     * <p>Note that in most cases, for two instances of class
-     * {@code Double}, {@code d1} and {@code d2}, the
-     * value of {@code d1.equals(d2)} is {@code true} if and
-     * only if
-     *
-     * <blockquote>
-     *  {@code d1.doubleValue() == d2.doubleValue()}
-     * </blockquote>
-     *
-     * <p>also has the value {@code true}. However, there are two
-     * exceptions:
-     * <ul>
-     * <li>If {@code d1} and {@code d2} both represent
-     *     {@code Double.NaN}, then the {@code equals} method
-     *     returns {@code true}, even though
-     *     {@code Double.NaN==Double.NaN} has the value
-     *     {@code false}.
-     * <li>If {@code d1} represents {@code +0.0} while
-     *     {@code d2} represents {@code -0.0}, or vice versa,
-     *     the {@code equal} test has the value {@code false},
-     *     even though {@code +0.0==-0.0} has the value {@code true}.
-     * </ul>
-     * This definition allows hash tables to operate properly.
-     * @param   obj   the object to compare with.
-     * @return  {@code true} if the objects are the same;
-     *          {@code false} otherwise.
-     * @see java.lang.Double#doubleToLongBits(double)
-     */
-    override bool opEquals(Object obj) {
-        auto dl = cast(Float)obj;
-        if(dl !is null)
-        {
-            return to!string(value) == dl.toString;
-        }
-
-        return false;
     }
 
 }

@@ -22,6 +22,12 @@ class StringBuilder : Appendable
         _buffer.reserve(capacity);
     }
 
+
+    this(string data, size_t capacity=16)
+    {
+        _buffer.reserve(capacity);
+        this.append(data);
+    }
     
     // void append(in char[] s)
     // {
