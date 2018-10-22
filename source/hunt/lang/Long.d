@@ -670,7 +670,5 @@ class Long : Nullable!long, Number {
         return false;
     }
 
-    bool opEquals(long v) {
-        return value == v;
-    }
+    alias opEquals = Nullable!long.opEquals;
 }
