@@ -1,6 +1,6 @@
 module hunt.util.memory;
 
-size_t getPageSize() {
+size_t getPageSize() @safe pure nothrow @nogc {
     return _pageSize;
 }
 

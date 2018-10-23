@@ -6,6 +6,7 @@ import hunt.container.Collection;
 import hunt.container.Set;
 
 import hunt.lang.exception;
+import hunt.lang.common;
 
 
 /**
@@ -28,7 +29,7 @@ import hunt.lang.exception;
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @param <E> the type of elements maintained by this set
+ * @param !(E) the type of elements maintained by this set
  *
  * @see Collection
  * @see AbstractCollection
@@ -176,4 +177,41 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
         return modified;
     }
 
+}
+
+
+/**
+*/
+class EmptySet(E) : AbstractSet!(E) {
+
+    // Iterator!(E) iterator() { return emptyIterator(); }
+
+    override int size() {return 0;}
+    override bool isEmpty() {return true;}
+    override void clear() {}
+
+    override bool contains(E obj) {return false;}
+    override bool containsAll(Collection!E c) { return c.isEmpty(); }
+
+    override E[] toArray() { return []; }
+
+    // <T> T[] toArray(T[] a) {
+    //     if (a.length > 0)
+    //         a[0] = null;
+    //     return a;
+    // }
+
+    // Override default methods in Collection
+    // override
+    // void forEach(Consumer<? super E> action) {
+    //     Objects.requireNonNull(action);
+    // }
+    override bool removeIf(Predicate!E filter) {
+        assert(filter !is null);
+        return false;
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return 0;
+    }
 }

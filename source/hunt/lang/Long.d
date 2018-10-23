@@ -129,19 +129,11 @@ class Long : AbstractNumber!long {
      * @see        java.lang.Long#parseLong(java.lang.string, int)
      */
     this(string s) {
-        // this.value = to!long(s);
         super(to!long(s));
     }
 
     static long parseLong(string s, int radix=10)  {
-        try {
-            auto i = to!long(s, radix);
-            return i;
-        }
-        catch(Exception e){
-            throw new Exception(
-                    "Value " ~s ~ " out of range from input ");
-        }
+        return to!long(s, radix);
     }
 
 
