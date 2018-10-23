@@ -74,3 +74,4 @@ class Nullable(T) : IObject {
     }
 }
 
+alias String = Nullable!(string);
