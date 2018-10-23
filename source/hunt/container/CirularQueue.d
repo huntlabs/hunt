@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.container.cirularqueue;
+module hunt.container.CirularQueue;
 
 import core.memory;
 import std.experimental.allocator.common;

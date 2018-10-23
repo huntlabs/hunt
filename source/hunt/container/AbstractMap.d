@@ -664,9 +664,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
 *
 * @since 1.6
 */
-static class SimpleImmutableEntry(K,V) : MapEntry!(K,V) // , java.io.Serializable
-{
-    // private static final long serialVersionUID = 7138329143949025153L;
+class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
 
     private K key;
     private V value;
@@ -799,4 +797,103 @@ static class SimpleImmutableEntry(K,V) : MapEntry!(K,V) // , java.io.Serializabl
         return key.to!string() ~ "=" ~ value.to!string();
     }
 
+}
+
+
+/**
+*/
+class EmptyMap(K,V) : AbstractMap!(K,V) {
+    // private enum long serialVersionUID = 6428348081105594320L;
+
+    override
+    int size()                          {return 0;}
+
+    override
+    bool isEmpty()                   {return true;}
+
+    override
+    bool containsKey(K key)     {return false;}
+
+    // override
+    // bool containsValue(V value) {return false;}
+
+    override
+    V get(K key)                   {return V.init;}
+
+    override K[] keySet() { return null; }
+    override V[] values() { return null; }
+    // Collection!(V) values()              {return emptySet();}
+    // Set!(MapEntry!(K,V)) entrySet()      {return emptySet();}
+
+    override
+    bool opEquals(Object o) {
+        return (typeid(o) == typeid(Map!(K,V))) && (cast(Map!(K,V))o).isEmpty();
+    }
+
+    override
+    size_t toHash()                      {return 0;}
+
+    // Override default methods in Map
+    override
+    V getOrDefault(K k, V defaultValue) {
+        return defaultValue;
+    }
+
+    override int opApply(scope int delegate(ref K, ref V) dg) {
+        return 0;
+    }
+
+    // override
+    // void replaceAll(BiFunction!(K, V, V) function) {
+    //     Objects.requireNonNull(function);
+    // }
+
+    // override
+    // V putIfAbsent(K key, V value) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // bool remove(Object key, Object value) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // bool replace(K key, V oldValue, V newValue) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // V replace(K key, V value) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // V computeIfAbsent(K key,
+    //         Function!(K, V) mappingFunction) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // V computeIfPresent(K key,
+    //         BiFunction!(K, V, V) remappingFunction) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // V compute(K key,
+    //         BiFunction!(K, V, V) remappingFunction) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // override
+    // V merge(K key, V value,
+    //         BiFunction!(V, V, V) remappingFunction) {
+    //     throw new UnsupportedOperationException();
+    // }
+
+    // // Preserves singleton property
+    // private Object readResolve() {
+    //     return EMPTY_MAP;
+    // }
 }
