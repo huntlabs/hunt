@@ -11,10 +11,13 @@ void implementationMissing(string name = __FUNCTION__,
         throw new Exception("Implementation missing: " ~ name, file, line);
     else
     {
-        // import hunt.logging;
-        // warningf("Implementation missing %s, in %s:%d", name, file, line);
-        import std.stdio;
-        stderr.writefln("Implementation missing %s, in %s:%d", name, file, line);
+        version(HUNT_DEBUG) {
+            import hunt.logging;
+            warningf("Implementation missing %s, in %s:%d", name, file, line);
+        } else {
+            import std.stdio;
+            stderr.writefln("======> Implementation missing %s, in %s:%d", name, file, line);
+        }
     }
 }
 
