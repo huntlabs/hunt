@@ -88,6 +88,8 @@ interface Number {
      * @since   1.1
      */
     short shortValue();
+
+    string toString();
 }
 
 
@@ -152,5 +154,9 @@ abstract class AbstractNumber(T) : Nullable!T,  Number {
      */
     short shortValue() {
         return cast(short)value;
+    }
+
+    override string toString() {
+        return super.toString();
     }
 }
