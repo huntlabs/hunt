@@ -33,7 +33,7 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-module hunt.concurrent.ThreadPoolExecutor;
+module hunt.concurrent.thread.ThreadPoolExecutor;
 
 import hunt.concurrent.AbstractExecutorService;
 import hunt.concurrent.AbstractOwnableSynchronizer;
@@ -44,7 +44,8 @@ import hunt.concurrent.exception;
 import hunt.concurrent.ExecutorService;
 import hunt.concurrent.Executor;
 import hunt.concurrent.Future;
-import hunt.concurrent.ThreadFactory;
+import hunt.concurrent.thread.ThreadEx;
+import hunt.concurrent.thread.ThreadFactory;
 
 import hunt.container;
 import hunt.datetime;
@@ -54,7 +55,6 @@ import hunt.lang.exception;
 
 import core.sync.mutex;
 import core.sync.condition;
-import core.thread;
 import std.algorithm;
 import std.conv;
 

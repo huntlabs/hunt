@@ -33,14 +33,14 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-module hunt.concurrent.ThreadFactory;
+module hunt.concurrent.thread.ThreadFactory;
 
 import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.thread.ThreadEx;
 
 import hunt.lang.common;
 import hunt.util.thread;
 
-import core.thread;
 import std.conv;
 
 /**

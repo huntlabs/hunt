@@ -10,6 +10,7 @@ import test.NullableTest;
 import test.NumberTest;
 import test.TaskTest;
 import test.ThreadPoolExecutorTest;
+import test.ThreadTest;
 
 void main()
 {
@@ -17,6 +18,9 @@ void main()
 	// testTask();
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(ThreadPoolExecutorTest);
+	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
-	testUnits!(NumberTest);
+	// testUnits!(NumberTest);
+
 }
+
