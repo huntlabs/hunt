@@ -1,7 +1,5 @@
 module hunt.util.UnitTest;
 
-
-
 void testUnits(T)()
 {
 	enum v = generateUnitTests!T;
@@ -30,7 +28,9 @@ writeln("=================================");
 
 	foreach (memberName; __traits(derivedMembers, T))
 	{
-		static if(memberName.startsWith("test") || memberName.endsWith("Test") )
+		// enum currentMember = __traits(getMember, T, memberName);
+		static if(memberName.startsWith("test") || memberName.endsWith("Test") || 
+			hasUDA!(__traits(getMember, T, memberName), Test))
 		{
 			alias memberType = typeof(__traits(getMember, T, memberName));
 			static if(is(memberType == function))
@@ -38,11 +38,14 @@ writeln("=================================");
 				str ~= `writeln("\n========> running: ` ~ memberName ~ "\");\n";
 				str ~= "t." ~ memberName ~ "();\n";
 			}
-		}
+		} 
 	}
 	return str;
 }
 
+
+/**
+*/
 struct Test {
 	
 }
