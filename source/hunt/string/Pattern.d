@@ -10,8 +10,7 @@ abstract class Pattern {
 	
 	private __gshared AllMatch ALL_MATCH;
 
-    shared static this()
-    {
+    shared static this() {
         ALL_MATCH = new AllMatch();
     }
 	

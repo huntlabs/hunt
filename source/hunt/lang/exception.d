@@ -366,10 +366,11 @@ class IllegalThreadStateException : IllegalArgumentException
     mixin BasicExceptionCtors;
 }
 
-
 class IllegalMonitorStateException : RuntimeException
 {
     mixin BasicExceptionCtors;
 }
 
-
+class NestedRuntimeException : Exception {
+    mixin BasicExceptionCtors;
+}
