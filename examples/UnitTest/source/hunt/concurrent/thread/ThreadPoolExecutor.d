@@ -55,6 +55,7 @@ import hunt.lang.exception;
 
 import core.sync.mutex;
 import core.sync.condition;
+import core.thread;
 import std.algorithm;
 import std.conv;
 

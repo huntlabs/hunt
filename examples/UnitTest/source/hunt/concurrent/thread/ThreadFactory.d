@@ -41,6 +41,7 @@ import hunt.concurrent.thread.ThreadEx;
 import hunt.lang.common;
 import hunt.util.thread;
 
+import core.thread;
 import std.conv;
 
 /**
