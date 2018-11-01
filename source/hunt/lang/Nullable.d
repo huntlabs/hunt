@@ -74,6 +74,8 @@ class Nullable(T) : IObject {
         return _value;
     }
 
+    alias payload = value;
+
     /**
      * If a value is present, returns the value, otherwise throws
      * {@code NoSuchElementException}.

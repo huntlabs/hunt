@@ -150,6 +150,15 @@ abstract class AbstractCollection(E) : Collection!E {
         return modified;
     }
 
+    bool addAll(E[] c) {
+        bool modified = false;
+        foreach (E e ; c) {
+            if (add(e))
+                modified = true;
+        }
+        return modified;
+    }
+
     /**
      * {@inheritDoc}
      *

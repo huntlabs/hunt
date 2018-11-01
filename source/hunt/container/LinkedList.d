@@ -80,18 +80,18 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
     this() {
     }
 
-//     /**
-//      * Constructs a list containing the elements of the specified
-//      * collection, in the order they are returned by the collection's
-//      * iterator.
-//      *
-//      * @param  c the collection whose elements are to be placed into this list
-//      * @throws NullPointerException if the specified collection is null
-//      */
-//     this(Collection!E c) {
-//         this();
-//         addAll(c);
-//     }
+    /**
+     * Constructs a list containing the elements of the specified
+     * collection, in the order they are returned by the collection's
+     * iterator.
+     *
+     * @param  c the collection whose elements are to be placed into this list
+     * @throws NullPointerException if the specified collection is null
+     */
+    this(Collection!E c) {
+        this();
+        addAll(c);
+    }
 
     /**
      * Links e as first element.
