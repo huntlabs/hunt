@@ -221,6 +221,7 @@ interface Collection(E) : Iterable!E {
      * @see #add(Object)
      */
     bool addAll(Collection!E c);
+    bool addAll(E[] c);
 
     /**
      * Removes all of this collection's elements that are also contained in the

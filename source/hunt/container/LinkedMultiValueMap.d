@@ -227,11 +227,13 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	 * @since 4.2
 	 * @see #clone()
 	 */
-	// LinkedMultiValueMap!(K, V) deepCopy() {
-	// 	LinkedMultiValueMap!(K, V) copy = new LinkedMultiValueMap!(K, V)(this.targetMap.size());
-	// 	this.targetMap.forEach((key, value) -> copy.put(key, new LinkedList!(K, V)(value)));
-	// 	return copy;
-	// }
+	LinkedMultiValueMap!(K, V) deepCopy() {
+		LinkedMultiValueMap!(K, V) copy = new LinkedMultiValueMap!(K, V)(this.targetMap.size());
+		foreach(K key, List!(V) value; this.targetMap) {
+			copy.put(key, new LinkedList!(V)(value));
+		}
+		return copy;
+	}
 
 	/**
 	 * Create a regular copy of this Map.

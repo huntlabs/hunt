@@ -173,7 +173,31 @@ interface Comparable(T) {
     int opCmp(T o);
 }
 
-
+/**
+ * The <code>Runnable</code> interface should be implemented by any
+ * class whose instances are intended to be executed by a thread. The
+ * class must define a method of no arguments called <code>run</code>.
+ * <p>
+ * This interface is designed to provide a common protocol for objects that
+ * wish to execute code while they are active. For example,
+ * <code>Runnable</code> is implemented by class <code>Thread</code>.
+ * Being active simply means that a thread has been started and has not
+ * yet been stopped.
+ * <p>
+ * In addition, <code>Runnable</code> provides the means for a class to be
+ * active while not subclassing <code>Thread</code>. A class that implements
+ * <code>Runnable</code> can run without subclassing <code>Thread</code>
+ * by instantiating a <code>Thread</code> instance and passing itself in
+ * as the target.  In most cases, the <code>Runnable</code> interface should
+ * be used if you are only planning to override the <code>run()</code>
+ * method and no other <code>Thread</code> methods.
+ * This is important because classes should not be subclassed
+ * unless the programmer intends on modifying or enhancing the fundamental
+ * behavior of the class.
+ *
+ * @author  Arthur van Hoff
+ * @see     Callable
+ */
 interface Runnable {
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -215,6 +239,109 @@ interface Callable(V) {
      */
     V call();
 }
+
+
+/**
+ * An object that executes submitted {@link Runnable} tasks. This
+ * interface provides a way of decoupling task submission from the
+ * mechanics of how each task will be run, including details of thread
+ * use, scheduling, etc.  An {@code Executor} is normally used
+ * instead of explicitly creating threads. For example, rather than
+ * invoking {@code new Thread(new RunnableTask()).start()} for each
+ * of a set of tasks, you might use:
+ *
+ * <pre> {@code
+ * Executor executor = anExecutor();
+ * executor.execute(new RunnableTask1());
+ * executor.execute(new RunnableTask2());
+ * ...}</pre>
+ *
+ * However, the {@code Executor} interface does not strictly require
+ * that execution be asynchronous. In the simplest case, an executor
+ * can run the submitted task immediately in the caller's thread:
+ *
+ * <pre> {@code
+ * class DirectExecutor implements Executor {
+ *   public void execute(Runnable r) {
+ *     r.run();
+ *   }
+ * }}</pre>
+ *
+ * More typically, tasks are executed in some thread other than the
+ * caller's thread.  The executor below spawns a new thread for each
+ * task.
+ *
+ * <pre> {@code
+ * class ThreadPerTaskExecutor implements Executor {
+ *   public void execute(Runnable r) {
+ *     new Thread(r).start();
+ *   }
+ * }}</pre>
+ *
+ * Many {@code Executor} implementations impose some sort of
+ * limitation on how and when tasks are scheduled.  The executor below
+ * serializes the submission of tasks to a second executor,
+ * illustrating a composite executor.
+ *
+ * <pre> {@code
+ * class SerialExecutor implements Executor {
+ *   final Queue!(Runnable) tasks = new ArrayDeque<>();
+ *   final Executor executor;
+ *   Runnable active;
+ *
+ *   SerialExecutor(Executor executor) {
+ *     this.executor = executor;
+ *   }
+ *
+ *   public synchronized void execute(Runnable r) {
+ *     tasks.add(() -> {
+ *       try {
+ *         r.run();
+ *       } finally {
+ *         scheduleNext();
+ *       }
+ *     });
+ *     if (active is null) {
+ *       scheduleNext();
+ *     }
+ *   }
+ *
+ *   protected synchronized void scheduleNext() {
+ *     if ((active = tasks.poll()) !is null) {
+ *       executor.execute(active);
+ *     }
+ *   }
+ * }}</pre>
+ *
+ * The {@code Executor} implementations provided in this package
+ * implement {@link ExecutorService}, which is a more extensive
+ * interface.  The {@link ThreadPoolExecutor} class provides an
+ * extensible thread pool implementation. The {@link Executors} class
+ * provides convenient factory methods for these Executors.
+ *
+ * <p>Memory consistency effects: Actions in a thread prior to
+ * submitting a {@code Runnable} object to an {@code Executor}
+ * <a href="package-summary.html#MemoryVisibility"><i>happen-before</i></a>
+ * its execution begins, perhaps in another thread.
+ *
+ * @since 1.5
+ * @author Doug Lea
+ */
+interface Executor {
+
+    /**
+     * Executes the given command at some time in the future.  The command
+     * may execute in a new thread, in a pooled thread, or in the calling
+     * thread, at the discretion of the {@code Executor} implementation.
+     *
+     * @param command the runnable task
+     * @throws RejectedExecutionException if this task cannot be
+     * accepted for execution
+     * @throws NullPointerException if command is null
+     */
+    void execute(Runnable command);
+}
+
 
 
 /**
