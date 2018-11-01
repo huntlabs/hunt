@@ -34,7 +34,7 @@ char charAt(string s, int i) nothrow
     return s[i];
 }
 
-char charAt(string s, ulong i) nothrow
+char charAt(string s, size_t i) nothrow
 {
     return s[i];
 }

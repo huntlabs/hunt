@@ -1227,7 +1227,7 @@ class HeapByteBuffer : ByteBuffer
     }
 
     version(LittleEndian)
-    private int _getInt(long index) {
+    private int _getInt(size_t index) {
         if(bigEndian)
             return makeInt(hb[index], hb[index+1], hb[index+2], hb[index+3]);
         else
