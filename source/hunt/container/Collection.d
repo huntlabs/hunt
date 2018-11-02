@@ -49,7 +49,7 @@ interface Collection(E) : Iterable!E {
      *
      * @return an <tt>Iterator</tt> over the elements in this collection
      */
-    // InputRange!E iterator();
+    InputRange!E iterator();
 
     /**
      * Returns an array containing all of the elements in this collection.

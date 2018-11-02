@@ -55,9 +55,9 @@ abstract class AbstractCollection(E) : Collection!E {
      *
      * @return an iterator over the elements contained in this collection
      */
-    // InputRange!E iterator() {
-    //     throw new NotImplementedException();
-    // }
+    InputRange!E iterator() {
+        throw new NotImplementedException();
+    }
 
     abstract int size();
 

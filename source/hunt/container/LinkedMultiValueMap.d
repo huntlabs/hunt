@@ -131,7 +131,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
     }
 
 	override	
-	List!(V) get(string key) {
+	List!(V) get(K key) {
 		return this.targetMap.get(key);
 	}
 
@@ -150,7 +150,7 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
     }
 
 	override
-	List!(V) remove(string key) {
+	List!(V) remove(K key) {
 		return this.targetMap.remove(key);
 	}
 	

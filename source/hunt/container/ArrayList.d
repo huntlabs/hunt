@@ -7,6 +7,7 @@ import std.container.array;
 
 import hunt.lang.exception;
 import hunt.container.AbstractList;
+import hunt.container.Collection;
 import hunt.container.List;
 
 /**
@@ -72,27 +73,19 @@ class ArrayList(E) : AbstractList!E {
      * @param c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-     this(ref Array!E arr)
-     {
+     this(ref Array!E arr) {
          _array = arr;
      }
 
-     this(E[] arr)
-     {
+     this(E[] arr) {
          _array.insertBack(arr);
      }
 
-    // this(Collection<E> c) {
-    //     _array = c.toArray();
-    //     if ((size = _array.length) != 0) {
-    //         // c.toArray might (incorrectly) not return Object[] (see 6260652)
-    //         if (_array.getClass() != Object[].class)
-    //             _array = Arrays.copyOf(_array, size, Object[].class);
-    //     } else {
-    //         // replace with empty array.
-    //         this._array = EMPTY_ELEMENTDATA;
-    //     }
-    // }
+    this(Collection!E c) {
+        foreach(E e; c) {
+            _array.insertBack(e);
+        }
+    }
 
     /**
      * Trims the capacity of this <tt>ArrayList</tt> instance to be the
