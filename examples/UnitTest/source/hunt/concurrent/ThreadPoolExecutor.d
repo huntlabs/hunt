@@ -33,7 +33,7 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-module hunt.concurrent.thread.ThreadPoolExecutor;
+module hunt.concurrent.ThreadPoolExecutor;
 
 import hunt.concurrent.AbstractExecutorService;
 import hunt.concurrent.AbstractOwnableSynchronizer;
@@ -45,7 +45,7 @@ import hunt.concurrent.ExecutorService;
 import hunt.concurrent.Executor;
 import hunt.concurrent.Future;
 import hunt.concurrent.thread.ThreadEx;
-import hunt.concurrent.thread.ThreadFactory;
+import hunt.concurrent.ThreadFactory;
 
 import hunt.container;
 import hunt.datetime;

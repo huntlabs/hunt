@@ -6,7 +6,7 @@ import hunt.concurrent.Executors;
 import hunt.concurrent.ExecutorService;
 import hunt.concurrent.Future;
 import hunt.concurrent.LinkedBlockingQueue;
-import hunt.concurrent.thread.ThreadPoolExecutor;
+import hunt.concurrent.ThreadPoolExecutor;
 
 import hunt.datetime;
 import hunt.lang.common;
@@ -19,7 +19,6 @@ import std.conv;
 import std.stdio;
 
 class ThreadPoolExecutorTest {
-
 
 	void testBasicOperatoins() {
 		try {

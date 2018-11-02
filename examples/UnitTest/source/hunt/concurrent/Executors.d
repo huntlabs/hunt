@@ -42,8 +42,8 @@ import hunt.concurrent.ExecutorService;
 import hunt.concurrent.ForkJoinPool;
 import hunt.concurrent.Future;
 import hunt.concurrent.LinkedBlockingQueue;
-import hunt.concurrent.thread.ThreadFactory;
-import hunt.concurrent.thread.ThreadPoolExecutor;
+import hunt.concurrent.ThreadFactory;
+import hunt.concurrent.ThreadPoolExecutor;
 
 import hunt.datetime;
 import hunt.lang.common;
