@@ -3,12 +3,6 @@ module hunt.util.memory;
 import core.atomic;
 import core.memory;
 
-// import core.sync.condition;
-// import core.thread;
-
-// import std.functional;
-// import std.meta;
-// import std.range.primitives;
 import std.traits;
 
 version (OSX) {
@@ -23,6 +17,11 @@ else version (DragonFlyBSD) {
 else version (NetBSD) {
     version = useSysctlbyname;
 }
+
+version(useSysctlbyname)
+    private extern(C) int sysctlbyname(
+        const char *, void *, size_t *, void *, size_t
+    ) @nogc nothrow;
 
 /*
 (For now public undocumented with reserved name.)
