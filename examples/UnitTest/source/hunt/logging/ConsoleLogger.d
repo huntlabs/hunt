@@ -70,54 +70,54 @@ class ConsoleLogger {
     }
 
     static void trace(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Trace, layout!(file, line, func)(logFormat(args), traceLevel));
     }
 
     static void tracef(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Trace, layout!(file, line, func)(logFormatf(args), traceLevel));
     }
 
     static void info(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Info, layout!(file, line, func)(logFormat(args), infoLevel));
     }
 
     static void infof(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Info, layout!(file, line, func)(logFormatf(args), infoLevel));
     }
 
     static void warning(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Warning, layout!(file, line,
                 func)(logFormat(args), warningLevel));
     }
 
     static void warningf(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Warning, layout!(file, line,
                 func)(logFormatf(args), warningLevel));
     }
 
     static void error(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Error, layout!(file, line, func)(logFormat(args), errorLevel));
     }
 
     static void errorf(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Error, layout!(file, line, func)(logFormatf(args), errorLevel));
     }
 
     static void fatal(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Fatal, layout!(file, line, func)(logFormat(args), fatalLevel));
     }
 
     static void fatalf(string file = __FILE__, size_t line = __LINE__,
-            string func = __FUNCTION__, A...)(lazy A args) {
+            string func = __FUNCTION__, A...)(lazy A args) nothrow {
         writeFormatColor(LogLevel.Fatal, layout!(file, line, func)(logFormatf(args), fatalLevel));
     }
 
@@ -188,7 +188,7 @@ class ConsoleLogger {
     //     return time_prior ~ " | " ~ tid ~ " | " ~ level ~ context ~ msg;
     // }
 
-    static string toString(LogLevel level) {
+    static string toString(LogLevel level) nothrow {
         string r;
         final switch (level) with (LogLevel) {
         case Trace:
@@ -213,7 +213,7 @@ class ConsoleLogger {
         return r;
     }
 
-    private static void writeFormatColor(LogLevel level, lazy string msg) {
+    private static void writeFormatColor(LogLevel level, lazy string msg) nothrow {
         if (level < g_logLevel)
             return;
 
@@ -233,8 +233,9 @@ class ConsoleLogger {
             default:
                 prior_color = string.init;
             }
-
-            writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
+            import std.exception;
+            collectException(writeln(prior_color ~ msg ~ PRINT_COLOR_NONE));
+            
         }
         else version (Windows) {
             import std.windows.charset;
@@ -265,3 +266,15 @@ class ConsoleLogger {
         }
     }
 }
+
+
+alias trace = ConsoleLogger.trace;
+alias tracef = ConsoleLogger.tracef;
+alias info = ConsoleLogger.info;
+alias infof = ConsoleLogger.infof;
+alias warning = ConsoleLogger.warning;
+alias warningf = ConsoleLogger.warningf;
+alias error = ConsoleLogger.error;
+alias errorf = ConsoleLogger.errorf;
+// alias critical = ConsoleLogger.critical;
+// alias criticalf = ConsoleLogger.criticalf;

@@ -33,7 +33,7 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-module hunt.concurrent.thread.ThreadFactory;
+module hunt.concurrent.ThreadFactory;
 
 import hunt.concurrent.AtomicHelper;
 import hunt.concurrent.thread.ThreadEx;

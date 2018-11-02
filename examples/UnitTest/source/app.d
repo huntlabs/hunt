@@ -15,9 +15,13 @@ import test.ThreadTest;
 
 import core.thread;
 
+import hunt.concurrent.thread;
+import hunt.util.memory;
+
 void main()
 {
-	writeln(Thread.getThis().id);
+	writeln("Thread id: ", Thread.getThis().id);
+	writeln("CPU: ", totalCPUs);
 	// testUnits!(BigIntegerTest);
 	// testTask();
 	// testUnits!(LinkedBlockingQueueTest);
@@ -27,5 +31,20 @@ void main()
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
 
+	// testLockSupport01();
+
 }
 
+
+
+    // void testLockSupport01() {
+    //     Thread thread = Thread.getThis();  
+      
+    //     LockSupport.unpark(thread);  
+      
+    //     writeln("a");  
+    //     LockSupport.park();  
+    //     writeln("b");  
+    //     LockSupport.park();  
+    //     writeln("c");  
+    // }
