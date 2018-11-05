@@ -5,6 +5,7 @@ import hunt.lang.exception;
 
 import std.algorithm;
 import std.conv;
+import std.format;
 
 /**
  * This class implements an output stream in which the data is
@@ -127,11 +128,12 @@ class ByteArrayOutputStream : OutputStream {
      */
     override void write(byte[] b, int off, int len) {
         if ((off < 0) || (off > b.length) || (len < 0) ||
-            ((off + len) - b.length > 0)) {
-            throw new IndexOutOfBoundsException("");
+            ((off + len) > b.length)) {
+                string msg = format("buffer error, size: %d, offset: %d, length: %d",
+                    b.length, off, len);
+            throw new IndexOutOfBoundsException(msg);
         }
         ensureCapacity(count + len);
-        // System.arraycopy(b, off, buf, count, len);
         buf[count .. count+len] = b[off .. off + len];
         count += len;
     }

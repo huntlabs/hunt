@@ -3,6 +3,10 @@ module hunt.io.BufferedOutputStream;
 import hunt.io.common;
 import hunt.lang.exception;
 
+version(HUNT_DEBUG) {
+    import hunt.logging;
+}
+
 /**
  * 
  */
