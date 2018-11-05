@@ -433,12 +433,16 @@ abstract class OutputStream : Closeable  { // implements  Flushable
      *             an <code>IOException</code> is thrown if the output
      *             stream is closed.
      */
-    void write(byte[] b, int off, int len)  {
+    void write(byte[] b, int off, int len) {
+        int bufferSize = cast(int)b.length;
         if (b is null) {
             throw new NullPointerException("");
-        } else if ((off < 0) || (off > b.length) || (len < 0) ||
-                   ((off + len) > b.length) || ((off + len) < 0)) {
-            throw new IndexOutOfBoundsException("");
+        } else if ((off < 0) || (off > bufferSize) || (len < 0) ||
+                   ((off + len) > bufferSize) || ((off + len) < 0)) {
+            import std.format;
+            string msg = format("buffer error, size: %d, offset: %d, length: %d",
+                bufferSize, off, len);
+            throw new IndexOutOfBoundsException(msg);
         } else if (len == 0) {
             return;
         }
