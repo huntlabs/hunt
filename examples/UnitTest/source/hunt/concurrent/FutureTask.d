@@ -38,13 +38,14 @@ module hunt.concurrent.FutureTask;
 import hunt.concurrent.AtomicHelper;
 import hunt.concurrent.Executors;
 import hunt.concurrent.Future;
-import hunt.datetime;
+import hunt.concurrent.thread;
 import hunt.lang.common;
 import hunt.lang.exception;
 
 import core.thread;
-import std.datetime;
+import core.time;
 
+import hunt.concurrent.thread;
 import hunt.logging.ConsoleLogger;
 
 
@@ -187,26 +188,23 @@ static if(is(V == void)) {
     }
 
     bool cancel(bool mayInterruptIfRunning) {
-        throw new NotSupportedException();
-        // if (!(state == NEW && AtomicHelper.cas(state, 
-        //     mayInterruptIfRunning ? INTERRUPTING : CANCELLED)))
-        //     return false;
-        // try {    // in case call to interrupt throws exception
-        //     if (mayInterruptIfRunning) {
-        //         try {
-        //             Thread t = runner;
-        //             // TODO: Tasks pending completion -@zxp at 10/11/2018, 10:48:16 PM
-        //             // 
-        //             // if (t !is null)
-        //             //     t.interrupt();
-        //         } finally { // final state
-        //             AtomicHelper.store(state, INTERRUPTED);
-        //         }
-        //     }
-        // } finally {
-        //     finishCompletion();
-        // }
-        // return true;
+        if (!(state == NEW && AtomicHelper.cas(state, NEW,
+            mayInterruptIfRunning ? INTERRUPTING : CANCELLED)))
+            return false;
+        try {    // in case call to interrupt throws exception
+            if (mayInterruptIfRunning) {
+                try {
+                    ThreadEx t = cast(ThreadEx) runner;
+                    if (t !is null)
+                        t.interrupt();
+                } finally { // final state
+                    AtomicHelper.store(state, INTERRUPTED);
+                }
+            }
+        } finally {
+            finishCompletion();
+        }
+        return true;
     }
 
     /**
@@ -215,7 +213,7 @@ static if(is(V == void)) {
     V get() {
         int s = state;
         if (s <= COMPLETING)
-            s = awaitDone(false, 0L);
+            s = awaitDone(false, Duration.zero);
         return report(s);
     }
 
@@ -225,7 +223,7 @@ static if(is(V == void)) {
     V get(Duration timeout) {
         int s = state;
         if (s <= COMPLETING &&
-            (s = awaitDone(true, timeout.total!(TimeUnit.HectoNanosecond)())) <= COMPLETING)
+            (s = awaitDone(true, timeout)) <= COMPLETING)
             throw new TimeoutException();
         return report(s);
     }
@@ -398,7 +396,7 @@ static if(is(V == void)) {
             while (state == INTERRUPTING)
                 Thread.yield(); // wait out pending interrupt
 
-        // assert state == INTERRUPTED;
+        assert(state == INTERRUPTED);
 
         // We want to clear any interrupt we may have received from
         // cancel(true).  However, it is permissible to use interrupts
@@ -406,7 +404,7 @@ static if(is(V == void)) {
         // its caller, and there is no way to clear only the
         // cancellation interrupt.
         //
-        // Thread.interrupted();
+        ThreadEx.interrupted();
     }
 
     /**
@@ -432,8 +430,7 @@ static if(is(V == void)) {
                     Thread t = q.thread;
                     if (t !is null) {
                         q.thread = null;
-                        // LockSupport.unpark(t);
-                        implementationMissing(false);
+                        LockSupport.unpark(t);
                     }
                     WaitNode next = q.next;
                     if (next is null)
@@ -454,10 +451,10 @@ static if(is(V == void)) {
      * Awaits completion or aborts on interrupt or timeout.
      *
      * @param timed true if use timed waits
-     * @param nanos time to wait, if timed
+     * @param duration time to wait, if timed
      * @return state upon completion or at timeout
      */
-    private int awaitDone(bool timed, long nanos) {
+    private int awaitDone(bool timed, Duration timeout) {
         // The code below is very delicate, to achieve these goals:
         // - call nanoTime exactly once for each call to park
         // - if nanos <= 0L, return promptly without allocation or nanoTime
@@ -465,7 +462,7 @@ static if(is(V == void)) {
         // - if nanos == Long.MAX_VALUE, and nanoTime is non-monotonic
         //   and we suffer a spurious wakeup, we will do no worse than
         //   to park-spin for a while
-        long startTime = 0L;    // Special value 0L means not yet parked
+        MonoTime startTime = MonoTime.zero;    // Special value 0L means not yet parked
         WaitNode q = null;
         bool queued = false;
         for (;;) {
@@ -479,40 +476,38 @@ static if(is(V == void)) {
                 // We may have already promised (via isDone) that we are done
                 // so never return empty-handed or throw InterruptedException
                 Thread.yield();
-            // else if (Thread.interrupted()) {
-            //     removeWaiter(q);
-            //     throw new InterruptedException();
-            // }
+            else if (ThreadEx.interrupted()) {
+                removeWaiter(q);
+                throw new InterruptedException();
+            }
             else if (q is null) {
-                if (timed && nanos <= 0L)
+                if (timed && timeout <= Duration.zero)
                     return s;
                 q = new WaitNode();
             }
             else if (!queued)
                 queued = AtomicHelper.cas!(WaitNode)(waiters, q.next = waiters, q);
             else if (timed) {
-                long parkNanos;
-                if (startTime == 0L) { // first time
-                    startTime = Clock.currStdTime;
-                    if (startTime == 0L)
-                        startTime = 1L;
-                    parkNanos = nanos;
+                Duration parkDuration;
+                if (startTime == MonoTime.zero) { // first time
+                    startTime = MonoTime.currTime;
+                    if (startTime == MonoTime.zero)
+                        startTime = MonoTime(1);
+                    parkDuration = timeout;
                 } else {                    
-                    long elapsed = Clock.currStdTime - startTime;
-                    if (elapsed >= nanos) {
+                    Duration elapsed = MonoTime.currTime - startTime;
+                    if (elapsed >= timeout) {
                         removeWaiter(q);
                         return state;
                     }
-                    parkNanos = nanos - elapsed;
+                    parkDuration = timeout - elapsed;
                 }
                 // nanoTime may be slow; recheck before parking
                 if (state < COMPLETING) {
-                    // LockSupport.parkNanos(this, parkNanos);
-                    // implementationMissing(false);
+                    LockSupport.park(this, parkDuration);
                 }
             } else {
-                // LockSupport.park(this);
-                implementationMissing(false);
+                LockSupport.park(this);
             }
         }
     }

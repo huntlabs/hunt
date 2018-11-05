@@ -1,5 +1,6 @@
 module hunt.concurrent.thread.ThreadEx;
 
+import hunt.lang.common;
 import hunt.logging.ConsoleLogger;
 import hunt.util.memory;
 
@@ -33,11 +34,29 @@ version (Posix) {
     }
 }
 
+interface Interruptible {
+
+    void interrupt(Thread t);
+
+}
+
 /**
 */
 class ThreadEx : Thread {
 
     Object parkBlocker;
+
+    /* The object in which this thread is blocked in an interruptible I/O
+     * operation, if any.  The blocker's interrupt method should be invoked
+     * after setting this thread's interrupt status.
+     */
+    private Interruptible blocker;
+    private Object blockerLock;
+    private shared bool _interrupted;     // Thread.isInterrupted state
+
+    this(Runnable target, size_t sz = 0) {
+        this({ target.run(); }, sz);
+    }
 
     this(void function() fn, size_t sz = 0) nothrow {
         super(fn, sz);
@@ -49,14 +68,145 @@ class ThreadEx : Thread {
         initialize();
     }
 
-    private void initialize() nothrow {
-        _parker = Parker.allocate(this);
+    ~this() {
+        blocker = null;
+        blockerLock = null;
+        parkBlocker = null;
+        _parker = null;
     }
 
-    // void run() {
-    //     start();
-    //     _tid = getTid();
-    // }
+    private void initialize() nothrow {
+        _parker = Parker.allocate(this);
+        blockerLock = new Object();
+    }
+
+
+    /* Set the blocker field; invoked via sun.misc.SharedSecrets from java.nio code
+     */
+    void blockedOn(Interruptible b) {
+        synchronized (blockerLock) {
+            blocker = b;
+        }
+    }
+
+    /**
+     * Interrupts this thread.
+     *
+     * <p> Unless the current thread is interrupting itself, which is
+     * always permitted, the {@link #checkAccess() checkAccess} method
+     * of this thread is invoked, which may cause a {@link
+     * SecurityException} to be thrown.
+     *
+     * <p> If this thread is blocked in an invocation of the {@link
+     * Object#wait() wait()}, {@link Object#wait(long) wait(long)}, or {@link
+     * Object#wait(long, int) wait(long, int)} methods of the {@link Object}
+     * class, or of the {@link #join()}, {@link #join(long)}, {@link
+     * #join(long, int)}, {@link #sleep(long)}, or {@link #sleep(long, int)},
+     * methods of this class, then its interrupt status will be cleared and it
+     * will receive an {@link InterruptedException}.
+     *
+     * <p> If this thread is blocked in an I/O operation upon an {@link
+     * java.nio.channels.InterruptibleChannel InterruptibleChannel}
+     * then the channel will be closed, the thread's interrupt
+     * status will be set, and the thread will receive a {@link
+     * java.nio.channels.ClosedByInterruptException}.
+     *
+     * <p> If this thread is blocked in a {@link java.nio.channels.Selector}
+     * then the thread's interrupt status will be set and it will return
+     * immediately from the selection operation, possibly with a non-zero
+     * value, just as if the selector's {@link
+     * java.nio.channels.Selector#wakeup wakeup} method were invoked.
+     *
+     * <p> If none of the previous conditions hold then this thread's interrupt
+     * status will be set. </p>
+     *
+     * <p> Interrupting a thread that is not alive need not have any effect.
+     *
+     * @throws  SecurityException
+     *          if the current thread cannot modify this thread
+     *
+     * @revised 6.0
+     * @spec JSR-51
+     */
+    void interrupt() {
+        // if (this !is Thread.getThis())
+        //     checkAccess();
+
+        synchronized (blockerLock) {
+            Interruptible b = blocker;
+            if (b !is null) {
+                interrupt0();           // Just to set the interrupt flag
+                b.interrupt(this);
+                return;
+            }
+        }
+        interrupt0();
+    }
+
+    private void interrupt0() {
+        if(!_interrupted) {
+            _interrupted = true;
+            // More than one thread can get here with the same value of osthread,
+            // resulting in multiple notifications.  We do, however, want the store
+            // to interrupted() to be visible to other threads before we execute unpark().
+            // OrderAccess::fence();
+            // ParkEvent * const slp = thread->_SleepEvent ;
+            // if (slp != NULL) slp->unpark() ;
+        }
+
+        // For JSR166. Unpark even if interrupt status already was set
+        _parker.unpark();
+
+        // ParkEvent * ev = thread->_ParkEvent ;
+        // if (ev != NULL) ev->unpark() ;
+    }
+
+    /**
+     * Tests whether this thread has been interrupted.  The <i>interrupted
+     * status</i> of the thread is unaffected by this method.
+     *
+     * <p>A thread interruption ignored because a thread was not alive
+     * at the time of the interrupt will be reflected by this method
+     * returning false.
+     *
+     * @return  <code>true</code> if this thread has been interrupted;
+     *          <code>false</code> otherwise.
+     * @see     #interrupted()
+     * @revised 6.0
+     */
+    bool isInterrupted() {
+        return isInterrupted(false);
+    }
+
+    /**
+     * Tests if some Thread has been interrupted.  The interrupted state
+     * is reset or not based on the value of ClearInterrupted that is
+     * passed.
+     */
+    private bool isInterrupted(bool canClear) {
+        // bool interrupted = osthread->interrupted();
+
+        // NOTE that since there is no "lock" around the interrupt and
+        // is_interrupted operations, there is the possibility that the
+        // interrupted flag (in osThread) will be "false" but that the
+        // low-level events will be in the signaled state. This is
+        // intentional. The effect of this is that Object.wait() and
+        // LockSupport.park() will appear to have a spurious wakeup, which
+        // is allowed and not harmful, and the possibility is so rare that
+        // it is not worth the added complexity to add yet another lock.
+        // For the sleep event an explicit reset is performed on entry
+        // to os::sleep, so there is no early return. It has also been
+        // recommended not to put the interrupted flag into the "event"
+        // structure because it hides the issue.
+        if (_interrupted && canClear) {
+            _interrupted = false;
+            // osthread->set_interrupted(false);
+            // consider thread->_SleepEvent->reset() ... optional optimization
+        }
+
+        return _interrupted;
+    }
+
 
     Parker parker() {
         return _parker;
@@ -96,9 +246,33 @@ class ThreadEx : Thread {
     }
 
 
-//   static void start(Thread* thread);
-//   static void interrupt(Thread* thr);
-//   static bool is_interrupted(Thread* thr, bool clear_interrupted);
+    /**
+     * Tests whether the current thread has been interrupted.  The
+     * <i>interrupted status</i> of the thread is cleared by this method.  In
+     * other words, if this method were to be called twice in succession, the
+     * second call would return false (unless the current thread were
+     * interrupted again, after the first call had cleared its interrupted
+     * status and before the second call had examined it).
+     *
+     * <p>A thread interruption ignored because a thread was not alive
+     * at the time of the interrupt will be reflected by this method
+     * returning false.
+     *
+     * @return  <code>true</code> if the current thread has been interrupted;
+     *          <code>false</code> otherwise.
+     * @see #isInterrupted()
+     * @revised 6.0
+     */
+    static bool interrupted() {
+        ThreadEx tex = cast(ThreadEx)Thread.getThis();
+        if(tex is null) {
+            // FIXME: Needing refactor or cleanup -@zxp at 11/4/2018, 10:45:33 PM
+            // 
+            return false;
+        } else {
+            return tex.isInterrupted(true);
+        }
+    }
 
     static void spinRelease(shared(int)* adr) @safe nothrow @nogc {
         assert(*adr != 0, "invariant");
@@ -193,7 +367,6 @@ class Parker {
     // on the condvar. Contention seen when trying to park implies that someone
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
-
     void park(Duration time) {
         bool isAbsolute = false;
 
