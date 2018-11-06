@@ -67,9 +67,9 @@ class BufferedOutputStream : OutputStream {
         version(HUNT_DEBUG) {
             import hunt.logging;
             if(count == 0)
-                warning("count=0");
+                warning("buffered data(bytes): 0");
             else
-                trace("count=", count);
+                trace("buffered data(bytes): ", count);
         }
         if (count > 0) {
             output.write(buf, 0, count);
