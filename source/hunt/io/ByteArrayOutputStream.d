@@ -46,10 +46,7 @@ class ByteArrayOutputStream : OutputStream {
      * @param   size   the initial size.
      * @exception  IllegalArgumentException if size is negative.
      */
-    this(int size) {
-        if (size < 0) {
-            throw new IllegalArgumentException("Negative initial size: " ~ size.to!string());
-        }
+    this(size_t size) {
         buf = new byte[size];
     }
 
@@ -63,9 +60,9 @@ class ByteArrayOutputStream : OutputStream {
      * interpreted as a request for the unsatisfiably large capacity
      * {@code (long) Integer.MAX_VALUE + (minCapacity - Integer.MAX_VALUE)}.
      */
-    private void ensureCapacity(int minCapacity) {
+    private void ensureCapacity(size_t minCapacity) {
         // overflow-conscious code
-        if (minCapacity - buf.length > 0)
+        if (minCapacity > buf.length)
             grow(minCapacity);
     }
 
@@ -83,10 +80,10 @@ class ByteArrayOutputStream : OutputStream {
      *
      * @param minCapacity the desired minimum capacity
      */
-    private void grow(int minCapacity) {
+    private void grow(size_t minCapacity) {
         // overflow-conscious code
-        int oldCapacity = cast(int)buf.length;
-        int newCapacity = oldCapacity << 1;
+        size_t oldCapacity = buf.length;
+        size_t newCapacity = oldCapacity << 1;
         if (newCapacity - minCapacity < 0)
             newCapacity = minCapacity;
         if (newCapacity - MAX_ARRAY_SIZE > 0)
@@ -97,11 +94,11 @@ class ByteArrayOutputStream : OutputStream {
         buf = newBuf;
     }
 
-    private static int hugeCapacity(int minCapacity) {
-        if (minCapacity < 0) // overflow
-            throw new OutOfMemoryError();
+    private static size_t hugeCapacity(size_t minCapacity) {
+        // if (minCapacity < 0) // overflow
+        //     throw new OutOfMemoryError();
         return (minCapacity > MAX_ARRAY_SIZE) ?
-            int.max :
+            size_t.max :
             MAX_ARRAY_SIZE;
     }
 
