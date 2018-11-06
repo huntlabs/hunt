@@ -109,7 +109,8 @@ class ThreadTest {
             // FIXME: Needing refactor or cleanup -@zxp at 11/5/2018, 10:16:15 AM
             // to cancel the sleeping thread
             // Thread.sleep(10.seconds);
-            LockSupport.park(10.seconds);
+            // LockSupport.park(10.seconds);
+            ThreadEx.sleep(10.seconds);
             trace("task done.");
             return 10;
         }

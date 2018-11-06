@@ -35,16 +35,28 @@ version (Posix) {
 }
 
 interface Interruptible {
-
     void interrupt(Thread t);
-
 }
+
+enum ThreadState {
+    ALLOCATED,                    // Memory has been allocated but not initialized
+    INITIALIZED,                  // The thread has been initialized but yet started
+    RUNNABLE,                     // Has been started and is runnable, but not necessarily running
+    //   MONITOR_WAIT,                 // Waiting on a contended monitor lock
+    CONDVAR_WAIT,                 // Waiting on a condition variable
+    //   OBJECT_WAIT,                  // Waiting on an Object.wait() call
+    //   BREAKPOINTED,                 // Suspended at breakpoint
+    SLEEPING,                     // Thread.sleep()
+    ZOMBIE                        // All done, but not reclaimed yet
+    }
 
 /**
 */
 class ThreadEx : Thread {
 
     Object parkBlocker;
+
+    ThreadState state;
 
     /* The object in which this thread is blocked in an interruptible I/O
      * operation, if any.  The blocker's interrupt method should be invoked
@@ -78,6 +90,7 @@ class ThreadEx : Thread {
     private void initialize() nothrow {
         _parker = Parker.allocate(this);
         blockerLock = new Object();
+        state = ThreadState.ALLOCATED;
     }
 
 
@@ -213,10 +226,28 @@ class ThreadEx : Thread {
     }
     private Parker _parker;
 
+    // Short sleep, direct OS call.
+    static void nakedSleep(Duration timeout) {
+        Thread.sleep(timeout);
+    }
+
+    // Sleep forever; naked call to OS-specific sleep; use with CAUTION
+    static void infiniteSleep() {
+        while (true) {    // sleep forever ...
+            Thread.sleep(100.seconds);   // ... 100 seconds at a time
+        }
+    }
+
+    static void sleep(Duration timeout) {
+        // TODO: Tasks pending completion -@zxp at 11/6/2018, 12:29:22 PM
+        // using ParkEvent
+        LockSupport.park(timeout);
+    }
+
     // Low-level leaf-lock primitives used to implement synchronization
     // and native monitor-mutex infrastructure.
     // Not for general synchronization use.
-    static void spinAcquire(shared(int)* adr, string name) nothrow  {
+    private static void spinAcquire(shared(int)* adr, string name) nothrow  {
         int last = *adr;
         cas(adr, 0, 1);
         if (last == 0) return; // normal fast-path return
@@ -245,36 +276,7 @@ class ThreadEx : Thread {
         }
     }
 
-
-    /**
-     * Tests whether the current thread has been interrupted.  The
-     * <i>interrupted status</i> of the thread is cleared by this method.  In
-     * other words, if this method were to be called twice in succession, the
-     * second call would return false (unless the current thread were
-     * interrupted again, after the first call had cleared its interrupted
-     * status and before the second call had examined it).
-     *
-     * <p>A thread interruption ignored because a thread was not alive
-     * at the time of the interrupt will be reflected by this method
-     * returning false.
-     *
-     * @return  <code>true</code> if the current thread has been interrupted;
-     *          <code>false</code> otherwise.
-     * @see #isInterrupted()
-     * @revised 6.0
-     */
-    static bool interrupted() {
-        ThreadEx tex = cast(ThreadEx)Thread.getThis();
-        if(tex is null) {
-            // FIXME: Needing refactor or cleanup -@zxp at 11/4/2018, 10:45:33 PM
-            // 
-            return false;
-        } else {
-            return tex.isInterrupted(true);
-        }
-    }
-
-    static void spinRelease(shared(int)* adr) @safe nothrow @nogc {
+    private static void spinRelease(shared(int)* adr) @safe nothrow @nogc {
         assert(*adr != 0, "invariant");
         atomicFence(); // guarantee at least release consistency.
         // Roach-motel semantics.
