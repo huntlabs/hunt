@@ -135,6 +135,54 @@ class LockSupport {
             tx.parker().unpark();
     }
 
+
+    /**
+     * Disables the current thread for thread scheduling purposes unless the
+     * permit is available.
+     *
+     * <p>If the permit is available then it is consumed and the call
+     * returns immediately; otherwise the current thread becomes disabled
+     * for thread scheduling purposes and lies dormant until one of three
+     * things happens:
+     *
+     * <ul>
+     *
+     * <li>Some other thread invokes {@link #unpark unpark} with the
+     * current thread as the target; or
+     *
+     * <li>Some other thread {@linkplain Thread#interrupt interrupts}
+     * the current thread; or
+     *
+     * <li>The call spuriously (that is, for no reason) returns.
+     * </ul>
+     *
+     * <p>This method does <em>not</em> report which of these caused the
+     * method to return. Callers should re-check the conditions which caused
+     * the thread to park in the first place. Callers may also determine,
+     * for example, the interrupt status of the thread upon return.
+     */
+    static void park() {
+        ThreadEx tx = cast(ThreadEx)Thread.getThis();
+        if (tx !is null) {
+            tx.parker().park(Duration.zero);
+        } else {
+            warning("The current thread is not ThreadEx!");
+            // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:08:21 AM
+            // upgrade Thread to ThreadEx
+            Thread.sleep(Duration.zero);
+        }
+    }
+
+    static void park(Duration time) {        
+        ThreadEx tx = cast(ThreadEx)Thread.getThis();
+        if (!time.isNegative && tx !is null) {
+            tx.parker().park(time);
+        } else {
+            warning("The current thread is not ThreadEx!");
+            Thread.sleep(time);
+        }
+    }
+
     /**
      * Disables the current thread for thread scheduling purposes unless the
      * permit is available.
@@ -177,7 +225,6 @@ class LockSupport {
             warning("The current thread is not ThreadEx!");
         }
     }
-    
 
     /**
      * Disables the current thread for thread scheduling purposes, for up to
@@ -258,67 +305,6 @@ class LockSupport {
     // }
 
     /**
-     * Returns the blocker object supplied to the most recent
-     * invocation of a park method that has not yet unblocked, or null
-     * if not blocked.  The value returned is just a momentary
-     * snapshot -- the thread may have since unblocked or blocked on a
-     * different blocker object.
-     *
-     * @param t the thread
-     * @return the blocker
-     * @throws NullPointerException if argument is null
-     * @since 1.6
-     */
-    static Object getBlocker(Thread t) {
-         ThreadEx tx = cast(ThreadEx)t;
-        if (tx !is null) 
-            throw new NullPointerException();
-        return tx.parkBlocker;
-        
-    }
-
-    /**
-     * Disables the current thread for thread scheduling purposes unless the
-     * permit is available.
-     *
-     * <p>If the permit is available then it is consumed and the call
-     * returns immediately; otherwise the current thread becomes disabled
-     * for thread scheduling purposes and lies dormant until one of three
-     * things happens:
-     *
-     * <ul>
-     *
-     * <li>Some other thread invokes {@link #unpark unpark} with the
-     * current thread as the target; or
-     *
-     * <li>Some other thread {@linkplain Thread#interrupt interrupts}
-     * the current thread; or
-     *
-     * <li>The call spuriously (that is, for no reason) returns.
-     * </ul>
-     *
-     * <p>This method does <em>not</em> report which of these caused the
-     * method to return. Callers should re-check the conditions which caused
-     * the thread to park in the first place. Callers may also determine,
-     * for example, the interrupt status of the thread upon return.
-     */
-    static void park() {
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (tx !is null) {
-            tx.parker().park(Duration.zero);
-        } else {
-            warning("The current thread is not ThreadEx!");
-        }
-    }
-
-    static void park(Duration time) {        
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (!time.isNegative && tx !is null) {
-            tx.parker().park(time);
-        }
-    }
-
-    /**
      * Disables the current thread for thread scheduling purposes, for up to
      * the specified waiting time, unless the permit is available.
      *
@@ -390,6 +376,26 @@ class LockSupport {
     }
 
     /**
+     * Returns the blocker object supplied to the most recent
+     * invocation of a park method that has not yet unblocked, or null
+     * if not blocked.  The value returned is just a momentary
+     * snapshot -- the thread may have since unblocked or blocked on a
+     * different blocker object.
+     *
+     * @param t the thread
+     * @return the blocker
+     * @throws NullPointerException if argument is null
+     * @since 1.6
+     */
+    static Object getBlocker(Thread t) {
+         ThreadEx tx = cast(ThreadEx)t;
+        if (tx is null) 
+            throw new NullPointerException();
+        return tx.parkBlocker;
+        
+    }
+
+    /**
      * Returns the pseudo-randomly initialized or updated secondary seed.
      * Copied from ThreadLocalRandom due to package access restrictions.
      */
@@ -416,14 +422,5 @@ class LockSupport {
     // static final long getThreadId(Thread thread) {
     //     return U.getLong(thread, TID);
     // }
-
-    // Hotspot implementation via intrinsics API
-    // private static final Unsafe U = Unsafe.getUnsafe();
-    // private static final long PARKBLOCKER = U.objectFieldOffset
-    //         (Thread.class, "parkBlocker");
-    // private static final long SECONDARY = U.objectFieldOffset
-    //         (Thread.class, "threadLocalRandomSecondarySeed");
-    // private static final long TID = U.objectFieldOffset
-    //         (Thread.class, "tid");
 
 }

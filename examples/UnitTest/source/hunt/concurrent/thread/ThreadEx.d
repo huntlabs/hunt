@@ -10,6 +10,7 @@ import core.time;
 import core.sync.condition;
 import core.sync.mutex;
 
+import hunt.concurrent.thread.LockSupport;
 
 version (Posix) {
     import hunt.sys.syscall;
@@ -189,6 +190,30 @@ class ThreadEx : Thread {
      */
     bool isInterrupted() {
         return isInterrupted(false);
+    }
+
+
+    /**
+     * Tests whether the current thread has been interrupted.  The
+     * <i>interrupted status</i> of the thread is cleared by this method.  In
+     * other words, if this method were to be called twice in succession, the
+     * second call would return false (unless the current thread were
+     * interrupted again, after the first call had cleared its interrupted
+     * status and before the second call had examined it).
+     *
+     * <p>A thread interruption ignored because a thread was not alive
+     * at the time of the interrupt will be reflected by this method
+     * returning false.
+     *
+     * @return  <code>true</code> if the current thread has been interrupted;
+     *          <code>false</code> otherwise.
+     * @see #isInterrupted()
+     * @revised 6.0
+     */
+    static bool interrupted() {
+        ThreadEx tex = cast(ThreadEx) Thread.getThis();
+        assert(tex !is null, "Must be a ThreadEx");
+        return tex.isInterrupted(true);
     }
 
     /**
