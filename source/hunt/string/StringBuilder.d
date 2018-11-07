@@ -10,32 +10,26 @@ import std.conv;
 import std.string;
 import std.uni;
 
-
 /**
 */
-class StringBuilder : Appendable
-{
+class StringBuilder : Appendable {
     Appender!(byte[]) _buffer;
 
-    this(size_t capacity=16)
-    {
+    this(size_t capacity = 16) {
         _buffer.reserve(capacity);
     }
 
-
-    this(string data, size_t capacity=16)
-    {
+    this(string data, size_t capacity = 16) {
         _buffer.reserve(capacity);
         this.append(data);
     }
-    
+
     // void append(in char[] s)
     // {
     //     _buffer.put(cast(string) s);
     // }
 
-    void reset()
-    {
+    void reset() {
         _buffer.clear();
     }
 
@@ -44,39 +38,33 @@ class StringBuilder : Appendable
         return this;
     }
 
-    StringBuilder append(char s)    {
+    StringBuilder append(char s) {
         _buffer.put(s);
         return this;
     }
 
-
-    StringBuilder append(bool s)    {
+    StringBuilder append(bool s) {
         append(s.to!string());
         return this;
     }
 
-
-    StringBuilder append(int i)
-    {
+    StringBuilder append(int i) {
         _buffer.put(cast(byte[])(to!(string)(i)));
         return this;
     }
 
-    StringBuilder append(float f)
-    {
+    StringBuilder append(float f) {
         _buffer.put(cast(byte[])(to!(string)(f)));
         return this;
     }
 
-    StringBuilder append(const(char)[] s)
-    {
-        _buffer.put(cast(byte[])s);
+    StringBuilder append(const(char)[] s) {
+        _buffer.put(cast(byte[]) s);
         return this;
     }
 
-    StringBuilder append(const(char)[] s, int start, int end)
-    {
-        _buffer.put(cast(byte[])s[start..end]);
+    StringBuilder append(const(char)[] s, int start, int end) {
+        _buffer.put(cast(byte[]) s[start .. end]);
         return this;
     }
 
@@ -87,15 +75,13 @@ class StringBuilder : Appendable
     // }
 
     /// Warning: It's different from the previous one.
-    StringBuilder append(byte[] str, int offset, int len)
-    {
-        _buffer.put(str[offset..offset+len]);
+    StringBuilder append(byte[] str, int offset, int len) {
+        _buffer.put(str[offset .. offset + len]);
         return this;
     }
 
-    int length()
-    {
-        return cast(int)_buffer.data.length;
+    int length() {
+        return cast(int) _buffer.data.length;
     }
 
     void setLength(int newLength) {
@@ -119,16 +105,18 @@ class StringBuilder : Appendable
         // }
     }
 
-    int lastIndexOf(string s)
-    {
+    int lastIndexOf(string s) {
         string source = cast(string) _buffer.data;
-        return cast(int)source.lastIndexOf(s);
+        return cast(int) source.lastIndexOf(s);
 
         // return cast(int)_buffer.data.countUntil(cast(byte[])s);
     }
 
-    override string toString()
-    {
-        return cast(string) _buffer.data.idup;
+    override string toString() {
+        string s = cast(string) _buffer.data.idup;
+        if (s is null)
+            return "";
+        else
+            return s;
     }
 }
