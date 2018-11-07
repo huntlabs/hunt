@@ -22,7 +22,7 @@ class Locker {
 
     private  bool _spin;
     // private  ReentrantLock _lock = new ReentrantLock();
-    // private  AtomicReference<Thread> _spinLockState = new AtomicReference<>(null);
+    // private  AtomicReference!(Thread) _spinLockState = new AtomicReference<>(null);
     private  Lock _unlock; // = new Lock();
 
     this() {
