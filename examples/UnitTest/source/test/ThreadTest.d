@@ -65,8 +65,7 @@ class ThreadTest {
     // }
 
     void testFutureTask01() {
-        ThreadEx tx;
-        tx = new ThreadEx(&futureTask01);
+        ThreadEx tx = new ThreadEx(&futureTask01);
         tx.start();
 
         thread_joinAll();

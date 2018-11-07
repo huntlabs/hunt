@@ -471,23 +471,20 @@ static if(is(V == void)) {
                 if (q !is null)
                     q.thread = null;
                 return s;
-            }
-            else if (s == COMPLETING)
+            } else if (s == COMPLETING) {
                 // We may have already promised (via isDone) that we are done
                 // so never return empty-handed or throw InterruptedException
                 Thread.yield();
-            else if (ThreadEx.interrupted()) {
+            } else if (ThreadEx.interrupted()) {
                 removeWaiter(q);
                 throw new InterruptedException();
-            }
-            else if (q is null) {
+            } else if (q is null) {
                 if (timed && timeout <= Duration.zero)
                     return s;
                 q = new WaitNode();
-            }
-            else if (!queued)
+            } else if (!queued) {
                 queued = AtomicHelper.cas!(WaitNode)(waiters, q.next = waiters, q);
-            else if (timed) {
+            } else if (timed) {
                 Duration parkDuration;
                 if (startTime == MonoTime.zero) { // first time
                     startTime = MonoTime.currTime;
