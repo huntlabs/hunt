@@ -73,7 +73,7 @@ import hunt.logging.ConsoleLogger;
  * <pre> {@code
  * class FIFOMutex {
  *   private final AtomicBoolean locked = new AtomicBoolean(false);
- *   private final Queue<Thread> waiters
+ *   private final Queue!(Thread) waiters
  *     = new ConcurrentLinkedQueue<>();
  *
  *   void lock() {

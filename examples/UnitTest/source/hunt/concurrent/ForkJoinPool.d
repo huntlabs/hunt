@@ -1283,7 +1283,7 @@ class ForkJoinPool { // : AbstractExecutorService
     // final string workerNamePrefix;       // for worker thread string; sync lock
     // final ForkJoinWorkerThreadFactory factory;
     // final UncaughtExceptionHandler ueh;  // per-worker UEH
-    // final Predicate<ForkJoinPool> saturate;
+    // final Predicate!(ForkJoinPool) saturate;
 
     // @jdk.internal.vm.annotation.Contended("fjpctl") // segregate
     // long ctl;                   // main pool control
@@ -1541,7 +1541,7 @@ class ForkJoinPool { // : AbstractExecutorService
     //             if (unstable || tc != 0 || ctl != c)
     //                 return 0;                    // inconsistent
     //             else if (t + pc >= MAX_CAP || t >= (bounds >>> SWIDTH)) {
-    //                 Predicate<ForkJoinPool> sat;
+    //                 Predicate!(ForkJoinPool) sat;
     //                 if ((sat = saturate) !is null && sat.test(this))
     //                     return -1;
     //                 else if (bc < pc) {          // lagging
@@ -2263,7 +2263,7 @@ class ForkJoinPool { // : AbstractExecutorService
     //                     int corePoolSize,
     //                     int maximumPoolSize,
     //                     int minimumRunnable,
-    //                     Predicate<ForkJoinPool> saturate,
+    //                     Predicate!(ForkJoinPool) saturate,
     //                     long keepAliveTime,
     //                     TimeUnit unit) {
     //     // check, encode, pack parameters
@@ -2480,11 +2480,11 @@ class ForkJoinPool { // : AbstractExecutorService
     //  * @throws NullPointerException       {@inheritDoc}
     //  * @throws RejectedExecutionException {@inheritDoc}
     //  */
-    // !(T) List<Future!(T)> invokeAll(Collection<Callable!(T)> tasks) {
+    // !(T) List!(Future!(T)) invokeAll(Collection!(Callable!(T)) tasks) {
     //     // In previous versions of this class, this method constructed
     //     // a task to run ForkJoinTask.invokeAll, but now external
     //     // invocation of multiple tasks is at least as efficient.
-    //     ArrayList<Future!(T)> futures = new ArrayList<>(tasks.size());
+    //     ArrayList!(Future!(T)) futures = new ArrayList<>(tasks.size());
 
     //     try {
     //         for (Callable!(T) t : tasks) {
@@ -3015,10 +3015,10 @@ class ForkJoinPool { // : AbstractExecutorService
     //  * <p>Here is a class that possibly blocks waiting for an
     //  * item on a given queue:
     //  * <pre> {@code
-    //  * class QueueTaker<E> : ManagedBlocker {
-    //  *   final BlockingQueue<E> queue;
+    //  * class QueueTaker!(E) : ManagedBlocker {
+    //  *   final BlockingQueue!(E) queue;
     //  *   E item = null;
-    //  *   QueueTaker(BlockingQueue<E> q) { this.queue = q; }
+    //  *   QueueTaker(BlockingQueue!(E) q) { this.queue = q; }
     //  *   bool block() throws InterruptedException {
     //  *     if (item is null)
     //  *       item = queue.take();

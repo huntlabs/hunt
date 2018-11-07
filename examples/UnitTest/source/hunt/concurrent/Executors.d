@@ -107,7 +107,7 @@ class Executors {
      * @throws IllegalArgumentException if {@code nThreads <= 0}
      */
     static ThreadPoolExecutor newFixedThreadPool(int nThreads) {
-        return new ThreadPoolExecutor(nThreads, nThreads, dur!(TimeUnit.HectoNanosecond)(0) ,
+        return new ThreadPoolExecutor(nThreads, nThreads, 0.hnsecs,
                                       new LinkedBlockingQueue!(Runnable)());
     }
 
@@ -149,45 +149,44 @@ class Executors {
     //          null, true);
     // }
 
-    // /**
-    //  * Creates a thread pool that reuses a fixed number of threads
-    //  * operating off a shared unbounded queue, using the provided
-    //  * ThreadFactory to create new threads when needed.  At any point,
-    //  * at most {@code nThreads} threads will be active processing
-    //  * tasks.  If additional tasks are submitted when all threads are
-    //  * active, they will wait in the queue until a thread is
-    //  * available.  If any thread terminates due to a failure during
-    //  * execution prior to shutdown, a new one will take its place if
-    //  * needed to execute subsequent tasks.  The threads in the pool will
-    //  * exist until it is explicitly {@link ExecutorService#shutdown
-    //  * shutdown}.
-    //  *
-    //  * @param nThreads the number of threads in the pool
-    //  * @param threadFactory the factory to use when creating new threads
-    //  * @return the newly created thread pool
-    //  * @throws NullPointerException if threadFactory is null
-    //  * @throws IllegalArgumentException if {@code nThreads <= 0}
-    //  */
-    // static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory) {
-    //     return new ThreadPoolExecutor(nThreads, nThreads,
-    //                                   0L, TimeUnit.MILLISECONDS,
-    //                                   new LinkedBlockingQueue!(Runnable)(),
-    //                                   threadFactory);
-    // }
+    /**
+     * Creates a thread pool that reuses a fixed number of threads
+     * operating off a shared unbounded queue, using the provided
+     * ThreadFactory to create new threads when needed.  At any point,
+     * at most {@code nThreads} threads will be active processing
+     * tasks.  If additional tasks are submitted when all threads are
+     * active, they will wait in the queue until a thread is
+     * available.  If any thread terminates due to a failure during
+     * execution prior to shutdown, a new one will take its place if
+     * needed to execute subsequent tasks.  The threads in the pool will
+     * exist until it is explicitly {@link ExecutorService#shutdown
+     * shutdown}.
+     *
+     * @param nThreads the number of threads in the pool
+     * @param threadFactory the factory to use when creating new threads
+     * @return the newly created thread pool
+     * @throws NullPointerException if threadFactory is null
+     * @throws IllegalArgumentException if {@code nThreads <= 0}
+     */
+    static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory) {
+        return new ThreadPoolExecutor(nThreads, nThreads, 0.msecs,
+                                      new LinkedBlockingQueue!(Runnable)(),
+                                      threadFactory);
+    }
 
-    // /**
-    //  * Creates an Executor that uses a single worker thread operating
-    //  * off an unbounded queue. (Note however that if this single
-    //  * thread terminates due to a failure during execution prior to
-    //  * shutdown, a new one will take its place if needed to execute
-    //  * subsequent tasks.)  Tasks are guaranteed to execute
-    //  * sequentially, and no more than one task will be active at any
-    //  * given time. Unlike the otherwise equivalent
-    //  * {@code newFixedThreadPool(1)} the returned executor is
-    //  * guaranteed not to be reconfigurable to use additional threads.
-    //  *
-    //  * @return the newly created single-threaded Executor
-    //  */
+    /**
+     * Creates an Executor that uses a single worker thread operating
+     * off an unbounded queue. (Note however that if this single
+     * thread terminates due to a failure during execution prior to
+     * shutdown, a new one will take its place if needed to execute
+     * subsequent tasks.)  Tasks are guaranteed to execute
+     * sequentially, and no more than one task will be active at any
+     * given time. Unlike the otherwise equivalent
+     * {@code newFixedThreadPool(1)} the returned executor is
+     * guaranteed not to be reconfigurable to use additional threads.
+     *
+     * @return the newly created single-threaded Executor
+     */
     // static ExecutorService newSingleThreadExecutor() {
     //     return new FinalizableDelegatedExecutorService
     //         (new ThreadPoolExecutor(1, 1,
@@ -215,22 +214,22 @@ class Executors {
     //                                 threadFactory));
     // }
 
-    // /**
-    //  * Creates a thread pool that creates new threads as needed, but
-    //  * will reuse previously constructed threads when they are
-    //  * available.  These pools will typically improve the performance
-    //  * of programs that execute many short-lived asynchronous tasks.
-    //  * Calls to {@code execute} will reuse previously constructed
-    //  * threads if available. If no existing thread is available, a new
-    //  * thread will be created and added to the pool. Threads that have
-    //  * not been used for sixty seconds are terminated and removed from
-    //  * the cache. Thus, a pool that remains idle for long enough will
-    //  * not consume any resources. Note that pools with similar
-    //  * properties but different details (for example, timeout parameters)
-    //  * may be created using {@link ThreadPoolExecutor} constructors.
-    //  *
-    //  * @return the newly created thread pool
-    //  */
+    /**
+     * Creates a thread pool that creates new threads as needed, but
+     * will reuse previously constructed threads when they are
+     * available.  These pools will typically improve the performance
+     * of programs that execute many short-lived asynchronous tasks.
+     * Calls to {@code execute} will reuse previously constructed
+     * threads if available. If no existing thread is available, a new
+     * thread will be created and added to the pool. Threads that have
+     * not been used for sixty seconds are terminated and removed from
+     * the cache. Thus, a pool that remains idle for long enough will
+     * not consume any resources. Note that pools with similar
+     * properties but different details (for example, timeout parameters)
+     * may be created using {@link ThreadPoolExecutor} constructors.
+     *
+     * @return the newly created thread pool
+     */
     // static ExecutorService newCachedThreadPool() {
     //     return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
     //                                   60L, TimeUnit.SECONDS,
@@ -441,10 +440,10 @@ class Executors {
      * @return a callable object
      * @throws NullPointerException if task null
      */
-    // static Callable<Object> callable(Runnable task) {
+    // static Callable!(Object) callable(Runnable task) {
     //     if (task is null)
     //         throw new NullPointerException();
-    //     return new RunnableAdapter<Object>(task, null);
+    //     return new RunnableAdapter!(Object)(task, null);
     // }
 
     // /**
@@ -454,10 +453,10 @@ class Executors {
     //  * @return a callable object
     //  * @throws NullPointerException if action null
     //  */
-    // static Callable<Object> callable(PrivilegedAction<?> action) {
+    // static Callable!(Object) callable(PrivilegedAction<?> action) {
     //     if (action is null)
     //         throw new NullPointerException();
-    //     return new Callable<Object>() {
+    //     return new Callable!(Object)() {
     //         Object call() { return action.run(); }};
     // }
 
@@ -469,10 +468,10 @@ class Executors {
     //  * @return a callable object
     //  * @throws NullPointerException if action null
     //  */
-    // static Callable<Object> callable(PrivilegedExceptionAction<?> action) {
+    // static Callable!(Object) callable(PrivilegedExceptionAction<?> action) {
     //     if (action is null)
     //         throw new NullPointerException();
-    //     return new Callable<Object>() {
+    //     return new Callable!(Object)() {
     //         Object call() throws Exception { return action.run(); }};
     // }
 
@@ -939,26 +938,26 @@ private final class RunnableAdapter(T) : Callable!(T) if(!is(T == void)) {
 //             return e.submit(task, result);
 //         } finally { reachabilityFence(this); }
 //     }
-//     !(T) List<Future!(T)> invokeAll(Collection<Callable!(T)> tasks)
+//     !(T) List!(Future!(T)) invokeAll(Collection!(Callable!(T)) tasks)
 //         throws InterruptedException {
 //         try {
 //             return e.invokeAll(tasks);
 //         } finally { reachabilityFence(this); }
 //     }
-//     !(T) List<Future!(T)> invokeAll(Collection<Callable!(T)> tasks,
+//     !(T) List!(Future!(T)) invokeAll(Collection!(Callable!(T)) tasks,
 //                                          Duration timeout)
 //         throws InterruptedException {
 //         try {
 //             return e.invokeAll(tasks, timeout, unit);
 //         } finally { reachabilityFence(this); }
 //     }
-//     !(T) T invokeAny(Collection<Callable!(T)> tasks)
+//     !(T) T invokeAny(Collection!(Callable!(T)) tasks)
 //         throws InterruptedException, ExecutionException {
 //         try {
 //             return e.invokeAny(tasks);
 //         } finally { reachabilityFence(this); }
 //     }
-//     !(T) T invokeAny(Collection<Callable!(T)> tasks,
+//     !(T) T invokeAny(Collection!(Callable!(T)) tasks,
 //                            Duration timeout)
 //         throws InterruptedException, ExecutionException, TimeoutException {
 //         try {

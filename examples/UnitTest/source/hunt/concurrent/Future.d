@@ -62,8 +62,8 @@ import std.datetime;
  *   ExecutorService executor = ...
  *   ArchiveSearcher searcher = ...
  *   void showSearch(string target) throws InterruptedException {
- *     Callable<string> task = () -> searcher.search(target);
- *     Future<string> future = executor.submit(task);
+ *     Callable!(string) task = () -> searcher.search(target);
+ *     Future!(string) future = executor.submit(task);
  *     displayOtherThings(); // do other things while searching
  *     try {
  *       displayText(future.get()); // use future
@@ -75,7 +75,7 @@ import std.datetime;
  * implements {@code Runnable}, and so may be executed by an {@code Executor}.
  * For example, the above construction with {@code submit} could be replaced by:
  * <pre> {@code
- * FutureTask<string> future = new FutureTask<>(task);
+ * FutureTask!(string) future = new FutureTask<>(task);
  * executor.execute(future);}</pre>
  *
  * <p>Memory consistency effects: Actions taken by the asynchronous computation

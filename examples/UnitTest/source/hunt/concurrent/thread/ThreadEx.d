@@ -94,6 +94,19 @@ class ThreadEx : Thread {
         state = ThreadState.ALLOCATED;
     }
 
+     /**
+     * Tests if this thread is alive. A thread is alive if it has
+     * been started and has not yet died.
+     *
+     * @return  <code>true</code> if this thread is alive;
+     *          <code>false</code> otherwise.
+     */
+    final bool isAlive() {
+        // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:30:43 AM
+        // 
+        return isRunning;
+    }
+
 
     /* Set the blocker field; invoked via sun.misc.SharedSecrets from java.nio code
      */

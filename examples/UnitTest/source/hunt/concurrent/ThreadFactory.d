@@ -95,9 +95,8 @@ interface ThreadFactory {
      *         create a thread is rejected
      */
     final Thread newThread(Runnable r) {
-        return newThread(() { r.run(); });
+        return newThread({ r.run(); });
     }
-
 
     Thread newThread(Action dg );
 }
@@ -124,7 +123,7 @@ private class DefaultThreadFactory : ThreadFactory {
     Thread newThread(Action dg ) {
         int n = AtomicHelper.getAndIncrement(threadNumber);
 
-        Thread t = new Thread(dg);
+        Thread t = new ThreadEx(dg);
         t.name = namePrefix ~ n.to!string();
         t.isDaemon = false;
         t.priority = Thread.PRIORITY_DEFAULT;

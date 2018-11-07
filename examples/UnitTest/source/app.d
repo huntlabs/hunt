@@ -25,8 +25,8 @@ void main()
 	// testUnits!(BigIntegerTest);
 	// testTask();
 	// testUnits!(LinkedBlockingQueueTest);
-	// testUnits!(ThreadPoolExecutorTest);
-	testUnits!(ThreadTest);
+	testUnits!(ThreadPoolExecutorTest);
+	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
