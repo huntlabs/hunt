@@ -647,7 +647,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
         this(Runnable firstTask) {
             setState(-1); // inhibit interrupts until runWorker
             this.firstTask = firstTask;
-            this.thread = getThreadFactory().newThread(this);
+            this.thread = getThreadFactory().newThread(&run);
         }
 
         /** Delegates main run loop to outer runWorker. */
