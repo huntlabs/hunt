@@ -6,22 +6,31 @@ import hunt.lang.object;
 
 import std.traits;
 
+interface INullable : IObject {
+    TypeInfo valueType();
+
+    // const(ubyte)[] getBytes();
+}
+
 /**
 */
-class Nullable(T) : IObject {
+class Nullable(T) : INullable {
     
     protected T _value;
+    private TypeInfo _valueType;
     private bool _isNull = true;
 
     alias value this;
 
     this() {
         _value = T.init;
+        _valueType = typeid(T);
     }
 
     this(T v) {
         _value = v;
         _isNull = false;
+        _valueType = typeid(T);
     }
 
 
@@ -68,6 +77,10 @@ class Nullable(T) : IObject {
      */
     static Nullable!U empty(U)() {
         return new Nullable!U();
+    }
+
+    TypeInfo valueType() {
+        return _valueType;
     }
 
     T value() @trusted nothrow {
@@ -165,5 +178,3 @@ class Nullable(T) : IObject {
         return super.toHash();
     }
 }
-
-alias String = Nullable!(string);
