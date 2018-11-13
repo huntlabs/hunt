@@ -791,7 +791,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level)
 }
 
 // uinteger
-T toOBJ(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
+T toOBJ(T)(ref JSONValue v, RefClass stack) if (isUnsignedType!T)
 {
 	if(v.type() == JSON_TYPE.UINTEGER)
 		return cast(T) v.uinteger;
@@ -800,7 +800,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 }
 
 // integer
-T toOBJ(T)(JSONValue v, RefClass stack) if (isSignedType!T)
+T toOBJ(T)(ref JSONValue v, RefClass stack) if (isSignedType!T)
 {
 	if(v.type() == JSON_TYPE.INTEGER)
 		return cast(T) v.integer;
@@ -809,7 +809,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 }
 
 // string
-T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == string))
+T toOBJ(T)(ref JSONValue v, RefClass stack) if (is(T == string))
 {
 	if(v.type() == JSON_TYPE.STRING)
 		return v.str;
@@ -818,7 +818,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == string))
 }
 
 // bool
-T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == bool))
+T toOBJ(T)(ref JSONValue v, RefClass stack) if (is(T == bool))
 {
 	if(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE)
 		return v.type() == JSON_TYPE.TRUE;
@@ -827,7 +827,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == bool))
 }
 
 // floating
-T toOBJ(T)(JSONValue v, RefClass stack) if (isFloatType!T)
+T toOBJ(T)(ref JSONValue v, RefClass stack) if (isFloatType!T)
 {
 	if(v.type() == JSON_TYPE.FLOAT)
 		return cast(T) v.floating;
@@ -863,7 +863,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 	
 }
 
-T toOBJ(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
+T toOBJ(T)(ref JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
 {
 	T t;
 	if(v.type() == JSON_TYPE.ARRAY)
@@ -902,7 +902,7 @@ string toJSONMembersAll(T)()
 	{
 		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{		
-			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
+			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);\n";
 		}
 	}
 	return str;
@@ -917,8 +917,8 @@ string toOBJMembers(T)()
 	{
 		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{
-			str ~= " if ( \"" ~ m ~ "\"  in j )";
-			str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);";
+			str ~= " if ( \"" ~ m ~ "\"  in j )\n";
+			str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);\n";
 		}
 
 	}
@@ -928,28 +928,25 @@ string toOBJMembers(T)()
 JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 {
 	JSONValue j;
+	import std.datetime;
 
 	static if (is(T == JSONValue))
 	{
 		return t;
-	}
-	else{
+	} else static if(is(T == SysTime)) {
+		return JSONValue(t.toString());
+	} else {
 		bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
 
 		if(ignore)
 			mixin(toJSONMembers!(T,true));
 		else
 			mixin(toJSONMembers!(T,false));
-
-
-
-
-		
 		return j;
 	}
 }
 
-T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == struct))
+T toOBJ(T)(ref JSONValue j, RefClass stack) if (is(T == struct))
 {
 	static if (is(T == JSONValue))
 	{
@@ -994,7 +991,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 	}
 }
 
-T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == class))
+T toOBJ(T)(ref JSONValue j, RefClass stack) if (is(T == class))
 {
 	if ( j.type() != JSON_TYPE.OBJECT)
 		return T.init;
@@ -1024,7 +1021,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 	return j;
 }
 
-T toOBJ(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
+T toOBJ(T)(ref JSONValue j, RefClass stack) if (isAssociativeArray!T)
 {
 	import std.conv;
 	if ( j.type() != JSON_TYPE.OBJECT)
@@ -1057,7 +1054,7 @@ JSONValue toJSON(T)(T t   , UnIgnoreArray array  ,  uint level = uint.max)
 
 
 
-T toOBJ(T)(JSONValue j)
+T toOBJ(T)(ref JSONValue j)
 {
 	RefClass stack = new RefClass();
 	return toOBJ!T(j, stack);
