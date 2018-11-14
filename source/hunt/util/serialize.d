@@ -791,7 +791,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level)
 }
 
 // uinteger
-T toOBJ(T)(ref JSONValue v, RefClass stack) if (isUnsignedType!T)
+T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (isUnsignedType!T)
 {
 	if(v.type() == JSON_TYPE.UINTEGER)
 		return cast(T) v.uinteger;
@@ -800,7 +800,7 @@ T toOBJ(T)(ref JSONValue v, RefClass stack) if (isUnsignedType!T)
 }
 
 // integer
-T toOBJ(T)(ref JSONValue v, RefClass stack) if (isSignedType!T)
+T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (isSignedType!T)
 {
 	if(v.type() == JSON_TYPE.INTEGER)
 		return cast(T) v.integer;
@@ -809,7 +809,7 @@ T toOBJ(T)(ref JSONValue v, RefClass stack) if (isSignedType!T)
 }
 
 // string
-T toOBJ(T)(ref JSONValue v, RefClass stack) if (is(T == string))
+T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (is(T == string))
 {
 	if(v.type() == JSON_TYPE.STRING)
 		return v.str;
@@ -818,7 +818,7 @@ T toOBJ(T)(ref JSONValue v, RefClass stack) if (is(T == string))
 }
 
 // bool
-T toOBJ(T)(ref JSONValue v, RefClass stack) if (is(T == bool))
+T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (is(T == bool))
 {
 	if(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE)
 		return v.type() == JSON_TYPE.TRUE;
@@ -827,7 +827,7 @@ T toOBJ(T)(ref JSONValue v, RefClass stack) if (is(T == bool))
 }
 
 // floating
-T toOBJ(T)(ref JSONValue v, RefClass stack) if (isFloatType!T)
+T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (isFloatType!T)
 {
 	if(v.type() == JSON_TYPE.FLOAT)
 		return cast(T) v.floating;
@@ -863,7 +863,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 	
 }
 
-T toOBJ(T)(ref JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
+T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (isDynamicArray!T && !is(T == string))
 {
 	T t;
 	if(v.type() == JSON_TYPE.ARRAY)
@@ -946,7 +946,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 	}
 }
 
-T toOBJ(T)(ref JSONValue j, RefClass stack) if (is(T == struct))
+T toOBJ(T)(ref const(JSONValue) j, RefClass stack) if (is(T == struct))
 {
 	static if (is(T == JSONValue))
 	{
@@ -991,7 +991,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 	}
 }
 
-T toOBJ(T)(ref JSONValue j, RefClass stack) if (is(T == class))
+T toOBJ(T)(ref const(JSONValue) j, RefClass stack) if (is(T == class))
 {
 	if ( j.type() != JSON_TYPE.OBJECT)
 		return T.init;
@@ -1021,7 +1021,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 	return j;
 }
 
-T toOBJ(T)(ref JSONValue j, RefClass stack) if (isAssociativeArray!T)
+T toOBJ(T)(ref const(JSONValue) j, RefClass stack) if (isAssociativeArray!T)
 {
 	import std.conv;
 	if ( j.type() != JSON_TYPE.OBJECT)
@@ -1054,7 +1054,7 @@ JSONValue toJSON(T)(T t   , UnIgnoreArray array  ,  uint level = uint.max)
 
 
 
-T toOBJ(T)(ref JSONValue j)
+T toOBJ(T)(ref const(JSONValue) j)
 {
 	RefClass stack = new RefClass();
 	return toOBJ!T(j, stack);
