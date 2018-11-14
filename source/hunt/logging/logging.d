@@ -50,6 +50,12 @@ void catchAndLogException(E)(lazy E runer) @trusted nothrow
     }
 }
 
+shared static this() {
+	if(g_logger is null) {
+		LogConf conf;
+		logLoadConf(conf);
+	}
+}
 
 private:
 class SizeBaseRollover
