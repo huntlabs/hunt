@@ -11,6 +11,7 @@
 
 module hunt.util.serialize;
 
+import std.conv;
 import std.traits;
 import std.string;
 import core.stdc.string;
@@ -802,7 +803,11 @@ T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (isUnsignedType!T)
 // integer
 T toOBJ(T)(ref const(JSONValue) v, RefClass stack) if (isSignedType!T)
 {
-	if(v.type() == JSON_TYPE.INTEGER)
+
+	if (v.type() == JSON_TYPE.STRING) {
+                    return to!T(v.str);
+            }
+		else 	if(v.type() == JSON_TYPE.INTEGER)
 		return cast(T) v.integer;
 	else
 		return T.init;

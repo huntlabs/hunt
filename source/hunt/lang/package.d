@@ -10,3 +10,4 @@ public import hunt.lang.Long;
 public import hunt.lang.Nullable;
 public import hunt.lang.Number;
 public import hunt.lang.Short;
+public import hunt.lang.String;
