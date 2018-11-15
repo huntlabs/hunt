@@ -5,6 +5,7 @@ import hunt.util.UnitTest;
 import hunt.logging;
 
 import test.BigIntegerTest;
+import test.JsonHelperTest;
 import test.LinkedBlockingQueueTest;
 import test.NullableTest;
 import test.NumberTest;
@@ -24,8 +25,10 @@ void main()
 	writeln("CPU: ", totalCPUs);
 	// testUnits!(BigIntegerTest);
 	// testTask();
+
+	testUnits!(JsonHelperTest);
 	// testUnits!(LinkedBlockingQueueTest);
-	testUnits!(ThreadPoolExecutorTest);
+	// testUnits!(ThreadPoolExecutorTest);
 	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
