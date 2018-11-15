@@ -17,7 +17,7 @@ module hunt.util.concurrent.IdleTimeout;
 //     private long idleTimestamp = Millisecond100Clock.currentTimeMillis();
 
 //     private final Runnable idleTask = new Runnable() {
-//         @Override
+//         override
 //         void run() {
 //             long idleLeft = checkIdleTimeout();
 //             if (idleLeft >= 0)
