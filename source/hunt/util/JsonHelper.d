@@ -72,7 +72,7 @@ final class JsonHelper {
         if(jt == JSON_TYPE.string) {
             return SysTime.fromSimpleString(json.str);
         } else if(jt == JSON_TYPE.INTEGER) {
-            return SysTime(json.integer); // standard time
+            return SysTime.fromUnixTime(json.integer);  // Unix time
         } else {
             return handleException!(T, canThrow)(json, "wrong SysTime type", defaultValue);
         }
@@ -272,7 +272,7 @@ final class JsonHelper {
 
     static JSONValue toJson(T)(T value, bool asInteger=true) if(is(T == SysTime)) {
         if(asInteger)
-            return JSONValue(value.stdTime);
+            return JSONValue(value.toUnixTime()); // Unix time
         else 
             return JSONValue(value.toString());
     }
