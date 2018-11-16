@@ -23,16 +23,13 @@ import std.socket;
 import core.thread;
 import core.time;
 
-
 /**
 */
-class TcpStream : AbstractStream
-{
+class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
 
     // for client
-    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
-    {
+    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2) {
         super(loop, family, bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
@@ -41,8 +38,7 @@ class TcpStream : AbstractStream
     }
 
     // for server
-    this(Selector loop, Socket socket, size_t bufferSize = 4096 * 2)
-    {
+    this(Selector loop, Socket socket, size_t bufferSize = 4096 * 2) {
         super(loop, socket.addressFamily, bufferSize);
         this.socket = socket;
         _remoteAddress = socket.remoteAddress();
@@ -52,18 +48,15 @@ class TcpStream : AbstractStream
         _isConnected = true;
     }
 
-    void connect(string ip, ushort port)
-    {
+    void connect(string ip, ushort port) {
         connect(parseAddress(ip, port));
     }
 
-    void connect(Address addr)
-    {
+    void connect(Address addr) {
         if (_isConnected)
             return;
 
-        try
-        {
+        try {
             Address binded = createAddress(this.socket, 0);
             this.socket.bind(binded);
             this.doConnect(addr);
@@ -72,8 +65,7 @@ class TcpStream : AbstractStream
             _remoteAddress = addr;
             _localAddress = this.socket.localAddress();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             error(ex.message);
         }
 
@@ -81,8 +73,7 @@ class TcpStream : AbstractStream
             _connectionHandler(_isConnected);
     }
 
-    void reconnect(Address addr)
-    {
+    void reconnect(Address addr) {
         if (_isConnected)
             this.close();
         _isConnected = false;
@@ -94,14 +85,12 @@ class TcpStream : AbstractStream
         connect(addr);
     }
 
-    TcpStream onConnected(ConnectionHandler cback)
-    {
+    TcpStream onConnected(ConnectionHandler cback) {
         _connectionHandler = cback;
         return this;
     }
 
-    TcpStream onDataReceived(DataReceivedHandler handler)
-    {
+    TcpStream onDataReceived(DataReceivedHandler handler) {
         dataReceivedHandler = handler;
         return this;
     }
@@ -112,31 +101,26 @@ class TcpStream : AbstractStream
     //     return this;
     // }
 
-    TcpStream onClosed(SimpleEventHandler handler)
-    {
+    TcpStream onClosed(SimpleEventHandler handler) {
         closeHandler = handler;
         return this;
     }
 
-    TcpStream onDisconnected(SimpleEventHandler handler)
-    {
+    TcpStream onDisconnected(SimpleEventHandler handler) {
         disconnectionHandler = handler;
         return this;
     }
 
-    TcpStream onError(ErrorEventHandler handler)
-    {
+    TcpStream onError(ErrorEventHandler handler) {
         errorHandler = handler;
         return this;
     }
 
-    bool isConnected() nothrow
-    {
+    bool isConnected() nothrow {
         return _isConnected;
     }
 
-    override void start()
-    {
+    override void start() {
         if (_isRegistered)
             return;
         _inLoop.register(this);
@@ -145,12 +129,10 @@ class TcpStream : AbstractStream
             this.beginRead();
     }
 
-    void write(StreamWriteBuffer buffer)
-    {
+    void write(StreamWriteBuffer buffer) {
         assert(buffer !is null);
 
-        if (!_isConnected)
-        {
+        if (!_isConnected) {
             warning("The connection has been closed!");
             return;
         }
@@ -158,75 +140,64 @@ class TcpStream : AbstractStream
         _writeQueue.enQueue(buffer);
 
         version (Windows) {
-            if (_isWritting)
-            {
+            if (_isWritting) {
                 version (HUNT_DEBUG)
                     infof("Busy in writting, data buffered (%d bytes)", buffer.capacity);
-            } 
+            }
             else
                 tryWrite();
         }
-        else
-        {
+        else {
             onWrite();
         }
     }
 
     /// safe for big data sending
-    void write(in ubyte[] data, DataWrittenHandler handler = null)
-    {
+    void write(in ubyte[] data, DataWrittenHandler handler = null) {
         if (data.length == 0)
             return;
 
         write(new SocketStreamBuffer(data, handler));
     }
 
-    void shutdownInput()
-    {
+    void shutdownInput() {
         this.socket.shutdown(SocketShutdown.RECEIVE);
     }
 
-    void shutdownOutput()
-    {
+    void shutdownOutput() {
         this.socket.shutdown(SocketShutdown.SEND);
-    }    
+    }
 
 protected:
     bool _isClientSide;
     ConnectionHandler _connectionHandler;
 
-    override void onRead()
-    {
+    override void onRead() {
         version (HUNT_DEBUG)
             trace("start to read");
 
-        version (Posix)
-        {
-            while (_isRegistered && !tryRead())
-            {
-                version (HUNT_DEBUG) trace("continue reading...");
+        version (Posix) {
+            while (_isRegistered && !tryRead()) {
+                version (HUNT_DEBUG)
+                    trace("continue reading...");
             }
         }
-        else
-        {
+        else {
             doRead();
         }
 
-        if (this.isError)
-        {
+        if (this.isError) {
             string msg = format("Socket error on read: fd=%d, message: %s",
                     this.handle, this.erroString);
-            errorf(msg);
+            version (HUNT_DEBUG)
+                errorf(msg);
             errorOccurred(msg);
         }
     }
 
-    override void onClose()
-    {
-        version (HUNT_DEBUG)
-        {
-            if (!_writeQueue.empty)
-            {
+    override void onClose() {
+        version (HUNT_DEBUG) {
+            if (!_writeQueue.empty) {
                 warning("Some data has not been sent yet.");
             }
 
@@ -243,10 +214,8 @@ protected:
             closeHandler();
     }
 
-    override void onWrite()
-    {
-        if (!_isConnected)
-        {
+    override void onWrite() {
+        if (!_isConnected) {
             _isConnected = true;
             _remoteAddress = socket.remoteAddress();
 
@@ -259,34 +228,31 @@ protected:
         version (HUNT_DEBUG)
             trace("start to write");
 
-        while (_isRegistered && !isWriteCancelling && !_writeQueue.empty)
-        {
+        while (_isRegistered && !isWriteCancelling && !_writeQueue.empty) {
             version (HUNT_DEBUG)
                 trace("writting...");
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
             const(ubyte[]) data = writeBuffer.remaining();
-            if (data.length == 0)
-            {
+            if (data.length == 0) {
                 _writeQueue.deQueue().finish();
                 continue;
             }
 
             this.clearError();
             size_t nBytes = tryWrite(data);
-            if (nBytes > 0 && writeBuffer.pop(nBytes))
-            {
+            if (nBytes > 0 && writeBuffer.pop(nBytes)) {
                 version (HUNT_DEBUG)
                     tracef("finishing data writing...%d bytes", nBytes);
                 _writeQueue.deQueue().finish();
             }
 
-            if (this.isError)
-            {
+            if (this.isError) {
                 string msg = format("Socket error on write: fd=%d, message=%s",
                         this.handle, this.erroString);
+                version (HUNT_DEBUG)
+                    errorf(msg);
                 errorOccurred(msg);
-                errorf(msg);
                 break;
             }
         }
