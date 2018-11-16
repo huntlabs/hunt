@@ -27,7 +27,7 @@ class DefaultConstraintValidatorContext :  ConstraintValidatorContext
         return json().toString;
     }
 
-    public JSONValue json()
+    override public string[string] messages()
     {
         string[string] msg;
         foreach(v; _validators) {
@@ -36,7 +36,13 @@ class DefaultConstraintValidatorContext :  ConstraintValidatorContext
                 msg[v.getPropertyName] = v.getMessage;
             }
         }
-        return JSONValue(msg);
+        return msg;
+    }
+
+
+    public JSONValue json()
+    {
+        return JSONValue(messages());
     }
 
     override public ConstraintValidatorContext append(Validator v)
