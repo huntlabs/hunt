@@ -7,9 +7,12 @@ A refined core library for D programming language.
  * hunt.io ( TcpListener / TcpStream )
  * hunt.container (Java alike)
  * hunt.event ( kqueue / epoll / iocp )
+ * hunt.lang
  * hunt.logging
  * hunt.math (BigIngeger etc.)
- * hunt.util (buffer configration memory radix-tree serialize string timer etc.)
+ * hunt.string
+ * hunt.util (buffer configration memory radix-tree serialize timer etc.)
+ * hunt.validation
 
 ## Platforms
  * FreeBSD
@@ -36,4 +39,4 @@ For details, see [here](docs/benchmark.md).
 - [ ] More friendly APIs
 - [ ] More examples
 - [ ] More common utils
-- [x] Improve supports on Mac OS
+- [ ] Add concurrent modules
