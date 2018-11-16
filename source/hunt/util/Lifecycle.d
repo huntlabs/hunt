@@ -1,5 +1,4 @@
-
-module hunt.util.SmartLifecycle;
+module hunt.util.Lifecycle;
 
 import hunt.lang.common;
 
@@ -27,22 +26,15 @@ import hunt.lang.common;
  * {@link SmartLifecycle} interface provides sophisticated integration with the
  * application context's startup and shutdown phases.
  *
- * @author Juergen Hoeller
- * @since 2.0
  * @see SmartLifecycle
- * @see ConfigurableApplicationContext
- * @see org.springframework.jms.listener.AbstractMessageListenerContainer
- * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
  */
 interface Lifecycle {
-
 	/**
 	 * Start this component.
 	 * <p>Should not throw an exception if the component is already running.
 	 * <p>In the case of a container, this will propagate the start signal to all
 	 * components that apply.
-	 * @see SmartLifecycle#isAutoStartup()
-	 */
+	 */    
 	void start();
 
 	/**
@@ -58,9 +50,9 @@ interface Lifecycle {
 	 * <p>In the case of a container, this will propagate the stop signal to all components
 	 * that apply.
 	 * @see SmartLifecycle#stop(Runnable)
-	 * @see org.springframework.beans.factory.DisposableBean#destroy()
 	 */
 	void stop();
+
 
 	/**
 	 * Check whether this component is currently running.
@@ -69,7 +61,6 @@ interface Lifecycle {
 	 * @return whether the component is currently running
 	 */
 	bool isRunning();
-
 }
 
 
@@ -77,8 +68,6 @@ interface Lifecycle {
  * Interface for objects that may participate in a phased
  * process such as lifecycle management.
  *
- * @author Mark Fisher
- * @since 3.0
  * @see SmartLifecycle
  */
 interface Phased {
@@ -87,9 +76,7 @@ interface Phased {
 	 * Return the phase value of this object.
 	 */
 	int getPhase();
-
 }
-
 
 
 /**
@@ -130,9 +117,6 @@ interface Phased {
  * lazy-init flag has very limited actual effect on {@code SmartLifecycle} beans.
  *
  * @author Mark Fisher
- * @since 3.0
- * @see LifecycleProcessor
- * @see ConfigurableApplicationContext
  */
 interface SmartLifecycle : Lifecycle, Phased {
 
@@ -145,8 +129,6 @@ interface SmartLifecycle : Lifecycle, Phased {
 	 * to a plain {@link Lifecycle} implementation.
 	 * @see #start()
 	 * @see #getPhase()
-	 * @see LifecycleProcessor#onRefresh()
-	 * @see ConfigurableApplicationContext#refresh()
 	 */
 	bool isAutoStartup();
 
@@ -167,7 +149,53 @@ interface SmartLifecycle : Lifecycle, Phased {
 
     alias stop = Lifecycle.stop;
 
-
 	int getPhase();
 
+}
+
+/**
+*/
+abstract class AbstractLifecycle : Lifecycle {
+
+    protected bool _isRunning;
+
+    this() {
+       
+    }
+
+    bool isRunning() {
+        return _isRunning;
+    }
+
+    bool isStopped() {
+        return !_isRunning;
+    }
+
+    void start() {
+        if (_isRunning)
+            return;
+
+        synchronized (this) {
+            if (!_isRunning){
+                initilize();
+                _isRunning = true;
+            }
+        }
+    }
+
+    void stop() {
+        if (!_isRunning)
+            return;
+
+        synchronized (this) {
+            if (_isRunning){
+                destroy();
+                _isRunning = false;
+            }
+        }
+    }
+
+    abstract protected void initilize();
+
+    abstract protected void destroy();
 }
