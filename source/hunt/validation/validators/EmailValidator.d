@@ -32,9 +32,9 @@ public class EmailValidator : AbstractValidator , ConstraintValidator!(Email, st
                     ~ "|"
                     ~ IP_DOMAIN
                     ~ ")$";
-	private Email _email;
+	private  Email _email;
 
-	override void initialize(Email constraintAnnotation){
+	override void initialize(Email constraintAnnotation) {
 		_email = constraintAnnotation;
     }
     
