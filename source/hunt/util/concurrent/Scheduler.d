@@ -1,11 +1,11 @@
 module hunt.util.concurrent.Scheduler;
 
 import hunt.lang.common;
-import hunt.util.LifeCycle;
+import hunt.util.Lifecycle;
 
 import core.time;
 
-public interface Scheduler : LifeCycle {
+public interface Scheduler : Lifecycle {
 
     interface Future {
         bool cancel();
