@@ -36,17 +36,14 @@ import core.sys.posix.sys.socket : accept;
 /**
 TCP Server
 */
-abstract class AbstractListener : AbstractSocketChannel
-{
-    this(Selector loop, AddressFamily family = AddressFamily.INET)
-    {
+abstract class AbstractListener : AbstractSocketChannel {
+    this(Selector loop, AddressFamily family = AddressFamily.INET) {
         super(loop, WatcherType.Accept);
         setFlag(WatchFlag.Read, true);
         this.socket = new TcpSocket(family);
     }
 
-    protected bool onAccept(scope AcceptHandler handler)
-    {
+    protected bool onAccept(scope AcceptHandler handler) {
         version (HUNT_DEBUG)
             trace("new connection coming...");
         this.clearError();
@@ -62,9 +59,8 @@ abstract class AbstractListener : AbstractSocketChannel
         return true;
     }
 
-    override void onWriteDone()
-    {
-        version (KissDebugMode)
+    override void onWriteDone() {
+        version (HUNT_DEBUG)
             tracef("a new connection created");
     }
 }
@@ -72,18 +68,16 @@ abstract class AbstractListener : AbstractSocketChannel
 /**
 TCP Client
 */
-abstract class AbstractStream : AbstractSocketChannel, Stream
-{
+abstract class AbstractStream : AbstractSocketChannel, Stream {
     SimpleEventHandler disconnectionHandler;
     // DataWrittenHandler sentHandler;
 
     protected bool _isConnected; //if server side always true.
     // alias UbyteArrayObject = BaseTypeObject!(ubyte[]);
 
-    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2)
-    {
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         // _readBuffer = new UbyteArrayObject();
-        version (KissDebugMode)
+        version (HUNT_DEBUG)
             trace("Buffer size for read: ", bufferSize);
         _readBuffer = new ubyte[bufferSize];
         super(loop, WatcherType.TCP);
@@ -94,16 +88,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     /**
     */
-    protected bool tryRead()
-    {
+    protected bool tryRead() {
         bool isDone = true;
         this.clearError();
         ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
-        version (KissDebugMode)
+        version (HUNT_DEBUG)
             trace("read nbytes...", len);
 
-        if (len > 0)
-        {
+        if (len > 0) {
             if (dataReceivedHandler !is null)
                 dataReceivedHandler(this._readBuffer[0 .. len]);
 
@@ -111,24 +103,21 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             if (len == _readBuffer.length)
                 isDone = false;
         }
-        else if (len < 0)
-        {
+        else if (len < 0) {
             // https://stackoverflow.com/questions/14595269/errno-35-eagain-returned-on-recv-call
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
             // check more error status
-            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
-            {
+            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
                 this._error = true;
-                this._erroString = cast(string)fromStringz(strerror(errno));
+                this._erroString = cast(string) fromStringz(strerror(errno));
             }
 
-            version (KissDebugMode)
-                warningf("read error: isDone=%s, errno=%d, message=%s", 
-                    isDone, errno, cast(string)fromStringz(strerror(errno)));
+            version (HUNT_DEBUG)
+                warningf("read error: isDone=%s, errno=%d, message=%s", isDone,
+                        errno, cast(string) fromStringz(strerror(errno)));
         }
-        else
-        {
-            version (KissDebugMode)
+        else {
+            version (HUNT_DEBUG)
                 warningf("connection broken: %s", _remoteAddress.toString());
             onDisconnected();
             if (_isClosed)
@@ -140,8 +129,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         return isDone;
     }
 
-    protected void onDisconnected()
-    {
+    protected void onDisconnected() {
         _isConnected = false;
         _isClosed = true;
         if (disconnectionHandler !is null)
@@ -156,17 +144,15 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     Warning: It will try the best to write all the data.   
     // TODO: create a examlple for test
     */
-    protected void tryWriteAll(in ubyte[] data)
-    {
+    protected void tryWriteAll(in ubyte[] data) {
         const nBytes = this.socket.send(data);
-        // version (KissDebugMode)
-        tracef("actually sent bytes: %d / %d", nBytes, data.length);
+        version (HUNT_DEBUG)
+            tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
-        if (nBytes > 0)
-        {
+        if (nBytes > 0) {
             if (canWriteAgain && nBytes < data.length) //  && writeRetries < writeRetryLimit
             {
-                // version (KissDebugMode)
+                // version (HUNT_DEBUG)
                 writeRetries++;
                 tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
                         writeRetries, nBytes, data.length - nBytes, data.length);
@@ -179,10 +165,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
                 writeRetries = 0;
 
         }
-        else if (nBytes == Socket.ERROR)
-        {
-            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
-            {
+        else if (nBytes == Socket.ERROR) {
+            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
                 string msg = lastSocketError();
                 warningf("errno=%d, message: %s", errno, msg);
                 this._error = true;
@@ -190,12 +174,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
                 errorOccurred(msg);
             }
-            else
-            {
-                // version (KissDebugMode)
-                warningf("errno=%d, message: %s", errno, lastSocketError());
-                if (canWriteAgain)
-                {
+            else {
+                version (HUNT_DEBUG)
+                    warningf("errno=%d, message: %s", errno, lastSocketError());
+                if (canWriteAgain) {
                     import core.thread;
                     import core.time;
 
@@ -210,15 +192,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
                 }
             }
         }
-        else
-        {
-            version (KissDebugMode)
-            {
+        else {
+            version (HUNT_DEBUG) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
             }
-            else
-            {
+            else {
                 this._error = true;
                 this._erroString = lastSocketError();
             }
@@ -228,39 +207,33 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     /**
     Try to write a block of data.
     */
-    protected size_t tryWrite(in ubyte[] data)
-    {
+    protected size_t tryWrite(in ubyte[] data) {
         const nBytes = this.socket.send(data);
-        version (KissDebugMode)
+        version (HUNT_DEBUG)
             tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
-        if (nBytes > 0)
-        {
+        if (nBytes > 0) {
             return nBytes;
         }
-        else if (nBytes == Socket.ERROR)
-        {
-            version (KissDebugMode)
+        else if (nBytes == Socket.ERROR) {
+            version (HUNT_DEBUG)
                 warningf("errno=%d, message: %s", errno, lastSocketError());
 
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
-            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK)
-            {
+            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
                 this._error = true;
                 this._erroString = lastSocketError();
-                warningf("errno=%d, message: %s", errno, this._erroString);
+                version (HUNT_DEBUG)
+                    warningf("errno=%d, message: %s", errno, this._erroString);
             }
         }
-        else
-        {
-            version (KissDebugMode)
-            {
+        else {
+            version (HUNT_DEBUG) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
             }
-            else
-            {
+            else {
                 this._error = true;
                 this._erroString = lastSocketError();
             }
@@ -268,20 +241,17 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         return 0;
     }
 
-    protected void doConnect(Address addr)
-    {
+    protected void doConnect(Address addr) {
         this.socket.connect(addr);
     }
 
-    void cancelWrite()
-    {
+    void cancelWrite() {
         isWriteCancelling = true;
     }
 
-    override void onWriteDone()
-    {
+    override void onWriteDone() {
         // notified by kqueue selector when data writing done
-        version (KissDebugMode)
+        version (HUNT_DEBUG)
             tracef("done with data writing");
     }
 
@@ -301,10 +271,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 /**
 UDP Socket
 */
-abstract class AbstractDatagramSocket : AbstractSocketChannel
-{
-    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2)
-    {
+abstract class AbstractDatagramSocket : AbstractSocketChannel {
+    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2) {
         super(loop, WatcherType.UDP);
         setFlag(WatchFlag.Read, true);
         setFlag(WatchFlag.ETMode, false);
@@ -322,8 +290,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
             _bindAddress = new UnknownAddress();
     }
 
-    final void bind(Address addr)
-    {
+    final void bind(Address addr) {
         if (_binded)
             return;
         _bindAddress = addr;
@@ -331,13 +298,11 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
         _binded = true;
     }
 
-    final bool isBind()
-    {
+    final bool isBind() {
         return _binded;
     }
 
-    Address bindAddr()
-    {
+    Address bindAddr() {
         return _bindAddress;
     }
 
@@ -345,10 +310,8 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
     protected bool _binded = false;
     protected Address _bindAddress;
 
-    protected bool tryRead(scope ReadCallBack read)
-    {
-        scope Address createAddress()
-        {
+    protected bool tryRead(scope ReadCallBack read) {
+        scope Address createAddress() {
             enum ushort DPORT = 0;
             if (AddressFamily.INET == this.socket.addressFamily)
                 return new InternetAddress(DPORT);
@@ -364,18 +327,16 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
         scope (exit)
             this._readBuffer.data = data;
         auto len = this.socket.receiveFrom(this._readBuffer.data, this._readBuffer.addr);
-        if (len > 0)
-        {
+        if (len > 0) {
             this._readBuffer.data = this._readBuffer.data[0 .. len];
             read(this._readBuffer);
         }
         return false;
     }
 
-    override void onWriteDone()
-    {
+    override void onWriteDone() {
         // notified by kqueue selector when data writing done
-        version (KissDebugMode)
+        version (HUNT_DEBUG)
             tracef("done with data writing");
     }
 }
