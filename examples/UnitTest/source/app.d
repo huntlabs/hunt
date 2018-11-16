@@ -7,6 +7,7 @@ import hunt.logging;
 import test.BigIntegerTest;
 import test.JsonHelperTest;
 import test.LinkedBlockingQueueTest;
+import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
@@ -26,8 +27,9 @@ void main()
 	// testUnits!(BigIntegerTest);
 	// testTask();
 
-	testUnits!(JsonHelperTest);
+	// testUnits!(JsonHelperTest);
 	// testUnits!(LinkedBlockingQueueTest);
+	testUnits!(MimeTypeTest);
 	// testUnits!(ThreadPoolExecutorTest);
 	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
