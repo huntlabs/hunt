@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 import std.stdio;
 
 import hunt.event;
@@ -31,31 +31,26 @@ import std.string;
 
 /**
 */
-abstract class AbstractTcpServer
-{
+abstract class AbstractTcpServer {
 	protected EventLoopGroup _group = null;
 	protected bool _isStarted = false;
 	protected Address _address;
 
-	this(Address address, int thread = (totalCPUs - 1))
-	{
+	this(Address address, int thread = (totalCPUs - 1)) {
 		this._address = address;
 		_group = new EventLoopGroup(cast(uint) thread);
 	}
 
-	@property Address bindingAddress()
-	{
+	@property Address bindingAddress() {
 		return _address;
 	}
 
-	void start()
-	{
+	void start() {
 		if (_isStarted)
 			return;
 		debug writeln("start to listen:");
 
-		for (size_t i = 0; i < _group.length; ++i)
-		{
+		for (size_t i = 0; i < _group.length; ++i) {
 			createServer(_group[i]);
 			debug writefln("lister[%d] created", i);
 		}
@@ -64,8 +59,7 @@ abstract class AbstractTcpServer
 		_isStarted = true;
 	}
 
-	protected void createServer(EventLoop loop)
-	{
+	protected void createServer(EventLoop loop) {
 		TcpListener listener = new TcpListener(loop, _address.addressFamily);
 
 		listener.reusePort(true);
@@ -76,8 +70,7 @@ abstract class AbstractTcpServer
 
 	protected void onConnectionAccepted(TcpListener sender, TcpStream client);
 
-	void stop()
-	{
+	void stop() {
 		if (!_isStarted)
 			return;
 		_isStarted = false;
@@ -87,20 +80,16 @@ abstract class AbstractTcpServer
 
 /**
 */
-class HttpServer : AbstractTcpServer
-{
-	this(string ip, ushort port, int thread = (totalCPUs - 1))
-	{
+class HttpServer : AbstractTcpServer {
+	this(string ip, ushort port, int thread = (totalCPUs - 1)) {
 		super(new InternetAddress(ip, port), thread);
 	}
 
-	this(Address address, int thread = (totalCPUs - 1))
-	{
+	this(Address address, int thread = (totalCPUs - 1)) {
 		super(address, thread);
 	}
 
-	override protected void onConnectionAccepted(TcpListener sender, TcpStream client)
-	{
+	override protected void onConnectionAccepted(TcpListener sender, TcpStream client) {
 		client.onDataReceived((in ubyte[] data) {
 			notifyDataReceived(client, data);
 		}).onClosed(() { notifyClientClosed(client); }).onError((string msg) {
@@ -108,8 +97,7 @@ class HttpServer : AbstractTcpServer
 		});
 	}
 
-	protected void notifyDataReceived(TcpStream client, in ubyte[] data)
-	{
+	protected void notifyDataReceived(TcpStream client, in ubyte[] data) {
 		debug writefln("on thread:%s, data received: %s", getTid(), cast(string) data);
 		string request = cast(string) data;
 		bool keepAlive = indexOf(request, " keep-alive", CaseSensitive.no) > 0;
@@ -117,23 +105,21 @@ class HttpServer : AbstractTcpServer
 		ptrdiff_t index = indexOf(request, "/plaintext ", CaseSensitive.no);
 		if (index > 0)
 			respondPlaintext(client, keepAlive);
-		else if (indexOf(request, "/json ", CaseSensitive.no) > 0)
-		{
+		else if (indexOf(request, "/json ", CaseSensitive.no) > 0) {
 			respondJson(client, keepAlive);
 		}
-		else
-		{
+		else {
 			badRequest(client);
 		}
 
 	}
 
-	private void respondPlaintext(TcpStream client, bool keepAlive)
-	{
-		// string currentTime = Clock.currTime.toString();
-		string currentTime = "Wed, 17 Apr 2013 12:00:00 GMT";
-		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
-		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/0.3\r\nDate: " ~ currentTime ~ "\r\n\r\nHello, World!";
+	private void respondPlaintext(TcpStream client, bool keepAlive) {
+		string currentTime = Clock.currTime.toString();
+		// string currentTime = "Wed, 17 Apr 2013 12:00:00 GMT";
+		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\n" ~ 
+			"Content-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: " ~ currentTime ~ "\r\n\r\nHello, World!";
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
 			if (!keepAlive)
@@ -141,15 +127,15 @@ class HttpServer : AbstractTcpServer
 		});
 	}
 
-	private void respondJson(TcpStream client, bool keepAlive)
-	{
+	private void respondJson(TcpStream client, bool keepAlive) {
+		string currentTime = Clock.currTime.toString();
 		JSONValue js;
 		js["message"] = "Hello, World!";
 		string content = js.toString();
 
-		string writeData = "HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: " ~ to!string(
-				content.length)
-			~ "\r\nServer: Hunt/0.3\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\n";
+		string writeData = "HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: " 
+			~ to!string(content.length)
+			~ "\r\nServer: Hunt/1.0\r\nDate: " ~ currentTime ~ "\r\n\r\n";
 		writeData ~= content;
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
@@ -158,11 +144,9 @@ class HttpServer : AbstractTcpServer
 		});
 	}
 
-	private void badRequest(TcpStream client)
-	{
-		// string writeData = "HTTP/1.1 404 Not Found\r\nServer: Hunt/0.3\r\nConnection: close\r\n\r\n";
+	private void badRequest(TcpStream client) {
 		string writeData = `HTTP/1.1 404 Not Found
-Server: Hunt/0.3
+Server: Hunt/1.0
 Content-Type: text/html
 Content-Length: 165
 Connection: keep-alive
@@ -171,7 +155,7 @@ Connection: keep-alive
 <head><title>404 Not Found</title></head>
 <body bgcolor="white">
 <center><h1>404 Not Found</h1></center>
-<hr><center>Hunt/0.3</center>
+<hr><center>Hunt/1.0</center>
 </body>
 </html>
 `;
@@ -179,21 +163,18 @@ Connection: keep-alive
 		client.close();
 	}
 
-	protected void notifyClientClosed(TcpStream client)
-	{
+	protected void notifyClientClosed(TcpStream client) {
 		debug writefln("The connection[%s] is closed on thread %s",
 				client.remoteAddress(), getTid());
 	}
 }
 
-void main(string[] args)
-{
+void main(string[] args) {
 	// globalLogLevel(LogLevel.warning);
 
 	ushort port = 8080;
 	GetoptResult o = getopt(args, "port|p", "Port (default 8080)", &port);
-	if (o.helpWanted)
-	{
+	if (o.helpWanted) {
 		defaultGetoptPrinter("A simple http server powered by Hunt!", o.options);
 		return;
 	}

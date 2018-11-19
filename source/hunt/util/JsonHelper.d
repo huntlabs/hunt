@@ -168,8 +168,7 @@ final class JsonHelper {
             }
             return handleException!(T, canThrow)(json, 
                 " is not a member of " ~ typeid(T).toString(), defaultValue);
-        }
-        else {
+        } else {
             return (json.type == JSON_TYPE.STRING ? json.str : json.toString()).to!T;
         }
     }
@@ -303,14 +302,6 @@ final class JsonHelper {
         }
 
         return result;
-    }
-
-
-    /// 
-    static string toJsonString(T)(T v, uint level = uint.max, bool ignore = true) {
-        // TODO: Tasks pending completion -@zxp at 11/15/2018, 11:08:40 AM
-        // 
-        return "TODO!";
     }
 
 }
