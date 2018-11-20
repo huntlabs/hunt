@@ -54,7 +54,7 @@ abstract class AbstractTcpServer {
 			createServer(_group[i]);
 			debug writefln("lister[%d] created", i);
 		}
-		debug writefln("All the servers is listening on %s.", _address.toString());
+		debug writefln("All the servers are listening on %s.", _address.toString());
 		_group.start();
 		_isStarted = true;
 	}

@@ -58,26 +58,14 @@ class EventLoopGroup
         return _loops.length;
     }
 
-    // void addEventLoop(EventLoop lop)
-    // {
-    //     auto loop = new GroupMember(lop);
-    //     auto th = new Thread(&loop.start);
-    //     _loops[loop] = th;
-    //     if (_started)
-    //         th.start();
-    // }
 
     EventLoop opIndex(size_t index)
-    {
-        return at(index);
-    }
-
-    EventLoop at(size_t index)
     {
         auto loops = _loops.keys;
         auto i = index % cast(size_t) loops.length;
         return loops[i];
     }
+
 
     void wait()
     {
@@ -99,7 +87,6 @@ class EventLoopGroup
         return ret;
     }
 
-	private	EventLoop _mainLoop;
     
 private:
     bool _started;
