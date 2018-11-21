@@ -7,7 +7,7 @@
 			"path": "examples\\UnitTest"
 		},
 		{
-			"path": "examples/ContainerDemo"
+			"path": "examples/Benchmark"
 		}
 	],
 	"settings": {}
