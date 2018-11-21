@@ -235,7 +235,12 @@ protected:
             StreamWriteBuffer writeBuffer = _writeQueue.front();
             const(ubyte[]) data = writeBuffer.remaining();
             if (data.length == 0) {
-                _writeQueue.deQueue().finish();
+                auto q = _writeQueue.deQueue();
+                if(q is null)
+                    warning("StreamWriteBuffer is null");
+                else    
+                    q.finish();
+                // _writeQueue.deQueue().finish();
                 continue;
             }
 
@@ -244,7 +249,11 @@ protected:
             if (nBytes > 0 && writeBuffer.pop(nBytes)) {
                 version (HUNT_DEBUG)
                     tracef("finishing data writing...%d bytes", nBytes);
-                _writeQueue.deQueue().finish();
+                auto q = _writeQueue.deQueue();
+                if(q is null)
+                    warning("StreamWriteBuffer is null");
+                else    
+                    q.finish();
             }
 
             if (this.isError) {
