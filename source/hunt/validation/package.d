@@ -18,3 +18,4 @@ public import hunt.validation.ConstraintValidator;
 public import hunt.validation.ConstraintValidatorContext;
 public import hunt.validation.DefaultConstraintValidatorContext;
 public import hunt.validation.DeclDef;
+public import hunt.validation.Valid;
