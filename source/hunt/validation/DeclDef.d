@@ -34,8 +34,6 @@ import hunt.validation.constraints.Size;
 import hunt.validation.constraints.Length;
 import hunt.validation.constraints.Range;
 
-/// @Valid Annotation
-enum Valid = 0 ;
 
 mixin template MakeValid()
 {
