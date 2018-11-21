@@ -113,10 +113,10 @@ abstract class ByteBuffer : Buffer
      * @throws  IllegalArgumentException
      *          If the <tt>capacity</tt> is a negative integer
      */
-    static ByteBuffer allocate(int capacity) {
-        if (capacity < 0)
-            throw new IllegalArgumentException("");
-        return new HeapByteBuffer(capacity, capacity);
+    static ByteBuffer allocate(size_t capacity) {
+        // if (capacity < 0)
+        //     throw new IllegalArgumentException("");
+        return new HeapByteBuffer(cast(int)capacity, cast(int)capacity);
     }
 
     /**
