@@ -1,7 +1,6 @@
 module hunt.lang.common;
 
 
-
 /**
  * An action.
  */
@@ -80,6 +79,13 @@ alias Func5(T1, T2, T3, T4, T5, R) = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t
 alias Func6(T1, T2, T3, T4, T5, T6, R) = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
 
 alias FuncN(T, R) = R delegate(T[] args...);
+
+
+alias EventHandler = void delegate(Object sender, EventArgs args);
+alias ErrorEventHandler = void delegate(string message);
+alias TickedEventHandler = void delegate(Object sender);
+
+alias SimpleEventHandler = Action;
 
 /**
  * Represents an operation that accepts a single input argument and returns no
@@ -523,9 +529,9 @@ interface EventListener {
 }
 
 
-
-enum ByteOrder
-{
+/**
+*/
+enum ByteOrder {
     BigEndian,
     LittleEndian
 }
@@ -548,13 +554,11 @@ size_t hashCode(T)(T[] a...) {
 */
 class CompilerHelper {
 
-    static bool isGreater(int ver)
-    {
+    static bool isGreater(int ver) pure @safe @nogc nothrow {
         return __VERSION__ >= ver;
     }
 
-    static bool isSmaller(int ver)
-    {
+    static bool isSmaller(int ver) pure @safe @nogc nothrow {
         return __VERSION__ <= ver;
     }
 }
@@ -562,12 +566,6 @@ class CompilerHelper {
 
 /**
 */
-class EventArgs
-{
+class EventArgs {
 
 }
-
-alias EventHandler = void delegate(Object sender, EventArgs args);
-alias SimpleEventHandler = void delegate();
-alias ErrorEventHandler = void delegate(string message);
-alias TickedEventHandler = void delegate(Object sender);
