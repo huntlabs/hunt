@@ -102,8 +102,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             // It's prossible that more data are wainting for read in inner buffer.
             if (len == _readBuffer.length)
                 isDone = false;
-        }
-        else if (len < 0) {
+        } else if (len < 0) {
             // https://stackoverflow.com/questions/14595269/errno-35-eagain-returned-on-recv-call
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
             // check more error status
@@ -160,8 +159,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                     warning("You are writting a Big block of data!!!");
 
                 tryWriteAll(data[nBytes .. $]);
-            }
-            else
+            } else
                 writeRetries = 0;
 
         }
@@ -173,11 +171,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 this._erroString = msg;
 
                 errorOccurred(msg);
-            }
-            else {
+            } else {
                 version (HUNT_DEBUG)
                     warningf("errno=%d, message: %s", errno, lastSocketError());
-                if (canWriteAgain) {
+                if (canWriteAgain && !_isClosed) {
                     import core.thread;
                     import core.time;
 
