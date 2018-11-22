@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.event.selector.epoll;
 
 // dfmt off
@@ -37,37 +37,31 @@ import hunt.event.timer.epoll;
 
 /**
 */
-class AbstractSelector : Selector
-{
-    this()
-    {
+class AbstractSelector : Selector {
+    this() {
         _epollFD = epoll_create1(0);
         _event = new EpollEventChannel(this);
         register(_event);
     }
-    
-    ~this()
-    {
+
+    ~this() {
         dispose();
     }
 
-    void dispose()
-    {
-        if(isDisposed)
+    void dispose() {
+        if (isDisposed)
             return;
         isDisposed = true;
         deregister(_event);
         core.sys.posix.unistd.close(_epollFD);
     }
+
     private bool isDisposed = false;
 
-
-    override bool register(AbstractChannel watcher)
-    {
+    override bool register(AbstractChannel watcher) {
         assert(watcher !is null);
 
-        if (watcher.type == WatcherType.Timer)
-        {
+        if (watcher.type == WatcherType.Timer) {
             auto wt = cast(AbstractTimer) watcher;
             if (wt !is null)
                 wt.setTimer();
@@ -79,28 +73,25 @@ class AbstractSelector : Selector
 
         // if(fd < 0) return false;
         epoll_event ev = buildEpollEvent(watcher);
-        if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd, &ev)) != 0)
-        {
+        if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd, &ev)) != 0) {
             if (errno != EEXIST)
                 return false;
         }
-        
+
         _event.setNext(watcher);
         return true;
     }
 
-    override bool reregister(AbstractChannel watcher)
-    {
+    override bool reregister(AbstractChannel watcher) {
         assert(watcher !is null);
-        const int fd = watcher.handle; 
+        const int fd = watcher.handle;
         if (fd < 0)
             return false;
         auto ev = buildEpollEvent(watcher);
-       return epoll_ctl(_epollFD, EPOLL_CTL_MOD, fd, &ev) == 0;
+        return epoll_ctl(_epollFD, EPOLL_CTL_MOD, fd, &ev) == 0;
     }
 
-    override bool deregister(AbstractChannel watcher)
-    {
+    override bool deregister(AbstractChannel watcher) {
         assert(watcher !is null);
         // version(HUNT_DEBUG) infof("unregister watcher(fd=%d)", watcher.handle);
 
@@ -108,8 +99,7 @@ class AbstractSelector : Selector
         if (fd < 0)
             return false;
 
-        if ((epoll_ctl(_epollFD, EPOLL_CTL_DEL, fd, null)) != 0)
-        {
+        if ((epoll_ctl(_epollFD, EPOLL_CTL_DEL, fd, null)) != 0) {
             errorf("unregister failed, watcher.handle=%d", watcher.handle);
             return false;
         }
@@ -118,76 +108,64 @@ class AbstractSelector : Selector
         return true;
     }
 
- 
-    void onLoop(scope void delegate() weak)
-    {
+    void onLoop(scope void delegate() weak) {
         _runing = true;
-        do
-        {
+        do {
             weak();
             handleEpollEvent();
         }
         while (_runing);
     }
 
-    private void handleEpollEvent()
-    {
+    private void handleEpollEvent() {
         epoll_event[64] events;
         const int len = epoll_wait(_epollFD, events.ptr, events.length, 10);
-        foreach (i; 0 .. len)
-        {
+        foreach (i; 0 .. len) {
             AbstractChannel watch = cast(AbstractChannel)(events[i].data.ptr);
-            if (watch is null)
-            {
-                version(HUNT_DEBUG) warningf("watcher is null");
+            if (watch is null) {
+                version (HUNT_DEBUG)
+                    warningf("watcher is null");
                 continue;
             }
 
-            if (isErro(events[i].events))
-            {
-                version(HUNT_DEBUG) info("closing watcher for error: ", watch.handle);
+            if (isErro(events[i].events)) {
+                version (HUNT_DEBUG)
+                    info("closing watcher for error: ", watch.handle);
                 watch.close();
                 continue;
             }
 
-            if (watch.isRegistered && isRead(events[i].events))
-            {
+            if (watch.isRegistered && isRead(events[i].events)) {
                 watch.onRead();
             }
 
-            if (watch.isRegistered && isWrite(events[i].events))
-            {
+            if (watch.isRegistered && isWrite(events[i].events)) {
                 AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
-                    assert(wt !is null);
-                    wt.onWriteDone();
+                assert(wt !is null);
+                wt.onWriteDone();
                 // watch.onWrite();
             }
         }
     }
 
-    override void stop()
-    {
+    override void stop() {
         _runing = false;
     }
 
 protected:
-    bool isErro(uint events) nothrow
-    {
+    bool isErro(uint events) nothrow {
         return (events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP)) != 0;
     }
 
-    bool isRead(uint events) nothrow
-    {
+    bool isRead(uint events) nothrow {
         return (events & EPOLLIN) != 0;
     }
 
-    bool isWrite(uint events) nothrow
-    {
+    bool isWrite(uint events) nothrow {
         return (events & EPOLLOUT) != 0;
     }
 
-    static epoll_event buildEpollEvent(AbstractChannel watch)
-    {
+    static epoll_event buildEpollEvent(AbstractChannel watch) {
         epoll_event ev;
         ev.data.ptr = cast(void*) watch;
         ev.events = EPOLLRDHUP | EPOLLERR | EPOLLHUP;
@@ -210,36 +188,30 @@ private:
 
 /**
 */
-class EpollEventChannel : EventChannel
-{
+class EpollEventChannel : EventChannel {
     alias UlongObject = BaseTypeObject!ulong;
-    this(Selector loop)
-    {
+    this(Selector loop) {
         super(loop);
         setFlag(WatchFlag.Read, true);
         _readBuffer = new UlongObject();
         this.handle = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     }
 
-    ~this()
-    {
+    ~this() {
         close();
     }
 
-    override void call()
-    {
+    override void call() {
         ulong value = 1;
         core.sys.posix.unistd.write(this.handle, &value, value.sizeof);
     }
 
-    override void onRead()
-    {
+    override void onRead() {
         readEvent((Object obj) {  });
         super.onRead();
     }
 
-    bool readEvent(scope ReadCallBack read)
-    {
+    bool readEvent(scope ReadCallBack read) {
         this.clearError();
         ulong value;
         core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
@@ -252,21 +224,18 @@ class EpollEventChannel : EventChannel
     UlongObject _readBuffer;
 }
 
-enum
-{
+enum {
     EFD_SEMAPHORE = 0x1,
     EFD_CLOEXEC = 0x80000,
     EFD_NONBLOCK = 0x800
-};
+}
 
-enum
-{
+enum {
     EPOLL_CLOEXEC = 0x80000,
     EPOLL_NONBLOCK = 0x800
 }
 
-enum
-{
+enum {
     EPOLLIN = 0x001,
     EPOLLPRI = 0x002,
     EPOLLOUT = 0x004,
@@ -283,33 +252,29 @@ enum
 }
 
 /* Valid opcodes ( "op" parameter ) to issue to epoll_ctl().  */
-enum
-{
+enum {
     EPOLL_CTL_ADD = 1, // Add a file descriptor to the interface.
     EPOLL_CTL_DEL = 2, // Remove a file descriptor from the interface.
     EPOLL_CTL_MOD = 3, // Change file descriptor epoll_event structure.
 }
 
-
-
 // dfmt off
 extern (C) : @system : nothrow :
-// dfmt on
 
-align(1) struct epoll_event
-{
+align(1) struct epoll_event {
 align(1):
 uint events;
     epoll_data_t data;
 }
 
-union epoll_data_t
-{
+union epoll_data_t {
     void* ptr;
     int fd;
     uint u32;
     ulong u64;
 }
+
+// dfmt on
 
 int epoll_create(int size);
 int epoll_create1(int flags);
@@ -317,4 +282,3 @@ int epoll_ctl(int epfd, int op, int fd, epoll_event* event);
 int epoll_wait(int epfd, epoll_event* events, int maxevents, int timeout);
 
 socket_t eventfd(uint initval, int flags);
-
