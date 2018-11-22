@@ -42,7 +42,7 @@ class BufferUtils {
      * @param capacity capacity of the allocated ByteBuffer
      * @return Buffer
      */
-    static ByteBuffer allocate(int capacity) {
+    static ByteBuffer allocate(size_t capacity) {
         ByteBuffer buf = ByteBuffer.allocate(capacity);
         buf.limit(0);
         return buf;
