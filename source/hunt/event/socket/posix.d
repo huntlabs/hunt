@@ -207,7 +207,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     /**
     Try to write a block of data.
     */
-    protected size_t tryWrite(in ubyte[] data) {
+    protected size_t tryWrite(const ubyte[] data) {
         const nBytes = this.socket.send(data);
         version (HUNT_DEBUG)
             tracef("actually sent bytes: %d / %d", nBytes, data.length);
@@ -217,15 +217,17 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         }
         else if (nBytes == Socket.ERROR) {
             version (HUNT_DEBUG)
-                warningf("errno=%d, message: %s", errno, lastSocketError());
+                warningf("fd: %d, errno: %d, message: %s", this.handle, errno, lastSocketError());
 
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
+            // EPIPE/Broken pipe: 
+            // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
             if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
                 this._error = true;
                 this._erroString = lastSocketError();
                 version (HUNT_DEBUG)
-                    warningf("errno=%d, message: %s", errno, this._erroString);
+                    warningf("fd: %d, errno=%d, message: %s", this.handle, errno, this._erroString);
             }
         }
         else {
