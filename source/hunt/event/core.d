@@ -75,6 +75,7 @@ abstract class AbstractChannel : Channel
     ErrorEventHandler errorHandler;
 
     protected bool _isRegistered = false;
+    protected bool _isClosed = false;
 
     this(Selector loop, WatcherType type)
     {
@@ -98,8 +99,6 @@ abstract class AbstractChannel : Channel
         return _isClosed;
     }
 
-    protected bool _isClosed = false;
-
     protected void onClose()
     {
         _isRegistered = false;
@@ -113,8 +112,10 @@ abstract class AbstractChannel : Channel
 
     protected void errorOccurred(string msg)
     {
-        if (errorHandler !is null)
+        warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
+        if (errorHandler !is null) {
             errorHandler(msg);
+        }
     }
 
     void onRead()
