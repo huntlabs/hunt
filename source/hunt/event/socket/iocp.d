@@ -262,7 +262,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     /// 
     // TODO: created by Administrator @ 2018-4-18 10:15:20
     // Send a big block of data
-    protected size_t tryWrite(in ubyte[] data)
+    protected size_t tryWrite(const ubyte[] data)
     {
         if (_isWritting)
         {
