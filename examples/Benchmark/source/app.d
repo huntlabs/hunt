@@ -98,7 +98,7 @@ class HttpServer : AbstractTcpServer {
 	}
 
 	protected void notifyDataReceived(TcpStream client, in ubyte[] data) {
-		debug writefln("on thread:%s, data received: %s", getTid(), cast(string) data);
+		// debug writefln("on thread:%s, data received: %s", getTid(), cast(string) data);
 		string request = cast(string) data;
 		bool keepAlive = indexOf(request, " keep-alive", CaseSensitive.no) > 0;
 
@@ -164,8 +164,8 @@ Connection: keep-alive
 	}
 
 	protected void notifyClientClosed(TcpStream client) {
-		debug writefln("The connection[%s] is closed on thread %s",
-				client.remoteAddress(), getTid());
+		// debug writefln("The connection[%s] is closed on thread %s",
+		// 		client.remoteAddress(), getTid());
 	}
 }
 
