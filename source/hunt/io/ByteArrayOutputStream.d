@@ -173,6 +173,10 @@ class ByteArrayOutputStream : OutputStream {
         return buf[0 .. count]; // .dup; // Arrays.copyOf(buf, count);
     }
 
+    byte[] getBuffer() {
+		return buf;
+	}
+
     /**
      * Returns the current size of the buffer.
      *
@@ -221,8 +225,7 @@ class ByteArrayOutputStream : OutputStream {
      *             If the named charset is not supported
      * @since      JDK1.1
      */
-    string toString(string charsetName)
-    {
+    string toString(string charsetName) {
         return cast(string)(buf[0..count]); // , charsetName);
     }
 

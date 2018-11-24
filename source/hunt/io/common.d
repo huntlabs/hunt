@@ -241,7 +241,7 @@ abstract class InputStream : Closeable {
      *             it reaches the end of the input stream.
      * @exception  IOException if an I/O error occurs.
      */
-    int available() @trusted nothrow {
+    int available() { // @trusted nothrow 
         return 0;
     }
 
