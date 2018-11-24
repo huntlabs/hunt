@@ -39,7 +39,7 @@ abstract class AbstractTimer : TimerChannelBase
 
     private void init()
     {
-        setFlag(WatchFlag.Read, true);
+        setFlag(ChannelFlag.Read, true);
         _readBuffer = new UintObject();
         this.handle = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
     }

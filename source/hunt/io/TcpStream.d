@@ -177,7 +177,7 @@ protected:
             trace("start to read");
 
         version (Posix) {
-            while (_isRegistered && !tryRead()) {
+            while (!_isClosed && !tryRead()) {
                 version (HUNT_DEBUG)
                     trace("continue reading...");
             }
@@ -189,7 +189,7 @@ protected:
         if (this.isError) {
             string msg = format("Socket error on read: fd=%d, message: %s",
                     this.handle, this.erroString);
-            version (HUNT_DEBUG)
+            // version (HUNT_DEBUG)
                 errorf(msg);
             errorOccurred(msg);
         }

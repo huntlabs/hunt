@@ -69,7 +69,7 @@ class AbstractSelector : Selector
         assert(watcher !is null);
 
         int err = -1;
-        if (watcher.type == WatcherType.Timer)
+        if (watcher.type == ChannelType.Timer)
         {
             kevent_t ev;
             AbstractTimer watch = cast(AbstractTimer) watcher;
@@ -88,18 +88,18 @@ class AbstractSelector : Selector
             kevent_t[2] ev = void;
             short read = EV_ADD | EV_ENABLE;
             short write = EV_ADD | EV_ENABLE;
-            if (watcher.flag(WatchFlag.ETMode))
+            if (watcher.flag(ChannelFlag.ETMode))
             {
                 read |= EV_CLEAR;
                 write |= EV_CLEAR;
             }
             EV_SET(&(ev[0]), fd, EVFILT_READ, read, 0, 0, cast(void*) watcher);
             EV_SET(&(ev[1]), fd, EVFILT_WRITE, write, 0, 0, cast(void*) watcher);
-            if (watcher.flag(WatchFlag.Read) && watcher.flag(WatchFlag.Write))
+            if (watcher.flag(ChannelFlag.Read) && watcher.flag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
-            else if (watcher.flag(WatchFlag.Read))
+            else if (watcher.flag(ChannelFlag.Read))
                 err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
-            else if (watcher.flag(WatchFlag.Write))
+            else if (watcher.flag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
         }
         if (err < 0)
@@ -125,7 +125,7 @@ class AbstractSelector : Selector
                 return false;
 
         int err = -1;
-        if (watcher.type == WatcherType.Timer)
+        if (watcher.type == ChannelType.Timer)
         {
             kevent_t ev;
             AbstractTimer watch = cast(AbstractTimer) watcher;
@@ -139,11 +139,11 @@ class AbstractSelector : Selector
             kevent_t[2] ev = void;
             EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) watcher);
             EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) watcher);
-            if (watcher.flag(WatchFlag.Read) && watcher.flag(WatchFlag.Write))
+            if (watcher.flag(ChannelFlag.Read) && watcher.flag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
-            else if (watcher.flag(WatchFlag.Read))
+            else if (watcher.flag(ChannelFlag.Read))
                 err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
-            else if (watcher.flag(WatchFlag.Write))
+            else if (watcher.flag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
         }
         if (err < 0)
@@ -181,7 +181,7 @@ class AbstractSelector : Selector
                     watch.close();
                     continue;
                 }
-                if (watch.type == WatcherType.Timer)
+                if (watch.type == ChannelType.Timer)
                 {
                     watch.onRead();
                     continue;
@@ -220,7 +220,7 @@ class KqueueEventChannel : EventChannel
     this(Selector loop)
     {
         super(loop);
-        setFlag(WatchFlag.Read, true);
+        setFlag(ChannelFlag.Read, true);
         _pair = socketPair();
         _pair[0].blocking = false;
         _pair[1].blocking = false;

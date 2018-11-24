@@ -28,7 +28,8 @@ import core.sys.posix.sys.types; // for ssize_t, size_t
 import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
-import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
+// import core.sys.posix.time;
+import core.sys.posix.sys.time;
 
 import hunt.event.core;
 import hunt.event.socket;
@@ -48,7 +49,7 @@ class AbstractSelector : Selector {
         dispose();
     }
 
-    void dispose() {
+    override void dispose() {
         if (isDisposed)
             return;
         isDisposed = true;
@@ -61,7 +62,7 @@ class AbstractSelector : Selector {
     override bool register(AbstractChannel watcher) {
         assert(watcher !is null);
 
-        if (watcher.type == WatcherType.Timer) {
+        if (watcher.type == ChannelType.Timer) {
             auto wt = cast(AbstractTimer) watcher;
             if (wt !is null)
                 wt.setTimer();
@@ -108,18 +109,37 @@ class AbstractSelector : Selector {
         return true;
     }
 
+    override protected int doSelect(long timeout) {
+        // return epollWait(cast(int)timeout);
+        return 0;
+    }
+
     void onLoop(scope void delegate() weak) {
         _runing = true;
         do {
             weak();
-            handleEpollEvent();
+            epollWait(10);
         }
         while (_runing);
     }
 
-    private void handleEpollEvent() {
+    private void epollWait(int timeout) {
         epoll_event[64] events;
-        const int len = epoll_wait(_epollFD, events.ptr, events.length, 10);
+        int len = 0;
+
+                    // warningf("epoll_wait eeeeeeeeeeeee: %d", errno);
+        // if(timeout <= 0) { /* Indefinite or no wait */
+            // do {
+                // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
+                len = epoll_wait(_epollFD, events.ptr, events.length, timeout);
+                // if(len == -1) {
+                //     warningf("epoll_wait error: %d", errno);
+                // }
+            // } while((len == -1) && (errno == EINTR));
+        // } else { /* Bounded wait; bounded restarts */
+        //     len = iepoll(_epollFD, events.ptr, events.length, timeout);
+        // }
+
         foreach (i; 0 .. len) {
             AbstractChannel watch = cast(AbstractChannel)(events[i].data.ptr);
             if (watch is null) {
@@ -148,6 +168,35 @@ class AbstractSelector : Selector {
         }
     }
 
+    int iepoll(int epfd, epoll_event *events, int numfds, int timeout) {
+        long start, now;
+        int remaining = timeout;
+        timeval t;
+        long diff;
+
+        gettimeofday(&t, null);
+        start = t.tv_sec * 1000 + t.tv_usec / 1000;
+
+        for (;;) {
+            int res = epoll_wait(epfd, events, numfds, remaining);
+            // warningf("epoll_wait xxxxxxxxxxx: %d", res);
+            if (res < 0 && errno == EINTR) {
+                if (remaining >= 0) {
+                    gettimeofday(&t, null);
+                    now = t.tv_sec * 1000 + t.tv_usec / 1000;
+                    diff = now - start;
+                    remaining -= diff;
+                    if (diff < 0 || remaining <= 0) {
+                        return 0;
+                    }
+                    start = now;
+                }
+            } else {
+                return res;
+            }
+        }
+    }
+
     override void stop() {
         _runing = false;
     }
@@ -169,13 +218,13 @@ protected:
         epoll_event ev;
         ev.data.ptr = cast(void*) watch;
         ev.events = EPOLLRDHUP | EPOLLERR | EPOLLHUP;
-        if (watch.flag(WatchFlag.Read))
+        if (watch.hasFlag(ChannelFlag.Read))
             ev.events |= EPOLLIN;
-        if (watch.flag(WatchFlag.Write))
+        if (watch.hasFlag(ChannelFlag.Write))
             ev.events |= EPOLLOUT;
-        if (watch.flag(WatchFlag.OneShot))
+        if (watch.hasFlag(ChannelFlag.OneShot))
             ev.events |= EPOLLONESHOT;
-        if (watch.flag(WatchFlag.ETMode))
+        if (watch.hasFlag(ChannelFlag.ETMode))
             ev.events |= EPOLLET;
         return ev;
     }
@@ -192,7 +241,7 @@ class EpollEventChannel : EventChannel {
     alias UlongObject = BaseTypeObject!ulong;
     this(Selector loop) {
         super(loop);
-        setFlag(WatchFlag.Read, true);
+        setFlag(ChannelFlag.Read, true);
         _readBuffer = new UlongObject();
         this.handle = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     }
