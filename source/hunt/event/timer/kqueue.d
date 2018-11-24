@@ -38,7 +38,7 @@ class AbstractTimer : TimerChannelBase
     this(Selector loop)
     {
         super(loop);
-        setFlag(WatchFlag.Read, true);
+        setFlag(ChannelFlag.Read, true);
         _sock = new Socket(AddressFamily.UNIX, SocketType.STREAM);
         this.handle = _sock.handle;
         _readBuffer = new UintObject();

@@ -358,7 +358,7 @@ abstract class TimerChannelBase : AbstractChannel, ITimer
 
     this(Selector loop)
     {
-        super(loop, WatcherType.Timer);
+        super(loop, ChannelType.Timer);
         _timeOut = 50;
     }
 

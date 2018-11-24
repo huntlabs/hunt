@@ -13,11 +13,13 @@ module hunt.event.core;
 
 import hunt.init;
 import hunt.lang.common;
+import hunt.lang.exception;
 import hunt.logging;
 
-import std.socket;
-import std.exception;
+import core.atomic;
 import std.bitmanip;
+import std.exception;
+import std.socket;
 
 alias ReadCallBack = void delegate(Object obj);
 
@@ -26,8 +28,7 @@ alias DataWrittenHandler = void delegate(in ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
 // dfmt on
 
-interface StreamWriteBuffer
-{
+interface StreamWriteBuffer {
     // todo Write Data;
     const(ubyte)[] remaining();
 
@@ -47,38 +48,87 @@ alias ChannelBase = AbstractChannel;
 
 /**
 */
-interface Channel
-{
+interface Channel {
 
 }
 
 /**
 */
-interface Selector
-{
-    bool register(AbstractChannel channel);
+abstract class Selector {
 
-    bool reregister(AbstractChannel channel);
+    protected shared bool _runing;
+    // protected shared bool _isOpen = true;
 
-    bool deregister(AbstractChannel channel);
+    abstract bool register(AbstractChannel channel);
 
-    void stop();
+    abstract bool reregister(AbstractChannel channel);
 
-    void dispose();
+    abstract bool deregister(AbstractChannel channel);
+
+    void stop() {
+        atomicStore(_runing, false);
+    }
+
+    abstract void dispose();
+
+    /**
+     * Tells whether or not this selector is open.
+     *
+     * @return <tt>true</tt> if, and only if, this selector is open
+     */
+    bool isOpen() {
+        return atomicLoad(_runing);
+    }
+
+    // void onLoop(scope void delegate() weak, long timeout = -1) {
+    //     _runing = true;
+    //     do {
+    //         weak();
+    //         lockAndDoSelect(timeout);
+    //     }
+    //     while (_runing);
+    // }
+
+    int select(long timeout) {
+        if (timeout < 0)
+            throw new IllegalArgumentException("Negative timeout");
+        return lockAndDoSelect((timeout == 0) ? -1 : timeout);
+    }
+
+    int select() {
+        return select(0);
+    }
+
+    int selectNow() {
+        return lockAndDoSelect(0);
+    }
+
+    protected abstract int doSelect(long timeout);
+
+    private int lockAndDoSelect(long timeout) {
+        synchronized (this) {
+            // if (!isOpen())
+            //     throw new ClosedSelectorException();
+            // synchronized (publicKeys) {
+            //     synchronized (publicSelectedKeys) {
+            //         return doSelect(timeout);
+            //     }
+            // }
+            return doSelect(timeout);
+        }
+    }
 }
 
 /**
 */
-abstract class AbstractChannel : Channel
-{
+abstract class AbstractChannel : Channel {
     socket_t handle = socket_t.init;
     ErrorEventHandler errorHandler;
 
     protected bool _isRegistered = false;
     protected bool _isClosed = false;
 
-    this(Selector loop, WatcherType type)
-    {
+    this(Selector loop, ChannelType type) {
         this._inLoop = loop;
         _type = type;
         _flags = BitArray([false, false, false, false, false, false, false,
@@ -87,80 +137,69 @@ abstract class AbstractChannel : Channel
 
     /**
     */
-    bool isRegistered()
-    {
+    bool isRegistered() {
         return _isRegistered;
     }
 
     /**
     */
-    bool isClosed()
-    {
+    bool isClosed() {
         return _isClosed;
     }
 
-    protected void onClose()
-    {
+    protected void onClose() {
         _isRegistered = false;
         _isClosed = true;
-        version(Windows) {} else {
+        version (Windows) {
+        }
+        else {
             _inLoop.deregister(this);
         }
         //  _inLoop = null;
         clear();
     }
 
-    protected void errorOccurred(string msg)
-    {
+    protected void errorOccurred(string msg) {
         warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
         if (errorHandler !is null) {
             errorHandler(msg);
         }
     }
 
-    void onRead()
-    {
+    void onRead() {
         assert(false, "not implemented");
     }
 
-    void onWrite()
-    {
+    void onWrite() {
         assert(false, "not implemented");
     }
 
-    final bool flag(WatchFlag index)
-    {
+    final bool hasFlag(ChannelFlag index) {
         return _flags[index];
     }
 
-    @property WatcherType type()
-    {
+    @property ChannelType type() {
         return _type;
     }
 
-    @property Selector eventLoop()
-    {
+    @property Selector eventLoop() {
         return _inLoop;
     }
 
-    void close()
-    {
-        if (!_isClosed)
-        {
-            version (HUNT_DEBUG)
+    void close() {
+        if (!_isClosed) {
+            // version (HUNT_DEBUG)
                 trace("channel closing...", this.handle);
             onClose();
-            version (HUNT_DEBUG)
+            // version (HUNT_DEBUG)
                 trace("channel closed...", this.handle);
         }
-        else
-        {
+        else {
             debug warningf("The watcher(fd=%d) has already been closed", this.handle);
         }
     }
 
-    void setNext(AbstractChannel next)
-    {
+    void setNext(AbstractChannel next) {
         if (next is this)
             return; // Can't set to self
         next._next = _next;
@@ -170,8 +209,7 @@ abstract class AbstractChannel : Channel
         this._next = next;
     }
 
-    void clear()
-    {
+    void clear() {
         if (_priv)
             _priv._next = _next;
         if (_next)
@@ -183,8 +221,7 @@ abstract class AbstractChannel : Channel
     mixin OverrideErro;
 
 protected:
-    final void setFlag(WatchFlag index, bool enable)
-    {
+    final void setFlag(ChannelFlag index, bool enable) {
         _flags[index] = enable;
     }
 
@@ -192,7 +229,7 @@ protected:
 
 private:
     BitArray _flags;
-    WatcherType _type;
+    ChannelType _type;
 
     AbstractChannel _priv;
     AbstractChannel _next;
@@ -200,33 +237,26 @@ private:
 
 /**
 */
-class EventChannel : AbstractChannel
-{
-    this(Selector loop)
-    {
-        super(loop, WatcherType.Event);
+class EventChannel : AbstractChannel {
+    this(Selector loop) {
+        super(loop, ChannelType.Event);
     }
 
-    void call()
-    {
+    void call() {
         assert(false);
     }
 }
 
-mixin template OverrideErro()
-{
-    bool isError()
-    {
+mixin template OverrideErro() {
+    bool isError() {
         return _error;
     }
 
-    string erroString()
-    {
+    string erroString() {
         return _erroString;
     }
 
-    void clearError()
-    {
+    void clearError() {
         _error = false;
         _erroString = "";
     }
@@ -235,8 +265,7 @@ mixin template OverrideErro()
     string _erroString;
 }
 
-enum WatcherType : ubyte
-{
+enum ChannelType : ubyte {
     Accept = 0,
     TCP,
     UDP,
@@ -246,8 +275,7 @@ enum WatcherType : ubyte
     None
 }
 
-enum WatchFlag : ushort
-{
+enum ChannelFlag : ushort {
     None = 0,
     Read,
     Write,
@@ -256,53 +284,42 @@ enum WatchFlag : ushort
     ETMode = 16
 }
 
-final class UdpDataObject
-{
+final class UdpDataObject {
     Address addr;
     ubyte[] data;
 }
 
-final class BaseTypeObject(T)
-{
+final class BaseTypeObject(T) {
     T data;
 }
 
-class LoopException : Exception
-{
+class LoopException : Exception {
     mixin basicExceptionCtors;
 }
 
 // dfmt off
 version(linux):
 // dfmt on
-static if (CompilerHelper.isSmaller(2078))
-{
-    version (X86)
-    {
+static if (CompilerHelper.isSmaller(2078)) {
+    version (X86) {
         enum SO_REUSEPORT = 15;
     }
-    else version (X86_64)
-    {
+    else version (X86_64) {
         enum SO_REUSEPORT = 15;
     }
-    else version (MIPS32)
-    {
+    else version (MIPS32) {
         enum SO_REUSEPORT = 0x0200;
     }
-    else version (MIPS64)
-    {
+    else version (MIPS64) {
         enum SO_REUSEPORT = 0x0200;
     }
-    else version (PPC)
-    {
+    else version (PPC) {
         enum SO_REUSEPORT = 15;
     }
-    else version (PPC64)
-    {
+    else version (PPC64) {
         enum SO_REUSEPORT = 15;
     }
-    else version (ARM)
-    {
+    else version (ARM) {
         enum SO_REUSEPORT = 15;
     }
 }
