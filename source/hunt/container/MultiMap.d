@@ -300,6 +300,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 		bool delim = false;
+		import std.conv;
 		foreach(string key, List!(V) vals; this) {
 			if (delim) {
 				sb.append(", ");
@@ -307,7 +308,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 			sb.append(key);
 			sb.append('=');
 			if (vals.size() == 1) {
-				sb.append(vals.get(0));
+				sb.append(vals.get(0).to!string());
 			} else {
 				sb.append(vals.toString());
 			}

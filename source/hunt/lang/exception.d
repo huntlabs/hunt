@@ -110,6 +110,10 @@ class IOException : Exception {
     mixin BasicExceptionCtors;
 }
 
+class FileNotFoundException : Exception {
+    mixin BasicExceptionCtors;
+}
+
 class MalformedURLException : IOException {
     mixin BasicExceptionCtors;
 }
