@@ -84,11 +84,10 @@ class ByteArrayOutputStream : OutputStream {
         // overflow-conscious code
         size_t oldCapacity = buf.length;
         size_t newCapacity = oldCapacity << 1;
-        if (newCapacity - minCapacity < 0)
+        if (newCapacity < minCapacity)
             newCapacity = minCapacity;
-        if (newCapacity - MAX_ARRAY_SIZE > 0)
+        if (newCapacity > MAX_ARRAY_SIZE)
             newCapacity = hugeCapacity(minCapacity);
-
         byte[] newBuf = new byte[newCapacity];
         newBuf[0..count] = buf[0 .. count];
         buf = newBuf;
