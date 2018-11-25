@@ -1,12 +1,11 @@
 module hunt.io.common;
 
-import hunt.util.concurrent.CountingCallback;
+import hunt.container.ByteBuffer;
 import hunt.lang.common;
 import hunt.lang.exception;
-
-import hunt.container.ByteBuffer;
-
 import hunt.logging;
+import hunt.util.concurrent.CountingCallback;
+
 import std.algorithm;
 
 
@@ -487,34 +486,32 @@ abstract class OutputStream : Closeable  { // implements  Flushable
 
 }
 
-
-
 /**
  * IO Utilities. Provides stream handling utilities in singleton Threadpool
  * implementation accessed by static members.
  */
-class IO {
+// class IO {
 
-	enum string CRLF = "\015\012";
+// 	enum string CRLF = "\015\012";
 
-	enum byte[] CRLF_BYTES = [ '\015', '\012' ];
+// 	enum byte[] CRLF_BYTES = [ '\015', '\012' ];
 
-	enum int bufferSize = 64 * 1024;
+// 	enum int bufferSize = 64 * 1024;
 
-    /**
-	 * Closes an arbitrary closable, and logs exceptions at ignore level
-	 *
-	 * @param closeable
-	 *            the closeable to close
-	 */
-	static void close(Closeable closeable) {
-		try {
-			if (closeable !is null)
-				closeable.close();
-		} catch (IOException ignore) {
-		}
-	}
-}
+//     /**
+// 	 * Closes an arbitrary closable, and logs exceptions at ignore level
+// 	 *
+// 	 * @param closeable
+// 	 *            the closeable to close
+// 	 */
+// 	static void close(Closeable closeable) {
+// 		try {
+// 			if (closeable !is null)
+// 				closeable.close();
+// 		} catch (IOException ignore) {
+// 		}
+// 	}
+// }
 
 
 interface BufferReaderHandler {
