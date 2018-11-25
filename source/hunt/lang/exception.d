@@ -43,7 +43,7 @@ mixin template BasicExceptionCtors() {
     }
 
     this(Throwable next, string file = __FILE__, size_t line = __LINE__) @nogc @safe pure nothrow {
-        super("", file, line, next);
+        super(next.msg, file, line, next);
     }
 
     // mixin basicExceptionCtors;
