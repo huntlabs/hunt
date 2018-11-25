@@ -220,9 +220,9 @@ class IOUtils {
 	 * @throws IOException
 	 *             if unable to read the stream (or handle the charset)
 	 */
-	// static string toString(InputStream input) {
-	// 	return toString(input, null);
-	// }
+	static string toString(InputStream input) {
+		return toString(input, null);
+	}
 
 	/**
 	 * Read input stream to string.
@@ -250,13 +250,23 @@ class IOUtils {
 	 * @throws IOException
 	 *             if unable to read the stream (or handle the charset)
 	 */
-	// static string toString(InputStream input, Charset encoding) {
-	// 	StringWriter writer = new StringWriter();
-	// 	InputStreamReader reader = encoding == null ? new InputStreamReader(input) : new InputStreamReader(input, encoding);
+	static string toString(InputStream input, string encoding) {
+		import std.array;
+		Appender!(string) sb;
+		byte[] buffer = new byte[bufferSize];
+		int len = bufferSize;
+		while (true) {
+			len = input.read(buffer, 0, bufferSize);
+			if (len < 0)
+				break;
+			sb.put(cast(string)buffer[0..len]);
+		}
+		// StringWriter writer = new StringWriter();
+		// InputStreamReader reader = encoding == null ? new InputStreamReader(input) : new InputStreamReader(input, encoding);
 
-	// 	copy(reader, writer);
-	// 	return writer.toString();
-	// }
+		// copy(reader, writer);
+		return sb.data;
+	}
 
 	/**
 	 * Read input stream to string.
