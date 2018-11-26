@@ -120,8 +120,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             }
         }
         else {
-            // version (HUNT_DEBUG)
-                warningf("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
+            version (HUNT_DEBUG)
+                infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
             onDisconnected();
             this.close();
         }
