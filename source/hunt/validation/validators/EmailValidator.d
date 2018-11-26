@@ -46,6 +46,7 @@ public class EmailValidator : AbstractValidator , ConstraintValidator!(Email, st
 
 		// need to check if
 		if ( splitPosition < 0 ) {
+			_isValid = false;
 			return false;
 		}
 
