@@ -28,19 +28,41 @@ import core.sys.posix.sys.types; // for ssize_t, size_t
 import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
-// import core.sys.posix.time;
+
+import core.sys.posix.sys.resource;
 import core.sys.posix.sys.time;
 
+import hunt.lang.exception;
 import hunt.event.core;
 import hunt.event.socket;
 import hunt.event.timer;
 import hunt.event.timer.epoll;
 
+/* Max. theoretical number of file descriptors on system. */
+__gshared size_t fdLimit = 0;
+
+shared static this() {
+    rlimit fileLimit;
+    getrlimit(RLIMIT_NOFILE, &fileLimit);
+    fdLimit = fileLimit.rlim_max;
+}
+
 /**
 */
 class AbstractSelector : Selector {
+    private int _epollFD;
+    private EventChannel _event;
+
     this() {
-        _epollFD = epoll_create1(0);
+        // http://man7.org/linux/man-pages/man2/epoll_create.2.html
+        /*
+         * epoll_create expects a size as a hint to the kernel about how to
+         * dimension internal structures. We can't predict the size in advance.
+         */
+        // _epollFD = epoll_create1(0);
+        _epollFD = epoll_create(256);
+        if(_epollFD < 0)
+            throw new IOException("epoll_create failed");
         _event = new EpollEventChannel(this);
         register(_event);
     }
@@ -59,116 +81,94 @@ class AbstractSelector : Selector {
 
     private bool isDisposed = false;
 
-    override bool register(AbstractChannel watcher) {
-        assert(watcher !is null);
+    override bool register(AbstractChannel channel) {
+        assert(channel !is null);
 
-        if (watcher.type == ChannelType.Timer) {
-            auto wt = cast(AbstractTimer) watcher;
+        if (channel.type == ChannelType.Timer) {
+            auto wt = cast(AbstractTimer) channel;
             if (wt !is null)
                 wt.setTimer();
         }
 
-        // version(HUNT_DEBUG) infof("register, watcher(fd=%d)", watcher.handle);
-        const fd = watcher.handle;
-        assert(fd >= 0, "The watcher.handle is not initilized!");
+        // version(HUNT_DEBUG) infof("register, channel(fd=%d)", channel.handle);
+        // const fd = channel.handle;
+        // assert(fd >= 0, "The channel.handle is not initilized!");
 
-        // if(fd < 0) return false;
-        epoll_event ev = buildEpollEvent(watcher);
-        if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd, &ev)) != 0) {
-            if (errno != EEXIST)
-                return false;
-        }
-
-        _event.setNext(watcher);
-        return true;
-    }
-
-    override bool reregister(AbstractChannel watcher) {
-        assert(watcher !is null);
-        const int fd = watcher.handle;
-        if (fd < 0)
-            return false;
-        auto ev = buildEpollEvent(watcher);
-        return epoll_ctl(_epollFD, EPOLL_CTL_MOD, fd, &ev) == 0;
-    }
-
-    override bool deregister(AbstractChannel watcher) {
-        assert(watcher !is null);
-        // version(HUNT_DEBUG) infof("unregister watcher(fd=%d)", watcher.handle);
-
-        const int fd = watcher.handle;
-        if (fd < 0)
-            return false;
-
-        if ((epoll_ctl(_epollFD, EPOLL_CTL_DEL, fd, null)) != 0) {
-            errorf("unregister failed, watcher.handle=%d", watcher.handle);
+        // epoll_event ev;
+        // buildEpollEvent(channel, ev);
+        // if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd, &ev)) != 0) {
+        //     if (errno != EEXIST)
+        //         return false;
+        // }
+        if(epollCtl(channel, EPOLL_CTL_ADD)) {
+            _event.setNext(channel);
+            return true;
+        } else {
+            warningf("register failed: %d", channel.handle);
             return false;
         }
-        // TODO: check this
-        // watcher.clear();
-        return true;
+    }
+
+    override bool reregister(AbstractChannel channel) {        
+        return epollCtl(channel, EPOLL_CTL_MOD);
+    }
+
+    override bool deregister(AbstractChannel channel) {
+        if(epollCtl(channel, EPOLL_CTL_DEL)) {
+            return true;
+        } else {
+            warningf("unregister failed, channel.handle=%d", channel.handle);
+            return false;
+        }
     }
 
     override protected int doSelect(long timeout) {
-        // return epollWait(cast(int)timeout);
-        return 0;
+        return epollWait(cast(int)timeout);
     }
 
-    void onLoop(scope void delegate() weak) {
-        _runing = true;
-        do {
-            weak();
-            epollWait(10);
-        }
-        while (_runing);
-    }
-
-    private void epollWait(int timeout) {
-        epoll_event[64] events;
+    private int epollWait(int timeout) {
+        epoll_event[1024*2] events;
         int len = 0;
 
-                    // warningf("epoll_wait eeeeeeeeeeeee: %d", errno);
-        // if(timeout <= 0) { /* Indefinite or no wait */
-            // do {
+        if(timeout <= 0) { /* Indefinite or no wait */
+            do {
                 // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
                 len = epoll_wait(_epollFD, events.ptr, events.length, timeout);
-                // if(len == -1) {
-                //     warningf("epoll_wait error: %d", errno);
-                // }
-            // } while((len == -1) && (errno == EINTR));
-        // } else { /* Bounded wait; bounded restarts */
-        //     len = iepoll(_epollFD, events.ptr, events.length, timeout);
-        // }
+            } while((len == -1) && (errno == EINTR));
+        } else { /* Bounded wait; bounded restarts */
+            len = iepoll(_epollFD, events.ptr, events.length, timeout);
+        }
 
         foreach (i; 0 .. len) {
-            AbstractChannel watch = cast(AbstractChannel)(events[i].data.ptr);
-            if (watch is null) {
-                version (HUNT_DEBUG)
-                    warningf("watcher is null");
+            AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+            if (channel is null) {
+                warningf("channel is null");
                 continue;
             }
 
-            if (isErro(events[i].events)) {
-                version (HUNT_DEBUG)
-                    info("closing watcher for error: ", watch.handle);
-                watch.close();
-                continue;
-            }
+            uint currentEvents = events[i].events;
 
-            if (watch.isRegistered && isRead(events[i].events)) {
-                watch.onRead();
-            }
-
-            if (watch.isRegistered && isWrite(events[i].events)) {
-                AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
+            if (isError(currentEvents)) {
+                // version (HUNT_DEBUG)
+                debug warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
+                        errno, cast(string) fromStringz(strerror(errno)));
+                channel.close();
+            } else if (channel.isRegistered && isReadable(currentEvents)) {
+                channel.onRead();
+            } else if (channel.isRegistered && isWritable(currentEvents)) {
+                AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
                 assert(wt !is null);
                 wt.onWriteDone();
-                // watch.onWrite();
+                // channel.onWrite();
+            } else {
+                warning("Undefined behavior!");
             }
         }
+
+        return len;
     }
 
-    int iepoll(int epfd, epoll_event *events, int numfds, int timeout) {
+    private int iepoll(int epfd, epoll_event* events, int numfds, int timeout) {
         long start, now;
         int remaining = timeout;
         timeval t;
@@ -179,7 +179,6 @@ class AbstractSelector : Selector {
 
         for (;;) {
             int res = epoll_wait(epfd, events, numfds, remaining);
-            // warningf("epoll_wait xxxxxxxxxxx: %d", res);
             if (res < 0 && errno == EINTR) {
                 if (remaining >= 0) {
                     gettimeofday(&t, null);
@@ -197,42 +196,61 @@ class AbstractSelector : Selector {
         }
     }
 
-    override void stop() {
-        _runing = false;
-    }
-
-protected:
-    bool isErro(uint events) nothrow {
+    private static bool isError(uint events) nothrow {
         return (events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP)) != 0;
     }
 
-    bool isRead(uint events) nothrow {
+    private static bool isReadable(uint events) nothrow {
         return (events & EPOLLIN) != 0;
     }
 
-    bool isWrite(uint events) nothrow {
+    private static bool isWritable(uint events) nothrow {
         return (events & EPOLLOUT) != 0;
     }
 
-    static epoll_event buildEpollEvent(AbstractChannel watch) {
-        epoll_event ev;
-        ev.data.ptr = cast(void*) watch;
+    private static buildEpollEvent(AbstractChannel channel, ref epoll_event ev) {
+        ev.data.ptr = cast(void*) channel;
+        // ev.data.fd = channel.handle;
         ev.events = EPOLLRDHUP | EPOLLERR | EPOLLHUP;
-        if (watch.hasFlag(ChannelFlag.Read))
+        if (channel.hasFlag(ChannelFlag.Read))
             ev.events |= EPOLLIN;
-        if (watch.hasFlag(ChannelFlag.Write))
+        if (channel.hasFlag(ChannelFlag.Write))
             ev.events |= EPOLLOUT;
-        if (watch.hasFlag(ChannelFlag.OneShot))
+        if (channel.hasFlag(ChannelFlag.OneShot))
             ev.events |= EPOLLONESHOT;
-        if (watch.hasFlag(ChannelFlag.ETMode))
+        if (channel.hasFlag(ChannelFlag.ETMode))
             ev.events |= EPOLLET;
         return ev;
     }
 
-private:
-    bool _runing;
-    int _epollFD;
-    EventChannel _event;
+    private bool epollCtl(AbstractChannel channel, int opcode) {
+        assert(channel !is null);
+        const fd = channel.handle;
+        assert(fd >= 0, "The channel.handle is not initilized!");
+
+        epoll_event ev;
+        buildEpollEvent(channel, ev);
+        int res = 0;
+        do {
+            res = epoll_ctl(_epollFD, opcode, fd, &ev);
+        } while((res == -1) && (errno == EINTR));
+
+        /*
+         * A channel may be registered with several Selectors. When each Selector
+         * is polled a EPOLL_CTL_DEL op will be inserted into its pending update
+         * list to remove the file descriptor from epoll. The "last" Selector will
+         * close the file descriptor which automatically unregisters it from each
+         * epoll descriptor. To avoid costly synchronization between Selectors we
+         * allow pending updates to be processed, ignoring errors. The errors are
+         * harmless as the last update for the file descriptor is guaranteed to
+         * be EPOLL_CTL_DEL.
+         */
+        if (res < 0 && errno != EBADF && errno != ENOENT && errno != EPERM) {
+            warning("epoll_ctl failed");
+            return false;
+        } else
+            return true;        
+    }
 }
 
 /**
@@ -312,11 +330,11 @@ extern (C) : @system : nothrow :
 
 align(1) struct epoll_event {
 align(1):
-uint events;
-    epoll_data_t data;
+    uint events;
+    epoll_data data;
 }
 
-union epoll_data_t {
+union epoll_data {
     void* ptr;
     int fd;
     uint u32;
