@@ -45,7 +45,7 @@ string makeValidInit()
 {
 	string str = `
 		private ConstraintValidatorContext _context;
-		public ConstraintValidatorContext valid(){ return doValid() ;}
+		override public ConstraintValidatorContext valid(){ return doValid() ;}
 	`;
 
 	return str;
