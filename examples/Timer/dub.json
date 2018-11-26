@@ -23,8 +23,5 @@
 				"NativeTimer"
 			]
 		}
-	],
-	"subConfigurations": {
-		"hunt": "debug"
-	}
+	]
 }

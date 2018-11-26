@@ -13,8 +13,18 @@ version(HUNT_DEBUG) {
 class BufferedOutputStream : OutputStream {
     protected  OutputStream output;
     protected  int bufferSize;
-    private byte[] buf;
-    private int count;
+    /**
+     * The internal buffer where data is stored.
+     */
+    protected byte[] buf;
+
+    /**
+     * The number of valid bytes in the buffer. This value is always
+     * in the range {@code 0} through {@code buf.length}; elements
+     * {@code buf[0]} through {@code buf[count-1]} contain valid
+     * byte data.
+     */
+    protected int count;
 
     this(OutputStream output, int bufferSize = 1024) {
         this.output = output;
@@ -66,10 +76,10 @@ class BufferedOutputStream : OutputStream {
     void flush()  {
         version(HUNT_DEBUG) {
             import hunt.logging;
-            if(count == 0)
-                warning("buffered data(bytes): 0");
-            else
-                trace("buffered data(bytes): ", count);
+            // if(count == 0)
+            //     warning("buffered data(bytes): 0");
+            // else
+            trace("buffered data(bytes): ", count);
         }
         if (count > 0) {
             output.write(buf, 0, count);

@@ -3,81 +3,66 @@ module hunt.lang.exception;
 import core.exception;
 import std.exception;
 
-void implementationMissing(string name = __FUNCTION__, 
-    string file = __FILE__, int line = __LINE__ )
-    (bool canThrow=true)
-{
-    if(canThrow)
+void implementationMissing(string name = __FUNCTION__, string file = __FILE__, int line = __LINE__)(
+        bool canThrow = true) {
+    if (canThrow)
         throw new Exception("Implementation missing: " ~ name, file, line);
-    else
-    {
-        version(HUNT_DEBUG) {
+    else {
+        version (HUNT_DEBUG) {
             import hunt.logging;
+
             warningf("Implementation missing %s, in %s:%d", name, file, line);
-        } else {
+        }
+        else {
             import std.stdio;
+
             stderr.writefln("======> Implementation missing %s, in %s:%d", name, file, line);
         }
     }
 }
 
-
-mixin template ExceptionBuild(string name, string parent = "")
-{
+mixin template ExceptionBuild(string name, string parent = "") {
     import std.exception;
-	enum buildStr = "class " ~ name ~ "Exception : " ~ parent 
-        ~ "Exception { \n\t" ~ "mixin basicExceptionCtors;\n }";
-	mixin(buildStr);
+
+    enum buildStr = "class " ~ name ~ "Exception : " ~ parent ~ "Exception { \n\t"
+        ~ "mixin basicExceptionCtors;\n }";
+    mixin(buildStr);
 }
 
-mixin template BasicExceptionCtors()
-{
-    this(size_t line = __LINE__, string file = __FILE__) @nogc @safe pure nothrow
-    {
+mixin template BasicExceptionCtors() {
+    this(size_t line = __LINE__, string file = __FILE__) @nogc @safe pure nothrow {
         super("", file, line, null);
     }
 
-    this(string msg, string file = __FILE__, size_t line = __LINE__,
-         Throwable next = null) @nogc @safe pure nothrow
-    {
+    this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @nogc @safe pure nothrow {
         super(msg, file, line, next);
     }
 
-    this(string msg, Throwable next, string file = __FILE__,
-         size_t line = __LINE__) @nogc @safe pure nothrow
-    {
+    this(string msg, Throwable next, string file = __FILE__, size_t line = __LINE__) @nogc @safe pure nothrow {
         super(msg, file, line, next);
     }
-    
-    this(Throwable next, string file = __FILE__,
-         size_t line = __LINE__) @nogc @safe pure nothrow
-    {
-        super("", file, line, next);
+
+    this(Throwable next, string file = __FILE__, size_t line = __LINE__) @nogc @safe pure nothrow {
+        super(next.msg, file, line, next);
     }
-    
+
     // mixin basicExceptionCtors;
 }
 
-
-class NotImplementedException: Exception
-{
+class NotImplementedException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class NotSupportedException: Exception
-{
+class NotSupportedException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class IllegalArgumentException: Exception
-{
+class IllegalArgumentException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class RuntimeException : Exception
-{
-    this(Exception ex)
-    {
+class RuntimeException : Exception {
+    this(Exception ex) {
         super("", ex);
     }
 
@@ -88,9 +73,7 @@ class RuntimeException : Exception
             line = The line number where the exception occurred.
             next = The previous exception in the chain of exceptions, if any.
     +/
-    this(string msg, string file = __FILE__, size_t line = __LINE__,
-         Throwable next = null) @nogc @safe pure nothrow
-    {
+    this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @nogc @safe pure nothrow {
         super(msg, file, line, next);
     }
 
@@ -101,86 +84,69 @@ class RuntimeException : Exception
             file = The file where the exception occurred.
             line = The line number where the exception occurred.
     +/
-    this(string msg, Throwable next, string file = __FILE__,
-         size_t line = __LINE__) @nogc @safe pure nothrow
-    {
+    this(string msg, Throwable next, string file = __FILE__, size_t line = __LINE__) @nogc @safe pure nothrow {
         super(msg, file, line, next);
     }
     // mixin BasicExceptionCtors;
 }
 
-
-class TimeoutException: Exception
-{
+class TimeoutException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class InterruptedException: Exception
-{
+class InterruptedException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class ExecutionException: Exception
-{
+class ExecutionException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class URISyntaxException : IOException
-{
+class URISyntaxException : IOException {
     mixin BasicExceptionCtors;
 }
 
-
-class IOException : Exception
-{
+class IOException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class MalformedURLException : IOException
-{
+class FileNotFoundException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class InterruptedIOException : IOException
-{
+class MalformedURLException : IOException {
     mixin BasicExceptionCtors;
 }
 
-class CommonRuntimeException : RuntimeException
-{
+class InterruptedIOException : IOException {
     mixin BasicExceptionCtors;
 }
 
-
-class IndexOutOfBoundsException : RuntimeException
-{
+class CommonRuntimeException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class ReadOnlyBufferException : RuntimeException
-{
+class IndexOutOfBoundsException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class BufferUnderflowException : RuntimeException
-{
+class ReadOnlyBufferException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class BufferOverflowException : RuntimeException
-{
+class BufferUnderflowException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class UnsupportedOperationException : RuntimeException
-{
+class BufferOverflowException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
+class UnsupportedOperationException : RuntimeException {
+    mixin BasicExceptionCtors;
+}
 
-class NoSuchElementException : RuntimeException
-{
+class NoSuchElementException : RuntimeException {
     // this()
     // {
     //     super("");
@@ -188,186 +154,140 @@ class NoSuchElementException : RuntimeException
     mixin BasicExceptionCtors;
 }
 
-class NumberFormatException : IllegalArgumentException
-{
+class NumberFormatException : IllegalArgumentException {
     mixin BasicExceptionCtors;
 }
 
-
-class NullPointerException : RuntimeException
-{
+class NullPointerException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class EofException : RuntimeException
-{
+class EofException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class SecureNetException: RuntimeException
-{
+class SecureNetException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class ArithmeticException: RuntimeException
-{
+class ArithmeticException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-class ArrayIndexOutOfBoundsException: IndexOutOfBoundsException
-{
+class ArrayIndexOutOfBoundsException : IndexOutOfBoundsException {
     mixin BasicExceptionCtors;
 }
 
-class ClosedChannelException : IOException
-{
+class ClosedChannelException : IOException {
     mixin BasicExceptionCtors;
 }
 
-class EOFException : IOException
-{
+class EOFException : IOException {
     mixin BasicExceptionCtors;
 }
 
-
-class IllegalStateException : Exception
-{
+class IllegalStateException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class InvalidMarkException : IllegalStateException
-{
+class InvalidMarkException : IllegalStateException {
     mixin BasicExceptionCtors;
 }
 
-class WritePendingException : IllegalStateException
-{
+class WritePendingException : IllegalStateException {
     mixin BasicExceptionCtors;
 }
 
-class CancellationException : IllegalStateException
-{
+class CancellationException : IllegalStateException {
     mixin BasicExceptionCtors;
 }
 
-
-class OutOfMemoryError : Error
-{
+class OutOfMemoryError : Error {
     // this(string msg, Throwable nextInChain = null)
     // {
     //     super(msg, nextInChain);
     // }
-    
+
     mixin BasicExceptionCtors;
 }
 
-
-class GeneralSecurityException : Exception
-{
+class GeneralSecurityException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class CertificateException : GeneralSecurityException
-{
+class CertificateException : GeneralSecurityException {
     mixin BasicExceptionCtors;
 }
 
-class NoSuchAlgorithmException: GeneralSecurityException
-{
+class NoSuchAlgorithmException : GeneralSecurityException {
     mixin BasicExceptionCtors;
 }
 
-
-class ConcurrentModificationException : RuntimeException
-{
+class ConcurrentModificationException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
-
-class InternalError : Exception
-{
+class InternalError : Exception {
     mixin BasicExceptionCtors;
 }
 
-class CRLException : GeneralSecurityException
-{
+class CRLException : GeneralSecurityException {
     mixin BasicExceptionCtors;
 }
 
-
-class NoSuchProviderException : Exception
-{
+class NoSuchProviderException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class CertificateNotYetValidException : Exception
-{
+class CertificateNotYetValidException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class CertificateExpiredException : Exception
-{
+class CertificateExpiredException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class SignatureException : Exception
-{
+class SignatureException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class CertificateEncodingException : Exception
-{
+class CertificateEncodingException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class ParsingException : Exception
-{
+class ParsingException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class CertificateParsingException : ParsingException
-{
+class CertificateParsingException : ParsingException {
     mixin BasicExceptionCtors;
 }
 
-class InvalidKeyException : Exception
-{
+class InvalidKeyException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class KeyStoreException : Exception
-{
+class KeyStoreException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
-class UnrecoverableKeyException : Exception
-{
+class UnrecoverableKeyException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class KeyManagementException : Exception
-{
+class KeyManagementException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class StringIndexOutOfBoundsException : Exception
-{
+class StringIndexOutOfBoundsException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class IllegalThreadStateException : IllegalArgumentException
-{
+class IllegalThreadStateException : IllegalArgumentException {
     mixin BasicExceptionCtors;
 }
 
-class IllegalMonitorStateException : RuntimeException
-{
+class IllegalMonitorStateException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 

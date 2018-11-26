@@ -48,7 +48,7 @@ class AbstractSelector : Selector
     {
         assert(watcher !is null);
 
-        if (watcher.type == WatcherType.Timer)
+        if (watcher.type == ChannelType.Timer)
         {
             AbstractTimer wt = cast(AbstractTimer) watcher;
             assert(wt !is null);
@@ -56,9 +56,9 @@ class AbstractSelector : Selector
                 return false;
             _timer.timeWheel().addNewTimer(wt.timer, wt.wheelSize());
         }
-        else if (watcher.type == WatcherType.TCP
-                || watcher.type == WatcherType.Accept 
-                || watcher.type == WatcherType.UDP)
+        else if (watcher.type == ChannelType.TCP
+                || watcher.type == ChannelType.Accept 
+                || watcher.type == ChannelType.UDP)
         {
             version (HUNT_DEBUG)
                 trace("Run CreateIoCompletionPort on socket: ", watcher.handle);

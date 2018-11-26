@@ -159,12 +159,14 @@ class BufferUtils {
      * @param buffer The buffer to convert in flush mode. The buffer is not altered.
      * @return An array of bytes duplicated from the buffer.
      */
-    static byte[] toArray(ByteBuffer buffer) {
+    static byte[] toArray(ByteBuffer buffer, bool canDuplicate = true) {
         if (buffer.hasArray()) {
             byte[] array = buffer.array();
             int from = buffer.arrayOffset() + buffer.position();
-            // return Arrays.copyOfRange(array, from, from + buffer.remaining());
-            return array[from .. from + buffer.remaining()].dup;
+            if(canDuplicate)
+                return array[from .. from + buffer.remaining()].dup;
+            else
+                return array[from .. from + buffer.remaining()];
         } else {
             byte[] to = new byte[buffer.remaining()];
             buffer.slice().get(to);

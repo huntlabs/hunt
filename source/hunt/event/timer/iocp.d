@@ -32,7 +32,7 @@ class AbstractTimer : TimerChannelBase
     this(Selector loop)
     {
         super(loop);
-        setFlag(WatchFlag.Read, true);
+        setFlag(ChannelFlag.Read, true);
         _timer = new HuntWheelTimer();
         _timer.timeout = &onTimerTimeout;
         _readBuffer = new UintObject();

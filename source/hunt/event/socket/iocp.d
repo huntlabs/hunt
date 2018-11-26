@@ -42,8 +42,8 @@ abstract class AbstractListener : AbstractSocketChannel
 {
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
     {
-        super(loop, WatcherType.Accept);
-        setFlag(WatchFlag.Read, true);
+        super(loop, ChannelType.Accept);
+        setFlag(ChannelFlag.Read, true);
         _buffer = new ubyte[bufferSize];
         this.socket = new TcpSocket(family);
 
@@ -119,9 +119,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2)
     {
-        super(loop, WatcherType.TCP);
-        setFlag(WatchFlag.Read, true);
-        setFlag(WatchFlag.Write, true);
+        super(loop, ChannelType.TCP);
+        setFlag(ChannelFlag.Read, true);
+        setFlag(ChannelFlag.Write, true);
 
         version (HUNT_DEBUG)
             trace("Buffer size for read: ", bufferSize);
@@ -262,7 +262,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     /// 
     // TODO: created by Administrator @ 2018-4-18 10:15:20
     // Send a big block of data
-    protected size_t tryWrite(in ubyte[] data)
+    protected size_t tryWrite(const ubyte[] data)
     {
         if (_isWritting)
         {
@@ -405,9 +405,9 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
     /// Constructs a blocking IPv4 UDP Socket.
     this(Selector loop, AddressFamily family = AddressFamily.INET)
     {
-        super(loop, WatcherType.UDP);
-        setFlag(WatchFlag.Read, true);
-        setFlag(WatchFlag.ETMode, false);
+        super(loop, ChannelType.UDP);
+        setFlag(ChannelFlag.Read, true);
+        setFlag(ChannelFlag.ETMode, false);
 
         this.socket = new UdpSocket(family);
         _readBuffer = new UdpDataObject();

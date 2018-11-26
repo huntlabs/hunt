@@ -8,17 +8,6 @@
         "zoujiaqing"
     ],
     "license": "Apache-2.0",
-    "configurations":[
-        {
-            "name": "default"
-        },
-        {
-            "name": "debug",
-            "versions": [
-                "HUNT_DEBUG"
-            ]
-        }
-    ],
     "versions-osx": [
         "Kqueue"
     ],

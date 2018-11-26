@@ -53,8 +53,6 @@ final class EventLoop : AbstractSelector
 
     EventLoop postTask(AbstractTask task)
     {
-        import hunt.logging;
-
         synchronized (this)
         {
             _queue.enQueue(task);
