@@ -91,8 +91,7 @@ class AbstractSelector : Selector
         return true;
     }
 
-    void weakUp()
-    {
+    void weakUp() {
         IocpContext _data;
         _data.watcher = _event;
         _data.operation = IocpOperation.event;
@@ -100,19 +99,12 @@ class AbstractSelector : Selector
         PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
     }
 
-    void onLoop(scope void delegate() handler)
-    {
-        _runing = true;
+    override void onLoop(scope void delegate() weakup, long timeout = -1) {
         _timer.init();
-        do
-        {
-            handler();
-            handleSocketEvent();
-        }
-        while (_runing);
+        super.onLoop(weakup, timeout);
     }
 
-    private void handleSocketEvent()
+    override protected int doSelect(long t)
     {
         auto timeout = _timer.doWheel();
         OVERLAPPED* overlapped;
@@ -132,7 +124,7 @@ class AbstractSelector : Selector
         {
             const auto erro = GetLastError();
             if (erro == WAIT_TIMEOUT) // || erro == ERROR_OPERATION_ABORTED
-                return;
+                return ret;
 
             error("error occurred, code=", erro);
             if (ev !is null) {
@@ -145,6 +137,7 @@ class AbstractSelector : Selector
             warning("ev is null or ev.watche is null");
         else
             handleIocpOperation(ev.operation, ev.watcher, bytes);
+        return ret;
     }
 
     private void handleIocpOperation(IocpOperation op, AbstractChannel channel, DWORD bytes) {
@@ -178,19 +171,16 @@ class AbstractSelector : Selector
         }
     }
 
-    override void stop()
-    {
-        _runing = false;
+    override void stop() {
+        super.stop();
         weakUp();
     }
 
-    void handleTimer()
-    {
+    void handleTimer() {
 
     }
 
-    void dispose()
-    {
+    override void dispose() {
 
     }
 
@@ -232,7 +222,6 @@ class AbstractSelector : Selector
     }
 
 private:
-    bool _runing;
     HANDLE _iocpHandle;
     EventChannel _event;
     CustomTimer _timer;
