@@ -80,10 +80,10 @@ abstract class Selector {
         return atomicLoad(_runing);
     }
 
-    void onLoop(scope void delegate() weak, long timeout = -1) {
+    void onLoop(scope void delegate() weakup, long timeout = -1) {
         _runing = true;
         do {
-            weak();
+            weakup();
             lockAndDoSelect(timeout);
         }
         while (_runing);
