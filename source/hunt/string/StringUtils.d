@@ -14,8 +14,7 @@ import hunt.string.common;
 
 /**
 */
-class StringUtils
-{
+class StringUtils {
     private enum string FOLDER_SEPARATOR = "/";
     private enum string WINDOWS_FOLDER_SEPARATOR = "\\";
     private enum string TOP_PATH = "..";
@@ -82,8 +81,7 @@ class StringUtils
         return normalizeCharset(s[offset .. offset+length]);
     }
 
-    static string asciiToLowerCase(string s)
-    {
+    static string asciiToLowerCase(string s) {
         return toLower(s);
     }
 
@@ -93,6 +91,12 @@ class StringUtils
 
     static byte[] getBytes(string s) {
         return cast(byte[])s.dup;
+    }
+
+    static string randomId(size_t n=10) {
+        import std.random : randomSample;
+        import std.utf : byCodeUnit;
+        return letters.byCodeUnit.randomSample(n).to!string;
     }
 
     // Splitting
