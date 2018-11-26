@@ -80,14 +80,14 @@ abstract class Selector {
         return atomicLoad(_runing);
     }
 
-    // void onLoop(scope void delegate() weak, long timeout = -1) {
-    //     _runing = true;
-    //     do {
-    //         weak();
-    //         lockAndDoSelect(timeout);
-    //     }
-    //     while (_runing);
-    // }
+    void onLoop(scope void delegate() weakup, long timeout = -1) {
+        _runing = true;
+        do {
+            weakup();
+            lockAndDoSelect(timeout);
+        }
+        while (_runing);
+    }
 
     int select(long timeout) {
         if (timeout < 0)
@@ -188,10 +188,10 @@ abstract class AbstractChannel : Channel {
 
     void close() {
         if (!_isClosed) {
-            // version (HUNT_DEBUG)
+            version (HUNT_DEBUG)
                 trace("channel closing...", this.handle);
             onClose();
-            // version (HUNT_DEBUG)
+            version (HUNT_DEBUG)
                 trace("channel closed...", this.handle);
         }
         else {
