@@ -177,7 +177,7 @@ protected:
             trace("start to read");
 
         version (Posix) {
-            while (_isRegistered && !tryRead()) {
+            while (!_isClosed && !tryRead()) {
                 version (HUNT_DEBUG)
                     trace("continue reading...");
             }
@@ -189,7 +189,7 @@ protected:
         if (this.isError) {
             string msg = format("Socket error on read: fd=%d, message: %s",
                     this.handle, this.erroString);
-            version (HUNT_DEBUG)
+            // version (HUNT_DEBUG)
                 errorf(msg);
             errorOccurred(msg);
         }
@@ -229,8 +229,7 @@ protected:
             trace("start to write");
 
         while (_isRegistered && !isWriteCancelling && !_writeQueue.empty) {
-            version (HUNT_DEBUG)
-                trace("writting...");
+            version (HUNT_DEBUG) trace("writting...");
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
             const(ubyte[]) data = writeBuffer.remaining();
@@ -259,8 +258,7 @@ protected:
             if (this.isError) {
                 string msg = format("Socket error on write: fd=%d, message=%s",
                         this.handle, this.erroString);
-                version (HUNT_DEBUG)
-                    errorf(msg);
+                version (HUNT_DEBUG) errorf(msg);
                 errorOccurred(msg);
                 break;
             }

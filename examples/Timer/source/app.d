@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 import std.stdio;
 
 import hunt.lang.common;
@@ -17,24 +17,20 @@ import hunt.logging;
 import core.thread;
 import core.time;
 import hunt.util.timer;
+import hunt.event.timer.common;
 
-version (NativeTimer)
-{
-	void main()
-	{
+version (NativeTimer) {
+	void main() {
 		int count1 = 10;
 		int count2 = 6;
 
-		void onTimerTick(Object sender)
-		{
+		void onTimerTick(Object sender) {
 			trace("Countdown[1]: ", count1--);
-			if (count1 == 0)
-			{
+			if (count1 == 0) {
 				ITimer timer = cast(ITimer) sender;
 				timer.stop();
 			}
-			else if (count1 == 5)
-			{
+			else if (count1 == 5) {
 				trace("reset timer1's interval to 2 secondes");
 				ITimer timer = cast(ITimer) sender;
 				timer.reset(2.seconds);
@@ -45,8 +41,7 @@ version (NativeTimer)
 
 		new NativeTimer().interval(2.seconds).onTick(delegate void(Object sender) {
 			trace("Countdown[2]: ", count2--);
-			if (count2 == 0)
-			{
+			if (count2 == 0) {
 				ITimer timer = cast(ITimer) sender;
 				timer.stop();
 			}
@@ -56,21 +51,17 @@ version (NativeTimer)
 		getchar();
 	}
 
-}
-else
-{
+} else {
 
 	import hunt.event;
 
-	void main()
-	{
+	void main() {
 		EventLoop loop = new EventLoop();
 
 		bool isTimer1Running = true;
 		bool isTimer2Running = true;
 
-		void checkTimer()
-		{
+		void checkTimer() {
 			if (isTimer1Running || isTimer2Running)
 				return;
 
@@ -83,18 +74,15 @@ else
 		}
 
 		int count1 = 10;
-		void onTimerTick(Object sender)
-		{
+		void onTimerTick(Object sender) {
 			trace("Countdown[1]: ", count1--);
-			if (count1 == 0)
-			{
+			if (count1 == 0) {
 				ITimer timer = cast(ITimer) sender;
 				timer.stop();
 				isTimer1Running = false;
 				checkTimer();
 			}
-			else if (count1 == 5)
-			{
+			else if (count1 == 5) {
 				trace("reset the timer1's interval to 2 secondes");
 				ITimer timer = cast(ITimer) sender;
 				timer.reset(2.seconds);
@@ -106,8 +94,7 @@ else
 		int count2 = 5;
 		new Timer(loop).interval(2.seconds).onTick(delegate void(Object sender) {
 			trace("Countdown[2]: ", count2--);
-			if (count2 == 0)
-			{
+			if (count2 == 0) {
 				ITimer timer = cast(ITimer) sender;
 				timer.stop();
 				isTimer2Running = false;

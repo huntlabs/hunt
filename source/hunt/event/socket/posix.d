@@ -38,8 +38,8 @@ TCP Server
 */
 abstract class AbstractListener : AbstractSocketChannel {
     this(Selector loop, AddressFamily family = AddressFamily.INET) {
-        super(loop, WatcherType.Accept);
-        setFlag(WatchFlag.Read, true);
+        super(loop, ChannelType.Accept);
+        setFlag(ChannelFlag.Read, true);
         this.socket = new TcpSocket(family);
     }
 
@@ -73,17 +73,15 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     // DataWrittenHandler sentHandler;
 
     protected bool _isConnected; //if server side always true.
-    // alias UbyteArrayObject = BaseTypeObject!(ubyte[]);
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
-        // _readBuffer = new UbyteArrayObject();
         version (HUNT_DEBUG)
             trace("Buffer size for read: ", bufferSize);
         _readBuffer = new ubyte[bufferSize];
-        super(loop, WatcherType.TCP);
-        setFlag(WatchFlag.Read, true);
-        setFlag(WatchFlag.Write, true);
-        setFlag(WatchFlag.ETMode, true);
+        super(loop, ChannelType.TCP);
+        setFlag(ChannelFlag.Read, true);
+        setFlag(ChannelFlag.Write, true);
+        setFlag(ChannelFlag.ETMode, true);
     }
 
     /**
@@ -102,8 +100,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             // It's prossible that more data are wainting for read in inner buffer.
             if (len == _readBuffer.length)
                 isDone = false;
-        }
-        else if (len < 0) {
+        } else if (len < 0) {
             // https://stackoverflow.com/questions/14595269/errno-35-eagain-returned-on-recv-call
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
             // check more error status
@@ -112,18 +109,21 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 this._erroString = cast(string) fromStringz(strerror(errno));
             }
 
-            version (HUNT_DEBUG)
-                warningf("read error: isDone=%s, errno=%d, message=%s", isDone,
+            // version (HUNT_DEBUG)
+                warningf("read error: fd=%s, errno=%d, message=%s", this.handle,
                         errno, cast(string) fromStringz(strerror(errno)));
+
+            if(errno == ECONNRESET) {
+                // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
+                onDisconnected();
+                this.close();
+            }
         }
         else {
             version (HUNT_DEBUG)
-                warningf("connection broken: %s", _remoteAddress.toString());
+                infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
             onDisconnected();
-            if (_isClosed)
-                this.socket.close(); // release the sources
-            else
-                this.close();
+            this.close();
         }
 
         return isDone;
@@ -131,7 +131,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
     protected void onDisconnected() {
         _isConnected = false;
-        _isClosed = true;
+        // _isClosed = true;
         if (disconnectionHandler !is null)
             disconnectionHandler();
     }
@@ -160,8 +160,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                     warning("You are writting a Big block of data!!!");
 
                 tryWriteAll(data[nBytes .. $]);
-            }
-            else
+            } else
                 writeRetries = 0;
 
         }
@@ -173,11 +172,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 this._erroString = msg;
 
                 errorOccurred(msg);
-            }
-            else {
+            } else {
                 version (HUNT_DEBUG)
                     warningf("errno=%d, message: %s", errno, lastSocketError());
-                if (canWriteAgain) {
+                if (canWriteAgain && !_isClosed) {
                     import core.thread;
                     import core.time;
 
@@ -207,7 +205,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     /**
     Try to write a block of data.
     */
-    protected size_t tryWrite(in ubyte[] data) {
+    protected size_t tryWrite(const ubyte[] data) {
         const nBytes = this.socket.send(data);
         version (HUNT_DEBUG)
             tracef("actually sent bytes: %d / %d", nBytes, data.length);
@@ -217,15 +215,17 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         }
         else if (nBytes == Socket.ERROR) {
             version (HUNT_DEBUG)
-                warningf("errno=%d, message: %s", errno, lastSocketError());
+                warningf("fd: %d, errno: %d, message: %s", this.handle, errno, lastSocketError());
 
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
+            // EPIPE/Broken pipe: 
+            // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
             if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
                 this._error = true;
                 this._erroString = lastSocketError();
                 version (HUNT_DEBUG)
-                    warningf("errno=%d, message: %s", errno, this._erroString);
+                    warningf("fd: %d, errno=%d, message: %s", this.handle, errno, this._erroString);
             }
         }
         else {
@@ -273,9 +273,9 @@ UDP Socket
 */
 abstract class AbstractDatagramSocket : AbstractSocketChannel {
     this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2) {
-        super(loop, WatcherType.UDP);
-        setFlag(WatchFlag.Read, true);
-        setFlag(WatchFlag.ETMode, false);
+        super(loop, ChannelType.UDP);
+        setFlag(ChannelFlag.Read, true);
+        setFlag(ChannelFlag.ETMode, false);
 
         this.socket = new UdpSocket(family);
         // _socket.blocking = false;

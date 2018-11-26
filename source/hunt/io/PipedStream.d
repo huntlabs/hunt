@@ -3,20 +3,26 @@ module hunt.io.PipedStream;
 import hunt.io.common;
 import hunt.io.ByteArrayInputStream;
 import hunt.io.ByteArrayOutputStream;
+import hunt.io.BufferedInputStream;
+import hunt.io.BufferedOutputStream;
+import hunt.io.FileInputStream;
+import hunt.io.FileOutputStream;
 import hunt.lang.common;
-import hunt.lang.exception;
 
 // import hunt.logging;
-import std.algorithm;
 
+import std.path;
+import std.file;
 
 interface PipedStream : Closeable {
 
-	InputStream getInputStream();
-	
-	OutputStream getOutputStream();
+    InputStream getInputStream();
+
+    OutputStream getOutputStream();
 }
 
+/**
+*/
 class ByteArrayPipedStream : PipedStream {
 
     private ByteArrayOutputStream outStream;
@@ -27,13 +33,11 @@ class ByteArrayPipedStream : PipedStream {
         this.size = size;
     }
 
-    override
     void close() {
         inStream = null;
         outStream = null;
     }
 
-    override
     InputStream getInputStream() {
         if (inStream is null) {
             inStream = new ByteArrayInputStream(outStream.toByteArray());
@@ -42,12 +46,64 @@ class ByteArrayPipedStream : PipedStream {
         return inStream;
     }
 
-    override
     OutputStream getOutputStream() {
         if (outStream is null) {
             outStream = new ByteArrayOutputStream(size);
         }
         return outStream;
     }
-
 }
+
+/**
+*/
+class FilePipedStream : PipedStream {
+
+    private OutputStream output;
+    private InputStream input;
+    private string temp;
+
+    this() {
+        import std.uuid;
+        this(tempDir() ~ dirSeparator ~ randomUUID().toString());
+    }
+
+    this(string tempdir) {
+        temp = tempdir;
+    }
+
+    void close() {
+        import std.array;
+        if (temp.empty())
+            return;
+
+        try {
+            temp.remove();
+        } finally {
+            if (input !is null)
+                input.close();
+
+            if (output !is null)
+                output.close();
+        }
+
+        input = null;
+        output = null;
+        temp = null;
+    }
+
+
+    InputStream getInputStream() {
+        if (input is null) {
+            input = new BufferedInputStream(new FileInputStream(temp));
+        }
+        return input;
+    }
+
+    OutputStream getOutputStream() {
+        if (output is null) {
+            output = new BufferedOutputStream(new FileOutputStream(temp));
+        }
+        return output;
+    }
+}
+

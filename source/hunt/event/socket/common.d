@@ -51,7 +51,7 @@ interface Stream
 */
 abstract class AbstractSocketChannel : AbstractChannel
 {
-    this(Selector loop, WatcherType type)
+    this(Selector loop, ChannelType type)
     {
         super(loop, type);
     }
@@ -70,6 +70,11 @@ abstract class AbstractSocketChannel : AbstractChannel
         return _socket;
     }
     protected Socket _socket;
+
+    override void close() {
+        super.close();
+        _socket.close();
+    }
 
     
     /// Get a socket option.
