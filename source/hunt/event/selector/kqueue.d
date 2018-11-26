@@ -62,83 +62,83 @@ class AbstractSelector : Selector {
 
     private bool isDisposed = false;
 
-    override bool register(AbstractChannel watcher) {
-        assert(watcher !is null);
+    override bool register(AbstractChannel channel) {
+        assert(channel !is null);
 
         int err = -1;
-        if (watcher.type == ChannelType.Timer) {
+        if (channel.type == ChannelType.Timer) {
             kevent_t ev;
-            AbstractTimer watch = cast(AbstractTimer) watcher;
+            AbstractTimer watch = cast(AbstractTimer) channel;
             if (watch is null)
                 return false;
             size_t time = watch.time < 20 ? 20 : watch.time; // in millisecond
             EV_SET(&ev, watch.handle, EVFILT_TIMER,
-                    EV_ADD | EV_ENABLE | EV_CLEAR, 0, time, cast(void*) watcher);
+                    EV_ADD | EV_ENABLE | EV_CLEAR, 0, time, cast(void*) channel);
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else {
-            const int fd = watcher.handle;
+            const int fd = channel.handle;
             if (fd < 0)
                 return false;
             kevent_t[2] ev = void;
             short read = EV_ADD | EV_ENABLE;
             short write = EV_ADD | EV_ENABLE;
-            if (watcher.flag(ChannelFlag.ETMode)) {
+            if (channel.hasFlag(ChannelFlag.ETMode)) {
                 read |= EV_CLEAR;
                 write |= EV_CLEAR;
             }
-            EV_SET(&(ev[0]), fd, EVFILT_READ, read, 0, 0, cast(void*) watcher);
-            EV_SET(&(ev[1]), fd, EVFILT_WRITE, write, 0, 0, cast(void*) watcher);
-            if (watcher.flag(ChannelFlag.Read) && watcher.flag(ChannelFlag.Write))
+            EV_SET(&(ev[0]), fd, EVFILT_READ, read, 0, 0, cast(void*) channel);
+            EV_SET(&(ev[1]), fd, EVFILT_WRITE, write, 0, 0, cast(void*) channel);
+            if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
-            else if (watcher.flag(ChannelFlag.Read))
+            else if (channel.hasFlag(ChannelFlag.Read))
                 err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
-            else if (watcher.flag(ChannelFlag.Write))
+            else if (channel.hasFlag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
         }
         if (err < 0) {
             return false;
         }
-        // watcher.currtLoop = this;
-        _event.setNext(watcher);
+        // channel.currtLoop = this;
+        _event.setNext(channel);
         return true;
     }
 
-    override bool reregister(AbstractChannel watcher) {
+    override bool reregister(AbstractChannel channel) {
         throw new LoopException("The Kqueue does not support reregister!");
     }
 
-    override bool deregister(AbstractChannel watcher) {
-        assert(watcher !is null);
-        const fd = watcher.handle;
+    override bool deregister(AbstractChannel channel) {
+        assert(channel !is null);
+        const fd = channel.handle;
         if (fd < 0)
             return false;
 
         int err = -1;
-        if (watcher.type == ChannelType.Timer) {
+        if (channel.type == ChannelType.Timer) {
             kevent_t ev;
-            AbstractTimer watch = cast(AbstractTimer) watcher;
+            AbstractTimer watch = cast(AbstractTimer) channel;
             if (watch is null)
                 return false;
-            EV_SET(&ev, fd, EVFILT_TIMER, EV_DELETE, 0, 0, cast(void*) watcher);
+            EV_SET(&ev, fd, EVFILT_TIMER, EV_DELETE, 0, 0, cast(void*) channel);
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else {
             kevent_t[2] ev = void;
-            EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) watcher);
-            EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) watcher);
-            if (watcher.flag(ChannelFlag.Read) && watcher.flag(ChannelFlag.Write))
+            EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) channel);
+            EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) channel);
+            if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
-            else if (watcher.flag(ChannelFlag.Read))
+            else if (channel.hasFlag(ChannelFlag.Read))
                 err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
-            else if (watcher.flag(ChannelFlag.Write))
+            else if (channel.hasFlag(ChannelFlag.Write))
                 err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
         }
         if (err < 0) {
             return false;
         }
-        // watcher.currtLoop = null;
-        watcher.clear();
+        // channel.currtLoop = null;
+        channel.clear();
         return true;
     }
 
@@ -150,8 +150,6 @@ class AbstractSelector : Selector {
         auto tspec = timespec(1, 1000 * 10);
         kevent_t[1024*2] events;
         auto len = kevent(_kqueueFD, null, 0, events.ptr, events.length, &tspec);
-        if (len < 1)
-            continue;
         foreach (i; 0 .. len) {
             AbstractChannel watch = cast(AbstractChannel)(events[i].udata);
             if ((events[i].flags & EV_EOF) || (events[i].flags & EV_ERROR)) {
@@ -173,6 +171,7 @@ class AbstractSelector : Selector {
             if ((events[i].filter & EVFILT_READ) && watch.isRegistered)
                 watch.onRead();
         }
+        return len;
     }
 
 private:
