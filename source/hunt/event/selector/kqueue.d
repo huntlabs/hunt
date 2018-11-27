@@ -42,10 +42,16 @@ import core.sys.posix.time;
 /**
 */
 class AbstractSelector : Selector {
+    // kevent array size
+    enum int NUM_KEVENTS = 128;
+
     this() {
         _kqueueFD = kqueue();
         _event = new KqueueEventChannel(this);
-        register(_event);
+        incomingInterruptFD = _event._pair[0].handle;
+        outgoingInterruptFD = _event._pair[1].handle;
+        // register(_event);
+        register0(_kqueueFD, incomingInterruptFD, true, false, _event);
     }
 
     ~this() {
@@ -62,46 +68,75 @@ class AbstractSelector : Selector {
 
     private bool isDisposed = false;
 
+    private static int register0(int kq, int fd, bool read, bool write, AbstractChannel channel) {
+        kevent[2] changes;
+        kevent[2] errors;
+        timespec dontBlock = {0, 0};
+
+        // if (r) then { register for read } else { unregister for read }
+        // if (w) then { register for write } else { unregister for write }
+        // Ignore errors - they're probably complaints about deleting non-
+        //   added filters - but provide an error array anyway because
+        //   kqueue behaves erratically if some of its registrations fail.
+        EV_SET(&changes[0], fd, EVFILT_READ,  read ? EV_ADD : EV_DELETE, 0, 0, cast(void*) channel);
+        EV_SET(&changes[1], fd, EVFILT_WRITE, write ? EV_ADD : EV_DELETE, 0, 0, cast(void*) channel);
+        return kevent(kq, changes, 2, errors, 2, &dontBlock);
+    }
+
+    // void initInterrupt(int fd0, int fd1) {
+    //     outgoingInterruptFD = fd1;
+    //     incomingInterruptFD = fd0;
+    //     register0(kq, fd0, 1, 0);
+    // }
+
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
+        const int fd = channel.handle;
+        if (fd < 0)
+            return false;
+
+        kevent[2] errors;
+        timespec dontBlock = {0, 0};
 
         int err = -1;
         if (channel.type == ChannelType.Timer) {
-            kevent_t ev;
-            AbstractTimer watch = cast(AbstractTimer) channel;
-            if (watch is null)
+            kevent ev;
+            AbstractTimer timerChannel = cast(AbstractTimer) channel;
+            if (timerChannel is null)
                 return false;
-            size_t time = watch.time < 20 ? 20 : watch.time; // in millisecond
-            EV_SET(&ev, watch.handle, EVFILT_TIMER,
+            size_t time = timerChannel.time < 20 ? 20 : timerChannel.time; // in millisecond
+            EV_SET(&ev, fd, EVFILT_TIMER,
                     EV_ADD | EV_ENABLE | EV_CLEAR, 0, time, cast(void*) channel);
-            err = kevent(_kqueueFD, &ev, 1, null, 0, null);
+            err = kevent(_kqueueFD, &ev, 1, errors, 1, &dontBlock);
+        } else {
+            err = register0(_kqueueFD, fd, channel.hasFlag(ChannelFlag.Read), 
+                channel.hasFlag(ChannelFlag.Write), channel);
+            // kevent[2] ev = void;
+            // short read = EV_ADD | EV_ENABLE;
+            // short write = EV_ADD | EV_ENABLE;
+            // if (channel.hasFlag(ChannelFlag.ETMode)) {
+            //     read |= EV_CLEAR;
+            //     write |= EV_CLEAR;
+            // }
+            // EV_SET(&(ev[0]), fd, EVFILT_READ, read, 0, 0, cast(void*) channel);
+            // EV_SET(&(ev[1]), fd, EVFILT_WRITE, write, 0, 0, cast(void*) channel);
+            // // Ignore errors - they're probably complaints about deleting non-
+            // //   added filters - but provide an error array anyway because
+            // //   kqueue behaves erratically if some of its registrations fail.
+            // if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
+            //     err = kevent(_kqueueFD, &(ev[0]), 2, errors, 2, &dontBlock);
+            // else if (channel.hasFlag(ChannelFlag.Read))
+            //     err = kevent(_kqueueFD, &(ev[0]), 1, errors, 1, &dontBlock);
+            // else if (channel.hasFlag(ChannelFlag.Write))
+            //     err = kevent(_kqueueFD, &(ev[1]), 1, errors, 1, &dontBlock);
         }
-        else {
-            const int fd = channel.handle;
-            if (fd < 0)
-                return false;
-            kevent_t[2] ev = void;
-            short read = EV_ADD | EV_ENABLE;
-            short write = EV_ADD | EV_ENABLE;
-            if (channel.hasFlag(ChannelFlag.ETMode)) {
-                read |= EV_CLEAR;
-                write |= EV_CLEAR;
-            }
-            EV_SET(&(ev[0]), fd, EVFILT_READ, read, 0, 0, cast(void*) channel);
-            EV_SET(&(ev[1]), fd, EVFILT_WRITE, write, 0, 0, cast(void*) channel);
-            if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
-                err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
-            else if (channel.hasFlag(ChannelFlag.Read))
-                err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
-            else if (channel.hasFlag(ChannelFlag.Write))
-                err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
-        }
+
         if (err < 0) {
             return false;
+        } else {
+            _event.setNext(channel);
+            return true;
         }
-        // channel.currtLoop = this;
-        _event.setNext(channel);
-        return true;
     }
 
     override bool reregister(AbstractChannel channel) {
@@ -116,23 +151,24 @@ class AbstractSelector : Selector {
 
         int err = -1;
         if (channel.type == ChannelType.Timer) {
-            kevent_t ev;
-            AbstractTimer watch = cast(AbstractTimer) channel;
-            if (watch is null)
+            kevent ev;
+            AbstractTimer timerChannel = cast(AbstractTimer) channel;
+            if (timerChannel is null)
                 return false;
             EV_SET(&ev, fd, EVFILT_TIMER, EV_DELETE, 0, 0, cast(void*) channel);
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else {
-            kevent_t[2] ev = void;
-            EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) channel);
-            EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) channel);
-            if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
-                err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
-            else if (channel.hasFlag(ChannelFlag.Read))
-                err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
-            else if (channel.hasFlag(ChannelFlag.Write))
-                err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
+            err = register0(_kqueueFD, fd, false, false, channel);
+            // kevent[2] ev = void;
+            // EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) channel);
+            // EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) channel);
+            // if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
+            //     err = kevent(_kqueueFD, &(ev[0]), 2, null, 0, null);
+            // else if (channel.hasFlag(ChannelFlag.Read))
+            //     err = kevent(_kqueueFD, &(ev[0]), 1, null, 0, null);
+            // else if (channel.hasFlag(ChannelFlag.Write))
+            //     err = kevent(_kqueueFD, &(ev[1]), 1, null, 0, null);
         }
         if (err < 0) {
             return false;
@@ -143,39 +179,75 @@ class AbstractSelector : Selector {
     }
 
     override protected int doSelect(long timeout) {
-        return kqueueWait(cast(int)timeout);
-    }
+        timespec ts;
+        timespec *tsp;
+        // timeout is in milliseconds. Convert to struct timespec.
+        // timeout == -1 : wait forever : timespec timeout of NULL
+        // timeout == 0  : return immediately : timespec timeout of zero
+        if (timeout >= 0) {
+            // For some indeterminate reason kevent(2) has been found to fail with
+            // an EINVAL error for timeout values greater than or equal to
+            // 100000001000L. To avoid this problem, clamp the timeout arbitrarily
+            // to the maximum value of a 32-bit signed integer which is
+            // approximately 25 days in milliseconds.
+            const int timeoutMax = int.max; // Integer.MAX_VALUE
+            if (timeout > timeoutMax) {
+                timeout = timeoutMax;
+            }
+            ts.tv_sec = timeout / 1000;
+            ts.tv_nsec = (timeout % 1000) * 1000000; //nanosec = 1 million millisec
+            tsp = &ts;
+        } else {
+            tsp = null;
+        }        
 
-    private int kqueueWait(int timeout) {
-        auto tspec = timespec(1, 1000 * 10);
-        kevent_t[1024*2] events;
-        auto len = kevent(_kqueueFD, null, 0, events.ptr, events.length, &tspec);
-        foreach (i; 0 .. len) {
-            AbstractChannel watch = cast(AbstractChannel)(events[i].udata);
-            if ((events[i].flags & EV_EOF) || (events[i].flags & EV_ERROR)) {
-                watch.close();
-                continue;
+        // auto tspec = timespec(1, 1000 * 10);
+        kevent[NUM_KEVENTS] events;
+        int result = kevent(_kqueueFD, null, 0, events.ptr, events.length, tsp);
+        if(result < 0) {
+            if (errno == EINTR) {
+                // ignore EINTR, pretend nothing was selected
+                result = 0;
+            } else {
+                error("kqueue failed");
+                result = 0;
             }
-            if (watch.type == ChannelType.Timer) {
-                watch.onRead();
-                continue;
-            }
-            if ((events[i].filter & EVFILT_WRITE) && watch.isRegistered) {
-                // import hunt.logging;
-                // version(HUNT_DEBUG) trace("The channel socket is: ", typeid(watch));
-                AbstractSocketChannel wt = cast(AbstractSocketChannel) watch;
-                assert(wt !is null);
-                wt.onWriteDone();
-            }
+        } else {
+            foreach (i; 0 .. result) {
+                AbstractChannel channel = cast(AbstractChannel)(events[i].udata);
+                if ((events[i].flags & EV_EOF) || (events[i].flags & EV_ERROR)) {
+                    channel.close();
+                    continue;
+                }
+                if (channel.type == ChannelType.Timer) {
+                    channel.onRead();
+                    continue;
+                }
+                if ((events[i].filter & EVFILT_WRITE) && channel.isRegistered) {
+                    // import hunt.logging;
+                    // version(HUNT_DEBUG) trace("The channel socket is: ", typeid(channel));
+                    AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
+                    assert(wt !is null);
+                    wt.onWriteDone();
+                }
 
-            if ((events[i].filter & EVFILT_READ) && watch.isRegistered)
-                watch.onRead();
+                if ((events[i].filter & EVFILT_READ) && channel.isRegistered)
+                    channel.onRead();
+            }
         }
-        return len;
+        return result;
     }
 
 private:
+    // The kqueue fd
     int _kqueueFD;
+
+    // The fd of the interrupt line going out
+    int outgoingInterruptFD;
+
+    // The fd of the interrupt line coming in
+    int incomingInterruptFD;
+
     EventChannel _event;
 }
 
@@ -188,7 +260,8 @@ class KqueueEventChannel : EventChannel {
         _pair = socketPair();
         _pair[0].blocking = false;
         _pair[1].blocking = false;
-        this.handle = _pair[1].handle;
+        // this.handle = _pair[1].handle;
+        this.handle = _pair[0].handle;
     }
 
     ~this() {
@@ -209,8 +282,6 @@ class KqueueEventChannel : EventChannel {
         super.onRead();
     }
 
-    // mixin OverrideErro;
-
     Socket[2] _pair;
 }
 
@@ -229,11 +300,11 @@ enum : short {
     EVFILT_SYSCOUNT = 11
 }
 
-extern (D) void EV_SET(kevent_t* kevp, typeof(kevent_t.tupleof) args) @nogc nothrow {
-    *kevp = kevent_t(args);
+extern (D) void EV_SET(kevent* kevp, typeof(kevent.tupleof) args) @nogc nothrow {
+    *kevp = kevent(args);
 }
 
-struct kevent_t {
+struct kevent {
     uintptr_t ident; /* identifier for this event */
     short filter; /* filter for event */
     ushort flags;
@@ -318,8 +389,8 @@ enum {
 
 extern (C) {
     int kqueue() @nogc nothrow;
-    int kevent(int kq, const kevent_t* changelist, int nchanges,
-            kevent_t* eventlist, int nevents, const timespec* timeout) @nogc nothrow;
+    int kevent(int kq, const kevent* changelist, int nchanges,
+            kevent* eventlist, int nevents, const timespec* timeout) @nogc nothrow;
 }
 
 enum SO_REUSEPORT = 0x0200;
