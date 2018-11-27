@@ -53,6 +53,7 @@ interface Channel {
 }
 
 /**
+http://tutorials.jenkov.com/java-nio/selectors.html
 */
 abstract class Selector {
 
