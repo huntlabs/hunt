@@ -90,16 +90,6 @@ class AbstractSelector : Selector {
                 wt.setTimer();
         }
 
-        // version(HUNT_DEBUG) infof("register, channel(fd=%d)", channel.handle);
-        // const fd = channel.handle;
-        // assert(fd >= 0, "The channel.handle is not initilized!");
-
-        // epoll_event ev;
-        // buildEpollEvent(channel, ev);
-        // if ((epoll_ctl(_epollFD, EPOLL_CTL_ADD, fd, &ev)) != 0) {
-        //     if (errno != EEXIST)
-        //         return false;
-        // }
         if(epollCtl(channel, EPOLL_CTL_ADD)) {
             _event.setNext(channel);
             return true;
@@ -123,20 +113,16 @@ class AbstractSelector : Selector {
     }
 
     override protected int doSelect(long timeout) {
-        return epollWait(cast(int)timeout);
-    }
-
-    private int epollWait(int timeout) {
-        epoll_event[1024*2] events;
+        epoll_event[512] events;
         int len = 0;
 
         if(timeout <= 0) { /* Indefinite or no wait */
             do {
                 // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
-                len = epoll_wait(_epollFD, events.ptr, events.length, timeout);
+                len = epoll_wait(_epollFD, events.ptr, events.length, cast(int)timeout);
             } while((len == -1) && (errno == EINTR));
         } else { /* Bounded wait; bounded restarts */
-            len = iepoll(_epollFD, events.ptr, events.length, timeout);
+            len = iepoll(_epollFD, events.ptr, events.length, cast(int)timeout);
         }
 
         foreach (i; 0 .. len) {
@@ -148,9 +134,14 @@ class AbstractSelector : Selector {
 
             uint currentEvents = events[i].events;
 
-            if (isError(currentEvents)) {
+            if (isClosed(currentEvents)) {
                 // version (HUNT_DEBUG)
-                debug warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
+                debug infof("channel closed: fd=%s, errno=%d, message=%s", channel.handle,
+                        errno, cast(string) fromStringz(strerror(errno)));
+                channel.close();
+            } else if (isError(currentEvents)) {
+                // version (HUNT_DEBUG)
+                warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
                         errno, cast(string) fromStringz(strerror(errno)));
                 channel.close();
             } else if (channel.isRegistered && isReadable(currentEvents)) {
@@ -196,8 +187,13 @@ class AbstractSelector : Selector {
         }
     }
 
+    // https://blog.csdn.net/ljx0305/article/details/4065058
     private static bool isError(uint events) nothrow {
-        return (events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP)) != 0;
+        return (events & EPOLLERR ) != 0;
+    }
+
+    private static bool isClosed(uint events) nothrow {
+        return (events & (EPOLLHUP | EPOLLRDHUP)) != 0;
     }
 
     private static bool isReadable(uint events) nothrow {

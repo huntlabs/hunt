@@ -70,7 +70,6 @@ TCP Client
 */
 abstract class AbstractStream : AbstractSocketChannel, Stream {
     SimpleEventHandler disconnectionHandler;
-    // DataWrittenHandler sentHandler;
 
     protected bool _isConnected; //if server side always true.
 
@@ -91,7 +90,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         this.clearError();
         ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
         version (HUNT_DEBUG)
-            trace("read nbytes...", len);
+            trace("reading nbytes: ", len);
 
         if (len > 0) {
             if (dataReceivedHandler !is null)
@@ -131,7 +130,6 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
     protected void onDisconnected() {
         _isConnected = false;
-        // _isClosed = true;
         if (disconnectionHandler !is null)
             disconnectionHandler();
     }
@@ -150,8 +148,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
         if (nBytes > 0) {
-            if (canWriteAgain && nBytes < data.length) //  && writeRetries < writeRetryLimit
-            {
+            if (canWriteAgain && nBytes < data.length) { //  && writeRetries < writeRetryLimit
                 // version (HUNT_DEBUG)
                 writeRetries++;
                 tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
@@ -162,9 +159,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 tryWriteAll(data[nBytes .. $]);
             } else
                 writeRetries = 0;
-
-        }
-        else if (nBytes == Socket.ERROR) {
+        } else if (nBytes == Socket.ERROR) {
             if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
                 string msg = lastSocketError();
                 warningf("errno=%d, message: %s", errno, msg);
@@ -189,8 +184,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                     tryWriteAll(data);
                 }
             }
-        }
-        else {
+        } else {
             version (HUNT_DEBUG) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
@@ -205,15 +199,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     /**
     Try to write a block of data.
     */
-    protected size_t tryWrite(const ubyte[] data) {
+    protected ptrdiff_t tryWrite(const ubyte[] data) {
         const nBytes = this.socket.send(data);
         version (HUNT_DEBUG)
             tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
         if (nBytes > 0) {
             return nBytes;
-        }
-        else if (nBytes == Socket.ERROR) {
+        } else if (nBytes == Socket.ERROR) {
             version (HUNT_DEBUG)
                 warningf("fd: %d, errno: %d, message: %s", this.handle, errno, lastSocketError());
 
@@ -227,8 +220,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 version (HUNT_DEBUG)
                     warningf("fd: %d, errno=%d, message: %s", this.handle, errno, this._erroString);
             }
-        }
-        else {
+        } else {
             version (HUNT_DEBUG) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
