@@ -15,15 +15,14 @@ module hunt.event.selector.iocp;
 version (Windows) : 
 // dfmt on
 
-import hunt.event.socket;
-
 import hunt.event.core;
-import hunt.event.socket.iocp;
+import hunt.event.socket;
 import hunt.event.timer;
+import hunt.logging;
+import hunt.sys.error;
 
 import core.sys.windows.windows;
 import std.conv;
-import hunt.logging;
 
 /**
 */
@@ -113,8 +112,8 @@ class AbstractSelector : Selector {
             const auto erro = GetLastError();
             if (erro == WAIT_TIMEOUT) // || erro == ERROR_OPERATION_ABORTED
                 return ret;
-
-            error("error occurred, code=", erro);
+                
+            errorf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
             if (ev !is null) {
                 AbstractChannel channel = ev.watcher;
                 if (channel !is null && !channel.isClosed())

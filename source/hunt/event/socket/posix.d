@@ -19,6 +19,7 @@ version(Posix):
 import hunt.event.socket.common;
 import hunt.event.core;
 import hunt.lang.common;
+import hunt.sys.error;
 import hunt.util.thread;
 
 import std.conv;
@@ -105,11 +106,11 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             // check more error status
             this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
             if (_error) {
-                this._erroString = lastSocketError();
+                this._erroString = getErrorMessage(errno);
                 errorOccurred(_erroString);
             } else {
                 debug warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
-                        errno, lastSocketError());
+                        errno, getErrorMessage(errno));
             }
 
             if(errno == ECONNRESET) {
