@@ -54,7 +54,7 @@ abstract class AbstractListener : AbstractSocketChannel
 
     protected void doAccept()
     {
-        _iocp.watcher = this;
+        _iocp.channel = this;
         _iocp.operation = IocpOperation.accept;
         _clientSocket = new Socket(this.localAddress.addressFamily, SocketType.STREAM, ProtocolType.TCP);
         DWORD dwBytesReceived = 0;
@@ -150,7 +150,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         _inRead = true;
         _dataReadBuffer.len = cast(uint) _readBuffer.length;
         _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
-        _iocpread.watcher = this;
+        _iocpread.channel = this;
         _iocpread.operation = IocpOperation.read;
         DWORD dwReceived = 0;
         DWORD dwFlags = 0;
@@ -166,7 +166,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     protected void doConnect(Address addr)
     {
-        _iocpwrite.watcher = this;
+        _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.connect;
         int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
                 cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
@@ -179,7 +179,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         _inWrite = true;
         DWORD dwFlags = 0;
         DWORD dwSent = 0;
-        _iocpwrite.watcher = this;
+        _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.write;
         version (HUNT_DEBUG)
         {
@@ -466,7 +466,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
 
             _dataReadBuffer.len = cast(uint) _readBuffer.data.length;
             _dataReadBuffer.buf = cast(char*) _readBuffer.data.ptr;
-            _iocpread.watcher = this;
+            _iocpread.channel = this;
             _iocpread.operation = IocpOperation.read;
             remoteAddrLen = cast(int) bindAddr().nameLen();
 
@@ -561,7 +561,7 @@ struct IocpContext
 {
     OVERLAPPED overlapped;
     IocpOperation operation;
-    AbstractChannel watcher = null;
+    AbstractChannel channel = null;
 }
 
 alias WSAOVERLAPPED = OVERLAPPED;
