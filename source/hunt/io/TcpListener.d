@@ -28,8 +28,7 @@ alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, 
 
 /**
 */
-class TcpListener : AbstractListener
-{
+class TcpListener : AbstractListener {
     private bool isSslEnabled = false;
     private size_t _bufferSize = 4 * 1024;
     protected EventHandler _shutdownHandler;
@@ -39,8 +38,7 @@ class TcpListener : AbstractListener
     SimpleEventHandler closeHandler;
     PeerCreateHandler peerCreateHandler;
 
-    this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
-    {
+    this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
         _bufferSize = bufferSize;
         version (Windows)
             super(loop, family, bufferSize);
@@ -48,61 +46,50 @@ class TcpListener : AbstractListener
             super(loop, family);
     }
 
-    TcpListener onConnectionAccepted(AcceptEventHandler handler)
-    {
+    TcpListener onConnectionAccepted(AcceptEventHandler handler) {
         acceptHandler = handler;
         return this;
     }
 
-    TcpListener onPeerCreating(PeerCreateHandler handler)
-    {
+    TcpListener onPeerCreating(PeerCreateHandler handler) {
         peerCreateHandler = handler;
         return this;
     }
 
-    TcpListener onShutdown(EventHandler handler)
-    {
+    TcpListener onShutdown(EventHandler handler) {
         _shutdownHandler = handler;
         return this;
     }
 
-    TcpListener bind(string ip, ushort port)
-    {
+    TcpListener bind(string ip, ushort port) {
         bind(parseAddress(ip, port));
         return this;
     }
 
-    TcpListener bind(ushort port)
-    {
+    TcpListener bind(ushort port) {
         bind(createAddress(this.socket, port));
         return this;
     }
 
-    TcpListener bind(Address addr)
-    {
+    TcpListener bind(Address addr) {
         this.socket.bind(addr);
         this.socket.blocking = false;
         _localAddress = _socket.localAddress();
         return this;
     }
 
-    Address bindingAddress()
-    {
+    Address bindingAddress() {
         return _localAddress;
     }
 
-    TcpListener reusePort(bool use)
-    {
+    TcpListener reusePort(bool use) {
         this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
 
-        version (Posix)
-        {
+        version (Posix) {
             import core.sys.posix.sys.socket;
 
             this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, use);
-        }
-        else version (windows)
-        {
+        } else version (windows) {
             import core.sys.windows.winsock2;
 
             if (!use)
@@ -113,22 +100,19 @@ class TcpListener : AbstractListener
         return this;
     }
 
-    TcpListener listen(int backlog)
-    {
+    TcpListener listen(int backlog) {
         this.socket.listen(backlog);
         return this;
     }
 
-    override void start()
-    {
+    override void start() {
         _inLoop.register(this);
         _isRegistered = true;
         version (Windows)
             this.doAccept();
     }
 
-    override void close()
-    {
+    override void close() {
         if (closeHandler !is null)
             closeHandler();
         else if (_shutdownHandler !is null)
@@ -136,24 +120,23 @@ class TcpListener : AbstractListener
         this.onClose();
     }
 
-    protected override void onRead()
-    {
+    protected override void onRead() {
         bool canRead = true;
         version (HUNT_DEBUG)
             trace("start to listen");
         // while(canRead && this.isRegistered) // why??
         {
-            version (HUNT_DEBUG) trace("listening...");
+            version (HUNT_DEBUG)
+                trace("listening...");
 
             canRead = onAccept((Socket socket) {
 
                 version (HUNT_DEBUG) {
-                    infof("new connection from %s, fd=%d", 
+                    infof("new connection from %s, fd=%d",
                         socket.remoteAddress.toString(), socket.handle());
                 }
 
-                if (acceptHandler !is null)
-                {
+                if (acceptHandler !is null) {
                     TcpStream stream;
                     if (peerCreateHandler is null)
                         stream = new TcpStream(_inLoop, socket, _bufferSize);
@@ -165,8 +148,7 @@ class TcpListener : AbstractListener
                 }
             });
 
-            if (this.isError)
-            {
+            if (this.isError) {
                 canRead = false;
                 error("listener error: ", this.erroString);
                 this.close();
