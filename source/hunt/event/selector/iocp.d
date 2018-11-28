@@ -40,40 +40,40 @@ class AbstractSelector : Selector {
         // std.socket.close(_iocpHandle);
     }
 
-    override bool register(AbstractChannel watcher) {
-        assert(watcher !is null);
+    override bool register(AbstractChannel channel) {
+        assert(channel !is null);
 
-        if (watcher.type == ChannelType.Timer) {
-            AbstractTimer wt = cast(AbstractTimer) watcher;
-            assert(wt !is null);
-            if (wt is null || !wt.setTimerOut())
+        if (channel.type == ChannelType.Timer) {
+            AbstractTimer timerChannel = cast(AbstractTimer) channel;
+            assert(timerChannel !is null);
+            if (timerChannel is null || !timerChannel.setTimerOut())
                 return false;
-            _timer.timeWheel().addNewTimer(wt.timer, wt.wheelSize());
-        } else if (watcher.type == ChannelType.TCP
-                || watcher.type == ChannelType.Accept || watcher.type == ChannelType.UDP) {
+            _timer.timeWheel().addNewTimer(timerChannel.timer, timerChannel.wheelSize());
+        } else if (channel.type == ChannelType.TCP
+                || channel.type == ChannelType.Accept || channel.type == ChannelType.UDP) {
             version (HUNT_DEBUG)
-                trace("Run CreateIoCompletionPort on socket: ", watcher.handle);
-            CreateIoCompletionPort(cast(HANDLE) watcher.handle, _iocpHandle,
-                    cast(size_t)(cast(void*) watcher), 0);
+                trace("Run CreateIoCompletionPort on socket: ", channel.handle);
+            CreateIoCompletionPort(cast(HANDLE) channel.handle, _iocpHandle,
+                    cast(size_t)(cast(void*) channel), 0);
         }
 
         version (HUNT_DEBUG)
-            tracef("register, watcher(fd=%d, type=%s)", watcher.handle, watcher.type);
-        _event.setNext(watcher);
+            tracef("register, channel(fd=%d, type=%s)", channel.handle, channel.type);
+        _event.setNext(channel);
         return true;
     }
 
-    override bool reregister(AbstractChannel watcher) {
+    override bool reregister(AbstractChannel channel) {
         throw new LoopException("IOCP does not support reregister!");
     }
 
-    override bool deregister(AbstractChannel watcher) {
+    override bool deregister(AbstractChannel channel) {
         // FIXME: Needing refactor or cleanup -@Administrator at 8/28/2018, 3:28:18 PM
         // https://stackoverflow.com/questions/6573218/removing-a-handle-from-a-i-o-completion-port-and-other-questions-about-iocp
-        //tracef("deregister (fd=%d)", watcher.handle);
+        //tracef("deregister (fd=%d)", channel.handle);
 
         // IocpContext _data;
-        // _data.watcher = watcher;
+        // _data.channel = channel;
         // _data.operation = IocpOperation.close;
         // PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
 
@@ -82,7 +82,7 @@ class AbstractSelector : Selector {
 
     void weakUp() {
         IocpContext _data;
-        _data.watcher = _event;
+        _data.channel = _event;
         _data.operation = IocpOperation.event;
 
         PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
@@ -112,17 +112,17 @@ class AbstractSelector : Selector {
             const auto erro = GetLastError();
             if (erro == WAIT_TIMEOUT) // || erro == ERROR_OPERATION_ABORTED
                 return ret;
-                
+
             errorf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
             if (ev !is null) {
-                AbstractChannel channel = ev.watcher;
+                AbstractChannel channel = ev.channel;
                 if (channel !is null && !channel.isClosed())
                     channel.close();
             }
-        } else if (ev is null || ev.watcher is null)
+        } else if (ev is null || ev.channel is null)
             warning("ev is null or ev.watche is null");
         else
-            handleIocpOperation(ev.operation, ev.watcher, bytes);
+            handleIocpOperation(ev.operation, ev.channel, bytes);
         return ret;
     }
 
@@ -169,35 +169,35 @@ class AbstractSelector : Selector {
 
     }
 
-    private void onSocketRead(AbstractChannel wt, size_t len) {
-        debug if (wt is null) {
+    private void onSocketRead(AbstractChannel channel, size_t len) {
+        debug if (channel is null) {
             warning("channel is null");
             return;
         }
 
-        if (len == 0 || wt.isClosed) {
+        if (len == 0 || channel.isClosed) {
             version (HUNT_DEBUG)
                 info("channel closed");
             return;
         }
 
-        AbstractSocketChannel io = cast(AbstractSocketChannel) wt;
-        // assert(io !is null, "The type of channel is: " ~ typeid(wt).name);
-        if (io is null) {
+        AbstractSocketChannel socketChannel = cast(AbstractSocketChannel) channel;
+        // assert(socketChannel !is null, "The type of channel is: " ~ typeid(channel).name);
+        if (socketChannel is null) {
             warning("The channel socket is null: ");
         } else {
-            io.setRead(len);
-            wt.onRead();
+            socketChannel.setRead(len);
+            channel.onRead();
         }
     }
 
-    private void onSocketWrite(AbstractChannel wt, size_t len) {
-        debug if (wt is null) {
+    private void onSocketWrite(AbstractChannel channel, size_t len) {
+        debug if (channel is null) {
             warning("channel is null");
             return;
         }
-        AbstractStream client = cast(AbstractStream) wt;
-        // assert(client !is null, "The type of channel is: " ~ typeid(wt).name);
+        AbstractStream client = cast(AbstractStream) channel;
+        // assert(client !is null, "The type of channel is: " ~ typeid(channel).name);
         if (client is null) {
             warning("The channel socket is null: ");
             return;
