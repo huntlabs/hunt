@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.event.timer.common;
 
 import hunt.event.core;
@@ -18,64 +18,58 @@ import hunt.lang.common;
 import std.datetime;
 import std.exception;
 
-
 enum CustomTimerMinTimeOut = 50; // in ms
 enum CustomTimerWheelSize = 500;
 enum CustomTimer_Next_TimeOut = cast(long)(CustomTimerMinTimeOut * (2.0 / 3.0));
 
 alias UintObject = BaseTypeObject!uint;
 
-
 /**
 */
 interface ITimer {
-    
+
     /// 
-	bool isActive();
+    bool isActive();
 
-	/// in ms
-	size_t interval();
+    /// in ms
+    size_t interval();
 
-	/// ditto
-	ITimer interval(size_t v);
-	
-	/// ditto
-	ITimer interval(Duration duration);
+    /// ditto
+    ITimer interval(size_t v);
 
-	///
-	ITimer onTick(TickedEventHandler handler);
+    /// ditto
+    ITimer interval(Duration duration);
 
-	/// immediately: true to call first event immediately
-	/// once: true to call timed event only once
-	void start(bool immediately = false, bool once = false);
-	
-	void stop();
+    ///
+    ITimer onTick(TickedEventHandler handler);
 
-	void reset(bool immediately = false, bool once = false);
+    /// immediately: true to call first event immediately
+    /// once: true to call timed event only once
+    void start(bool immediately = false, bool once = false);
 
-	void reset(size_t interval);
+    void stop();
 
-	void reset(Duration duration);
+    void reset(bool immediately = false, bool once = false);
+
+    void reset(size_t interval);
+
+    void reset(Duration duration);
 }
-
 
 /**
     Timing Wheel manger Class
 */
-final class TimingWheel
-{
+final class TimingWheel {
     /**
         constructor
         Params:
             wheelSize =  the Wheel's element router.
     */
-    this(uint wheelSize)
-    {
+    this(uint wheelSize) {
         if (wheelSize == 0)
             wheelSize = 2;
         _list = new NullWheelTimer[wheelSize];
-        for (int i = 0; i < wheelSize; ++i)
-        {
+        for (int i = 0; i < wheelSize; ++i) {
             _list[i] = new NullWheelTimer();
         }
     }
@@ -85,8 +79,7 @@ final class TimingWheel
         Params:
             tm  = the timer.
     */
-    pragma(inline) void addNewTimer(WheelTimer tm, size_t wheel = 0)
-    {
+    pragma(inline) void addNewTimer(WheelTimer tm, size_t wheel = 0) {
         size_t index;
         if (wheel > 0)
             index = nextWheel(wheel);
@@ -109,12 +102,10 @@ final class TimingWheel
         Notes:
             all forward's element will timeout.
     */
-    void prevWheel(uint size = 1)
-    {
+    void prevWheel(uint size = 1) {
         if (size == 0)
             return;
-        foreach (i; 0 .. size)
-        {
+        foreach (i; 0 .. size) {
             NullWheelTimer timer = doNext();
             timer.onTimeOut();
         }
@@ -122,37 +113,32 @@ final class TimingWheel
 
 protected:
     /// get next wheel times 's Wheel
-    pragma(inline) size_t nextWheel(size_t wheel)
-    {
+    pragma(inline) size_t nextWheel(size_t wheel) {
         auto next = wheel % _list.length;
         return (_now + next) % _list.length;
     }
 
     /// get the index whitch is farthest with current index.
-    size_t getPrev() const
-    {
+    size_t getPrev() const {
         if (_now == 0)
             return (_list.length - 1);
         else
             return (_now - 1);
     }
     /// go forward a element,and return the element.
-    pragma(inline) NullWheelTimer doNext()
-    {
+    pragma(inline) NullWheelTimer doNext() {
         ++_now;
         if (_now == _list.length)
             _now = 0;
         return _list[_now];
     }
     /// rest a timer.
-    pragma(inline) void rest(WheelTimer tm, size_t next)
-    {
+    pragma(inline) void rest(WheelTimer tm, size_t next) {
         remove(tm);
         addNewTimer(tm, next);
     }
     /// remove the timer.
-    pragma(inline) void remove(WheelTimer tm)
-    {
+    pragma(inline) void remove(WheelTimer tm) {
         tm._prev._next = tm._next;
         if (tm._next)
             tm._next._prev = tm._prev;
@@ -169,10 +155,8 @@ private:
 /**
     The timer parent's class.
 */
-abstract class WheelTimer
-{
-    ~this()
-    {
+abstract class WheelTimer {
+    ~this() {
         stop();
     }
     /**
@@ -181,37 +165,30 @@ abstract class WheelTimer
     void onTimeOut();
 
     /// rest the timer.
-    pragma(inline) final void rest(size_t next = 0)
-    {
-        if (_manger)
-        {
+    pragma(inline) final void rest(size_t next = 0) {
+        if (_manger) {
             _manger.rest(this, next);
         }
     }
 
     /// stop the time, it will remove from Wheel.
-    pragma(inline) final void stop()
-    {
-        if (_manger)
-        {
+    pragma(inline) final void stop() {
+        if (_manger) {
             _manger.remove(this);
         }
     }
 
     /// the time is active.
-    pragma(inline, true) final bool isActive() const
-    {
+    pragma(inline, true) final bool isActive() const {
         return _manger !is null;
     }
 
     /// get the timer only run once.
-    pragma(inline, true) final @property oneShop()
-    {
+    pragma(inline, true) final @property oneShop() {
         return _oneShop;
     }
     /// set the timer only run once.
-    pragma(inline) final @property oneShop(bool one)
-    {
+    pragma(inline) final @property oneShop(bool one) {
         _oneShop = one;
     }
 
@@ -223,17 +200,13 @@ private:
 }
 
 /// the Header Timer in the wheel.
-class NullWheelTimer : WheelTimer
-{
-    override void onTimeOut()
-    {
+class NullWheelTimer : WheelTimer {
+    override void onTimeOut() {
         WheelTimer tm = _next;
 
-        while (tm)
-        {
+        while (tm) {
             // WheelTimer timer = tm._next;
-            if (tm.oneShop())
-            {
+            if (tm.oneShop()) {
                 tm.stop();
             }
             tm.onTimeOut();
@@ -242,23 +215,19 @@ class NullWheelTimer : WheelTimer
     }
 }
 
-unittest
-{
+unittest {
     import std.datetime;
     import std.stdio;
     import std.conv;
     import core.thread;
     import std.exception;
 
-    @trusted class TestWheelTimer : WheelTimer
-    {
-        this()
-        {
+    @trusted class TestWheelTimer : WheelTimer {
+        this() {
             time = Clock.currTime();
         }
 
-        override void onTimeOut() nothrow
-        {
+        override void onTimeOut() nothrow {
             collectException(writeln("\nname is ", name, " \tcutterTime is : ",
                     Clock.currTime().toSimpleString(), "\t new time is : ", time.toSimpleString()));
         }
@@ -271,14 +240,12 @@ unittest
     writeln("start");
     TimingWheel wheel = new TimingWheel(5);
     TestWheelTimer[] timers = new TestWheelTimer[5];
-    foreach (tm; 0 .. 5)
-    {
+    foreach (tm; 0 .. 5) {
         timers[tm] = new TestWheelTimer();
     }
 
     int i = 0;
-    foreach (timer; timers)
-    {
+    foreach (timer; timers) {
         timer.name = to!string(i);
         wheel.addNewTimer(timer);
         writeln("i  = ", i);
@@ -301,8 +268,7 @@ unittest
     wheel.prevWheel(2);
     assert(wheel._now == 0);
 
-    foreach (u; 0 .. 20)
-    {
+    foreach (u; 0 .. 20) {
         Thread.sleep(2.seconds);
         writeln("prevWheel() the _now  = ", wheel._now);
         wheel.prevWheel();
@@ -312,21 +278,17 @@ unittest
 
 /**
 */
-struct CustomTimer
-{
-    void init()
-    {
+struct CustomTimer {
+    void init() {
         if (_timeWheel is null)
             _timeWheel = new TimingWheel(CustomTimerWheelSize);
         _nextTime = (Clock.currStdTime() / 10000) + CustomTimerMinTimeOut;
     }
 
-    int doWheel()
-    {
+    int doWheel() {
         auto nowTime = (Clock.currStdTime() / 10000);
         // tracef("nowTime - _nextTime = %d", nowTime - _nextTime);
-        while (nowTime >= _nextTime)
-        {
+        while (nowTime >= _nextTime) {
             _timeWheel.prevWheel();
             _nextTime += CustomTimerMinTimeOut;
             nowTime = (Clock.currStdTime() / 10000);
@@ -335,8 +297,7 @@ struct CustomTimer
         return cast(int) nowTime;
     }
 
-    TimingWheel timeWheel()
-    {
+    TimingWheel timeWheel() {
         return _timeWheel;
     }
 
@@ -347,8 +308,7 @@ private:
 
 /**
 */
-abstract class TimerChannelBase : AbstractChannel, ITimer
-{
+abstract class TimerChannelBase : AbstractChannel, ITimer {
 
     protected bool _isActive = false;
     protected size_t _interval = 1000;
@@ -356,100 +316,82 @@ abstract class TimerChannelBase : AbstractChannel, ITimer
     /// Timer tick handler
     TickedEventHandler ticked;
 
-    this(Selector loop)
-    {
+    this(Selector loop) {
         super(loop, ChannelType.Timer);
         _timeOut = 50;
     }
 
     /// 
-    @property bool isActive()
-    {
+    @property bool isActive() {
         return _isActive;
     }
 
     /// in ms
-    @property size_t interval()
-    {
+    @property size_t interval() {
         return _interval;
     }
 
     /// ditto
-    @property ITimer interval(size_t v)
-    {
+    @property ITimer interval(size_t v) {
         _interval = v;
         return this;
     }
 
     /// ditto
-    @property ITimer interval(Duration duration)
-    {
+    @property ITimer interval(Duration duration) {
         _interval = cast(size_t) duration.total!("msecs");
         return this;
     }
 
-
     /// The handler will be handled in another thread.
-    ITimer onTick(TickedEventHandler handler)
-    {
+    ITimer onTick(TickedEventHandler handler) {
         this.ticked = handler;
         return this;
     }
 
-    @property size_t wheelSize()
-    {
+    @property size_t wheelSize() {
         return _wheelSize;
     }
 
-    @property size_t time()
-    {
+    @property size_t time() {
         return _interval;
     }
 
-    void start(bool immediately = false, bool once = false)
-    {
+    void start(bool immediately = false, bool once = false) {
         _inLoop.register(this);
         _isRegistered = true;
         _isActive = true;
     }
 
-    void stop()
-    {
-        if (_isActive)
-        {
+    void stop() {
+        if (_isActive) {
             _isActive = false;
             onClose();
         }
     }
 
-    void reset(size_t interval)
-    {
+    void reset(size_t interval) {
         this.interval = interval;
         reset();
     }
 
-    void reset(Duration duration)
-    {
+    void reset(Duration duration) {
         this.interval = duration;
         reset();
     }
 
-    void reset(bool immediately = false, bool once = false)
-    {
-        if (_isActive)
-        {
+    void reset(bool immediately = false, bool once = false) {
+        if (_isActive) {
             stop();
             start();
         }
     }
 
-    override void close()
-    {
+    override void close() {
         onClose();
     }
 
-    protected void onTick()
-    {
+    protected void onTick() {
         // trace("tick thread id: ", getTid());
         if (ticked !is null)
             ticked(this);
@@ -465,10 +407,8 @@ alias TimeoutHandler = void delegate(Object sender);
 
 /**
 */
-class HuntWheelTimer : WheelTimer
-{
-    this()
-    {
+class HuntWheelTimer : WheelTimer {
+    this() {
         // time = Clock.currTime();
     }
 
@@ -478,18 +418,11 @@ class HuntWheelTimer : WheelTimer
     //             Clock.currTime().toSimpleString(), "\t new time is : ", time.toSimpleString()));
     // }
 
-    override void onTimeOut()
-    {
+    override void onTimeOut() {
         _now++;
-        if (_now >= _circle)
-        {
+        if (_now >= _circle) {
             _now = 0;
-            // rest(_wheelSize);
-            // if(_watcher)
-            //     catchAndLogException(_watcher.onRead);
-
-            if (timeout !is null)
-            {
+            if (timeout !is null) {
                 timeout(this);
             }
         }
