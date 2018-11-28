@@ -64,8 +64,7 @@ class TcpStream : AbstractStream {
             _isConnected = true;
             _remoteAddress = addr;
             _localAddress = this.socket.localAddress();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             error(ex.message);
         }
 
@@ -143,11 +142,9 @@ class TcpStream : AbstractStream {
             if (_isWritting) {
                 version (HUNT_DEBUG)
                     infof("Busy in writting, data buffered (%d bytes)", buffer.capacity);
-            }
-            else
+            } else
                 tryWrite();
-        }
-        else {
+        } else {
             onWrite();
         }
     }
@@ -181,8 +178,7 @@ protected:
                 version (HUNT_DEBUG)
                     trace("continue reading...");
             }
-        }
-        else {
+        } else {
             doRead();
         }
 
@@ -229,15 +225,16 @@ protected:
             trace("start to write");
 
         while (_isRegistered && !isWriteCancelling && !_writeQueue.empty) {
-            version (HUNT_DEBUG) trace("writting...");
+            version (HUNT_DEBUG)
+                trace("writting...");
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
             const(ubyte[]) data = writeBuffer.remaining();
             if (data.length == 0) {
                 auto q = _writeQueue.deQueue();
-                if(q is null)
+                if (q is null)
                     warning("StreamWriteBuffer is null");
-                else    
+                else
                     q.finish();
                 // _writeQueue.deQueue().finish();
                 continue;
@@ -249,16 +246,17 @@ protected:
                 version (HUNT_DEBUG)
                     tracef("finishing data writing...%d bytes", nBytes);
                 auto q = _writeQueue.deQueue();
-                if(q is null)
+                if (q is null)
                     warning("StreamWriteBuffer is null");
-                else    
+                else
                     q.finish();
             }
 
             if (this.isError) {
                 string msg = format("Socket error on write: fd=%d, message=%s",
                         this.handle, this.erroString);
-                version (HUNT_DEBUG) errorf(msg);
+                version (HUNT_DEBUG)
+                    errorf(msg);
                 errorOccurred(msg);
                 break;
             }
