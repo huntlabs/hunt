@@ -38,10 +38,8 @@ import std.stdio;
 /**
 TCP Server
 */
-abstract class AbstractListener : AbstractSocketChannel
-{
-    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024)
-    {
+abstract class AbstractListener : AbstractSocketChannel {
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
         super(loop, ChannelType.Accept);
         setFlag(ChannelFlag.Read, true);
         _buffer = new ubyte[bufferSize];
@@ -52,11 +50,11 @@ abstract class AbstractListener : AbstractSocketChannel
 
     mixin CheckIocpError;
 
-    protected void doAccept()
-    {
+    protected void doAccept() {
         _iocp.channel = this;
         _iocp.operation = IocpOperation.accept;
-        _clientSocket = new Socket(this.localAddress.addressFamily, SocketType.STREAM, ProtocolType.TCP);
+        _clientSocket = new Socket(this.localAddress.addressFamily,
+                SocketType.STREAM, ProtocolType.TCP);
         DWORD dwBytesReceived = 0;
 
         version (HUNT_DEBUG) {
@@ -64,19 +62,18 @@ abstract class AbstractListener : AbstractSocketChannel
                     _clientSocket.handle());
             // info("AcceptEx@", AcceptEx);
         }
-        uint sockaddrSize = cast(uint)sockaddr_storage.sizeof;
-        int nRet = AcceptEx(this.handle, cast(SOCKET) _clientSocket.handle,
-                _buffer.ptr, 0, sockaddrSize + 16, sockaddrSize + 16,
-                &dwBytesReceived, &_iocp.overlapped);
+        uint sockaddrSize = cast(uint) sockaddr_storage.sizeof;
+        int nRet = AcceptEx(this.handle, cast(SOCKET) _clientSocket.handle, _buffer.ptr,
+                0, sockaddrSize + 16, sockaddrSize + 16, &dwBytesReceived, &_iocp.overlapped);
 
         version (HUNT_DEBUG)
             trace("do AcceptEx : the return is : ", nRet);
         checkErro(nRet);
     }
 
-    protected bool onAccept(scope AcceptHandler handler)
-    {
-        version (HUNT_DEBUG) trace("a new connection coming...");
+    protected bool onAccept(scope AcceptHandler handler) {
+        version (HUNT_DEBUG)
+            trace("a new connection coming...");
         this.clearError();
         SOCKET slisten = cast(SOCKET) this.handle;
         SOCKET slink = cast(SOCKET) this._clientSocket.handle;
@@ -89,14 +86,14 @@ abstract class AbstractListener : AbstractSocketChannel
         if (handler !is null)
             handler(this._clientSocket);
 
-        version (HUNT_DEBUG) trace("accepting next connection...");
+        version (HUNT_DEBUG)
+            trace("accepting next connection...");
         if (this.isRegistered)
             this.doAccept();
         return true;
     }
 
-    override void onClose()
-    {
+    override void onClose() {
         // assert(false, "");
         // TODO: created by Administrator @ 2018-3-27 15:51:52
     }
@@ -112,13 +109,11 @@ alias AcceptorBase = AbstractListener;
 /**
 TCP Client
 */
-abstract class AbstractStream : AbstractSocketChannel, Stream
-{
+abstract class AbstractStream : AbstractSocketChannel, Stream {
     DataReceivedHandler dataReceivedHandler;
     DataWrittenHandler sentHandler;
 
-    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2)
-    {
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
         setFlag(ChannelFlag.Write, true);
@@ -131,22 +126,19 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
     mixin CheckIocpError;
 
-    override void onRead()
-    {
+    override void onRead() {
         version (HUNT_DEBUG)
             trace("ready to read");
         _inRead = false;
         super.onRead();
     }
 
-    override void onWrite()
-    {
+    override void onWrite() {
         _inWrite = false;
         super.onWrite();
     }
 
-    protected void beginRead()
-    {
+    protected void beginRead() {
         _inRead = true;
         _dataReadBuffer.len = cast(uint) _readBuffer.length;
         _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
@@ -164,8 +156,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         checkErro(nRet, SOCKET_ERROR);
     }
 
-    protected void doConnect(Address addr)
-    {
+    protected void doConnect(Address addr) {
         _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.connect;
         int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
@@ -174,30 +165,27 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         checkErro(nRet, ERROR_IO_PENDING);
     }
 
-    private uint doWrite()
-    {
+    private uint doWrite() {
         _inWrite = true;
         DWORD dwFlags = 0;
         DWORD dwSent = 0;
         _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.write;
-        version (HUNT_DEBUG)
-        {
+        version (HUNT_DEBUG) {
             size_t bufferLength = sendDataBuffer.length;
             trace("writing...handle=", this.socket.handle());
             trace("buffer content length: ", bufferLength);
             // trace(cast(string) data);
-            if(bufferLength>64)
-                tracef("%(%02X %) ...", sendDataBuffer[0..64]);
+            if (bufferLength > 64)
+                tracef("%(%02X %) ...", sendDataBuffer[0 .. 64]);
             else
-                tracef("%(%02X %)", sendDataBuffer[0..$]);
+                tracef("%(%02X %)", sendDataBuffer[0 .. $]);
         }
 
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
                 dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
-        version (HUNT_DEBUG)
-        {
+        version (HUNT_DEBUG) {
             if (dwSent != _dataWriteBuffer.len)
                 warningf("dwSent=%d, BufferLength=%d", dwSent, _dataWriteBuffer.len);
         }
@@ -205,8 +193,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         // The buffer may be full, so what can do here?
         // checkErro(nRet, SOCKET_ERROR); // bug:
 
-        if (this.isError)
-        {
+        if (this.isError) {
             errorf("Socket error on write: fd=%d, message=%s", this.handle, this.erroString);
             this.close();
         }
@@ -214,14 +201,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         return dwSent;
     }
 
-    protected void doRead()
-    {
+    protected void doRead() {
         this.clearError();
         version (HUNT_DEBUG)
             tracef("data reading...%d nbytes", this.readLen);
 
-        if (readLen > 0)
-        {
+        if (readLen > 0) {
             // import std.stdio;
             // writefln("length=%d, data: %(%02X %)", readLen, _readBuffer[0 .. readLen]);
 
@@ -232,9 +217,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 
             // continue reading
             this.beginRead();
-        }
-        else if (readLen == 0)
-        {
+        } else if (readLen == 0) {
             version (HUNT_DEBUG) {
                 if (_remoteAddress !is null)
                     warningf("connection broken: %s", _remoteAddress.toString());
@@ -242,15 +225,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
             onDisconnected();
             // if (_isClosed)
             //     this.close();
-        }
-        else
-        {
-            version (HUNT_DEBUG)
-            {
+        } else {
+            version (HUNT_DEBUG) {
                 warningf("undefined behavior on thread %d", getTid());
-            }
-            else
-            {
+            } else {
                 this._error = true;
                 this._erroString = "undefined behavior on thread";
             }
@@ -262,10 +240,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
     /// 
     // TODO: created by Administrator @ 2018-4-18 10:15:20
     // Send a big block of data
-    protected size_t tryWrite(const ubyte[] data)
-    {
-        if (_isWritting)
-        {
+    protected size_t tryWrite(const ubyte[] data) {
+        if (_isWritting) {
             warning("Busy in writting on thread: ");
             return 0;
         }
@@ -280,8 +256,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         return nBytes;
     }
 
-    protected void tryWrite()
-    {
+    protected void tryWrite() {
         // if (_isWritting)
         // {
         //     version (HUNT_DEBUG)
@@ -292,7 +267,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         if (_writeQueue.empty)
             return;
 
-        version (HUNT_DEBUG) trace("start writting...");
+        version (HUNT_DEBUG)
+            trace("start writting...");
         _isWritting = true;
         clearError();
 
@@ -301,18 +277,18 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         setWriteBuffer(data);
         size_t nBytes = doWrite();
 
-        if(nBytes < data.length) { // to fix the corrupted data 
-            version (HUNT_DEBUG) warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
+        if (nBytes < data.length) { // to fix the corrupted data 
+            version (HUNT_DEBUG)
+                warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
             sendDataBuffer = data.dup;
         }
     }
 
     protected bool _isWritting = false;
 
-    private void setWriteBuffer(in ubyte[] data)
-    {
+    private void setWriteBuffer(in ubyte[] data) {
         version (HUNT_DEBUG)
-        trace("buffer content length: ", data.length);
+            trace("buffer content length: ", data.length);
         // trace(cast(string) data);
         // tracef("%(%02X %)", data);
 
@@ -325,22 +301,20 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
      * Called by selector after data sent
      * Note: It's only for IOCP selector: 
     */
-    package(hunt.event) void onWriteDone(size_t nBytes)
-    {
+    package(hunt.event) void onWriteDone(size_t nBytes) {
         version (HUNT_DEBUG)
             tracef("finishing data writting %d bytes) ", nBytes);
-        if (isWriteCancelling)
-        {
+        if (isWriteCancelling) {
             _isWritting = false;
             isWriteCancelling = false;
             _writeQueue.clear(); // clean the data buffer 
             return;
         }
 
-        if (writeBuffer.pop(nBytes))
-        {
+        if (writeBuffer.pop(nBytes)) {
             if (_writeQueue.deQueue() is null) {
-               version (HUNT_DEBUG) warning("_writeQueue is empty!");
+                version (HUNT_DEBUG)
+                    warning("_writeQueue is empty!");
             }
 
             writeBuffer.finish();
@@ -350,11 +324,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
                 tracef("done with data writting %d bytes) ", nBytes);
 
             tryWrite();
-        }
-        else // if (sendDataBuffer.length > nBytes) 
+        } else // if (sendDataBuffer.length > nBytes) 
         {
             // version (HUNT_DEBUG)
-                tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
+            tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
             // sendDataBuffer corrupted
             // const(ubyte)[] data = writeBuffer.remaining();
@@ -365,13 +338,11 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
         }
     }
 
-    void cancelWrite()
-    {
+    void cancelWrite() {
         isWriteCancelling = true;
     }
 
-    protected void onDisconnected()
-    {
+    protected void onDisconnected() {
         _isConnected = false;
         _isClosed = true;
         if (disconnectionHandler !is null)
@@ -400,11 +371,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream
 /**
 UDP Socket
 */
-abstract class AbstractDatagramSocket : AbstractSocketChannel
-{
+abstract class AbstractDatagramSocket : AbstractSocketChannel {
     /// Constructs a blocking IPv4 UDP Socket.
-    this(Selector loop, AddressFamily family = AddressFamily.INET)
-    {
+    this(Selector loop, AddressFamily family = AddressFamily.INET) {
         super(loop, ChannelType.UDP);
         setFlag(ChannelFlag.Read, true);
         setFlag(ChannelFlag.ETMode, false);
@@ -421,8 +390,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
             _bindAddress = new UnknownAddress();
     }
 
-    final void bind(Address addr)
-    {
+    final void bind(Address addr) {
         if (_binded)
             return;
         _bindAddress = addr;
@@ -430,20 +398,16 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
         _binded = true;
     }
 
-    final bool isBind()
-    {
+    final bool isBind() {
         return _binded;
     }
 
-    Address bindAddr()
-    {
+    Address bindAddr() {
         return _bindAddress;
     }
 
-    override void start()
-    {
-        if (!_binded)
-        {
+    override void start() {
+        if (!_binded) {
             socket.bind(_bindAddress);
             _binded = true;
         }
@@ -455,12 +419,10 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
     protected bool _binded = false;
     protected Address _bindAddress;
 
-    version (Windows)
-    {
+    version (Windows) {
         mixin CheckIocpError;
 
-        void doRead()
-        {
+        void doRead() {
             version (HUNT_DEBUG)
                 trace("Receiving......");
 
@@ -479,31 +441,23 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
             checkErro(nRet, SOCKET_ERROR);
         }
 
-        Address buildAddress()
-        {
+        Address buildAddress() {
             Address tmpaddr;
-            if (remoteAddrLen == 32)
-            {
+            if (remoteAddrLen == 32) {
                 sockaddr_in* addr = cast(sockaddr_in*)(&remoteAddr);
                 tmpaddr = new InternetAddress(*addr);
-            }
-            else
-            {
+            } else {
                 sockaddr_in6* addr = cast(sockaddr_in6*)(&remoteAddr);
                 tmpaddr = new Internet6Address(*addr);
             }
             return tmpaddr;
         }
 
-        bool tryRead(scope ReadCallBack read)
-        {
+        bool tryRead(scope ReadCallBack read) {
             this.clearError();
-            if (this.readLen == 0)
-            {
+            if (this.readLen == 0) {
                 read(null);
-            }
-            else
-            {
+            } else {
                 ubyte[] data = this._readBuffer.data;
                 this._readBuffer.data = data[0 .. this.readLen];
                 this._readBuffer.addr = this.buildAddress();
@@ -528,10 +482,8 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel
 
 /**
 */
-mixin template CheckIocpError()
-{
-    void checkErro(int ret, int erro = 0)
-    {
+mixin template CheckIocpError() {
+    void checkErro(int ret, int erro = 0) {
         DWORD dwLastError = GetLastError();
         if (ret != 0 || dwLastError == 0)
             return;
@@ -539,16 +491,14 @@ mixin template CheckIocpError()
         version (HUNT_DEBUG)
             tracef("erro=%d, dwLastError=%d", erro, dwLastError);
 
-        if (ERROR_IO_PENDING != dwLastError)
-        {
+        if (ERROR_IO_PENDING != dwLastError) {
             this._error = true;
             this._erroString = format("AcceptEx failed with error: code=%s", dwLastError);
         }
     }
 }
 
-enum IocpOperation
-{
+enum IocpOperation {
     accept,
     connect,
     read,
@@ -557,8 +507,7 @@ enum IocpOperation
     close
 }
 
-struct IocpContext
-{
+struct IocpContext {
     OVERLAPPED overlapped;
     IocpOperation operation;
     AbstractChannel channel = null;
@@ -576,23 +525,21 @@ __gshared LPFN_TRANSMITPACKETS TransmitPackets;
 __gshared LPFN_WSARECVMSG WSARecvMsg;
 __gshared LPFN_WSASENDMSG WSASendMsg;*/
 
-shared static this()
-{
+shared static this() {
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if(iResult != 0) {
+    if (iResult != 0) {
         stderr.writeln("unable to load Winsock!");
     }
 }
 
-shared static ~this()
-{
+shared static ~this() {
     WSACleanup();
 }
 
-void loadWinsockExtension(SOCKET socket)
-{
-    if(isApiLoaded) return;
+void loadWinsockExtension(SOCKET socket) {
+    if (isApiLoaded)
+        return;
     isApiLoaded = true;
 
     // SOCKET ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -607,14 +554,13 @@ void loadWinsockExtension(SOCKET socket)
      mixin(GET_FUNC_POINTER("WSAID_TRANSMITPACKETS", "TransmitPackets"));
      mixin(GET_FUNC_POINTER("WSAID_WSARECVMSG", "WSARecvMsg"));*/
 }
+
 private __gshared bool isApiLoaded = false;
 
-private bool GetFunctionPointer(FuncPointer)(SOCKET sock, ref FuncPointer pfn, ref GUID guid)
-{
+private bool GetFunctionPointer(FuncPointer)(SOCKET sock, ref FuncPointer pfn, ref GUID guid) {
     DWORD dwBytesReturned = 0;
     if (WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, guid.sizeof,
-            &pfn, pfn.sizeof, &dwBytesReturned, null, null) == SOCKET_ERROR)
-    {
+            &pfn, pfn.sizeof, &dwBytesReturned, null, null) == SOCKET_ERROR) {
         error("Get function failed with error:", GetLastError());
         return false;
     }
@@ -622,16 +568,14 @@ private bool GetFunctionPointer(FuncPointer)(SOCKET sock, ref FuncPointer pfn, r
     return true;
 }
 
-private string GET_FUNC_POINTER(string GuidValue, string pft, string socket = "socket")
-{
+private string GET_FUNC_POINTER(string GuidValue, string pft, string socket = "socket") {
     string str = " guid = " ~ GuidValue ~ ";";
     str ~= "if( !GetFunctionPointer( " ~ socket ~ ", " ~ pft
         ~ ", guid ) ) { errnoEnforce(false,\"get function error!\"); } ";
     return str;
 }
 
-enum : DWORD
-{
+enum : DWORD {
     IOCPARAM_MASK = 0x7f,
     IOC_VOID = 0x20000000,
     IOC_OUT = 0x40000000,
@@ -644,23 +588,19 @@ enum IOC_WS2 = 0x08000000;
 enum IOC_PROTOCOL = 0x10000000;
 enum IOC_VENDOR = 0x18000000;
 
-template _WSAIO(int x, int y)
-{
+template _WSAIO(int x, int y) {
     enum _WSAIO = IOC_VOID | x | y;
 }
 
-template _WSAIOR(int x, int y)
-{
+template _WSAIOR(int x, int y) {
     enum _WSAIOR = IOC_OUT | x | y;
 }
 
-template _WSAIOW(int x, int y)
-{
+template _WSAIOW(int x, int y) {
     enum _WSAIOW = IOC_IN | x | y;
 }
 
-template _WSAIORW(int x, int y)
-{
+template _WSAIORW(int x, int y) {
     enum _WSAIORW = IOC_INOUT | x | y;
 }
 
