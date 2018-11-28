@@ -44,6 +44,7 @@ examples/Timer/timer
 examples/UnitTest/unittest
 
 # others
+.DS_Store
 *.zip
 hunt-test-default
 test.config

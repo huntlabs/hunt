@@ -71,7 +71,7 @@ TCP Client
 abstract class AbstractStream : AbstractSocketChannel, Stream {
     SimpleEventHandler disconnectionHandler;
 
-    protected bool _isConnected; //if server side always true.
+    protected bool _isConnected; // It's always true for server.
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         version (HUNT_DEBUG)
@@ -103,14 +103,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             // https://stackoverflow.com/questions/14595269/errno-35-eagain-returned-on-recv-call
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
             // check more error status
-            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
-                this._error = true;
-                this._erroString = cast(string) fromStringz(strerror(errno));
+            this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
+            if (_error) {
+                this._erroString = lastSocketError();
+                errorOccurred(_erroString);
+            } else {
+                debug warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
+                        errno, lastSocketError());
             }
-
-            // version (HUNT_DEBUG)
-                warningf("read error: fd=%s, errno=%d, message=%s", this.handle,
-                        errno, cast(string) fromStringz(strerror(errno)));
 
             if(errno == ECONNRESET) {
                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
@@ -160,16 +160,24 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             } else
                 writeRetries = 0;
         } else if (nBytes == Socket.ERROR) {
-            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
-                string msg = lastSocketError();
-                warningf("errno=%d, message: %s", errno, msg);
-                this._error = true;
-                this._erroString = msg;
+            this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
+            if (this._error) {
+                this._erroString = lastSocketError();
 
-                errorOccurred(msg);
+                warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
+                        errno, this._erroString);
+
+                if(errno == ECONNRESET) {
+                    // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
+                    onDisconnected();
+                    this.close();
+                } else {
+                    errorOccurred(_erroString);
+                }
             } else {
-                version (HUNT_DEBUG)
-                    warningf("errno=%d, message: %s", errno, lastSocketError());
+                debug warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
+                        errno, lastSocketError());
+
                 if (canWriteAgain && !_isClosed) {
                     import core.thread;
                     import core.time;
@@ -192,6 +200,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             else {
                 this._error = true;
                 this._erroString = lastSocketError();
+
+                errorOccurred(_erroString);
             }
         }
     }

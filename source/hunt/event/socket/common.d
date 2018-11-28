@@ -59,8 +59,9 @@ abstract class AbstractSocketChannel : AbstractChannel
     protected @property void socket(Socket s)
     {
         this.handle = s.handle();
-        version (Posix)
+        version (Posix) {
             s.blocking = false;
+        }
         _socket = s;
         version (HUNT_DEBUG) info("new socket fd: ", this.handle);
     }

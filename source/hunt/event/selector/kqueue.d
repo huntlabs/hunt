@@ -40,6 +40,9 @@ import core.sys.posix.time;
 /**
 */
 class AbstractSelector : Selector {
+    // kevent array size
+    enum int NUM_KEVENTS = 128;
+
     this() {
         _kqueueFD = kqueue();
         _event = new KqueueEventChannel(this);
@@ -65,7 +68,7 @@ class AbstractSelector : Selector {
 
         int err = -1;
         if (channel.type == ChannelType.Timer) {
-            kevent_t ev;
+            Kevent ev;
             AbstractTimer timerChannel = cast(AbstractTimer) channel;
             if (timerChannel is null)
                 return false;
@@ -78,13 +81,13 @@ class AbstractSelector : Selector {
             const int fd = channel.handle;
             if (fd < 0)
                 return false;
-            kevent_t[2] ev = void;
+            Kevent[2] ev = void;
             short read = EV_ADD | EV_ENABLE;
             short write = EV_ADD | EV_ENABLE;
-            // if (channel.hasFlag(ChannelFlag.ETMode)) {
-            //     read |= EV_CLEAR;
-            //     write |= EV_CLEAR;
-            // }
+            if (channel.hasFlag(ChannelFlag.ETMode)) {
+                read |= EV_CLEAR;
+                write |= EV_CLEAR;
+            }
             EV_SET(&(ev[0]), fd, EVFILT_READ, read, 0, 0, cast(void*) channel);
             EV_SET(&(ev[1]), fd, EVFILT_WRITE, write, 0, 0, cast(void*) channel);
             if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
@@ -97,7 +100,6 @@ class AbstractSelector : Selector {
         if (err < 0) {
             return false;
         }
-        // channel.currtLoop = this;
         _event.setNext(channel);
         return true;
     }
@@ -114,7 +116,7 @@ class AbstractSelector : Selector {
 
         int err = -1;
         if (channel.type == ChannelType.Timer) {
-            kevent_t ev;
+            Kevent ev;
             AbstractTimer timerChannel = cast(AbstractTimer) channel;
             if (timerChannel is null)
                 return false;
@@ -122,7 +124,7 @@ class AbstractSelector : Selector {
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else {
-            kevent_t[2] ev = void;
+            Kevent[2] ev = void;
             EV_SET(&(ev[0]), fd, EVFILT_READ, EV_DELETE, 0, 0, cast(void*) channel);
             EV_SET(&(ev[1]), fd, EVFILT_WRITE, EV_DELETE, 0, 0, cast(void*) channel);
             if (channel.hasFlag(ChannelFlag.Read) && channel.hasFlag(ChannelFlag.Write))
@@ -141,17 +143,35 @@ class AbstractSelector : Selector {
     }
 
     override protected int doSelect(long timeout) {
-        return kqueueWait(cast(int)timeout);
-    }
+        timespec ts;
+        timespec *tsp;
+        // timeout is in milliseconds. Convert to struct timespec.
+        // timeout == -1 : wait forever : timespec timeout of NULL
+        // timeout == 0  : return immediately : timespec timeout of zero
+        if (timeout >= 0) {
+            // For some indeterminate reason kevent(2) has been found to fail with
+            // an EINVAL error for timeout values greater than or equal to
+            // 100000001000L. To avoid this problem, clamp the timeout arbitrarily
+            // to the maximum value of a 32-bit signed integer which is
+            // approximately 25 days in milliseconds.
+            const int timeoutMax = int.max; // Integer.MAX_VALUE
+            if (timeout > timeoutMax) {
+                timeout = timeoutMax;
+            }
+            ts.tv_sec = timeout / 1000;
+            ts.tv_nsec = (timeout % 1000) * 1000000; //nanosec = 1 million millisec
+            tsp = &ts;
+        } else {
+            tsp = null;
+        }        
 
-    private int kqueueWait(int timeout) {
-        auto tspec = timespec(1, 1000 * 10);
-        kevent_t[128] events;
-        auto len = kevent(_kqueueFD, null, 0, events.ptr, events.length, &tspec);
-        foreach (i; 0 .. len) {
+        // auto tspec = timespec(1, 1000 * 10);
+        Kevent[NUM_KEVENTS] events;
+        int result = kevent(_kqueueFD, null, 0, events.ptr, events.length, tsp);
+        foreach (i; 0 .. result) {
             AbstractChannel channel = cast(AbstractChannel)(events[i].udata);
             ushort eventFlags = events[i].flags;
-            info("eventFlags: ", eventFlags);
+            // info("eventFlags: ", eventFlags);
 
             if (eventFlags & EV_ERROR) {
                 warningf("channel[fd=%d] has a error.", channel.handle);
@@ -159,32 +179,26 @@ class AbstractSelector : Selector {
                 continue;
             }
             if (eventFlags & EV_EOF) {
-                infof("channel[fd=%d] closed", channel.handle);
+                version (HUNT_DEBUG) infof("channel[fd=%d] closed", channel.handle);
                 channel.close();
                 continue;
             }
 
             short filter = events[i].filter;
-            infof("channel fileter: %d", filter);
-
             if(filter == EVFILT_TIMER) {
                 channel.onRead();
                 continue;
-            }
-
-            if ((filter & EVFILT_WRITE) && channel.isRegistered) {
-                // version(HUNT_DEBUG) trace("The channel socket is: ", typeid(channel));
+            } else if (filter == EVFILT_WRITE) {
                 AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
                 assert(wt !is null);
                 wt.onWriteDone();
-            }
-            
-            if ((filter & EVFILT_READ) && channel.isRegistered) {
+            } else if (filter == EVFILT_READ) {
                 channel.onRead();
-            } 
-            
+            } else {
+                warningf("Unhandled channel fileter: %d", filter);
+            }
         }
-        return len;
+        return result;
     }
 
 private:
@@ -242,11 +256,11 @@ enum : short {
     EVFILT_SYSCOUNT = 11
 }
 
-extern (D) void EV_SET(kevent_t* kevp, typeof(kevent_t.tupleof) args) @nogc nothrow {
-    *kevp = kevent_t(args);
+extern (D) void EV_SET(Kevent* kevp, typeof(Kevent.tupleof) args) @nogc nothrow {
+    *kevp = Kevent(args);
 }
 
-struct kevent_t {
+struct Kevent {
     uintptr_t ident; /* identifier for this event */
     short filter; /* filter for event */
     ushort flags;
@@ -331,8 +345,8 @@ enum {
 
 extern (C) {
     int kqueue() @nogc nothrow;
-    int kevent(int kq, const kevent_t* changelist, int nchanges,
-            kevent_t* eventlist, int nevents, const timespec* timeout) @nogc nothrow;
+    int kevent(int kq, const Kevent* changelist, int nchanges,
+            Kevent* eventlist, int nevents, const timespec* timeout) @nogc nothrow;
 }
 
 enum SO_REUSEPORT = 0x0200;
