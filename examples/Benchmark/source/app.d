@@ -13,6 +13,7 @@ import std.stdio;
 
 import hunt.event;
 import hunt.io;
+import hunt.logging;
 import hunt.util.timer;
 import hunt.util.thread;
 
@@ -21,7 +22,6 @@ import std.json;
 import std.functional;
 import std.getopt;
 import std.exception;
-import hunt.logging;
 import std.datetime;
 import std.parallelism;
 import std.socket;
@@ -159,8 +159,16 @@ Connection: keep-alive
 </body>
 </html>
 `;
-		client.write(cast(ubyte[]) writeData);
-		client.close();
+
+		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
+			debug info("The connection shutdown now.");
+			// import core.thread;
+			// import core.time;
+			// Thread.sleep(200.msecs);
+			client.close();
+		});
+
+		// client.close();
 	}
 
 	protected void notifyClientClosed(TcpStream client) {

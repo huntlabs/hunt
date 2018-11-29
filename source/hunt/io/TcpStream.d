@@ -48,6 +48,11 @@ class TcpStream : AbstractStream {
         _isConnected = true;
     }
 
+    
+    override bool isBusy() {
+        return _isWritting;
+    }
+
     void connect(string ip, ushort port) {
         connect(parseAddress(ip, port));
     }
@@ -197,7 +202,7 @@ protected:
                 warning("Some data has not been sent yet.");
             }
 
-            infof("connection closed: %s", this.remoteAddress);
+            infof("connection closed with: %s", this.remoteAddress);
         }
 
         _writeQueue.clear();

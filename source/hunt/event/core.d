@@ -23,8 +23,8 @@ import std.socket;
 
 alias ReadCallBack = void delegate(Object obj);
 
-alias DataReceivedHandler = void delegate(in ubyte[] data);
-alias DataWrittenHandler = void delegate(in ubyte[] data, size_t size);
+alias DataReceivedHandler = void delegate(const ubyte[] data);
+alias DataWrittenHandler = void delegate(const ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
 // dfmt on
 
@@ -127,6 +127,7 @@ abstract class AbstractChannel : Channel {
     ErrorEventHandler errorHandler;
 
     protected bool _isRegistered = false;
+    protected bool _isClosing = false;
     protected bool _isClosed = false;
 
     this(Selector loop, ChannelType type) {
@@ -145,12 +146,13 @@ abstract class AbstractChannel : Channel {
     /**
     */
     bool isClosed() {
-        return _isClosed;
+        return _isClosing || _isClosed;
     }
 
     protected void onClose() {
         _isRegistered = false;
         _isClosed = true;
+        _isClosing = false;
         version (Windows) {
         }
         else {
@@ -190,13 +192,13 @@ abstract class AbstractChannel : Channel {
     void close() {
         if (!_isClosed) {
             version (HUNT_DEBUG)
-                trace("channel closing...", this.handle);
+                tracef("channel[fd=%d] closing...", this.handle);
             onClose();
             version (HUNT_DEBUG)
-                trace("channel closed...", this.handle);
+                tracef("channel[fd=%d] closed...", this.handle);
         }
         else {
-            debug warningf("The watcher(fd=%d) has already been closed", this.handle);
+            debug warningf("The channel[fd=%d] has already been closed", this.handle);
         }
     }
 
