@@ -52,6 +52,9 @@ abstract class AbstractSocketChannel : AbstractChannel {
         super(loop, type);
     }
 
+    // Busy with reading or writting
+    protected bool isBusy() { return false; }
+
     protected @property void socket(Socket s) {
         this.handle = s.handle();
         version (Posix) {
@@ -68,9 +71,51 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
     protected Socket _socket;
 
+    // override void onClose() {
+    //     import core.thread;
+    //     import core.time;
+    //     import std.parallelism;
+
+    //     void doClose() {
+    //         while(isBusy) {
+    //             info("busy....");
+    //             // Thread.sleep(50.msecs);
+    //         }
+    //         super.onClose();
+    //         _socket.close();
+    //     }
+
+    //     if(isBusy) {
+    //         debug warning("Close action delayed");
+    //         auto theTask = task(&doClose);
+    //         taskPool.put(theTask);
+    //     } else {
+    //         super.onClose();
+    //         _socket.close();
+    //     }
+    // }
+
     override void close() {
-        super.close();
-        _socket.close();
+        if(_isClosing)
+            return;
+        _isClosing = true;
+
+        if(isBusy) {
+            // import core.thread;
+            // import core.time;
+            import std.parallelism;
+            debug warning("Close operation delayed");
+            auto theTask = task(() {
+                while(isBusy) {
+                    debug info("waitting for idle....");
+                    // Thread.sleep(20.msecs);
+                }
+                super.close();
+            });
+            taskPool.put(theTask);
+        } else {
+            super.close();
+        }
     }
 
     /// Get a socket option.

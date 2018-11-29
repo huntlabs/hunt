@@ -63,12 +63,12 @@ abstract class AbstractListener : AbstractSocketChannel {
             // info("AcceptEx@", AcceptEx);
         }
         uint sockaddrSize = cast(uint) sockaddr_storage.sizeof;
-        int nRet = AcceptEx(this.handle, cast(SOCKET) _clientSocket.handle, _buffer.ptr,
+        // https://docs.microsoft.com/en-us/windows/desktop/api/mswsock/nf-mswsock-acceptex
+        BOOL ret = AcceptEx(this.handle, cast(SOCKET) _clientSocket.handle, _buffer.ptr,
                 0, sockaddrSize + 16, sockaddrSize + 16, &dwBytesReceived, &_iocp.overlapped);
-
         version (HUNT_DEBUG)
-            trace("do AcceptEx : the return is : ", nRet);
-        checkErro(nRet);
+            trace("AcceptEx return: ", ret);
+        checkErro(ret, FALSE);
     }
 
     protected bool onAccept(scope AcceptHandler handler) {
@@ -148,8 +148,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         DWORD dwFlags = 0;
 
         version (HUNT_DEBUG)
-            tracef("start receiving handle=%d ", this.socket.handle);
+            tracef("start receiving by handle[fd=%d] ", this.socket.handle);
 
+        // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
         int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
                 &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
@@ -162,7 +163,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
                 cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
                 &_iocpwrite.overlapped);
-        checkErro(nRet, ERROR_IO_PENDING);
+        checkErro(nRet, SOCKET_ERROR);
     }
 
     private uint doWrite() {
@@ -173,11 +174,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         _iocpwrite.operation = IocpOperation.write;
         version (HUNT_DEBUG) {
             size_t bufferLength = sendDataBuffer.length;
-            trace("writing...handle=", this.socket.handle());
-            trace("buffer content length: ", bufferLength);
+            tracef("To be written %d nbytes by handle[fd=%d]", bufferLength, this.socket.handle());
             // trace(cast(string) data);
-            if (bufferLength > 64)
-                tracef("%(%02X %) ...", sendDataBuffer[0 .. 64]);
+            if (bufferLength > 32)
+                tracef("%(%02X %) ...", sendDataBuffer[0 .. 32]);
             else
                 tracef("%(%02X %)", sendDataBuffer[0 .. $]);
         }
@@ -189,9 +189,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (dwSent != _dataWriteBuffer.len)
                 warningf("dwSent=%d, BufferLength=%d", dwSent, _dataWriteBuffer.len);
         }
-        // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-9 16:28:55
-        // The buffer may be full, so what can do here?
-        // checkErro(nRet, SOCKET_ERROR); // bug:
+
+        checkErro(nRet, SOCKET_ERROR);
 
         if (this.isError) {
             errorf("Socket error on write: fd=%d, message=%s", this.handle, this.erroString);
@@ -204,7 +203,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     protected void doRead() {
         this.clearError();
         version (HUNT_DEBUG)
-            tracef("data reading...%d nbytes", this.readLen);
+            tracef("start reading: %d nbytes", this.readLen);
 
         if (readLen > 0) {
             // import std.stdio;
@@ -213,7 +212,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (dataReceivedHandler !is null)
                 dataReceivedHandler(this._readBuffer[0 .. readLen]);
             version (HUNT_DEBUG)
-                tracef("done with data reading...%d nbytes", this.readLen);
+                tracef("reading done: %d nbytes", this.readLen);
 
             // continue reading
             this.beginRead();
@@ -257,13 +256,6 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     }
 
     protected void tryWrite() {
-        // if (_isWritting)
-        // {
-        //     version (HUNT_DEBUG)
-        //         warning("Busy in writting (data buffered)");
-        //     return;
-        // }
-
         if (_writeQueue.empty)
             return;
 
@@ -288,7 +280,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
     private void setWriteBuffer(in ubyte[] data) {
         version (HUNT_DEBUG)
-            trace("buffer content length: ", data.length);
+            tracef("data length: %d nbytes", data.length);
         // trace(cast(string) data);
         // tracef("%(%02X %)", data);
 
@@ -303,7 +295,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     */
     package(hunt.event) void onWriteDone(size_t nBytes) {
         version (HUNT_DEBUG)
-            tracef("finishing data writting %d bytes) ", nBytes);
+            tracef("finishing writting: %d bytes", nBytes);
         if (isWriteCancelling) {
             _isWritting = false;
             isWriteCancelling = false;
@@ -321,7 +313,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             _isWritting = false;
 
             version (HUNT_DEBUG)
-                tracef("done with data writting %d bytes) ", nBytes);
+                tracef("writting done: %d bytes", nBytes);
 
             tryWrite();
         } else // if (sendDataBuffer.length > nBytes) 
@@ -485,15 +477,16 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
 mixin template CheckIocpError() {
     void checkErro(int ret, int erro = 0) {
         DWORD dwLastError = GetLastError();
-        if (ret != 0 || dwLastError == 0)
+        version (HUNT_DEBUG)
+            infof("erro=%d, dwLastError=%d", erro, dwLastError);
+        if (ret != erro || dwLastError == 0)
             return;
 
-        version (HUNT_DEBUG)
-            tracef("erro=%d, dwLastError=%d", erro, dwLastError);
-
-        if (ERROR_IO_PENDING != dwLastError) {
+        if (ERROR_IO_PENDING != dwLastError) { // ERROR_IO_PENDING
+            import hunt.sys.error;
+            warningf("erro=%d, dwLastError=%d", erro, dwLastError);
             this._error = true;
-            this._erroString = format("AcceptEx failed with error: code=%s", dwLastError);
+            this._erroString = getErrorMessage(dwLastError); // format("IOCP error: code=%s", dwLastError);
         }
     }
 }

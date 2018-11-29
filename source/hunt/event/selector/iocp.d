@@ -42,24 +42,28 @@ class AbstractSelector : Selector {
 
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
+        ChannelType ct = channel.type;
+        auto fd = channel.handle;
+        version (HUNT_DEBUG)
+            tracef("register, channel(fd=%d, type=%s)", fd, ct);
 
-        if (channel.type == ChannelType.Timer) {
+        if (ct == ChannelType.Timer) {
             AbstractTimer timerChannel = cast(AbstractTimer) channel;
             assert(timerChannel !is null);
-            if (timerChannel is null || !timerChannel.setTimerOut())
+            if (!timerChannel.setTimerOut())
                 return false;
             _timer.timeWheel().addNewTimer(timerChannel.timer, timerChannel.wheelSize());
-        } else if (channel.type == ChannelType.TCP
-                || channel.type == ChannelType.Accept || channel.type == ChannelType.UDP) {
+        } else if (ct == ChannelType.TCP
+                || ct == ChannelType.Accept || ct == ChannelType.UDP) {
             version (HUNT_DEBUG)
-                trace("Run CreateIoCompletionPort on socket: ", channel.handle);
-            CreateIoCompletionPort(cast(HANDLE) channel.handle, _iocpHandle,
-                    cast(size_t)(cast(void*) channel), 0);
-        }
+                trace("Run CreateIoCompletionPort on socket: ", fd);
 
-        version (HUNT_DEBUG)
-            tracef("register, channel(fd=%d, type=%s)", channel.handle, channel.type);
-        _event.setNext(channel);
+            _event.setNext(channel);
+            CreateIoCompletionPort(cast(HANDLE) fd, _iocpHandle,
+                    cast(size_t)(cast(void*) channel), 0);
+        } else {
+            warningf("Can't register a channel: %s", ct);
+        }
         return true;
     }
 
@@ -85,7 +89,8 @@ class AbstractSelector : Selector {
         _data.channel = _event;
         _data.operation = IocpOperation.event;
 
-        PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
+        // PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
+        PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
     }
 
     override void onLoop(scope void delegate() weakup, long timeout = -1) {
@@ -110,15 +115,18 @@ class AbstractSelector : Selector {
         IocpContext* ev = cast(IocpContext*) overlapped;
         if (ret == 0) {
             const auto erro = GetLastError();
-            if (erro == WAIT_TIMEOUT) // || erro == ERROR_OPERATION_ABORTED
+            // About ERROR_OPERATION_ABORTED
+            // https://stackoverflow.com/questions/7228703/the-i-o-operation-has-been-aborted-because-of-either-a-thread-exit-or-an-applica
+            if (erro == WAIT_TIMEOUT || erro == ERROR_OPERATION_ABORTED) // 
                 return ret;
-
-            errorf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
-            if (ev !is null) {
-                AbstractChannel channel = ev.channel;
-                if (channel !is null && !channel.isClosed())
-                    channel.close();
-            }
+            
+            debug errorf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
+            assert(ev !is null);
+            // if (ev !is null) {
+            AbstractChannel channel = ev.channel;
+            if (channel !is null && !channel.isClosed())
+                channel.close();
+            // }
         } else if (ev is null || ev.channel is null)
             warning("ev is null or ev.watche is null");
         else
@@ -129,7 +137,7 @@ class AbstractSelector : Selector {
     private void handleIocpOperation(IocpOperation op, AbstractChannel channel, DWORD bytes) {
 
         version (HUNT_DEBUG)
-            trace("ev.operation: ", op);
+            info("ev.operation: ", op);
 
         switch (op) {
         case IocpOperation.accept:
