@@ -48,6 +48,9 @@ interface Stream {
 /**
 */
 abstract class AbstractSocketChannel : AbstractChannel {
+
+    protected bool _isWritting = false;
+
     this(Selector loop, ChannelType type) {
         super(loop, type);
     }

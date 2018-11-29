@@ -20,6 +20,7 @@ version (Windows) {
     string getErrorMessage(int errno) @trusted {
         version (Posix) {
             import core.stdc.errno;
+            import std.conv: to;
 
             char[80] buf;
             const(char)* cs;
