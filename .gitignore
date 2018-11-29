@@ -46,5 +46,5 @@ examples/UnitTest/unittest
 # others
 .DS_Store
 *.zip
-hunt-test-default
+hunt-test-*
 test.config
