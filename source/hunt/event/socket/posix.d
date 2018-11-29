@@ -237,7 +237,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             }
             else {
                 this._error = true;
-                this._erroString = getErrorMessage();
+                this._erroString = getErrorMessage(errno);
             }
         }
         return 0;
