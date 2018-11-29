@@ -100,16 +100,15 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             // It's prossible that more data are wainting for read in inner buffer.
             if (len == _readBuffer.length)
                 isDone = false;
-        } else if (len < 0) {
+        } else if (len == Socket.ERROR) {
             // https://stackoverflow.com/questions/14595269/errno-35-eagain-returned-on-recv-call
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:06:13
             // check more error status
             this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
             if (_error) {
                 this._erroString = getErrorMessage(errno);
-                errorOccurred(_erroString);
             } else {
-                debug warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
+                debug warningf("write warning: fd=%s, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
             }
 
@@ -172,8 +171,6 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                     // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                     onDisconnected();
                     this.close();
-                } else {
-                    errorOccurred(_erroString);
                 }
             } else {
                 debug warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
@@ -201,8 +198,6 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             else {
                 this._error = true;
                 this._erroString = lastSocketError();
-
-                errorOccurred(_erroString);
             }
         }
     }
@@ -218,18 +213,22 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         if (nBytes > 0) {
             return nBytes;
         } else if (nBytes == Socket.ERROR) {
-            version (HUNT_DEBUG)
-                warningf("fd: %d, errno: %d, message: %s", this.handle, errno, lastSocketError());
-
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
             // EPIPE/Broken pipe: 
             // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
-            if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
-                this._error = true;
-                this._erroString = lastSocketError();
-                version (HUNT_DEBUG)
-                    warningf("fd: %d, errno=%d, message: %s", this.handle, errno, this._erroString);
+            this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
+            if (_error) {
+                this._erroString = getErrorMessage(errno);
+            } else {
+                debug warningf("write warning: fd=%d, errno=%d, message=%s", this.handle,
+                        errno, getErrorMessage(errno));
+            }
+
+            if(errno == ECONNRESET) {
+                // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
+                onDisconnected();
+                this.close();
             }
         } else {
             version (HUNT_DEBUG) {
@@ -238,7 +237,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             }
             else {
                 this._error = true;
-                this._erroString = lastSocketError();
+                this._erroString = getErrorMessage();
             }
         }
         return 0;

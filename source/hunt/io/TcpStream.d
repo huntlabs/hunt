@@ -260,8 +260,7 @@ protected:
             if (this.isError) {
                 string msg = format("Socket error on write: fd=%d, message=%s",
                         this.handle, this.erroString);
-                version (HUNT_DEBUG)
-                    errorf(msg);
+                debug errorf(msg);
                 errorOccurred(msg);
                 break;
             }
