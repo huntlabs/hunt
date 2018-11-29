@@ -24,7 +24,7 @@ version (Windows) {
 
             char[80] buf;
             const(char)* cs;
-            version (GNU_STRERROR) {
+            version (CRuntime_Glibc) {
                 cs = strerror_r(errno, buf.ptr, buf.length);
             } else {
                 auto errs = strerror_r(errno, buf.ptr, buf.length);
