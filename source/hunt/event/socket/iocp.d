@@ -276,8 +276,6 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         }
     }
 
-    protected bool _isWritting = false;
-
     private void setWriteBuffer(in ubyte[] data) {
         version (HUNT_DEBUG)
             tracef("data length: %d nbytes", data.length);
