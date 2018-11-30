@@ -102,15 +102,16 @@ abstract class AbstractSocketChannel : AbstractChannel {
         if(_isClosing)
             return;
         _isClosing = true;
+        version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
 
         if(isBusy) {
             // import core.thread;
             // import core.time;
             import std.parallelism;
-            debug warning("Close operation delayed");
+            version (HUNT_DEBUG) warning("Close operation delayed");
             auto theTask = task(() {
                 while(isBusy) {
-                    debug info("waitting for idle....");
+                    version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
                     // Thread.sleep(20.msecs);
                 }
                 super.close();

@@ -133,10 +133,11 @@ class AbstractSelector : Selector {
             }
 
             uint currentEvents = events[i].events;
+            version (HUNT_DEBUG) infof("events=%d", currentEvents);
 
             if (isClosed(currentEvents)) {
-                // version (HUNT_DEBUG)
-                debug infof("channel closed: fd=%s, errno=%d, message=%s", channel.handle,
+                version (HUNT_DEBUG)
+                infof("channel closed: fd=%s, errno=%d, message=%s", channel.handle,
                         errno, cast(string) fromStringz(strerror(errno)));
                 channel.close();
             } else if (isError(currentEvents)) {
