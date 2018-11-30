@@ -227,11 +227,11 @@ protected:
 
         // bool canWrite = true;
         version (HUNT_DEBUG)
-            trace("start to write");
+            tracef("start to write [fd=%d]", this.handle);
 
         while (_isRegistered && !isWriteCancelling && !_writeQueue.empty) {
             version (HUNT_DEBUG)
-                trace("writting...");
+                tracef("writting [fd=%d]...", this.handle);
 
             StreamWriteBuffer writeBuffer = _writeQueue.front();
             const(ubyte[]) data = writeBuffer.remaining();
@@ -249,7 +249,7 @@ protected:
             size_t nBytes = tryWrite(data);
             if (nBytes > 0 && writeBuffer.pop(nBytes)) {
                 version (HUNT_DEBUG)
-                    tracef("finishing data writing...%d bytes", nBytes);
+                    tracef("writing done: %d bytes, fd: %d", nBytes, this.handle);
                 auto q = _writeQueue.deQueue();
                 if (q is null)
                     warning("StreamWriteBuffer is null");

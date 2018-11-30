@@ -57,7 +57,7 @@ http://tutorials.jenkov.com/java-nio/selectors.html
 */
 abstract class Selector {
 
-    protected shared bool _runing;
+    protected shared bool _running;
     // protected shared bool _isOpen = true;
 
     abstract bool register(AbstractChannel channel);
@@ -67,7 +67,8 @@ abstract class Selector {
     abstract bool deregister(AbstractChannel channel);
 
     void stop() {
-        atomicStore(_runing, false);
+        atomicStore(_running, false);
+        version (HUNT_DEBUG) trace("Selector stopped.");
     }
 
     abstract void dispose();
@@ -78,16 +79,16 @@ abstract class Selector {
      * @return <tt>true</tt> if, and only if, this selector is open
      */
     bool isOpen() {
-        return atomicLoad(_runing);
+        return atomicLoad(_running);
     }
 
     void onLoop(scope void delegate() weakup, long timeout = -1) {
-        _runing = true;
+        _running = true;
         do {
+            // version (HUNT_DEBUG) trace("Selector rolled once.");
             weakup();
             lockAndDoSelect(timeout);
-        }
-        while (_runing);
+        } while (_running);
     }
 
     int select(long timeout) {
@@ -160,6 +161,8 @@ abstract class AbstractChannel : Channel {
         }
         //  _inLoop = null;
         clear();
+
+        version (HUNT_DEBUG) tracef("closed [fd=%d]...", this.handle);
     }
 
     protected void errorOccurred(string msg) {

@@ -91,7 +91,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         this.clearError();
         ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
         version (HUNT_DEBUG)
-            trace("reading nbytes: ", len);
+            tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
         if (len > 0) {
             if (dataReceivedHandler !is null)
@@ -208,7 +208,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     protected ptrdiff_t tryWrite(const ubyte[] data) {
         const nBytes = this.socket.send(data);
         version (HUNT_DEBUG)
-            tracef("actually sent bytes: %d / %d", nBytes, data.length);
+            tracef("actually sent : %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
         if (nBytes > 0) {
             return nBytes;
@@ -221,7 +221,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (_error) {
                 this._erroString = getErrorMessage(errno);
             } else {
-                debug warningf("write warning: fd=%d, errno=%d, message=%s", this.handle,
+                debug warningf("warning for write: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
             }
 

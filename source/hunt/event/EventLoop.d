@@ -8,79 +8,70 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.event.EventLoop;
 
+import core.thread;
 import hunt.event.core;
 import hunt.event.selector;
-import core.thread;
 import hunt.event.task;
+import hunt.logging;
 
 /**
 
 */
-final class EventLoop : AbstractSelector
-{
+final class EventLoop : AbstractSelector {
 
-    this()
-    {
+    this() {
         super();
     }
 
-    void run()
-    {
-        if (isRuning())
-            throw new LoopException("The current eventloop is running!");
+    void run(long timeout = -1) {
+        if (isRuning()) {
+            // throw new LoopException("The current eventloop is running!");
+            version (HUNT_DEBUG) warning("The current eventloop is running!");
+            return;
+        }
         _thread = Thread.getThis();
-        onLoop(&onWeakUp);
+        onLoop(&onWeakUp, timeout);
     }
 
-    override void stop()
-    {
+    override void stop() {
         _thread = null;
         super.stop();
     }
 
-    bool isRuning()
-    {
+    bool isRuning() {
         return (_thread !is null);
     }
 
-    bool isInLoopThread()
-    {
+    bool isLoopThread() {
         return isRuning() && _thread is Thread.getThis();
     }
 
-    EventLoop postTask(AbstractTask task)
-    {
-        synchronized (this)
-        {
+    EventLoop postTask(AbstractTask task) {
+        synchronized (this) {
             _queue.enQueue(task);
         }
         return this;
     }
 
-    static AbstractTask createTask(alias fun, Args...)(Args args)
-    {
+    static AbstractTask createTask(alias fun, Args...)(Args args) {
         return newTask!(fun, Args)(args);
     }
 
     static AbstractTask createTask(F, Args...)(F delegateOrFp, Args args)
-            if (is(typeof(delegateOrFp(args))))
-    {
+            if (is(typeof(delegateOrFp(args)))) {
         return newTask(F, Args)(delegateOrFp, args);
     }
 
-    protected void onWeakUp()
-    {
+    protected void onWeakUp() {
         TaskQueue queue;
-        synchronized (this)
-        {
+        synchronized (this) {
             queue = _queue;
             _queue = TaskQueue();
         }
-        while (!queue.empty)
-        {
+        while (!queue.empty) {
             auto task = queue.deQueue();
             task.job();
         }
