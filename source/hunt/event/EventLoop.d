@@ -27,14 +27,22 @@ final class EventLoop : AbstractSelector {
     }
 
     void run(long timeout = -1) {
-        if (isRuning()) {
-            // throw new LoopException("The current eventloop is running!");
+        if (_running) {
             version (HUNT_DEBUG) warning("The current eventloop is running!");
-            return;
+        } else {
+            version (HUNT_DEBUG) info("running eventloop...");
+            _thread = Thread.getThis();
+            onLoop(&onWeakUp, timeout);
         }
-        _thread = Thread.getThis();
-        onLoop(&onWeakUp, timeout);
     }
+
+    void runAsync(long timeout = -1) {
+        import std.parallelism;
+
+        auto clientTask = task(&run, timeout);
+        taskPool.put(clientTask);
+    }
+
 
     override void stop() {
         _thread = null;
