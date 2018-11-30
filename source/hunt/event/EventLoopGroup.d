@@ -11,68 +11,58 @@
 
 module hunt.event.EventLoopGroup;
 
-import core.thread;
-import std.parallelism;
-
+import hunt.util.memory;
 import hunt.event.EventLoop;
 import hunt.logging;
 
 class EventLoopGroup {
 
-    private long timeout = -1;
-
     this(uint size = (totalCPUs - 1)) {
         assert(size <= totalCPUs && size >= 0);
-        this.size = size > 0 ? size : 1;
-        foreach (i; 0 .. this.size) {
-            auto loop = new EventLoop();
-            _loops[loop] = new Thread(() { loop.run(timeout); });
+        this._size = size > 0 ? size : 1;
+        eventLoopPool = new EventLoop[this._size];
+
+        foreach (i; 0 .. this._size) {
+            eventLoopPool[i] = new EventLoop();
         }
     }
 
     void start(long timeout = -1) {
-        this.timeout = timeout;
         if (_started)
             return;
         _started = true;
-        foreach (Thread t; _loops.values) {
-            t.start();
+        foreach (i; 0 .. this._size) {
+            eventLoopPool[i].runAsync(timeout);
         }
     }
 
     void stop() {
-        version (HUNT_DEBUG) trace("stopping EventLoopGroup...");
+        version (HUNT_DEBUG)
+            trace("stopping EventLoopGroup...");
         if (!_started)
             return;
-        foreach (EventLoop loop; _loops.keys) {
-            loop.stop();
+        foreach (i; 0 .. this._size) {
+            eventLoopPool[i].stop();
         }
         _started = false;
-        // wait();
 
-        version (HUNT_DEBUG) trace("EventLoopGroup stopped.");
+        version (HUNT_DEBUG)
+            trace("EventLoopGroup stopped.");
     }
 
-    @property size_t length() {
-        return size;
+    @property size_t size() {
+        return _size;
     }
 
     EventLoop opIndex(size_t index) {
-        auto loops = _loops.keys;
-        auto i = index % cast(size_t) loops.length;
-        return loops[i];
-    }
-
-    void wait() {
-        foreach (ref t; _loops.values) {
-            t.join(false);
-        }
+        auto i = index % _size;
+        return eventLoopPool[i];
     }
 
     int opApply(scope int delegate(EventLoop) dg) {
         int ret = 0;
-        foreach (ref loop; _loops.keys) {
-            ret = dg(loop);
+        foreach (i; 0 .. this._size) {
+            ret = dg(eventLoopPool[i]);
             if (ret)
                 break;
         }
@@ -81,8 +71,8 @@ class EventLoopGroup {
 
 private:
     bool _started;
-    uint size;
+    uint _size;
 
-    Thread[EventLoop] _loops;
+    EventLoop[] eventLoopPool;
 
 }

@@ -82,7 +82,7 @@ abstract class Selector {
         return atomicLoad(_running);
     }
 
-    void onLoop(scope void delegate() weakup, long timeout = -1) {
+    protected void onLoop(scope void delegate() weakup, long timeout = -1) {
         _running = true;
         do {
             // version (HUNT_DEBUG) trace("Selector rolled once.");
