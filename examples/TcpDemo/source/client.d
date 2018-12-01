@@ -41,7 +41,7 @@ void main()
 		}
 	}).onClosed(() {
 		writeln("The connection is closed!");
-		// loop.stop(); // It's will raise a exception: Invalid memory operation
+		loop.stop();
 	}).connect("127.0.0.1", 8090);
 	// }).connect("::1", 8090);
 	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8090);

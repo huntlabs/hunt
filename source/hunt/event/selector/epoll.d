@@ -37,6 +37,7 @@ import hunt.event.core;
 import hunt.event.socket;
 import hunt.event.timer;
 import hunt.event.timer.epoll;
+import hunt.sys.error;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
@@ -50,6 +51,7 @@ shared static this() {
 /**
 */
 class AbstractSelector : Selector {
+    enum int NUM_KEVENTS = 512;
     private int _epollFD;
     private EventChannel _event;
 
@@ -74,15 +76,30 @@ class AbstractSelector : Selector {
     override void dispose() {
         if (isDisposed)
             return;
+        
+        version (HUNT_DEBUG) tracef("disposing selector[fd=%d]...", _epollFD);
         isDisposed = true;
-        deregister(_event);
+        _event.close();
+        // deregister(_event);
         core.sys.posix.unistd.close(_epollFD);
     }
 
     private bool isDisposed = false;
 
+    override void stop() {
+        if(_running) {
+            super.stop();
+            version (HUNT_DEBUG) tracef("notice that selector[fd=%d] stopped", _epollFD);
+            _event.call(); 
+            // import core.thread;
+            // import core.time;
+            // Thread.sleep(500.msecs);
+        }
+    }
+
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
+        version (HUNT_DEBUG) tracef("register channel: fd=%d", channel.handle);
 
         if (channel.type == ChannelType.Timer) {
             auto wt = cast(AbstractTimer) channel;
@@ -94,7 +111,7 @@ class AbstractSelector : Selector {
             _event.setNext(channel);
             return true;
         } else {
-            warningf("register failed: %d", channel.handle);
+            warningf("register channell failed: fd=%d", channel.handle);
             return false;
         }
     }
@@ -105,15 +122,16 @@ class AbstractSelector : Selector {
 
     override bool deregister(AbstractChannel channel) {
         if(epollCtl(channel, EPOLL_CTL_DEL)) {
+            version (HUNT_DEBUG) tracef("deregister channel: fd=%d", channel.handle);
             return true;
         } else {
-            warningf("unregister failed, channel.handle=%d", channel.handle);
+            warningf("deregister channel failed: fd=%d", channel.handle);
             return false;
         }
     }
 
     override protected int doSelect(long timeout) {
-        epoll_event[512] events;
+        epoll_event[NUM_KEVENTS] events;
         int len = 0;
 
         if(timeout <= 0) { /* Indefinite or no wait */
@@ -133,17 +151,17 @@ class AbstractSelector : Selector {
             }
 
             uint currentEvents = events[i].events;
-            version (HUNT_DEBUG) infof("events=%d", currentEvents);
+            version (HUNT_DEBUG) infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
             if (isClosed(currentEvents)) {
                 version (HUNT_DEBUG)
-                infof("channel closed: fd=%s, errno=%d, message=%s", channel.handle,
-                        errno, cast(string) fromStringz(strerror(errno)));
+                infof("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
+                        errno, getErrorMessage(errno));
                 channel.close();
             } else if (isError(currentEvents)) {
                 // version (HUNT_DEBUG)
                 warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
-                        errno, cast(string) fromStringz(strerror(errno)));
+                        errno, getErrorMessage(errno));
                 channel.close();
             } else if (channel.isRegistered && isReadable(currentEvents)) {
                 channel.onRead();
@@ -153,7 +171,7 @@ class AbstractSelector : Selector {
                 wt.onWriteDone();
                 // channel.onWrite();
             } else {
-                warning("Undefined behavior!");
+                warningf("Undefined behavior: fd=%d, registered=%s", channel.handle, channel.isRegistered);
             }
         }
 
@@ -250,15 +268,15 @@ class AbstractSelector : Selector {
     }
 }
 
+
 /**
 */
 class EpollEventChannel : EventChannel {
-    alias UlongObject = BaseTypeObject!ulong;
     this(Selector loop) {
         super(loop);
         setFlag(ChannelFlag.Read, true);
-        _readBuffer = new UlongObject();
         this.handle = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+        _isRegistered = true;
     }
 
     ~this() {
@@ -266,26 +284,23 @@ class EpollEventChannel : EventChannel {
     }
 
     override void call() {
+        version (HUNT_DEBUG) tracef("calling event [fd=%d]...%s", this.handle, eventLoop.isRuning);
         ulong value = 1;
         core.sys.posix.unistd.write(this.handle, &value, value.sizeof);
     }
 
     override void onRead() {
-        readEvent((Object obj) {  });
-        super.onRead();
-    }
-
-    bool readEvent(scope ReadCallBack read) {
+        version (HUNT_DEBUG) tracef("channel reading [fd=%d]...", this.handle);
         this.clearError();
         ulong value;
-        core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
-        this._readBuffer.data = value;
-        if (read)
-            read(this._readBuffer);
-        return false;
+        ssize_t n = core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
+        version (HUNT_DEBUG) tracef("channel read done: %d bytes, fd=%d", n, this.handle);
     }
 
-    UlongObject _readBuffer;
+    override protected void onClose() {
+        version (HUNT_DEBUG) tracef("close event channel [fd=%d]...", this.handle);
+        core.sys.posix.unistd.close(this.handle);
+    }
 }
 
 enum {

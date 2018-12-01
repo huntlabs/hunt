@@ -17,6 +17,7 @@ import hunt.event.selector;
 import hunt.event.task;
 import hunt.logging;
 
+import std.parallelism;
 /**
 
 */
@@ -37,24 +38,34 @@ final class EventLoop : AbstractSelector {
     }
 
     void runAsync(long timeout = -1) {
-        import std.parallelism;
-
-        auto clientTask = task(&run, timeout);
-        taskPool.put(clientTask);
+        auto runTask = task(&run, timeout);
+        taskPool.put(runTask);
     }
 
 
     override void stop() {
-        _thread = null;
-        super.stop();
+        if(!_running) {
+            version (HUNT_DEBUG) trace("event loop has been stopped.");
+            return;
+        }
+        
+        version (HUNT_DEBUG) trace("Stopping event loop...");
+        if(isLoopThread()) {
+            auto stopTask = task(&stop);
+            taskPool.put(stopTask);
+        } else {
+            _thread = null;
+            super.stop();
+            // dispose();
+        }
     }
 
-    bool isRuning() {
-        return (_thread !is null);
-    }
+    // bool isRuning() {
+    //     return (_thread !is null);
+    // }
 
     bool isLoopThread() {
-        return isRuning() && _thread is Thread.getThis();
+        return _thread is Thread.getThis();
     }
 
     EventLoop postTask(AbstractTask task) {

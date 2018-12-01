@@ -82,6 +82,8 @@ abstract class Selector {
         return atomicLoad(_running);
     }
 
+    alias isRuning = isOpen;
+
     protected void onLoop(scope void delegate() weakup, long timeout = -1) {
         _running = true;
         do {
@@ -89,6 +91,7 @@ abstract class Selector {
             weakup();
             lockAndDoSelect(timeout);
         } while (_running);
+        dispose();
     }
 
     int select(long timeout) {
@@ -251,6 +254,28 @@ class EventChannel : AbstractChannel {
     void call() {
         assert(false);
     }
+
+    // override void close() {
+    //     if(_isClosing)
+    //         return;
+    //     _isClosing = true;
+    //     version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
+
+    //     if(isBusy) {
+    //         import std.parallelism;
+    //         version (HUNT_DEBUG) warning("Close operation delayed");
+    //         auto theTask = task(() {
+    //             while(isBusy) {
+    //                 version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
+    //                 // Thread.sleep(20.msecs);
+    //             }
+    //             super.close();
+    //         });
+    //         taskPool.put(theTask);
+    //     } else {
+    //         super.close();
+    //     }
+    // }
 }
 
 mixin template OverrideErro() {
