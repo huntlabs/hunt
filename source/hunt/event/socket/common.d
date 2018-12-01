@@ -65,7 +65,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
         }
         _socket = s;
         version (HUNT_DEBUG)
-            info("new socket fd: ", this.handle);
+            infof("new socket: fd=%d", this.handle);
     }
 
     protected @property Socket socket() {
@@ -74,30 +74,6 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
     protected Socket _socket;
 
-    // override void onClose() {
-    //     import core.thread;
-    //     import core.time;
-    //     import std.parallelism;
-
-    //     void doClose() {
-    //         while(isBusy) {
-    //             info("busy....");
-    //             // Thread.sleep(50.msecs);
-    //         }
-    //         super.onClose();
-    //         _socket.close();
-    //     }
-
-    //     if(isBusy) {
-    //         debug warning("Close action delayed");
-    //         auto theTask = task(&doClose);
-    //         taskPool.put(theTask);
-    //     } else {
-    //         super.onClose();
-    //         _socket.close();
-    //     }
-    // }
-
     override void close() {
         if(_isClosing)
             return;
@@ -105,8 +81,6 @@ abstract class AbstractSocketChannel : AbstractChannel {
         version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
 
         if(isBusy) {
-            // import core.thread;
-            // import core.time;
             import std.parallelism;
             version (HUNT_DEBUG) warning("Close operation delayed");
             auto theTask = task(() {
