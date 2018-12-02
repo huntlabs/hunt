@@ -12,7 +12,7 @@
 module hunt.io.TcpStream;
 
 import hunt.event;
-import hunt.io.core;
+
 import hunt.logging;
 import hunt.lang.common;
 
@@ -114,7 +114,9 @@ class TcpStream : AbstractStream {
             return;
 
         try {
-            Address binded = createAddress(this.socket, 0);
+            version (HUNT_DEBUG)
+                trace("listening...");
+            Address binded = createAddress(this.socket.addressFamily);
             this.socket.bind(binded);
             this.doConnect(addr);
             start();

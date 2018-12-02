@@ -80,7 +80,6 @@ class AbstractSelector : Selector {
         version (HUNT_DEBUG) tracef("disposing selector[fd=%d]...", _epollFD);
         isDisposed = true;
         _event.close();
-        // deregister(_event);
         core.sys.posix.unistd.close(_epollFD);
     }
 
@@ -91,9 +90,6 @@ class AbstractSelector : Selector {
             super.stop();
             version (HUNT_DEBUG) tracef("notice that selector[fd=%d] stopped", _epollFD);
             _event.call(); 
-            // import core.thread;
-            // import core.time;
-            // Thread.sleep(500.msecs);
         }
     }
 

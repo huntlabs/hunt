@@ -313,18 +313,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
     protected Address _bindAddress;
 
     protected bool tryRead(scope ReadCallBack read) {
-        scope Address createAddress() {
-            enum ushort DPORT = 0;
-            if (AddressFamily.INET == this.socket.addressFamily)
-                return new InternetAddress(DPORT);
-            else if (AddressFamily.INET6 == this.socket.addressFamily)
-                return new Internet6Address(DPORT);
-            else
-                throw new AddressException(
-                        "NOT SUPPORT addressFamily. It only can be AddressFamily.INET or AddressFamily.INET6");
-        }
-
-        this._readBuffer.addr = createAddress();
+        this._readBuffer.addr = createAddress(this.socket.addressFamily, 0);
         auto data = this._readBuffer.data;
         scope (exit)
             this._readBuffer.data = data;
