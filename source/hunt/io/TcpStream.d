@@ -23,29 +23,81 @@ import std.socket;
 import core.thread;
 import core.time;
 
+
+import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
+
+class TcpStreamOption {
+    string ip = "127.0.0.1";
+    ushort port = 8080;
+
+    // http://www.tldp.org/HOWTO/TCP-Keepalive-HOWTO/usingkeepalive.html
+    /// the interval between the last data packet sent (simple ACKs are not considered data) and the first keepalive probe; 
+    /// after the connection is marked to need keepalive, this counter is not used any further 
+    int keepaliveTime = 7200; // in seconds
+
+    /// the interval between subsequential keepalive probes, regardless of what the connection has exchanged in the meantime 
+    int keepaliveInterval = 75; // in seconds
+
+    /// the number of unacknowledged probes to send before considering the connection dead and notifying the application layer 
+    int keepaliveProbes = 9; // times
+
+    bool isKeepalive = false;
+
+    size_t bufferSize = 1024*8;
+
+    this() {
+
+    }
+}
+
 /**
 */
 class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
+
+    private TcpStreamOption _tcpOption;
 
     // for client
     this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2) {
         super(loop, family, bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
-        _isClientSide = false;
+        _isClient = false;
         _isConnected = false;
+        initialize();
     }
 
     // for server
-    this(Selector loop, Socket socket, size_t bufferSize = 4096 * 2) {
-        super(loop, socket.addressFamily, bufferSize);
+    this(Selector loop, Socket socket, TcpStreamOption option = null) {
+        if(option is null)
+            initialize();
+        else
+            _tcpOption = option;
+        super(loop, socket.addressFamily, _tcpOption.bufferSize);
         this.socket = socket;
         _remoteAddress = socket.remoteAddress();
         _localAddress = socket.localAddress();
 
-        _isClientSide = false;
+        _isClient = false;
         _isConnected = true;
+        setKeepalive();
+    }
+
+    private void initialize() {
+        _tcpOption = new TcpStreamOption();
+        _tcpOption.isKeepalive = true;
+        _tcpOption.keepaliveTime = 15; 
+        _tcpOption.keepaliveInterval = 3; 
+        _tcpOption.keepaliveProbes = 5;
+    }
+
+    void options(TcpStreamOption option) @property {
+        assert(option !is null);
+        this._tcpOption = option;
+    }
+
+    TcpStreamOption options() @property {
+        return this._tcpOption;
     }
 
     
@@ -68,6 +120,8 @@ class TcpStream : AbstractStream {
             start();
             _isConnected = true;
             _remoteAddress = addr;
+            setKeepalive();
+
             _localAddress = this.socket.localAddress();
         } catch (Exception ex) {
             error(ex.message);
@@ -75,6 +129,32 @@ class TcpStream : AbstractStream {
 
         if (_connectionHandler !is null)
             _connectionHandler(_isConnected);
+    }
+
+
+    // www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/
+    // http://www.importnew.com/27624.html
+    private void setKeepalive() {
+        if(_tcpOption.isKeepalive) {
+            this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
+            this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, _tcpOption.keepaliveProbes);
+            checkKeepAlive();
+        }
+    }
+
+    private void checkKeepAlive() {
+        int time ;
+        int interval;
+        int isKeep;
+        int ret1 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPIDLE, time);
+        warningf("ret=%d, time=%d", ret1, time);
+        int ret2 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPINTVL, interval);
+        warningf("ret=%d, interval=%d", ret2, interval);
+        int ret3 = getOption(SocketOptionLevel.SOCKET, SocketOption.KEEPALIVE, isKeep);
+        warningf("ret=%d, keepalive=%s", ret3, isKeep==1);
+        int probe;
+        int ret4 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, probe);
+        warningf("ret=%d, interval=%d", ret4, probe);
     }
 
     void reconnect(Address addr) {
@@ -171,7 +251,7 @@ class TcpStream : AbstractStream {
     }
 
 protected:
-    bool _isClientSide;
+    bool _isClient;
     ConnectionHandler _connectionHandler;
 
     override void onRead() {
