@@ -112,25 +112,31 @@ class TcpStream : AbstractStream {
     void connect(Address addr) {
         if (_isConnected)
             return;
+        import std.parallelism;
+        auto connectionTask = task(&doConnect, addr);
+        taskPool.put(connectionTask);
+    }
 
+    protected override void doConnect(Address addr) {
         try {
-            version (HUNT_DEBUG)
-                trace("listening...");
-            Address binded = createAddress(this.socket.addressFamily);
-            this.socket.bind(binded);
-            this.doConnect(addr);
-            start();
-            _isConnected = true;
             _remoteAddress = addr;
+            version (HUNT_DEBUG) tracef("connecting to %s...", _remoteAddress);
+            // Address binded = createAddress(this.socket.addressFamily);
+            // this.socket.bind(binded);
+            this.socket.blocking = true;
+            super.doConnect(_remoteAddress);
+            this.socket.blocking = false;
+            _isConnected = true;
             setKeepalive();
-
             _localAddress = this.socket.localAddress();
+            start();
         } catch (Exception ex) {
-            error(ex.message);
+            warning(ex.message);
         }
 
         if (_connectionHandler !is null)
             _connectionHandler(_isConnected);
+        
     }
 
 
