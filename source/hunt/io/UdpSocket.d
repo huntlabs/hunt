@@ -12,7 +12,7 @@
 module hunt.io.UdpSocket;
 
 import hunt.event;
-import hunt.io.core;
+
 
 import std.socket;
 import std.exception;

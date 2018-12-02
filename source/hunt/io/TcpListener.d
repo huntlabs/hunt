@@ -12,7 +12,6 @@
 module hunt.io.TcpListener;
 
 import hunt.event;
-import hunt.io.core;
 
 import std.socket;
 import std.exception;
@@ -67,7 +66,7 @@ class TcpListener : AbstractListener {
     }
 
     TcpListener bind(ushort port) {
-        bind(createAddress(this.socket, port));
+        bind(createAddress(this.socket.addressFamily, port));
         return this;
     }
 

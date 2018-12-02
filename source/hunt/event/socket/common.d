@@ -266,3 +266,16 @@ private:
     StreamWriteBuffer _last = null;
     StreamWriteBuffer _first = null;
 }
+
+
+/**
+*/
+Address createAddress(AddressFamily family = AddressFamily.INET, ushort port=InternetAddress.PORT_ANY)
+{
+    if (family == AddressFamily.INET6) {
+        // addr = new Internet6Address(port); // bug on windows
+        return new Internet6Address("::", port);
+    }
+    else
+        return new InternetAddress(port);
+}

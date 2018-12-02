@@ -13,7 +13,7 @@ module hunt.util.timer;
 
 import hunt.event;
 import hunt.event.timer;
-import hunt.io.core;
+
 import hunt.logging;
 import hunt.lang.common;
 
