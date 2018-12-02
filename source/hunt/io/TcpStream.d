@@ -100,7 +100,6 @@ class TcpStream : AbstractStream {
         return this._tcpOption;
     }
 
-    
     override bool isBusy() {
         return _isWritting;
     }
@@ -146,23 +145,27 @@ class TcpStream : AbstractStream {
         if(_tcpOption.isKeepalive) {
             this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
             this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, _tcpOption.keepaliveProbes);
-            checkKeepAlive();
+            version (HUNT_DEBUG) checkKeepAlive();
         }
     }
 
+    version (HUNT_DEBUG)
     private void checkKeepAlive() {
         int time ;
-        int interval;
-        int isKeep;
         int ret1 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPIDLE, time);
-        warningf("ret=%d, time=%d", ret1, time);
+        tracef("ret=%d, time=%d", ret1, time);
+
+        int interval;
         int ret2 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPINTVL, interval);
-        warningf("ret=%d, interval=%d", ret2, interval);
+        tracef("ret=%d, interval=%d", ret2, interval);
+
+        int isKeep;
         int ret3 = getOption(SocketOptionLevel.SOCKET, SocketOption.KEEPALIVE, isKeep);
-        warningf("ret=%d, keepalive=%s", ret3, isKeep==1);
+        tracef("ret=%d, keepalive=%s", ret3, isKeep==1);
+
         int probe;
         int ret4 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, probe);
-        warningf("ret=%d, interval=%d", ret4, probe);
+        tracef("ret=%d, interval=%d", ret4, probe);
     }
 
     void reconnect(Address addr) {
