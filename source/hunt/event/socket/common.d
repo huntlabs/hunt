@@ -75,8 +75,10 @@ abstract class AbstractSocketChannel : AbstractChannel {
     protected Socket _socket;
 
     override void close() {
-        if(_isClosing)
+        if(_isClosing) {
+            debug warning("already closed [fd=%d]", this.handle);
             return;
+        }
         _isClosing = true;
         version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
 

@@ -53,7 +53,7 @@ abstract class AbstractListener : AbstractSocketChannel {
             return false;
 
         version (HUNT_DEBUG)
-            infof("Listener fd=%d, client fd=%d", this.handle, clientFd);
+            tracef("Listener fd=%d, client fd=%d", this.handle, clientFd);
 
         if (handler !is null)
             handler(new Socket(clientFd, this.localAddress.addressFamily));
