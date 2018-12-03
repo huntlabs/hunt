@@ -39,7 +39,7 @@ void main()
 	// TcpListener listener = new TcpListener(loop, AddressFamily.INET6, 512);
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
 
-	listener.bind(8090).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {
+	listener.bind(8080).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {
 		debug writefln("new connection from: %s", client.remoteAddress.toString());
 		client.onDataReceived((in ubyte[] data) {
 			debug writeln("received bytes: ", data.length);

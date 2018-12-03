@@ -50,7 +50,7 @@ abstract class AbstractTcpServer {
 			return;
 		debug writeln("start to listen:");
 
-		for (size_t i = 0; i < _group.length; ++i) {
+		for (size_t i = 0; i < _group.size(); ++i) {
 			createServer(_group[i]);
 			debug writefln("lister[%d] created", i);
 		}
@@ -122,8 +122,10 @@ class HttpServer : AbstractTcpServer {
 			"Content-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: " ~ currentTime ~ "\r\n\r\nHello, World!";
 		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
-			if (!keepAlive)
+			if (!keepAlive) {
+				debug writefln("closing...%d", client.handle);
 				client.close();
+			}
 		});
 	}
 
@@ -187,7 +189,7 @@ void main(string[] args) {
 		return;
 	}
 
-	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs);
+	HttpServer httpServer = new HttpServer("0.0.0.0", port);
 	writefln("listening on %s", httpServer.bindingAddress.toString());
 	httpServer.start();
 }

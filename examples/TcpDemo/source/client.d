@@ -38,10 +38,10 @@ void main() {
 	}).onClosed(() {
 		writeln("The connection closed!");
 		loop.stop();
-	}).connect("127.0.0.1", 8090);
-	// }).connect("::1", 8090);
-	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8090);
-	// }).connect("fe80::2435:c2f0:4a2e:ba11%ens33", 8090);
+	}).connect("127.0.0.1", 8080);
+	// }).connect("::1", 8080);
+	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8080);
+	// }).connect("fe80::2435:c2f0:4a2e:ba11%ens33", 8080);
 
 	loop.run();
 
