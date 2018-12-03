@@ -18,16 +18,35 @@ import hunt.event.task;
 import hunt.logging;
 
 import std.parallelism;
+import core.thread;
+
 /**
 
 */
 final class EventLoop : AbstractSelector {
+    private long timeout = -1;
 
     this() {
         super();
     }
 
     void run(long timeout = -1) {
+        this.timeout = timeout;
+        doRun();
+    }
+
+    void runAsync(long timeout = -1) {
+        this.timeout = timeout;
+        version (HUNT_DEBUG) info("runAsync ...");
+        // BUG: Reported defects -@zxp at 12/3/2018, 8:17:58 PM
+        // The task may not be executed.
+        // auto runTask = task(&run, timeout);
+        // taskPool.put(runTask); // 
+        Thread th = new Thread(&doRun);
+        th.start();
+    }
+
+    private void doRun() {
         if (_running) {
             version (HUNT_DEBUG) warning("The current eventloop is running!");
         } else {
@@ -36,12 +55,6 @@ final class EventLoop : AbstractSelector {
             onLoop(&onWeakUp, timeout);
         }
     }
-
-    void runAsync(long timeout = -1) {
-        auto runTask = task(&run, timeout);
-        taskPool.put(runTask);
-    }
-
 
     override void stop() {
         if(!_running) {
