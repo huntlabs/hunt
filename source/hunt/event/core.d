@@ -162,7 +162,6 @@ abstract class AbstractChannel : Channel {
         else {
             _inLoop.deregister(this);
         }
-        //  _inLoop = null;
         clear();
 
         version (HUNT_DEBUG) tracef("closed [fd=%d]...", this.handle);
