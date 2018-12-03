@@ -138,7 +138,7 @@ class TcpListener : AbstractListener {
                 if (acceptHandler !is null) {
                     TcpStream stream;
                     if (peerCreateHandler is null) {
-                        TcpStreamOption option = new TcpStreamOption();
+                        TcpStreamOption option = TcpStreamOption.defaultOption();
                         option.bufferSize = _bufferSize;
                         stream = new TcpStream(_inLoop, socket, option);
                     }
