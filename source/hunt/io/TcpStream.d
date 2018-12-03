@@ -45,6 +45,18 @@ class TcpStreamOption {
 
     size_t bufferSize = 1024*8;
 
+
+    static TcpStreamOption defaultOption() {
+        TcpStreamOption option = new TcpStreamOption();
+        option.isKeepalive = true;
+        option.keepaliveTime = 15; 
+        option.keepaliveInterval = 3; 
+        option.keepaliveProbes = 5;
+        option.bufferSize = 1024*8;
+        return option;
+    }
+
+
     this() {
 
     }
@@ -64,13 +76,13 @@ class TcpStream : AbstractStream {
 
         _isClient = false;
         _isConnected = false;
-        initialize();
+        _tcpOption = TcpStreamOption.defaultOption();
     }
 
     // for server
     this(Selector loop, Socket socket, TcpStreamOption option = null) {
         if(option is null)
-            initialize();
+           _tcpOption = TcpStreamOption.defaultOption();
         else
             _tcpOption = option;
         super(loop, socket.addressFamily, _tcpOption.bufferSize);
@@ -81,14 +93,6 @@ class TcpStream : AbstractStream {
         _isClient = false;
         _isConnected = true;
         setKeepalive();
-    }
-
-    private void initialize() {
-        _tcpOption = new TcpStreamOption();
-        _tcpOption.isKeepalive = true;
-        _tcpOption.keepaliveTime = 15; 
-        _tcpOption.keepaliveInterval = 3; 
-        _tcpOption.keepaliveProbes = 5;
     }
 
     void options(TcpStreamOption option) @property {
@@ -297,10 +301,10 @@ protected:
         }
 
         _writeQueue.clear();
-        super.onClose();
         _isConnected = false;
         this.socket.shutdown(SocketShutdown.BOTH);
         this.socket.close();
+        super.onClose();
 
         if (closeHandler)
             closeHandler();
