@@ -46,7 +46,7 @@ class TcpStreamOption {
     size_t bufferSize = 1024*8;
 
 
-    static TcpStreamOption defaultOption() {
+    static TcpStreamOption createOption() {
         TcpStreamOption option = new TcpStreamOption();
         option.isKeepalive = true;
         option.keepaliveTime = 15; 
@@ -55,7 +55,6 @@ class TcpStreamOption {
         option.bufferSize = 1024*8;
         return option;
     }
-
 
     this() {
 
@@ -70,19 +69,23 @@ class TcpStream : AbstractStream {
     private TcpStreamOption _tcpOption;
 
     // for client
-    this(Selector loop, AddressFamily family = AddressFamily.INET, int bufferSize = 4096 * 2) {
-        super(loop, family, bufferSize);
+    this(Selector loop, AddressFamily family = AddressFamily.INET, TcpStreamOption option = null) {
+        if(option is null)
+           _tcpOption = TcpStreamOption.createOption();
+        else
+            _tcpOption = option;
+        super(loop, family, _tcpOption.bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         _isClient = false;
         _isConnected = false;
-        _tcpOption = TcpStreamOption.defaultOption();
+        _tcpOption = TcpStreamOption.createOption();
     }
 
     // for server
     this(Selector loop, Socket socket, TcpStreamOption option = null) {
         if(option is null)
-           _tcpOption = TcpStreamOption.defaultOption();
+           _tcpOption = TcpStreamOption.createOption();
         else
             _tcpOption = option;
         super(loop, socket.addressFamily, _tcpOption.bufferSize);
