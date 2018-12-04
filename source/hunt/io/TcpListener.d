@@ -29,7 +29,7 @@ alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, 
 */
 class TcpListener : AbstractListener {
     private bool isSslEnabled = false;
-    private size_t _bufferSize = 4 * 1024;
+    private TcpStreamOption _tcpStreamoption;
     protected EventHandler _shutdownHandler;
 
     /// event handlers
@@ -38,7 +38,8 @@ class TcpListener : AbstractListener {
     PeerCreateHandler peerCreateHandler;
 
     this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
-        _bufferSize = bufferSize;
+        _tcpStreamoption = TcpStreamOption.createOption();
+        _tcpStreamoption.bufferSize = bufferSize;
         version (Windows)
             super(loop, family, bufferSize);
         else
@@ -138,12 +139,10 @@ class TcpListener : AbstractListener {
                 if (acceptHandler !is null) {
                     TcpStream stream;
                     if (peerCreateHandler is null) {
-                        TcpStreamOption option = TcpStreamOption.defaultOption();
-                        option.bufferSize = _bufferSize;
-                        stream = new TcpStream(_inLoop, socket, option);
+                        stream = new TcpStream(_inLoop, socket, _tcpStreamoption);
                     }
                     else
-                        stream = peerCreateHandler(this, socket, _bufferSize);
+                        stream = peerCreateHandler(this, socket, _tcpStreamoption.bufferSize);
 
                     acceptHandler(this, stream);
                     stream.start();

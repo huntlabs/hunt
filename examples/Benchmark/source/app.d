@@ -189,7 +189,7 @@ void main(string[] args) {
 		return;
 	}
 
-	HttpServer httpServer = new HttpServer("0.0.0.0", port);
+	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs);
 	writefln("listening on %s", httpServer.bindingAddress.toString());
 	httpServer.start();
 }
