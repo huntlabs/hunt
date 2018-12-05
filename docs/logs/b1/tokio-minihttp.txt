@@ -1,299 +1,146 @@
-﻿➜  benchmark ./bench.sh Tokio plaintext 10.1.223.120 8080
-Usage: ./bench.sh Kiss plaintext 127.0.0.1 8080
+﻿ops@pressure:~/benchmark$ ./bench.sh tokio plaintext 127.0.0.1 8080
+Usage: ./bench.sh Name plaintext 127.0.0.1 8080
 
 ---------------------------------------------------------
- Running Primer Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://10.1.223.120:8080/plaintext
+ Running Primer tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://127.0.0.1:8080/plaintext
 ---------------------------------------------------------
 
-Running 5s test @ http://10.1.223.120:8080/plaintext
+Running 5s test @ http://127.0.0.1:8080/plaintext
   8 threads and 8 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   626.76us  239.08us   5.95ms   86.23%
-    Req/Sec     1.56k   242.95     2.47k    78.22%
+    Latency   178.17us  210.90us  14.75ms   99.89%
+    Req/Sec     5.73k     1.99k   10.01k    60.29%
   Latency Distribution
-     50%  582.00us
-     75%  686.00us
-     90%  839.00us
-     99%    1.50ms
-  62662 requests in 5.10s, 7.71MB read
-Requests/sec:  12285.94
-Transfer/sec:      1.51MB
+     50%  156.00us
+     75%  211.00us
+     90%  272.00us
+     99%  299.00us
+  232742 requests in 5.10s, 28.63MB read
+Requests/sec:  45635.49
+Transfer/sec:      5.61MB
 
 ---------------------------------------------------------
- Running Warmup Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+ Running Warmup tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
 ---------------------------------------------------------
 
-Running 15s test @ http://10.1.223.120:8080/plaintext
-  2 threads and 512 connections
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.34ms    8.45ms 142.45ms   90.82%
-    Req/Sec    18.53k    11.41k   53.27k    74.65%
+    Latency     6.22ms    2.16ms  36.97ms   75.86%
+    Req/Sec     6.84k   361.13     9.29k    73.98%
   Latency Distribution
-     50%    7.10ms
-     75%   11.01ms
-     90%   17.12ms
-     99%   42.29ms
-  546387 requests in 15.10s, 67.22MB read
-Requests/sec:  36181.91
-Transfer/sec:      4.45MB
+     50%    5.82ms
+     75%    7.26ms
+     90%    8.74ms
+     99%   13.56ms
+  1232006 requests in 15.10s, 151.57MB read
+Requests/sec:  81600.25
+Transfer/sec:     10.04MB
 
 ---------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+ Concurrency: 512 for tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
 ---------------------------------------------------------
 
-Running 15s test @ http://10.1.223.120:8080/plaintext
-  2 threads and 512 connections
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.09ms    6.72ms 110.67ms   86.30%
-    Req/Sec    18.55k     9.92k   49.56k    69.90%
+    Latency     6.28ms    2.58ms  54.63ms   85.88%
+    Req/Sec     6.86k   362.29    14.36k    85.79%
   Latency Distribution
-     50%    7.30ms
-     75%   11.17ms
-     90%   16.03ms
-     99%   34.85ms
-  547290 requests in 15.08s, 67.33MB read
-Requests/sec:  36296.24
-Transfer/sec:      4.47MB
-STARTTIME 1525341074
-ENDTIME 1525341089
+     50%    5.83ms
+     75%    7.07ms
+     90%    8.64ms
+     99%   15.80ms
+  1235518 requests in 15.10s, 152.00MB read
+Requests/sec:  81825.53
+Transfer/sec:     10.07MB
+STARTTIME 1543842074
+ENDTIME 1543842089
 
 ---------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+ Concurrency: 512 for tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
 ---------------------------------------------------------
 
-Running 15s test @ http://10.1.223.120:8080/plaintext
-  2 threads and 512 connections
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.24ms    5.54ms  78.52ms   84.26%
-    Req/Sec    16.11k     6.55k   40.23k    67.82%
+    Latency     6.22ms    1.96ms  50.19ms   83.80%
+    Req/Sec     6.84k   517.35    17.35k    88.09%
   Latency Distribution
-     50%    7.91ms
-     75%   11.40ms
-     90%   15.41ms
-     99%   29.96ms
-  478826 requests in 15.08s, 58.91MB read
-Requests/sec:  31749.29
-Transfer/sec:      3.91MB
-STARTTIME 1525341091
-ENDTIME 1525341106
+     50%    5.98ms
+     75%    6.92ms
+     90%    8.22ms
+     99%   13.39ms
+  1228790 requests in 15.10s, 151.17MB read
+Requests/sec:  81377.92
+Transfer/sec:     10.01MB
+STARTTIME 1543842091
+ENDTIME 1543842107
 
 ---------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+ Concurrency: 512 for tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
 ---------------------------------------------------------
 
-Running 15s test @ http://10.1.223.120:8080/plaintext
-  2 threads and 512 connections
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.18ms    4.87ms  55.32ms   80.65%
-    Req/Sec    16.38k     6.43k   38.04k    73.01%
+    Latency     6.23ms    2.06ms  30.94ms   85.11%
+    Req/Sec     6.83k   307.64    11.53k    76.13%
   Latency Distribution
-     50%    7.75ms
-     75%   11.37ms
-     90%   15.27ms
-     99%   26.81ms
-  486032 requests in 15.09s, 59.79MB read
-Requests/sec:  32208.43
-Transfer/sec:      3.96MB
-STARTTIME 1525341108
-ENDTIME 1525341123
+     50%    5.36ms
+     75%    6.71ms
+     90%    8.57ms
+     99%   14.54ms
+  1230778 requests in 15.10s, 151.42MB read
+Requests/sec:  81533.25
+Transfer/sec:     10.03MB
+STARTTIME 1543842109
+ENDTIME 1543842124
 
 ---------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+ Concurrency: 512 for tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
 ---------------------------------------------------------
 
-Running 15s test @ http://10.1.223.120:8080/plaintext
-  2 threads and 512 connections
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.25ms    8.25ms 168.61ms   90.44%
-    Req/Sec    17.52k    10.80k   53.16k    79.72%
+    Latency     6.26ms    2.19ms  35.72ms   80.48%
+    Req/Sec     6.80k   820.46    30.53k    97.39%
   Latency Distribution
-     50%    6.62ms
-     75%   11.24ms
-     90%   17.14ms
-     99%   40.68ms
-  515014 requests in 15.05s, 63.36MB read
-Requests/sec:  34218.43
-Transfer/sec:      4.21MB
-STARTTIME 1525341125
-ENDTIME 1525341140
+     50%    5.67ms
+     75%    6.92ms
+     90%    9.28ms
+     99%   14.78ms
+  1219733 requests in 15.10s, 150.06MB read
+Requests/sec:  80780.85
+Transfer/sec:      9.94MB
+STARTTIME 1543842126
+ENDTIME 1543842141
 
 ---------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/plaintext"
+ Concurrency: 512 for tokio
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
 ---------------------------------------------------------
 
-Running 15s test @ http://10.1.223.120:8080/plaintext
-  2 threads and 512 connections
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.10ms    5.87ms  82.88ms   84.21%
-    Req/Sec    17.51k     8.21k   48.79k    70.14%
+    Latency     6.26ms    2.05ms  36.47ms   79.26%
+    Req/Sec     6.78k   474.02    13.65k    81.26%
   Latency Distribution
-     50%    7.52ms
-     75%   11.15ms
-     90%   15.95ms
-     99%   30.54ms
-  518093 requests in 15.06s, 63.74MB read
-Requests/sec:  34406.35
-Transfer/sec:      4.23MB
-STARTTIME 1525341142
-ENDTIME 1525341157
-➜  benchmark
-
-
-
-
-
-
-➜  benchmark ./bench.sh Tokio json 10.1.223.120 8080
-Usage: ./bench.sh Kiss plaintext 127.0.0.1 8080
-
----------------------------------------------------------
- Running Primer Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://10.1.223.120:8080/json
----------------------------------------------------------
-
-Running 5s test @ http://10.1.223.120:8080/json
-  8 threads and 8 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   652.27us  305.72us   9.29ms   92.99%
-    Req/Sec     1.51k   214.59     2.12k    76.87%
-  Latency Distribution
-     50%  593.00us
-     75%  706.00us
-     90%    0.86ms
-     99%    1.64ms
-  60321 requests in 5.10s, 8.57MB read
-Requests/sec:  11826.19
-Transfer/sec:      1.68MB
-
----------------------------------------------------------
- Running Warmup Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/json"
----------------------------------------------------------
-
-Running 15s test @ http://10.1.223.120:8080/json
-  2 threads and 512 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.47ms    6.45ms 100.79ms   86.89%
-    Req/Sec    16.55k     7.52k   47.49k    68.40%
-  Latency Distribution
-     50%    8.37ms
-     75%   11.06ms
-     90%   16.94ms
-     99%   33.17ms
-  489405 requests in 15.04s, 69.54MB read
-Requests/sec:  32542.86
-Transfer/sec:      4.62MB
-
----------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/json"
----------------------------------------------------------
-
-Running 15s test @ http://10.1.223.120:8080/json
-  2 threads and 512 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.46ms    8.00ms 151.73ms   90.99%
-    Req/Sec    19.53k    11.53k   47.95k    71.38%
-  Latency Distribution
-     50%    7.49ms
-     75%   10.92ms
-     90%   16.54ms
-     99%   42.51ms
-  575576 requests in 15.07s, 81.79MB read
-Requests/sec:  38185.57
-Transfer/sec:      5.43MB
-STARTTIME 1525341342
-ENDTIME 1525341357
-
----------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/json"
----------------------------------------------------------
-
-Running 15s test @ http://10.1.223.120:8080/json
-  2 threads and 512 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.15ms    6.23ms 126.21ms   85.91%
-    Req/Sec    18.80k     8.52k   48.12k    66.67%
-  Latency Distribution
-     50%    8.05ms
-     75%   10.89ms
-     90%   16.38ms
-     99%   31.35ms
-  557604 requests in 15.10s, 79.23MB read
-Requests/sec:  36937.62
-Transfer/sec:      5.25MB
-STARTTIME 1525341359
-ENDTIME 1525341374
-
----------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/json"
----------------------------------------------------------
-
-Running 15s test @ http://10.1.223.120:8080/json
-  2 threads and 512 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.07ms    5.54ms  68.96ms   82.47%
-    Req/Sec    17.05k     7.16k   44.13k    69.76%
-  Latency Distribution
-     50%    7.86ms
-     75%   11.01ms
-     90%   15.93ms
-     99%   29.38ms
-  507955 requests in 15.10s, 72.18MB read
-Requests/sec:  33636.86
-Transfer/sec:      4.78MB
-STARTTIME 1525341376
-ENDTIME 1525341391
-
----------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/json"
----------------------------------------------------------
-
-Running 15s test @ http://10.1.223.120:8080/json
-  2 threads and 512 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.37ms    8.29ms 141.11ms   90.54%
-    Req/Sec    19.04k    10.99k   48.68k    66.67%
-  Latency Distribution
-     50%    7.42ms
-     75%   10.59ms
-     90%   17.24ms
-     99%   43.24ms
-  558261 requests in 15.10s, 79.33MB read
-Requests/sec:  36980.57
-Transfer/sec:      5.25MB
-STARTTIME 1525341393
-ENDTIME 1525341409
-
----------------------------------------------------------
- Concurrency: 512 for Tokio
- wrk -H 'Host: 10.1.223.120' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 2 "http://10.1.223.120:8080/json"
----------------------------------------------------------
-
-Running 15s test @ http://10.1.223.120:8080/json
-  2 threads and 512 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.27ms    5.21ms  64.24ms   78.74%
-    Req/Sec    17.64k     6.78k   37.18k    61.38%
-  Latency Distribution
-     50%    8.29ms
-     75%   11.08ms
-     90%   15.88ms
-     99%   28.26ms
-  522217 requests in 15.03s, 74.21MB read
-Requests/sec:  34741.94
-Transfer/sec:      4.94MB
-STARTTIME 1525341411
-ENDTIME 1525341426
-➜  benchmark
-
+     50%    6.06ms
+     75%    7.27ms
+     90%    8.34ms
+     99%   12.18ms
+  1220289 requests in 15.10s, 150.12MB read
+Requests/sec:  80815.85
+Transfer/sec:      9.94MB
+STARTTIME 1543842143
+ENDTIME 1543842158
+ops@pressure:~/benchmark$
