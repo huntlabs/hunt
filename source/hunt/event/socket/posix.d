@@ -34,6 +34,15 @@ import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 
+extern (C) nothrow @nogc {
+    int     accept4(int, sockaddr*, socklen_t*, int);
+}
+
+enum int SOCK_CLOEXEC = 0x02000000;	/* Atomically set close-on-exec flag for the
+				   new descriptor(s).  */
+enum int SOCK_NONBLOCK = 0x00004000;	/* Atomically mark descriptor(s) as
+				   non-blocking.  */
+
 /**
 TCP Server
 */
@@ -48,7 +57,8 @@ abstract class AbstractListener : AbstractSocketChannel {
         version (HUNT_DEBUG)
             trace("new connection coming...");
         this.clearError();
-        socket_t clientFd = cast(socket_t)(accept(this.handle, null, null));
+        // socket_t clientFd = cast(socket_t)(accept(this.handle, null, null));
+        socket_t clientFd = cast(socket_t)(accept4(this.handle, null, null, SOCK_NONBLOCK | SOCK_CLOEXEC));
         if (clientFd == socket_t.init)
             return false;
 
