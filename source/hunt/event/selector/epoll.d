@@ -159,9 +159,9 @@ class AbstractSelector : Selector {
                 warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
                         errno, getErrorMessage(errno));
                 channel.close();
-            } else if (channel.isRegistered && isReadable(currentEvents)) {
+            } else if (isReadable(currentEvents)) {
                 channel.onRead();
-            } else if (channel.isRegistered && isWritable(currentEvents)) {
+            } else if (isWritable(currentEvents)) {
                 AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
                 assert(wt !is null);
                 wt.onWriteDone();

@@ -37,7 +37,7 @@ final class EventLoop : AbstractSelector {
 
     void runAsync(long timeout = -1) {
         this.timeout = timeout;
-        version (HUNT_DEBUG) info("runAsync ...");
+        version (HUNT_DEBUG) trace("runAsync ...");
         // BUG: Reported defects -@zxp at 12/3/2018, 8:17:58 PM
         // The task may not be executed.
         // auto runTask = task(&run, timeout);
@@ -50,7 +50,7 @@ final class EventLoop : AbstractSelector {
         if (_running) {
             version (HUNT_DEBUG) warning("The current eventloop is running!");
         } else {
-            version (HUNT_DEBUG) info("running eventloop...");
+            version (HUNT_DEBUG) trace("running eventloop...");
             _thread = Thread.getThis();
             onLoop(&onWeakUp, timeout);
         }

@@ -54,6 +54,18 @@ class EventLoopGroup {
         return _size;
     }
 
+    EventLoop nextLoop() {
+        import core.atomic;
+        int index = atomicOp!"+="(_loopIndex, 1);
+        if(index > 10000) {
+            index = 0;
+            atomicStore(_loopIndex, 0);
+        }
+        index %= _size;
+        return eventLoopPool[index];
+    }
+    private shared int _loopIndex;
+
     EventLoop opIndex(size_t index) {
         auto i = index % _size;
         return eventLoopPool[i];
