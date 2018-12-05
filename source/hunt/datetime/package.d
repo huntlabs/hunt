@@ -3,8 +3,9 @@ module hunt.datetime;
 public import hunt.datetime.format;
 
 import core.atomic;
-import core.thread;
+import core.thread : Thread;
 import std.datetime;
+import std.format : formattedWrite;
 
 enum TimeUnit : string {
     Year = "years",
@@ -19,7 +20,6 @@ enum TimeUnit : string {
     Nanosecond = "nsecs"
 }
 
-
 /**
 */
 class DateTimeHelper {
@@ -32,9 +32,9 @@ class DateTimeHelper {
     }
 
     static void startClock() {
-        if(!atomicLoad(_isClockRunning)) {
+        if (!atomicLoad(_isClockRunning)) {
             atomicStore(_isClockRunning, true);
-            dateThread.start(); 
+            dateThread.start();
         }
     }
 
@@ -46,7 +46,7 @@ class DateTimeHelper {
     private static __gshared Thread dateThread;
     private static shared bool _isClockRunning = false;
 
-    shared static this(){
+    shared static this() {
         import std.array;
 
         Appender!(char[])[2] bufs;
@@ -60,10 +60,10 @@ class DateTimeHelper {
         }
 
         tick(0);
-        
+
         dateThread = new Thread({
             size_t cur = 1;
-            while(_isClockRunning){ 
+            while (_isClockRunning) {
                 tick(cur);
                 cur = 1 - cur;
                 Thread.sleep(250.msecs);
@@ -71,19 +71,14 @@ class DateTimeHelper {
         });
     }
 
-    shared static ~this(){
+    shared static ~this() {
         stopClock();
         dateThread.join();
     }
 
-    private static size_t updateDate(Output, D)(ref Output sink, D date){
-        import std.format;
-        string weekDay = dayAsString(date.dayOfWeek);
-        string month = monthAsString(date.month);
-        return formattedWrite(sink,
-            "%s, %02s %s %04s %02s:%02s:%02s GMT",
-            weekDay, date.day, month, date.year,
-            date.hour, date.minute, date.second
-        );
+    private static size_t updateDate(Output, D)(ref Output sink, D date) {
+        return formattedWrite(sink, "%s, %02s %s %04s %02s:%02s:%02s GMT", dayAsString(date.dayOfWeek),
+                date.day, monthAsString(date.month), date.year, date.hour,
+                date.minute, date.second);
     }
 }
