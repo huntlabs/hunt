@@ -17,11 +17,10 @@ import std.string;
 
 import hunt.datetime;
 
-
 // https://www.techempower.com/benchmarks/
 
 shared static this() {
-    DateTimeHelper.startClock();
+	DateTimeHelper.startClock();
 }
 
 /**
@@ -45,7 +44,7 @@ abstract class AbstractTcpServer {
 	void start() {
 		if (_isStarted)
 			return;
-		debug writeln("start to listen:");
+		debug trace("start to listen:");
 		_isStarted = true;
 
 		Socket server = new TcpSocket();
@@ -53,23 +52,23 @@ abstract class AbstractTcpServer {
 		server.bind(new InternetAddress("0.0.0.0", 8080));
 		server.listen(1000);
 
-		debug writeln("Launching server");
+		debug trace("Launching server");
 
 		_group.start();
 
-		while(true) {
+		while (true) {
 			try {
-				version (HUNT_DEBUG) trace("Waiting for server.accept()");
+				version (HUNT_DEBUG)
+					trace("Waiting for server.accept()");
 				Socket client = server.accept();
 				// debug writeln("New client accepted");
 				processClient(client);
-			}
-			catch(Exception e) {
-				writefln("Failure on accept %s", e);
+			} catch (Exception e) {
+				warningf("Failure on accept %s", e);
 				break;
 			}
 		}
-		_isStarted = false;		
+		_isStarted = false;
 
 		// for (size_t i = 0; i < _group.size(); ++i) {
 		// 	createServer(_group[i]);
@@ -82,16 +81,14 @@ abstract class AbstractTcpServer {
 	private void processClient(Socket socket) {
 		// new Thread(() => server_worker(client)).start();
 		version (HUNT_DEBUG) {
-			infof("new connection from %s, fd=%d",
-				socket.remoteAddress.toString(), socket.handle());
+			infof("new connection from %s, fd=%d", socket.remoteAddress.toString(), socket.handle());
 		}
 		EventLoop loop = _group.nextLoop();
 		TcpStream stream;
 		stream = new TcpStream(loop, socket, _tcpStreamoption);
-		// loop.register();
 		onConnectionAccepted(null, stream);
 		stream.start();
-	} 
+	}
 
 	protected void createServer(EventLoop loop) {
 		TcpListener listener = new TcpListener(loop, _address.addressFamily);
@@ -131,7 +128,7 @@ class HttpServer : AbstractTcpServer {
 		});
 	}
 
-	protected void notifyDataReceived(TcpStream client, in ubyte[] data) {
+	protected void notifyDataReceived(TcpStream client, const ubyte[] data) {
 		// debug writefln("on thread:%s, data received: %s", getTid(), cast(string) data);
 		// string request = cast(string) data;
 		bool keepAlive = true; //indexOf(request, " keep-alive", CaseSensitive.no) > 0;
@@ -148,23 +145,23 @@ class HttpServer : AbstractTcpServer {
 	}
 
 	private void respondPlaintext(TcpStream client, bool keepAlive) {
-        // auto date = cast()atomicLoad(httpDate);
 		// string currentTime = Clock.currTime.toString();
 		// string currentTime = "Wed, 17 Apr 2013 12:00:00 GMT";
 		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
-		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\n" ~ 
-			"Content-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: " ~ DateTimeHelper.getDateAsGMT() ~ "\r\n\r\nHello, World!";
-        
-        // string _body = "Hello, World!";
-        // Appender!(char[]) outBuf;
-        // outBuf.put("HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\n");
-        // outBuf.put(*date);
-        // outBuf.put("Server: Hunt/1.0\r\nContent-Type: text/plain\r\n");
-        // formattedWrite(outBuf, "Content-Length: %d\r\n\r\n", _body.length);
-        // outBuf.put(_body);
-        // writeData = cast(string)outBuf.data;
+		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\n"
+			~ "Content-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: "
+			~ DateTimeHelper.getDateAsGMT() ~ "\r\n\r\nHello, World!";
 
-		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
+		// string _body = "Hello, World!";
+		// Appender!(char[]) outBuf;
+		// outBuf.put("HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\n");
+		// outBuf.put(*date);
+		// outBuf.put("Server: Hunt/1.0\r\nContent-Type: text/plain\r\n");
+		// formattedWrite(outBuf, "Content-Length: %d\r\n\r\n", _body.length);
+		// outBuf.put(_body);
+		// writeData = cast(string)outBuf.data;
+
+		client.write(cast(ubyte[]) writeData, (const ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", writeData);
 			if (!keepAlive) {
 				debug writefln("closing...%d", client.handle);
@@ -179,11 +176,13 @@ class HttpServer : AbstractTcpServer {
 		js["message"] = "Hello, World!";
 		string content = js.toString();
 
-		string writeData = "HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: " 
-			~ to!string(content.length)
-			~ "\r\nServer: Hunt/1.0\r\nDate: " ~ currentTime ~ "\r\n\r\n";
+		string writeData = "HTTP/1.1 200 OK\r\nConnection: Keep-Alive\r\n" ~ 
+			"Content-Type: application/json\r\nContent-Length: " ~ 
+			to!string(content.length) ~ "\r\nServer: Hunt/1.0\r\nDate: " ~ 
+			currentTime ~ "\r\n\r\n";
+
 		writeData ~= content;
-		client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
+		client.write(cast(ubyte[]) writeData, (const ubyte[] wdata, size_t size) {
 			debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
 			if (!keepAlive)
 				client.close();
