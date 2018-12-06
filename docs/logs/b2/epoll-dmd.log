@@ -1,0 +1,450 @@
+﻿ops@pressure:~/benchmark$ ./bench.sh Hunt plaintext 127.0.0.1 8080
+Usage: ./bench.sh Name plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://127.0.0.1:8080/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://127.0.0.1:8080/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    74.77us  303.87us  17.78ms   95.67%
+    Req/Sec    30.39k     1.55k   36.89k    79.78%
+  Latency Distribution
+     50%   27.00us
+     75%   31.00us
+     90%   44.00us
+     99%    1.13ms
+  1076049 requests in 5.10s, 161.11MB read
+Requests/sec: 211011.43
+Transfer/sec:     31.59MB
+
+---------------------------------------------------------
+ Running Warmup Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.32ms    2.03ms  38.53ms   90.03%
+    Req/Sec    45.42k     7.18k   82.76k    79.28%
+  Latency Distribution
+     50%  610.00us
+     75%    1.42ms
+     90%    3.35ms
+     99%   10.34ms
+  8170972 requests in 15.09s, 1.19GB read
+Requests/sec: 541360.74
+Transfer/sec:     81.06MB
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.32ms    2.05ms  39.20ms   90.08%
+    Req/Sec    45.42k     7.09k   82.54k    78.15%
+  Latency Distribution
+     50%  598.00us
+     75%    1.41ms
+     90%    3.34ms
+     99%   10.32ms
+  8168982 requests in 15.10s, 1.19GB read
+Requests/sec: 541036.44
+Transfer/sec:     81.01MB
+STARTTIME 1543925723
+ENDTIME 1543925738
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.35ms    2.15ms  50.25ms   90.14%
+    Req/Sec    45.37k     7.30k   80.69k    78.90%
+  Latency Distribution
+     50%  574.00us
+     75%    1.41ms
+     90%    3.46ms
+     99%   10.80ms
+  8150100 requests in 15.09s, 1.19GB read
+Requests/sec: 540091.24
+Transfer/sec:     80.87MB
+STARTTIME 1543925740
+ENDTIME 1543925755
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.35ms    2.08ms  33.72ms   89.69%
+    Req/Sec    45.63k     7.10k   84.82k    79.19%
+  Latency Distribution
+     50%  587.00us
+     75%    1.46ms
+     90%    3.51ms
+     99%   10.40ms
+  8199943 requests in 15.10s, 1.20GB read
+Requests/sec: 543071.61
+Transfer/sec:     81.31MB
+STARTTIME 1543925757
+ENDTIME 1543925772
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.33ms    2.03ms  41.10ms   89.85%
+    Req/Sec    45.63k     6.82k   81.99k    79.32%
+  Latency Distribution
+     50%  608.00us
+     75%    1.44ms
+     90%    3.39ms
+     99%   10.26ms
+  8209688 requests in 15.09s, 1.20GB read
+Requests/sec: 543942.70
+Transfer/sec:     81.44MB
+STARTTIME 1543925774
+ENDTIME 1543925789
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.34ms    2.07ms  41.61ms   89.89%
+    Req/Sec    45.70k     6.91k   83.86k    78.64%
+  Latency Distribution
+     50%  604.00us
+     75%    1.43ms
+     90%    3.43ms
+     99%   10.31ms
+  8213118 requests in 15.09s, 1.20GB read
+Requests/sec: 544123.49
+Transfer/sec:     81.47MB
+STARTTIME 1543925791
+ENDTIME 1543925806
+
+
+
+
+
+
+
+ops@pressure:~/benchmark$ ./bench.sh Hunt plaintext 127.0.0.1 8080
+Usage: ./bench.sh Name plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://127.0.0.1:8080/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://127.0.0.1:8080/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    70.54us  233.60us   9.56ms   95.76%
+    Req/Sec    29.48k     1.93k   34.31k    78.87%
+  Latency Distribution
+     50%   28.00us
+     75%   34.00us
+     90%   46.00us
+     99%    1.12ms
+  1193244 requests in 5.10s, 178.66MB read
+Requests/sec: 233994.92
+Transfer/sec:     35.04MB
+
+---------------------------------------------------------
+ Running Warmup Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.71ms    2.43ms  34.12ms   87.44%
+    Req/Sec    40.68k     5.74k   65.78k    69.61%
+  Latency Distribution
+     50%  577.00us
+     75%    2.29ms
+     90%    4.79ms
+     99%   11.09ms
+  7316057 requests in 15.09s, 1.07GB read
+Requests/sec: 484855.76
+Transfer/sec:     72.60MB
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.58ms    2.66ms  40.94ms   89.02%
+    Req/Sec    45.46k     8.34k   84.65k    76.80%
+  Latency Distribution
+     50%  420.00us
+     75%    1.70ms
+     90%    4.57ms
+     99%   12.92ms
+  8162447 requests in 15.09s, 1.19GB read
+Requests/sec: 540885.65
+Transfer/sec:     80.99MB
+STARTTIME 1543924919
+ENDTIME 1543924934
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.57ms    2.65ms  41.89ms   88.92%
+    Req/Sec    45.43k     8.22k   86.81k    76.62%
+  Latency Distribution
+     50%  425.00us
+     75%    1.66ms
+     90%    4.57ms
+     99%   12.84ms
+  8159156 requests in 15.10s, 1.19GB read
+Requests/sec: 540421.66
+Transfer/sec:     80.92MB
+STARTTIME 1543924936
+ENDTIME 1543924951
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.53ms    2.55ms  39.42ms   88.85%
+    Req/Sec    45.70k     8.12k  112.02k    77.72%
+  Latency Distribution
+     50%  429.00us
+     75%    1.66ms
+     90%    4.44ms
+     99%   12.38ms
+  8199929 requests in 15.09s, 1.20GB read
+Requests/sec: 543405.95
+Transfer/sec:     81.36MB
+STARTTIME 1543924953
+ENDTIME 1543924968
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.53ms    2.53ms  41.22ms   88.80%
+    Req/Sec    45.70k     8.04k   84.22k    78.45%
+  Latency Distribution
+     50%  429.00us
+     75%    1.67ms
+     90%    4.42ms
+     99%   12.26ms
+  8214356 requests in 15.10s, 1.20GB read
+Requests/sec: 544075.53
+Transfer/sec:     81.46MB
+STARTTIME 1543924970
+ENDTIME 1543924985
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.54ms    2.59ms  44.37ms   89.02%
+    Req/Sec    45.50k     7.86k   85.96k    77.94%
+  Latency Distribution
+     50%  437.00us
+     75%    1.67ms
+     90%    4.43ms
+     99%   12.53ms
+  8177268 requests in 15.10s, 1.20GB read
+Requests/sec: 541596.84
+Transfer/sec:     81.09MB
+STARTTIME 1543924987
+ENDTIME 1543925002
+ops@pressure:~/benchmark$
+
+
+
+
+
+
+ops@pressure:~/benchmark$ ./bench.sh Hunt-photon plaintext 127.0.0.1 8080
+Usage: ./bench.sh Name plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://127.0.0.1:8080/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://127.0.0.1:8080/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    42.54us  359.58us  14.06ms   99.71%
+    Req/Sec    36.12k     2.69k   44.67k    76.47%
+  Latency Distribution
+     50%   24.00us
+     75%   28.00us
+     90%   34.00us
+     99%   50.00us
+  1282324 requests in 5.10s, 192.00MB read
+Requests/sec: 251467.49
+Transfer/sec:     37.65MB
+
+---------------------------------------------------------
+ Running Warmup Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    38.28us  106.29us  22.99ms   99.98%
+    Req/Sec   104.30k    11.85k  119.54k    66.89%
+  Latency Distribution
+     50%   31.00us
+     75%   46.00us
+     90%   69.00us
+     99%   96.00us
+  3130613 requests in 15.09s, 468.74MB read
+Requests/sec: 207415.82
+Transfer/sec:     31.06MB
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    37.37us  106.78us  16.06ms   99.98%
+    Req/Sec   106.78k    14.38k  126.35k    54.97%
+  Latency Distribution
+     50%   32.00us
+     75%   41.00us
+     90%   64.00us
+     99%   79.00us
+  3205060 requests in 15.10s, 479.88MB read
+Requests/sec: 212297.25
+Transfer/sec:     31.79MB
+STARTTIME 1543926688
+ENDTIME 1543926703
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    37.52us   85.31us  16.07ms   99.92%
+    Req/Sec   101.86k    15.67k  130.12k    60.93%
+  Latency Distribution
+     50%   32.00us
+     75%   46.00us
+     90%   71.00us
+     99%   84.00us
+  3057818 requests in 15.10s, 457.84MB read
+Requests/sec: 202560.60
+Transfer/sec:     30.33MB
+STARTTIME 1543926705
+ENDTIME 1543926721
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    39.66us   94.20us  23.19ms   99.96%
+    Req/Sec    93.86k    12.86k  116.38k    53.31%
+  Latency Distribution
+     50%   36.00us
+     75%   49.00us
+     90%   77.00us
+     99%   96.00us
+  2816822 requests in 15.10s, 421.75MB read
+Requests/sec: 186567.36
+Transfer/sec:     27.93MB
+STARTTIME 1543926723
+ENDTIME 1543926738
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    38.71us  114.27us  19.05ms   99.94%
+    Req/Sec   103.00k    13.53k  124.57k    62.25%
+  Latency Distribution
+     50%   31.00us
+     75%   46.00us
+     90%   66.00us
+     99%   96.00us
+  3090686 requests in 15.10s, 462.76MB read
+Requests/sec: 204721.04
+Transfer/sec:     30.65MB
+STARTTIME 1543926740
+ENDTIME 1543926755
+
+---------------------------------------------------------
+ Concurrency: 512 for Hunt-photon
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    40.16us  127.47us  22.15ms   99.98%
+    Req/Sec    98.55k    11.52k  121.40k    70.20%
+  Latency Distribution
+     50%   37.00us
+     75%   50.00us
+     90%   58.00us
+     99%   76.00us
+  2957494 requests in 15.10s, 442.82MB read
+Requests/sec: 195870.52
+Transfer/sec:     29.33MB
+STARTTIME 1543926757
+ENDTIME 1543926772
+

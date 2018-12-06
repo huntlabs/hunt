@@ -1,0 +1,146 @@
+﻿ops@pressure:~/benchmark$ ./bench.sh photon-threaded plaintext 127.0.0.1 8080
+Usage: ./bench.sh Name plaintext 127.0.0.1 8080
+
+---------------------------------------------------------
+ Running Primer photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 5 -c 8 --timeout 8 -t 8 http://127.0.0.1:8080/plaintext
+---------------------------------------------------------
+
+Running 5s test @ http://127.0.0.1:8080/plaintext
+  8 threads and 8 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    39.06us  182.08us  12.10ms   99.89%
+    Req/Sec    27.77k     2.62k   31.20k    53.92%
+  Latency Distribution
+     50%   34.00us
+     75%   36.00us
+     90%   38.00us
+     99%   58.00us
+  1127257 requests in 5.10s, 120.40MB read
+Requests/sec: 221043.83
+Transfer/sec:     23.61MB
+
+---------------------------------------------------------
+ Running Warmup photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     0.95ms    2.93ms 111.04ms   99.51%
+    Req/Sec    27.47k     6.45k   86.47k    84.56%
+  Latency Distribution
+     50%  774.00us
+     75%    0.94ms
+     90%    1.14ms
+     99%    2.23ms
+  4926203 requests in 15.10s, 526.18MB read
+Requests/sec: 326255.66
+Transfer/sec:     34.85MB
+
+---------------------------------------------------------
+ Concurrency: 512 for photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     0.88ms    1.77ms  98.00ms   99.57%
+    Req/Sec    27.19k     4.40k   74.60k    84.65%
+  Latency Distribution
+     50%  792.00us
+     75%    0.94ms
+     90%    1.06ms
+     99%    1.52ms
+  4883860 requests in 15.10s, 521.65MB read
+Requests/sec: 323455.77
+Transfer/sec:     34.55MB
+STARTTIME 1543841522
+ENDTIME 1543841537
+
+---------------------------------------------------------
+ Concurrency: 512 for photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     0.89ms    1.75ms  75.19ms   99.02%
+    Req/Sec    27.68k     9.90k   82.72k    76.22%
+  Latency Distribution
+     50%  752.00us
+     75%    0.98ms
+     90%    1.27ms
+     99%    2.62ms
+  4962744 requests in 15.04s, 530.08MB read
+Requests/sec: 329934.52
+Transfer/sec:     35.24MB
+STARTTIME 1543841539
+ENDTIME 1543841554
+
+---------------------------------------------------------
+ Concurrency: 512 for photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   841.20us    1.16ms  65.60ms   99.35%
+    Req/Sec    27.41k     3.07k   82.63k    93.01%
+  Latency Distribution
+     50%  783.00us
+     75%    0.98ms
+     90%    1.16ms
+     99%    1.60ms
+  4919916 requests in 15.10s, 525.50MB read
+Requests/sec: 325859.65
+Transfer/sec:     34.81MB
+STARTTIME 1543841556
+ENDTIME 1543841572
+
+---------------------------------------------------------
+ Concurrency: 512 for photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   839.20us    0.99ms  63.26ms   98.83%
+    Req/Sec    27.55k     6.81k   83.76k    85.07%
+  Latency Distribution
+     50%  789.00us
+     75%    0.94ms
+     90%    1.17ms
+     99%    1.93ms
+  4961318 requests in 15.10s, 529.93MB read
+Requests/sec: 328589.68
+Transfer/sec:     35.10MB
+STARTTIME 1543841574
+ENDTIME 1543841589
+
+---------------------------------------------------------
+ Concurrency: 512 for photon-threaded
+ wrk -H 'Host: 127.0.0.1' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' --latency -d 15 -c 512 --timeout 8 -t 12 "http://127.0.0.1:8080/plaintext"
+---------------------------------------------------------
+
+Running 15s test @ http://127.0.0.1:8080/plaintext
+  12 threads and 512 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     0.92ms    2.11ms  77.58ms   99.13%
+    Req/Sec    28.05k    12.97k   86.77k    80.11%
+  Latency Distribution
+     50%  744.00us
+     75%    1.00ms
+     90%    1.35ms
+     99%    2.83ms
+  5027965 requests in 15.10s, 537.04MB read
+Requests/sec: 333048.92
+Transfer/sec:     35.57MB
+STARTTIME 1543841591
+ENDTIME 1543841606
+
