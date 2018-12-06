@@ -48,7 +48,7 @@ void main(string[] args) {
 
 			//string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 
-			string writeData = buildResponse("Hello, World! The time is " ~ DateTimeHelper.getDateAsGMT());
+			string writeData = buildResponse("Hello, world! The time is " ~ DateTimeHelper.getDateAsGMT());
 			client.write(cast(ubyte[]) writeData, (in ubyte[] wdata, size_t size) {
 				debug writeln("sent bytes: ", size, "  content: ", cast(string) writeData);
 				// client.close(); // comment out for Keep-Alive

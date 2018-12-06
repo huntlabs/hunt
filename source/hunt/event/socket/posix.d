@@ -155,7 +155,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
     /**
     Warning: It will try the best to write all the data.   
-    // TODO: create a examlple for test
+    TODO: create a test
     */
     protected void tryWriteAll(in ubyte[] data) {
         const nBytes = this.socket.send(data);
@@ -169,7 +169,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
                         writeRetries, nBytes, data.length - nBytes, data.length);
                 if (writeRetries > writeRetryLimit)
-                    warning("You are writting a Big block of data!!!");
+                    warning("You are writting a big block of data!!!");
 
                 tryWriteAll(data[nBytes .. $]);
             } else
