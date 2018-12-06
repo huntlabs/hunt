@@ -6,13 +6,12 @@
 	"description": "A simple http server.",
 	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
+	"versions": [
+		"HUNT_DEBUG"
+	],
 	"dependencies": {
 		"hunt" : {
 			"path" : "../../"
-		},
-		"datefmt": "~>1.0.2"
-	},
-	"subConfigurations": {
-		"hunt" : "debug"
+		}
 	}
 }
