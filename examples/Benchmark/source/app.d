@@ -10,14 +10,16 @@
  */
 
 import std.getopt;
-import std.parallelism;
 import std.stdio;
 
-import HttpServer;
+import http.Processor;
+import http.Server;
+import hunt.io;
+import hunt.util.memory;
+import DemoProcessor;
 
 
 void main(string[] args) {
-	// globalLogLevel(LogLevel.warning);
 
 	ushort port = 8080;
 	GetoptResult o = getopt(args, "port|p", "Port (default 8080)", &port);
@@ -26,7 +28,11 @@ void main(string[] args) {
 		return;
 	}
 
-	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs-1);
-	writefln("listening on %s", httpServer.bindingAddress.toString());
+	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs-1)
+	.onProcessorCreate(delegate HttpProcessor (TcpStream client) {
+		return new DemoProcessor(client);
+	});
+
+	writefln("listening on http://%s", httpServer.bindingAddress.toString());
 	httpServer.start();
 }
