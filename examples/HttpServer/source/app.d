@@ -63,14 +63,14 @@ void main(string[] args) {
 		});
 	}).start();
 
-	writefln("The server is listening on http://%s.", listener.bindingAddress.toString());
+	writefln("The server is listening on http://%s", listener.bindingAddress.toString());
 	loop.run();
 }
 
 string buildResponse(string content) {
 	Appender!string sb;
 	sb.put("HTTP/1.1 200 OK\r\n");
-	sb.put("Server: Hunt/0.3\r\n");
+	sb.put("Server: Hunt/1.0\r\n");
 	sb.put("Connection: Keep-Alive\r\n");
 	sb.put("Content-Type: text/plain\r\n");
 	sb.put("Content-Length: " ~ to!string(content.length) ~ "\r\n");
