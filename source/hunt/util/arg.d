@@ -9,7 +9,7 @@
  * TODO:
  *  - Handle bundled options
  */
-module hunt.util.darg;
+module hunt.util.arg;
 
 /**
  * Generic argument parsing exception.
