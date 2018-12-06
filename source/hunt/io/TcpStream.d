@@ -23,7 +23,9 @@ import std.socket;
 import core.thread;
 import core.time;
 
-import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
+version(linux) {
+    import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
+}
 
 class TcpStreamOption {
     string ip = "127.0.0.1";
@@ -148,15 +150,26 @@ class TcpStream : AbstractStream {
     // www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/
     // http://www.importnew.com/27624.html
     private void setKeepalive() {
-        if(_tcpOption.isKeepalive) {
-            this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
-            this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, _tcpOption.keepaliveProbes);
-            version (HUNT_DEBUG) checkKeepAlive();
+        version(linux) {
+            if(_tcpOption.isKeepalive) {
+                this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
+                this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
+                    _tcpOption.keepaliveProbes);
+                version (HUNT_DEBUG) checkKeepAlive();
+            }
+        } else version(Windows) {
+            if(_tcpOption.isKeepalive) {
+                this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
+                // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
+                //     _tcpOption.keepaliveProbes);
+                version (HUNT_DEBUG) checkKeepAlive();
+            }
         }
     }
 
     version (HUNT_DEBUG)
     private void checkKeepAlive() {
+        version(linux) {
         int time ;
         int ret1 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPIDLE, time);
         tracef("ret=%d, time=%d", ret1, time);
@@ -172,6 +185,7 @@ class TcpStream : AbstractStream {
         int probe;
         int ret4 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, probe);
         tracef("ret=%d, interval=%d", ret4, probe);
+        }
     }
 
     void reconnect(Address addr) {
