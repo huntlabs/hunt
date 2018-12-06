@@ -23,7 +23,6 @@ import std.socket;
 import core.thread;
 import core.time;
 
-
 import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
 
 class TcpStreamOption {

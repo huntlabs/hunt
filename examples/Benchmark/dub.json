@@ -7,6 +7,8 @@
 	"description": "A simple http server powered by Hunt.",
 	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
 	"license": "Apache-2.0",
+	"libs-posix": [ "http_parser" ],
+	"lflags-posix": ["-Lhttp-parser/"],
 	"dependencies": {
 		"hunt" : {
 			"path" : "../../"
