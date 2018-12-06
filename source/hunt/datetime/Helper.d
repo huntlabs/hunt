@@ -7,7 +7,6 @@ import core.thread : Thread;
 import std.datetime;
 import std.format : formattedWrite;
 
-
 enum TimeUnit : string {
     Year = "years",
     Month = "months",
@@ -22,15 +21,12 @@ enum TimeUnit : string {
 }
 
 // return unix timestamp
-int time()
-{
-    return DateTimeHelper.time;
+long time() {
+    return DateTimeHelper.timestamp;
 }
 
-
 // return formated time string from timestamp
-string date(string format, long timestamp = 0)
-{
+string date(string format, long timestamp = 0) {
     import std.datetime : SysTime;
     import std.conv : to;
 
@@ -41,15 +37,13 @@ string date(string format, long timestamp = 0)
     SysTime st = SysTime.fromUnixTime(newTimestamp);
 
     // format to ubyte
-    foreach(c; format)
-    {
-        switch(c)
-        {
+    foreach (c; format) {
+        switch (c) {
         case 'Y':
             timeString ~= st.year.to!string;
             break;
         case 'y':
-            timeString ~= (st.year.to!string)[2..$];
+            timeString ~= (st.year.to!string)[2 .. $];
             break;
         case 'm':
             short month = monthToShort(st.month);
@@ -76,7 +70,6 @@ string date(string format, long timestamp = 0)
     return timeString;
 }
 
-
 /**
 */
 class DateTimeHelper {
@@ -88,7 +81,7 @@ class DateTimeHelper {
         return cast(string)*httpDate;
     }
 
-    static shared int time;
+    static shared long timestamp;
 
     static void startClock() {
         if (!atomicLoad(_isClockRunning)) {
@@ -112,8 +105,10 @@ class DateTimeHelper {
         const(char)[][2] targets;
 
         void tick(size_t index) {
+            import core.stdc.time : time;
+
             bufs[index].clear();
-            time = cast(int)Clock.currStdTime();
+            timestamp = time(null);
             auto date = Clock.currTime!(ClockType.coarse)(UTC());
             size_t sz = updateDate(bufs[index], date);
             targets[index] = bufs[index].data;
@@ -133,7 +128,7 @@ class DateTimeHelper {
     }
 
     shared static ~this() {
-        if(cas(&_isClockRunning, true, false)) {
+        if (cas(&_isClockRunning, true, false)) {
             dateThread.join();
         }
     }
