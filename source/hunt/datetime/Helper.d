@@ -133,8 +133,9 @@ class DateTimeHelper {
     }
 
     shared static ~this() {
-        stopClock();
-        dateThread.join();
+        if(cas(&_isClockRunning, true, false)) {
+            dateThread.join();
+        }
     }
 
     private static size_t updateDate(Output, D)(ref Output sink, D date) {
