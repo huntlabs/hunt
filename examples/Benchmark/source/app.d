@@ -12,12 +12,16 @@
 import std.getopt;
 import std.stdio;
 
-import http.Processor;
-import http.Server;
 import hunt.io;
 import hunt.util.memory;
-import DemoProcessor;
 
+version(Posix) {
+	import http.Processor;
+	import http.Server;
+	import DemoProcessor;
+} else {
+	import HttpServer;
+}
 
 void main(string[] args) {
 
@@ -28,11 +32,15 @@ void main(string[] args) {
 		return;
 	}
 
-	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs-1)
-	.onProcessorCreate(delegate HttpProcessor (TcpStream client) {
+	HttpServer httpServer = new HttpServer("0.0.0.0", port, totalCPUs-1);
+
+	version(Posix) {
+		httpServer.onProcessorCreate(delegate HttpProcessor (TcpStream client) {
 		return new DemoProcessor(client);
-	});
+		});
+	}
 
 	writefln("listening on http://%s", httpServer.bindingAddress.toString());
 	httpServer.start();
 }
+

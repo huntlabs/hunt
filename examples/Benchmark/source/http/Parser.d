@@ -1,6 +1,9 @@
 /// Minimalistic low-overhead wrapper for nodejs/http-parser
 /// Used for benchmarks with simple server
 module http.Parser;
+
+version(Posix):
+
 private:
 
 import std.range.primitives;

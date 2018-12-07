@@ -1,12 +1,14 @@
 module DemoProcessor;
 
+version(Posix):
+
 import hunt.io;
 import http.Processor;
 
 class DemoProcessor : HttpProcessor {
-    this(TcpStream sock){ super(sock); }
+    this(TcpStream client){ super(client); }
     
     override void onComplete(HttpRequest req) {
-        respondWith("Hello, world!", 200);
+        respondWith("Hello, World!", 200);
     }
 }

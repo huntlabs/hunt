@@ -1,5 +1,6 @@
 module http.Server;
 
+version(Posix):
 import std.stdio;
 
 import hunt.event;

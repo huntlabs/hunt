@@ -2,6 +2,8 @@
 ///
 module http.Processor;
 
+version(Posix):
+
 import std.array, std.exception, std.format, std.algorithm.mutation, std.socket;
 import core.stdc.stdlib;
 import core.thread, core.atomic;
