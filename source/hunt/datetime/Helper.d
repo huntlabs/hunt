@@ -77,9 +77,11 @@ class DateTimeHelper {
         return convert!(TimeUnit.HectoNanosecond, TimeUnit.Millisecond)(Clock.currStdTime);
     }
 
-    static string getDateAsGMT() {
+    static string getTimeAsGMT() {
         return cast(string)*httpDate;
     }
+
+    alias getDateAsGMT = getTimeAsGMT;
 
     static shared long timestamp;
 

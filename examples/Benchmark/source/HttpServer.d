@@ -157,7 +157,7 @@ class HttpServer : AbstractTcpServer!(ServerThreadMode.Single) {
 		// string currentTime = "Wed, 17 Apr 2013 12:00:00 GMT";
 		// string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 		string writeData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\n" ~ 
-			"Content-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: " ~ DateTimeHelper.getDateAsGMT() ~ "\r\n\r\nHello, World!";
+			"Content-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: " ~ DateTimeHelper.getTimeAsGMT() ~ "\r\n\r\nHello, World!";
         
         // string _body = "Hello, World!";
         // Appender!(char[]) outBuf;
@@ -178,7 +178,7 @@ class HttpServer : AbstractTcpServer!(ServerThreadMode.Single) {
 	}
 
 	private void respondJson(TcpStream client, bool keepAlive) {
-		string currentTime = DateTimeHelper.getDateAsGMT();
+		string currentTime = DateTimeHelper.getTimeAsGMT();
 		JSONValue js;
 		js["message"] = "Hello, World!";
 		string content = js.toString();
