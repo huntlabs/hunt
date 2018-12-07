@@ -43,6 +43,7 @@ private:
 	HttpRequest request;
 	State state;
 	bool serving;
+	
 public:
 	TcpStream client;
 
@@ -56,9 +57,14 @@ public:
 	}
 
 	void run() {
-		client.onDataReceived((const ubyte[] data) { parser.execute(data); }).onClosed(() {
+		client.onDataReceived((const ubyte[] data) { 
+			parser.execute(data);
+		})
+		.onClosed(() {
 			notifyClientClosed();
-		}).onError((string msg) { warning("Error: ", msg); }).start();
+		})
+		.onError((string msg) { warning("Error: ", msg); })
+		.start();
 	}
 
 	protected void notifyClientClosed() {
