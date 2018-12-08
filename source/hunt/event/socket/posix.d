@@ -34,9 +34,9 @@ import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 
-extern (C) nothrow @nogc {
-    int     accept4(int, sockaddr*, socklen_t*, int);
-}
+// extern (C) nothrow @nogc {
+//     int     accept4(int, sockaddr*, socklen_t*, int);
+// }
 
 enum int SOCK_CLOEXEC = 0x02000000;	/* Atomically set close-on-exec flag for the
 				   new descriptor(s).  */

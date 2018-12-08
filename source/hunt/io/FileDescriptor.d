@@ -190,7 +190,7 @@ final class FileDescriptor {
                         if (ioe is null) {
                             ioe = x;
                         } else {
-                            ioe.next(x);
+                            ioe.next = x;
                         }
                     }
                 }
@@ -200,7 +200,7 @@ final class FileDescriptor {
                  * add other exceptions as suppressed.
                  */
                 if (ioe !is null)
-                    ex.next(ioe);
+                    ex.next = ioe;
                 ioe = ex;
             } finally {
                 if (ioe !is null)
