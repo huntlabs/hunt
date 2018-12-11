@@ -151,7 +151,7 @@ class AbstractSelector : Selector {
 
             if (isClosed(currentEvents)) {
                 version (HUNT_DEBUG)
-                infof("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
+                tracef("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
                         errno, getErrorMessage(errno));
                 channel.close();
             } else if (isError(currentEvents)) {

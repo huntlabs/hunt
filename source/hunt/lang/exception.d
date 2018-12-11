@@ -106,11 +106,20 @@ class URISyntaxException : IOException {
     mixin BasicExceptionCtors;
 }
 
+class FileNotFoundException : Exception {
+    mixin BasicExceptionCtors;
+}
+
+
 class IOException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class FileNotFoundException : Exception {
+class ClosedChannelException : IOException {
+    mixin BasicExceptionCtors;
+}
+
+class EOFException : IOException {
     mixin BasicExceptionCtors;
 }
 
@@ -119,6 +128,10 @@ class MalformedURLException : IOException {
 }
 
 class InterruptedIOException : IOException {
+    mixin BasicExceptionCtors;
+}
+
+class AsynchronousCloseException : ClosedChannelException {
     mixin BasicExceptionCtors;
 }
 
@@ -175,14 +188,6 @@ class ArithmeticException : RuntimeException {
 }
 
 class ArrayIndexOutOfBoundsException : IndexOutOfBoundsException {
-    mixin BasicExceptionCtors;
-}
-
-class ClosedChannelException : IOException {
-    mixin BasicExceptionCtors;
-}
-
-class EOFException : IOException {
     mixin BasicExceptionCtors;
 }
 

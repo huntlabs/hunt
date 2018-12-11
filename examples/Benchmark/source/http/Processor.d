@@ -101,7 +101,7 @@ public:
 		version(HUNT_METRIC) {
 			client.write(cast(ubyte[]) outBuf.data, (const ubyte[] data, size_t size) {
 				Duration timeElapsed = MonoTime.currTime - startTime;
-				tracef("handling done with cost: %d microseconds",
+				tracef("handling done in: %d microseconds",
 					timeElapsed.total!(TimeUnit.Microsecond)());
 			}); 
 		} else {

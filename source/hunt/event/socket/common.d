@@ -272,8 +272,8 @@ private:
 
 /**
 */
-Address createAddress(AddressFamily family = AddressFamily.INET, ushort port=InternetAddress.PORT_ANY)
-{
+Address createAddress(AddressFamily family = AddressFamily.INET, 
+    ushort port=InternetAddress.PORT_ANY) {
     if (family == AddressFamily.INET6) {
         // addr = new Internet6Address(port); // bug on windows
         return new Internet6Address("::", port);
