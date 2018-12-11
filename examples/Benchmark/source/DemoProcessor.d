@@ -1,6 +1,6 @@
 module DemoProcessor;
 
-version (Posix)  : 
+version (Posix) : 
 import hunt.io;
 import http.Processor;
 import std.json;
