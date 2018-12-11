@@ -150,12 +150,14 @@ class Assert {
         else
             message = std.format.format("raised in %s:%s", file, line);
 
+        version (HUNT_DEBUG) {
+            trace("expected: ", expected);
+            trace("actual: ", actual);
+        }
+
         static if (is(T == class)) {
             assert(expected == actual, message);
-        }
-        else {
-            // trace("expected: ", expected);
-            // trace("actual: ", actual);
+        } else {
             assert(expected == actual, message);
         }
     }
@@ -592,8 +594,8 @@ class Assert {
      * <code>actual</code> for which both numbers are still
      * considered equal.
      */
-    static void assertEquals(size_t line = __LINE__, string file = __FILE__)
-        (string message, double expected, double actual, double delta) {
+    static void assertEquals(size_t line = __LINE__, string file = __FILE__)(
+            string message, double expected, double actual, double delta) {
         if (doubleIsDifferent(expected, actual, delta)) {
             failNotEquals!(double, line, file)(message, expected, actual);
         }
@@ -778,12 +780,10 @@ class Assert {
         static if (is(T == class) || is(T == interface)) {
             if (object is null)
                 return;
-        }
-        else static if (is(T == struct)) {
+        } else static if (is(T == struct)) {
             if (object == T.init)
                 return;
-        }
-        else {
+        } else {
             if (object.empty)
                 return;
         }
@@ -808,8 +808,7 @@ class Assert {
         }
         static if (is(T == class)) {
             fail!(line, file)(formatted ~ "expected null, but was:<" ~ actual.toString() ~ ">");
-        }
-        else {
+        } else {
             fail!(line, file)(formatted ~ "expected null, but was:<" ~ to!string(actual) ~ ">");
         }
     }
@@ -823,8 +822,8 @@ class Assert {
      * @param expected the expected object
      * @param actual the object to compare to <code>expected</code>
      */
-    static void assertSame(T, size_t line = __LINE__, string file = __FILE__)
-        (string message, T expected, T actual) {
+    static void assertSame(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T expected, T actual) {
         if (expected == actual) {
             return;
         }
@@ -838,8 +837,7 @@ class Assert {
      * @param expected the expected object
      * @param actual the object to compare to <code>expected</code>
      */
-    static void assertSame(T, size_t line = __LINE__, string file = __FILE__)
-        (T expected, T actual) {
+    static void assertSame(T, size_t line = __LINE__, string file = __FILE__)(T expected, T actual) {
         assertSame!(T, line, file)(null, expected, actual);
     }
 
@@ -853,8 +851,8 @@ class Assert {
      * @param unexpected the object you don't expect
      * @param actual the object to compare to <code>unexpected</code>
      */
-    static void assertNotSame(T, size_t line = __LINE__, string file = __FILE__)
-        (string message, T unexpected, T actual) {
+    static void assertNotSame(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T unexpected, T actual) {
         if (unexpected == actual) {
             failSame!(line, file)(message);
         }
@@ -868,7 +866,8 @@ class Assert {
      * @param unexpected the object you don't expect
      * @param actual the object to compare to <code>unexpected</code>
      */
-    static void assertNotSame(T, size_t line = __LINE__, string file = __FILE__)(T unexpected, T actual) {
+    static void assertNotSame(T, size_t line = __LINE__, string file = __FILE__)(
+            T unexpected, T actual) {
         assertNotSame!(T, line, file)("", unexpected, actual);
     }
 
@@ -880,8 +879,8 @@ class Assert {
         fail!(line, file)(formatted ~ "expected not same");
     }
 
-    static private void failNotSame(T, size_t line = __LINE__, string file = __FILE__)
-        (string message, T expected, T actual) {
+    static private void failNotSame(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T expected, T actual) {
         string formatted = "";
         if (!message.empty) {
             formatted = message ~ " ";
@@ -890,13 +889,13 @@ class Assert {
                 .toString() ~ "> was not:<" ~ typeid(actual).toString() ~ ">");
     }
 
-    static private void failNotEquals(T, size_t line = __LINE__, string file = __FILE__)
-        (string message, T expected, T actual) {
+    static private void failNotEquals(T, size_t line = __LINE__, string file = __FILE__)(
+            string message, T expected, T actual) {
         fail!(line, file)(format(message, expected, actual));
     }
 
-    static string format(T)(string message, T expected, T actual) 
-        if (is(T == class) || is(T == struct) || is(T == interface)) {
+    static string format(T)(string message, T expected, T actual)
+            if (is(T == class) || is(T == struct) || is(T == interface)) {
         string formatted = "";
         if (!message.empty) {
             formatted = message ~ " ";
@@ -906,8 +905,7 @@ class Assert {
         if (expectedString == actualString) {
             return formatted ~ "expected: " ~ formatClassAndValue(expected,
                     expectedString) ~ " but was: " ~ formatClassAndValue(actual, actualString);
-        }
-        else {
+        } else {
             return formatted ~ "expected:<" ~ expectedString ~ "> but was:<" ~ actualString ~ ">";
         }
     }
@@ -927,8 +925,7 @@ class Assert {
         string actualString = to!string(actual);
         if (expected != actual) {
             return formatted ~ "expected: " ~ expectedString ~ " but was: " ~ actualString;
-        }
-        else {
+        } else {
             return formatted;
         }
     }

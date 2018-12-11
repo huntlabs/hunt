@@ -155,7 +155,7 @@ class TcpStream : AbstractStream {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
                 this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
                     _tcpOption.keepaliveProbes);
-                version (HUNT_DEBUG) checkKeepAlive();
+                // version (HUNT_DEBUG) checkKeepAlive();
             }
         } else version(Windows) {
             if(_tcpOption.isKeepalive) {
@@ -266,7 +266,7 @@ class TcpStream : AbstractStream {
     }
 
     /// safe for big data sending
-    void write(in ubyte[] data, DataWrittenHandler handler = null) {
+    void write(const ubyte[] data, DataWrittenHandler handler = null) {
         if (data.length == 0)
             return;
 
