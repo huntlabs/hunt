@@ -19,11 +19,16 @@ version(Posix) {
 	import http.Processor;
 	import http.Server;
 	import DemoProcessor;
+	import HttpBenchmarkProcessor;
 } else {
 	import HttpServer;
 }
 
+
+
 void main(string[] args) {
+
+	// benchmark(10000);
 
 	ushort port = 8080;
 	GetoptResult o = getopt(args, "port|p", "Port (default 8080)", &port);
@@ -36,7 +41,7 @@ void main(string[] args) {
 
 	version(Posix) {
 		httpServer.onProcessorCreate(delegate HttpProcessor (TcpStream client) {
-		return new DemoProcessor(client);
+			return new DemoProcessor(client);
 		});
 	}
 

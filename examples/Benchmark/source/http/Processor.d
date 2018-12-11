@@ -43,6 +43,7 @@ private:
 	HttpRequest request;
 	State state;
 	bool serving;
+	version(HUNT_METRIC) MonoTime startTime;
 	
 public:
 	TcpStream client;
@@ -57,7 +58,11 @@ public:
 	}
 
 	void run() {
-		client.onDataReceived((const ubyte[] data) { 
+		client.onDataReceived((const ubyte[] data) {
+			version(HUNT_METRIC) {
+				debug trace("start hadling session data ...");
+				startTime = MonoTime.currTime;
+            } 
 			parser.execute(data);
 		})
 		.onClosed(() {
@@ -93,7 +98,15 @@ public:
 		}
 		formattedWrite(outBuf, "Content-Length: %d\r\n\r\n", _body.length);
 		outBuf.put(cast(string) _body);
-		client.write(cast(ubyte[]) outBuf.data); // TODO: short-writes are quite possible
+		version(HUNT_METRIC) {
+			client.write(cast(ubyte[]) outBuf.data, (const ubyte[] data, size_t size) {
+				Duration timeElapsed = MonoTime.currTime - startTime;
+				tracef("handling done with cost: %d microseconds",
+					timeElapsed.total!(TimeUnit.Microsecond)());
+			}); 
+		} else {
+			client.write(cast(ubyte[]) outBuf.data); // TODO: short-writes are quite possible
+		}
 	}
 
 	void onStart(HttpRequest req) {
