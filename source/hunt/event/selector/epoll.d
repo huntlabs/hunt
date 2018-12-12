@@ -237,7 +237,7 @@ class AbstractSelector : Selector {
     private bool epollCtl(AbstractChannel channel, int opcode) {
         assert(channel !is null);
         const fd = channel.handle;
-        assert(fd >= 0, "The channel.handle is not initilized!");
+        assert(fd >= 0, "The channel.handle is not initialized!");
 
         epoll_event ev;
         buildEpollEvent(channel, ev);
