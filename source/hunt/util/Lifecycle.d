@@ -177,7 +177,7 @@ abstract class AbstractLifecycle : Lifecycle {
 
         synchronized (this) {
             if (!_isRunning){
-                initilize();
+                initialize();
                 _isRunning = true;
             }
         }
@@ -195,7 +195,7 @@ abstract class AbstractLifecycle : Lifecycle {
         }
     }
 
-    abstract protected void initilize();
+    abstract protected void initialize();
 
     abstract protected void destroy();
 }

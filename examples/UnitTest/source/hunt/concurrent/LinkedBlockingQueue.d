@@ -167,7 +167,7 @@ class LinkedBlockingQueue(E) : AbstractQueue!(E), BlockingQueue!(E) {
     /** Wait queue for waiting puts */
     private Condition notFull;
 
-    private void initilize() {
+    private void initialize() {
         takeLock = new Mutex();
         putLock = new Mutex();
         notEmpty = new Condition(takeLock);
@@ -265,7 +265,7 @@ class LinkedBlockingQueue(E) : AbstractQueue!(E), BlockingQueue!(E) {
         if (capacity <= 0) throw new IllegalArgumentException();
         this.capacity = capacity;
         last = head = new Node!(E)(E.init);
-        initilize();
+        initialize();
     }
 
     /**
