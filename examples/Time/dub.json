@@ -1,0 +1,17 @@
+{
+	"name": "time-demo",
+	"description": "A demo for Time.",
+	"copyright": "Copyright (C) 2015-2018, HuntLabs.cn",
+	"license": "Apache-2.0",
+	"authors": [
+		"gaoxincheng"
+	],
+	"dependencies": {
+		"hunt" : {
+			"path" : "../../"
+		}
+	},
+	"versions": [
+		"HUNT_DEBUG"
+	]
+}

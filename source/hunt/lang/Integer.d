@@ -8,7 +8,8 @@ import hunt.util.Comparator;
 
 import std.conv;
 
-class Integer : AbstractNumber!int {
+class Integer : AbstractNumber!int
+{
 
     /**
      * Returns the number of one-bits in the two's complement binary
@@ -20,15 +21,16 @@ class Integer : AbstractNumber!int {
      *     representation of the specified {@code int} value.
      * @since 1.5
      */
-    enum  int   MIN_VALUE = 0x80000000;
+    enum int MIN_VALUE = 0x80000000;
 
     /**
      * A constant holding the maximum value an {@code int} can
-     * have, 2<sup>31</sup>-1.
+     * have, 2!(sup)31</sup>-1.
      */
-    enum  int   MAX_VALUE = 0x7fffffff;
+    enum int MAX_VALUE = 0x7fffffff;
 
-    static int bitCount(int i) {
+    static int bitCount(int i)
+    {
         // HD, Figure 5-2
         i = i - ((i >>> 1) & 0x55555555);
         i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
@@ -38,14 +40,11 @@ class Integer : AbstractNumber!int {
         return i & 0x3f;
     }
 
-     enum char[] digits = [
-        '0' , '1' , '2' , '3' , '4' , '5' ,
-        '6' , '7' , '8' , '9' , 'a' , 'b' ,
-        'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
-        'i' , 'j' , 'k' , 'l' , 'm' , 'n' ,
-        'o' , 'p' , 'q' , 'r' , 's' , 't' ,
-        'u' , 'v' , 'w' , 'x' , 'y' , 'z'
-     ];
+    enum char[] digits = [
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c',
+            'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+            'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+        ];
 
     /**
      * Returns the number of zero bits preceding the highest-order
@@ -57,8 +56,8 @@ class Integer : AbstractNumber!int {
      * <p>Note that this method is closely related to the logarithm base 2.
      * For all positive {@code int} values x:
      * <ul>
-     * <li>floor(log<sub>2</sub>(x)) = {@code 31 - numberOfLeadingZeros(x)}
-     * <li>ceil(log<sub>2</sub>(x)) = {@code 32 - numberOfLeadingZeros(x - 1)}
+     * <li>floor(log!(sub)2</sub>(x)) = {@code 31 - numberOfLeadingZeros(x)}
+     * <li>ceil(log!(sub)2</sub>(x)) = {@code 32 - numberOfLeadingZeros(x - 1)}
      * </ul>
      *
      * @param i the value whose number of leading zeros is to be computed
@@ -68,15 +67,32 @@ class Integer : AbstractNumber!int {
      *     is equal to zero.
      * @since 1.5
      */
-    static int numberOfLeadingZeros(int i) {
+    static int numberOfLeadingZeros(int i)
+    {
         // HD, Figure 5-6
         if (i == 0)
             return 32;
         int n = 1;
-        if (i >>> 16 == 0) { n += 16; i <<= 16; }
-        if (i >>> 24 == 0) { n +=  8; i <<=  8; }
-        if (i >>> 28 == 0) { n +=  4; i <<=  4; }
-        if (i >>> 30 == 0) { n +=  2; i <<=  2; }
+        if (i >>> 16 == 0)
+        {
+            n += 16;
+            i <<= 16;
+        }
+        if (i >>> 24 == 0)
+        {
+            n += 8;
+            i <<= 8;
+        }
+        if (i >>> 28 == 0)
+        {
+            n += 4;
+            i <<= 4;
+        }
+        if (i >>> 30 == 0)
+        {
+            n += 2;
+            i <<= 2;
+        }
         n -= i >>> 31;
         return n;
     }
@@ -95,29 +111,54 @@ class Integer : AbstractNumber!int {
      *     to zero.
      * @since 1.5
      */
-    static int numberOfTrailingZeros(int i) {
+    static int numberOfTrailingZeros(int i)
+    {
         // HD, Figure 5-14
         int y;
-        if (i == 0) return 32;
+        if (i == 0)
+            return 32;
         int n = 31;
-        y = i <<16; if (y != 0) { n = n -16; i = y; }
-        y = i << 8; if (y != 0) { n = n - 8; i = y; }
-        y = i << 4; if (y != 0) { n = n - 4; i = y; }
-        y = i << 2; if (y != 0) { n = n - 2; i = y; }
+        y = i << 16;
+        if (y != 0)
+        {
+            n = n - 16;
+            i = y;
+        }
+        y = i << 8;
+        if (y != 0)
+        {
+            n = n - 8;
+            i = y;
+        }
+        y = i << 4;
+        if (y != 0)
+        {
+            n = n - 4;
+            i = y;
+        }
+        y = i << 2;
+        if (y != 0)
+        {
+            n = n - 2;
+            i = y;
+        }
         return n - ((i << 1) >>> 31);
     }
 
-    override int opCmp(Object o) {
-        if(o is null) throw new NullPointerException();
-        Number n = cast(Number)o;
-        if(n is null) throw new Exception("Number needed.");
+    override int opCmp(Object o)
+    {
+        if (o is null)
+            throw new NullPointerException();
+        Number n = cast(Number) o;
+        if (n is null)
+            throw new Exception("Number needed.");
         return compare(this.value, n.intValue());
     }
 
-    int opCmp(long n) {
+    int opCmp(long n)
+    {
         return compare(this.value, n);
     }
-    
 
     /**
      * Returns a hash code for a {@code double} value; compatible with
@@ -127,8 +168,9 @@ class Integer : AbstractNumber!int {
      * @return a hash code value for a {@code double} value.
      * @since 1.8
      */
-    override size_t toHash() @safe nothrow {
-        return cast(size_t)value;
+    override size_t toHash() @safe nothrow
+    {
+        return cast(size_t) value;
     }
 
     /**
@@ -178,7 +220,6 @@ class Integer : AbstractNumber!int {
     //     return false;
     // }
 
-
     // alias opEquals = Nullable!int.opEquals;
 
     /**
@@ -195,21 +236,21 @@ class Integer : AbstractNumber!int {
      * @param   value   the value to be represented by the
      *                  {@code Integer} object.
      */
-    this(int value) {
+    this(int value)
+    {
         super(value);
     }
 
-
-    static int parseInt(string s)  {
+    static int parseInt(string s)
+    {
         auto i = to!long(s);
-        if (i < MIN_VALUE || i > MAX_VALUE) {
-            throw new Exception(
-                    "Value " ~ s ~ " out of range from input ");
+        if (i < MIN_VALUE || i > MAX_VALUE)
+        {
+            throw new Exception("Value " ~ s ~ " out of range from input ");
         }
 
-         return cast(int)i;
+        return cast(int) i;
     }
-
 
     /**
      * Parses the string argument as a signed integer in the radix
@@ -266,8 +307,9 @@ class Integer : AbstractNumber!int {
      * @exception  NumberFormatException if the {@code String}
      *             does not contain a parsable {@code int}.
      */
-    static int parseInt(string s, int radix)  {
-         return to!int(s, radix);
+    static int parseInt(string s, int radix)
+    {
+        return to!int(s, radix);
     }
 
     /**
@@ -281,12 +323,14 @@ class Integer : AbstractNumber!int {
      * sun.misc.VM class.
      */
 
-    private static class IntegerCache {
-        static  int low = -128;
-        static  int high;
-        static  Integer[] cache;
+    private static class IntegerCache
+    {
+        static int low = -128;
+        static int high;
+        static Integer[] cache;
 
-        static this(){
+        static this()
+        {
             // high value may be configured by property
             int h = 127;
             // string integerCacheHighPropValue =
@@ -305,14 +349,16 @@ class Integer : AbstractNumber!int {
 
             cache = new Integer[(high - low) + 1];
             int j = low;
-            for(int k = 0; k < cache.length; k++)
+            for (int k = 0; k < cache.length; k++)
                 cache[k] = new Integer(j++);
 
             // range [-128, 127] must be interned (JLS7 5.1.7)
             assert(IntegerCache.high >= 127);
         }
 
-        private this() {}
+        private this()
+        {
+        }
     }
 
     /**
@@ -330,13 +376,12 @@ class Integer : AbstractNumber!int {
      * @return an {@code Integer} instance representing {@code i}.
      * @since  1.5
      */
-    static Integer valueOf(int i) {
+    static Integer valueOf(int i)
+    {
         if (i >= IntegerCache.low && i <= IntegerCache.high)
             return IntegerCache.cache[i + (-IntegerCache.low)];
         return new Integer(i);
     }
-
-
 
     /**
      * Returns an {@code Integer} object holding the value
@@ -363,8 +408,9 @@ class Integer : AbstractNumber!int {
      * @exception NumberFormatException if the {@code String}
      *            does not contain a parsable {@code int}.
      */
-    static Integer valueOf(string s, int radix) {
-        return Integer.valueOf(parseInt(s,radix));
+    static Integer valueOf(string s, int radix)
+    {
+        return Integer.valueOf(parseInt(s, radix));
     }
 
     /**
@@ -389,10 +435,10 @@ class Integer : AbstractNumber!int {
      * @exception  NumberFormatException  if the string cannot be parsed
      *             as an integer.
      */
-    static Integer valueOf(string s) {
+    static Integer valueOf(string s)
+    {
         return Integer.valueOf(parseInt(s, 10));
     }
-
 
     // Bit twiddling
 
@@ -411,5 +457,55 @@ class Integer : AbstractNumber!int {
      * @since 1.8
      */
     enum int BYTES = int.sizeof; // SIZE / Byte.SIZE;
+
+    /**
+     * Returns the value obtained by rotating the two's complement binary
+     * representation of the specified {@code int} value left by the
+     * specified number of bits.  (Bits shifted out of the left hand, or
+     * high-order, side reenter on the right, or low-order.)
+     *
+     * <p>Note that left rotation with a negative distance is equivalent to
+     * right rotation: {@code rotateLeft(val, -distance) == rotateRight(val,
+     * distance)}.  Note also that rotation by any multiple of 32 is a
+     * no-op, so all but the last five bits of the rotation distance can be
+     * ignored, even if the distance is negative: {@code rotateLeft(val,
+     * distance) == rotateLeft(val, distance & 0x1F)}.
+     *
+     * @param i the value whose bits are to be rotated left
+     * @param distance the number of bit positions to rotate left
+     * @return the value obtained by rotating the two's complement binary
+     *     representation of the specified {@code int} value left by the
+     *     specified number of bits.
+     * @since 1.5
+     */
+    public static int rotateLeft(int i, int distance)
+    {
+        return (i << distance) | (i >>> -distance);
+    }
+
+    /**
+     * Returns the value obtained by rotating the two's complement binary
+     * representation of the specified {@code int} value right by the
+     * specified number of bits.  (Bits shifted out of the right hand, or
+     * low-order, side reenter on the left, or high-order.)
+     *
+     * <p>Note that right rotation with a negative distance is equivalent to
+     * left rotation: {@code rotateRight(val, -distance) == rotateLeft(val,
+     * distance)}.  Note also that rotation by any multiple of 32 is a
+     * no-op, so all but the last five bits of the rotation distance can be
+     * ignored, even if the distance is negative: {@code rotateRight(val,
+     * distance) == rotateRight(val, distance & 0x1F)}.
+     *
+     * @param i the value whose bits are to be rotated right
+     * @param distance the number of bit positions to rotate right
+     * @return the value obtained by rotating the two's complement binary
+     *     representation of the specified {@code int} value right by the
+     *     specified number of bits.
+     * @since 1.5
+     */
+    public static int rotateRight(int i, int distance)
+    {
+        return (i >>> distance) | (i << -distance);
+    }
 
 }

@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+time.so
+time.dylib
+time.dll
+time.a
+time.lib
+time-test-*
+*.exe
+*.o
+*.obj
+*.lst
+time-demo
