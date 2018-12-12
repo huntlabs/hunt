@@ -299,3 +299,15 @@ class IllegalMonitorStateException : RuntimeException {
 class NestedRuntimeException : Exception {
     mixin BasicExceptionCtors;
 }
+
+class InvalidClassException : Exception {
+    mixin BasicExceptionCtors;
+}
+
+class InvalidObjectException : Exception {
+    mixin BasicExceptionCtors;
+}
+
+class ClassCastException : Exception {
+    mixin BasicExceptionCtors;
+}
