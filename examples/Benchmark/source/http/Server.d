@@ -69,9 +69,19 @@ abstract class AbstractTcpServer {
 				version (HUNT_DEBUG) {
 					infof("new client from %s, fd=%d", socket.remoteAddress.toString(), socket.handle());
 				}
+				version(HUNT_METRIC) {
+                    import core.time;
+                    debug trace("processing client...");
+                    MonoTime startTime = MonoTime.currTime;
+                }
 				EventLoop loop = _group.nextLoop();
 				TcpStream stream = new TcpStream(loop, socket, _tcpStreamoption);
 				onConnectionAccepted(stream);
+				version(HUNT_METRIC) {
+                    Duration timeElapsed = MonoTime.currTime - startTime;
+                    warningf("client processing done in: %d microseconds",
+                        timeElapsed.total!(TimeUnit.Microsecond)());
+                }
 			} catch (Exception e) {
 				warningf("Failure on accept %s", e);
 				break;

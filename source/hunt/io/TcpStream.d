@@ -248,7 +248,7 @@ class TcpStream : AbstractStream {
         assert(buffer !is null);
 
         if (!_isConnected) {
-            warning("The connection has been closed!");
+            warningf("The connection (fd=%d) has been closed!", this.handle);
             return;
         }
 
