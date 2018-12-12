@@ -64,3 +64,17 @@ bool contains(string[] items, string item)
         }
         return len1 - len2;
 }
+
+import std.algorithm.searching; 
+
+int search(T)(T[] ts, T t)
+{
+    if(!ts.canFind(t))
+        return -1;
+    foreach(int idx,T tm ; ts)
+    {
+        if(tm == t)
+            return idx;
+    }
+    return -1;
+}
