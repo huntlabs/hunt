@@ -174,7 +174,7 @@ shared static this()
     }
 
     {
-        Clock.SystemClock.OFFSET_SEED = System.currentTimeMillis() / 1000 - 1024; // initial offest
+        Clock.SystemClock.OFFSET_SEED = System.currentTimeMillis() / 1000 /* - 1024 */; // initial offest
         Clock.SystemClock.UTC = new Clock.SystemClock(ZoneOffset.UTC);
     }
 
