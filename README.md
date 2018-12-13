@@ -33,6 +33,13 @@ A refined core library for D programming language.
 
 For details, see [here](docs/benchmark.md).
 
+## Thanks
+ * @shove70
+ * @n8sh
+ * @deviator
+ * @jasonwhite
+ * @Kripth
+
 ## TODO
 - [ ] Improve performance
 - [ ] Stablize APIs
