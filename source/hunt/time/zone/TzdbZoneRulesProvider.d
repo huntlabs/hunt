@@ -15,8 +15,12 @@ import hunt.time.util;
 import hunt.time.zone.ZoneRulesProvider;
 import hunt.time.zone.ZoneRules;
 import hunt.time.zone.Ser;
+
 import std.conv;
+import std.file;
+import std.path;
 import std.stdio;
+
 /**
  * Loads time-zone rules for 'TZDB'.
  *
@@ -47,16 +51,22 @@ final class TzdbZoneRulesProvider : ZoneRulesProvider {
      * @throws ZoneRulesException if unable to load
      */
     public this() {
-         regionIds = new ArrayList!string();
+        regionIds = new ArrayList!string();
 
         regionToRules = new HashMap!(string, Object)();
         //@gxc load timezone database
         try {
-            string libDir = "./";
+            string resourcePath = dirName(thisExePath()) ~ "/resources";
+            string resourceName = buildPath(resourcePath, "tzdb.dat");
+            if(!exists(resourceName)) {
+                version(HUNT_DEBUG) warningf("File does not exist: %s", resourceName);
+            } else {
+                File f = File(resourceName,"r");
+                scope(exit) f.close();
                 DataInputStream dis = new DataInputStream(
-                     new BufferedInputStream(new FileInputStream(
-                         File(libDir ~ "tzdb.dat","r"))));
+                     new BufferedInputStream(new FileInputStream(f)));
                 load(dis);
+            }
         } catch (Exception ex) {
             throw new ZoneRulesException("Unable to load TZDB time-zone rules", ex);
         } 
