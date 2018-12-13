@@ -11,8 +11,5 @@
 		"hunt" : {
 			"path" : "../../"
 		}
-	},
-	"subConfigurations": {
-		"hunt" : "debug"
 	}
 }
