@@ -64,7 +64,7 @@ public class ChronoField : TemporalField
      * The value is validated _in strict and smart mode but not _in lenient mode.
      * The field is resolved _in combination with {@code MILLI_OF_SECOND} and {@code MICRO_OF_SECOND}.
      */
-    static ChronoField NANO_OF_SECOND;
+    __gshared ChronoField NANO_OF_SECOND;
     /**
      * The nano-of-day.
      * !(p)
@@ -80,7 +80,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code NANO_OF_SECOND}, {@code SECOND_OF_MINUTE},
      * {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    static ChronoField NANO_OF_DAY;
+    __gshared ChronoField NANO_OF_DAY;
     /**
      * The micro-of-second.
      * !(p)
@@ -100,7 +100,7 @@ public class ChronoField : TemporalField
      * The field is resolved _in combination with {@code MILLI_OF_SECOND} to produce
      * {@code NANO_OF_SECOND}.
      */
-    static ChronoField MICRO_OF_SECOND;
+    __gshared ChronoField MICRO_OF_SECOND;
     /**
      * The micro-of-day.
      * !(p)
@@ -119,7 +119,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code MICRO_OF_SECOND}, {@code SECOND_OF_MINUTE},
      * {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    static ChronoField MICRO_OF_DAY;
+    __gshared ChronoField MICRO_OF_DAY;
     /**
      * The milli-of-second.
      * !(p)
@@ -139,7 +139,7 @@ public class ChronoField : TemporalField
      * The field is resolved _in combination with {@code MICRO_OF_SECOND} to produce
      * {@code NANO_OF_SECOND}.
      */
-    static ChronoField MILLI_OF_SECOND;
+    __gshared ChronoField MILLI_OF_SECOND;
     /**
      * The milli-of-day.
      * !(p)
@@ -158,7 +158,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code MILLI_OF_SECOND}, {@code SECOND_OF_MINUTE},
      * {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    static ChronoField MILLI_OF_DAY;
+    __gshared ChronoField MILLI_OF_DAY;
     /**
      * The second-of-minute.
      * !(p)
@@ -168,7 +168,7 @@ public class ChronoField : TemporalField
      * When parsing this field it behaves equivalent to the following:
      * The value is validated _in strict and smart mode but not _in lenient mode.
      */
-    static ChronoField SECOND_OF_MINUTE;
+    __gshared ChronoField SECOND_OF_MINUTE;
     /**
      * The second-of-day.
      * !(p)
@@ -180,7 +180,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code SECOND_OF_MINUTE}, {@code MINUTE_OF_HOUR}
      * and {@code HOUR_OF_DAY} fields.
      */
-    static ChronoField SECOND_OF_DAY;
+    __gshared ChronoField SECOND_OF_DAY;
     /**
      * The minute-of-hour.
      * !(p)
@@ -190,7 +190,7 @@ public class ChronoField : TemporalField
      * When parsing this field it behaves equivalent to the following:
      * The value is validated _in strict and smart mode but not _in lenient mode.
      */
-    static ChronoField MINUTE_OF_HOUR;
+    __gshared ChronoField MINUTE_OF_HOUR;
     /**
      * The minute-of-day.
      * !(p)
@@ -201,7 +201,7 @@ public class ChronoField : TemporalField
      * The value is validated _in strict and smart mode but not _in lenient mode.
      * The value is split to form {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    static ChronoField MINUTE_OF_DAY;
+    __gshared ChronoField MINUTE_OF_DAY;
     /**
      * The hour-of-am-pm.
      * !(p)
@@ -217,7 +217,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #CLOCK_HOUR_OF_AMPM} for the related field that counts hours from 1 to 12.
      */
-    static ChronoField HOUR_OF_AMPM;
+    __gshared ChronoField HOUR_OF_AMPM;
     /**
      * The clock-hour-of-am-pm.
      * !(p)
@@ -233,7 +233,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #HOUR_OF_AMPM} for the related field that counts hours from 0 to 11.
      */
-    static ChronoField CLOCK_HOUR_OF_AMPM;
+    __gshared ChronoField CLOCK_HOUR_OF_AMPM;
     /**
      * The hour-of-day.
      * !(p)
@@ -250,7 +250,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #CLOCK_HOUR_OF_DAY} for the related field that counts hours from 1 to 24.
      */
-    static ChronoField HOUR_OF_DAY;
+    __gshared ChronoField HOUR_OF_DAY;
     /**
      * The clock-hour-of-day.
      * !(p)
@@ -266,7 +266,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #HOUR_OF_DAY} for the related field that counts hours from 0 to 23.
      */
-    static ChronoField CLOCK_HOUR_OF_DAY;
+    __gshared ChronoField CLOCK_HOUR_OF_DAY;
     /**
      * The am-pm-of-day.
      * !(p)
@@ -279,7 +279,7 @@ public class ChronoField : TemporalField
      * {@code HOUR_OF_AMPM} to form {@code HOUR_OF_DAY} by multiplying
      * the {AMPM_OF_DAY} value by 12.
      */
-    static ChronoField AMPM_OF_DAY;
+    __gshared ChronoField AMPM_OF_DAY;
     /**
      * The day-of-week, such as Tuesday.
      * !(p)
@@ -295,7 +295,7 @@ public class ChronoField : TemporalField
      * if they have a similar concept of named or numbered days within a period similar
      * to a week. It is recommended that the numbering starts from 1.
      */
-    static ChronoField DAY_OF_WEEK;
+    __gshared ChronoField DAY_OF_WEEK;
     /**
      * The aligned day-of-week within a month.
      * !(p)
@@ -313,7 +313,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    static ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH;
+    __gshared ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH;
     /**
      * The aligned day-of-week within a year.
      * !(p)
@@ -331,7 +331,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    static ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR;
+    __gshared ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR;
     /**
      * The day-of-month.
      * !(p)
@@ -344,7 +344,7 @@ public class ChronoField : TemporalField
      * day-of-month values for users of the calendar system.
      * Normally, this is a count of days from 1 to the length of the month.
      */
-    static ChronoField DAY_OF_MONTH;
+    __gshared ChronoField DAY_OF_MONTH;
     /**
      * The day-of-year.
      * !(p)
@@ -362,7 +362,7 @@ public class ChronoField : TemporalField
      * the year number to 1, can happen on any date. The era and year reset also cause
      * the day-of-year to be reset to 1, but not the month-of-year or day-of-month.
      */
-    static ChronoField DAY_OF_YEAR;
+    __gshared ChronoField DAY_OF_YEAR;
     /**
      * The epoch-day, based on the Java epoch of 1970-01-01 (ISO).
      * !(p)
@@ -375,7 +375,7 @@ public class ChronoField : TemporalField
      * Range of EpochDay is between (LocalDate.MIN.toEpochDay(), LocalDate.MAX.toEpochDay())
      * both inclusive.
      */
-    static ChronoField EPOCH_DAY;
+    __gshared ChronoField EPOCH_DAY;
     /**
      * The aligned week within a month.
      * !(p)
@@ -391,7 +391,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    static ChronoField ALIGNED_WEEK_OF_MONTH;
+    __gshared ChronoField ALIGNED_WEEK_OF_MONTH;
     /**
      * The aligned week within a year.
      * !(p)
@@ -407,7 +407,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    static ChronoField ALIGNED_WEEK_OF_YEAR;
+    __gshared ChronoField ALIGNED_WEEK_OF_YEAR;
     /**
      * The month-of-year, such as March.
      * !(p)
@@ -418,7 +418,7 @@ public class ChronoField : TemporalField
      * month-of-year values for users of the calendar system.
      * Normally, this is a count of months starting from 1.
      */
-    static ChronoField MONTH_OF_YEAR;
+    __gshared ChronoField MONTH_OF_YEAR;
     /**
      * The proleptic-month based, counting months sequentially from year 0.
      * !(p)
@@ -438,7 +438,7 @@ public class ChronoField : TemporalField
      * If the calendar system has a minimum year that excludes year zero, then one must
      * be extrapolated _in order for this method to be defined.
      */
-    static ChronoField PROLEPTIC_MONTH;
+    __gshared ChronoField PROLEPTIC_MONTH;
     /**
      * The year within the era.
      * !(p)
@@ -473,7 +473,7 @@ public class ChronoField : TemporalField
      * will typically be the same as that used by the ISO calendar system.
      * The year-of-era value should typically always be positive, however this is not required.
      */
-    static ChronoField YEAR_OF_ERA;
+    __gshared ChronoField YEAR_OF_ERA;
     /**
      * The proleptic year, such as 2012.
      * !(p)
@@ -497,7 +497,7 @@ public class ChronoField : TemporalField
      * defined with any appropriate value, although defining it to be the same as ISO may be
      * the best option.
      */
-    static ChronoField YEAR;
+    __gshared ChronoField YEAR;
     /**
      * The era.
      * !(p)
@@ -514,7 +514,7 @@ public class ChronoField : TemporalField
      * Earlier eras must have sequentially smaller values.
      * Later eras must have sequentially larger values,
      */
-    static ChronoField ERA;
+    __gshared ChronoField ERA;
     /**
      * The instant epoch-seconds.
      * !(p)
@@ -529,7 +529,7 @@ public class ChronoField : TemporalField
      * This field is strictly defined to have the same meaning _in all calendar systems.
      * This is necessary to ensure interoperation between calendars.
      */
-    static ChronoField INSTANT_SECONDS;
+    __gshared ChronoField INSTANT_SECONDS;
     /**
      * The offset from UTC/Greenwich.
      * !(p)
@@ -543,7 +543,7 @@ public class ChronoField : TemporalField
      * This field is strictly defined to have the same meaning _in all calendar systems.
      * This is necessary to ensure interoperation between calendars.
      */
-    static ChronoField OFFSET_SECONDS;
+    __gshared ChronoField OFFSET_SECONDS;
 
     // static this()
     // {
@@ -675,7 +675,7 @@ public class ChronoField : TemporalField
     private ValueRange _range;
     private string displayNameKey;
 
-    __gshared ChronoField[] _values;
+    static ChronoField[] _values;
     private int _ordinal;
     public int ordinal()
     {
