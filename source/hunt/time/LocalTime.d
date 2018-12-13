@@ -310,6 +310,9 @@ public final class LocalTime
         ZoneOffset offset = zone.getRules().getOffset(instant);
         long localSecond = instant.getEpochSecond() + offset.getTotalSeconds();
         int secsOfDay = Math.floorMod(localSecond, SECONDS_PER_DAY);
+        import hunt.logging;
+        import std.string;
+        logDebug("--- > (%s , %s , %s)".format(localSecond,secsOfDay,offset.getId()));
         return ofNanoOfDay(secsOfDay * NANOS_PER_SECOND + instant.getNano());
     }
 
@@ -350,6 +353,9 @@ public final class LocalTime
         nanoOfDay -= minutes * LocalTime.NANOS_PER_MINUTE;
         int seconds = cast(int) (nanoOfDay / LocalTime.NANOS_PER_SECOND);
         nanoOfDay -= seconds * LocalTime.NANOS_PER_SECOND;
+        import hunt.logging;
+        import std.string;
+        logDebug("--- > (%s ,%s , %s , %s , %s)".format(nanoOfDay,hours,minutes,seconds,nanoOfDay));
         return create(hours, minutes, seconds, cast(int) nanoOfDay);
     }
 

@@ -3601,7 +3601,9 @@ public final class DateTimeFormatterBuilder
                 }
                 DecimalStyle decimalStyle = context.getDecimalStyle();
                 BigDecimal fraction = convertToFraction(value.longValue());
-                if (fraction.scale() == 0)
+                if(fraction !is null )
+                {
+                    if (fraction.scale() == 0)
                 { // scale is zero if value is zero
                     if (minWidth > 0)
                     {
@@ -3626,6 +3628,7 @@ public final class DateTimeFormatterBuilder
                         buf.append(decimalStyle.getDecimalSeparator());
                     }
                     buf.append(str);
+                    }
                 }
                 return true;
             }

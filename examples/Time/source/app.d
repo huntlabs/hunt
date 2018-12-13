@@ -12,12 +12,16 @@ void main()
 
 	writeln("LocalTime now : %s".format(localTime));
 
-	auto localDate = LocalDate.now();
+	// auto localDate = LocalDate.now();
 
-	writeln("LocalDate now : %s".format(localDate));
+	// writeln("LocalDate now : %s".format(localDate));
 
-	auto localDateTime = LocalDateTime.now();
+	// auto localDateTime = LocalDateTime.now();
 
-	writeln("LocalDateTime now : %s".format(localDateTime));
+	// writeln("LocalDateTime now : %s".format(localDateTime));
+
+	// writeln("System.currentTimeMillis : ",System.currentTimeMillis());
+
+	// writeln("Clock.currTime : ",std.datetime.Clock.currTime());
 
 }

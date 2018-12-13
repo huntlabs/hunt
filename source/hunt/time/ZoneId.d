@@ -226,7 +226,7 @@ public abstract class ZoneId : Serializable {
     public static ZoneId systemDefault() {
         // return TimeZone.getDefault().toZoneId();
         ///@gxc
-        return ZoneId.of("Asia/Shanghai",false);
+        return ZoneId.of("Asia/Shanghai",true);
     }
 
     /**

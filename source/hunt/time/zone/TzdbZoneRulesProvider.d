@@ -59,6 +59,7 @@ final class TzdbZoneRulesProvider : ZoneRulesProvider {
             string resourcePath = dirName(thisExePath()) ~ "/resources";
             string resourceName = buildPath(resourcePath, "tzdb.dat");
             if(!exists(resourceName)) {
+                import hunt.logging;
                 version(HUNT_DEBUG) warningf("File does not exist: %s", resourceName);
             } else {
                 File f = File(resourceName,"r");
