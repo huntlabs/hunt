@@ -250,6 +250,11 @@ private class UnmodifiableCollection(E) : Collection!(E) {
     
     override size_t toHash() @trusted nothrow { return super.toHash(); }
 
+    InputRange!E iterator() {
+        throw new NotImplementedException();
+    }
+
+
     // Iterator!(E) iterator() {
     //     return new Iterator!(E)() {
     //         private final Iterator!(E) i = c.iterator();
@@ -270,6 +275,11 @@ private class UnmodifiableCollection(E) : Collection!(E) {
     bool add(E e) {
         throw new UnsupportedOperationException();
     }
+
+    bool addAll(E[] e) {
+        throw new UnsupportedOperationException();
+    }
+    
     bool remove(E o) {
         throw new UnsupportedOperationException();
     }
