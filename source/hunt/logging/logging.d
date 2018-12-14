@@ -320,7 +320,8 @@ class Logger
 		}
 
 		immutable void* data = cast(immutable void*) this;
-		_tid = spawn(&Logger.worker, data);
+		if(!_conf.fileName.empty)
+			_tid = spawn(&Logger.worker, data);
 	}
 
 protected:
@@ -331,10 +332,8 @@ protected:
 		bool flag = true;
 		while (flag)
 		{
-			bool timeout = receiveTimeout(10.msecs, (string msg) {
-
+			receive((string msg) {
 				logger.saveMsg(msg);
-
 			}, (OwnerTerminated e) { flag = false; }, (Variant any) {  });
 		}
 	}
