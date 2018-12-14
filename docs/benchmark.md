@@ -28,18 +28,19 @@ Just repson with static string.
 
 [The logs](logs/b2/)
 
-
-
 ### See also
 
 [1] Hunt: https://github.com/huntlabs/hunt/
 
-[2] Photon: https://github.com/DmitryOlshansky/photon/
+[2] Hunt-Minihttp: https://github.com/huntlabs/hunt-minihttp
 
-[3] Tokio MiniHTTP: https://github.com/tokio-rs/tokio-minihttp/
+[3] Photon: https://github.com/DmitryOlshansky/photon/
 
-[4] fasthttp: https://github.com/valyala/fasthttp/
+[4] Tokio MiniHTTP: https://github.com/tokio-rs/tokio-minihttp/
 
-[5] FrameworkBenchmarks: https://github.com/TechEmpower/FrameworkBenchmarks/
+[5] fasthttp: https://github.com/valyala/fasthttp/
 
-[6] wrk: https://github.com/wg/wrk/
+[6] FrameworkBenchmarks: https://github.com/TechEmpower/FrameworkBenchmarks/
+
+[7] wrk: https://github.com/wg/wrk/
+
