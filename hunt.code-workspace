@@ -7,9 +7,6 @@
 			"path": "examples\\UnitTest"
 		},
 		{
-			"path": "examples/Benchmark"
-		},
-		{
 			"path": "examples/Time"
 		}
 	]
