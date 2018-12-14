@@ -176,6 +176,11 @@ shared static this()
     }
 
     {
+        DecimalStyle.STANDARD = new DecimalStyle('0', '+', '-', '.');
+        DecimalStyle.CACHE = new HashMap!(Locale, DecimalStyle)(16, 0.75f /* , 2 */ );
+    }
+
+    {
         Clock.SystemClock.OFFSET_SEED = System.currentTimeMillis() / 1000 /* - 1024 */; // initial offest
         Clock.SystemClock.UTC = new Clock.SystemClock(ZoneOffset.UTC);
     }
@@ -1083,10 +1088,7 @@ shared static this()
         DateTimeTextProvider.INSTANCE = new DateTimeTextProvider();
     }
 
-    {
-        DecimalStyle.STANDARD = new DecimalStyle('0', '+', '-', '.');
-        DecimalStyle.CACHE = new HashMap!(Locale, DecimalStyle)(16, 0.75f /* , 2 */ );
-    }
+    
 
     {
         Instant.EPOCH = new Instant(0, 0);

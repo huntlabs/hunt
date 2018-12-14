@@ -509,9 +509,9 @@ public abstract class Clock {
             long nsecs = System.currentTimeNsecs();
             long localOffset = convert!("nsecs", "seconds")(nsecs);
             long adjustment = nsecs - localOffset * 1000_000_000L;
-            import hunt.logging;
-            import std.string;
-            version(HUNT_DEBUG) logDebug("(nsecs : %s , msecs : %s , offset: %s )".format(nsecs,localOffset,adjustment));
+            // import hunt.logging;
+            // import std.string;
+            // version(HUNT_DEBUG) logDebug("(nsecs : %s , msecs : %s , offset: %s )".format(nsecs,localOffset,adjustment));
             return Instant.ofEpochSecond(localOffset, adjustment);
         }
         override

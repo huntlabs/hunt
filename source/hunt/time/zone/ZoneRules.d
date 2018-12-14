@@ -200,15 +200,17 @@ public final class ZoneRules : Serializable
             }
             localTransitionOffsetList.add(trans.getOffsetAfter());
         }
-        this.savingsLocalTransitions = new LocalDateTime[localTransitionList.size()];
-        foreach (data; localTransitionList)
-            this.savingsLocalTransitions ~= data;
-        this.wallOffsets = new ZoneOffset[localTransitionOffsetList.size()];
-        foreach (data; localTransitionOffsetList)
-        {
-            this.wallOffsets ~= data;
-        }
+        // this.savingsLocalTransitions = new LocalDateTime[localTransitionList.size()];
+        // foreach (data; localTransitionList)
+        //     this.savingsLocalTransitions ~= data;
+        // this.wallOffsets = new ZoneOffset[localTransitionOffsetList.size()];
+        // foreach (data; localTransitionOffsetList)
+        // {
+        //     this.wallOffsets ~= data;
+        // }
 
+        this.savingsLocalTransitions = localTransitionList.toArray();
+        this.wallOffsets = localTransitionOffsetList.toArray();
         // convert savings transitions to instants
         this.savingsInstantTransitions = new long[transitionList.size()];
         for (int i = 0; i < transitionList.size(); i++)
@@ -221,9 +223,10 @@ public final class ZoneRules : Serializable
         {
             throw new IllegalArgumentException("Too many transition rules");
         }
-        this.lastRules = new ZoneOffsetTransitionRule[lastRules.size()];
-        foreach (data; lastRules)
-            this.lastRules ~= data;
+        // this.lastRules = new ZoneOffsetTransitionRule[lastRules.size()];
+        // foreach (data; lastRules)
+        //     this.lastRules ~= data;
+        this.lastRules = lastRules.toArray();
     }
 
     /**
@@ -272,9 +275,10 @@ public final class ZoneRules : Serializable
                     localTransitionList.add(trans.getDateTimeBefore());
                 }
             }
-            this.savingsLocalTransitions = new LocalDateTime[localTransitionList.size()];
-            foreach (data; localTransitionList)
-                this.savingsLocalTransitions ~= data;
+            // this.savingsLocalTransitions = new LocalDateTime[localTransitionList.size()];
+            // foreach (data; localTransitionList)
+            //     this.savingsLocalTransitions ~= data;
+            this.savingsLocalTransitions = localTransitionList.toArray();
         }
     }
 

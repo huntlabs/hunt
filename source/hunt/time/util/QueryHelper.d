@@ -33,7 +33,7 @@ class QueryHelper
     static R query(R)(TemporalAccessor t, TemporalQuery!(R) param)
     {
         auto typeinfo = typeid(cast(Object) t);
-        writeln("test : ", typeinfo);
+        // writeln("test : ", typeinfo);
         if (typeinfo == typeid(DayOfWeek))
         {
             return (cast(DayOfWeek) t).query!R(param);
