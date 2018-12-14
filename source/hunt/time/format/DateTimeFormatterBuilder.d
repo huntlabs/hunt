@@ -62,6 +62,7 @@ import std.conv;
 import std.algorithm.searching;
 import hunt.time.format.DecimalStyle;
 import hunt.time.util.QueryHelper;
+import hunt.logging;
 
 // import sun.text.spi.JavaTimeDateTimePatternProvider;
 // import sun.util.locale.provider.CalendarDataUtility;
@@ -2557,15 +2558,38 @@ public final class DateTimeFormatterBuilder
 
         this(List!(DateTimePrinterParser) printerParsers, bool optional)
         {
-            auto a = new DateTimePrinterParser[printerParsers.size()];
-            foreach (l; printerParsers)
-                a ~= l;
+            auto a = printerParsers.toArray()/* new DateTimePrinterParser[printerParsers.size()] */;
+            // foreach (l; printerParsers)
+            // {
+            //     if(l is null)
+            //     {
+            //         version(HUNT_DEBUG) trace("is null");
+            //     }
+            //     version(HUNT_DEBUG) trace("----> :",(cast(Object)(l)).toString);
+            //     a ~= l;
+            // }
+            // foreach(p ; a)
+            // {
+            //     if(p is null)
+            //     {
+            //         import hunt.logging;
+            //         version(HUNT_DEBUG) trace("is null");
+            //     }
+            // }
             this(a, optional);
         }
 
         this(DateTimePrinterParser[] printerParsers, bool optional)
         {
             this.printerParsers = printerParsers;
+            // foreach(p ; this.printerParsers)
+            // {
+            //     if(p is null)
+            //     {
+            //         import hunt.logging;
+            //         version(HUNT_DEBUG) trace("is null");
+            //     }
+            // }
             this.optional = optional;
         }
 

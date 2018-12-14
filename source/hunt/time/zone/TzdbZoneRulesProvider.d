@@ -145,6 +145,8 @@ final class TzdbZoneRulesProvider : ZoneRulesProvider {
         for (int i = 0; i < ruleCount; i++) {
             byte[] bytes = new byte[dis.readShort()];
             dis.readFully(bytes);
+            // import hunt.logging;
+            // trace(" idx : ",i," rule : ",bytes);
             ruleArray[i] = new String(cast(string)bytes);
         }
         // link version-region-rules
@@ -157,6 +159,13 @@ final class TzdbZoneRulesProvider : ZoneRulesProvider {
                 regionToRules.put(region, rule);
             }
         }
+
+        // import hunt.logging;
+        // trace("regionIds :  ",regionIds);
+        // foreach(r , o; regionToRules )
+        // {
+        //     trace("id :  ",r," rule : ",o.toString);
+        // }
     }
 
     override

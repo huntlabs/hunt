@@ -13,3 +13,4 @@ time-test-*
 *.obj
 *.lst
 time-demo
+core
