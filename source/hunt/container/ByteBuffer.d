@@ -93,9 +93,9 @@ abstract class ByteBuffer : Buffer
      * @throws  IllegalArgumentException
      *          If the <tt>capacity</tt> is a negative integer
      */
-    // static ByteBuffer allocateDirect(int capacity) {
-    //     return new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity);
-    // }
+    static ByteBuffer allocateDirect(int capacity) {
+        return new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity);
+    }
 
     /**
      * Allocates a new byte buffer.
@@ -1015,7 +1015,6 @@ class HeapByteBuffer : ByteBuffer
         hb = new byte[cap];
         offset = 0;
         */
-
     }
 
     this(byte[] buf, int off, int len)
@@ -1026,7 +1025,6 @@ class HeapByteBuffer : ByteBuffer
         hb = buf;
         offset = 0;
         */
-
     }
 
     protected this(byte[] buf, int mark, int pos, int lim, int cap, int off)
