@@ -1856,6 +1856,11 @@ public final class LocalDateTime
         }
         return /* ChronoLocalDateTime. super.*/super_compareTo(other);
     }
+
+    // override 
+    public int opCmp(LocalDateTime other) {
+            return compareTo0(other);
+    }
     /**
      * Checks if this date-time is after the specified date-time.
      * !(p)

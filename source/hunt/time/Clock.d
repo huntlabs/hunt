@@ -3,6 +3,7 @@ module hunt.time.Clock;
 
 import std.conv;
 import std.math;
+import core.time : convert;
 import hunt.lang.exception;
 import hunt.lang;
 import hunt.time.LocalTime;
@@ -475,36 +476,42 @@ public abstract class Clock {
             // Take a local copy of _offset. _offset can be updated concurrently
             // by other threads (even if we haven't made it volatile) so we will
             // work with a local copy.
-            long localOffset = _offset;
-            long adjustment = 0L /* VM.getNanoTimeAdjustment(localOffset) */;
+            // long localOffset = _offset;
+            // long adjustment = VM.getNanoTimeAdjustment(localOffset);
 
-            if (adjustment == -1) {
-                // -1 is a sentinel value returned by VM.getNanoTimeAdjustment
-                // when the _offset it is given is too far off the current UTC
-                // time. In principle, this should not happen unless the
-                // JVM has run for more than ~136 years (not likely) or
-                // someone is fiddling with the system time, or the _offset is
-                // by chance at 1ns _in the future (very unlikely).
-                // We can easily recover from all these conditions by bringing
-                // back the _offset _in range and retry.
+            // if (adjustment == -1) {
+            //     // -1 is a sentinel value returned by VM.getNanoTimeAdjustment
+            //     // when the _offset it is given is too far off the current UTC
+            //     // time. In principle, this should not happen unless the
+            //     // JVM has run for more than ~136 years (not likely) or
+            //     // someone is fiddling with the system time, or the _offset is
+            //     // by chance at 1ns _in the future (very unlikely).
+            //     // We can easily recover from all these conditions by bringing
+            //     // back the _offset _in range and retry.
 
-                // bring back the _offset _in range. We use -1024 to make
-                // it more unlikely to hit the 1ns _in the future condition.
-                localOffset = System.currentTimeMillis()/1000 - 1024;
+            //     // bring back the _offset _in range. We use -1024 to make
+            //     // it more unlikely to hit the 1ns _in the future condition.
+            //     localOffset = System.currentTimeMillis()/1000 - 1024;
 
-                // retry
-                // adjustment = VM.getNanoTimeAdjustment(localOffset);
+            //     // retry
+            //     // adjustment = VM.getNanoTimeAdjustment(localOffset);
 
-                if (adjustment == -1) {
-                    // Should not happen: we just recomputed a new _offset.
-                    // It should have fixed the issue.
-                    throw new InternalError("Offset " ~ localOffset.to!string ~ " is not _in range");
-                } else {
-                    // OK - recovery succeeded. Update the _offset for the
-                    // next call...
-                    _offset = localOffset;
-                }
-            }
+            //     if (adjustment == -1) {
+            //         // Should not happen: we just recomputed a new _offset.
+            //         // It should have fixed the issue.
+            //         throw new InternalError("Offset " ~ localOffset.to!string ~ " is not _in range");
+            //     } else {
+            //         // OK - recovery succeeded. Update the _offset for the
+            //         // next call...
+            //         _offset = localOffset;
+            //     }
+            // }
+            long nsecs = System.currentTimeNsecs();
+            long localOffset = convert!("nsecs", "seconds")(nsecs);
+            long adjustment = nsecs - localOffset * 1000_000_000L;
+            import hunt.logging;
+            import std.string;
+            version(HUNT_DEBUG) logDebug("(nsecs : %s , msecs : %s , offset: %s )".format(nsecs,localOffset,adjustment));
             return Instant.ofEpochSecond(localOffset, adjustment);
         }
         override
