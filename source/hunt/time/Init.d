@@ -59,6 +59,8 @@ import hunt.time.zone.TzdbZoneRulesProvider;
 
 shared static this()
 {
+    import hunt.logging;
+        /* version(HUNT_DEBUG) */ trace("Init shared static this start");
     {
         Locale.ENGLISH = Locale.createConstant("en", "");
 
@@ -1492,4 +1494,6 @@ shared static this()
         ZoneOffsetTransitionRule.TimeDefinition._values
             ~= ZoneOffsetTransitionRule.TimeDefinition.STANDARD;
     }
+
+        /* version(HUNT_DEBUG) */ trace("Init shared static this end");
 }

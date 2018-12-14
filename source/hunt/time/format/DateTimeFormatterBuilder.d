@@ -3906,7 +3906,7 @@ public final class DateTimeFormatterBuilder
                 Long inNanos = null;
                 if (context.getTemporal().isSupported(ChronoField.NANO_OF_SECOND))
                 {
-                    inNanos = context.getTemporal().getLong(ChronoField.NANO_OF_SECOND);
+                    inNanos = new Long(context.getTemporal().getLong(ChronoField.NANO_OF_SECOND));
                 }
                 if (inSecs is null)
                 {

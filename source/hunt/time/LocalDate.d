@@ -49,7 +49,7 @@ import hunt.util.Comparator;
 import hunt.time.chrono.ChronoLocalDateTime;
 import hunt.time.chrono.ChronoLocalDateTimeImpl;
 import hunt.time.util.QueryHelper;
-
+import hunt.logging;
 // import hunt.util.stream.LongStream;
 // import hunt.util.stream.Stream;
 
@@ -224,6 +224,10 @@ public  class LocalDate
      *  or if the day-of-month is invalid for the month-year
      */
     public static LocalDate of(int year, int month, int dayOfMonth) {
+        if(ChronoField.YEAR is null)
+        {
+            logError("ChronoField.YEAR is null");
+        }
         ChronoField.YEAR.checkValidValue(year);
         ChronoField.MONTH_OF_YEAR.checkValidValue(month);
         ChronoField.DAY_OF_MONTH.checkValidValue(dayOfMonth);

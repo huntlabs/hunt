@@ -2,8 +2,6 @@
 module hunt.time.Duration;
 
 import hunt.time.LocalTime;
-import hunt.time.temporal.ChronoField;
-import hunt.time.temporal.ChronoUnit;
 import hunt.time.Ser;
 
 import hunt.io.DataInput;

@@ -22,6 +22,8 @@ import hunt.container.HashMap;
 import hunt.time.zone.ZoneOffsetTransitionRule;
 import hunt.time.zone.ZoneOffsetTransition;
 import hunt.string.common;
+import hunt.util.Arrays;
+
 
 /**
  * The rules defining how the zone offset varies for a single time-zone.
@@ -371,18 +373,6 @@ public final class ZoneRules : Serializable
         return new Ser(Ser.ZRULES, this);
     }
 
-    static int search(T)(T[] ts, T t)
-    {
-        if (!ts.canFind(t))
-            return -1;
-        foreach (int idx, T tm; ts)
-        {
-            if (tm == t)
-                return idx;
-        }
-        return -1;
-    }
-
     /**
      * Writes the state to the stream.
      *
@@ -506,7 +496,7 @@ public final class ZoneRules : Serializable
         // using historic rules
         import hunt.string.common;
 
-        int index = search(savingsInstantTransitions, epochSec);
+        int index = Arrays.binarySearch(savingsInstantTransitions, epochSec);
         if (index == -1)
             index = -(cast(int)(savingsInstantTransitions.length)) - 1;
         if (index < 0)
@@ -672,7 +662,7 @@ public final class ZoneRules : Serializable
         }
 
         // using historic rules
-        int index = search(savingsLocalTransitions, dt);
+        int index = Arrays.binarySearch(savingsLocalTransitions, dt);
         if (index == -1)
         {
             // before first transition
@@ -802,7 +792,7 @@ public final class ZoneRules : Serializable
             return standardOffsets[0];
         }
         long epochSec = instant.getEpochSecond();
-        int index = search(standardTransitions, epochSec);
+        int index = Arrays.binarySearch(standardTransitions, epochSec);
         if (index < 0)
         {
             // switch negative insert position to start of matched range
@@ -922,7 +912,7 @@ public final class ZoneRules : Serializable
         }
 
         // using historic rules
-        int index = search(savingsInstantTransitions, epochSec);
+        int index = Arrays.binarySearch(savingsInstantTransitions, epochSec);
         if (index < 0)
         {
             index = -index - 1; // switched value is the next transition
@@ -984,7 +974,7 @@ public final class ZoneRules : Serializable
         }
 
         // using historic rules
-        int index = search(savingsInstantTransitions, epochSec);
+        int index = Arrays.binarySearch(savingsInstantTransitions, epochSec);
         if (index < 0)
         {
             index = -index - 1;

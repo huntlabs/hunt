@@ -28,7 +28,7 @@ import std.stdio;
  */
 final class TzdbZoneRulesProvider : ZoneRulesProvider {
 
-    mixin MakeServiceLoader!ZoneRulesProvider;
+    // mixin MakeServiceLoader!ZoneRulesProvider;
     /**
      * All the regions that are available.
      */
