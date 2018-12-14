@@ -18,19 +18,15 @@ import hunt.datetime;
 
 void main()
 {
-    // testUnits!(ArrayListDemo)();
+    testUnits!(ArrayListDemo)();
     testUnits!(BufferUtilsDemo)();
-    // testUnits!HashMapDemo();
-    // testUnits!HashSetDemo();
-    // testUnits!(LinkedListDemo)();
-    // testUnits!LinkedHashSetDemo();
-    // testUnits!LinkedHashMapDemo();
-    // testUnits!(MultiMapDemo)();
-    // testUnits!TreeMapDemo();
-    // testUnits!(TrieTest)();
-    // testUnits!SetDemo();
-    // writeln(DateTimeHelper.currentTimeMillis);
-
-
-
+    testUnits!HashMapDemo();
+    testUnits!HashSetDemo();
+    testUnits!(LinkedListDemo)();
+    testUnits!LinkedHashSetDemo();
+    testUnits!LinkedHashMapDemo();
+    testUnits!(MultiMapDemo)();
+    testUnits!TreeMapDemo();
+    testUnits!(TrieTest)();
+    testUnits!SetDemo();
 }
