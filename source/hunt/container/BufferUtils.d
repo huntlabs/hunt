@@ -16,19 +16,83 @@ import hunt.util.TypeUtils;
 import std.conv;
 import std.range;
 
+/**
+ * Buffer utility methods.
+ * <p>
+ * The standard JVM {@link ByteBuffer} can exist in two modes: In fill mode the
+ * valid data is between 0 and pos; In flush mode the valid data is between the
+ * pos and the limit. The various ByteBuffer methods assume a mode and some of
+ * them will switch or enforce a mode: Allocate and clear set fill mode; flip
+ * and compact switch modes; read and write assume fill and flush modes. This
+ * duality can result in confusing code such as:
+ * </p>
+ * <p>
+ * <pre>
+ * buffer.clear();
+ * channel.write(buffer);
+ * </pre>
+ * <p>
+ * Which looks as if it should write no data, but in fact writes the buffer
+ * worth of garbage.
+ * </p>
+ * <p>
+ * The BufferUtils class provides a set of utilities that operate on the
+ * convention that ByteBuffers will always be left, passed in an API or returned
+ * from a method in the flush mode - ie with valid data between the pos and
+ * limit. This convention is adopted so as to avoid confusion as to what state a
+ * buffer is in and to avoid excessive copying of data that can result with the
+ * usage of compress.
+ * </p>
+ * <p>
+ * Thus this class provides alternate implementations of {@link #allocate(int)},
+ * {@link #allocateDirect(int)} and {@link #clear(ByteBuffer)} that leave the
+ * buffer in flush mode. Thus the following tests will pass:
+ * </p>
+ * <p>
+ * <pre>
+ * ByteBuffer buffer = BufferUtils.allocate(1024);
+ * assert (buffer.remaining() == 0);
+ * BufferUtils.clear(buffer);
+ * assert (buffer.remaining() == 0);
+ * </pre>
+ * <p>
+ * If the BufferUtils methods {@link #fill(ByteBuffer, byte[], int, int)},
+ * {@link #append(ByteBuffer, byte[], int, int)} or
+ * {@link #put(ByteBuffer, ByteBuffer)} are used, then the caller does not need
+ * to explicitly switch the buffer to fill mode. If the caller wishes to use
+ * other ByteBuffer bases libraries to fill a buffer, then they can use explicit
+ * calls of #flipToFill(ByteBuffer) and #flipToFlush(ByteBuffer, int) to change
+ * modes. Note because this convention attempts to avoid the copies of compact,
+ * the position is not set to zero on each fill cycle and so its value must be
+ * remembered:
+ * </p>
+ * <p>
+ * <pre>
+ * int pos = BufferUtils.flipToFill(buffer);
+ * try {
+ * 	buffer.put(data);
+ * } finally {
+ * 	flipToFlush(buffer, pos);
+ * }
+ * </pre>
+ * <p>
+ * The flipToFill method will effectively clear the buffer if it is empty and
+ * will compact the buffer if there is no space.
+ * </p>
+ */
 class BufferUtils {
 
-    __gshared ByteBuffer EMPTY_BUFFER; 
+    __gshared ByteBuffer EMPTY_BUFFER;
     __gshared ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY;
 
     enum int TEMP_BUFFER_SIZE = 4096;
-    enum  byte SPACE = 0x20;
-    enum  byte MINUS = '-';
-    enum byte[] DIGIT = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-                    'E', 'F'];
+    enum byte SPACE = 0x20;
+    enum byte MINUS = '-';
+    enum byte[] DIGIT = [
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+        ];
 
-    shared static this()
-    {
+    shared static this() {
         EMPTY_BUFFER = ByteBuffer.wrap(new byte[0]);
         EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
     }
@@ -58,12 +122,11 @@ class BufferUtils {
      * @param capacity capacity of the allocated ByteBuffer
      * @return Buffer
      */
-    // static ByteBuffer allocateDirect(int capacity) {
-    //     ByteBuffer buf = ByteBuffer.allocateDirect(capacity);
-    //     buf.limit(0);
-    //     return buf;
-    // }
-
+    static ByteBuffer allocateDirect(int capacity) {
+        ByteBuffer buf = ByteBuffer.allocateDirect(capacity);
+        buf.limit(0);
+        return buf;
+    }
 
     /* ------------------------------------------------------------ */
 
@@ -131,7 +194,6 @@ class BufferUtils {
         return position;
     }
 
-
     /* ------------------------------------------------------------ */
 
     /**
@@ -150,7 +212,6 @@ class BufferUtils {
         buffer.position(position);
     }
 
-
     /* ------------------------------------------------------------ */
 
     /**
@@ -163,7 +224,7 @@ class BufferUtils {
         if (buffer.hasArray()) {
             byte[] array = buffer.array();
             int from = buffer.arrayOffset() + buffer.position();
-            if(canDuplicate)
+            if (canDuplicate)
                 return array[from .. from + buffer.remaining()].dup;
             else
                 return array[from .. from + buffer.remaining()];
@@ -378,7 +439,6 @@ class BufferUtils {
         }
     }
 
-
     // /* ------------------------------------------------------------ */
     // static void readFrom(File file, ByteBuffer buffer) throws IOException {
     //     try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -435,20 +495,17 @@ class BufferUtils {
      * @return The buffer as a string.
      */
     static string toString(ByteBuffer buffer) {
-        if(buffer is null)
+        if (buffer is null || buffer.remaining() == 0)
             return null;
 
         byte[] array = buffer.hasArray() ? buffer.array() : null;
-        if (array is null)
-            return cast(string) buffer.array[0..buffer.remaining()];
-        else
-        {
+        if (array is null) {
+            return cast(string) buffer.array[0 .. buffer.remaining()];
+        } else {
             int start = buffer.arrayOffset() + buffer.position();
-            int end = start+buffer.remaining();
+            int end = start + buffer.remaining();
             return cast(string) array[start .. end];
         }
-
-        // return toString(buffer, StandardCharsets.ISO_8859_1);
     }
 
     // /* ------------------------------------------------------------ */
@@ -486,160 +543,161 @@ class BufferUtils {
 
     // /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert a partial buffer to a string.
-    //  *
-    //  * @param buffer   the buffer to convert
-    //  * @param position The position in the buffer to start the string from
-    //  * @param length   The length of the buffer
-    //  * @param charset  The {@link Charset} to use to convert the bytes
-    //  * @return The buffer as a string.
-    //  */
-    // static string toString(ByteBuffer buffer, int position, int length, Charset charset) {
-    //     if (buffer is null)
-    //         return null;
-    //     byte[] array = buffer.hasArray() ? buffer.array() : null;
-    //     if (array is null) {
-    //         ByteBuffer ro = buffer.asReadOnlyBuffer();
-    //         ro.position(position);
-    //         ro.limit(position + length);
-    //         byte[] to = new byte[length];
-    //         ro.get(to);
-    //         return new string(to, 0, to.length, charset);
-    //     }
-    //     return new string(array, buffer.arrayOffset() + position, length, charset);
-    // }
+    /**
+     * Convert a partial buffer to a string.
+     *
+     * @param buffer   the buffer to convert
+     * @param position The position in the buffer to start the string from
+     * @param length   The length of the buffer
+     * @param charset  The {@link Charset} to use to convert the bytes
+     * @return The buffer as a string.
+     */
+    static string toString(ByteBuffer buffer, int position, int length) {
+        if (buffer is null)
+            return null;
+        byte[] array = buffer.hasArray() ? buffer.array() : null;
+        if (array is null) {
+            ByteBuffer ro = buffer.asReadOnlyBuffer();
+            ro.position(position);
+            ro.limit(position + length);
+            byte[] to = new byte[length];
+            ro.get(to);
+            return cast(string) to;
+        }
+        int startIndex = buffer.arrayOffset() + position;
+        int endIndex = startIndex + length;
+        return cast(string) array[startIndex .. endIndex];
+    }
 
     // /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert buffer to an integer. Parses up to the first non-numeric character. If no number is found an IllegalArgumentException is thrown
-    //  *
-    //  * @param buffer A buffer containing an integer in flush mode. The position is not changed.
-    //  * @return an int
-    //  */
-    // static int toInt(ByteBuffer buffer) {
-    //     return toInt(buffer, buffer.position(), buffer.remaining());
-    // }
+    /**
+     * Convert buffer to an integer. Parses up to the first non-numeric character. If no number is found an IllegalArgumentException is thrown
+     *
+     * @param buffer A buffer containing an integer in flush mode. The position is not changed.
+     * @return an int
+     */
+    static int toInt(ByteBuffer buffer) {
+        return toInt(buffer, buffer.position(), buffer.remaining());
+    }
 
-    // /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
 
-    // /**
-    //  * Convert buffer to an integer. Parses up to the first non-numeric character. If no number is found an
-    //  * IllegalArgumentException is thrown
-    //  *
-    //  * @param buffer   A buffer containing an integer in flush mode. The position is not changed.
-    //  * @param position the position in the buffer to start reading from
-    //  * @param length   the length of the buffer to use for conversion
-    //  * @return an int of the buffer bytes
-    //  */
-    // static int toInt(ByteBuffer buffer, int position, int length) {
-    //     int val = 0;
-    //     bool started = false;
-    //     bool minus = false;
+    /**
+     * Convert buffer to an integer. Parses up to the first non-numeric character. If no number is found an
+     * IllegalArgumentException is thrown
+     *
+     * @param buffer   A buffer containing an integer in flush mode. The position is not changed.
+     * @param position the position in the buffer to start reading from
+     * @param length   the length of the buffer to use for conversion
+     * @return an int of the buffer bytes
+     */
+    static int toInt(ByteBuffer buffer, int position, int length) {
+        int val = 0;
+        bool started = false;
+        bool minus = false;
 
-    //     int limit = position + length;
+        int limit = position + length;
 
-    //     if (length <= 0)
-    //         throw new NumberFormatException(toString(buffer, position, length, StandardCharsets.UTF_8));
+        if (length <= 0)
+            throw new NumberFormatException(toString(buffer, position, length));
 
-    //     for (int i = position; i < limit; i++) {
-    //         byte b = buffer.get(i);
-    //         if (b <= SPACE) {
-    //             if (started)
-    //                 break;
-    //         } else if (b >= '0' && b <= '9') {
-    //             val = val * 10 + (b - '0');
-    //             started = true;
-    //         } else if (b == MINUS && !started) {
-    //             minus = true;
-    //         } else
-    //             break;
-    //     }
+        for (int i = position; i < limit; i++) {
+            byte b = buffer.get(i);
+            if (b <= SPACE) {
+                if (started)
+                    break;
+            } else if (b >= '0' && b <= '9') {
+                val = val * 10 + (b - '0');
+                started = true;
+            } else if (b == MINUS && !started) {
+                minus = true;
+            } else
+                break;
+        }
 
-    //     if (started)
-    //         return minus ? (-val) : val;
-    //     throw new NumberFormatException(toString(buffer));
-    // }
-    
-    // /* ------------------------------------------------------------ */
+        if (started)
+            return minus ? (-val) : val;
+        throw new NumberFormatException(toString(buffer));
+    }
 
-    // /**
-    //  * Convert buffer to an integer. Parses up to the first non-numeric character. If no number is found an IllegalArgumentException is thrown
-    //  *
-    //  * @param buffer A buffer containing an integer in flush mode. The position is updated.
-    //  * @return an int
-    //  */
-    // static int takeInt(ByteBuffer buffer) {
-    //     int val = 0;
-    //     bool started = false;
-    //     bool minus = false;
-    //     int i;
-    //     for (i = buffer.position(); i < buffer.limit(); i++) {
-    //         byte b = buffer.get(i);
-    //         if (b <= SPACE) {
-    //             if (started)
-    //                 break;
-    //         } else if (b >= '0' && b <= '9') {
-    //             val = val * 10 + (b - '0');
-    //             started = true;
-    //         } else if (b == MINUS && !started) {
-    //             minus = true;
-    //         } else
-    //             break;
-    //     }
+    /* ------------------------------------------------------------ */
 
-    //     if (started) {
-    //         buffer.position(i);
-    //         return minus ? (-val) : val;
-    //     }
-    //     throw new NumberFormatException(toString(buffer));
-    // }
+    /**
+     * Convert buffer to an integer. Parses up to the first non-numeric character. If no number is found an IllegalArgumentException is thrown
+     *
+     * @param buffer A buffer containing an integer in flush mode. The position is updated.
+     * @return an int
+     */
+    static int takeInt(ByteBuffer buffer) {
+        int val = 0;
+        bool started = false;
+        bool minus = false;
+        int i;
+        for (i = buffer.position(); i < buffer.limit(); i++) {
+            byte b = buffer.get(i);
+            if (b <= SPACE) {
+                if (started)
+                    break;
+            } else if (b >= '0' && b <= '9') {
+                val = val * 10 + (b - '0');
+                started = true;
+            } else if (b == MINUS && !started) {
+                minus = true;
+            } else
+                break;
+        }
 
-    // /**
-    //  * Convert buffer to an long. Parses up to the first non-numeric character. If no number is found an IllegalArgumentException is thrown
-    //  *
-    //  * @param buffer A buffer containing an integer in flush mode. The position is not changed.
-    //  * @return an int
-    //  */
-    // static long toLong(ByteBuffer buffer) {
-    //     long val = 0;
-    //     bool started = false;
-    //     bool minus = false;
+        if (started) {
+            buffer.position(i);
+            return minus ? (-val) : val;
+        }
+        throw new NumberFormatException(toString(buffer));
+    }
 
-    //     for (int i = buffer.position(); i < buffer.limit(); i++) {
-    //         byte b = buffer.get(i);
-    //         if (b <= SPACE) {
-    //             if (started)
-    //                 break;
-    //         } else if (b >= '0' && b <= '9') {
-    //             val = val * 10L + (b - '0');
-    //             started = true;
-    //         } else if (b == MINUS && !started) {
-    //             minus = true;
-    //         } else
-    //             break;
-    //     }
+    /**
+     * Convert buffer to an long. Parses up to the first non-numeric character. If no number is found an IllegalArgumentException is thrown
+     *
+     * @param buffer A buffer containing an integer in flush mode. The position is not changed.
+     * @return an int
+     */
+    static long toLong(ByteBuffer buffer) {
+        long val = 0;
+        bool started = false;
+        bool minus = false;
 
-    //     if (started)
-    //         return minus ? (-val) : val;
-    //     throw new NumberFormatException(toString(buffer));
-    // }
+        for (int i = buffer.position(); i < buffer.limit(); i++) {
+            byte b = buffer.get(i);
+            if (b <= SPACE) {
+                if (started)
+                    break;
+            } else if (b >= '0' && b <= '9') {
+                val = val * 10L + (b - '0');
+                started = true;
+            } else if (b == MINUS && !started) {
+                minus = true;
+            } else
+                break;
+        }
 
+        if (started)
+            return minus ? (-val) : val;
+        throw new NumberFormatException(toString(buffer));
+    }
 
     static void putHexInt(ByteBuffer buffer, int n) {
         if (n < 0) {
             buffer.put(cast(byte) '-');
 
             if (n == int.min) {
-                buffer.put(cast(byte) (0x7f & '8'));
-                buffer.put(cast(byte) (0x7f & '0'));
-                buffer.put(cast(byte) (0x7f & '0'));
-                buffer.put(cast(byte) (0x7f & '0'));
-                buffer.put(cast(byte) (0x7f & '0'));
-                buffer.put(cast(byte) (0x7f & '0'));
-                buffer.put(cast(byte) (0x7f & '0'));
-                buffer.put(cast(byte) (0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '8'));
+                buffer.put(cast(byte)(0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '0'));
+                buffer.put(cast(byte)(0x7f & '0'));
 
                 return;
             }
@@ -651,7 +709,7 @@ class BufferUtils {
         } else {
             bool started = false;
             // This assumes constant time int arithmatic
-            foreach (int hexDivisor ; hexDivisors) {
+            foreach (int hexDivisor; hexDivisors) {
                 if (n < hexDivisor) {
                     if (started)
                         buffer.put(cast(byte) '0');
@@ -683,7 +741,7 @@ class BufferUtils {
         } else {
             bool started = false;
             // This assumes constant time int arithmatic
-            foreach (int decDivisor ; decDivisors) {
+            foreach (int decDivisor; decDivisors) {
                 if (n < decDivisor) {
                     if (started)
                         buffer.put(cast(byte) '0');
@@ -714,7 +772,7 @@ class BufferUtils {
         } else {
             bool started = false;
             // This assumes constant time int arithmatic
-            foreach (long aDecDivisorsL ; decDivisorsL) {
+            foreach (long aDecDivisorsL; decDivisorsL) {
                 if (n < aDecDivisorsL) {
                     if (started)
                         buffer.put(cast(byte) '0');
@@ -729,20 +787,20 @@ class BufferUtils {
         }
     }
 
-    // static ByteBuffer toBuffer(int value) {
-    //     ByteBuffer buf = ByteBuffer.allocate(32);
-    //     putDecInt(buf, value);
-    //     return buf;
-    // }
+    static ByteBuffer toBuffer(int value) {
+        ByteBuffer buf = ByteBuffer.allocate(32);
+        putDecInt(buf, value);
+        return buf;
+    }
 
-    // static ByteBuffer toBuffer(long value) {
-    //     ByteBuffer buf = ByteBuffer.allocate(32);
-    //     putDecLong(buf, value);
-    //     return buf;
-    // }
+    static ByteBuffer toBuffer(long value) {
+        ByteBuffer buf = ByteBuffer.allocate(32);
+        putDecLong(buf, value);
+        return buf;
+    }
 
     static ByteBuffer toBuffer(string s) {
-        return toBuffer(cast(byte[])s.dup);
+        return toBuffer(cast(byte[]) s.dup);
     }
 
     // static ByteBuffer toBuffer(string s, Charset charset) {
@@ -760,7 +818,7 @@ class BufferUtils {
     static ByteBuffer toBuffer(byte[] array) {
         if (array is null)
             return EMPTY_BUFFER;
-        return toBuffer(array, 0, cast(int)array.length);
+        return toBuffer(array, 0, cast(int) array.length);
     }
 
     /**
@@ -780,10 +838,10 @@ class BufferUtils {
     static ByteBuffer toDirectBuffer(string s) {
         if (s.empty)
             return EMPTY_BUFFER;
-        byte[] bytes = cast(byte[])s.dup;
+        byte[] bytes = cast(byte[]) s.dup;
         // TODO: Tasks pending completion -@zxp at 8/25/2018, 3:11:29 PM
-        // 
-        ByteBuffer buf = new HeapByteBuffer(cast(int)bytes.length, cast(int)bytes.length); // ByteBuffer.allocateDirect(bytes.length);
+        // ByteBuffer.allocateDirect(bytes.length); 
+        ByteBuffer buf = new HeapByteBuffer(cast(int) bytes.length, cast(int) bytes.length);
         buf.put(bytes);
         buf.flip();
         return buf;
@@ -820,7 +878,6 @@ class BufferUtils {
     //     }
     // }
 
-    
     /* ------------------------------------------------------------ */
 
     /**
@@ -836,14 +893,13 @@ class BufferUtils {
             TypeUtils.toHex(array[1], ot);
             TypeUtils.toHex(array[2], ot);
             TypeUtils.toHex(array[3], ot);
-        } else
-        {
+        } else {
             size_t hashCode = hashOf(buffer);
             ot.append(to!string(hashCode, 16));
             // ot.append(Integer.toHexString(System.identityHashCode(buffer)));
         }
     }
-    
+
     /* ------------------------------------------------------------ */
 
     /**
@@ -857,10 +913,9 @@ class BufferUtils {
         idString(buffer, buf);
         return buf.toString();
     }
-    
-    
+
     /* ------------------------------------------------------------ */
-    
+
     static string toSummaryString(ByteBuffer buffer) {
         if (buffer is null)
             return "null";
@@ -881,7 +936,8 @@ class BufferUtils {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for (int i = 0; i < buffer.length; i++) {
-            if (i > 0) builder.append(',');
+            if (i > 0)
+                builder.append(',');
             builder.append(toDetailString(buffer[i]));
         }
         builder.append(']');
@@ -964,7 +1020,7 @@ class BufferUtils {
         else
             buf.append("\\x").append(TypeUtils.toHexString(b));
     }
-    
+
     /* ------------------------------------------------------------ */
 
     /**
@@ -1003,62 +1059,78 @@ class BufferUtils {
         return TypeUtils.toHexString(toArray(buffer));
     }
 
+    private enum int[] decDivisors = [
+            1000000000, 100000000, 10000000, 1000000, 100000, 10000, 1000, 100, 10, 1
+        ];
 
-    private enum int[] decDivisors =[1000000000, 100000000, 10000000, 1000000, 100000, 10000, 1000, 100, 10, 1];
+    private enum int[] hexDivisors = [
+            0x10000000, 0x1000000, 0x100000, 0x10000, 0x1000, 0x100, 0x10, 0x1
+        ];
 
-    private enum int[] hexDivisors =[0x10000000, 0x1000000, 0x100000, 0x10000, 0x1000, 0x100, 0x10, 0x1];
-
-    private enum long[] decDivisorsL =[1000000000000000000L, 100000000000000000L, 10000000000000000L, 1000000000000000L, 
-                    100000000000000L, 10000000000000L, 1000000000000L, 100000000000L,
-                    10000000000L, 1000000000L, 100000000L, 10000000L, 1000000L, 100000L, 10000L, 1000L, 100L, 10L, 1L];
+    private enum long[] decDivisorsL = [
+            1000000000000000000L, 100000000000000000L, 10000000000000000L,
+            1000000000000000L, 100000000000000L, 10000000000000L, 1000000000000L,
+            100000000000L, 10000000000L, 1000000000L, 100000000L, 10000000L,
+            1000000L, 100000L, 10000L, 1000L, 100L, 10L, 1L
+        ];
 
     static void putCRLF(ByteBuffer buffer) {
         buffer.put(cast(byte) 13);
         buffer.put(cast(byte) 10);
     }
 
-    // static bool isPrefix(ByteBuffer prefix, ByteBuffer buffer) {
-    //     if (prefix.remaining() > buffer.remaining())
-    //         return false;
-    //     int bi = buffer.position();
-    //     for (int i = prefix.position(); i < prefix.limit(); i++)
-    //         if (prefix.get(i) != buffer.get(bi++))
-    //             return false;
-    //     return true;
-    // }
+    static bool isPrefix(ByteBuffer prefix, ByteBuffer buffer) {
+        if (prefix.remaining() > buffer.remaining())
+            return false;
+        int bi = buffer.position();
+        for (int i = prefix.position(); i < prefix.limit(); i++)
+            if (prefix.get(i) != buffer.get(bi++))
+                return false;
+        return true;
+    }
 
-    // static ByteBuffer ensureCapacity(ByteBuffer buffer, int capacity) {
-    //     if (buffer is null)
-    //         return allocate(capacity);
+    static ByteBuffer ensureCapacity(ByteBuffer buffer, size_t capacity) {
+        if (buffer is null)
+            return allocate(capacity);
 
-    //     if (buffer.capacity() >= capacity)
-    //         return buffer;
+        if (buffer.capacity() >= capacity)
+            return buffer;
 
-    //     if (buffer.hasArray())
-    //         return ByteBuffer.wrap(Arrays.copyOfRange(buffer.array(), buffer.arrayOffset(), buffer.arrayOffset() + capacity), buffer.position(), buffer.remaining());
+        if (buffer.hasArray()) {
+            byte[] b = buffer.array();
+            size_t offset = buffer.arrayOffset();
+            size_t remaining = b.length - offset;
+            byte[] copy = new byte[capacity];
+            assert(remaining <= capacity);
+            // if(remaining  > capacity)
+            //     copy[0.. capacity] = b[offset .. offset+capacity];
+            // else
+            copy[0 .. remaining] = b[offset .. $];
+            return ByteBuffer.wrap(copy, buffer.position(), buffer.remaining());
+        }
 
-    //     throw new UnsupportedOperationException();
-    // }
+        throw new UnsupportedOperationException();
+    }
 
-    // /**
-    //  * The capacity modulo 1024 is 0
-    //  *
-    //  * @param capacity the buffer size
-    //  * @return the buffer size that modulo 1024 is 0
-    //  */
-    // static int normalizeBufferSize(int capacity) {
-    //     int q = capacity >>> 10;
-    //     int r = capacity & 1023;
-    //     if (r != 0) {
-    //         q++;
-    //     }
-    //     return q << 10;
-    // }
+    /**
+     * The capacity modulo 1024 is 0
+     *
+     * @param capacity the buffer size
+     * @return the buffer size that modulo 1024 is 0
+     */
+    static int normalizeBufferSize(int capacity) {
+        int q = capacity >>> 10;
+        int r = capacity & 1023;
+        if (r != 0) {
+            q++;
+        }
+        return q << 10;
+    }
 
     static string toString(List!(ByteBuffer) list) {
         Appender!(byte[]) ot;
         try {
-            foreach(ByteBuffer buffer ; list) {
+            foreach (ByteBuffer buffer; list) {
                 // auto array = buffer.array();
                 // int from = buffer.arrayOffset() + buffer.position();
                 // int to = from + buffer.remaining();
@@ -1066,12 +1138,11 @@ class BufferUtils {
                 // buffer.position = buffer.position() + buffer.remaining();
                 writeTo(buffer, ot);
             }
-            return cast(string)ot.data;
+            return cast(string) ot.data;
         } catch (IOException e) {
             return null;
         }
     }
-
 
     // static List!(ByteBuffer) split(ByteBuffer buffer, int maxSize) {
     //     if (buffer.remaining() <= maxSize) {
@@ -1094,7 +1165,7 @@ class BufferUtils {
 
     static long remaining(ByteBuffer[] byteBuffers) {
         long count = 0;
-        foreach (ByteBuffer byteBuffer ; byteBuffers) {
+        foreach (ByteBuffer byteBuffer; byteBuffers) {
             count += byteBuffer.remaining();
         }
         return count;
@@ -1102,7 +1173,7 @@ class BufferUtils {
 
     static long remaining(Collection!ByteBuffer collection) {
         long count = 0;
-        foreach (ByteBuffer byteBuffer ; collection) {
+        foreach (ByteBuffer byteBuffer; collection) {
             count += byteBuffer.remaining();
         }
         return count;
@@ -1111,7 +1182,7 @@ class BufferUtils {
     static byte[] toArray(List!(ByteBuffer) list) {
         Appender!(byte[]) ot;
         try {
-            foreach (ByteBuffer buffer ; list) {
+            foreach (ByteBuffer buffer; list) {
                 // BufferUtils.writeTo(buf, out);
                 // auto array = buffer.array();
                 // int from = buffer.arrayOffset() + buffer.position();
@@ -1147,23 +1218,3 @@ class BufferUtils {
         }
     }
 }
-
-
-// class Collections
-// {
-//     static Enumeration!T enumeration(T=string)(InputRange!T range)
-//     {
-//         return new RangeEnumeration!T(range);
-//     }
-
-//     static Enumeration!T enumeration(T=string)(T[] range)
-//     {
-//         return new RangeEnumeration!T(inputRangeObject(range));
-//     }
-
-    
-//     // static Enumeration!T enumeration(T=string)(List! range)
-//     // {
-//     //     return new RangeEnumeration!T(inputRangeObject(range));
-//     // }
-// }

@@ -3,6 +3,7 @@ import std.stdio;
 import hunt.util.UnitTest;
 
 import ArrayListDemo;
+import BufferUtilsDemo;
 import HashSetDemo;
 import HashMapDemo;
 import LinkedListDemo;
@@ -17,15 +18,16 @@ import hunt.datetime;
 
 void main()
 {
-    // testUnits!(TrieTest)();
     // testUnits!(ArrayListDemo)();
+    testUnits!(BufferUtilsDemo)();
     // testUnits!HashMapDemo();
     // testUnits!HashSetDemo();
     // testUnits!(LinkedListDemo)();
     // testUnits!LinkedHashSetDemo();
     // testUnits!LinkedHashMapDemo();
-    // testUnits!TreeMapDemo();
     // testUnits!(MultiMapDemo)();
+    // testUnits!TreeMapDemo();
+    // testUnits!(TrieTest)();
     // testUnits!SetDemo();
     // writeln(DateTimeHelper.currentTimeMillis);
 
