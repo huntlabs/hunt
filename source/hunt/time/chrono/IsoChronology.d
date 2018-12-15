@@ -44,6 +44,7 @@ import hunt.container;
 import hunt.util.Comparator;
 import hunt.time.LocalTime;
 import hunt.time.util.QueryHelper;
+import hunt.time.util.common;
 /**
  * The ISO calendar system.
  * !(p)
@@ -77,7 +78,7 @@ public final class IsoChronology : AbstractChronology , Serializable {
     /**
      * Singleton instance of the ISO chronology.
      */
-    public __gshared IsoChronology INSTANCE;
+    // public __gshared IsoChronology INSTANCE;
 
     /**
      * Serialization version.
@@ -89,6 +90,7 @@ public final class IsoChronology : AbstractChronology , Serializable {
     // shared static this()
     // {
     //     INSTANCE = new IsoChronology();
+        mixin(MakeGlobalVar!(IsoChronology)("INSTANCE",`new IsoChronology()`));
     // }
     /**
      * Restricted constructor.

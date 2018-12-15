@@ -47,7 +47,7 @@ import hunt.util.Comparator;
 import hunt.time.Ser;
 import std.conv;
 import hunt.time.util.QueryHelper;
-
+import hunt.time.util.common;
 /**
  * A date-time with an offset from UTC/Greenwich _in the ISO-8601 calendar system,
  * such as {@code 2007-12-03T10:15:30+01:00}.
@@ -90,7 +90,7 @@ public final class OffsetDateTime
      * This combines {@link LocalDateTime#MIN} and {@link ZoneOffset#MAX}.
      * This could be used by an application as a "far past" date-time.
      */
-    public __gshared OffsetDateTime MIN ;
+    // public __gshared OffsetDateTime MIN ;
     /**
      * The maximum supported {@code OffsetDateTime}, '+999999999-12-31T23:59:59.999999999-18:00'.
      * This is the local date-time just before midnight at the end of the maximum date
@@ -98,13 +98,16 @@ public final class OffsetDateTime
      * This combines {@link LocalDateTime#MAX} and {@link ZoneOffset#MIN}.
      * This could be used by an application as a "far future" date-time.
      */
-    public __gshared OffsetDateTime MAX ;
+    // public __gshared OffsetDateTime MAX ;
 
 
     // shared static this()
     // {
-    //     MIN = LocalDateTime.MIN.atOffset(ZoneOffset.MAX);
-    //     MAX = LocalDateTime.MAX.atOffset(ZoneOffset.MIN);
+        // MIN = LocalDateTime.MIN.atOffset(ZoneOffset.MAX);
+        mixin(MakeGlobalVar!(OffsetDateTime)("MIN",`LocalDateTime.MIN.atOffset(ZoneOffset.MAX)`));
+        // MAX = LocalDateTime.MAX.atOffset(ZoneOffset.MIN);
+        mixin(MakeGlobalVar!(OffsetDateTime)("MAX",`LocalDateTime.MAX.atOffset(ZoneOffset.MIN)`));
+
     // }
     /**
      * Gets a comparator that compares two {@code OffsetDateTime} instances

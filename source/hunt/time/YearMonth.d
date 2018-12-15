@@ -77,7 +77,7 @@ public final class YearMonth
     /**
      * Parser.
      */
-    __gshared DateTimeFormatter PARSER ;
+    __gshared DateTimeFormatter _PARSER ;
 
     /**
      * The year.
@@ -88,6 +88,18 @@ public final class YearMonth
      */
     private  int month;
 
+    public static ref  DateTimeFormatter PARSER()
+     {
+         if(_PARSER is null)
+         {
+             _PARSER = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+            .appendLiteral('-')
+            .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+            .toFormatter();
+         }
+         return _PARSER;
+     }
     // shared static this()
     // {
     //     PARSER = new DateTimeFormatterBuilder()

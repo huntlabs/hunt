@@ -42,6 +42,7 @@ import hunt.time.DateTimeException;
 import hunt.time.Period;
 import hunt.time.Ser;
 import std.conv;
+import hunt.time.util.common;
 /**
  * A date-time without a time-zone _in the ISO-8601 calendar system,
  * such as {@code 2007-12-03T10:15:30}.
@@ -87,14 +88,14 @@ public final class LocalDateTime
      * This combines {@link LocalDate#MIN} and {@link LocalTime#MIN}.
      * This could be used by an application as a "far past" date-time.
      */
-    public __gshared LocalDateTime MIN;
+    // public __gshared LocalDateTime MIN;
     /**
      * The maximum supported {@code LocalDateTime}, '+999999999-12-31T23:59:59.999999999'.
      * This is the local date-time just before midnight at the end of the maximum date.
      * This combines {@link LocalDate#MAX} and {@link LocalTime#MAX}.
      * This could be used by an application as a "far future" date-time.
      */
-    public __gshared LocalDateTime MAX;
+    // public __gshared LocalDateTime MAX;
 
     /**
      * Serialization version.
@@ -112,8 +113,11 @@ public final class LocalDateTime
 
     // shared static this()
     // {
-    //     MIN = LocalDateTime.of(LocalDate.MIN, LocalTime.MIN);
-    //     MAX = LocalDateTime.of(LocalDate.MAX, LocalTime.MAX);
+        // MIN = LocalDateTime.of(LocalDate.MIN, LocalTime.MIN);
+        mixin(MakeGlobalVar!(LocalDateTime)("MIN",`LocalDateTime.of(LocalDate.MIN, LocalTime.MIN)`));
+        // MAX = LocalDateTime.of(LocalDate.MAX, LocalTime.MAX);
+        mixin(MakeGlobalVar!(LocalDateTime)("MAX",`LocalDateTime.of(LocalDate.MAX, LocalTime.MAX)`));
+
     // }
 
     //-----------------------------------------------------------------------

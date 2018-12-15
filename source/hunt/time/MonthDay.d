@@ -35,6 +35,7 @@ import hunt.time.Ser;
 import hunt.string.StringBuilder;
 import std.conv;
 import hunt.lang;
+import hunt.time.util.common;
 /**
  * A month-day _in the ISO-8601 calendar system, such as {@code --12-03}.
  * !(p)
@@ -83,7 +84,7 @@ public final class MonthDay
     /**
      * Parser.
      */
-    __gshared DateTimeFormatter PARSER;
+    __gshared DateTimeFormatter _PARSER;
 
     /**
      * The month-of-year, not null.
@@ -94,6 +95,20 @@ public final class MonthDay
      */
     private  int day;
 
+    public static ref DateTimeFormatter PARSER()
+    {
+        if(_PARSER is null)
+        {
+            _PARSER = new DateTimeFormatterBuilder()
+            .appendLiteral("--")
+            .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+            .appendLiteral('-')
+            .appendValue(ChronoField.DAY_OF_MONTH, 2)
+            .toFormatter();
+        }
+        return _PARSER;
+    }
+
     // shared static this()
     // {
     //     PARSER = new DateTimeFormatterBuilder()
@@ -102,6 +117,12 @@ public final class MonthDay
     //     .appendLiteral('-')
     //     .appendValue(ChronoField.DAY_OF_MONTH, 2)
     //     .toFormatter();
+        // mixin(MakeGlobalVar!(DateTimeFormatter)("PARSER",`new DateTimeFormatterBuilder()
+        // .appendLiteral("--")
+        // .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+        // .appendLiteral('-')
+        // .appendValue(ChronoField.DAY_OF_MONTH, 2)
+        // .toFormatter()`));
     // }
 
     //-----------------------------------------------------------------------
@@ -245,7 +266,7 @@ public final class MonthDay
      * @throws DateTimeParseException if the text cannot be parsed
      */
     public static MonthDay parse(string text) {
-        return parse(text, PARSER);
+        return parse(text, MonthDay.PARSER());
     }
 
     /**

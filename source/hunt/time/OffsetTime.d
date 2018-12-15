@@ -38,7 +38,7 @@ import hunt.time.Ser;
 import hunt.lang;
 import hunt.util.Comparator;
 import std.conv;
-
+import hunt.time.util.common;
 /**
  * A time with an offset from UTC/Greenwich _in the ISO-8601 calendar system,
  * such as {@code 10:15:30+01:00}.
@@ -72,7 +72,7 @@ public final class OffsetTime
      * This combines {@link LocalTime#MIN} and {@link ZoneOffset#MAX}.
      * This could be used by an application as a "far past" date.
      */
-    public __gshared OffsetTime MIN ;
+    // public __gshared OffsetTime MIN ;
     /**
      * The maximum supported {@code OffsetTime}, '23:59:59.999999999-18:00'.
      * This is the time just before midnight at the end of the day _in the minimum offset
@@ -80,7 +80,7 @@ public final class OffsetTime
      * This combines {@link LocalTime#MAX} and {@link ZoneOffset#MIN}.
      * This could be used by an application as a "far future" date.
      */
-    public __gshared OffsetTime MAX ;
+    // public __gshared OffsetTime MAX ;
 
     /**
      * Serialization version.
@@ -98,8 +98,11 @@ public final class OffsetTime
 
     // shared static this()
     // {
-    //     MIN = LocalTime.MIN.atOffset(ZoneOffset.MAX);
-    //     MAX = LocalTime.MAX.atOffset(ZoneOffset.MIN);
+        // MIN = LocalTime.MIN.atOffset(ZoneOffset.MAX);
+        mixin(MakeGlobalVar!(OffsetTime)("MIN",`LocalTime.MIN.atOffset(ZoneOffset.MAX)`));
+        // MAX = LocalTime.MAX.atOffset(ZoneOffset.MIN);
+        mixin(MakeGlobalVar!(OffsetTime)("MAX",`LocalTime.MAX.atOffset(ZoneOffset.MIN)`));
+
     // }
 
     //-----------------------------------------------------------------------

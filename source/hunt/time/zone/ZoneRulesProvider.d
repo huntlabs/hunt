@@ -19,6 +19,9 @@ import hunt.container.HashMap;
 import hunt.container.Collections;
 import hunt.time.zone.ZoneRules;
 import hunt.time.zone.ZoneRulesException;
+import hunt.time.util.common;
+import hunt.time.zone.TzdbZoneRulesProvider;
+
 /**
  * Provider of time-zone rules to the system.
  * !(p)
@@ -72,25 +75,31 @@ public abstract class ZoneRulesProvider {
     /**
      * The set of loaded providers.
      */
-     __gshared ArrayList!(ZoneRulesProvider) PROVIDERS;
+    // __gshared ArrayList!(ZoneRulesProvider) PROVIDERS;
     /**
      * The lookup from zone ID to provider.
      */
-    //  __gshared ConcurrentMap!(string, ZoneRulesProvider) ZONES;
-     __gshared HashMap!(string, ZoneRulesProvider) ZONES;
+    // // __gshared ConcurrentMap!(string, ZoneRulesProvider) ZONES;
+    // __gshared HashMap!(string, ZoneRulesProvider) ZONES;
 
     /**
      * The zone ID data
      */
      static /* volatile */ Set!(string) ZONE_IDS;
-
+    static this()
+    {
+        ZoneRulesProvider.registerProvider(new TzdbZoneRulesProvider());
+    }
     // shared static this()
     // {
-    //     PROVIDERS = new ArrayList!(ZoneRulesProvider)();
-    //     ZONES = new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */);
+        // PROVIDERS = new ArrayList!(ZoneRulesProvider)();
+        mixin(MakeGlobalVar!(ArrayList!(ZoneRulesProvider))("PROVIDERS",`new ArrayList!(ZoneRulesProvider)()`));
+        // ZONES = new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */);
+        mixin(MakeGlobalVar!(HashMap!(string, ZoneRulesProvider))("ZONES",`new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */)`));
+
     // }
 
-    static this(){
+    // static this(){
         ///@gxc register Zone Provider
         // if the property hunt.time.zone.DefaultZoneRulesProvider is
         // set then its value is the class name of the default provider
@@ -164,7 +173,7 @@ public abstract class ZoneRulesProvider {
         // }
         // // CopyOnWriteList could be slow if lots of providers and each added individually
         // PROVIDERS.addAll(loaded);
-    }
+    // }
 
     //-------------------------------------------------------------------------
     /**

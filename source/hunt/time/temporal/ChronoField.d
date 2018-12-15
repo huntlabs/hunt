@@ -4,7 +4,7 @@ import hunt.time.temporal.ChronoUnit;
 
 import hunt.time.DayOfWeek;
 // import hunt.time.Instant;
-// import hunt.time.Year;
+import hunt.time.Year;
 // import hunt.time.ZoneOffset;
 // import hunt.time.chrono.ChronoLocalDate;
 // import hunt.time.chrono.Chronology;
@@ -19,7 +19,7 @@ import hunt.lang;
 import hunt.util.Comparator;
 import hunt.container;
 import hunt.time.format.ResolverStyle;
-
+import hunt.time.util.common;
 // import hunt.util.ResourceBundle;
 // import sun.util.locale.provider.CalendarDataUtility;
 // import sun.util.locale.provider.LocaleProviderAdapter;
@@ -64,7 +64,7 @@ public class ChronoField : TemporalField
      * The value is validated _in strict and smart mode but not _in lenient mode.
      * The field is resolved _in combination with {@code MILLI_OF_SECOND} and {@code MICRO_OF_SECOND}.
      */
-    __gshared ChronoField NANO_OF_SECOND;
+    //__gshared ChronoField NANO_OF_SECOND;
     /**
      * The nano-of-day.
      * !(p)
@@ -80,7 +80,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code NANO_OF_SECOND}, {@code SECOND_OF_MINUTE},
      * {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    __gshared ChronoField NANO_OF_DAY;
+    //__gshared ChronoField NANO_OF_DAY;
     /**
      * The micro-of-second.
      * !(p)
@@ -100,7 +100,7 @@ public class ChronoField : TemporalField
      * The field is resolved _in combination with {@code MILLI_OF_SECOND} to produce
      * {@code NANO_OF_SECOND}.
      */
-    __gshared ChronoField MICRO_OF_SECOND;
+    //__gshared ChronoField MICRO_OF_SECOND;
     /**
      * The micro-of-day.
      * !(p)
@@ -119,7 +119,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code MICRO_OF_SECOND}, {@code SECOND_OF_MINUTE},
      * {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    __gshared ChronoField MICRO_OF_DAY;
+    //__gshared ChronoField MICRO_OF_DAY;
     /**
      * The milli-of-second.
      * !(p)
@@ -139,7 +139,7 @@ public class ChronoField : TemporalField
      * The field is resolved _in combination with {@code MICRO_OF_SECOND} to produce
      * {@code NANO_OF_SECOND}.
      */
-    __gshared ChronoField MILLI_OF_SECOND;
+    //__gshared ChronoField MILLI_OF_SECOND;
     /**
      * The milli-of-day.
      * !(p)
@@ -158,7 +158,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code MILLI_OF_SECOND}, {@code SECOND_OF_MINUTE},
      * {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    __gshared ChronoField MILLI_OF_DAY;
+    //__gshared ChronoField MILLI_OF_DAY;
     /**
      * The second-of-minute.
      * !(p)
@@ -168,7 +168,7 @@ public class ChronoField : TemporalField
      * When parsing this field it behaves equivalent to the following:
      * The value is validated _in strict and smart mode but not _in lenient mode.
      */
-    __gshared ChronoField SECOND_OF_MINUTE;
+    //__gshared ChronoField SECOND_OF_MINUTE;
     /**
      * The second-of-day.
      * !(p)
@@ -180,7 +180,7 @@ public class ChronoField : TemporalField
      * The value is split to form {@code SECOND_OF_MINUTE}, {@code MINUTE_OF_HOUR}
      * and {@code HOUR_OF_DAY} fields.
      */
-    __gshared ChronoField SECOND_OF_DAY;
+    //__gshared ChronoField SECOND_OF_DAY;
     /**
      * The minute-of-hour.
      * !(p)
@@ -190,7 +190,7 @@ public class ChronoField : TemporalField
      * When parsing this field it behaves equivalent to the following:
      * The value is validated _in strict and smart mode but not _in lenient mode.
      */
-    __gshared ChronoField MINUTE_OF_HOUR;
+    //__gshared ChronoField MINUTE_OF_HOUR;
     /**
      * The minute-of-day.
      * !(p)
@@ -201,7 +201,7 @@ public class ChronoField : TemporalField
      * The value is validated _in strict and smart mode but not _in lenient mode.
      * The value is split to form {@code MINUTE_OF_HOUR} and {@code HOUR_OF_DAY} fields.
      */
-    __gshared ChronoField MINUTE_OF_DAY;
+    //__gshared ChronoField MINUTE_OF_DAY;
     /**
      * The hour-of-am-pm.
      * !(p)
@@ -217,7 +217,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #CLOCK_HOUR_OF_AMPM} for the related field that counts hours from 1 to 12.
      */
-    __gshared ChronoField HOUR_OF_AMPM;
+    //__gshared ChronoField HOUR_OF_AMPM;
     /**
      * The clock-hour-of-am-pm.
      * !(p)
@@ -233,7 +233,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #HOUR_OF_AMPM} for the related field that counts hours from 0 to 11.
      */
-    __gshared ChronoField CLOCK_HOUR_OF_AMPM;
+    //__gshared ChronoField CLOCK_HOUR_OF_AMPM;
     /**
      * The hour-of-day.
      * !(p)
@@ -250,7 +250,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #CLOCK_HOUR_OF_DAY} for the related field that counts hours from 1 to 24.
      */
-    __gshared ChronoField HOUR_OF_DAY;
+    //__gshared ChronoField HOUR_OF_DAY;
     /**
      * The clock-hour-of-day.
      * !(p)
@@ -266,7 +266,7 @@ public class ChronoField : TemporalField
      * !(p)
      * See {@link #HOUR_OF_DAY} for the related field that counts hours from 0 to 23.
      */
-    __gshared ChronoField CLOCK_HOUR_OF_DAY;
+    //__gshared ChronoField CLOCK_HOUR_OF_DAY;
     /**
      * The am-pm-of-day.
      * !(p)
@@ -279,7 +279,7 @@ public class ChronoField : TemporalField
      * {@code HOUR_OF_AMPM} to form {@code HOUR_OF_DAY} by multiplying
      * the {AMPM_OF_DAY} value by 12.
      */
-    __gshared ChronoField AMPM_OF_DAY;
+    //__gshared ChronoField AMPM_OF_DAY;
     /**
      * The day-of-week, such as Tuesday.
      * !(p)
@@ -295,7 +295,7 @@ public class ChronoField : TemporalField
      * if they have a similar concept of named or numbered days within a period similar
      * to a week. It is recommended that the numbering starts from 1.
      */
-    __gshared ChronoField DAY_OF_WEEK;
+    //__gshared ChronoField DAY_OF_WEEK;
     /**
      * The aligned day-of-week within a month.
      * !(p)
@@ -313,7 +313,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    __gshared ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH;
+    //__gshared ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH;
     /**
      * The aligned day-of-week within a year.
      * !(p)
@@ -331,7 +331,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    __gshared ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR;
+    //__gshared ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR;
     /**
      * The day-of-month.
      * !(p)
@@ -344,7 +344,7 @@ public class ChronoField : TemporalField
      * day-of-month values for users of the calendar system.
      * Normally, this is a count of days from 1 to the length of the month.
      */
-    __gshared ChronoField DAY_OF_MONTH;
+    //__gshared ChronoField DAY_OF_MONTH;
     /**
      * The day-of-year.
      * !(p)
@@ -362,7 +362,7 @@ public class ChronoField : TemporalField
      * the year number to 1, can happen on any date. The era and year reset also cause
      * the day-of-year to be reset to 1, but not the month-of-year or day-of-month.
      */
-    __gshared ChronoField DAY_OF_YEAR;
+    //__gshared ChronoField DAY_OF_YEAR;
     /**
      * The epoch-day, based on the Java epoch of 1970-01-01 (ISO).
      * !(p)
@@ -375,7 +375,7 @@ public class ChronoField : TemporalField
      * Range of EpochDay is between (LocalDate.MIN.toEpochDay(), LocalDate.MAX.toEpochDay())
      * both inclusive.
      */
-    __gshared ChronoField EPOCH_DAY;
+    //__gshared ChronoField EPOCH_DAY;
     /**
      * The aligned week within a month.
      * !(p)
@@ -391,7 +391,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    __gshared ChronoField ALIGNED_WEEK_OF_MONTH;
+    //__gshared ChronoField ALIGNED_WEEK_OF_MONTH;
     /**
      * The aligned week within a year.
      * !(p)
@@ -407,7 +407,7 @@ public class ChronoField : TemporalField
      * Calendar systems that do not have a seven day week should typically implement this
      * field _in the same way, but using the alternate week length.
      */
-    __gshared ChronoField ALIGNED_WEEK_OF_YEAR;
+    //__gshared ChronoField ALIGNED_WEEK_OF_YEAR;
     /**
      * The month-of-year, such as March.
      * !(p)
@@ -418,7 +418,7 @@ public class ChronoField : TemporalField
      * month-of-year values for users of the calendar system.
      * Normally, this is a count of months starting from 1.
      */
-    __gshared ChronoField MONTH_OF_YEAR;
+    //__gshared ChronoField MONTH_OF_YEAR;
     /**
      * The proleptic-month based, counting months sequentially from year 0.
      * !(p)
@@ -438,7 +438,7 @@ public class ChronoField : TemporalField
      * If the calendar system has a minimum year that excludes year zero, then one must
      * be extrapolated _in order for this method to be defined.
      */
-    __gshared ChronoField PROLEPTIC_MONTH;
+    //__gshared ChronoField PROLEPTIC_MONTH;
     /**
      * The year within the era.
      * !(p)
@@ -473,7 +473,7 @@ public class ChronoField : TemporalField
      * will typically be the same as that used by the ISO calendar system.
      * The year-of-era value should typically always be positive, however this is not required.
      */
-    __gshared ChronoField YEAR_OF_ERA;
+    //__gshared ChronoField YEAR_OF_ERA;
     /**
      * The proleptic year, such as 2012.
      * !(p)
@@ -497,7 +497,7 @@ public class ChronoField : TemporalField
      * defined with any appropriate value, although defining it to be the same as ISO may be
      * the best option.
      */
-    __gshared ChronoField YEAR;
+    //__gshared ChronoField YEAR;
     /**
      * The era.
      * !(p)
@@ -514,7 +514,7 @@ public class ChronoField : TemporalField
      * Earlier eras must have sequentially smaller values.
      * Later eras must have sequentially larger values,
      */
-    __gshared ChronoField ERA;
+    //__gshared ChronoField ERA;
     /**
      * The instant epoch-seconds.
      * !(p)
@@ -529,7 +529,7 @@ public class ChronoField : TemporalField
      * This field is strictly defined to have the same meaning _in all calendar systems.
      * This is necessary to ensure interoperation between calendars.
      */
-    __gshared ChronoField INSTANT_SECONDS;
+    //__gshared ChronoField INSTANT_SECONDS;
     /**
      * The offset from UTC/Greenwich.
      * !(p)
@@ -543,258 +543,168 @@ public class ChronoField : TemporalField
      * This field is strictly defined to have the same meaning _in all calendar systems.
      * This is necessary to ensure interoperation between calendars.
      */
-    __gshared ChronoField OFFSET_SECONDS;
+    //__gshared ChronoField OFFSET_SECONDS;
 
     // shared static this()
     // {
-    //     import hunt.logging;
-    //     /* version(HUNT_DEBUG) */ logDebug("ChronoField shared static this begin");
-    //     ChronoField.NANO_OF_SECOND = new ChronoField(0, "NanoOfSecond",
-    //             ChronoUnit.NANOS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999_999));
+    //     // import hunt.logging;
+        // /* version(HUNT_DEBUG) */ logDebug("ChronoField shared static this begin");
+        // ChronoField.NANO_OF_SECOND = new ChronoField(0, "NanoOfSecond",
+        //         ChronoUnit.NANOS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999_999));
+        mixin(MakeGlobalVar!ChronoField("NANO_OF_SECOND",`new ChronoField(0, "NanoOfSecond",
+                 ChronoUnit.NANOS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999_999))`));
 
-    //     ChronoField.NANO_OF_DAY = new ChronoField(1, "NanoOfDay", ChronoUnit.NANOS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000_000L - 1));
+        // ChronoField.NANO_OF_DAY = new ChronoField(1, "NanoOfDay", ChronoUnit.NANOS,
+        //         ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000_000L - 1));
+        mixin(MakeGlobalVar!ChronoField("NANO_OF_DAY",`new ChronoField(1, "NanoOfDay", ChronoUnit.NANOS,
+                ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000_000L - 1))`));
 
-    //     ChronoField.MICRO_OF_SECOND = new ChronoField(2, "MicroOfSecond",
-    //             ChronoUnit.MICROS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999));
+        // ChronoField.MICRO_OF_SECOND = new ChronoField(2, "MicroOfSecond",
+        //         ChronoUnit.MICROS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999));
+        mixin(MakeGlobalVar!ChronoField("MICRO_OF_SECOND",`new ChronoField(2, "MicroOfSecond",
+                ChronoUnit.MICROS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999))`));
 
-    //     ChronoField.MICRO_OF_DAY = new ChronoField(3, "MicroOfDay", ChronoUnit.MICROS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000L - 1));
+        // ChronoField.MICRO_OF_DAY = new ChronoField(3, "MicroOfDay", ChronoUnit.MICROS,
+        //         ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000L - 1));
+        mixin(MakeGlobalVar!ChronoField("MICRO_OF_DAY",`new ChronoField(3, "MicroOfDay", ChronoUnit.MICROS,
+                ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000L - 1))`));
 
-    //     ChronoField.MILLI_OF_SECOND = new ChronoField(4, "MilliOfSecond",
-    //             ChronoUnit.MILLIS, ChronoUnit.SECONDS, ValueRange.of(0, 999));
+        // ChronoField.MILLI_OF_SECOND = new ChronoField(4, "MilliOfSecond",
+        //         ChronoUnit.MILLIS, ChronoUnit.SECONDS, ValueRange.of(0, 999));
+        mixin(MakeGlobalVar!ChronoField("MILLI_OF_SECOND",`new ChronoField(4, "MilliOfSecond",
+                ChronoUnit.MILLIS, ChronoUnit.SECONDS, ValueRange.of(0, 999))`));
 
-    //     ChronoField.MILLI_OF_DAY = new ChronoField(5, "MilliOfDay",
-    //             ChronoUnit.MILLIS, ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000L - 1));
+        // ChronoField.MILLI_OF_DAY = new ChronoField(5, "MilliOfDay",
+        //         ChronoUnit.MILLIS, ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000L - 1));
+        mixin(MakeGlobalVar!ChronoField("MILLI_OF_DAY",`new ChronoField(5, "MilliOfDay",
+                ChronoUnit.MILLIS, ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000L - 1))`));
 
-    //     ChronoField.SECOND_OF_MINUTE = new ChronoField(6, "SecondOfMinute",
-    //             ChronoUnit.SECONDS, ChronoUnit.MINUTES, ValueRange.of(0, 59), "second");
 
-    //     ChronoField.SECOND_OF_DAY = new ChronoField(7, "SecondOfDay",
-    //             ChronoUnit.SECONDS, ChronoUnit.DAYS, ValueRange.of(0, 86400L - 1));
+        // ChronoField.SECOND_OF_MINUTE = new ChronoField(6, "SecondOfMinute",
+        //         ChronoUnit.SECONDS, ChronoUnit.MINUTES, ValueRange.of(0, 59), "second");
+        mixin(MakeGlobalVar!ChronoField("SECOND_OF_MINUTE",`new ChronoField(6, "SecondOfMinute",
+                ChronoUnit.SECONDS, ChronoUnit.MINUTES, ValueRange.of(0, 59), "second")`));
 
-    //     ChronoField.MINUTE_OF_HOUR = new ChronoField(8, "MinuteOfHour",
-    //             ChronoUnit.MINUTES, ChronoUnit.HOURS, ValueRange.of(0, 59), "minute");
+        // ChronoField.SECOND_OF_DAY = new ChronoField(7, "SecondOfDay",
+        //         ChronoUnit.SECONDS, ChronoUnit.DAYS, ValueRange.of(0, 86400L - 1));
+        mixin(MakeGlobalVar!ChronoField("SECOND_OF_DAY",`new ChronoField(7, "SecondOfDay",
+                ChronoUnit.SECONDS, ChronoUnit.DAYS, ValueRange.of(0, 86400L - 1))`));
 
-    //     ChronoField.MINUTE_OF_DAY = new ChronoField(9, "MinuteOfDay",
-    //             ChronoUnit.MINUTES, ChronoUnit.DAYS, ValueRange.of(0, (24 * 60) - 1));
+        // ChronoField.MINUTE_OF_HOUR = new ChronoField(8, "MinuteOfHour",
+        //         ChronoUnit.MINUTES, ChronoUnit.HOURS, ValueRange.of(0, 59), "minute");
+        mixin(MakeGlobalVar!ChronoField("MINUTE_OF_HOUR",`new ChronoField(8, "MinuteOfHour",
+                ChronoUnit.MINUTES, ChronoUnit.HOURS, ValueRange.of(0, 59), "minute")`));
 
-    //     ChronoField.HOUR_OF_AMPM = new ChronoField(10, "HourOfAmPm",
-    //             ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(0, 11));
+        // ChronoField.MINUTE_OF_DAY = new ChronoField(9, "MinuteOfDay",
+        //         ChronoUnit.MINUTES, ChronoUnit.DAYS, ValueRange.of(0, (24 * 60) - 1));
+        mixin(MakeGlobalVar!ChronoField("MINUTE_OF_DAY",`new ChronoField(9, "MinuteOfDay",
+                ChronoUnit.MINUTES, ChronoUnit.DAYS, ValueRange.of(0, (24 * 60) - 1))`));
 
-    //     ChronoField.CLOCK_HOUR_OF_AMPM = new ChronoField(11, "ClockHourOfAmPm",
-    //             ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(1, 12));
+        // ChronoField.HOUR_OF_AMPM = new ChronoField(10, "HourOfAmPm",
+        //         ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(0, 11));
+        mixin(MakeGlobalVar!ChronoField("HOUR_OF_AMPM",`new ChronoField(10, "HourOfAmPm",
+                ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(0, 11))`));
 
-    //     ChronoField.HOUR_OF_DAY = new ChronoField(12, "HourOfDay",
-    //             ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(0, 23), "hour");
+        // ChronoField.CLOCK_HOUR_OF_AMPM = new ChronoField(11, "ClockHourOfAmPm",
+        //         ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(1, 12));
+        mixin(MakeGlobalVar!ChronoField("CLOCK_HOUR_OF_AMPM",`new ChronoField(11, "ClockHourOfAmPm",
+                ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(1, 12))`));
 
-    //     ChronoField.CLOCK_HOUR_OF_DAY = new ChronoField(13, "ClockHourOfDay",
-    //             ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(1, 24));
+        // ChronoField.HOUR_OF_DAY = new ChronoField(12, "HourOfDay",
+        //         ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(0, 23), "hour");
+        mixin(MakeGlobalVar!ChronoField("HOUR_OF_DAY",`new ChronoField(12, "HourOfDay",
+                ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(0, 23), "hour")`));
 
-    //     ChronoField.AMPM_OF_DAY = new ChronoField(14, "AmPmOfDay",
-    //             ChronoUnit.HALF_DAYS, ChronoUnit.DAYS, ValueRange.of(0, 1), "dayperiod");
+        // ChronoField.CLOCK_HOUR_OF_DAY = new ChronoField(13, "ClockHourOfDay",
+        //         ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(1, 24));
+        mixin(MakeGlobalVar!ChronoField("CLOCK_HOUR_OF_DAY",`new ChronoField(13, "ClockHourOfDay",
+                ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(1, 24))`));
 
-    //     ChronoField.DAY_OF_WEEK = new ChronoField(15, "DayOfWeek",
-    //             ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7), "weekday");
+        // ChronoField.AMPM_OF_DAY = new ChronoField(14, "AmPmOfDay",
+        //         ChronoUnit.HALF_DAYS, ChronoUnit.DAYS, ValueRange.of(0, 1), "dayperiod");
+        mixin(MakeGlobalVar!ChronoField("AMPM_OF_DAY",`new ChronoField(14, "AmPmOfDay",
+                ChronoUnit.HALF_DAYS, ChronoUnit.DAYS, ValueRange.of(0, 1), "dayperiod")`));
 
-    //     ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH = new ChronoField(16,
-    //             "AlignedDayOfWeekInMonth", ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7));
+        // ChronoField.DAY_OF_WEEK = new ChronoField(15, "DayOfWeek",
+        //         ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7), "weekday");
+        mixin(MakeGlobalVar!ChronoField("DAY_OF_WEEK",`new ChronoField(15, "DayOfWeek",
+                ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7), "weekday")`));
 
-    //     ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR = new ChronoField(17,
-    //             "AlignedDayOfWeekInYear", ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7));
+        // ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH = new ChronoField(16,
+        //         "AlignedDayOfWeekInMonth", ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7));
+         mixin(MakeGlobalVar!ChronoField("ALIGNED_DAY_OF_WEEK_IN_MONTH",`new ChronoField(16,
+                "AlignedDayOfWeekInMonth", ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7))`));
 
-    //     ChronoField.DAY_OF_MONTH = new ChronoField(18, "DayOfMonth",
-    //             ChronoUnit.DAYS, ChronoUnit.MONTHS, ValueRange.of(1, 28, 31), "day");
+        // ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR = new ChronoField(17,
+        //         "AlignedDayOfWeekInYear", ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7));
+        mixin(MakeGlobalVar!ChronoField("ALIGNED_DAY_OF_WEEK_IN_YEAR",`new ChronoField(17,
+                "AlignedDayOfWeekInYear", ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7))`));
 
-    //     ChronoField.DAY_OF_YEAR = new ChronoField(19, "DayOfYear",
-    //             ChronoUnit.DAYS, ChronoUnit.YEARS, ValueRange.of(1, 365, 366));
+        // ChronoField.DAY_OF_MONTH = new ChronoField(18, "DayOfMonth",
+        //         ChronoUnit.DAYS, ChronoUnit.MONTHS, ValueRange.of(1, 28, 31), "day");
+        mixin(MakeGlobalVar!ChronoField("DAY_OF_MONTH",`new ChronoField(18, "DayOfMonth",
+                ChronoUnit.DAYS, ChronoUnit.MONTHS, ValueRange.of(1, 28, 31), "day")`));
 
-    //     ChronoField.EPOCH_DAY = new ChronoField(20, "EpochDay", ChronoUnit.DAYS,
-    //             ChronoUnit.FOREVER, ValueRange.of(-365243219162L, 365241780471L));
+        // ChronoField.DAY_OF_YEAR = new ChronoField(19, "DayOfYear",
+        //         ChronoUnit.DAYS, ChronoUnit.YEARS, ValueRange.of(1, 365, 366));
+        mixin(MakeGlobalVar!ChronoField("DAY_OF_YEAR",`new ChronoField(19, "DayOfYear",
+                ChronoUnit.DAYS, ChronoUnit.YEARS, ValueRange.of(1, 365, 366))`));
 
-    //     ChronoField.ALIGNED_WEEK_OF_MONTH = new ChronoField(21, "AlignedWeekOfMonth",
-    //             ChronoUnit.WEEKS, ChronoUnit.MONTHS, ValueRange.of(1, 4, 5));
+        // ChronoField.EPOCH_DAY = new ChronoField(20, "EpochDay", ChronoUnit.DAYS,
+        //         ChronoUnit.FOREVER, ValueRange.of(-365243219162L, 365241780471L));
+        mixin(MakeGlobalVar!ChronoField("EPOCH_DAY",`new ChronoField(20, "EpochDay", ChronoUnit.DAYS,
+                ChronoUnit.FOREVER, ValueRange.of(-365243219162L, 365241780471L))`));
 
-    //     ChronoField.ALIGNED_WEEK_OF_YEAR = new ChronoField(22, "AlignedWeekOfYear",
-    //             ChronoUnit.WEEKS, ChronoUnit.YEARS, ValueRange.of(1, 53));
+        // ChronoField.ALIGNED_WEEK_OF_MONTH = new ChronoField(21, "AlignedWeekOfMonth",
+        //         ChronoUnit.WEEKS, ChronoUnit.MONTHS, ValueRange.of(1, 4, 5));
+        mixin(MakeGlobalVar!ChronoField("ALIGNED_WEEK_OF_MONTH",`new ChronoField(21, "AlignedWeekOfMonth",
+                ChronoUnit.WEEKS, ChronoUnit.MONTHS, ValueRange.of(1, 4, 5))`));
 
-    //     ChronoField.MONTH_OF_YEAR = new ChronoField(23, "MonthOfYear",
-    //             ChronoUnit.MONTHS, ChronoUnit.YEARS, ValueRange.of(1, 12), "month");
+        // ChronoField.ALIGNED_WEEK_OF_YEAR = new ChronoField(22, "AlignedWeekOfYear",
+        //         ChronoUnit.WEEKS, ChronoUnit.YEARS, ValueRange.of(1, 53));
+        mixin(MakeGlobalVar!ChronoField("ALIGNED_WEEK_OF_YEAR",`new ChronoField(22, "AlignedWeekOfYear",
+                ChronoUnit.WEEKS, ChronoUnit.YEARS, ValueRange.of(1, 53))`));
 
-    //     enum Year_MIN_VALUE = -999_999_999;
-    //     enum Year_MAX_VALUE = 999_999_999;
-    //     ChronoField.PROLEPTIC_MONTH = new ChronoField(24, "ProlepticMonth", ChronoUnit.MONTHS,
-    //             ChronoUnit.FOREVER, ValueRange.of(Year_MIN_VALUE * 12L, Year_MAX_VALUE * 12L + 11));
+        // ChronoField.MONTH_OF_YEAR = new ChronoField(23, "MonthOfYear",
+        //         ChronoUnit.MONTHS, ChronoUnit.YEARS, ValueRange.of(1, 12), "month");
+        mixin(MakeGlobalVar!ChronoField("MONTH_OF_YEAR",`new ChronoField(23, "MonthOfYear",
+                ChronoUnit.MONTHS, ChronoUnit.YEARS, ValueRange.of(1, 12), "month")`));
 
-    //     ChronoField.YEAR_OF_ERA = new ChronoField(25, "YearOfEra", ChronoUnit.YEARS,
-    //             ChronoUnit.FOREVER, ValueRange.of(1, Year_MAX_VALUE, Year_MAX_VALUE + 1));
+        // ChronoField.PROLEPTIC_MONTH = new ChronoField(24, "ProlepticMonth", ChronoUnit.MONTHS,
+        //         ChronoUnit.FOREVER, ValueRange.of(Year.MIN_VALUE * 12L, Year.MAX_VALUE * 12L + 11));
+        mixin(MakeGlobalVar!ChronoField("PROLEPTIC_MONTH",`new ChronoField(24, "ProlepticMonth", ChronoUnit.MONTHS,
+                ChronoUnit.FOREVER, ValueRange.of(Year.MIN_VALUE * 12L, Year.MAX_VALUE * 12L + 11))`));
 
-    //     ChronoField.YEAR = new ChronoField(26, "Year", ChronoUnit.YEARS,
-    //             ChronoUnit.FOREVER, ValueRange.of(Year_MIN_VALUE, Year_MAX_VALUE), "year");
+        // ChronoField.YEAR_OF_ERA = new ChronoField(25, "YearOfEra", ChronoUnit.YEARS,
+        //         ChronoUnit.FOREVER, ValueRange.of(1, Year.MAX_VALUE, Year.MAX_VALUE + 1));
+        mixin(MakeGlobalVar!ChronoField("YEAR_OF_ERA",`new ChronoField(25, "YearOfEra", ChronoUnit.YEARS,
+                ChronoUnit.FOREVER, ValueRange.of(1, Year.MAX_VALUE, Year.MAX_VALUE + 1))`));
 
-    //     ChronoField.ERA = new ChronoField(27, "Era", ChronoUnit.ERAS,
-    //             ChronoUnit.FOREVER, ValueRange.of(0, 1), "era");
+        // ChronoField.YEAR = new ChronoField(26, "Year", ChronoUnit.YEARS,
+        //         ChronoUnit.FOREVER, ValueRange.of(Year.MIN_VALUE, Year.MAX_VALUE), "year");
+        mixin(MakeGlobalVar!ChronoField("YEAR",`new ChronoField(26, "Year", ChronoUnit.YEARS,
+                ChronoUnit.FOREVER, ValueRange.of(Year.MIN_VALUE, Year.MAX_VALUE), "year")`));
 
-    //     ChronoField.INSTANT_SECONDS = new ChronoField(28, "InstantSeconds", ChronoUnit.SECONDS,
-    //             ChronoUnit.FOREVER, ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE));
+        // ChronoField.ERA = new ChronoField(27, "Era", ChronoUnit.ERAS,
+        //         ChronoUnit.FOREVER, ValueRange.of(0, 1), "era");
+        mixin(MakeGlobalVar!ChronoField("ERA",`new ChronoField(27, "Era", ChronoUnit.ERAS,
+                ChronoUnit.FOREVER, ValueRange.of(0, 1), "era")`));
 
-    //     ChronoField.OFFSET_SECONDS = new ChronoField(29, "OffsetSeconds",
-    //             ChronoUnit.SECONDS, ChronoUnit.FOREVER, ValueRange.of(-18 * 3600, 18 * 3600));
-    //     ChronoField._values ~= ChronoField.NANO_OF_SECOND;
-    //     ChronoField._values ~= ChronoField.NANO_OF_DAY;
-    //     ChronoField._values ~= ChronoField.MICRO_OF_SECOND;
-    //     ChronoField._values ~= ChronoField.MICRO_OF_DAY;
-    //     ChronoField._values ~= ChronoField.MILLI_OF_SECOND;
-    //     ChronoField._values ~= ChronoField.MILLI_OF_DAY;
-    //     ChronoField._values ~= ChronoField.SECOND_OF_MINUTE;
-    //     ChronoField._values ~= ChronoField.SECOND_OF_DAY;
-    //     ChronoField._values ~= ChronoField.MINUTE_OF_HOUR;
-    //     ChronoField._values ~= ChronoField.MINUTE_OF_DAY;
-    //     ChronoField._values ~= ChronoField.HOUR_OF_AMPM;
-    //     ChronoField._values ~= ChronoField.CLOCK_HOUR_OF_AMPM;
-    //     ChronoField._values ~= ChronoField.HOUR_OF_DAY;
-    //     ChronoField._values ~= ChronoField.CLOCK_HOUR_OF_DAY;
-    //     ChronoField._values ~= ChronoField.AMPM_OF_DAY;
-    //     ChronoField._values ~= ChronoField.DAY_OF_WEEK;
-    //     ChronoField._values ~= ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH;
-    //     ChronoField._values ~= ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR;
-    //     ChronoField._values ~= ChronoField.DAY_OF_MONTH;
-    //     ChronoField._values ~= ChronoField.DAY_OF_YEAR;
-    //     ChronoField._values ~= ChronoField.EPOCH_DAY;
-    //     ChronoField._values ~= ChronoField.ALIGNED_WEEK_OF_MONTH;
-    //     ChronoField._values ~= ChronoField.ALIGNED_WEEK_OF_YEAR;
-    //     ChronoField._values ~= ChronoField.MONTH_OF_YEAR;
-    //     ChronoField._values ~= ChronoField.PROLEPTIC_MONTH;
-    //     ChronoField._values ~= ChronoField.YEAR_OF_ERA;
-    //     ChronoField._values ~= ChronoField.YEAR;
-    //     ChronoField._values ~= ChronoField.ERA;
-    //     ChronoField._values ~= ChronoField.INSTANT_SECONDS;
-    //     ChronoField._values ~= ChronoField.OFFSET_SECONDS;
-    //     import hunt.logging;
-    //     /* version(HUNT_DEBUG) */ logDebug("ChronoField shared static this begin");
+        // ChronoField.INSTANT_SECONDS = new ChronoField(28, "InstantSeconds", ChronoUnit.SECONDS,
+        //         ChronoUnit.FOREVER, ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE));
+        mixin(MakeGlobalVar!ChronoField("INSTANT_SECONDS",`new ChronoField(28, "InstantSeconds", ChronoUnit.SECONDS,
+                ChronoUnit.FOREVER, ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE))`));
+
+        // ChronoField.OFFSET_SECONDS = new ChronoField(29, "OffsetSeconds",
+        //         ChronoUnit.SECONDS, ChronoUnit.FOREVER, ValueRange.of(-18 * 3600, 18 * 3600));
+        mixin(MakeGlobalVar!ChronoField("OFFSET_SECONDS",`new ChronoField(29, "OffsetSeconds",
+                ChronoUnit.SECONDS, ChronoUnit.FOREVER, ValueRange.of(-18 * 3600, 18 * 3600))`));
+
+        
+        // import hunt.logging;
+        // /* version(HUNT_DEBUG) */ logDebug("ChronoField shared static this begin");
     // }
-    // {
-
-    //     NANO_OF_SECOND = new ChronoField(0, "NanoOfSecond", ChronoUnit.NANOS,
-    //             ChronoUnit.SECONDS, ValueRange.of(0, 999_999_999));
-
-    //     NANO_OF_DAY = new ChronoField(1, "NanoOfDay", ChronoUnit.NANOS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000_000L - 1));
-
-    //     MICRO_OF_SECOND = new ChronoField(2, "MicroOfSecond",
-    //             ChronoUnit.MICROS, ChronoUnit.SECONDS, ValueRange.of(0, 999_999));
-
-    //     MICRO_OF_DAY = new ChronoField(3, "MicroOfDay", ChronoUnit.MICROS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000_000L - 1));
-
-    //     MILLI_OF_SECOND = new ChronoField(4, "MilliOfSecond",
-    //             ChronoUnit.MILLIS, ChronoUnit.SECONDS, ValueRange.of(0, 999));
-
-    //     MILLI_OF_DAY = new ChronoField(5, "MilliOfDay", ChronoUnit.MILLIS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 86400L * 1000L - 1));
-
-    //     SECOND_OF_MINUTE = new ChronoField(6, "SecondOfMinute",
-    //             ChronoUnit.SECONDS, ChronoUnit.MINUTES, ValueRange.of(0, 59), "second");
-
-    //     SECOND_OF_DAY = new ChronoField(7, "SecondOfDay", ChronoUnit.SECONDS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 86400L - 1));
-
-    //     MINUTE_OF_HOUR = new ChronoField(8, "MinuteOfHour", ChronoUnit.MINUTES,
-    //             ChronoUnit.HOURS, ValueRange.of(0, 59), "minute");
-
-    //     MINUTE_OF_DAY = new ChronoField(9, "MinuteOfDay", ChronoUnit.MINUTES,
-    //             ChronoUnit.DAYS, ValueRange.of(0, (24 * 60) - 1));
-
-    //     HOUR_OF_AMPM = new ChronoField(10, "HourOfAmPm", ChronoUnit.HOURS,
-    //             ChronoUnit.HALF_DAYS, ValueRange.of(0, 11));
-
-    //     CLOCK_HOUR_OF_AMPM = new ChronoField(11, "ClockHourOfAmPm",
-    //             ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ValueRange.of(1, 12));
-
-    //     HOUR_OF_DAY = new ChronoField(12, "HourOfDay", ChronoUnit.HOURS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 23), "hour");
-
-    //     CLOCK_HOUR_OF_DAY = new ChronoField(13, "ClockHourOfDay",
-    //             ChronoUnit.HOURS, ChronoUnit.DAYS, ValueRange.of(1, 24));
-
-    //     AMPM_OF_DAY = new ChronoField(14, "AmPmOfDay", ChronoUnit.HALF_DAYS,
-    //             ChronoUnit.DAYS, ValueRange.of(0, 1), "dayperiod");
-
-    //     DAY_OF_WEEK = new ChronoField(15, "DayOfWeek", ChronoUnit.DAYS,
-    //             ChronoUnit.WEEKS, ValueRange.of(1, 7), "weekday");
-
-    //     ALIGNED_DAY_OF_WEEK_IN_MONTH = new ChronoField(16, "AlignedDayOfWeekInMonth",
-    //             ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7));
-
-    //     ALIGNED_DAY_OF_WEEK_IN_YEAR = new ChronoField(17, "AlignedDayOfWeekInYear",
-    //             ChronoUnit.DAYS, ChronoUnit.WEEKS, ValueRange.of(1, 7));
-
-    //     DAY_OF_MONTH = new ChronoField(18, "DayOfMonth", ChronoUnit.DAYS,
-    //             ChronoUnit.MONTHS, ValueRange.of(1, 28, 31), "day");
-
-    //     DAY_OF_YEAR = new ChronoField(19, "DayOfYear", ChronoUnit.DAYS,
-    //             ChronoUnit.YEARS, ValueRange.of(1, 365, 366));
-
-    //     EPOCH_DAY = new ChronoField(20, "EpochDay", ChronoUnit.DAYS,
-    //             ChronoUnit.FOREVER, ValueRange.of(-365243219162L, 365241780471L));
-
-    //     ALIGNED_WEEK_OF_MONTH = new ChronoField(21, "AlignedWeekOfMonth",
-    //             ChronoUnit.WEEKS, ChronoUnit.MONTHS, ValueRange.of(1, 4, 5));
-
-    //     ALIGNED_WEEK_OF_YEAR = new ChronoField(22, "AlignedWeekOfYear",
-    //             ChronoUnit.WEEKS, ChronoUnit.YEARS, ValueRange.of(1, 53));
-
-    //     MONTH_OF_YEAR = new ChronoField(23, "MonthOfYear", ChronoUnit.MONTHS,
-    //             ChronoUnit.YEARS, ValueRange.of(1, 12), "month");
-
-    //     PROLEPTIC_MONTH = new ChronoField(24, "ProlepticMonth", ChronoUnit.MONTHS,
-    //             ChronoUnit.FOREVER, ValueRange.of(Year.MIN_VALUE * 12L, Year.MAX_VALUE * 12L + 11));
-
-    //     YEAR_OF_ERA = new ChronoField(25, "YearOfEra", ChronoUnit.YEARS,
-    //             ChronoUnit.FOREVER, ValueRange.of(1, Year.MAX_VALUE, Year.MAX_VALUE + 1));
-
-    //     YEAR = new ChronoField(26, "Year", ChronoUnit.YEARS, ChronoUnit.FOREVER,
-    //             ValueRange.of(Year.MIN_VALUE, Year.MAX_VALUE), "year");
-
-    //     ERA = new ChronoField(27, "Era", ChronoUnit.ERAS, ChronoUnit.FOREVER,
-    //             ValueRange.of(0, 1), "era");
-
-    //     INSTANT_SECONDS = new ChronoField(28, "InstantSeconds", ChronoUnit.SECONDS,
-    //             ChronoUnit.FOREVER, ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE));
-
-    //     OFFSET_SECONDS = new ChronoField(29, "OffsetSeconds", ChronoUnit.SECONDS,
-    //             ChronoUnit.FOREVER, ValueRange.of(-18 * 3600, 18 * 3600));
-    //     _values ~= NANO_OF_SECOND;
-    //     _values ~= NANO_OF_DAY;
-    //     _values ~= MICRO_OF_SECOND;
-    //     _values ~= MICRO_OF_DAY;
-    //     _values ~= MILLI_OF_SECOND;
-    //     _values ~= MILLI_OF_DAY;
-    //     _values ~= SECOND_OF_MINUTE;
-    //     _values ~= SECOND_OF_DAY;
-    //     _values ~= MINUTE_OF_HOUR;
-    //     _values ~= MINUTE_OF_DAY;
-    //     _values ~= HOUR_OF_AMPM;
-    //     _values ~= CLOCK_HOUR_OF_AMPM;
-    //     _values ~= HOUR_OF_DAY;
-    //     _values ~= CLOCK_HOUR_OF_DAY;
-    //     _values ~= AMPM_OF_DAY;
-    //     _values ~= DAY_OF_WEEK;
-    //     _values ~= ALIGNED_DAY_OF_WEEK_IN_MONTH;
-    //     _values ~= ALIGNED_DAY_OF_WEEK_IN_YEAR;
-    //     _values ~= DAY_OF_MONTH;
-    //     _values ~= DAY_OF_YEAR;
-    //     _values ~= EPOCH_DAY;
-    //     _values ~= ALIGNED_WEEK_OF_MONTH;
-    //     _values ~= ALIGNED_WEEK_OF_YEAR;
-    //     _values ~= MONTH_OF_YEAR;
-    //     _values ~= PROLEPTIC_MONTH;
-    //     _values ~= YEAR_OF_ERA;
-    //     _values ~= YEAR;
-    //     _values ~= ERA;
-    //     _values ~= INSTANT_SECONDS;
-    //     _values ~= OFFSET_SECONDS;
-    // }
+   
 
     private string name;
     private TemporalUnit baseUnit;
@@ -811,6 +721,39 @@ public class ChronoField : TemporalField
 
     static ChronoField[] values()
     {
+        if(_values.length == 0)
+        {
+            ChronoField._values ~= ChronoField.NANO_OF_SECOND;
+            ChronoField._values ~= ChronoField.NANO_OF_DAY;
+            ChronoField._values ~= ChronoField.MICRO_OF_SECOND;
+            ChronoField._values ~= ChronoField.MICRO_OF_DAY;
+            ChronoField._values ~= ChronoField.MILLI_OF_SECOND;
+            ChronoField._values ~= ChronoField.MILLI_OF_DAY;
+            ChronoField._values ~= ChronoField.SECOND_OF_MINUTE;
+            ChronoField._values ~= ChronoField.SECOND_OF_DAY;
+            ChronoField._values ~= ChronoField.MINUTE_OF_HOUR;
+            ChronoField._values ~= ChronoField.MINUTE_OF_DAY;
+            ChronoField._values ~= ChronoField.HOUR_OF_AMPM;
+            ChronoField._values ~= ChronoField.CLOCK_HOUR_OF_AMPM;
+            ChronoField._values ~= ChronoField.HOUR_OF_DAY;
+            ChronoField._values ~= ChronoField.CLOCK_HOUR_OF_DAY;
+            ChronoField._values ~= ChronoField.AMPM_OF_DAY;
+            ChronoField._values ~= ChronoField.DAY_OF_WEEK;
+            ChronoField._values ~= ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH;
+            ChronoField._values ~= ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR;
+            ChronoField._values ~= ChronoField.DAY_OF_MONTH;
+            ChronoField._values ~= ChronoField.DAY_OF_YEAR;
+            ChronoField._values ~= ChronoField.EPOCH_DAY;
+            ChronoField._values ~= ChronoField.ALIGNED_WEEK_OF_MONTH;
+            ChronoField._values ~= ChronoField.ALIGNED_WEEK_OF_YEAR;
+            ChronoField._values ~= ChronoField.MONTH_OF_YEAR;
+            ChronoField._values ~= ChronoField.PROLEPTIC_MONTH;
+            ChronoField._values ~= ChronoField.YEAR_OF_ERA;
+            ChronoField._values ~= ChronoField.YEAR;
+            ChronoField._values ~= ChronoField.ERA;
+            ChronoField._values ~= ChronoField.INSTANT_SECONDS;
+            ChronoField._values ~= ChronoField.OFFSET_SECONDS;
+        }
         return _values;
     }
 

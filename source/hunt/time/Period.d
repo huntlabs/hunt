@@ -33,7 +33,7 @@ import std.conv;
 import std.regex;
 import hunt.string.StringBuilder;
 import hunt.time.util.QueryHelper;
-
+import hunt.time.util.common;
 // import hunt.util.regex.Matcher;
 // import hunt.util.regex.Pattern;
 
@@ -85,7 +85,7 @@ public final class Period
     /**
      * A constant for a period of zero.
      */
-    public __gshared Period ZERO;
+    // public __gshared Period ZERO;
     /**
      * Serialization version.
      */
@@ -99,7 +99,7 @@ public final class Period
     /**
      * The set of supported units.
      */
-    __gshared List!(TemporalUnit) SUPPORTED_UNITS;
+    __gshared List!(TemporalUnit) _SUPPORTED_UNITS;
 
     /**
      * The number of years.
@@ -114,13 +114,22 @@ public final class Period
      */
     private  int days;
 
+    public static ref List!(TemporalUnit) SUPPORTED_UNITS()
+    {
+        if(_SUPPORTED_UNITS is null)
+        {
+            _SUPPORTED_UNITS = new ArrayList!TemporalUnit();
+            _SUPPORTED_UNITS.add(ChronoUnit.YEARS);
+            _SUPPORTED_UNITS.add(ChronoUnit.MONTHS);
+            _SUPPORTED_UNITS.add(ChronoUnit.DAYS);
+        }
+        return _SUPPORTED_UNITS;
+    }
     // shared static this()
     // {
-    //     ZERO = new Period(0, 0, 0);
-    //     SUPPORTED_UNITS = new ArrayList!TemporalUnit();
-    //     SUPPORTED_UNITS.add(ChronoUnit.YEARS);
-    //     SUPPORTED_UNITS.add(ChronoUnit.MONTHS);
-    //     SUPPORTED_UNITS.add(ChronoUnit.DAYS);
+        // ZERO = new Period(0, 0, 0);
+        mixin(MakeGlobalVar!(Period)("ZERO",`new Period(0, 0, 0)`));
+        
     // }
 
     //-----------------------------------------------------------------------

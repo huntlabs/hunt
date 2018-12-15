@@ -14,7 +14,7 @@ import hunt.lang.exception;
 import hunt.time.Instant;
 import hunt.container;
 import hunt.time.util.Locale;
-
+import hunt.time.util.common;
 // import java.util.concurrent.ConcurrentHashMap;
 // import java.util.concurrent.ConcurrentMap;
 // import sun.util.BuddhistCalendar;
@@ -908,7 +908,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     // private enum ConcurrentMap!(Locale, int[]) cachedLocaleData
     //     = new ConcurrentHashMap(3);
 
-    __gshared  Map!(Locale, int[]) cachedLocaleData;
+    // __gshared  Map!(Locale, int[]) cachedLocaleData;
     // Special values of stamp[]
     /**
      * The corresponding fields[] has no value.
@@ -999,7 +999,8 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
 
     // shared static this()
     // {
-    //     cachedLocaleData = new HashMap!(Locale, int[])(3);
+        // cachedLocaleData = new HashMap!(Locale, int[])(3);
+        mixin(MakeGlobalVar!(Map!(Locale, int[]))("cachedLocaleData",`new HashMap!(Locale, int[])(3)`));
     // }
 
     /**

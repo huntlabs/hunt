@@ -15,13 +15,10 @@ void main()
 {
 	trace("Test Time.");
 
-	TestLocalTime.test();
-
-	TestLocalDate.test();
-
-	TestLocalDateTime.test();
-
-	testUnits!(TestMonthDay);
+	new Thread({ Thread.sleep(1.seconds); TestLocalTime.test(); }).start();
+	new Thread({ Thread.sleep(1.seconds); TestLocalDate.test(); }).start();
+	new Thread({ Thread.sleep(2.seconds); TestLocalDateTime.test(); }).start();
+	new Thread({ Thread.sleep(3.seconds); testUnits!(TestMonthDay); }).start();
 
 	TestTimeZone.test();
 

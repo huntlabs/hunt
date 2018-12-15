@@ -51,7 +51,19 @@ final class ChronoPeriodImpl
     /**
      * The set of supported units.
      */
-    __gshared List!(TemporalUnit) SUPPORTED_UNITS;
+    __gshared List!(TemporalUnit) _SUPPORTED_UNITS;
+
+    public static ref List!(TemporalUnit) SUPPORTED_UNITS()
+    {
+        if(_SUPPORTED_UNITS is null)
+        {
+            _SUPPORTED_UNITS = new ArrayList!TemporalUnit();
+            _SUPPORTED_UNITS.add(ChronoUnit.YEARS);
+            _SUPPORTED_UNITS.add(ChronoUnit.MONTHS);
+            _SUPPORTED_UNITS.add(ChronoUnit.DAYS);
+        }
+        return _SUPPORTED_UNITS;
+    }
 
     // shared static this()
     // {

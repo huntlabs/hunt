@@ -11,7 +11,7 @@ import hunt.time.temporal.TemporalQuery;
 import hunt.time.temporal.TemporalUnit;
 import hunt.time.temporal.TemporalAccessor;
 import hunt.time.util.QueryHelper;
-
+import hunt.time.util.common;
 /**
  * Common implementations of {@code TemporalQuery}.
  * !(p)
@@ -291,162 +291,265 @@ public final class TemporalQueries
     /**
      * A strict query for the {@code ZoneId}.
      */
-    __gshared TemporalQuery!(ZoneId) ZONE_ID;
+    // __gshared TemporalQuery!(ZoneId) ZONE_ID;
 
     /**
      * A query for the {@code Chronology}.
      */
-    __gshared TemporalQuery!(Chronology) CHRONO;
+    //__gshared TemporalQuery!(Chronology) CHRONO;
 
     /**
      * A query for the smallest supported unit.
      */
-    __gshared TemporalQuery!(TemporalUnit) PRECISION;
+    //__gshared TemporalQuery!(TemporalUnit) PRECISION;
 
     //-----------------------------------------------------------------------
     /**
      * A query for {@code ZoneOffset} returning null if not found.
      */
-    __gshared TemporalQuery!(ZoneOffset) OFFSET;
+    //__gshared TemporalQuery!(ZoneOffset) OFFSET;
 
     /**
      * A lenient query for the {@code ZoneId}, falling back to the {@code ZoneOffset}.
      */
-    __gshared TemporalQuery!(ZoneId) ZONE;
+    //__gshared TemporalQuery!(ZoneId) ZONE;
 
     /**
      * A query for {@code LocalDate} returning null if not found.
      */
-    __gshared TemporalQuery!(LocalDate) LOCAL_DATE;
+    //__gshared TemporalQuery!(LocalDate) LOCAL_DATE;
 
     /**
      * A query for {@code LocalTime} returning null if not found.
      */
-    __gshared TemporalQuery!(LocalTime) LOCAL_TIME;
+    //__gshared TemporalQuery!(LocalTime) LOCAL_TIME;
 
     // shared static this()
     // {
-    //     ZONE_ID = new class TemporalQuery!(ZoneId)
-    //     {
-    //         override public ZoneId queryFrom(TemporalAccessor temporal)
-    //         {
-    //             return QueryHelper.query!ZoneId(temporal, TemporalQueries.ZONE_ID);
-    //         }
+        // ZONE_ID = new class TemporalQuery!(ZoneId)
+        // {
+        //     override public ZoneId queryFrom(TemporalAccessor temporal)
+        //     {
+        //         return QueryHelper.query!ZoneId(temporal, TemporalQueries.ZONE_ID);
+        //     }
 
-    //         override public string toString()
-    //         {
-    //             return "ZoneId";
-    //         }
-    //     };
+        //     override public string toString()
+        //     {
+        //         return "ZoneId";
+        //     }
+        // };
 
-    //     /**
-    //  * A query for the {@code Chronology}.
-    //  */
-    //     CHRONO = new class TemporalQuery!(Chronology)
-    //     {
-    //         override public Chronology queryFrom(TemporalAccessor temporal)
-    //         {
-    //             return QueryHelper.query!Chronology(temporal, TemporalQueries.CHRONO);
-    //         }
+        mixin(MakeGlobalVar!(TemporalQuery!(ZoneId))("ZONE_ID",` new class TemporalQuery!(ZoneId)
+        {
+            override public ZoneId queryFrom(TemporalAccessor temporal)
+            {
+                return QueryHelper.query!ZoneId(temporal, TemporalQueries.ZONE_ID);
+            }
 
-    //         override public string toString()
-    //         {
-    //             return "Chronology";
-    //         }
-    //     };
+            override public string toString()
+            {
+                return "ZoneId";
+            }
+        }`));
 
-    //     /**
-    //  * A query for the smallest supported unit.
-    //  */
-    //     PRECISION = new class TemporalQuery!(TemporalUnit)
-    //     {
-    //         override public TemporalUnit queryFrom(TemporalAccessor temporal)
-    //         {
-    //             return QueryHelper.query!TemporalUnit(temporal, TemporalQueries.PRECISION);
-    //         }
+        /**
+     * A query for the {@code Chronology}.
+     */
+        // CHRONO = new class TemporalQuery!(Chronology)
+        // {
+        //     override public Chronology queryFrom(TemporalAccessor temporal)
+        //     {
+        //         return QueryHelper.query!Chronology(temporal, TemporalQueries.CHRONO);
+        //     }
 
-    //         override public string toString()
-    //         {
-    //             return "Precision";
-    //         }
-    //     };
+        //     override public string toString()
+        //     {
+        //         return "Chronology";
+        //     }
+        // };
 
-    //     //-----------------------------------------------------------------------
-    //     /**
-    //  * A query for {@code ZoneOffset} returning null if not found.
-    //  */
-    //     OFFSET = new class TemporalQuery!(ZoneOffset)
-    //     {
-    //         override public ZoneOffset queryFrom(TemporalAccessor temporal)
-    //         {
-    //             if (temporal.isSupported(ChronoField.OFFSET_SECONDS))
-    //             {
-    //                 return ZoneOffset.ofTotalSeconds(temporal.get(ChronoField.OFFSET_SECONDS));
-    //             }
-    //             return null;
-    //         }
+        mixin(MakeGlobalVar!(TemporalQuery!(Chronology))("CHRONO",`new class TemporalQuery!(Chronology)
+        {
+            override public Chronology queryFrom(TemporalAccessor temporal)
+            {
+                return QueryHelper.query!Chronology(temporal, TemporalQueries.CHRONO);
+            }
 
-    //         override public string toString()
-    //         {
-    //             return "ZoneOffset";
-    //         }
-    //     };
+            override public string toString()
+            {
+                return "Chronology";
+            }
+        }`));
 
-    //     /**
-    //  * A lenient query for the {@code ZoneId}, falling back to the {@code ZoneOffset}.
-    //  */
-    //     ZONE = new class TemporalQuery!(ZoneId)
-    //     {
-    //         override public ZoneId queryFrom(TemporalAccessor temporal)
-    //         {
-    //             ZoneId zone = QueryHelper.query!ZoneId(temporal, ZONE_ID);
-    //             return (zone !is null ? zone : QueryHelper.query!ZoneOffset(temporal, OFFSET));
-    //         }
+        /**
+     * A query for the smallest supported unit.
+     */
+        // PRECISION = new class TemporalQuery!(TemporalUnit)
+        // {
+        //     override public TemporalUnit queryFrom(TemporalAccessor temporal)
+        //     {
+        //         return QueryHelper.query!TemporalUnit(temporal, TemporalQueries.PRECISION);
+        //     }
 
-    //         override public string toString()
-    //         {
-    //             return "Zone";
-    //         }
-    //     };
+        //     override public string toString()
+        //     {
+        //         return "Precision";
+        //     }
+        // };
 
-    //     /**
-    //  * A query for {@code LocalDate} returning null if not found.
-    //  */
-    //     LOCAL_DATE = new class TemporalQuery!(LocalDate)
-    //     {
-    //         override public LocalDate queryFrom(TemporalAccessor temporal)
-    //         {
-    //             if (temporal.isSupported(ChronoField.EPOCH_DAY))
-    //             {
-    //                 return LocalDate.ofEpochDay(temporal.getLong(ChronoField.EPOCH_DAY));
-    //             }
-    //             return null;
-    //         }
+        mixin(MakeGlobalVar!(TemporalQuery!(TemporalUnit))("PRECISION",`new class TemporalQuery!(TemporalUnit)
+        {
+            override public TemporalUnit queryFrom(TemporalAccessor temporal)
+            {
+                return QueryHelper.query!TemporalUnit(temporal, TemporalQueries.PRECISION);
+            }
 
-    //         override public string toString()
-    //         {
-    //             return "LocalDate";
-    //         }
-    //     };
+            override public string toString()
+            {
+                return "Precision";
+            }
+        }`));
 
-    //     /**
-    //  * A query for {@code LocalTime} returning null if not found.
-    //  */
-    //     LOCAL_TIME = new class TemporalQuery!(LocalTime)
-    //     {
-    //         override public LocalTime queryFrom(TemporalAccessor temporal)
-    //         {
-    //             if (temporal.isSupported(ChronoField.NANO_OF_DAY))
-    //             {
-    //                 return LocalTime.ofNanoOfDay(temporal.getLong(ChronoField.NANO_OF_DAY));
-    //             }
-    //             return null;
-    //         }
+        //-----------------------------------------------------------------------
+        /**
+     * A query for {@code ZoneOffset} returning null if not found.
+     */
+        // OFFSET = new class TemporalQuery!(ZoneOffset)
+        // {
+        //     override public ZoneOffset queryFrom(TemporalAccessor temporal)
+        //     {
+        //         if (temporal.isSupported(ChronoField.OFFSET_SECONDS))
+        //         {
+        //             return ZoneOffset.ofTotalSeconds(temporal.get(ChronoField.OFFSET_SECONDS));
+        //         }
+        //         return null;
+        //     }
 
-    //         override public string toString()
-    //         {
-    //             return "LocalTime";
-    //         }
-    //     };
+        //     override public string toString()
+        //     {
+        //         return "ZoneOffset";
+        //     }
+        // };
+
+        mixin(MakeGlobalVar!(TemporalQuery!(ZoneOffset))("OFFSET",`new class TemporalQuery!(ZoneOffset)
+        {
+            override public ZoneOffset queryFrom(TemporalAccessor temporal)
+            {
+                if (temporal.isSupported(ChronoField.OFFSET_SECONDS))
+                {
+                    return ZoneOffset.ofTotalSeconds(temporal.get(ChronoField.OFFSET_SECONDS));
+                }
+                return null;
+            }
+
+            override public string toString()
+            {
+                return "ZoneOffset";
+            }
+        }`));
+
+        /**
+     * A lenient query for the {@code ZoneId}, falling back to the {@code ZoneOffset}.
+     */
+        // ZONE = new class TemporalQuery!(ZoneId)
+        // {
+        //     override public ZoneId queryFrom(TemporalAccessor temporal)
+        //     {
+        //         ZoneId zone = QueryHelper.query!ZoneId(temporal, ZONE_ID);
+        //         return (zone !is null ? zone : QueryHelper.query!ZoneOffset(temporal, OFFSET));
+        //     }
+
+        //     override public string toString()
+        //     {
+        //         return "Zone";
+        //     }
+        // };
+
+        mixin(MakeGlobalVar!(TemporalQuery!(ZoneId))("ZONE",`new class TemporalQuery!(ZoneId)
+        {
+            override public ZoneId queryFrom(TemporalAccessor temporal)
+            {
+                ZoneId zone = QueryHelper.query!ZoneId(temporal, ZONE_ID);
+                return (zone !is null ? zone : QueryHelper.query!ZoneOffset(temporal, OFFSET));
+            }
+
+            override public string toString()
+            {
+                return "Zone";
+            }
+        }`));
+        /**
+     * A query for {@code LocalDate} returning null if not found.
+     */
+        // LOCAL_DATE = new class TemporalQuery!(LocalDate)
+        // {
+        //     override public LocalDate queryFrom(TemporalAccessor temporal)
+        //     {
+        //         if (temporal.isSupported(ChronoField.EPOCH_DAY))
+        //         {
+        //             return LocalDate.ofEpochDay(temporal.getLong(ChronoField.EPOCH_DAY));
+        //         }
+        //         return null;
+        //     }
+
+        //     override public string toString()
+        //     {
+        //         return "LocalDate";
+        //     }
+        // };
+
+        
+        mixin(MakeGlobalVar!(TemporalQuery!(LocalDate))("LOCAL_DATE",`new class TemporalQuery!(LocalDate)
+        {
+            override public LocalDate queryFrom(TemporalAccessor temporal)
+            {
+                if (temporal.isSupported(ChronoField.EPOCH_DAY))
+                {
+                    return LocalDate.ofEpochDay(temporal.getLong(ChronoField.EPOCH_DAY));
+                }
+                return null;
+            }
+
+            override public string toString()
+            {
+                return "LocalDate";
+            }
+        }`));
+
+        /**
+     * A query for {@code LocalTime} returning null if not found.
+     */
+        // LOCAL_TIME = new class TemporalQuery!(LocalTime)
+        // {
+        //     override public LocalTime queryFrom(TemporalAccessor temporal)
+        //     {
+        //         if (temporal.isSupported(ChronoField.NANO_OF_DAY))
+        //         {
+        //             return LocalTime.ofNanoOfDay(temporal.getLong(ChronoField.NANO_OF_DAY));
+        //         }
+        //         return null;
+        //     }
+
+        //     override public string toString()
+        //     {
+        //         return "LocalTime";
+        //     }
+        // };
+        mixin(MakeGlobalVar!(TemporalQuery!(LocalTime))("LOCAL_TIME",`new class TemporalQuery!(LocalTime)
+        {
+            override public LocalTime queryFrom(TemporalAccessor temporal)
+            {
+                if (temporal.isSupported(ChronoField.NANO_OF_DAY))
+                {
+                    return LocalTime.ofNanoOfDay(temporal.getLong(ChronoField.NANO_OF_DAY));
+                }
+                return null;
+            }
+
+            override public string toString()
+            {
+                return "LocalTime";
+            }
+        }`));
     // }
 }

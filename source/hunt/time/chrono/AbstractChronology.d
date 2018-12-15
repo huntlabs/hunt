@@ -36,6 +36,7 @@ import hunt.time.chrono.IsoChronology;
 import hunt.time.chrono.Era;
 import std.conv;
 import hunt.time.chrono.Ser;
+import hunt.time.util.common;
 
 public abstract class AbstractChronology : Chronology {
 
@@ -43,19 +44,22 @@ public abstract class AbstractChronology : Chronology {
      * Map of available calendars by ID.
      */
     // private static final ConcurrentHashMap!(string, Chronology) CHRONOS_BY_ID = new ConcurrentHashMap!(string, Chronology)();
-     __gshared HashMap!(string, Chronology) CHRONOS_BY_ID;
+    //  __gshared HashMap!(string, Chronology) CHRONOS_BY_ID;
 
     /**
      * Map of available calendars by calendar type.
      */
     //  __gshared ConcurrentHashMap!(string, Chronology) CHRONOS_BY_TYPE = new ConcurrentHashMap!(string, Chronology)();
-     __gshared HashMap!(string, Chronology) CHRONOS_BY_TYPE;
+    //  __gshared HashMap!(string, Chronology) CHRONOS_BY_TYPE;
 
 
     // shared static this()
     // {
-    //     CHRONOS_BY_ID = new HashMap!(string, Chronology)();
-    //     CHRONOS_BY_TYPE = new HashMap!(string, Chronology)();
+        // CHRONOS_BY_ID = new HashMap!(string, Chronology)();
+        mixin(MakeGlobalVar!(HashMap!(string, Chronology))("CHRONOS_BY_ID",`new HashMap!(string, Chronology)()`));
+        // CHRONOS_BY_TYPE = new HashMap!(string, Chronology)();
+        mixin(MakeGlobalVar!(HashMap!(string, Chronology))("CHRONOS_BY_TYPE",`new HashMap!(string, Chronology)()`));
+
     // }
     /**
      * Register a Chronology by its ID and type for lookup by {@link #of(string)}.

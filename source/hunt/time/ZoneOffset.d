@@ -29,7 +29,7 @@ import std.conv;
 import hunt.string.StringBuilder;
 import hunt.time.Ser;
 import hunt.time.util.QueryHelper;
-
+import hunt.time.util.common;
 // import hunt.util.concurrent.ConcurrentMap;
 
 /**
@@ -79,11 +79,11 @@ public final class ZoneOffset : ZoneId, TemporalAccessor, TemporalAdjuster,
 
     /** Cache of time-zone offset by offset _in seconds. */
     // private static final ConcurrentMap!(Integer, ZoneOffset) SECONDS_CACHE = new ConcurrentHashMap!()(16, 0.75f, 4);
-     __gshared HashMap!(Integer, ZoneOffset) SECONDS_CACHE;
+     //__gshared HashMap!(Integer, ZoneOffset) SECONDS_CACHE;
 
     /** Cache of time-zone offset by ID. */
     //  static final ConcurrentMap!(string, ZoneOffset) ID_CACHE = new ConcurrentHashMap!()(16, 0.75f, 4);
-     __gshared HashMap!(string, ZoneOffset) ID_CACHE;
+     //__gshared HashMap!(string, ZoneOffset) ID_CACHE;
 
     /**
      * The abs maximum seconds.
@@ -97,15 +97,15 @@ public final class ZoneOffset : ZoneId, TemporalAccessor, TemporalAdjuster,
     /**
      * The time-zone offset for UTC, with an ID of 'Z'.
      */
-    public __gshared ZoneOffset UTC;
+    //public __gshared ZoneOffset UTC;
     /**
      * Constant for the minimum supported offset.
      */
-    public __gshared ZoneOffset MIN;
+    //public __gshared ZoneOffset MIN;
     /**
      * Constant for the maximum supported offset.
      */
-    public __gshared ZoneOffset MAX;
+    //public __gshared ZoneOffset MAX;
 
     /**
      * The total offset _in seconds.
@@ -118,11 +118,20 @@ public final class ZoneOffset : ZoneId, TemporalAccessor, TemporalAdjuster,
 
     // shared static this()
     // {
-    //     SECONDS_CACHE = new HashMap!(Integer, ZoneOffset)(16, 0.75f /* , 4 */ );
-    //     ID_CACHE = new HashMap!(string, ZoneOffset)(16, 0.75f /* , 4 */ );
-    //     UTC = ZoneOffset.ofTotalSeconds(0);
-    //     MIN = ZoneOffset.ofTotalSeconds(-MAX_SECONDS);
-    //     MAX = ZoneOffset.ofTotalSeconds(MAX_SECONDS);
+    //     // SECONDS_CACHE = new HashMap!(Integer, ZoneOffset)(16, 0.75f /* , 4 */ );
+        mixin(MakeGlobalVar!(HashMap!(Integer, ZoneOffset))("SECONDS_CACHE",`new HashMap!(Integer, ZoneOffset)(16, 0.75f /* , 4 */ )`));
+        // ID_CACHE = new HashMap!(string, ZoneOffset)(16, 0.75f /* , 4 */ );
+        mixin(MakeGlobalVar!(HashMap!(string, ZoneOffset))("ID_CACHE",`new HashMap!(string, ZoneOffset)(16, 0.75f /* , 4 */ )`));
+
+        // UTC = ZoneOffset.ofTotalSeconds(0);
+        mixin(MakeGlobalVar!(ZoneOffset)("UTC",`ZoneOffset.ofTotalSeconds(0)`));
+
+        // MIN = ZoneOffset.ofTotalSeconds(-MAX_SECONDS);
+        mixin(MakeGlobalVar!(ZoneOffset)("MIN",`ZoneOffset.ofTotalSeconds(-MAX_SECONDS)`));
+
+        // MAX = ZoneOffset.ofTotalSeconds(MAX_SECONDS);
+        mixin(MakeGlobalVar!(ZoneOffset)("MAX",`ZoneOffset.ofTotalSeconds(MAX_SECONDS)`));
+
     // }
     //-----------------------------------------------------------------------
     /**

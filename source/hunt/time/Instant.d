@@ -147,6 +147,7 @@ import hunt.time.Clock;
 import hunt.time.ZoneOffset;
 import hunt.time.ZonedDateTime;
 import hunt.time.ZoneId;
+import hunt.time.util.common;
 
 public final class Instant
         : Temporal, TemporalAdjuster, Comparable!(Instant), Serializable {
@@ -154,7 +155,7 @@ public final class Instant
     /**
      * Constant for the 1970-01-01T00:00:00Z epoch instant.
      */
-    public __gshared Instant EPOCH;
+    //public __gshared Instant EPOCH;
     /**
      * The minimum supported epoch second.
      */
@@ -173,7 +174,7 @@ public final class Instant
      * The value is also chosen such that the value of the year fits _in
      * an {@code int}.
      */
-    public __gshared Instant MIN;
+    //public __gshared Instant MIN;
     /**
      * The maximum supported {@code Instant}, '1000000000-12-31T23:59:59.999999999Z'.
      * This could be used by an application as a "far future" instant.
@@ -184,7 +185,7 @@ public final class Instant
      * The value is also chosen such that the value of the year fits _in
      * an {@code int}.
      */
-    public __gshared Instant MAX;
+    //public __gshared Instant MAX;
 
     /**
      * Serialization version.
@@ -203,9 +204,14 @@ public final class Instant
 
     // shared static this()
     // {
-    //     EPOCH = new Instant(0, 0);
-    //     MIN = Instant.ofEpochSecond(MIN_SECOND, 0);
-    //     MAX = Instant.ofEpochSecond(MAX_SECOND, 999_999_999);
+        // EPOCH = new Instant(0, 0);
+        mixin(MakeGlobalVar!(Instant)("EPOCH",`new Instant(0, 0)`));
+        // MIN = Instant.ofEpochSecond(MIN_SECOND, 0);
+        mixin(MakeGlobalVar!(Instant)("MIN",`Instant.ofEpochSecond(MIN_SECOND, 0)`));
+
+        // MAX = Instant.ofEpochSecond(MAX_SECOND, 999_999_999);
+        mixin(MakeGlobalVar!(Instant)("MAX",`Instant.ofEpochSecond(MAX_SECOND, 999_999_999)`));
+
     // }
 
     //-----------------------------------------------------------------------

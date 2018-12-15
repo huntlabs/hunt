@@ -18,6 +18,7 @@ import hunt.time.ZoneOffset;
 import hunt.time.chrono.IsoChronology;
 import hunt.time.zone.ZoneOffsetTransition;
 import hunt.string.StringBuilder;
+import hunt.time.util.common;
 /**
  * A rule expressing how to create a transition.
  * !(p)
@@ -533,11 +534,11 @@ public final class ZoneOffsetTransitionRule : Serializable {
      */
     public static class TimeDefinition {
         /** The local date-time is expressed _in terms of the UTC offset. */
-        static TimeDefinition UTC;
-        /** The local date-time is expressed _in terms of the wall offset. */
-        static TimeDefinition WALL;
-        /** The local date-time is expressed _in terms of the standard offset. */
-        static TimeDefinition STANDARD;
+        // static TimeDefinition UTC;
+        // /** The local date-time is expressed _in terms of the wall offset. */
+        // static TimeDefinition WALL;
+        // /** The local date-time is expressed _in terms of the standard offset. */
+        // static TimeDefinition STANDARD;
 
         /**
          * Converts the specified local date-time to the local date-time actually
@@ -561,16 +562,25 @@ public final class ZoneOffsetTransitionRule : Serializable {
         static TimeDefinition[] _values;
 
         // static this(){
-        //     UTC = new TimeDefinition(0,"UTC");
-        //     WALL = new TimeDefinition(1,"WALL");
-        //     STANDARD = new TimeDefinition(2,"STANDARD");
-        //     _values ~= UTC;
-        //     _values ~= WALL;
-        //     _values ~= STANDARD;
+            // UTC = new TimeDefinition(0,"UTC");
+            mixin(MakeGlobalVar!(TimeDefinition)("UTC",`new TimeDefinition(0,"UTC")`));
+            // WALL = new TimeDefinition(1,"WALL");
+            mixin(MakeGlobalVar!(TimeDefinition)("WALL",`new TimeDefinition(1,"WALL")`));
+
+            // STANDARD = new TimeDefinition(2,"STANDARD");
+            mixin(MakeGlobalVar!(TimeDefinition)("STANDARD",`new TimeDefinition(2,"STANDARD")`));
+
+           
         // }
 
-        static TimeDefinition[] values()
+        static ref  TimeDefinition[] values()
         {
+            if(_values.length == 0)
+            {
+                 _values ~= UTC;
+                _values ~= WALL;
+                _values ~= STANDARD;
+            }
             return _values;
         }
 

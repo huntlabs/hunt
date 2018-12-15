@@ -10,9 +10,8 @@ import hunt.time.Duration;
 import hunt.time.Instant;
 import hunt.time.LocalDate;
 import hunt.time.LocalDateTime;
-import hunt.time.ZoneId;
 import hunt.time.ZoneOffset;
-import hunt.time.Year;
+// import hunt.time.Year;
 import hunt.container.ArrayList;
 import hunt.time.zone.Ser;
 import hunt.container.Collections;
@@ -23,7 +22,7 @@ import hunt.time.zone.ZoneOffsetTransitionRule;
 import hunt.time.zone.ZoneOffsetTransition;
 import hunt.string.common;
 import hunt.util.Arrays;
-
+import hunt.time.util.common;
 
 /**
  * The rules defining how the zone offset varies for a single time-zone.
@@ -101,22 +100,27 @@ public final class ZoneRules : Serializable
     /**
      * The zero-length long array.
      */
-    __gshared long[] EMPTY_LONG_ARRAY;
+    //__gshared long[] EMPTY_LONG_ARRAY;
     /**
      * The zero-length lastrules array.
      */
-    __gshared ZoneOffsetTransitionRule[] EMPTY_LASTRULES;
+    //__gshared ZoneOffsetTransitionRule[] EMPTY_LASTRULES;
     /**
      * The zero-length ldt array.
      */
-    __gshared LocalDateTime[] EMPTY_LDT_ARRAY;
+    //__gshared LocalDateTime[] EMPTY_LDT_ARRAY;
 
     // shared static this()
     // {
-    //     EMPTY_LONG_ARRAY = new long[0];
-    //     EMPTY_LASTRULES =
-    //     new ZoneOffsetTransitionRule[0];
-    //     EMPTY_LDT_ARRAY = new LocalDateTime[0];
+        // EMPTY_LONG_ARRAY = new long[0];
+        mixin(MakeGlobalVar!(long[])("EMPTY_LONG_ARRAY",`new long[0]`));
+        // EMPTY_LASTRULES =
+        // new ZoneOffsetTransitionRule[0];
+        mixin(MakeGlobalVar!(ZoneOffsetTransitionRule[])("EMPTY_LASTRULES",`new ZoneOffsetTransitionRule[0]`));
+
+        // EMPTY_LDT_ARRAY = new LocalDateTime[0];
+        mixin(MakeGlobalVar!(LocalDateTime[])("EMPTY_LDT_ARRAY",`new LocalDateTime[0]`));
+
     // }
 
     /**
@@ -907,7 +911,7 @@ public final class ZoneRules : Serializable
                 }
             }
             // use first from following year
-            if (year < Year.MAX_VALUE)
+            if (year < 999_999_999/* Year.MAX_VALUE */)
             {
                 transArray = findTransitionArray(year + 1);
                 return transArray[0];

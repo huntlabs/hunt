@@ -18,6 +18,7 @@ import hunt.time.temporal.ValueRange;
 import hunt.time.temporal.WeekFields;
 import hunt.time.util.Locale;
 import hunt.time.DateTimeException;
+import hunt.time.util.common;
 /**
  * A day-of-week, such as 'Tuesday'.
  * !(p)
@@ -52,41 +53,41 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * The singleton instance for the day-of-week of Monday.
      * This has the numeric value of {@code 1}.
      */
-    static DayOfWeek MONDAY ;
+    //static DayOfWeek MONDAY ;
     /**
      * The singleton instance for the day-of-week of Tuesday.
      * This has the numeric value of {@code 2}.
      */
-    static DayOfWeek TUESDAY ;
+    //static DayOfWeek TUESDAY ;
     /**
      * The singleton instance for the day-of-week of Wednesday.
      * This has the numeric value of {@code 3}.
      */
-    static DayOfWeek WEDNESDAY ;
+    //static DayOfWeek WEDNESDAY ;
     /**
      * The singleton instance for the day-of-week of Thursday.
      * This has the numeric value of {@code 4}.
      */
-    static DayOfWeek THURSDAY ;
+    //static DayOfWeek THURSDAY ;
     /**
      * The singleton instance for the day-of-week of Friday.
      * This has the numeric value of {@code 5}.
      */
-    static DayOfWeek FRIDAY ;
+    //static DayOfWeek FRIDAY ;
     /**
      * The singleton instance for the day-of-week of Saturday.
      * This has the numeric value of {@code 6}.
      */
-    static DayOfWeek SATURDAY ;
+    //static DayOfWeek SATURDAY ;
     /**
      * The singleton instance for the day-of-week of Sunday.
      * This has the numeric value of {@code 7}.
      */
-    static DayOfWeek SUNDAY ;
+    //static DayOfWeek SUNDAY ;
     /**
      * Private cache of all the constants.
      */
-    __gshared DayOfWeek[] ENUMS;
+    __gshared DayOfWeek[] _ENUMS;
 
     // static this()
     // {
@@ -95,48 +96,74 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
 
     // shared static this()
     // {
-    //     MONDAY = new DayOfWeek(0,"MONDAY");
-    // /**
-    //  * The singleton instance for the day-of-week of Tuesday.
-    //  * This has the numeric value of {@code 2}.
-    //  */
+        // MONDAY = new DayOfWeek(0,"MONDAY");
+        mixin(MakeGlobalVar!(DayOfWeek)("MONDAY",`new DayOfWeek(0,"MONDAY")`));
+    /**
+     * The singleton instance for the day-of-week of Tuesday.
+     * This has the numeric value of {@code 2}.
+     */
     //  TUESDAY = new DayOfWeek(1,"TUESDAY");
-    // /**
-    //  * The singleton instance for the day-of-week of Wednesday.
-    //  * This has the numeric value of {@code 3}.
-    //  */
+        mixin(MakeGlobalVar!(DayOfWeek)("TUESDAY",`new DayOfWeek(1,"TUESDAY")`));
+    /**
+     * The singleton instance for the day-of-week of Wednesday.
+     * This has the numeric value of {@code 3}.
+     */
     //  WEDNESDAY = new DayOfWeek(2,"WEDNESDAY");
-    // /**
-    //  * The singleton instance for the day-of-week of Thursday.
-    //  * This has the numeric value of {@code 4}.
-    //  */
+        mixin(MakeGlobalVar!(DayOfWeek)("WEDNESDAY",`new DayOfWeek(2,"WEDNESDAY")`));
+
+    /**
+     * The singleton instance for the day-of-week of Thursday.
+     * This has the numeric value of {@code 4}.
+     */
     //  THURSDAY = new DayOfWeek(3,"THURSDAY");
-    // /**
-    //  * The singleton instance for the day-of-week of Friday.
-    //  * This has the numeric value of {@code 5}.
-    //  */
+        mixin(MakeGlobalVar!(DayOfWeek)("THURSDAY",`new DayOfWeek(3,"THURSDAY")`));
+
+    /**
+     * The singleton instance for the day-of-week of Friday.
+     * This has the numeric value of {@code 5}.
+     */
     //  FRIDAY = new DayOfWeek(4,"FRIDAY");
-    // /**
-    //  * The singleton instance for the day-of-week of Saturday.
-    //  * This has the numeric value of {@code 6}.
-    //  */
+        mixin(MakeGlobalVar!(DayOfWeek)("FRIDAY",`new DayOfWeek(4,"FRIDAY")`));
+
+    /**
+     * The singleton instance for the day-of-week of Saturday.
+     * This has the numeric value of {@code 6}.
+     */
     //  SATURDAY = new DayOfWeek(5,"SATURDAY");
-    // /**
-    //  * The singleton instance for the day-of-week of Sunday.
-    //  * This has the numeric value of {@code 7}.
-    //  */
+        mixin(MakeGlobalVar!(DayOfWeek)("SATURDAY",`new DayOfWeek(5,"SATURDAY")`));
+
+    /**
+     * The singleton instance for the day-of-week of Sunday.
+     * This has the numeric value of {@code 7}.
+     */
     //  SUNDAY = new DayOfWeek(6,"SUNDAY");
+        mixin(MakeGlobalVar!(DayOfWeek)("SUNDAY",`new DayOfWeek(6,"SUNDAY")`));
 
-    //     ENUMS ~= MONDAY;
-    //     ENUMS ~= TUESDAY;
 
-    //     ENUMS ~= WEDNESDAY;
-    //     ENUMS ~= THURSDAY;
-    //     ENUMS ~= FRIDAY;
-    //     ENUMS ~= SATURDAY;
-    //     ENUMS ~= SUNDAY;
+        // ENUMS ~= MONDAY;
+        // ENUMS ~= TUESDAY;
+
+        // ENUMS ~= WEDNESDAY;
+        // ENUMS ~= THURSDAY;
+        // ENUMS ~= FRIDAY;
+        // ENUMS ~= SATURDAY;
+        // ENUMS ~= SUNDAY;
     // }
+    public static DayOfWeek[] ENUMS()
+    {
+        if(_ENUMS.length == 0)
+        {
+            _ENUMS ~= DayOfWeek.MONDAY;
+            _ENUMS ~= DayOfWeek.TUESDAY;
 
+            _ENUMS ~= DayOfWeek.WEDNESDAY;
+            _ENUMS ~= DayOfWeek.THURSDAY;/*  */
+            _ENUMS ~= DayOfWeek.FRIDAY;
+            _ENUMS ~= DayOfWeek.SATURDAY;
+            _ENUMS ~= DayOfWeek.SUNDAY;
+        }
+        return _ENUMS;
+    }
     private int _ordinal;
     private string _name;
 
