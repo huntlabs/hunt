@@ -172,11 +172,48 @@ public abstract class ZoneId : Serializable {
      * </ul>
      * The map is unmodifiable.
      */
-    public __gshared Map!(string, string) SHORT_IDS;
+    public __gshared Map!(string, string) _SHORT_IDS;
     /**
      * Serialization version.
      */
     private enum long serialVersionUID = 8352817235686L;
+
+    public static ref Map!(string, string) SHORT_IDS()
+    {
+        if(_SHORT_IDS is null)
+        {
+            _SHORT_IDS = new HashMap!(string, string);
+            _SHORT_IDS.put("ACT", "Australia/Darwin");
+            _SHORT_IDS.put("AET", "Australia/Sydney");
+            _SHORT_IDS.put("AGT", "America/Argentina/Buenos_Aires");
+            _SHORT_IDS.put("ART", "Africa/Cairo");
+            _SHORT_IDS.put("AST", "America/Anchorage");
+            _SHORT_IDS.put("BET", "America/Sao_Paulo");
+            _SHORT_IDS.put("BST", "Asia/Dhaka");
+            _SHORT_IDS.put("CAT", "Africa/Harare");
+            _SHORT_IDS.put("CNT", "America/St_Johns");
+            _SHORT_IDS.put("CST", "America/Chicago");
+            _SHORT_IDS.put("CTT", "Asia/Shanghai");
+            _SHORT_IDS.put("EAT", "Africa/Addis_Ababa");
+            _SHORT_IDS.put("ECT", "Europe/Paris");
+            _SHORT_IDS.put("IET", "America/Indiana/Indianapolis");
+            _SHORT_IDS.put("IST", "Asia/Kolkata");
+            _SHORT_IDS.put("JST", "Asia/Tokyo");
+            _SHORT_IDS.put("MIT", "Pacific/Apia");
+            _SHORT_IDS.put("NET", "Asia/Yerevan");
+            _SHORT_IDS.put("NST", "Pacific/Auckland");
+            _SHORT_IDS.put("PLT", "Asia/Karachi");
+            _SHORT_IDS.put("PNT", "America/Phoenix");
+            _SHORT_IDS.put("PRT", "America/Puerto_Rico");
+            _SHORT_IDS.put("PST", "America/Los_Angeles");
+            _SHORT_IDS.put("SST", "Pacific/Guadalcanal");
+            _SHORT_IDS.put("VST", "Asia/Ho_Chi_Minh");
+            _SHORT_IDS.put("EST", "-05:00");
+            _SHORT_IDS.put("MST", "-07:00");
+            _SHORT_IDS.put("HST", "-10:00");
+        }
+        return _SHORT_IDS;
+    }
 
     // shared static this()
     // {

@@ -26,7 +26,7 @@ import hunt.container.HashMap;
 import std.conv;
 import hunt.lang.exception;
 import hunt.util.Comparator;
-
+import hunt.time.util.common;
 // import sun.util.locale.provider.CalendarDataUtility;
 // import sun.util.locale.provider.LocaleProviderAdapter;
 // import sun.util.locale.provider.LocaleResources;
@@ -138,7 +138,7 @@ public final class WeekFields : Serializable
      * Initialized first to be available for definition of ISO, etc.
      */
     // private static final ConcurrentMap!(string, WeekFields) CACHE = new ConcurrentHashMap!()(4, 0.75f, 2);
-    __gshared HashMap!(string, WeekFields) CACHE;
+    // __gshared HashMap!(string, WeekFields) CACHE;
 
     /**
      * The ISO-8601 definition, where a week starts on Monday and the first week
@@ -152,7 +152,7 @@ public final class WeekFields : Serializable
      * Note also that the first few days of a calendar year may be _in the
      * week-based-year corresponding to the previous calendar year.
      */
-    __gshared WeekFields ISO;
+    __gshared WeekFields _ISO;
 
     /**
      * The common definition of a week that starts on Sunday and the first week
@@ -161,7 +161,7 @@ public final class WeekFields : Serializable
      * Defined as starting on Sunday and with a minimum of 1 day _in the month.
      * This week definition is _in use _in the US and other European countries.
      */
-    __gshared WeekFields SUNDAY_START;
+    // __gshared WeekFields SUNDAY_START;
 
     /**
      * The unit that represents week-based-years for the purpose of addition and subtraction.
@@ -179,7 +179,7 @@ public final class WeekFields : Serializable
      * !(p)
      * This unit is an immutable and thread-safe singleton.
      */
-    __gshared TemporalUnit WEEK_BASED_YEARS;
+    // __gshared TemporalUnit WEEK_BASED_YEARS;
 
     /**
      * Serialization version.
@@ -232,13 +232,29 @@ public final class WeekFields : Serializable
         _weekBasedYear = ComputedDayOfField.ofWeekBasedYearField(this);
     }
 
+    public static ref WeekFields ISO()
+    {
+        if(_ISO is null)
+        {
+            _ISO = new WeekFields(DayOfWeek.MONDAY, 4);
+            _ISO.do_init();
+        }
+        return _ISO;
+    }
+
     // shared static this()
     // {
-    //     CACHE = new HashMap!(string, WeekFields)(4, 0.75f /* , 2 */ );
-    //     ISO = new WeekFields(DayOfWeek.MONDAY, 4);
-    //     ISO.do_init();
-    //     SUNDAY_START = WeekFields.of(DayOfWeek.SUNDAY, 1);
-    //     WEEK_BASED_YEARS = IsoFields.WEEK_BASED_YEARS;
+        // CACHE = new HashMap!(string, WeekFields)(4, 0.75f /* , 2 */ );
+        mixin(MakeGlobalVar!(HashMap!(string, WeekFields))("CACHE",` new HashMap!(string, WeekFields)(4, 0.75f /* , 2 */ )`));
+        // ISO = new WeekFields(DayOfWeek.MONDAY, 4);
+        // mixin(MakeGlobalVar!(WeekFields)("ISO",` new WeekFields(DayOfWeek.MONDAY, 4)`));
+
+        // ISO.do_init();
+        // SUNDAY_START = WeekFields.of(DayOfWeek.SUNDAY, 1);
+        mixin(MakeGlobalVar!(WeekFields)("SUNDAY_START",`WeekFields.of(DayOfWeek.SUNDAY, 1)`));
+        // WEEK_BASED_YEARS = IsoFields.WEEK_BASED_YEARS;
+        mixin(MakeGlobalVar!(TemporalUnit)("WEEK_BASED_YEARS",`IsoFields.WEEK_BASED_YEARS`));
+
     // }
     //-----------------------------------------------------------------------
     /**
@@ -764,17 +780,24 @@ public final class WeekFields : Serializable
             this._range = _range;
         }
 
-         __gshared ValueRange DAY_OF_WEEK_RANGE;
-         __gshared ValueRange WEEK_OF_MONTH_RANGE;
-         __gshared ValueRange WEEK_OF_YEAR_RANGE;
-         __gshared ValueRange WEEK_OF_WEEK_BASED_YEAR_RANGE;
+        //  __gshared ValueRange DAY_OF_WEEK_RANGE;
+        //  __gshared ValueRange WEEK_OF_MONTH_RANGE;
+        //  __gshared ValueRange WEEK_OF_YEAR_RANGE;
+        //  __gshared ValueRange WEEK_OF_WEEK_BASED_YEAR_RANGE;
 
         // shared static this()
         // {
-        //     DAY_OF_WEEK_RANGE = ValueRange.of(1, 7);
-        //     WEEK_OF_MONTH_RANGE = ValueRange.of(0, 1, 4, 6);
-        //     WEEK_OF_YEAR_RANGE = ValueRange.of(0, 1, 52, 54);
-        //     WEEK_OF_WEEK_BASED_YEAR_RANGE = ValueRange.of(1, 52, 53);
+            // DAY_OF_WEEK_RANGE = ValueRange.of(1, 7);
+            mixin(MakeGlobalVar!(ValueRange)("DAY_OF_WEEK_RANGE",`ValueRange.of(1, 7)`));
+            // WEEK_OF_MONTH_RANGE = ValueRange.of(0, 1, 4, 6);
+            mixin(MakeGlobalVar!(ValueRange)("WEEK_OF_MONTH_RANGE",`ValueRange.of(0, 1, 4, 6)`));
+
+            // WEEK_OF_YEAR_RANGE = ValueRange.of(0, 1, 52, 54);
+            mixin(MakeGlobalVar!(ValueRange)("WEEK_OF_YEAR_RANGE",`ValueRange.of(0, 1, 52, 54)`));
+
+            // WEEK_OF_WEEK_BASED_YEAR_RANGE = ValueRange.of(1, 52, 53);
+            mixin(MakeGlobalVar!(ValueRange)("WEEK_OF_WEEK_BASED_YEAR_RANGE",`ValueRange.of(1, 52, 53)`));
+
         // }
 
         override public long getFrom(TemporalAccessor temporal)

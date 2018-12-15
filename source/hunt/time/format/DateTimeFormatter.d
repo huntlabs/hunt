@@ -1080,224 +1080,146 @@ public final class DateTimeFormatter {
      * It has no override zone and uses the {@link ResolverStyle#SMART SMART} resolver style.
      */
     public __gshared DateTimeFormatter RFC_1123_DATE_TIME ;
-    // shared static this()
-    // {
-    // //      ISO_LOCAL_DATE = new DateTimeFormatter();
-   
-    // //  ISO_OFFSET_DATE = new DateTimeFormatter();
- 
-    // //  ISO_DATE = new DateTimeFormatter();
     
-    // //  ISO_LOCAL_TIME = new DateTimeFormatter();
-   
-    // //  ISO_OFFSET_TIME = new DateTimeFormatter();
-    
-    // //  ISO_TIME = new DateTimeFormatter();
-   
-    // //  ISO_LOCAL_DATE_TIME = new DateTimeFormatter();
- 
-    // //  ISO_OFFSET_DATE_TIME = new DateTimeFormatter();
+    shared static this(){
 
-    // //  ISO_ZONED_DATE_TIME = new DateTimeFormatter();
+        DateTimeFormatter.PARSED_EXCESS_DAYS = new class TemporalQuery!(Period)
+        {
+            Period queryFrom(TemporalAccessor t)
+            {
+                if (cast(Parsed)(t) !is null)
+                {
+                    return (cast(Parsed) t).excessDays;
+                }
+                else
+                {
+                    return Period.ZERO;
+                }
+            }
+        };
 
-    // //  ISO_DATE_TIME = new DateTimeFormatter();
+        DateTimeFormatter.PARSED_LEAP_SECOND = new class TemporalQuery!(Boolean)
+        {
+            Boolean queryFrom(TemporalAccessor t)
+            {
+                if (cast(Parsed)(t) !is null)
+                {
+                    return new Boolean((cast(Parsed) t).leapSecond);
+                }
+                else
+                {
+                    return Boolean.FALSE;
+                }
+            }
+        };
 
-    // //  ISO_ORDINAL_DATE = new DateTimeFormatter();
+        DateTimeFormatter.BASIC_ISO_DATE = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2)
+            .appendValue(ChronoField.DAY_OF_MONTH, 2).optionalStart().parseLenient().appendOffset("+HHMMss", "Z")
+            .parseStrict().toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    // //  ISO_WEEK_DATE = new DateTimeFormatter();
-    
-    // //  ISO_INSTANT = new DateTimeFormatter();
-    
-    // //  BASIC_ISO_DATE = new DateTimeFormatter();
-    
-    // //  RFC_1123_DATE_TIME = new DateTimeFormatter();
+        DateTimeFormatter.ISO_INSTANT = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive().appendInstant().toFormatter(ResolverStyle.STRICT, null);
 
-    //  PARSED_EXCESS_DAYS = new class TemporalQuery!(Period){
-    //     Period queryFrom(TemporalAccessor t)
-    //     {
-    //         if (cast(Parsed)(t) !is null) {
-    //         return (cast(Parsed) t).excessDays;
-    //         } else {
-    //             return Period.ZERO;
-    //         }
-    //     }
-    //     };
+        DateTimeFormatter.ISO_WEEK_DATE = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .appendValue(IsoFields.WEEK_BASED_YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendLiteral("-W")
+            .appendValue(IsoFields.WEEK_OF_WEEK_BASED_YEAR,
+                    2).appendLiteral('-').appendValue(ChronoField.DAY_OF_WEEK, 1).optionalStart().appendOffsetId()
+            .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     PARSED_LEAP_SECOND = new class TemporalQuery!(Boolean) {
-    //         Boolean queryFrom(TemporalAccessor t)
-    //         {
-    //             if (cast(Parsed)(t) !is null) {
-    //                 return new Boolean((cast(Parsed) t).leapSecond);
-    //             } else {
-    //                 return Boolean.FALSE;
-    //             }
-    //         }
-    //     };
-    // }
-    // static this(){
+        DateTimeFormatter.ISO_ORDINAL_DATE = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendLiteral('-')
+            .appendValue(ChronoField.DAY_OF_YEAR, 3)
+            .optionalStart().appendOffsetId().toFormatter(ResolverStyle.STRICT,
+                    IsoChronology.INSTANCE);
 
-    //     BASIC_ISO_DATE = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .appendValue(ChronoField.YEAR, 4)
-    //             .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-    //             .appendValue(ChronoField.DAY_OF_MONTH, 2)
-    //             .optionalStart()
-    //             .parseLenient()
-    //             .appendOffset("+HHMMss", "Z")
-    //             .parseStrict()
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_LOCAL_TIME = new DateTimeFormatterBuilder().appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .appendLiteral(':').appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart()
+            .appendLiteral(':').appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalStart()
+            .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true).toFormatter(
+                    ResolverStyle.STRICT, null);
 
-    //     ISO_INSTANT = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .appendInstant()
-    //             .toFormatter(ResolverStyle.STRICT, null);
+        DateTimeFormatter.ISO_LOCAL_DATE = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4,
+                10, SignStyle.EXCEEDS_PAD).appendLiteral('-')
+            .appendValue(ChronoField.MONTH_OF_YEAR, 2).appendLiteral('-')
+            .appendValue(ChronoField.DAY_OF_MONTH, 2).toFormatter(ResolverStyle.STRICT,
+                    IsoChronology.INSTANCE);
 
-    //     ISO_WEEK_DATE = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .appendValue(IsoFields.WEEK_BASED_YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-    //             .appendLiteral("-W")
-    //             .appendValue(IsoFields.WEEK_OF_WEEK_BASED_YEAR, 2)
-    //             .appendLiteral('-')
-    //             .appendValue(ChronoField.DAY_OF_WEEK, 1)
-    //             .optionalStart()
-    //             .appendOffsetId()
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendLiteral('T').append(DateTimeFormatter.ISO_LOCAL_TIME)
+            .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_ORDINAL_DATE = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-    //             .appendLiteral('-')
-    //             .appendValue(ChronoField.DAY_OF_YEAR, 3)
-    //             .optionalStart()
-    //             .appendOffsetId()
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_OFFSET_DATE_TIME = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME).parseLenient().appendOffsetId()
+            .parseStrict().toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_DATE_TIME = new DateTimeFormatterBuilder()
-    //             .append(ISO_LOCAL_DATE_TIME)
-    //             .optionalStart()
-    //             .appendOffsetId()
-    //             .optionalStart()
-    //             .appendLiteral('[')
-    //             .parseCaseSensitive()
-    //             .appendZoneRegionId()
-    //             .appendLiteral(']')
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_DATE_TIME = new DateTimeFormatterBuilder().append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            .optionalStart().appendOffsetId().optionalStart().appendLiteral('[').parseCaseSensitive()
+            .appendZoneRegionId().appendLiteral(']')
+            .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_ZONED_DATE_TIME = new DateTimeFormatterBuilder()
-    //             .append(ISO_OFFSET_DATE_TIME)
-    //             .optionalStart()
-    //             .appendLiteral('[')
-    //             .parseCaseSensitive()
-    //             .appendZoneRegionId()
-    //             .appendLiteral(']')
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_ZONED_DATE_TIME = new DateTimeFormatterBuilder()
+            .append(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            .optionalStart().appendLiteral('[').parseCaseSensitive().appendZoneRegionId()
+            .appendLiteral(']').toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_OFFSET_DATE_TIME = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .append(ISO_LOCAL_DATE_TIME)
-    //             .parseLenient()
-    //             .appendOffsetId()
-    //             .parseStrict()
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendLiteral('T').append(DateTimeFormatter.ISO_LOCAL_TIME)
+            .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_LOCAL_DATE_TIME = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .append(ISO_LOCAL_DATE)
-    //             .appendLiteral('T')
-    //             .append(ISO_LOCAL_TIME)
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
+        DateTimeFormatter.ISO_TIME = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_TIME).optionalStart()
+            .appendOffsetId().toFormatter(ResolverStyle.STRICT, null);
 
-    //     ISO_TIME = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .append(ISO_LOCAL_TIME)
-    //             .optionalStart()
-    //             .appendOffsetId()
-    //             .toFormatter(ResolverStyle.STRICT, null);
+        DateTimeFormatter.ISO_OFFSET_TIME = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_TIME).appendOffsetId()
+            .toFormatter(ResolverStyle.STRICT, null);
 
-    //     ISO_OFFSET_TIME = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .append(ISO_LOCAL_TIME)
-    //             .appendOffsetId()
-    //             .toFormatter(ResolverStyle.STRICT, null);
+        DateTimeFormatter.ISO_DATE = new DateTimeFormatterBuilder().parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE).optionalStart().appendOffsetId()
+            .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_LOCAL_TIME = new DateTimeFormatterBuilder()
-    //             .appendValue(ChronoField.HOUR_OF_DAY, 2)
-    //             .appendLiteral(':')
-    //             .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-    //             .optionalStart()
-    //             .appendLiteral(':')
-    //             .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-    //             .optionalStart()
-    //             .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
-    //             .toFormatter(ResolverStyle.STRICT, null);
+        DateTimeFormatter.ISO_OFFSET_DATE = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendOffsetId().toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
 
-    //     ISO_DATE = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .append(ISO_LOCAL_DATE)
-    //             .optionalStart()
-    //             .appendOffsetId()
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
-
-    //     ISO_OFFSET_DATE = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .append(ISO_LOCAL_DATE)
-    //             .appendOffsetId()
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
-
-    //     ISO_LOCAL_DATE = new DateTimeFormatterBuilder()
-    //             .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-    //             .appendLiteral('-')
-    //             .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-    //             .appendLiteral('-')
-    //             .appendValue(ChronoField.DAY_OF_MONTH, 2)
-    //             .toFormatter(ResolverStyle.STRICT, IsoChronology.INSTANCE);
-    //     // manually code maps to ensure correct data always used
-    //     // (locale data can be changed by application code)
-    //     Map!(Long, string) dow = new HashMap!(Long, string)();
-    //     dow.put(new Long(1L), "Mon");
-    //     dow.put(new Long(2L), "Tue");
-    //     dow.put(new Long(3L), "Wed");
-    //     dow.put(new Long(4L), "Thu");
-    //     dow.put(new Long(5L), "Fri");
-    //     dow.put(new Long(6L), "Sat");
-    //     dow.put(new Long(7L), "Sun");
-    //     Map!(Long, string) moy = new HashMap!(Long, string)();
-    //     moy.put(new Long(1L), "Jan");
-    //     moy.put(new Long(2L), "Feb");
-    //     moy.put(new Long(3L), "Mar");
-    //     moy.put(new Long(4L), "Apr");
-    //     moy.put(new Long(5L), "May");
-    //     moy.put(new Long(6L), "Jun");
-    //     moy.put(new Long(7L), "Jul");
-    //     moy.put(new Long(8L), "Aug");
-    //     moy.put(new Long(9L), "Sep");
-    //     moy.put(new Long(10L), "Oct");
-    //     moy.put(new Long(11L), "Nov");
-    //     moy.put(new Long(12L), "Dec");
-    //     RFC_1123_DATE_TIME = new DateTimeFormatterBuilder()
-    //             .parseCaseInsensitive()
-    //             .parseLenient()
-    //             .optionalStart()
-    //             .appendText(ChronoField.DAY_OF_WEEK, dow)
-    //             .appendLiteral(", ")
-    //             .optionalEnd()
-    //             .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-    //             .appendLiteral(' ')
-    //             .appendText(ChronoField.MONTH_OF_YEAR, moy)
-    //             .appendLiteral(' ')
-    //             .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
-    //             .appendLiteral(' ')
-    //             .appendValue(ChronoField.HOUR_OF_DAY, 2)
-    //             .appendLiteral(':')
-    //             .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-    //             .optionalStart()
-    //             .appendLiteral(':')
-    //             .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-    //             .optionalEnd()
-    //             .appendLiteral(' ')
-    //             .appendOffset("+HHMM", "GMT")  // should handle UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
-    //             .toFormatter(ResolverStyle.SMART, IsoChronology.INSTANCE);
-    // }
+        // manually code maps to ensure correct data always used
+        // (locale data can be changed by application code)
+        Map!(Long, string) dow = new HashMap!(Long, string)();
+        dow.put(new Long(1L), "Mon");
+        dow.put(new Long(2L), "Tue");
+        dow.put(new Long(3L), "Wed");
+        dow.put(new Long(4L), "Thu");
+        dow.put(new Long(5L), "Fri");
+        dow.put(new Long(6L), "Sat");
+        dow.put(new Long(7L), "Sun");
+        Map!(Long, string) moy = new HashMap!(Long, string)();
+        moy.put(new Long(1L), "Jan");
+        moy.put(new Long(2L), "Feb");
+        moy.put(new Long(3L), "Mar");
+        moy.put(new Long(4L), "Apr");
+        moy.put(new Long(5L), "May");
+        moy.put(new Long(6L), "Jun");
+        moy.put(new Long(7L), "Jul");
+        moy.put(new Long(8L), "Aug");
+        moy.put(new Long(9L), "Sep");
+        moy.put(new Long(10L), "Oct");
+        moy.put(new Long(11L), "Nov");
+        moy.put(new Long(12L), "Dec");
+        DateTimeFormatter.RFC_1123_DATE_TIME = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+            .optionalStart().appendText(ChronoField.DAY_OF_WEEK, dow).appendLiteral(", ").optionalEnd()
+            .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+            .appendText(ChronoField.MONTH_OF_YEAR,
+                    moy).appendLiteral(' ').appendValue(ChronoField.YEAR, 4) // 2 digit year not handled
+            .appendLiteral(' ')
+            .appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':').appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .optionalStart().appendLiteral(':').appendValue(ChronoField.SECOND_OF_MINUTE,
+                    2).optionalEnd().appendLiteral(' ').appendOffset("+HHMM",
+                    "GMT") // should handle UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
+            .toFormatter(ResolverStyle.SMART, IsoChronology.INSTANCE);
+    }
 
     //-----------------------------------------------------------------------
     /**

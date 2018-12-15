@@ -63,7 +63,7 @@ import std.algorithm.searching;
 import hunt.time.format.DecimalStyle;
 import hunt.time.util.QueryHelper;
 import hunt.logging;
-
+import hunt.time.util.common;
 // import sun.text.spi.JavaTimeDateTimePatternProvider;
 // import sun.util.locale.provider.CalendarDataUtility;
 // import sun.util.locale.provider.LocaleProviderAdapter;
@@ -107,7 +107,7 @@ public final class DateTimeFormatterBuilder
     /**
      * Query for a time-zone that is region-only.
      */
-    __gshared TemporalQuery!(ZoneId) QUERY_REGION_ONLY;
+    // __gshared TemporalQuery!(ZoneId) QUERY_REGION_ONLY;
 
     // shared static this()
     // {
@@ -119,6 +119,14 @@ public final class DateTimeFormatterBuilder
     //     }
 
     //     };
+        mixin(MakeGlobalVar!(TemporalQuery!(ZoneId))("QUERY_REGION_ONLY",`new class TemporalQuery!(ZoneId)  {
+        ZoneId queryFrom(TemporalAccessor temporal)
+        {
+             ZoneId zone = QueryHelper.query!ZoneId(temporal ,TemporalQueries.zoneId());
+            return (zone !is null && (cast(ZoneOffset)(zone) !is null) == false ? zone : null);
+        }
+
+        }`));
     // }
 
     /**
@@ -2178,11 +2186,12 @@ public final class DateTimeFormatterBuilder
     }
 
     /** Map of letters to fields. */
-    __gshared Map!(char, TemporalField) FIELD_MAP;
+    // __gshared Map!(char, TemporalField) FIELD_MAP;
 
     // shared static this()
     // {
     //     FIELD_MAP = new HashMap!(char, TemporalField)();
+        mixin(MakeGlobalVar!(Map!(char, TemporalField))("FIELD_MAP",`new HashMap!(char, TemporalField)()`));
     // }
 
     static Comparator!(string) LENGTH_SORT;
@@ -2778,10 +2787,10 @@ public final class DateTimeFormatterBuilder
      */
     static class SettingsParser : DateTimePrinterParser
     {
-        static SettingsParser SENSITIVE;
-        static SettingsParser INSENSITIVE;
-        static SettingsParser STRICT;
-        static SettingsParser LENIENT;
+        // static SettingsParser SENSITIVE;
+        // static SettingsParser INSENSITIVE;
+        // static SettingsParser STRICT;
+        // static SettingsParser LENIENT;
 
         private int _ordinal;
         int ordinal()
@@ -2791,10 +2800,16 @@ public final class DateTimeFormatterBuilder
 
         // static this()
         // {
-        //     SENSITIVE = new SettingsParser(0);
-        //     INSENSITIVE = new SettingsParser(1);
-        //     STRICT = new SettingsParser(2);
-        //     LENIENT = new SettingsParser(3);
+            // SENSITIVE = new SettingsParser(0);
+            mixin(MakeGlobalVar!(SettingsParser)("SENSITIVE",`new SettingsParser(0)`));
+            // INSENSITIVE = new SettingsParser(1);
+            mixin(MakeGlobalVar!(SettingsParser)("INSENSITIVE",`new SettingsParser(1)`));
+            // STRICT = new SettingsParser(2);
+            mixin(MakeGlobalVar!(SettingsParser)("STRICT",`new SettingsParser(2)`));
+
+            // LENIENT = new SettingsParser(3);
+            mixin(MakeGlobalVar!(SettingsParser)("LENIENT",`new SettingsParser(3)`));
+
         // }
 
         this(int ordinal)
@@ -3327,7 +3342,7 @@ public final class DateTimeFormatterBuilder
         /**
          * The base date for reduced value parsing.
          */
-        __gshared LocalDate BASE_DATE;
+        // __gshared LocalDate BASE_DATE;
 
         private int baseValue;
         private ChronoLocalDate baseDate;
@@ -3335,6 +3350,7 @@ public final class DateTimeFormatterBuilder
         // shared static this()
         // {
         //     BASE_DATE = LocalDate.of(2000, 1, 1);
+            mixin(MakeGlobalVar!(LocalDate)("BASE_DATE",`LocalDate.of(2000, 1, 1)`));
         // }
 
         /**
@@ -4085,8 +4101,8 @@ public final class DateTimeFormatterBuilder
                     "+HHmmss", "+HH:mm:ss", "+H", "+Hmm", "+H:mm", "+HMM", "+H:MM", "+HMMss",
                     "+H:MM:ss", "+HMMSS", "+H:MM:SS", "+Hmmss", "+H:mm:ss",
                 ]; // order used _in pattern builder
-            __gshared OffsetIdPrinterParser INSTANCE_ID_Z;
-            __gshared OffsetIdPrinterParser INSTANCE_ID_ZERO;
+            // __gshared OffsetIdPrinterParser INSTANCE_ID_Z;
+            // __gshared OffsetIdPrinterParser INSTANCE_ID_ZERO;
 
             private string noOffsetText;
             private int type;
@@ -4094,8 +4110,11 @@ public final class DateTimeFormatterBuilder
 
             // shared static this()
             // {
-            //     INSTANCE_ID_Z = new OffsetIdPrinterParser("+HH:MM:ss", "Z");
-            //     INSTANCE_ID_ZERO = new OffsetIdPrinterParser("+HH:MM:ss", "0");
+                // INSTANCE_ID_Z = new OffsetIdPrinterParser("+HH:MM:ss", "Z");
+                mixin(MakeGlobalVar!(OffsetIdPrinterParser)("INSTANCE_ID_Z",`new OffsetIdPrinterParser("+HH:MM:ss", "Z")`));
+                // INSTANCE_ID_ZERO = new OffsetIdPrinterParser("+HH:MM:ss", "0");
+                mixin(MakeGlobalVar!(OffsetIdPrinterParser)("INSTANCE_ID_ZERO",`new OffsetIdPrinterParser("+HH:MM:ss", "0")`));
+
             // }
             /**
          * Constructor.
@@ -4712,11 +4731,12 @@ public final class DateTimeFormatterBuilder
             private enum int STD = 0;
             private enum int DST = 1;
             private enum int GENERIC = 2;
-            __gshared Map!(string, Map!(Locale, string[])) cache;
+            // __gshared Map!(string, Map!(Locale, string[])) cache;
 
             // shared static this()
             // {
             //     cache = new HashMap!(string, Map!(Locale, string[]))();
+                mixin(MakeGlobalVar!(Map!(string, Map!(Locale, string[])))("cache",`new HashMap!(string, Map!(Locale, string[]))()`));
             // }
 
             private string getDisplayName(string id, int type, Locale locale)
@@ -5580,14 +5600,15 @@ public final class DateTimeFormatterBuilder
         static final class LocalizedPrinterParser : DateTimePrinterParser
         {
             /** Cache of formatters. */
-            __gshared Map!(string, DateTimeFormatter) FORMATTER_CACHE;
+            // __gshared Map!(string, DateTimeFormatter) FORMATTER_CACHE;
 
             private FormatStyle dateStyle;
             private FormatStyle timeStyle;
 
             // shared static this()
             // {
-            //     FORMATTER_CACHE = new HashMap!(string, DateTimeFormatter)(16, 0.75f /* , 2 */ );
+                // FORMATTER_CACHE = new HashMap!(string, DateTimeFormatter)(16, 0.75f /* , 2 */ );
+                mixin(MakeGlobalVar!(Map!(string, DateTimeFormatter))("FORMATTER_CACHE",`new HashMap!(string, DateTimeFormatter)(16, 0.75f /* , 2 */ )`));
             // }
             /**
          * Constructor.

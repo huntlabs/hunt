@@ -425,14 +425,17 @@ public abstract class Clock {
      */
     static final class SystemClock : Clock , Serializable {
          enum long serialVersionUID = 6740630888130243051L;
-         __gshared long OFFSET_SEED ; // initial offest
-        __gshared SystemClock UTC;
+        //  __gshared long OFFSET_SEED ; // initial offest
+        // __gshared SystemClock UTC;
 
         // shared static this()
         // {
-        //     OFFSET_SEED =
-        //         System.currentTimeMillis()/1000 - 1024; // initial offest
-        //     UTC = new SystemClock(ZoneOffset.UTC);
+            // OFFSET_SEED =
+            //     System.currentTimeMillis()/1000 /* - 1024 */; // initial offest
+            mixin(MakeGlobalVar!(long)("OFFSET_SEED",`System.currentTimeMillis()/1000`));
+            // UTC = new SystemClock(ZoneOffset.UTC);
+            mixin(MakeGlobalVar!(SystemClock)("UTC",`new SystemClock(ZoneOffset.UTC)`));
+
         // }
 
         private  ZoneId zone;

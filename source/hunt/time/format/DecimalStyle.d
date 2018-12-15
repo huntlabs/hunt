@@ -53,11 +53,11 @@ public final class DecimalStyle {
      */
     private  char decimalSeparator;
 
-    // shared static this()
-    // {
-    //     STANDARD = new DecimalStyle('0', '+', '-', '.');
-    //     CACHE = new HashMap!(Locale, DecimalStyle)(16, 0.75f/* , 2 */);
-    // }
+    shared static this()
+    {
+        STANDARD = new DecimalStyle('0', '+', '-', '.');
+        CACHE = new HashMap!(Locale, DecimalStyle)(16, 0.75f/* , 2 */);
+    }
     //-----------------------------------------------------------------------
     /**
      * Lists all the locales that are supported.

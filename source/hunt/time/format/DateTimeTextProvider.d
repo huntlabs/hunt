@@ -23,6 +23,7 @@ import hunt.time.format.TextStyle;
 import hunt.lang;
 // import hunt.util.concurrent.ConcurrentMap;
 import hunt.lang.exception;
+import hunt.time.util.common;
 // import sun.util.locale.provider.CalendarDataUtility;
 // import sun.util.locale.provider.LocaleProviderAdapter;
 // import sun.util.locale.provider.LocaleResources;
@@ -40,25 +41,33 @@ class DateTimeTextProvider {
 
     /** Cache. */
     // private static final ConcurrentMap!(MapEntry!(TemporalField, Locale), Object) CACHE = new ConcurrentHashMap!()(16, 0.75f, 2);
-    __gshared Map!(MapEntry!(TemporalField, Locale), Object) CACHE;
+    //__gshared Map!(MapEntry!(TemporalField, Locale), Object) CACHE;
 
     /** Comparator. */
-    __gshared Comparator!(MapEntry!(string, Long)) COMPARATOR;
+    //__gshared Comparator!(MapEntry!(string, Long)) COMPARATOR;
 
     // Singleton instance
-    __gshared DateTimeTextProvider INSTANCE;
+    //__gshared DateTimeTextProvider INSTANCE;
 
     // shared static this()
     // {
-    //     // CACHE = new HashMap!(MapEntry!(TemporalField, Locale), Object)(16, 0.75f/* , 2 */);
-    //     COMPARATOR = new class Comparator!(MapEntry!(string, Long)){
-    //     override
-    //     public int compare(MapEntry!(string, Long) obj1, MapEntry!(string, Long) obj2) {
-    //         return cast(int)(obj2.getKey().length - obj1.getKey().length);  // longest to shortest
-    //     }
-    //     };
+        // CACHE = new HashMap!(MapEntry!(TemporalField, Locale), Object)(16, 0.75f/* , 2 */);
+        // COMPARATOR = new class Comparator!(MapEntry!(string, Long)){
+        // override
+        // public int compare(MapEntry!(string, Long) obj1, MapEntry!(string, Long) obj2) {
+        //     return cast(int)(obj2.getKey().length - obj1.getKey().length);  // longest to shortest
+        // }
+        // };
 
-    //     INSTANCE = new DateTimeTextProvider();
+        mixin(MakeGlobalVar!(Comparator!(MapEntry!(string, Long)))("COMPARATOR",`new class Comparator!(MapEntry!(string, Long)){
+        override
+        public int compare(MapEntry!(string, Long) obj1, MapEntry!(string, Long) obj2) {
+            return cast(int)(obj2.getKey().length - obj1.getKey().length);  // longest to shortest
+        }
+        }`));
+
+        // INSTANCE = new DateTimeTextProvider();
+        mixin(MakeGlobalVar!(DateTimeTextProvider)("INSTANCE",`new DateTimeTextProvider()`));
     // }
 
     this() {}

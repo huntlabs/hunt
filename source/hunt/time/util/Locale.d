@@ -564,105 +564,105 @@ public final class Locale : Cloneable, Serializable
      */
     enum long serialVersionUID = 9149081749638150636L;
 
-   //  shared static this()
-   //  {
-   //      ENGLISH = createConstant("en", "");
+    shared static this()
+    {
+        ENGLISH = createConstant("en", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      FRENCH = createConstant("fr", "");
+        /** Useful constant for language.
+     */
+        FRENCH = createConstant("fr", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      GERMAN = createConstant("de", "");
+        /** Useful constant for language.
+     */
+        GERMAN = createConstant("de", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      ITALIAN = createConstant("it", "");
+        /** Useful constant for language.
+     */
+        ITALIAN = createConstant("it", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      JAPANESE = createConstant("ja", "");
+        /** Useful constant for language.
+     */
+        JAPANESE = createConstant("ja", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      KOREAN = createConstant("ko", "");
+        /** Useful constant for language.
+     */
+        KOREAN = createConstant("ko", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      CHINESE = createConstant("zh", "");
+        /** Useful constant for language.
+     */
+        CHINESE = createConstant("zh", "");
 
-   //      /** Useful constant for language.
-   //   */
-   //      SIMPLIFIED_CHINESE = createConstant("zh", "CN");
+        /** Useful constant for language.
+     */
+        SIMPLIFIED_CHINESE = createConstant("zh", "CN");
 
-   //      /** Useful constant for language.
-   //   */
-   //      TRADITIONAL_CHINESE = createConstant("zh", "TW");
+        /** Useful constant for language.
+     */
+        TRADITIONAL_CHINESE = createConstant("zh", "TW");
 
-   //      /** Useful constant for country.
-   //   */
-   //      FRANCE = createConstant("fr", "FR");
+        /** Useful constant for country.
+     */
+        FRANCE = createConstant("fr", "FR");
 
-   //      /** Useful constant for country.
-   //   */
-   //      GERMANY = createConstant("de", "DE");
+        /** Useful constant for country.
+     */
+        GERMANY = createConstant("de", "DE");
 
-   //      /** Useful constant for country.
-   //   */
-   //      ITALY = createConstant("it", "IT");
+        /** Useful constant for country.
+     */
+        ITALY = createConstant("it", "IT");
 
-   //      /** Useful constant for country.
-   //   */
-   //      JAPAN = createConstant("ja", "JP");
+        /** Useful constant for country.
+     */
+        JAPAN = createConstant("ja", "JP");
 
-   //      /** Useful constant for country.
-   //   */
-   //      KOREA = createConstant("ko", "KR");
+        /** Useful constant for country.
+     */
+        KOREA = createConstant("ko", "KR");
 
-   //      /** Useful constant for country.
-   //   */
-   //      CHINA = SIMPLIFIED_CHINESE;
+        /** Useful constant for country.
+     */
+        CHINA = SIMPLIFIED_CHINESE;
 
-   //      /** Useful constant for country.
-   //   */
-   //      PRC = SIMPLIFIED_CHINESE;
+        /** Useful constant for country.
+     */
+        PRC = SIMPLIFIED_CHINESE;
 
-   //      /** Useful constant for country.
-   //   */
-   //      TAIWAN = TRADITIONAL_CHINESE;
+        /** Useful constant for country.
+     */
+        TAIWAN = TRADITIONAL_CHINESE;
 
-   //      /** Useful constant for country.
-   //   */
-   //      UK = createConstant("en", "GB");
+        /** Useful constant for country.
+     */
+        UK = createConstant("en", "GB");
 
-   //      /** Useful constant for country.
-   //   */
-   //      US = createConstant("en", "US");
+        /** Useful constant for country.
+     */
+        US = createConstant("en", "US");
 
-   //      /** Useful constant for country.
-   //   */
-   //      CANADA = createConstant("en", "CA");
+        /** Useful constant for country.
+     */
+        CANADA = createConstant("en", "CA");
 
-   //      /** Useful constant for country.
-   //   */
-   //      CANADA_FRENCH = createConstant("fr", "CA");
+        /** Useful constant for country.
+     */
+        CANADA_FRENCH = createConstant("fr", "CA");
 
-   //      /**
-   //   * Useful constant for the root locale.  The root locale is the locale whose
-   //   * language, country, and variant are empty ("") strings.  This is regarded
-   //   * as the base locale of all locales, and is used as the language/country
-   //   * neutral locale for the locale sensitive operations.
-   //   *
-   //   * @since 1.6
-   //   */
-   //      ROOT = createConstant("", "");
+        /**
+     * Useful constant for the root locale.  The root locale is the locale whose
+     * language, country, and variant are empty ("") strings.  This is regarded
+     * as the base locale of all locales, and is used as the language/country
+     * neutral locale for the locale sensitive operations.
+     *
+     * @since 1.6
+     */
+        ROOT = createConstant("", "");
 
-   //      CHINA = SIMPLIFIED_CHINESE;
-   //      PRC = SIMPLIFIED_CHINESE;
-   //      TAIWAN = TRADITIONAL_CHINESE;
+        CHINA = SIMPLIFIED_CHINESE;
+        PRC = SIMPLIFIED_CHINESE;
+        TAIWAN = TRADITIONAL_CHINESE;
         
-   //  }
+    }
 
     /**
      * Enum for specifying the type defined in ISO 3166. This enum is used to

@@ -50,6 +50,8 @@ import hunt.time.chrono.ChronoLocalDateTime;
 import hunt.time.chrono.ChronoLocalDateTimeImpl;
 import hunt.time.util.QueryHelper;
 import hunt.logging;
+import hunt.time.util.common;
+
 // import hunt.util.stream.LongStream;
 // import hunt.util.stream.Stream;
 
@@ -95,16 +97,16 @@ public  class LocalDate
      * The minimum supported {@code LocalDate}, '-999999999-01-01'.
      * This could be used by an application as a "far past" date.
      */
-    public __gshared LocalDate MIN ;
+    //public __gshared LocalDate MIN ;
     /**
      * The maximum supported {@code LocalDate}, '+999999999-12-31'.
      * This could be used by an application as a "far future" date.
      */
-    public __gshared LocalDate MAX ;
+    //public __gshared LocalDate MAX ;
     /**
      * The epoch year {@code LocalDate}, '1970-01-01'.
      */
-    public __gshared LocalDate EPOCH ;
+    //public __gshared LocalDate EPOCH ;
 
     /**
      * Serialization version.
@@ -136,9 +138,14 @@ public  class LocalDate
 
     // shared static this()
     // {
-    //     MIN = LocalDate.of(Year.MIN_VALUE, 1, 1);
-    //     MAX = LocalDate.of(Year.MAX_VALUE, 12, 31);
-    //     EPOCH = LocalDate.of(1970, 1, 1);
+        // MIN = LocalDate.of(Year.MIN_VALUE, 1, 1);
+        mixin(MakeGlobalVar!(LocalDate)("MIN",`LocalDate.of(Year.MIN_VALUE, 1, 1)`));
+        // MAX = LocalDate.of(Year.MAX_VALUE, 12, 31);
+        mixin(MakeGlobalVar!(LocalDate)("MAX",`LocalDate.of(Year.MAX_VALUE, 12, 31)`));
+
+        // EPOCH = LocalDate.of(1970, 1, 1);
+        mixin(MakeGlobalVar!(LocalDate)("EPOCH",`LocalDate.of(1970, 1, 1)`));
+
     // }
 
     //-----------------------------------------------------------------------

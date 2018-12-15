@@ -39,6 +39,7 @@ import hunt.time.DateTimeException;
 import hunt.lang;
 import hunt.time.Ser;
 import std.conv;
+import hunt.time.util.common;
 /**
  * A year _in the ISO-8601 calendar system, such as {@code 2007}.
  * !(p)
@@ -94,13 +95,27 @@ public final class Year
     /**
      * Parser.
      */
-     __gshared DateTimeFormatter PARSER ;
+     __gshared DateTimeFormatter _PARSER ;
+
+     public static ref  DateTimeFormatter PARSER()
+     {
+         if(_PARSER is null)
+         {
+             _PARSER = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+            .toFormatter();
+         }
+         return _PARSER;
+     }
 
     // shared static this()
     // {
     //     PARSER = new DateTimeFormatterBuilder()
     //     .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
     //     .toFormatter();
+        // mixin(MakeGlobalVar!(DateTimeFormatter)("PARSER",`new DateTimeFormatterBuilder()
+        // .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+        // .toFormatter()`));
     // }
 
     /**

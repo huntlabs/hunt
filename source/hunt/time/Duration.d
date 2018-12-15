@@ -28,7 +28,7 @@ import std.string;
 import std.conv;
 import hunt.string.StringBuilder;
 import hunt.util.Comparator;
-
+import hunt.time.util.common;
 // import hunt.util.regex.Matcher;
 // import hunt.util.regex.Pattern;
 
@@ -75,7 +75,7 @@ public final class Duration
     /**
      * Constant for a duration of zero.
      */
-    public __gshared Duration ZERO;
+    // public __gshared Duration ZERO;
     /**
      * Serialization version.
      */
@@ -83,12 +83,15 @@ public final class Duration
     /**
      * Constant for nanos per second.
      */
-    __gshared BigInteger BI_NANOS_PER_SECOND;
+    // __gshared BigInteger BI_NANOS_PER_SECOND;
 
     // shared static this()
     // {
-    //     ZERO = new Duration(0, 0);
-    //     BI_NANOS_PER_SECOND = BigInteger.valueOf(LocalTime.NANOS_PER_SECOND);
+    //     // ZERO = new Duration(0, 0);
+        mixin(MakeGlobalVar!(Duration)("ZERO",`new Duration(0, 0)`));
+        // BI_NANOS_PER_SECOND = BigInteger.valueOf(LocalTime.NANOS_PER_SECOND);
+        mixin(MakeGlobalVar!(BigInteger)("BI_NANOS_PER_SECOND",`BigInteger.valueOf(LocalTime.NANOS_PER_SECOND)`));
+
     // }
     /**
      * The pattern for parsing.
@@ -521,7 +524,18 @@ public final class Duration
      * the simple initialization _in Duration.
      */
      static class DurationUnits {
-        __gshared List!(TemporalUnit) UNITS;
+        __gshared List!(TemporalUnit) _UNITS;
+        public static ref List!(TemporalUnit) UNITS()
+        {
+            if(_UNITS is null)
+            {
+                _UNITS = new ArrayList!(TemporalUnit)();
+            
+                _UNITS.add(ChronoUnit.SECONDS);
+                _UNITS.add(ChronoUnit.NANOS);
+            }
+            return _UNITS;
+        }
         // shared static this()
         // {
         //     UNITS = new ArrayList!(TemporalUnit)();
