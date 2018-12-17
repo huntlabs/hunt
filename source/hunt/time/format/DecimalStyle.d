@@ -10,6 +10,7 @@ import hunt.container.Set;
 import hunt.container.HashMap;
 import hunt.container.Map;
 import hunt.lang.exception;
+import hunt.time.util.common;
 // import hunt.util.concurrent.ConcurrentMap;
 
 /**
@@ -30,11 +31,11 @@ public final class DecimalStyle {
      * !(p)
      * This uses standard ASCII characters for zero, positive, negative and a dot for the decimal point.
      */
-    public __gshared DecimalStyle STANDARD;
+    // public __gshared DecimalStyle STANDARD;
     /**
      * The cache of DecimalStyle instances.
      */
-    __gshared Map!(Locale, DecimalStyle) CACHE;
+    // __gshared Map!(Locale, DecimalStyle) CACHE;
 
     /**
      * The zero digit.
@@ -53,11 +54,13 @@ public final class DecimalStyle {
      */
     private  char decimalSeparator;
 
-    shared static this()
-    {
-        STANDARD = new DecimalStyle('0', '+', '-', '.');
-        CACHE = new HashMap!(Locale, DecimalStyle)(16, 0.75f/* , 2 */);
-    }
+    // shared static this()
+    // {
+        // STANDARD = new DecimalStyle('0', '+', '-', '.');
+        mixin(MakeGlobalVar!(DecimalStyle)("STANDARD",`new DecimalStyle('0', '+', '-', '.')`));
+        // CACHE = new HashMap!(Locale, DecimalStyle)(16, 0.75f/* , 2 */);
+        mixin(MakeGlobalVar!(Map!(Locale, DecimalStyle))("CACHE",`new HashMap!(Locale, DecimalStyle)(16, 0.75f/* , 2 */)`));
+    // }
     //-----------------------------------------------------------------------
     /**
      * Lists all the locales that are supported.
