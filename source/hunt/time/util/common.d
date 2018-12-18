@@ -1,6 +1,7 @@
 module hunt.time.util.common;
 
 import std.datetime;
+import core.stdc.errno;
 public import std.traits;
 public import std.array;
 
@@ -101,7 +102,6 @@ string MakeGlobalVar(T)(string var, string init = null)
 
     return str;
 }
-
 
 version (Posix)
 {
@@ -269,7 +269,7 @@ version (Posix)
             tz = getPlatformTimeZoneID();
             freetz = tz;
         }
-        writeln("tz : ", tz, " freeTz : ", freetz);
+        // writeln("tz : ", tz, " freeTz : ", freetz);
         if (tz !is null)
         {
             /* Ignore preceding ':' */
