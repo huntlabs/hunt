@@ -542,6 +542,34 @@ class Long : AbstractNumber!long {
         return charPos;
     }
 
+    /**
+     * Returns the number of zero bits following the lowest-order ("rightmost")
+     * one-bit in the two's complement binary representation of the specified
+     * {@code long} value.  Returns 64 if the specified value has no
+     * one-bits in its two's complement representation, in other words if it is
+     * equal to zero.
+     *
+     * @param i the value whose number of trailing zeros is to be computed
+     * @return the number of zero bits following the lowest-order ("rightmost")
+     *     one-bit in the two's complement binary representation of the
+     *     specified {@code long} value, or 64 if the value is equal
+     *     to zero.
+     * @since 1.5
+     */
+    static int numberOfTrailingZeros(long i) {
+        // HD, Figure 5-14
+        int x, y;
+        if (i == 0) return 64;
+        int n = 63;
+        y = cast(int)i; if (y != 0) { n = n -32; x = y; } else x = cast(int)(i>>>32);
+        y = x <<16; if (y != 0) { n = n -16; x = y; }
+        y = x << 8; if (y != 0) { n = n - 8; x = y; }
+        y = x << 4; if (y != 0) { n = n - 4; x = y; }
+        y = x << 2; if (y != 0) { n = n - 2; x = y; }
+        return n - ((x << 1) >>> 31);
+    }
+
+
      /**
      * Returns the number of one-bits in the two's complement binary
      * representation of the specified {@code long} value.  This function is
