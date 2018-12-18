@@ -90,7 +90,7 @@ class RuntimeException : Exception {
     // mixin BasicExceptionCtors;
 }
 
-class TimeoutException : Exception {
+class ExecutionException : Exception {
     mixin BasicExceptionCtors;
 }
 
@@ -98,11 +98,11 @@ class InterruptedException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class ExecutionException : Exception {
+class ParseException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class URISyntaxException : IOException {
+class TimeoutException : Exception {
     mixin BasicExceptionCtors;
 }
 
@@ -110,8 +110,11 @@ class FileNotFoundException : Exception {
     mixin BasicExceptionCtors;
 }
 
-
 class IOException : Exception {
+    mixin BasicExceptionCtors;
+}
+
+class URISyntaxException : IOException {
     mixin BasicExceptionCtors;
 }
 
@@ -140,6 +143,10 @@ class CommonRuntimeException : RuntimeException {
 }
 
 class IndexOutOfBoundsException : RuntimeException {
+    mixin BasicExceptionCtors;
+}
+
+class NegativeArraySizeException : RuntimeException {
     mixin BasicExceptionCtors;
 }
 
