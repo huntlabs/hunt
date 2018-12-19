@@ -3,7 +3,7 @@ module hunt.logging.helper;
 version(HUNT_DEBUG) {
     import hunt.logging.ConsoleLogger;
 } else {
-    import hunt.logging.logging;
+    import hunt.logging.Logger;
 }
 
 

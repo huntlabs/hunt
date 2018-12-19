@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
-module hunt.logging.logging;
+module hunt.logging.Logger;
 
 import hunt.concurrent.thread.Utils;
 
