@@ -15,7 +15,7 @@ import hunt.event;
 import hunt.io.TcpListener;
 import hunt.io.TcpStream;
 import hunt.util.timer;
-import hunt.util.thread;
+import hunt.concurrent.thread.Utils;
 
 import std.socket;
 import std.functional;

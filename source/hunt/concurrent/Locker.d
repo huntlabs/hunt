@@ -1,4 +1,4 @@
-module hunt.util.concurrent.Locker;
+module hunt.concurrent.Locker;
 
 import hunt.lang.common;
 import hunt.lang.exception;

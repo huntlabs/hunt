@@ -1,6 +1,6 @@
 module hunt.logging.ConsoleLogger;
 
-import hunt.util.thread;
+import hunt.concurrent.thread.Utils;
 
 import core.stdc.stdlib;
 import core.runtime;

@@ -10,10 +10,8 @@
  */
 module hunt.logging.logging;
 
-import hunt.util.thread;
+import hunt.concurrent.thread.Utils;
 
-import core.stdc.stdlib;
-import core.runtime;
 import core.thread;
 
 import std.algorithm.iteration;
@@ -33,22 +31,6 @@ import std.typecons;
 import std.traits;
 import std.string;
 
-void catchAndLogException(E)(lazy E runer) @trusted nothrow
-{
-    try
-    {
-        runer();
-    }
-    catch (Exception e)
-    {
-        collectException(error(e.toString));
-    }
-    catch (Error e)
-    {
-        collectException(() { critical(e.toString); rt_term(); }());
-        exit(-1);
-    }
-}
 
 shared static this() {
 	if(g_logger is null) {

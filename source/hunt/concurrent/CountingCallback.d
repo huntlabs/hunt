@@ -1,4 +1,4 @@
-module hunt.util.concurrent.CountingCallback;
+module hunt.concurrent.CountingCallback;
 
 import hunt.util.functional;
 import core.atomic;

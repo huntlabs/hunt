@@ -1,4 +1,4 @@
-module hunt.util.concurrent.Promise;
+module hunt.concurrent.Promise;
 
 import hunt.lang.exception;
 
