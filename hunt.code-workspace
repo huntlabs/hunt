@@ -5,9 +5,6 @@
 		},
 		{
 			"path": "examples\\UnitTest"
-		},
-		{
-			"path": "examples/Time"
 		}
 	]
 }

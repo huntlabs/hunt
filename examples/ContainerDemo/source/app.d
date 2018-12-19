@@ -16,8 +16,7 @@ import TrieTest;
 
 import hunt.datetime;
 
-void main()
-{
+void main() {
     testUnits!(ArrayListDemo)();
     testUnits!(BufferUtilsDemo)();
     testUnits!HashMapDemo();
