@@ -5292,8 +5292,7 @@ public final class DateTimeFormatterBuilder
                             break;
                         }
                         c = c.sibling;
-                    }
-                    while (c !is null);
+                    }while (c !is null);
                 }
                 pos.setIndex(off);
                 return value;
