@@ -1,5 +1,6 @@
 module hunt.lang.character.Character;
 
+import hunt.lang.Nullable;
 
 /**
  * The {@code Character} class wraps a value of the primitive
@@ -90,9 +91,8 @@ module hunt.lang.character.Character;
  * @author  Ulf Zibis
  * @since   1.0
  */
-class Character
-{
-        /**
+class Character : Nullable!char {
+    /**
      * The minimum radix available for conversion to and from strings.
      * The constant value of this field is the smallest value permitted
      * for the radix argument in radix-conversion methods such as the
@@ -211,7 +211,7 @@ class Character
      * General category "Nd" in the Unicode specification.
      * @since   1.1
      */
-    enum byte DECIMAL_DIGIT_NUMBER        = 9;
+    enum byte DECIMAL_DIGIT_NUMBER = 9;
 
     /**
      * General category "Nl" in the Unicode specification.
@@ -337,7 +337,6 @@ class Character
      * Error flag. Use int (code point) to avoid confusion with U+FFFF.
      */
     enum int ERROR = 0xFFFFFFFF;
-
 
     /**
      * Undefined bidirectional character type. Undefined {@code char}
@@ -547,6 +546,46 @@ class Character
      */
     enum int MAX_CODE_POINT = 0X10FFFF;
 
+    this(char value) {
+        super(value);
+    }
+
+    /**
+     * Returns a {@code Character} instance representing the specified
+     * {@code char} value.
+     * If a new {@code Character} instance is not required, this method
+     * should generally be used in preference to the constructor
+     * {@link #Character(char)}, as this method is likely to yield
+     * significantly better space and time performance by caching
+     * frequently requested values.
+     *
+     * This method will always cache values in the range {@code
+     * '\u005Cu0000'} to {@code '\u005Cu007F'}, inclusive, and may
+     * cache other values outside of this range.
+     *
+     * @param  c a char value.
+     * @return a {@code Character} instance representing {@code c}.
+     * @since  1.5
+     */
+    static Character valueOf(char c) {
+        if (c <= 127) { // must cache
+            return CharacterCache.cache[cast(int)c];
+        }
+        return new Character(c);
+    }
+
+    /**
+     * Returns the value of this {@code Character} object.
+     * @return  the primitive {@code char} value represented by
+     *          this object.
+     */
+    char charValue() {
+        return _value;
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return _value;
+    }
 
     /**
      * Determines the number of {@code char} values needed to
@@ -564,7 +603,7 @@ class Character
      * @see     Character#isSupplementaryCodePoint(int)
      * @since   1.5
      */
-    public static int charCount(int codePoint) {
+    static int charCount(int codePoint) {
         return codePoint >= MIN_SUPPLEMENTARY_CODE_POINT ? 2 : 1;
     }
 
@@ -580,7 +619,7 @@ class Character
      *         specified surrogate pair.
      * @since  1.5
      */
-    // public static int toCodePoint(char high, char low) {
+    // static int toCodePoint(char high, char low) {
     //     // Optimized form of:
     //     // return ((high - MIN_HIGH_SURROGATE) << 10)
     //     //         + (low - MIN_LOW_SURROGATE)
@@ -590,4 +629,18 @@ class Character
     //                                    - MIN_LOW_SURROGATE);
     // }
 
+}
+
+private class CharacterCache {
+    private this() {
+    }
+
+    __gshared Character[] cache;
+
+    shared static this() {
+        cache = new Character[127 + 1];
+        for (int i = 0; i < cast(int)cache.length; i++) {
+            cache[i] = new Character(cast(char) i);
+        }
+    }
 }

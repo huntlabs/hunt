@@ -171,7 +171,11 @@ class Nullable(T) : INullable {
         // } else {
         //     return super.toString();
         // }
-        return to!string(_value);
+        static if(is(T == string)) {
+            return this._value;
+        } else {
+            return to!string(_value);
+        }
     }
 
     override size_t toHash() @trusted nothrow {
