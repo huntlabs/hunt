@@ -1,3 +1,7 @@
 module hunt.logging;
 
-public import hunt.logging.logging;
+version(HUNT_DEBUG) {
+    public import hunt.logging.ConsoleLogger;
+} else {
+    public import hunt.logging.logging;
+}
