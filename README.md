@@ -12,15 +12,13 @@ A refined core library for D programming language.
  * hunt.math (BigIngeger etc.)
  * hunt.string
  * hunt.util (buffer configration memory radix-tree serialize timer etc.)
- * hunt.validation
+ * hunt.time (Compatible with Java java.time API design)
 
 ## Platforms
  * FreeBSD
  * Windows
  * OSX
  * Linux
- * NetBSD
- * OpenBSD
 
 ## Libraries
  * [hunt-net](https://github.com/huntlabs/hunt-net) – An asynchronous event-driven network library written in D.
