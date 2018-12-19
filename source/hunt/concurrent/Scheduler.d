@@ -1,4 +1,4 @@
-module hunt.util.concurrent.Scheduler;
+module hunt.concurrent.Scheduler;
 
 import hunt.lang.common;
 import hunt.util.Lifecycle;

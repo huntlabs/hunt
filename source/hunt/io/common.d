@@ -4,7 +4,7 @@ import hunt.container.ByteBuffer;
 import hunt.lang.common;
 import hunt.lang.exception;
 import hunt.logging;
-import hunt.util.concurrent.CountingCallback;
+import hunt.concurrent.CountingCallback;
 
 import std.algorithm;
 

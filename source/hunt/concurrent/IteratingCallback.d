@@ -1,7 +1,7 @@
-module hunt.util.concurrent.IteratingCallback;
+module hunt.concurrent.IteratingCallback;
 
 import hunt.util.functional;
-import hunt.util.concurrent.Locker;
+import hunt.concurrent.Locker;
 
 import hunt.lang.exception;
 

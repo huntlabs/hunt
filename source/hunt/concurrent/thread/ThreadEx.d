@@ -1,96 +1,594 @@
-/*
- * Hunt - A refined core library for D programming language.
- *
- * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
- *
- * Developer: HuntLabs.cn
- *
- * Licensed under the Apache-2.0 License.
- *
- */
- 
-module hunt.util.thread;
+module hunt.concurrent.thread.ThreadEx;
 
+import hunt.concurrent.thread.LockSupport;
+
+import hunt.lang.common;
 import hunt.lang.exception;
+// import hunt.logging.ConsoleLogger;
+import hunt.util.memory;
 
+import core.atomic;
 import core.thread;
-import std.algorithm;
-import std.conv;
-import std.stdio;
+import core.time;
+import core.sync.condition;
+import core.sync.mutex;
 
-version (Posix) {
-    import core.sys.posix.sys.types : pid_t;
-    import hunt.sys.syscall;
+import std.algorithm: min, max;
+import std.conv: to;
 
-    pid_t getTid() {
-        version(FreeBSD) {
-            long tid;
-            syscall(SYS_thr_self, &tid);
-
-            return cast(pid_t)tid;
-        } else version(OSX) {
-            return cast(pid_t)syscall(SYS_thread_selfid);
-        } else version(linux) {
-            return cast(pid_t)syscall(__NR_gettid);
-        } else {
-            return 0;
-        }
-    }
-} else {
-    ThreadID getTid() {
-        return Thread.getThis.id;
-    }
-}
-
-private __gshared UncaughtExceptionHandler defaultUncaughtExceptionHandler;
-
-void setDefaultUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
-// SecurityManager sm = System.getSecurityManager();
-// if (sm != null) {
-//     sm.checkPermission(
-//         new RuntimePermission("setDefaultUncaughtExceptionHandler")
-//             );
-// }
-    defaultUncaughtExceptionHandler = eh;
-}
-
-UncaughtExceptionHandler getDefaultUncaughtExceptionHandler(){
-    return defaultUncaughtExceptionHandler;
-}
 
 /**
- * Interface for handlers invoked when a {@code Thread} abruptly
- * terminates due to an uncaught exception.
- * <p>When a thread is about to terminate due to an uncaught exception
- * the Java Virtual Machine will query the thread for its
- * {@code UncaughtExceptionHandler} using
- * {@link #getUncaughtExceptionHandler} and will invoke the handler's
- * {@code uncaughtException} method, passing the thread and the
- * exception as arguments.
- * If a thread has not had its {@code UncaughtExceptionHandler}
- * explicitly set, then its {@code ThreadGroupEx} object acts as its
- * {@code UncaughtExceptionHandler}. If the {@code ThreadGroupEx} object
- * has no
- * special requirements for dealing with the exception, it can forward
- * the invocation to the {@linkplain #getDefaultUncaughtExceptionHandler
- * default uncaught exception handler}.
- *
- * @see #setDefaultUncaughtExceptionHandler
- * @see #setUncaughtExceptionHandler
- * @see ThreadGroupEx#uncaughtException
- * @since 1.5
- */
-interface UncaughtExceptionHandler {
-    /**
-     * Method invoked when the given thread terminates due to the
-     * given uncaught exception.
-     * <p>Any exception thrown by this method will be ignored by the
-     * Java Virtual Machine.
-     * @param t the thread
-     * @param e the exception
-     */
-    void uncaughtException(Thread t, Throwable e);
+*/
+interface Interruptible {
+    void interrupt(Thread t);
 }
+
+enum ThreadState {
+    ALLOCATED,                    // Memory has been allocated but not initialized
+    INITIALIZED,                  // The thread has been initialized but yet started
+    RUNNABLE,                     // Has been started and is runnable, but not necessarily running
+    //   MONITOR_WAIT,                 // Waiting on a contended monitor lock
+    CONDVAR_WAIT,                 // Waiting on a condition variable
+    //   OBJECT_WAIT,                  // Waiting on an Object.wait() call
+    //   BREAKPOINTED,                 // Suspended at breakpoint
+    SLEEPING,                     // Thread.sleep()
+    ZOMBIE                        // All done, but not reclaimed yet
+    }
+
+/**
+*/
+class ThreadEx : Thread {
+
+    Object parkBlocker;
+
+    ThreadState state;
+
+    /* The object in which this thread is blocked in an interruptible I/O
+     * operation, if any.  The blocker's interrupt method should be invoked
+     * after setting this thread's interrupt status.
+     */
+    private Interruptible blocker;
+    private Object blockerLock;
+    private shared bool _interrupted;     // Thread.isInterrupted state
+    
+    /* For autonumbering anonymous threads. */
+    private static shared int threadInitNumber;
+    private static int nextThreadNum() {
+        return core.atomic.atomicOp!"+="(threadInitNumber, 1);
+    }
+
+    this() {
+        this(null, null, "Thread-" ~ nextThreadNum().to!string());
+    }
+
+    this(string name) {
+        this(null, null, name);
+    }
+
+    this(Runnable target) {
+        this(null, target, "Thread-" ~ nextThreadNum().to!string());
+    }
+
+    this(Runnable target, string name) {
+        this(null, target, name);
+    }
+
+    this(ThreadGroupEx group,  string name) {
+        this(group, null, name);
+    }
+
+    this(ThreadGroupEx group, Runnable target, string name,  size_t sz = 0) {
+        this.name = name;
+        this.group = group;
+        if(target !is null) {
+            this({ target.run(); }, sz);
+        } else {
+            this({}, sz);
+        }
+    }
+
+    this(void function() fn, size_t sz = 0) nothrow {
+        super(fn, sz);
+        initialize();
+    }
+
+    this(void delegate() dg, size_t sz = 0) nothrow {
+        super(dg , sz);
+        initialize();
+    }
+
+    ~this() {
+        blocker = null;
+        blockerLock = null;
+        parkBlocker = null;
+        _parker = null;
+    }
+
+    private void initialize() nothrow {
+        _parker = Parker.allocate(this);
+        blockerLock = new Object();
+        state = ThreadState.ALLOCATED;
+    }
+
+    
+    /**
+     * Returns the thread group to which this thread belongs.
+     * This method returns null if this thread has died
+     * (been stopped).
+     *
+     * @return  this thread's thread group.
+     */
+    public final ThreadGroupEx getThreadGroup() {
+        return group;
+    }
+
+    /* The group of this thread */
+    private ThreadGroupEx group;
+
+
+     /**
+     * Tests if this thread is alive. A thread is alive if it has
+     * been started and has not yet died.
+     *
+     * @return  <code>true</code> if this thread is alive;
+     *          <code>false</code> otherwise.
+     */
+    final bool isAlive() {
+        // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:30:43 AM
+        // 
+        return isRunning;
+    }
+
+
+    /* Set the blocker field; invoked via sun.misc.SharedSecrets from java.nio code
+     */
+    void blockedOn(Interruptible b) {
+        synchronized (blockerLock) {
+            blocker = b;
+        }
+    }
+
+    /**
+     * Interrupts this thread.
+     *
+     * <p> Unless the current thread is interrupting itself, which is
+     * always permitted, the {@link #checkAccess() checkAccess} method
+     * of this thread is invoked, which may cause a {@link
+     * SecurityException} to be thrown.
+     *
+     * <p> If this thread is blocked in an invocation of the {@link
+     * Object#wait() wait()}, {@link Object#wait(long) wait(long)}, or {@link
+     * Object#wait(long, int) wait(long, int)} methods of the {@link Object}
+     * class, or of the {@link #join()}, {@link #join(long)}, {@link
+     * #join(long, int)}, {@link #sleep(long)}, or {@link #sleep(long, int)},
+     * methods of this class, then its interrupt status will be cleared and it
+     * will receive an {@link InterruptedException}.
+     *
+     * <p> If this thread is blocked in an I/O operation upon an {@link
+     * java.nio.channels.InterruptibleChannel InterruptibleChannel}
+     * then the channel will be closed, the thread's interrupt
+     * status will be set, and the thread will receive a {@link
+     * java.nio.channels.ClosedByInterruptException}.
+     *
+     * <p> If this thread is blocked in a {@link java.nio.channels.Selector}
+     * then the thread's interrupt status will be set and it will return
+     * immediately from the selection operation, possibly with a non-zero
+     * value, just as if the selector's {@link
+     * java.nio.channels.Selector#wakeup wakeup} method were invoked.
+     *
+     * <p> If none of the previous conditions hold then this thread's interrupt
+     * status will be set. </p>
+     *
+     * <p> Interrupting a thread that is not alive need not have any effect.
+     *
+     * @throws  SecurityException
+     *          if the current thread cannot modify this thread
+     *
+     * @revised 6.0
+     * @spec JSR-51
+     */
+    void interrupt() {
+        // if (this !is Thread.getThis())
+        //     checkAccess();
+
+        synchronized (blockerLock) {
+            Interruptible b = blocker;
+            if (b !is null) {
+                interrupt0();           // Just to set the interrupt flag
+                b.interrupt(this);
+                return;
+            }
+        }
+        interrupt0();
+    }
+
+    private void interrupt0() {
+        if(!_interrupted) {
+            _interrupted = true;
+            // More than one thread can get here with the same value of osthread,
+            // resulting in multiple notifications.  We do, however, want the store
+            // to interrupted() to be visible to other threads before we execute unpark().
+            // OrderAccess::fence();
+            // ParkEvent * const slp = thread->_SleepEvent ;
+            // if (slp != NULL) slp->unpark() ;
+        }
+
+        // For JSR166. Unpark even if interrupt status already was set
+        _parker.unpark();
+
+        // ParkEvent * ev = thread->_ParkEvent ;
+        // if (ev != NULL) ev->unpark() ;
+    }
+
+    /**
+     * Tests whether this thread has been interrupted.  The <i>interrupted
+     * status</i> of the thread is unaffected by this method.
+     *
+     * <p>A thread interruption ignored because a thread was not alive
+     * at the time of the interrupt will be reflected by this method
+     * returning false.
+     *
+     * @return  <code>true</code> if this thread has been interrupted;
+     *          <code>false</code> otherwise.
+     * @see     #interrupted()
+     * @revised 6.0
+     */
+    bool isInterrupted() {
+        return isInterrupted(false);
+    }
+
+
+    /**
+     * Tests whether the current thread has been interrupted.  The
+     * <i>interrupted status</i> of the thread is cleared by this method.  In
+     * other words, if this method were to be called twice in succession, the
+     * second call would return false (unless the current thread were
+     * interrupted again, after the first call had cleared its interrupted
+     * status and before the second call had examined it).
+     *
+     * <p>A thread interruption ignored because a thread was not alive
+     * at the time of the interrupt will be reflected by this method
+     * returning false.
+     *
+     * @return  <code>true</code> if the current thread has been interrupted;
+     *          <code>false</code> otherwise.
+     * @see #isInterrupted()
+     * @revised 6.0
+     */
+    static bool interrupted() {
+        ThreadEx tex = cast(ThreadEx) Thread.getThis();
+        assert(tex !is null, "Must be a ThreadEx");
+        return tex.isInterrupted(true);
+    }
+
+    /**
+     * Tests if some Thread has been interrupted.  The interrupted state
+     * is reset or not based on the value of ClearInterrupted that is
+     * passed.
+     */
+    private bool isInterrupted(bool canClear) {
+        // bool interrupted = osthread->interrupted();
+
+        // NOTE that since there is no "lock" around the interrupt and
+        // is_interrupted operations, there is the possibility that the
+        // interrupted flag (in osThread) will be "false" but that the
+        // low-level events will be in the signaled state. This is
+        // intentional. The effect of this is that Object.wait() and
+        // LockSupport.park() will appear to have a spurious wakeup, which
+        // is allowed and not harmful, and the possibility is so rare that
+        // it is not worth the added complexity to add yet another lock.
+        // For the sleep event an explicit reset is performed on entry
+        // to os::sleep, so there is no early return. It has also been
+        // recommended not to put the interrupted flag into the "event"
+        // structure because it hides the issue.
+        if (_interrupted && canClear) {
+            _interrupted = false;
+            // osthread->set_interrupted(false);
+            // consider thread->_SleepEvent->reset() ... optional optimization
+        }
+
+        return _interrupted;
+    }
+
+
+    Parker parker() {
+        return _parker;
+    }
+    private Parker _parker;
+
+    // Short sleep, direct OS call.
+    static void nakedSleep(Duration timeout) {
+        Thread.sleep(timeout);
+    }
+
+    // Sleep forever; naked call to OS-specific sleep; use with CAUTION
+    static void infiniteSleep() {
+        while (true) {    // sleep forever ...
+            Thread.sleep(100.seconds);   // ... 100 seconds at a time
+        }
+    }
+
+    static void sleep(Duration timeout) {
+        // TODO: Tasks pending completion -@zxp at 11/6/2018, 12:29:22 PM
+        // using ParkEvent
+        LockSupport.park(timeout);
+    }
+
+    // Low-level leaf-lock primitives used to implement synchronization
+    // and native monitor-mutex infrastructure.
+    // Not for general synchronization use.
+    private static void spinAcquire(shared(int)* adr, string name) nothrow  {
+        int last = *adr;
+        cas(adr, 0, 1);
+        if (last == 0) return; // normal fast-path return
+
+        // Slow-path : We've encountered contention -- Spin/Yield/Block strategy.
+        //   TEVENT(SpinAcquire - ctx);
+        int ctr = 0;
+        int yields = 0;
+        for (;;) {
+            while (*adr != 0) {
+                ++ctr;
+                if ((ctr & 0xFFF) == 0 && !is_MP()) {
+                    if (yields > 5) {
+                        Thread.sleep(1.msecs);
+                    } else {
+                        Thread.yield();
+                        ++yields;
+                    }
+                } else {
+                    spinPause();
+                }
+            }
+            last = *adr;
+            cas(adr, 1, 0);
+            if (last == 0) return;
+        }
+    }
+
+    private static void spinRelease(shared(int)* adr) @safe nothrow @nogc {
+        assert(*adr != 0, "invariant");
+        atomicFence(); // guarantee at least release consistency.
+        // Roach-motel semantics.
+        // It's safe if subsequent LDs and STs float "up" into the critical section,
+        // but prior LDs and STs within the critical section can't be allowed
+        // to reorder or float past the ST that releases the lock.
+        // Loads and stores in the critical section - which appear in program
+        // order before the store that releases the lock - must also appear
+        // before the store that releases the lock in memory visibility order.
+        // Conceptually we need a #loadstore|#storestore "release" MEMBAR before
+        // the ST of 0 into the lock-word which releases the lock, so fence
+        // more than covers this on all platforms.
+        *adr = 0;
+    }
+
+    //   static void muxAcquire(shared intptr_t * Lock, string Name);
+    // //   static void muxAcquireW(shared intptr_t * Lock, ParkEvent * ev);
+    //   static void muxRelease(shared intptr_t * Lock);
+
+    private static int spinPause() @safe nothrow @nogc {
+        version (X86_64) {
+            return 0;
+        }
+        else version (AsmX86_Windows) {
+            asm pure nothrow @nogc {
+                pause;
+            }
+            return 1;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    private static bool is_MP() @safe pure nothrow @nogc {
+        // During bootstrap if _processor_count is not yet initialized
+        // we claim to be MP as that is safest. If any platform has a
+        // stub generator that might be triggered in this phase and for
+        // which being declared MP when in fact not, is a problem - then
+        // the bootstrap routine for the stub generator needs to check
+        // the processor count directly and leave the bootstrap routine
+        // in place until called after initialization has ocurred.
+        // return (_processor_count != 1); // AssumeMP || 
+        return totalCPUs != 1;
+    }
+}
+
+/*
+ * Per-thread blocking support for JSR166. See the Java-level
+ * Documentation for rationale. Basically, park acts like wait, unpark
+ * like notify.
+ *
+ * 6271289 --
+ * To avoid errors where an os thread expires but the JavaThread still
+ * exists, Parkers are immortal (type-stable) and are recycled across
+ * new threads.  This parallels the ParkEvent implementation.
+ * Because park-unpark allow spurious wakeups it is harmless if an
+ * unpark call unparks a new thread using the old Parker reference.
+ *
+ * In the future we'll want to think about eliminating Parker and using
+ * ParkEvent instead.  There's considerable duplication between the two
+ * services.
+ *
+ */
+class Parker {
+
+    enum int REL_INDEX = 0;
+    enum int ABS_INDEX = 1;
+
+    private shared int _counter;
+    private Parker freeNext;
+    private Thread associatedWith; // Current association
+
+    private  int _cur_index;  // which cond is in use: -1, 0, 1
+    private Mutex _mutex;
+    private Condition[2]  _cond; // one for relative times and one for absolute
+
+    this() @safe nothrow {
+        _counter = 0;
+        _mutex = new Mutex();
+        _cond[REL_INDEX] = new Condition(_mutex);
+        _cond[ABS_INDEX] = new Condition(_mutex);
+        _cur_index = -1; // mark as unused
+    }
+
+    // For simplicity of interface with Java, all forms of park (indefinite,
+    // relative, and absolute) are multiplexed into one call.
+    // Parker.park decrements count if > 0, else does a condvar wait.  Unpark
+    // sets count to 1 and signals condvar.  Only one thread ever waits
+    // on the condvar. Contention seen when trying to park implies that someone
+    // is unparking you, so don't wait. And spurious returns are fine, so there
+    // is no need to track notifications.
+    void park(Duration time) {
+        bool isAbsolute = false;
+
+        // Optional fast-path check:
+        // Return immediately if a permit is available.
+        // We depend on Atomic.xchg() having full barrier semantics
+        // since we are doing a lock-free update to _counter.
+        int old = _counter;
+        atomicStore(_counter, 0);
+        if (old > 0)
+            return;
+
+        Thread thread = Thread.getThis();
+        ThreadEx jt = cast(ThreadEx) thread;
+        if(jt is null) throw new Exception("Must be ThreadEx");
+
+        // // Optional optimization -- avoid state transitions if there's
+        // // an interrupt pending.
+        // if (Thread.is_interrupted(thread, false)) {
+        //     return;
+        // }
+
+        // Next, demultiplex/decode time arguments
+        if (time < Duration.zero || (isAbsolute && time == Duration.zero)) { // don't wait at all
+            return;
+        }
+
+        // Enter safepoint region
+        // Beware of deadlocks such as 6317397.
+        // The per-thread Parker. mutex is a classic leaf-lock.
+        // In particular a thread must never block on the Threads_lock while
+        // holding the Parker. mutex.  If safepoints are pending both the
+        // the ThreadBlockInVM() CTOR and DTOR may grab Threads_lock.
+        //   ThreadBlockInVM tbivm(jt);
+
+        // Don't wait if cannot get lock since interference arises from
+        // unparking. Also re-check interrupt before trying wait.
+        // if (Thread.is_interrupted(thread, false) || pthread_mutex_trylock(_mutex) != 0) {
+        //     return;
+        // }
+        if(!_mutex.tryLock())
+            return;
+
+        if (_counter > 0) { // no wait needed
+            _counter = 0;
+            _mutex.unlock();
+            // Paranoia to ensure our locked and lock-free paths interact
+            // correctly with each other and Java-level accesses.
+            atomicFence();
+            return;
+        }
+
+        // OSThreadWaitState osts(thread.osthread(), false  /* not Object.wait() */ );
+        // jt.set_suspend_equivalent();
+        // // cleared by handle_special_suspend_equivalent_condition() or java_suspend_self()
+
+        assert(_cur_index == -1, "invariant");
+        if (time == Duration.zero) {
+            _cur_index = REL_INDEX; // arbitrary choice when not timed
+            _cond[_cur_index].wait();
+        }
+        else {
+            _cur_index = isAbsolute ? ABS_INDEX : REL_INDEX;
+            _cond[_cur_index].wait(time);
+        }
+        _cur_index = -1;
+
+        _counter = 0;
+        _mutex.unlock();
+        // Paranoia to ensure our locked and lock-free paths interact
+        // correctly with each other and Java-level accesses.
+        atomicFence();
+
+        // // If externally suspended while waiting, re-suspend
+        // if (jt.handle_special_suspend_equivalent_condition()) {
+        //     jt.java_suspend_self();
+        // }
+    }
+
+    void unpark() {
+        _mutex.lock();
+        const int s = _counter;
+        _counter = 1;
+        // must capture correct index before unlocking
+        int index = _cur_index;
+        _mutex.unlock();
+
+        // Note that we signal() *after* dropping the lock for "immortal" Events.
+        // This is safe and avoids a common class of futile wakeups.  In rare
+        // circumstances this can cause a thread to return prematurely from
+        // cond_{timed}wait() but the spurious wakeup is benign and the victim
+        // will simply re-test the condition and re-park itself.
+        // This provides particular benefit if the underlying platform does not
+        // provide wait morphing.
+
+        if (s < 1 && index != -1) {
+            // thread is definitely parked
+            _cond[index].notify();
+        }
+    }
+
+    // Lifecycle operators
+    static Parker allocate(Thread t) nothrow {
+        assert(t !is null, "invariant");
+        Parker p;
+
+        // Start by trying to recycle an existing but unassociated
+        // Parker from the global free list.
+        // 8028280: using concurrent free list without memory management can leak
+        // pretty badly it turns out.
+        ThreadEx.spinAcquire(&listLock, "ParkerFreeListAllocate");
+        {
+            p = freeList;
+            if (p !is null) {
+                freeList = p.freeNext;
+            }
+        }
+        ThreadEx.spinRelease(&listLock);
+
+        if (p !is null) {
+            assert(p.associatedWith is null, "invariant");
+        }
+        else {
+            // Do this the hard way -- materialize a new Parker..
+            p = new Parker();
+        }
+        p.associatedWith = t; // Associate p with t
+        p.freeNext = null;
+        return p;
+    }
+
+    static void release(Parker p) {
+        if (p is null)
+            return;
+        assert(p.associatedWith !is null, "invariant");
+        assert(p.freeNext is null, "invariant");
+        p.associatedWith = null;
+
+        ThreadEx.spinAcquire(&listLock, "ParkerFreeListRelease");
+        {
+            p.freeNext = freeList;
+            freeList = p;
+        }
+        ThreadEx.spinRelease(&listLock);
+    }
+
+    private static Parker freeList;
+    private static shared int listLock;
+}
+
 
 /**
  * A thread group represents a set of threads. In addition, a thread
@@ -116,19 +614,19 @@ interface UncaughtExceptionHandler {
  * and working off of that snapshot, rather than holding the thread group locked
  * while we work on the children.
  */
-class ThreadGroupEx : UncaughtExceptionHandler {
+class ThreadGroupEx  { //: Thread.UncaughtExceptionHandler
     private ThreadGroupEx parent;
-    private string name;
-    private int maxPriority;
-    private bool destroyed;
-    private bool daemon;
+    string name;
+    int maxPriority;
+    bool destroyed;
+    bool daemon;
 
-    private int nUnstartedThreads = 0;
-    private int nthreads;
-    private Thread[] threads;
+    int nUnstartedThreads = 0;
+    int nthreads;
+    Thread[] threads;
 
-    private int ngroups;
-    private ThreadGroupEx[] groups;
+    int ngroups;
+    ThreadGroupEx[] groups;
 
     /**
      * Creates an empty Thread group that is not in any Thread group.
@@ -154,8 +652,11 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @since   1.0
      */
     this(string name) {
-        // this(Thread.getThis().getThreadGroup(), name);
-        this(null, name);
+        ThreadEx t = cast(ThreadEx)Thread.getThis();
+        if(t is null)
+            this(null, name);
+        else
+            this(t.getThreadGroup(), name);
     }
 
     /**
@@ -176,13 +677,23 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @since   1.0
      */
     this(ThreadGroupEx parent, string name) {
-        // checkParentAccess(parent);
+        parent.checkAccess();
+        // this(checkParentAccess(parent), parent, name);
+        
         this.name = name;
         this.maxPriority = parent.maxPriority;
         this.daemon = parent.daemon;
         this.parent = parent;
         parent.add(this);
     }
+
+    // private ThreadGroupEx(Void unused, ThreadGroupEx parent, string name) {
+    //     this.name = name;
+    //     this.maxPriority = parent.maxPriority;
+    //     this.daemon = parent.daemon;
+    //     this.parent = parent;
+    //     parent.add(this);
+    // }
 
     /*
      * @throws  NullPointerException  if the parent argument is {@code null}
@@ -191,7 +702,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      */
     // private static void checkParentAccess(ThreadGroupEx parent) {
     //     parent.checkAccess();
-    //     return null;
+    //     // return null;
     // }
 
     /**
@@ -259,7 +770,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @return  true if this object is destroyed
      * @since   1.1
      */
-    synchronized bool isDestroyed() {
+    bool isDestroyed() {
         return destroyed;
     }
 
@@ -325,7 +836,9 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             maxPriority = (parent !is null) ? min(pri, parent.maxPriority) : pri;
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
-                groupsSnapshot = groups[0..ngroupsSnapshot]; // Arrays.copyOf(groups, ngroupsSnapshot);
+                // groupsSnapshot = Arrays.copyOf(groups, ngroupsSnapshot);
+                size_t limit = min(ngroupsSnapshot, groups.length);
+                groupsSnapshot = groups[0..limit].dup;
             } else {
                 groupsSnapshot = null;
             }
@@ -347,7 +860,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      */
     final bool parentOf(ThreadGroupEx g) {
         for (; g !is null ; g = g.parent) {
-            if (g == this) {
+            if (g is this) {
                 return true;
             }
         }
@@ -368,8 +881,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @since      1.0
      */
     final void checkAccess() {
-        // TODO: Tasks pending completion -@zxp at 10/13/2018, 4:13:51 PM
-        // 
         // SecurityManager security = System.getSecurityManager();
         // if (security !is null) {
         //     security.checkAccess(this);
@@ -406,9 +917,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             result = nthreads;
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
-                groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-                groupsSnapshot[0..groups.length] = groups[0..$];
-                // Arrays.copyOf(groups, ngroupsSnapshot);
+                size_t limit = min(ngroupsSnapshot, groups.length);
+                groupsSnapshot = groups[0..limit].dup;
             } else {
                 groupsSnapshot = null;
             }
@@ -491,11 +1001,11 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (destroyed) {
                 return 0;
             }
-            size_t nt = nthreads;
-            if (nt > list.length - n) {
-                nt = list.length - n;
+            int nt = nthreads;
+            if (nt > cast(int)list.length - n) {
+                nt = cast(int)list.length - n;
             }
-            for (size_t i = 0; i < nt; i++) {
+            for (int i = 0; i < nt; i++) {
                 // TODO: Tasks pending completion -@zxp at 10/14/2018, 9:11:46 AM
                 // 
                 implementationMissing(false);
@@ -506,9 +1016,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (recurse) {
                 ngroupsSnapshot = ngroups;
                 if (groups !is null) {
-                    groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-                    groupsSnapshot[0..groups.length] = groups[0..$];
-                    // Arrays.copyOf(groups, ngroupsSnapshot);
+                    size_t limit = min(ngroupsSnapshot, groups.length);
+                    groupsSnapshot = groups[0..limit].dup;
                 } else {
                     groupsSnapshot = null;
                 }
@@ -546,9 +1055,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             }
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
-                groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-                groupsSnapshot[0..groups.length] = groups[0..$];
-                // Arrays.copyOf(groups, ngroupsSnapshot);
+                size_t limit = min(ngroupsSnapshot, groups.length);
+                groupsSnapshot = groups[0..limit].dup;
             } else {
                 groupsSnapshot = null;
             }
@@ -632,9 +1140,9 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (destroyed) {
                 return 0;
             }
-            size_t ng = ngroups;
-            if (ng > list.length - n) {
-                ng = list.length - n;
+            int ng = ngroups;
+            if (ng > cast(int)list.length - n) {
+                ng = cast(int)list.length - n;
             }
             if (ng > 0) {
                 // System.arraycopy(groups, 0, list, n, ng);
@@ -644,9 +1152,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (recurse) {
                 ngroupsSnapshot = ngroups;
                 if (groups !is null) {
-                    groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-                    groupsSnapshot[0..groups.length] = groups[0..$]; 
-                    // Arrays.copyOf(groups, ngroupsSnapshot);
+                    size_t limit = min(ngroupsSnapshot, groups.length);
+                    groupsSnapshot = groups[0..limit].dup;
                 } else {
                     groupsSnapshot = null;
                 }
@@ -679,7 +1186,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @deprecated    This method is inherently unsafe.  See
      *     {@link Thread#stop} for details.
      */
-    //@Deprecated(since="1.2")
+    // @Deprecated(since="1.2")
     // final void stop() {
     //     if (stopOrSuspend(false))
     //         Thread.getThis().stop();
@@ -710,14 +1217,10 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             // for (int i = 0 ; i < nthreads ; i++) {
             //     threads[i].interrupt();
             // }
-            // TODO: Tasks pending completion -@zxp at 10/14/2018, 9:13:18 AM
-            // 
-            implementationMissing(false);
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
-                groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-                groupsSnapshot[0..groups.length] = groups[0..$];
-                // Arrays.copyOf(groups, ngroupsSnapshot);
+                size_t limit = min(ngroupsSnapshot, groups.length);
+                groupsSnapshot = groups[0..limit].dup;
             } else {
                 groupsSnapshot = null;
             }
@@ -746,7 +1249,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @deprecated    This method is inherently deadlock-prone.  See
      *     {@link Thread#suspend} for details.
      */
-    //@Deprecated(since="1.2")
+    // @Deprecated(since="1.2")
     // @SuppressWarnings("deprecation")
     // final void suspend() {
     //     if (stopOrSuspend(true))
@@ -778,10 +1281,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
     //         }
 
     //         ngroupsSnapshot = ngroups;
-    //         if (groups !is null) {                
-    //             groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-    //             groupsSnapshot[0..groups.length] = groups[0..$];
-    //             // Arrays.copyOf(groups, ngroupsSnapshot);
+    //         if (groups !is null) {
+    //             groupsSnapshot = Arrays.copyOf(groups, ngroupsSnapshot);
     //         }
     //     }
     //     for (int i = 0 ; i < ngroupsSnapshot ; i++)
@@ -811,7 +1312,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *       both of which have been deprecated, as they are inherently
      *       deadlock-prone.  See {@link Thread#suspend} for details.
      */
-    //@Deprecated(since="1.2")
+    // @Deprecated(since="1.2")
     // @SuppressWarnings("deprecation")
     // final void resume() {
     //     int ngroupsSnapshot;
@@ -823,9 +1324,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
     //         }
     //         ngroupsSnapshot = ngroups;
     //         if (groups !is null) {
-    //             groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-    //             groupsSnapshot[0..groups.length] = groups[0..$];
-    //             // Arrays.copyOf(groups, ngroupsSnapshot);
+    //             groupsSnapshot = Arrays.copyOf(groups, ngroupsSnapshot);
     //         } else {
     //             groupsSnapshot = null;
     //         }
@@ -860,9 +1359,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             }
             ngroupsSnapshot = ngroups;
             if (groups !is null) {
-                groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-                groupsSnapshot[0..groups.length] = groups[0..$];
-                // Arrays.copyOf(groups, ngroupsSnapshot);
+                size_t limit = min(ngroupsSnapshot, groups.length);
+                groupsSnapshot = groups[0..limit].dup;
             } else {
                 groupsSnapshot = null;
             }
@@ -892,13 +1390,11 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (destroyed) {
                 throw new IllegalThreadStateException();
             }
-            if (groups is null) {
+            if (groups == null) {
                 groups = new ThreadGroupEx[4];
             } else if (ngroups == groups.length) {
-                // groups = Arrays.copyOf(groups, ngroups * 2);
-                ThreadGroupEx[] th = new ThreadGroupEx[ngroups * 2];
-                th[0..groups.length] = groups[0..$];
-                groups = th;
+                size_t limit = min(ngroups * 2, groups.length);
+                groups = groups[0..limit].dup;
             }
             groups[ngroups] = g;
 
@@ -923,7 +1419,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
                     ngroups -= 1;
                     // System.arraycopy(groups, i + 1, groups, i, ngroups - i);
                     for(int j=i; j<ngroups; j++)
-                        groups[j] = groups[j+1];
+                        groups[j] = groups[j+1];                    
                     // Zap dangling reference to the dead group so that
                     // the garbage collector will collect it.
                     groups[ngroups] = null;
@@ -931,12 +1427,16 @@ class ThreadGroupEx : UncaughtExceptionHandler {
                 }
             }
             if (nthreads == 0) {
+                // TODO: Tasks pending completion -@zxp at 12/19/2018, 4:57:38 PM
+                // 
                 // notifyAll();
             }
             if (daemon && (nthreads == 0) &&
                 (nUnstartedThreads == 0) && (ngroups == 0))
             {
-                destroy();
+                // TODO: Tasks pending completion -@zxp at 12/19/2018, 4:57:42 PM
+                // 
+                // destroy();
             }
         }
     }
@@ -976,13 +1476,11 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             if (destroyed) {
                 throw new IllegalThreadStateException();
             }
-            if (threads is null) {
+            if (threads == null) {
                 threads = new Thread[4];
             } else if (nthreads == threads.length) {
-                Thread[] th = new Thread[nthreads * 2];
-                th[0..threads.length] = threads[0..$];
-                threads = th;
-                // threads = Arrays.copyOf(threads, nthreads * 2);
+                size_t limit = min(nthreads * 2, threads.length);
+                threads = threads[0..limit].dup;
             }
             threads[nthreads] = t;
 
@@ -1033,9 +1531,8 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             remove(t);
 
             if (nthreads == 0) {
-                // TODO: Tasks pending completion -@zxp at 10/14/2018, 9:04:08 AM
+                // TODO: Tasks pending completion -@zxp at 12/19/2018, 4:57:55 PM
                 // 
-                implementationMissing(false);
                 // notifyAll();
             }
             if (daemon && (nthreads == 0) &&
@@ -1060,11 +1557,9 @@ class ThreadGroupEx : UncaughtExceptionHandler {
             }
             for (int i = 0 ; i < nthreads ; i++) {
                 if (threads[i] == t) {
-                    //System.arraycopy(threads, i + 1, threads, i, --nthreads - i);
-                    --nthreads;
-                    for(int j=i; j<nthreads; j++)
-                        threads[j] = threads[j+1];
-
+                    // System.arraycopy(threads, i + 1, threads, i, --nthreads - i);
+                    for(int j=i; j<ngroups; j++)
+                        groups[j] = groups[j+1];                    
                     // Zap dangling reference to the dead thread so that
                     // the garbage collector will collect it.
                     threads[nthreads] = null;
@@ -1080,9 +1575,9 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @since   1.0
      */
-    // void list() {
-    //     list(System.out, 0);
-    // }
+    void list() {
+        // list(System.out, 0);
+    }
     // void list(PrintStream out, int indent) {
     //     int ngroupsSnapshot;
     //     ThreadGroupEx[] groupsSnapshot;
@@ -1100,9 +1595,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
     //         }
     //         ngroupsSnapshot = ngroups;
     //         if (groups !is null) {
-    //             groupsSnapshot = new ThreadGroupEx[ngroupsSnapshot]; 
-    //             groupsSnapshot[0..groups.length] = groups[0..$];
-    //             // Arrays.copyOf(groups, ngroupsSnapshot);
+    //             groupsSnapshot = Arrays.copyOf(groups, ngroupsSnapshot);
     //         } else {
     //             groupsSnapshot = null;
     //         }
@@ -1115,7 +1608,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
     /**
      * Called by the Java Virtual Machine when a thread in this
      * thread group stops because of an uncaught exception, and the thread
-     * does not have a specific {@link UncaughtExceptionHandler}
+     * does not have a specific {@link Thread.UncaughtExceptionHandler}
      * installed.
      * <p>
      * The {@code uncaughtException} method of
@@ -1147,19 +1640,36 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @param   e   the uncaught exception.
      * @since   1.0
      */
-    void uncaughtException(Thread t, Throwable e) {
-        if (parent !is null) {
-            parent.uncaughtException(t, e);
-        } else {
-            UncaughtExceptionHandler ueh = getDefaultUncaughtExceptionHandler();
-            if (ueh !is null) {
-                ueh.uncaughtException(t, e);
-            } else {
-                stderr.writeln("Exception in thread \"" ~ t.name() ~ "\" ");
-                stderr.writeln(e.toString());
-            }
-        }
-    }
+    // void uncaughtException(Thread t, Throwable e) {
+    //     if (parent !is null) {
+    //         parent.uncaughtException(t, e);
+    //     } else {
+    //         Thread.UncaughtExceptionHandler ueh =
+    //             Thread.getDefaultUncaughtExceptionHandler();
+    //         if (ueh !is null) {
+    //             ueh.uncaughtException(t, e);
+    //         } else if (!(e instanceof ThreadDeath)) {
+    //             System.err.print("Exception in thread \""
+    //                              + t.getName() + "\" ");
+    //             e.printStackTrace(System.err);
+    //         }
+    //     }
+    // }
+
+    /**
+     * Used by VM to control lowmem implicit suspension.
+     *
+     * @param b bool to allow or disallow suspension
+     * @return true on success
+     * @since   1.1
+     * @deprecated The definition of this call depends on {@link #suspend},
+     *             which is deprecated.  Further, the behavior of this call
+     *             was never specified.
+     */
+    // @Deprecated(since="1.2")
+    // bool allowThreadSuspension(bool b) {
+    //     return true;
+    // }
 
     /**
      * Returns a string representation of this Thread group.
@@ -1167,8 +1677,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @return  a string representation of this thread group.
      * @since   1.0
      */
-    override string toString() {
-        return typeid(this).name ~ "[name=" ~ getName() ~ 
-            ",maxpri=" ~ maxPriority.to!string() ~ "]";
-    }
+    // string toString() {
+    //     return getClass().getName() + "[name=" + getName() + ",maxpri=" + maxPriority + "]";
+    // }
 }

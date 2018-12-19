@@ -1,7 +1,7 @@
-module hunt.util.concurrent.FuturePromise;
+module hunt.concurrent.FuturePromise;
 
-import hunt.util.concurrent.Future;
-import hunt.util.concurrent.Promise;
+import hunt.concurrent.Future;
+import hunt.concurrent.Promise;
 
 import hunt.lang.exception;
 import std.format;

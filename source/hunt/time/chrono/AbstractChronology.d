@@ -129,7 +129,7 @@ public abstract class AbstractChronology : Chronology {
                     // Log the attempt to replace an existing Chronology
                     // PlatformLogger logger = PlatformLogger.getLogger("hunt.time.chrono");
                     import hunt.logging;
-                    version(HUNT_DEBUG) logDebug("Ignoring duplicate Chronology, from ServiceLoader configuration "  ~ id);
+                    version(HUNT_DEBUG) trace("Ignoring duplicate Chronology, from ServiceLoader configuration "  ~ id);
                 }
             }
 

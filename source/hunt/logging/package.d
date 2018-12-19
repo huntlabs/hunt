@@ -5,3 +5,5 @@ version(HUNT_DEBUG) {
 } else {
     public import hunt.logging.logging;
 }
+
+public import hunt.logging.helper;

@@ -1,10 +1,10 @@
 import std.stdio;
 
 import hunt.event.socket;
-import hunt.util.thread;
+import hunt.concurrent.thread.Utils;
 import hunt.event;
 import hunt.io;
-import hunt.util.thread;
+import hunt.concurrent.thread.Utils;
 import hunt.lang.common;
 
 import std.getopt;

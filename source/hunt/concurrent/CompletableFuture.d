@@ -1,7 +1,7 @@
-module hunt.util.concurrent.CompletableFuture;
+module hunt.concurrent.CompletableFuture;
 
-import hunt.util.concurrent.Future;
-import hunt.util.concurrent.Promise;
+import hunt.concurrent.Future;
+import hunt.concurrent.Promise;
 
 import hunt.lang.common;
 import hunt.lang.exception;

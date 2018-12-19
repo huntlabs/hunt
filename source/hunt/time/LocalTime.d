@@ -330,7 +330,7 @@ public final class LocalTime
         int secsOfDay = Math.floorMod(localSecond, SECONDS_PER_DAY);
         import hunt.logging;
         import std.string;
-        version(HUNT_DEBUG) logDebug("--- > (%s , %s , %s)".format(localSecond,secsOfDay,offset.getId()));
+        version(HUNT_DEBUG) trace("--- > (%s , %s , %s)".format(localSecond,secsOfDay,offset.getId()));
         return ofNanoOfDay(secsOfDay * NANOS_PER_SECOND + instant.getNano());
     }
 

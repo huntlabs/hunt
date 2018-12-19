@@ -233,7 +233,7 @@ public  class LocalDate
     public static LocalDate of(int year, int month, int dayOfMonth) {
         if(ChronoField.YEAR is null)
         {
-            logError("ChronoField.YEAR is null");
+            error("ChronoField.YEAR is null");
         }
         ChronoField.YEAR.checkValidValue(year);
         ChronoField.MONTH_OF_YEAR.checkValidValue(month);

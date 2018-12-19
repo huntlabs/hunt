@@ -1,4 +1,4 @@
-module hunt.util.concurrent.atomic.AtomicBiInteger;
+module hunt.concurrent.atomic.AtomicBiInteger;
 
 /**
  * An AtomicLong with additional methods to treat it as two hi/lo integers.

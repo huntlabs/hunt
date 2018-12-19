@@ -1,4 +1,4 @@
-module hunt.util.concurrent.IdleTimeout;
+module hunt.concurrent.IdleTimeout;
 
 
 /**
