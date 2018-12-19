@@ -12,6 +12,7 @@ class TestTimeZone {
     {
         test_zoneid();
         test_now();
+        test_parse();
     }
 
     static void test_zoneid()
@@ -30,5 +31,13 @@ class TestTimeZone {
         mixin(DO_TEST);
 
         trace("ZonedDateTime.now() : ",ZonedDateTime.now());
+    }
+
+    static void test_parse()
+    {
+        mixin(DO_TEST);
+
+        auto zdt  = ZonedDateTime.parse("2007-12-03T10:15:30+08:00[GMT+08:00]");
+        trace("parse : ",zdt);
     }
 }

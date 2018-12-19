@@ -10,6 +10,7 @@ import test.TestLocalTime;
 import test.TestLocalDate;
 import test.TestMonthDay;
 import test.TestTimeZone;
+import test.TestInstant;
 
 void main()
 {
@@ -21,5 +22,5 @@ void main()
 	new Thread({ Thread.sleep(3.seconds); testUnits!(TestMonthDay); }).start();
 
 	TestTimeZone.test();
-
+	TestInstant.test();
 }
