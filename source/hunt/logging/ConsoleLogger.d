@@ -260,7 +260,12 @@ class ConsoleLogger {
             }
 
             SetConsoleTextAttribute(g_hout, color);
-            printf("%s\n", toMBSz(msg));
+            
+            try {
+                printf("%s\n", toMBSz(msg));
+            } catch (Exception) {
+            }
+
             if (color != defaultColor)
                 SetConsoleTextAttribute(g_hout, defaultColor);
         }
