@@ -9,7 +9,7 @@ import hunt.io.DataOutput;
 import hunt.lang.exception;
 import hunt.lang;
 import std.conv;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.chrono.ChronoLocalDate;
 import hunt.time.chrono.IsoEra;
 import hunt.time.chrono.IsoChronology;

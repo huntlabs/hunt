@@ -8,7 +8,7 @@ import hunt.io.DataOutput;
 import hunt.lang.exception;
 
 import hunt.time.zone.Ser;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.DayOfWeek;
 import hunt.time.LocalDate;
 import hunt.time.LocalDateTime;
