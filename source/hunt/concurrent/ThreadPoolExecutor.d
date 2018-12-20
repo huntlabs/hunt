@@ -38,7 +38,7 @@ module hunt.concurrent.ThreadPoolExecutor;
 import hunt.concurrent.AbstractExecutorService;
 import hunt.concurrent.AbstractOwnableSynchronizer;
 import hunt.concurrent.AbstractQueuedSynchronizer;
-import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.BlockingQueue;
 import hunt.concurrent.exception;
 import hunt.concurrent.ExecutorService;

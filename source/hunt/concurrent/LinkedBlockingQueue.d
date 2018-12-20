@@ -35,7 +35,7 @@
 
 module hunt.concurrent.LinkedBlockingQueue;
 
-import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.Helpers;
 import hunt.concurrent.BlockingQueue;
 

@@ -1,4 +1,4 @@
-module hunt.concurrent.AtomicHelper;
+module hunt.concurrent.atomic.AtomicHelper;
 
 import core.atomic;
 
@@ -24,6 +24,8 @@ class AtomicHelper {
     }
 
     static T getAndAdd(T, U)(ref T stuff, U delta) {
+// TODO: Tasks pending completion -@zxp at 12/20/2018, 11:14:28 AM        
+// 
         T v = stuff;
         increment(stuff, delta);
         return v;

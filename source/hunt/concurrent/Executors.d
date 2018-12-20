@@ -36,7 +36,7 @@
 module hunt.concurrent.Executors;
 
 import hunt.concurrent.AbstractExecutorService;
-import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.exception;
 import hunt.concurrent.ExecutorService;
 // import hunt.concurrent.ForkJoinPool;

@@ -37,7 +37,7 @@
 module hunt.concurrent.AbstractQueuedSynchronizer;
 
 import hunt.concurrent.AbstractOwnableSynchronizer;
-import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.atomic.AtomicHelper;
 
 import hunt.container.ArrayList;
 import hunt.container.Collection;
