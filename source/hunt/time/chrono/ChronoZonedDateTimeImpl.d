@@ -8,7 +8,7 @@ import hunt.lang;
 import hunt.io.ObjectInput;
 import hunt.util.Comparator;
 import hunt.io.ObjectOutput;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.Instant;
 import hunt.time.LocalDateTime;
 import hunt.time.ZoneId;

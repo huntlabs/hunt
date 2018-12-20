@@ -422,8 +422,7 @@ interface AutoCloseable {
 }
 
 
-interface Closeable : AutoCloseable
-{
+interface Closeable : AutoCloseable {
     
 }
 

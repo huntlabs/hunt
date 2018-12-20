@@ -8,7 +8,7 @@ import hunt.io.DataInput;
 import hunt.io.DataOutput;
 import hunt.lang.exception;
 // //import hunt.io.ObjectInputStream;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.math.BigDecimal;
 import hunt.math.BigInteger;
 import hunt.time.DateTimeException;

@@ -6,7 +6,7 @@ import hunt.io.DataOutput;
 import hunt.lang.exception;
 
 //import hunt.io.ObjectInputStream;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.Duration;
 import hunt.time.Instant;
 import hunt.time.LocalDateTime;

@@ -3,7 +3,7 @@ module hunt.time.util.Locale;
 
 import hunt.lang.exception;
 import hunt.lang.common;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.container;
 // import java.text.MessageFormat;
 // import java.util.concurrent.ConcurrentHashMap;

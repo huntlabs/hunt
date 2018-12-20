@@ -5,7 +5,7 @@ import hunt.lang.exception;
 import std.conv;
 import hunt.lang;
 import hunt.string.StringBuilder;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.DateTimeException;
 import hunt.time.temporal.TemporalField;
 /**

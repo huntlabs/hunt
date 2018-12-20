@@ -5,7 +5,7 @@ import hunt.io.DataOutput;
 import hunt.lang.exception;
 
 import std.conv;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.format.TextStyle;
 import hunt.time.temporal.TemporalAccessor;

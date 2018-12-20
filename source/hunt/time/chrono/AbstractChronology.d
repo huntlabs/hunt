@@ -11,7 +11,7 @@ import hunt.lang.exception;
 
 //import hunt.io.ObjectInputStream;
 // import hunt.io.ObjectStreamException;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.DateTimeException;
 import hunt.time.DayOfWeek;
 import hunt.time.format.ResolverStyle;

@@ -3,7 +3,7 @@ module hunt.time.chrono.ChronoLocalDate;
 
 import hunt.time.temporal.ChronoField;
 
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.DateTimeException;
 import hunt.time.LocalDate;
 import hunt.time.LocalTime;

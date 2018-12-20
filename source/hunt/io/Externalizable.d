@@ -3,7 +3,7 @@ module hunt.io.Externalizable;
 
 import hunt.io.ObjectOutput;
 import hunt.io.ObjectInput;
-import hunt.io.Serializable;
+import hunt.io.common;
 
 public interface Externalizable : Serializable {
     /**

@@ -7,7 +7,7 @@ import core.time : convert;
 import hunt.lang.exception;
 import hunt.lang;
 import hunt.time.LocalTime;
-import hunt.io.Serializable;
+import hunt.io.common;
 import hunt.time.ZoneId;
 import hunt.time.Duration;
 import hunt.time.Instant;
