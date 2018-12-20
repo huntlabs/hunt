@@ -284,7 +284,10 @@ import hunt.io.Serializable;
 import hunt.lang.common;
 import std.datetime : TimeZone ;
 
-public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
+
+alias HuntCalendar = Calendar;
+
+abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
 
     // Data flow in Calendar
     // ---------------------
@@ -344,13 +347,13 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see GregorianCalendar#AD
      * @see GregorianCalendar#BC
      */
-    public enum int ERA = 0;
+    enum int ERA = 0;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
      * year. This is a calendar-specific value; see subclass documentation.
      */
-    public enum int YEAR = 1;
+    enum int YEAR = 1;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -373,7 +376,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #DECEMBER
      * @see #UNDECIMBER
      */
-    public enum int MONTH = 2;
+    enum int MONTH = 2;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -386,7 +389,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #getFirstDayOfWeek
      * @see #getMinimalDaysInFirstWeek
      */
-    public enum int WEEK_OF_YEAR = 3;
+    enum int WEEK_OF_YEAR = 3;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -399,7 +402,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #getFirstDayOfWeek
      * @see #getMinimalDaysInFirstWeek
      */
-    public enum int WEEK_OF_MONTH = 4;
+    enum int WEEK_OF_MONTH = 4;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -408,7 +411,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      *
      * @see #DAY_OF_MONTH
      */
-    public enum int DATE = 5;
+    enum int DATE = 5;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -417,13 +420,13 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      *
      * @see #DATE
      */
-    public enum int DAY_OF_MONTH = 5;
+    enum int DAY_OF_MONTH = 5;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the day
      * number within the current year.  The first day of the year has value 1.
      */
-    public enum int DAY_OF_YEAR = 6;
+    enum int DAY_OF_YEAR = 6;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the day
@@ -439,7 +442,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #FRIDAY
      * @see #SATURDAY
      */
-    public enum int DAY_OF_WEEK = 7;
+    enum int DAY_OF_WEEK = 7;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -464,7 +467,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #DAY_OF_WEEK
      * @see #WEEK_OF_MONTH
      */
-    public enum int DAY_OF_WEEK_IN_MONTH = 8;
+    enum int DAY_OF_WEEK_IN_MONTH = 8;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating
@@ -475,7 +478,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #PM
      * @see #HOUR
      */
-    public enum int AM_PM = 9;
+    enum int AM_PM = 9;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -486,7 +489,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #AM_PM
      * @see #HOUR_OF_DAY
      */
-    public enum int HOUR = 10;
+    enum int HOUR = 10;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -495,28 +498,28 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      *
      * @see #HOUR
      */
-    public enum int HOUR_OF_DAY = 11;
+    enum int HOUR_OF_DAY = 11;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
      * minute within the hour.
      * E.g., at 10:04:15.250 PM the <code>MINUTE</code> is 4.
      */
-    public enum int MINUTE = 12;
+    enum int MINUTE = 12;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
      * second within the minute.
      * E.g., at 10:04:15.250 PM the <code>SECOND</code> is 15.
      */
-    public enum int SECOND = 13;
+    enum int SECOND = 13;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
      * millisecond within the second.
      * E.g., at 10:04:15.250 PM the <code>MILLISECOND</code> is 250.
      */
-    public enum int MILLISECOND = 14;
+    enum int MILLISECOND = 14;
 
     /**
      * Field number for <code>get</code> and <code>set</code>
@@ -527,7 +530,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * <code>TimeZone</code> implementation subclass supports
      * historical GMT offset changes.
      */
-    public enum int ZONE_OFFSET = 15;
+    enum int ZONE_OFFSET = 15;
 
     /**
      * Field number for <code>get</code> and <code>set</code> indicating the
@@ -538,146 +541,146 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * <code>TimeZone</code> implementation subclass supports
      * historical Daylight Saving Time schedule changes.
      */
-    public enum int DST_OFFSET = 16;
+    enum int DST_OFFSET = 16;
 
     /**
      * The number of distinct fields recognized by <code>get</code> and <code>set</code>.
      * Field numbers range from <code>0..FIELD_COUNT-1</code>.
      */
-    public enum int FIELD_COUNT = 17;
+    enum int FIELD_COUNT = 17;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Sunday.
      */
-    public enum int SUNDAY = 1;
+    enum int SUNDAY = 1;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Monday.
      */
-    public enum int MONDAY = 2;
+    enum int MONDAY = 2;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Tuesday.
      */
-    public enum int TUESDAY = 3;
+    enum int TUESDAY = 3;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Wednesday.
      */
-    public enum int WEDNESDAY = 4;
+    enum int WEDNESDAY = 4;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Thursday.
      */
-    public enum int THURSDAY = 5;
+    enum int THURSDAY = 5;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Friday.
      */
-    public enum int FRIDAY = 6;
+    enum int FRIDAY = 6;
 
     /**
      * Value of the {@link #DAY_OF_WEEK} field indicating
      * Saturday.
      */
-    public enum int SATURDAY = 7;
+    enum int SATURDAY = 7;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * first month of the year in the Gregorian and Julian calendars.
      */
-    public enum int JANUARY = 0;
+    enum int JANUARY = 0;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * second month of the year in the Gregorian and Julian calendars.
      */
-    public enum int FEBRUARY = 1;
+    enum int FEBRUARY = 1;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * third month of the year in the Gregorian and Julian calendars.
      */
-    public enum int MARCH = 2;
+    enum int MARCH = 2;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * fourth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int APRIL = 3;
+    enum int APRIL = 3;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * fifth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int MAY = 4;
+    enum int MAY = 4;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * sixth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int JUNE = 5;
+    enum int JUNE = 5;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * seventh month of the year in the Gregorian and Julian calendars.
      */
-    public enum int JULY = 6;
+    enum int JULY = 6;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * eighth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int AUGUST = 7;
+    enum int AUGUST = 7;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * ninth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int SEPTEMBER = 8;
+    enum int SEPTEMBER = 8;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * tenth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int OCTOBER = 9;
+    enum int OCTOBER = 9;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * eleventh month of the year in the Gregorian and Julian calendars.
      */
-    public enum int NOVEMBER = 10;
+    enum int NOVEMBER = 10;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * twelfth month of the year in the Gregorian and Julian calendars.
      */
-    public enum int DECEMBER = 11;
+    enum int DECEMBER = 11;
 
     /**
      * Value of the {@link #MONTH} field indicating the
      * thirteenth month of the year. Although <code>GregorianCalendar</code>
      * does not use this value, lunar calendars do.
      */
-    public enum int UNDECIMBER = 12;
+    enum int UNDECIMBER = 12;
 
     /**
      * Value of the {@link #AM_PM} field indicating the
      * period of the day from midnight to just before noon.
      */
-    public enum int AM = 0;
+    enum int AM = 0;
 
     /**
      * Value of the {@link #AM_PM} field indicating the
      * period of the day from noon to just before midnight.
      */
-    public enum int PM = 1;
+    enum int PM = 1;
 
     /**
      * A style specifier for {@link #getDisplayNames(int, int, Locale)
@@ -692,7 +695,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #LONG
      * @since 1.6
      */
-    public enum int ALL_STYLES = 0;
+    enum int ALL_STYLES = 0;
 
     enum int STANDALONE_MASK = 0x8000;
 
@@ -705,7 +708,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #LONG
      * @since 1.6
      */
-    public enum int SHORT = 1;
+    enum int SHORT = 1;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -716,7 +719,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #SHORT
      * @since 1.6
      */
-    public enum int LONG = 2;
+    enum int LONG = 2;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -729,7 +732,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #LONG_FORMAT
      * @since 1.8
      */
-    public enum int NARROW_FORMAT = 4;
+    enum int NARROW_FORMAT = 4;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -742,7 +745,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #LONG_STANDALONE
      * @since 1.8
      */
-    public enum int NARROW_STANDALONE = NARROW_FORMAT | STANDALONE_MASK;
+    enum int NARROW_STANDALONE = NARROW_FORMAT | STANDALONE_MASK;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -754,7 +757,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #LONG_STANDALONE
      * @since 1.8
      */
-    public enum int SHORT_FORMAT = 1;
+    enum int SHORT_FORMAT = 1;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -766,7 +769,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #SHORT_STANDALONE
      * @since 1.8
      */
-    public enum int LONG_FORMAT = 2;
+    enum int LONG_FORMAT = 2;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -779,7 +782,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #LONG_STANDALONE
      * @since 1.8
      */
-    public enum int SHORT_STANDALONE = SHORT | STANDALONE_MASK;
+    enum int SHORT_STANDALONE = SHORT | STANDALONE_MASK;
 
     /**
      * A style specifier for {@link #getDisplayName(int, int, Locale)
@@ -792,7 +795,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see #SHORT_STANDALONE
      * @since 1.8
      */
-    public enum int LONG_STANDALONE = LONG | STANDALONE_MASK;
+    enum int LONG_STANDALONE = LONG | STANDALONE_MASK;
 
     // Internal notes:
     // Calendar contains two kinds of time representations: current "time" in
@@ -1052,7 +1055,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      * @see Calendar#getInstance(TimeZone, Locale)
      * @see Calendar#fields
      */
-    // public static class Builder {
+    // static class Builder {
     //     private enum int NFIELDS = FIELD_COUNT + 1; // +1 for WEEK_YEAR
     //     private enum int WEEK_YEAR = FIELD_COUNT;
 
@@ -1074,7 +1077,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //     /**
     //      * Constructs a {@code Calendar.Builder}.
     //      */
-    //     public this() {
+    //     this() {
     //     }
 
     //     /**
@@ -1090,7 +1093,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @see Calendar#setTimeInMillis(long)
     //      * @see Calendar#time
     //      */
-    //     public Builder setInstant(long instant) {
+    //     Builder setInstant(long instant) {
     //         if (fields !is null) {
     //             throw new IllegalStateException();
     //         }
@@ -1114,7 +1117,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @see Calendar#setTimeInMillis(long)
     //      * @see Calendar#time
     //      */
-    //     public Builder setInstant(Date instant) {
+    //     Builder setInstant(Date instant) {
     //         return setInstant(instant.getTime()); // NPE if instant is null
     //     }
 
@@ -1135,7 +1138,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      *                      (approximately {@link Integer#MAX_VALUE}) times.
     //      * @see Calendar#set(int, int)
     //      */
-    //     public Builder set(int field, int value) {
+    //     Builder set(int field, int value) {
     //         // Note: WEEK_YEAR can't be set with this method.
     //         if (field < 0 || field >= FIELD_COUNT) {
     //             throw new IllegalArgumentException("field is invalid");
@@ -1172,7 +1175,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      *             or if fields have been set too many (approximately
     //      *             {@link Integer#MAX_VALUE}) times.
     //      */
-    //     public Builder setFields(int... fieldValuePairs) {
+    //     Builder setFields(int... fieldValuePairs) {
     //         int len = fieldValuePairs.length;
     //         if ((len % 2) != 0) {
     //             throw new IllegalArgumentException();
@@ -1210,7 +1213,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @param dayOfMonth the {@link Calendar#DAY_OF_MONTH DAY_OF_MONTH} value
     //      * @return this {@code Calendar.Builder}
     //      */
-    //     public Builder setDate(int year, int month, int dayOfMonth) {
+    //     Builder setDate(int year, int month, int dayOfMonth) {
     //         return setFields(YEAR, year, MONTH, month, DAY_OF_MONTH, dayOfMonth);
     //     }
 
@@ -1227,7 +1230,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @param second    the {@link Calendar#SECOND SECOND} value
     //      * @return this {@code Calendar.Builder}
     //      */
-    //     public Builder setTimeOfDay(int hourOfDay, int minute, int second) {
+    //     Builder setTimeOfDay(int hourOfDay, int minute, int second) {
     //         return setTimeOfDay(hourOfDay, minute, second, 0);
     //     }
 
@@ -1248,7 +1251,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @param millis    the {@link Calendar#MILLISECOND MILLISECOND} value
     //      * @return this {@code Calendar.Builder}
     //      */
-    //     public Builder setTimeOfDay(int hourOfDay, int minute, int second, int millis) {
+    //     Builder setTimeOfDay(int hourOfDay, int minute, int second, int millis) {
     //         return setFields(HOUR_OF_DAY, hourOfDay, MINUTE, minute,
     //                          SECOND, second, MILLISECOND, millis);
     //     }
@@ -1269,7 +1272,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @see Calendar#setWeekDate(int, int, int)
     //      * @see Calendar#isWeekDateSupported()
     //      */
-    //     public Builder setWeekDate(int weekYear, int weekOfYear, int dayOfWeek) {
+    //     Builder setWeekDate(int weekYear, int weekOfYear, int dayOfWeek) {
     //         allocateFields();
     //         internalSet(WEEK_YEAR, weekYear);
     //         internalSet(WEEK_OF_YEAR, weekOfYear);
@@ -1289,7 +1292,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @throws NullPointerException if {@code zone} is {@code null}
     //      * @see Calendar#setTimeZone(TimeZone)
     //      */
-    //     public Builder setTimeZone(TimeZone zone) {
+    //     Builder setTimeZone(TimeZone zone) {
     //         if (zone is null) {
     //             throw new NullPointerException();
     //         }
@@ -1307,7 +1310,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @return this {@code Calendar.Builder}
     //      * @see Calendar#setLenient(bool)
     //      */
-    //     public Builder setLenient(bool lenient) {
+    //     Builder setLenient(bool lenient) {
     //         this.lenient = lenient;
     //         return this;
     //     }
@@ -1331,7 +1334,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @see Calendar#getCalendarType()
     //      * @see Calendar#getAvailableCalendarTypes()
     //      */
-    //     public Builder setCalendarType(String type) {
+    //     Builder setCalendarType(String type) {
     //         if (type.equals("gregorian")) { // NPE if type is null
     //             type = "gregory";
     //         }
@@ -1369,7 +1372,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @return this {@code Calendar.Builder}
     //      * @see Calendar#getInstance(Locale)
     //      */
-    //     public Builder setLocale(Locale locale) {
+    //     Builder setLocale(Locale locale) {
     //         if (locale is null) {
     //             throw new NullPointerException();
     //         }
@@ -1395,7 +1398,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @see Calendar#getFirstDayOfWeek()
     //      * @see Calendar#getMinimalDaysInFirstWeek()
     //      */
-    //     public Builder setWeekDefinition(int firstDayOfWeek, int minimalDaysInFirstWeek) {
+    //     Builder setWeekDefinition(int firstDayOfWeek, int minimalDaysInFirstWeek) {
     //         if (!isValidWeekParameter(firstDayOfWeek)
     //                 || !isValidWeekParameter(minimalDaysInFirstWeek)) {
     //             throw new IllegalArgumentException();
@@ -1444,7 +1447,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //      * @see Locale#getDefault(Locale.Category)
     //      * @see TimeZone#getDefault()
     //      */
-    //     public Calendar build() {
+    //     Calendar build() {
     //         if (locale is null) {
     //             locale = Locale.getDefault();
     //         }
@@ -1598,7 +1601,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
      *
      * @return a Calendar.
      */
-    // public static Calendar getInstance()
+    // static Calendar getInstance()
     // {
     //     Locale aLocale = Locale.getDefault(Locale.Category.FORMAT);
     //     return createCalendar(defaultTimeZone(aLocale), aLocale);
@@ -1613,7 +1616,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @param zone the time zone to use
     //  * @return a Calendar.
     //  */
-    // public static Calendar getInstance(TimeZone zone)
+    // static Calendar getInstance(TimeZone zone)
     // {
     //     return createCalendar(zone, Locale.getDefault(Locale.Category.FORMAT));
     // }
@@ -1630,7 +1633,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @param aLocale the locale for the week data
     //  * @return a Calendar.
     //  */
-    // public static Calendar getInstance(Locale aLocale)
+    // static Calendar getInstance(Locale aLocale)
     // {
     //     return createCalendar(defaultTimeZone(aLocale), aLocale);
     // }
@@ -1644,7 +1647,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @param aLocale the locale for the week data
     //  * @return a Calendar.
     //  */
-    // public static Calendar getInstance(TimeZone zone,
+    // static Calendar getInstance(TimeZone zone,
     //                                    Locale aLocale)
     // {
     //     return createCalendar(zone, aLocale);
@@ -1720,7 +1723,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @return An array of locales for which localized
     //  *         <code>Calendar</code> instances are available.
     //  */
-    // public static synchronized Locale[] getAvailableLocales()
+    // static synchronized Locale[] getAvailableLocales()
     // {
     //     return DateFormat.getAvailableLocales();
     // }
@@ -1756,7 +1759,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #setTime(Date)
     //  * @see #getTimeInMillis()
     //  */
-    // public const Date getTime() {
+    // const Date getTime() {
     //     return new Date(getTimeInMillis());
     // }
 
@@ -1771,7 +1774,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getTime()
     //  * @see #setTimeInMillis(long)
     //  */
-    // public const void setTime(Date date) {
+    // const void setTime(Date date) {
     //     setTimeInMillis(date.getTime());
     // }
 
@@ -1782,7 +1785,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getTime()
     //  * @see #setTimeInMillis(long)
     //  */
-    // public long getTimeInMillis() {
+    // long getTimeInMillis() {
     //     if (!isTimeSet) {
     //         updateTime();
     //     }
@@ -1796,7 +1799,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #setTime(Date)
     //  * @see #getTimeInMillis()
     //  */
-    // public void setTimeInMillis(long millis) {
+    // void setTimeInMillis(long millis) {
     //     // If we don't need to recalculate the calendar field values,
     //     // do nothing.
     //     if (time == millis && isTimeSet && areFieldsSet && areAllFieldsSet
@@ -1826,7 +1829,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #set(int,int)
     //  * @see #complete()
     //  */
-    // public int get(int field)
+    // int get(int field)
     // {
     //     complete();
     //     return internalGet(field);
@@ -1876,7 +1879,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #set(int,int,int,int,int,int)
     //  * @see #get(int)
     //  */
-    // public void set(int field, int value)
+    // void set(int field, int value)
     // {
     //     // If the fields are partially normalized, calculate all the
     //     // fields before changing any fields.
@@ -1907,7 +1910,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #set(int,int,int,int,int)
     //  * @see #set(int,int,int,int,int,int)
     //  */
-    // public const void set(int year, int month, int date)
+    // const void set(int year, int month, int date)
     // {
     //     set(YEAR, year);
     //     set(MONTH, month);
@@ -1931,7 +1934,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #set(int,int,int)
     //  * @see #set(int,int,int,int,int,int)
     //  */
-    // public const void set(int year, int month, int date, int hourOfDay, int minute)
+    // const void set(int year, int month, int date, int hourOfDay, int minute)
     // {
     //     set(YEAR, year);
     //     set(MONTH, month);
@@ -1958,7 +1961,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #set(int,int,int)
     //  * @see #set(int,int,int,int,int)
     //  */
-    // public const void set(int year, int month, int date, int hourOfDay, int minute,
+    // const void set(int year, int month, int date, int hourOfDay, int minute,
     //                       int second)
     // {
     //     set(YEAR, year);
@@ -1983,7 +1986,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  *
     //  * @see #clear(int)
     //  */
-    // public const void clear()
+    // const void clear()
     // {
     //     for (int i = 0; i < fields.length; ) {
     //         stamp[i] = fields[i] = 0; // UNSET == 0
@@ -2014,7 +2017,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @param field the calendar field to be cleared.
     //  * @see #clear()
     //  */
-    // public const void clear(int field)
+    // const void clear(int field)
     // {
     //     fields[field] = 0;
     //     stamp[field] = UNSET;
@@ -2033,7 +2036,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @return <code>true</code> if the given calendar field has a value set;
     //  * <code>false</code> otherwise.
     //  */
-    // public const bool isSet(int field)
+    // const bool isSet(int field)
     // {
     //     return stamp[field] != UNSET;
     // }
@@ -2082,7 +2085,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  *        if {@code locale} is null
     //  * @since 1.6
     //  */
-    // public String getDisplayName(int field, int style, Locale locale) {
+    // String getDisplayName(int field, int style, Locale locale) {
     //     if (!checkDisplayNameParams(field, style, SHORT, NARROW_FORMAT, locale,
     //                         ERA_MASK|MONTH_MASK|DAY_OF_WEEK_MASK|AM_PM_MASK)) {
     //         return null;
@@ -2173,7 +2176,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  *        if {@code locale} is null
     //  * @since 1.6
     //  */
-    // public Map<String, Integer> getDisplayNames(int field, int style, Locale locale) {
+    // Map<String, Integer> getDisplayNames(int field, int style, Locale locale) {
     //     if (!checkDisplayNameParams(field, style, ALL_STYLES, NARROW_FORMAT, locale,
     //                                 ERA_MASK|MONTH_MASK|DAY_OF_WEEK_MASK|AM_PM_MASK)) {
     //         return null;
@@ -2627,7 +2630,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see Calendar.Builder#setCalendarType(String)
     //  * @see Locale#getUnicodeLocaleType(String)
     //  */
-    // public static Set<String> getAvailableCalendarTypes() {
+    // static Set<String> getAvailableCalendarTypes() {
     //     return AvailableCalendarTypes.SET;
     // }
 
@@ -2661,7 +2664,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see Locale.Builder#setLocale(Locale)
     //  * @see Locale.Builder#setUnicodeLocaleKeyword(String, String)
     //  */
-    // public String getCalendarType() {
+    // String getCalendarType() {
     //     return this.getClass().getName();
     // }
 
@@ -2689,7 +2692,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  */
     // //@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     // @Override
-    // public bool equals(Object obj) {
+    // bool equals(Object obj) {
     //     if (this is obj) {
     //         return true;
     //     }
@@ -2715,7 +2718,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @since 1.2
     //  */
     // @Override
-    // public int hashCode() {
+    // int hashCode() {
     //     // 'otheritems' represents the hash code for the previous versions.
     //     int otheritems = (lenient ? 1 : 0)
     //         | (firstDayOfWeek << 1)
@@ -2741,7 +2744,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * <code>when</code>; <code>false</code> otherwise.
     //  * @see     #compareTo(Calendar)
     //  */
-    // public bool before(Object when) {
+    // bool before(Object when) {
     //     return when instanceof Calendar
     //         && compareTo((Calendar)when) < 0;
     // }
@@ -2762,7 +2765,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * otherwise.
     //  * @see     #compareTo(Calendar)
     //  */
-    // public bool after(Object when) {
+    // bool after(Object when) {
     //     return when instanceof Calendar
     //         && compareTo((Calendar)when) > 0;
     // }
@@ -2787,7 +2790,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @since   1.5
     //  */
     // @Override
-    // public int compareTo(Calendar anotherCalendar) {
+    // int compareTo(Calendar anotherCalendar) {
     //     return compareTo(getMillisOf(anotherCalendar));
     // }
 
@@ -2802,7 +2805,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #roll(int,int)
     //  * @see #set(int,int)
     //  */
-    // public abstract void add(int field, int amount);
+    // abstract void add(int field, int amount);
 
     // /**
     //  * Adds or subtracts (up/down) a single unit of time on the given time
@@ -2824,7 +2827,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see Calendar#add(int,int)
     //  * @see Calendar#set(int,int)
     //  */
-    // public abstract void roll(int field, bool up);
+    // abstract void roll(int field, bool up);
 
     // /**
     //  * Adds the specified (signed) amount to the specified calendar field
@@ -2845,7 +2848,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #add(int,int)
     //  * @see #set(int,int)
     //  */
-    // public void roll(int field, int amount)
+    // void roll(int field, int amount)
     // {
     //     while (amount > 0) {
     //         roll(field, true);
@@ -2862,7 +2865,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  *
     //  * @param value the given time zone.
     //  */
-    // public void setTimeZone(TimeZone value)
+    // void setTimeZone(TimeZone value)
     // {
     //     zone = value;
     //     sharedZone = false;
@@ -2883,7 +2886,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  *
     //  * @return the time zone object associated with this calendar.
     //  */
-    // public TimeZone getTimeZone()
+    // TimeZone getTimeZone()
     // {
     //     // If the TimeZone object is shared by other Calendar instances, then
     //     // create a clone.
@@ -2920,7 +2923,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #isLenient()
     //  * @see java.text.DateFormat#setLenient
     //  */
-    // public void setLenient(bool lenient)
+    // void setLenient(bool lenient)
     // {
     //     this.lenient = lenient;
     // }
@@ -2932,7 +2935,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * <code>false</code> otherwise.
     //  * @see #setLenient(bool)
     //  */
-    // public bool isLenient()
+    // bool isLenient()
     // {
     //     return lenient;
     // }
@@ -2945,7 +2948,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getFirstDayOfWeek()
     //  * @see #getMinimalDaysInFirstWeek()
     //  */
-    // public void setFirstDayOfWeek(int value)
+    // void setFirstDayOfWeek(int value)
     // {
     //     if (firstDayOfWeek == value) {
     //         return;
@@ -2962,7 +2965,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #setFirstDayOfWeek(int)
     //  * @see #getMinimalDaysInFirstWeek()
     //  */
-    // public int getFirstDayOfWeek()
+    // int getFirstDayOfWeek()
     // {
     //     return firstDayOfWeek;
     // }
@@ -2977,7 +2980,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * of the year.
     //  * @see #getMinimalDaysInFirstWeek()
     //  */
-    // public void setMinimalDaysInFirstWeek(int value)
+    // void setMinimalDaysInFirstWeek(int value)
     // {
     //     if (minimalDaysInFirstWeek == value) {
     //         return;
@@ -2996,7 +2999,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @return the minimal days required in the first week of the year.
     //  * @see #setMinimalDaysInFirstWeek(int)
     //  */
-    // public int getMinimalDaysInFirstWeek()
+    // int getMinimalDaysInFirstWeek()
     // {
     //     return minimalDaysInFirstWeek;
     // }
@@ -3013,7 +3016,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getWeeksInWeekYear()
     //  * @since 1.7
     //  */
-    // public bool isWeekDateSupported() {
+    // bool isWeekDateSupported() {
     //     return false;
     // }
 
@@ -3035,7 +3038,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getMinimalDaysInFirstWeek()
     //  * @since 1.7
     //  */
-    // public int getWeekYear() {
+    // int getWeekYear() {
     //     throw new UnsupportedOperationException();
     // }
 
@@ -3071,7 +3074,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getMinimalDaysInFirstWeek()
     //  * @since 1.7
     //  */
-    // public void setWeekDate(int weekYear, int weekOfYear, int dayOfWeek) {
+    // void setWeekDate(int weekYear, int weekOfYear, int dayOfWeek) {
     //     throw new UnsupportedOperationException();
     // }
 
@@ -3092,7 +3095,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMaximum(int)
     //  * @since 1.7
     //  */
-    // public int getWeeksInWeekYear() {
+    // int getWeeksInWeekYear() {
     //     throw new UnsupportedOperationException();
     // }
 
@@ -3111,7 +3114,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMinimum(int)
     //  * @see #getActualMaximum(int)
     //  */
-    // public abstract int getMinimum(int field);
+    // abstract int getMinimum(int field);
 
     // /**
     //  * Returns the maximum value for the given calendar field of this
@@ -3128,7 +3131,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMinimum(int)
     //  * @see #getActualMaximum(int)
     //  */
-    // public abstract int getMaximum(int field);
+    // abstract int getMaximum(int field);
 
     // /**
     //  * Returns the highest minimum value for the given calendar field
@@ -3146,7 +3149,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMinimum(int)
     //  * @see #getActualMaximum(int)
     //  */
-    // public abstract int getGreatestMinimum(int field);
+    // abstract int getGreatestMinimum(int field);
 
     // /**
     //  * Returns the lowest maximum value for the given calendar field
@@ -3168,7 +3171,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMinimum(int)
     //  * @see #getActualMaximum(int)
     //  */
-    // public abstract int getLeastMaximum(int field);
+    // abstract int getLeastMaximum(int field);
 
     // /**
     //  * Returns the minimum value that the specified calendar field
@@ -3190,7 +3193,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMaximum(int)
     //  * @since 1.2
     //  */
-    // public int getActualMinimum(int field) {
+    // int getActualMinimum(int field) {
     //     int fieldValue = getGreatestMinimum(field);
     //     int endValue = getMinimum(field);
 
@@ -3244,7 +3247,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @see #getActualMinimum(int)
     //  * @since 1.2
     //  */
-    // public int getActualMaximum(int field) {
+    // int getActualMaximum(int field) {
     //     int fieldValue = getLeastMaximum(field);
     //     int endValue = getMaximum(field);
 
@@ -3288,7 +3291,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @return a copy of this object.
     //  */
     // @Override
-    // public Object clone()
+    // Object clone()
     // {
     //     try {
     //         Calendar other = (Calendar) super.clone();
@@ -3340,7 +3343,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @return  a string representation of this calendar.
     //  */
     // @Override
-    // public String toString() {
+    // String toString() {
     //     // NOTE: BuddhistCalendar.toString() interprets the string
     //     // produced by this method so that the Gregorian year number
     //     // is substituted by its B.E. year value. It relies on
@@ -3590,7 +3593,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //         zi = AccessController.doPrivileged(
     //                 new PrivilegedExceptionAction<>() {
     //                     @Override
-    //                     public ZoneInfo run() throws Exception {
+    //                     ZoneInfo run() throws Exception {
     //                         return (ZoneInfo) input.readObject();
     //                     }
     //                 },
@@ -3634,7 +3637,7 @@ public abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) 
     //  * @return the instant representing the same point on the time-line
     //  * @since 1.8
     //  */
-    // public const Instant toInstant() {
+    // const Instant toInstant() {
     //     return Instant.ofEpochMilli(getTimeInMillis());
     // }
 }
