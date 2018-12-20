@@ -29,9 +29,9 @@ void main()
 
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LinkedBlockingQueueTest);
-	testUnits!(MimeTypeTest);
+	// testUnits!(MimeTypeTest);
 	// testUnits!(ThreadPoolExecutorTest);
-	// testUnits!(ThreadTest);
+	testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
