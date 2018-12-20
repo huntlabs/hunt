@@ -35,7 +35,7 @@
 
 module hunt.concurrent.FutureTask;
 
-import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.Executors;
 import hunt.concurrent.Future;
 import hunt.concurrent.thread;

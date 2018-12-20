@@ -35,7 +35,7 @@
 
 module hunt.concurrent.ThreadFactory;
 
-import hunt.concurrent.AtomicHelper;
+import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.thread.ThreadEx;
 import hunt.concurrent.thread.ThreadGroupEx;
 
