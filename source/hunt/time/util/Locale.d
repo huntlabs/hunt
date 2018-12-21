@@ -5,6 +5,7 @@ import hunt.lang.exception;
 import hunt.lang.common;
 import hunt.io.common;
 import hunt.container;
+import hunt.time.util.LocaleExtensions;
 // import java.text.MessageFormat;
 // import java.util.concurrent.ConcurrentHashMap;
 // import java.util.spi.LocaleNameProvider;
@@ -313,7 +314,7 @@ import hunt.container;
  * the language suitable for displaying to the user. Interestingly,
  * the <code>getDisplayXXX</code> methods are themselves locale-sensitive
  * and have two versions: one that uses the default
- * {@link Locale.Category#DISPLAY DISPLAY} locale and one
+ * {@link LocaleCategory#DISPLAY DISPLAY} locale and one
  * that uses the locale specified as an argument.
  *
  * <p>The Java Platform provides a number of classes that perform locale-sensitive
@@ -332,7 +333,7 @@ import hunt.container;
  * </blockquote>
  * Each of these methods has two variants; one with an explicit locale
  * and one without; the latter uses the default
- * {@link Locale.Category#FORMAT FORMAT} locale:
+ * {@link LocaleCategory#FORMAT FORMAT} locale:
  * <blockquote>
  * <pre>
  *     NumberFormat.getInstance(myLocale)
@@ -442,95 +443,95 @@ import hunt.container;
  * @author Mark Davis
  * @since 1.1
  */
-public final class Locale : Cloneable, Serializable
+final class Locale : Cloneable, Serializable
 {
 
     // private static final  Cache LOCALECACHE = new Cache();
 
     /** Useful constant for language.
      */
-    public __gshared Locale ENGLISH;
+    __gshared Locale ENGLISH;
 
     /** Useful constant for language.
      */
-    public __gshared Locale FRENCH ;
+    __gshared Locale FRENCH ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale GERMAN ;
+    __gshared Locale GERMAN ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale ITALIAN ;
+    __gshared Locale ITALIAN ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale JAPANESE ;
+    __gshared Locale JAPANESE ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale KOREAN ;
+    __gshared Locale KOREAN ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale CHINESE ;
+    __gshared Locale CHINESE ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale SIMPLIFIED_CHINESE ;
+    __gshared Locale SIMPLIFIED_CHINESE ;
 
     /** Useful constant for language.
      */
-    public __gshared Locale TRADITIONAL_CHINESE ;
+    __gshared Locale TRADITIONAL_CHINESE ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale FRANCE ;
+    __gshared Locale FRANCE ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale GERMANY ;
+    __gshared Locale GERMANY ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale ITALY ;
+    __gshared Locale ITALY ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale JAPAN ;
+    __gshared Locale JAPAN ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale KOREA ;
+    __gshared Locale KOREA ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale CHINA ;
+    __gshared Locale CHINA ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale PRC ;
+    __gshared Locale PRC ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale TAIWAN ;
+    __gshared Locale TAIWAN ;
 
 
     /** Useful constant for country.
      */
-    public __gshared Locale UK ;
+    __gshared Locale UK ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale US ;
+    __gshared Locale US ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale CANADA ;
+    __gshared Locale CANADA ;
 
     /** Useful constant for country.
      */
-    public __gshared Locale CANADA_FRENCH ;
+    __gshared Locale CANADA_FRENCH ;
 
     /**
      * Useful constant for the root locale.  The root locale is the locale whose
@@ -540,7 +541,7 @@ public final class Locale : Cloneable, Serializable
      *
      * @since 1.6
      */
-    public __gshared Locale ROOT ;
+    __gshared Locale ROOT ;
 
     /**
      * The key for the private use extension ('x').
@@ -549,7 +550,7 @@ public final class Locale : Cloneable, Serializable
      * @see Builder#setExtension(char, string)
      * @since 1.7
      */
-    public enum char PRIVATE_USE_EXTENSION = 'x';
+    enum char PRIVATE_USE_EXTENSION = 'x';
 
     /**
      * The key for Unicode locale extension ('u').
@@ -558,11 +559,8 @@ public final class Locale : Cloneable, Serializable
      * @see Builder#setExtension(char, string)
      * @since 1.7
      */
-    public enum char UNICODE_LOCALE_EXTENSION = 'u';
+    enum char UNICODE_LOCALE_EXTENSION = 'u';
 
-    /** serialization ID
-     */
-    enum long serialVersionUID = 9149081749638150636L;
 
     shared static this()
     {
@@ -661,7 +659,8 @@ public final class Locale : Cloneable, Serializable
         CHINA = SIMPLIFIED_CHINESE;
         PRC = SIMPLIFIED_CHINESE;
         TAIWAN = TRADITIONAL_CHINESE;
-        
+
+        defaultLocale = initDefault();
     }
 
     /**
@@ -672,7 +671,7 @@ public final class Locale : Cloneable, Serializable
      * @see #getISOCountries(Locale.IsoCountryCode)
      * @since 9
      */
-    public static class IsoCountryCode
+    static class IsoCountryCode
     {
         /**
          * PART1_ALPHA2 is used to represent the ISO3166-1 alpha-2 two letter
@@ -796,7 +795,7 @@ public final class Locale : Cloneable, Serializable
      * See the <code>Locale</code> class description for the details.
      * @exception NullPointerException thrown if any argument is null.
      */
-    public this(string language, string country, string variant)
+    this(string language, string country, string variant)
     {
         if (language is null || country is null || variant is null)
         {
@@ -828,7 +827,7 @@ public final class Locale : Cloneable, Serializable
      * See the <code>Locale</code> class description about valid country values.
      * @exception NullPointerException thrown if either argument is null.
      */
-    public this(string language, string country)
+    this(string language, string country)
     {
         this(language, country, "");
     }
@@ -853,7 +852,7 @@ public final class Locale : Cloneable, Serializable
      * @exception NullPointerException thrown if argument is null.
      * @since 1.4
      */
-    public this(string language)
+    this(string language)
     {
         this(language, "", "");
     }
@@ -883,23 +882,25 @@ public final class Locale : Cloneable, Serializable
      * @return the <code>Locale</code> instance requested
      * @exception NullPointerException if any argument is null.
      */
-    // static Locale getInstance(string language, string country, string variant) {
-    //     return getInstance(language, "", country, variant, null);
-    // }
+    static Locale getInstance(string language, string country, string variant) {
+        return getInstance(language, "", country, variant, null);
+    }
 
-    // static Locale getInstance(string language, string script, string country,
-    //                                   string variant, LocaleExtensions extensions) {
-    //     if (languageis null || script is null || country is null || variant is null) {
-    //         throw new NullPointerException();
-    //     }
+    static Locale getInstance(string language, string script, string country,
+                                      string variant, LocaleExtensions extensions) {
+        if (language is null || script is null || country is null || variant is null) {
+            throw new NullPointerException();
+        }
 
-    //     if (extensions is null) {
-    //         extensions = getCompatibilityExtensions(language, script, country, variant);
-    //     }
+        // if (extensions is null) {
+        //     extensions = getCompatibilityExtensions(language, script, country, variant);
+        // }
 
-    //     BaseLocale baseloc = BaseLocale.getInstance(language, script, country, variant);
-    //     return getInstance(baseloc, extensions);
-    // }
+        implementationMissing(false);
+        return null;
+        // BaseLocale baseloc = BaseLocale.getInstance(language, script, country, variant);
+        // return getInstance(baseloc, extensions);
+    }
 
     // static Locale getInstance(BaseLocale baseloc, LocaleExtensions extensions) {
     //     if (extensions is null) {
@@ -943,7 +944,7 @@ public final class Locale : Cloneable, Serializable
     //     }
 
     //     override
-    //     public boolean equals(Object obj) {
+    //     boolean equals(Object obj) {
     //         if (this is obj) {
     //             return true;
     //         }
@@ -961,7 +962,7 @@ public final class Locale : Cloneable, Serializable
     //     }
 
     //     override
-    //     public int hashCode() {
+    //     int hashCode() {
     //         return hash;
     //     }
     // }
@@ -978,12 +979,10 @@ public final class Locale : Cloneable, Serializable
      *
      * @return the default locale for this instance of the Java Virtual Machine
      */
-    public static Locale getDefault()
+    static Locale getDefault()
     {
         // do not synchronize this method - see 4071298
-        // return defaultLocale;
-        implementationMissing();
-        return null;
+        return defaultLocale;
     }
 
     /**
@@ -993,85 +992,95 @@ public final class Locale : Cloneable, Serializable
      * The Java Virtual Machine sets the default locale during startup based
      * on the host environment. It is used by many locale-sensitive methods
      * if no locale is explicitly specified. It can be changed using the
-     * setDefault(Locale.Category, Locale) method.
+     * setDefault(LocaleCategory, Locale) method.
      *
      * @param category - the specified category to get the default locale
      * @throws NullPointerException if category is null
      * @return the default locale for the specified Category for this instance
      *     of the Java Virtual Machine
-     * @see #setDefault(Locale.Category, Locale)
+     * @see #setDefault(LocaleCategory, Locale)
      * @since 1.7
      */
-    // public static Locale getDefault(Locale.Category category) {
-    //     // do not synchronize this method - see 4071298
-    //     switch (category) {
-    //     case DISPLAY:
-    //         if (defaultDisplayLocale is null) {
-    //             synchronized(Locale.class) {
-    //                 if (defaultDisplayLocale is null) {
-    //                     defaultDisplayLocale = initDefault(category);
-    //                 }
-    //             }
-    //         }
-    //         return defaultDisplayLocale;
-    //     case FORMAT:
-    //         if (defaultFormatLocale is null) {
-    //             synchronized(Locale.class) {
-    //                 if (defaultFormatLocale is null) {
-    //                     defaultFormatLocale = initDefault(category);
-    //                 }
-    //             }
-    //         }
-    //         return defaultFormatLocale;
-    //     default:
-    //         assert false: "Unknown Category";
-    //     }
-    //     return getDefault();
-    // }
+    static Locale getDefault(LocaleCategory category) {
+        // do not synchronize this method - see 4071298
+        if(category == LocaleCategory.DISPLAY) {
+            if (defaultDisplayLocale is null) {
+                synchronized {
+                    if (defaultDisplayLocale is null) {
+                        defaultDisplayLocale = initDefault(category);
+                    }
+                }
+            }
+            return defaultDisplayLocale;
+        } else if(category == LocaleCategory.FORMAT) {
+            if (defaultFormatLocale is null) {
+                synchronized {
+                    if (defaultFormatLocale is null) {
+                        defaultFormatLocale = initDefault(category);
+                    }
+                }
+            }
+            return defaultFormatLocale;
+        } else {
+            assert(false, "Unknown Category");
+        }
+        // return getDefault();
+    }
 
-    // private static Locale initDefault() {
-    //     string language, region, script, country, variant;
-    //     Properties props = GetPropertyAction.privilegedGetProperties();
-    //     language = props.getProperty("user.language", "en");
-    //     // for compatibility, check for old user.region property
-    //     region = props.getProperty("user.region");
-    //     if (region !is null) {
-    //         // region can be of form country, country_variant, or _variant
-    //         int i = region.indexOf('_');
-    //         if (i >= 0) {
-    //             country = region.substring(0, i);
-    //             variant = region.substring(i + 1);
-    //         } else {
-    //             country = region;
-    //             variant = "";
-    //         }
-    //         script = "";
-    //     } else {
-    //         script = props.getProperty("user.script", "");
-    //         country = props.getProperty("user.country", "");
-    //         variant = props.getProperty("user.variant", "");
-    //     }
+    private static Locale initDefault() {
+        string language = "en";
+        string region = "";
+        string script = "";
+        string country = "";
+        string variant = "";
 
-    //     return getInstance(language, script, country, variant,
-    //             getDefaultExtensions(props.getProperty("user.extensions", ""))
-    //                 .orElse(null));
-    // }
+        return getInstance(language, script, country, variant, null);
 
-    // private static Locale initDefault(Locale.Category category) {
-    //     Properties props = GetPropertyAction.privilegedGetProperties();
+      //   Properties props = GetPropertyAction.privilegedGetProperties();
+      //   language = props.getProperty("user.language", "en");
+      //   // for compatibility, check for old user.region property
+      //   region = props.getProperty("user.region");
+      //   if (region !is null) {
+      //       // region can be of form country, country_variant, or _variant
+      //       int i = region.indexOf('_');
+      //       if (i >= 0) {
+      //           country = region.substring(0, i);
+      //           variant = region.substring(i + 1);
+      //       } else {
+      //           country = region;
+      //           variant = "";
+      //       }
+      //       script = "";
+      //   } else {
+      //       script = props.getProperty("user.script", "");
+      //       country = props.getProperty("user.country", "");
+      //       variant = props.getProperty("user.variant", "");
+      //   }
 
-    //     return getInstance(
-    //         props.getProperty(category.languageKey,
-    //                 defaultLocale.getLanguage()),
-    //         props.getProperty(category.scriptKey,
-    //                 defaultLocale.getScript()),
-    //         props.getProperty(category.countryKey,
-    //                 defaultLocale.getCountry()),
-    //         props.getProperty(category.variantKey,
-    //                 defaultLocale.getVariant()),
-    //         getDefaultExtensions(props.getProperty(category.extensionsKey, ""))
-    //             .orElse(defaultLocale.getLocaleExtensions()));
-    // }
+      //   return getInstance(language, script, country, variant,
+      //           getDefaultExtensions(props.getProperty("user.extensions", ""))
+      //               .orElse(null));
+    }
+
+    private static Locale initDefault(LocaleCategory category) {
+        // TODO: Tasks pending completion -@zxp at 12/20/2018, 8:47:02 PM
+        // 
+        implementationMissing(false);
+        return null;
+        // Properties props = GetPropertyAction.privilegedGetProperties();
+
+        // return getInstance(
+        //     props.getProperty(category.languageKey,
+        //             defaultLocale.getLanguage()),
+        //     props.getProperty(category.scriptKey,
+        //             defaultLocale.getScript()),
+        //     props.getProperty(category.countryKey,
+        //             defaultLocale.getCountry()),
+        //     props.getProperty(category.variantKey,
+        //             defaultLocale.getVariant()),
+        //     getDefaultExtensions(props.getProperty(category.extensionsKey, ""))
+        //         .orElse(defaultLocale.getLocaleExtensions()));
+    }
 
     // private static Optional<LocaleExtensions> getDefaultExtensions(string extensionsProp) {
     //     LocaleExtensions exts = null;
@@ -1115,7 +1124,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see SecurityManager#checkPermission
     //  * @see java.util.PropertyPermission
     //  */
-    // public static synchronized void setDefault(Locale newLocale) {
+    // static synchronized void setDefault(Locale newLocale) {
     //     setDefault(Category.DISPLAY, newLocale);
     //     setDefault(Category.FORMAT, newLocale);
     //     defaultLocale = newLocale;
@@ -1145,10 +1154,10 @@ public final class Locale : Cloneable, Serializable
     //  * @throws NullPointerException if category and/or newLocale is null
     //  * @see SecurityManager#checkPermission(java.security.Permission)
     //  * @see PropertyPermission
-    //  * @see #getDefault(Locale.Category)
+    //  * @see #getDefault(LocaleCategory)
     //  * @since 1.7
     //  */
-    // public static synchronized void setDefault(Locale.Category category,
+    // static synchronized void setDefault(LocaleCategory category,
     //     Locale newLocale) {
     //     if (category is null)
     //         throw new NullPointerException("Category cannot be NULL");
@@ -1180,7 +1189,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @return An array of installed locales.
     //  */
-    // public static Locale[] getAvailableLocales() {
+    // static Locale[] getAvailableLocales() {
     //     return LocaleServiceProviderPool.getAllAvailableLocales();
     // }
 
@@ -1201,7 +1210,7 @@ public final class Locale : Cloneable, Serializable
     //  * {@code type}  {@link IsoCountryCode#PART3}.
     //  * @return An array of ISO 3166 two-letter country codes.
     //  */
-    // public static string[] getISOCountries() {
+    // static string[] getISOCountries() {
     //     if (isoCountries is null) {
     //         isoCountries = getISO2Table(LocaleISOData.isoCountryTable);
     //     }
@@ -1219,7 +1228,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return a {@code Set} of ISO country codes for the specified type.
     //  * @since 9
     //  */
-    // public static Set!(string) getISOCountries(IsoCountryCode type) {
+    // static Set!(string) getISOCountries(IsoCountryCode type) {
     //     assert(type);
     //     return IsoCountryCode.retrieveISOCountryCodes(type);
     // }
@@ -1240,7 +1249,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @return An array of ISO 639 two-letter language codes.
     //  */
-    // public static string[] getISOLanguages() {
+    // static string[] getISOLanguages() {
     //     if (isoLanguages is null) {
     //         isoLanguages = getISO2Table(LocaleISOData.isoLanguageTable);
     //     }
@@ -1277,7 +1286,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The language code, or the empty string if none is defined.
     //  * @see #getDisplayLanguage
     //  */
-    // public string getLanguage() {
+    // string getLanguage() {
     //     return baseLocale.getLanguage();
     // }
 
@@ -1291,7 +1300,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see #getDisplayScript
     //  * @since 1.7
     //  */
-    // public string getScript() {
+    // string getScript() {
     //     return baseLocale.getScript();
     // }
 
@@ -1303,7 +1312,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The country/region code, or the empty string if none is defined.
     //  * @see #getDisplayCountry
     //  */
-    // public string getCountry() {
+    // string getCountry() {
     //     return baseLocale.getRegion();
     // }
 
@@ -1313,7 +1322,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The variant code, or the empty string if none is defined.
     //  * @see #getDisplayVariant
     //  */
-    // public string getVariant() {
+    // string getVariant() {
     //     return baseLocale.getVariant();
     // }
 
@@ -1324,7 +1333,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return {@code true} if this {@code Locale} has any extensions
     //  * @since 1.8
     //  */
-    // public boolean hasExtensions() {
+    // boolean hasExtensions() {
     //     return localeExtensions !is null;
     // }
 
@@ -1337,7 +1346,7 @@ public final class Locale : Cloneable, Serializable
     //  *         if {@code this} has no extensions
     //  * @since 1.8
     //  */
-    // public Locale stripExtensions() {
+    // Locale stripExtensions() {
     //     return hasExtensions() ? Locale.getInstance(baseLocale, null) : this;
     // }
 
@@ -1356,7 +1365,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see #UNICODE_LOCALE_EXTENSION
     //  * @since 1.7
     //  */
-    // public string getExtension(char key) {
+    // string getExtension(char key) {
     //     if (!LocaleExtensions.isValidKey(key)) {
     //         throw new IllegalArgumentException("Ill-formed extension key: " ~ key);
     //     }
@@ -1372,7 +1381,7 @@ public final class Locale : Cloneable, Serializable
     //  * no extensions.
     //  * @since 1.7
     //  */
-    // public Set<Character> getExtensionKeys() {
+    // Set<Character> getExtensionKeys() {
     //     if (!hasExtensions()) {
     //         return Collections.emptySet();
     //     }
@@ -1387,7 +1396,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The set of attributes.
     //  * @since 1.7
     //  */
-    // public Set!(string) getUnicodeLocaleAttributes() {
+    // Set!(string) getUnicodeLocaleAttributes() {
     //     if (!hasExtensions()) {
     //         return Collections.emptySet();
     //     }
@@ -1408,7 +1417,7 @@ public final class Locale : Cloneable, Serializable
     //  * @throws NullPointerException if <code>key</code> is null
     //  * @since 1.7
     //  */
-    public string getUnicodeLocaleType(string key) {
+    string getUnicodeLocaleType(string key) {
         /* if (!isUnicodeExtensionKey(key)) {
             throw new IllegalArgumentException("Ill-formed Unicode locale key: " ~ key);
         }
@@ -1424,7 +1433,7 @@ public final class Locale : Cloneable, Serializable
     //  * no Unicode locale keywords.
     //  * @since 1.7
     //  */
-    // public Set!(string) getUnicodeLocaleKeys() {
+    // Set!(string) getUnicodeLocaleKeys() {
     //     if (localeExtensions is null) {
     //         return Collections.emptySet();
     //     }
@@ -1493,7 +1502,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see #toLanguageTag
     //  */
     // override
-    // public final string tostring() {
+    // final string tostring() {
     //     boolean l = (baseLocale.getLanguage().length() != 0);
     //     boolean s = (baseLocale.getScript().length() != 0);
     //     boolean r = (baseLocale.getRegion().length() != 0);
@@ -1593,7 +1602,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see #forLanguageTag(string)
     //  * @since 1.7
     //  */
-    // public string toLanguageTag() {
+    // string toLanguageTag() {
     //     if (languageTag !is null) {
     //         return languageTag;
     //     }
@@ -1776,7 +1785,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see java.util.Locale.Builder#setLanguageTag(string)
     //  * @since 1.7
     //  */
-    // public static Locale forLanguageTag(string languageTag) {
+    // static Locale forLanguageTag(string languageTag) {
     //     LanguageTag tag = LanguageTag.parse(languageTag, null);
     //     InternalLocaleBuilder bldr = new InternalLocaleBuilder();
     //     bldr.setLanguageTag(tag);
@@ -1803,7 +1812,7 @@ public final class Locale : Cloneable, Serializable
     //  * @exception MissingResourceException Throws MissingResourceException if
     //  * three-letter language abbreviation is not available for this locale.
     //  */
-    // public string getISO3Language() throws MissingResourceException {
+    // string getISO3Language() throws MissingResourceException {
     //     string lang = baseLocale.getLanguage();
     //     if (lang.length() == 3) {
     //         return lang;
@@ -1830,7 +1839,7 @@ public final class Locale : Cloneable, Serializable
     //  * @exception MissingResourceException Throws MissingResourceException if the
     //  * three-letter country abbreviation is not available for this locale.
     //  */
-    // public string getISO3Country() throws MissingResourceException {
+    // string getISO3Country() throws MissingResourceException {
     //     string country3 = getISO3Code(baseLocale.getRegion(), LocaleISOData.isoCountryTable);
     //     if (country3 is null) {
     //         throw new MissingResourceException("Couldn't find 3-letter country code for "
@@ -1864,21 +1873,21 @@ public final class Locale : Cloneable, Serializable
     //  * Returns a name for the locale's language that is appropriate for display to the
     //  * user.
     //  * If possible, the name returned will be localized for the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale.
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale.
     //  * For example, if the locale is fr_FR and the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale
     //  * is en_US, getDisplayLanguage() will return "French"; if the locale is en_US and
-    //  * the default {@link Locale.Category#DISPLAY DISPLAY} locale is fr_FR,
+    //  * the default {@link LocaleCategory#DISPLAY DISPLAY} locale is fr_FR,
     //  * getDisplayLanguage() will return "anglais".
     //  * If the name returned cannot be localized for the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale,
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale,
     //  * (say, we don't have a Japanese name for Croatian),
     //  * this function falls back on the English name, and uses the ISO code as a last-resort
     //  * value.  If the locale doesn't specify a language, this function returns the empty string.
     //  *
     //  * @return The name of the display language.
     //  */
-    // public final string getDisplayLanguage() {
+    // final string getDisplayLanguage() {
     //     return getDisplayLanguage(getDefault(Category.DISPLAY));
     // }
 
@@ -1899,21 +1908,21 @@ public final class Locale : Cloneable, Serializable
     //  * @return The name of the display language appropriate to the given locale.
     //  * @exception NullPointerException if <code>inLocale</code> is <code>null</code>
     //  */
-    // public string getDisplayLanguage(Locale inLocale) {
+    // string getDisplayLanguage(Locale inLocale) {
     //     return getDisplaystring(baseLocale.getLanguage(), null, inLocale, DISPLAY_LANGUAGE);
     // }
 
     // /**
     //  * Returns a name for the locale's script that is appropriate for display to
     //  * the user. If possible, the name will be localized for the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale.  Returns
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale.  Returns
     //  * the empty string if this locale doesn't specify a script code.
     //  *
     //  * @return the display name of the script code for the current default
-    //  *     {@link Locale.Category#DISPLAY DISPLAY} locale
+    //  *     {@link LocaleCategory#DISPLAY DISPLAY} locale
     //  * @since 1.7
     //  */
-    // public string getDisplayScript() {
+    // string getDisplayScript() {
     //     return getDisplayScript(getDefault(Category.DISPLAY));
     // }
 
@@ -1925,11 +1934,11 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @param inLocale The locale for which to retrieve the display script.
     //  * @return the display name of the script code for the current default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale
     //  * @throws NullPointerException if <code>inLocale</code> is <code>null</code>
     //  * @since 1.7
     //  */
-    // public string getDisplayScript(Locale inLocale) {
+    // string getDisplayScript(Locale inLocale) {
     //     return getDisplaystring(baseLocale.getScript(), null, inLocale, DISPLAY_SCRIPT);
     // }
 
@@ -1937,21 +1946,21 @@ public final class Locale : Cloneable, Serializable
     //  * Returns a name for the locale's country that is appropriate for display to the
     //  * user.
     //  * If possible, the name returned will be localized for the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale.
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale.
     //  * For example, if the locale is fr_FR and the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale
     //  * is en_US, getDisplayCountry() will return "France"; if the locale is en_US and
-    //  * the default {@link Locale.Category#DISPLAY DISPLAY} locale is fr_FR,
+    //  * the default {@link LocaleCategory#DISPLAY DISPLAY} locale is fr_FR,
     //  * getDisplayCountry() will return "Etats-Unis".
     //  * If the name returned cannot be localized for the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale,
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale,
     //  * (say, we don't have a Japanese name for Croatia),
     //  * this function falls back on the English name, and uses the ISO code as a last-resort
     //  * value.  If the locale doesn't specify a country, this function returns the empty string.
     //  *
     //  * @return The name of the country appropriate to the locale.
     //  */
-    // public final string getDisplayCountry() {
+    // final string getDisplayCountry() {
     //     return getDisplayCountry(getDefault(Category.DISPLAY));
     // }
 
@@ -1972,7 +1981,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The name of the country appropriate to the given locale.
     //  * @exception NullPointerException if <code>inLocale</code> is <code>null</code>
     //  */
-    // public string getDisplayCountry(Locale inLocale) {
+    // string getDisplayCountry(Locale inLocale) {
     //     return getDisplaystring(baseLocale.getRegion(), null, inLocale, DISPLAY_COUNTRY);
     // }
 
@@ -1996,12 +2005,12 @@ public final class Locale : Cloneable, Serializable
     // /**
     //  * Returns a name for the locale's variant code that is appropriate for display to the
     //  * user.  If possible, the name will be localized for the default
-    //  * {@link Locale.Category#DISPLAY DISPLAY} locale.  If the locale
+    //  * {@link LocaleCategory#DISPLAY DISPLAY} locale.  If the locale
     //  * doesn't specify a variant code, this function returns the empty string.
     //  *
     //  * @return The name of the display variant code appropriate to the locale.
     //  */
-    // public final string getDisplayVariant() {
+    // final string getDisplayVariant() {
     //     return getDisplayVariant(getDefault(Category.DISPLAY));
     // }
 
@@ -2014,7 +2023,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The name of the display variant code appropriate to the given locale.
     //  * @exception NullPointerException if <code>inLocale</code> is <code>null</code>
     //  */
-    // public string getDisplayVariant(Locale inLocale) {
+    // string getDisplayVariant(Locale inLocale) {
     //     if (baseLocale.getVariant().length() == 0)
     //         return "";
 
@@ -2051,7 +2060,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @return The name of the locale appropriate to display.
     //  */
-    // public final string getDisplayName() {
+    // final string getDisplayName() {
     //     return getDisplayName(getDefault(Category.DISPLAY));
     // }
 
@@ -2079,7 +2088,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return The name of the locale appropriate to display.
     //  * @throws NullPointerException if <code>inLocale</code> is <code>null</code>
     //  */
-    // public string getDisplayName(Locale inLocale) {
+    // string getDisplayName(Locale inLocale) {
     //     LocaleResources lr =  LocaleProviderAdapter
     //         .getResourceBundleBased()
     //         .getLocaleResources(inLocale);
@@ -2179,7 +2188,7 @@ public final class Locale : Cloneable, Serializable
     //  * Overrides Cloneable.
     //  */
     // override
-    // public Object clone()
+    // Object clone()
     // {
     //     try {
     //         Locale that = (Locale)super.clone();
@@ -2195,7 +2204,7 @@ public final class Locale : Cloneable, Serializable
     //  * for speed.
     //  */
     // override
-    // public int hashCode() {
+    // int hashCode() {
     //     int hc = hashCodeValue;
     //     if (hc == 0) {
     //         hc = baseLocale.hashCode();
@@ -2217,7 +2226,7 @@ public final class Locale : Cloneable, Serializable
     //  * @return true if this Locale is equal to the specified object.
     //  */
     // override
-    // public boolean equals(Object obj) {
+    // boolean equals(Object obj) {
     //     if (this is obj)                      // quick check
     //         return true;
     //     if (!(obj instanceof Locale))
@@ -2234,19 +2243,19 @@ public final class Locale : Cloneable, Serializable
 
     // // ================= privates =====================================
 
-    // private transient BaseLocale baseLocale;
-    // private transient LocaleExtensions localeExtensions;
+    // private BaseLocale baseLocale;
+    // private LocaleExtensions localeExtensions;
 
-    // /**
-    //  * Calculated hashcode
-    //  */
-    // private transient volatile int hashCodeValue;
+    /**
+     * Calculated hashcode
+     */
+    private int hashCodeValue;
 
-    // private static volatile Locale defaultLocale = initDefault();
-    // private static volatile Locale defaultDisplayLocale;
-    // private static volatile Locale defaultFormatLocale;
+    private __gshared Locale defaultLocale;
+    private __gshared Locale defaultDisplayLocale;
+    private __gshared Locale defaultFormatLocale;
 
-    // private transient volatile string languageTag;
+    private string languageTag;
 
     // /**
     //  * Return an array of the display names of the variant.
@@ -2439,9 +2448,9 @@ public final class Locale : Cloneable, Serializable
     //             baseLocale.getRegion(), baseLocale.getVariant(), localeExtensions);
     // }
 
-    // private static volatile string[] isoLanguages;
+    // private static string[] isoLanguages;
 
-    // private static volatile string[] isoCountries;
+    // private static string[] isoCountries;
 
     // private static string convertOldISOCodes(string language) {
     //     // we accept both the old and the new ISO codes for the languages whose ISO
@@ -2489,7 +2498,7 @@ public final class Locale : Cloneable, Serializable
     //     private static final LocaleNameGetter INSTANCE = new LocaleNameGetter();
 
     //     override
-    //     public string getObject(LocaleNameProvider localeNameProvider,
+    //     string getObject(LocaleNameProvider localeNameProvider,
     //                             Locale locale,
     //                             string key,
     //                             Object... params) {
@@ -2519,53 +2528,7 @@ public final class Locale : Cloneable, Serializable
     //     }
     // }
 
-    // /**
-    //  * Enum for locale categories.  These locale categories are used to get/set
-    //  * the default locale for the specific functionality represented by the
-    //  * category.
-    //  *
-    //  * @see #getDefault(Locale.Category)
-    //  * @see #setDefault(Locale.Category, Locale)
-    //  * @since 1.7
-    //  */
-    // public enum Category {
-
-    //     /**
-    //      * Category used to represent the default locale for
-    //      * displaying user interfaces.
-    //      */
-    //     DISPLAY("user.language.display",
-    //             "user.script.display",
-    //             "user.country.display",
-    //             "user.variant.display",
-    //             "user.extensions.display"),
-
-    //     /**
-    //      * Category used to represent the default locale for
-    //      * formatting dates, numbers, and/or currencies.
-    //      */
-    //     FORMAT("user.language.format",
-    //            "user.script.format",
-    //            "user.country.format",
-    //            "user.variant.format",
-    //            "user.extensions.format");
-
-    //     Category(string languageKey, string scriptKey, string countryKey,
-    //             string variantKey, string extensionsKey) {
-    //         this.languageKey = languageKey;
-    //         this.scriptKey = scriptKey;
-    //         this.countryKey = countryKey;
-    //         this.variantKey = variantKey;
-    //         this.extensionsKey = extensionsKey;
-    //     }
-
-    //     final string languageKey;
-    //     final string scriptKey;
-    //     final string countryKey;
-    //     final string variantKey;
-    //     final string extensionsKey;
-    // }
-
+    
     // /**
     //  * <code>Builder</code> is used to build instances of <code>Locale</code>
     //  * from values configured by the setters.  Unlike the <code>Locale</code>
@@ -2599,7 +2562,7 @@ public final class Locale : Cloneable, Serializable
     //  * @see Locale#forLanguageTag
     //  * @since 1.7
     //  */
-    // public static final class Builder {
+    // static final class Builder {
     //     private final InternalLocaleBuilder localeBuilder;
 
     //     /**
@@ -2607,7 +2570,7 @@ public final class Locale : Cloneable, Serializable
     //      * fields, extensions, and private use information is the
     //      * empty string.
     //      */
-    //     public Builder() {
+    //     Builder() {
     //         localeBuilder = new InternalLocaleBuilder();
     //     }
 
@@ -2631,7 +2594,7 @@ public final class Locale : Cloneable, Serializable
     //      * any ill-formed fields.
     //      * @throws NullPointerException if <code>locale</code> is null.
     //      */
-    //     public Builder setLocale(Locale locale) {
+    //     Builder setLocale(Locale locale) {
     //         try {
     //             localeBuilder.setLocale(locale.baseLocale, locale.localeExtensions);
     //         } catch (LocaleSyntaxException e) {
@@ -2657,7 +2620,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws IllformedLocaleException if <code>languageTag</code> is ill-formed
     //      * @see Locale#forLanguageTag(string)
     //      */
-    //     public Builder setLanguageTag(string languageTag) {
+    //     Builder setLanguageTag(string languageTag) {
     //         ParseStatus sts = new ParseStatus();
     //         LanguageTag tag = LanguageTag.parse(languageTag, sts);
     //         if (sts.isError()) {
@@ -2680,7 +2643,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return This builder.
     //      * @throws IllformedLocaleException if <code>language</code> is ill-formed
     //      */
-    //     public Builder setLanguage(string language) {
+    //     Builder setLanguage(string language) {
     //         try {
     //             localeBuilder.setLanguage(language);
     //         } catch (LocaleSyntaxException e) {
@@ -2701,7 +2664,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return This builder.
     //      * @throws IllformedLocaleException if <code>script</code> is ill-formed
     //      */
-    //     public Builder setScript(string script) {
+    //     Builder setScript(string script) {
     //         try {
     //             localeBuilder.setScript(script);
     //         } catch (LocaleSyntaxException e) {
@@ -2726,7 +2689,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return This builder.
     //      * @throws IllformedLocaleException if <code>region</code> is ill-formed
     //      */
-    //     public Builder setRegion(string region) {
+    //     Builder setRegion(string region) {
     //         try {
     //             localeBuilder.setRegion(region);
     //         } catch (LocaleSyntaxException e) {
@@ -2753,7 +2716,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return This builder.
     //      * @throws IllformedLocaleException if <code>variant</code> is ill-formed
     //      */
-    //     public Builder setVariant(string variant) {
+    //     Builder setVariant(string variant) {
     //         try {
     //             localeBuilder.setVariant(variant);
     //         } catch (LocaleSyntaxException e) {
@@ -2785,7 +2748,7 @@ public final class Locale : Cloneable, Serializable
     //      * or <code>value</code> is ill-formed
     //      * @see #setUnicodeLocaleKeyword(string, string)
     //      */
-    //     public Builder setExtension(char key, string value) {
+    //     Builder setExtension(char key, string value) {
     //         try {
     //             localeBuilder.setExtension(key, value);
     //         } catch (LocaleSyntaxException e) {
@@ -2815,7 +2778,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws NullPointerException if <code>key</code> is null
     //      * @see #setExtension(char, string)
     //      */
-    //     public Builder setUnicodeLocaleKeyword(string key, string type) {
+    //     Builder setUnicodeLocaleKeyword(string key, string type) {
     //         try {
     //             localeBuilder.setUnicodeLocaleKeyword(key, type);
     //         } catch (LocaleSyntaxException e) {
@@ -2836,7 +2799,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws IllformedLocaleException if <code>attribute</code> is ill-formed
     //      * @see #setExtension(char, string)
     //      */
-    //     public Builder addUnicodeLocaleAttribute(string attribute) {
+    //     Builder addUnicodeLocaleAttribute(string attribute) {
     //         try {
     //             localeBuilder.addUnicodeLocaleAttribute(attribute);
     //         } catch (LocaleSyntaxException e) {
@@ -2859,7 +2822,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws IllformedLocaleException if <code>attribute</code> is ill-formed
     //      * @see #setExtension(char, string)
     //      */
-    //     public Builder removeUnicodeLocaleAttribute(string attribute) {
+    //     Builder removeUnicodeLocaleAttribute(string attribute) {
     //         assert(attribute);
     //         try {
     //             localeBuilder.removeUnicodeLocaleAttribute(attribute);
@@ -2874,7 +2837,7 @@ public final class Locale : Cloneable, Serializable
     //      *
     //      * @return This builder.
     //      */
-    //     public Builder clear() {
+    //     Builder clear() {
     //         localeBuilder.clear();
     //         return this;
     //     }
@@ -2886,7 +2849,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return This builder.
     //      * @see #setExtension(char, string)
     //      */
-    //     public Builder clearExtensions() {
+    //     Builder clearExtensions() {
     //         localeBuilder.clearExtensions();
     //         return this;
     //     }
@@ -2901,7 +2864,7 @@ public final class Locale : Cloneable, Serializable
     //      *
     //      * @return A Locale.
     //      */
-    //     public Locale build() {
+    //     Locale build() {
     //         BaseLocale baseloc = localeBuilder.getBaseLocale();
     //         LocaleExtensions extensions = localeBuilder.getLocaleExtensions();
     //         if (extensions is null && baseloc.getVariant().length() > 0) {
@@ -3009,7 +2972,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static enum FilteringMode {
+    // static enum FilteringMode {
     //     /**
     //      * Specifies automatic filtering mode based on the given Language
     //      * Priority List consisting of language ranges. If all of the ranges
@@ -3082,24 +3045,24 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static final class LanguageRange {
+    // static final class LanguageRange {
 
     //    /**
     //     * A constant holding the maximum value of weight, 1.0, which indicates
     //     * that the language range is a good fit for the user.
     //     */
-    //     public static final double MAX_WEIGHT = 1.0;
+    //     static final double MAX_WEIGHT = 1.0;
 
     //    /**
     //     * A constant holding the minimum value of weight, 0.0, which indicates
     //     * that the language range is not a good fit for the user.
     //     */
-    //     public static final double MIN_WEIGHT = 0.0;
+    //     static final double MIN_WEIGHT = 0.0;
 
     //     private final string range;
     //     private final double weight;
 
-    //     private volatile int hash;
+    //     private int hash;
 
     //     /**
     //      * Constructs a {@code LanguageRange} using the given {@code range}.
@@ -3114,7 +3077,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws IllegalArgumentException if the given {@code range} does not
     //      * comply with the syntax of the language range mentioned in RFC 4647
     //      */
-    //     public LanguageRange(string range) {
+    //     LanguageRange(string range) {
     //         this(range, MAX_WEIGHT);
     //     }
 
@@ -3133,7 +3096,7 @@ public final class Locale : Cloneable, Serializable
     //      * or if the given {@code weight} is less than {@code MIN_WEIGHT}
     //      * or greater than {@code MAX_WEIGHT}
     //      */
-    //     public LanguageRange(string range, double weight) {
+    //     LanguageRange(string range, double weight) {
     //         if (range is null) {
     //             throw new NullPointerException();
     //         }
@@ -3194,7 +3157,7 @@ public final class Locale : Cloneable, Serializable
     //      *
     //      * @return the language range.
     //      */
-    //     public string getRange() {
+    //     string getRange() {
     //         return range;
     //     }
 
@@ -3203,7 +3166,7 @@ public final class Locale : Cloneable, Serializable
     //      *
     //      * @return the weight value.
     //      */
-    //     public double getWeight() {
+    //     double getWeight() {
     //         return weight;
     //     }
 
@@ -3272,7 +3235,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws IllegalArgumentException if a language range or a weight
     //      *     found in the given {@code ranges} is ill-formed
     //      */
-    //     public static List<LanguageRange> parse(string ranges) {
+    //     static List<LanguageRange> parse(string ranges) {
     //         return LocaleMatcher.parse(ranges);
     //     }
 
@@ -3295,7 +3258,7 @@ public final class Locale : Cloneable, Serializable
     //      * @see #parse(string)
     //      * @see #mapEquivalents
     //      */
-    //     public static List<LanguageRange> parse(string ranges,
+    //     static List<LanguageRange> parse(string ranges,
     //                                             Map<string, List<string>> map) {
     //         return mapEquivalents(parse(ranges), map);
     //     }
@@ -3347,7 +3310,7 @@ public final class Locale : Cloneable, Serializable
     //      * @throws NullPointerException if {@code priorityList} is {@code null}
     //      * @see #parse(string, Map)
     //      */
-    //     public static List<LanguageRange> mapEquivalents(
+    //     static List<LanguageRange> mapEquivalents(
     //                                           List<LanguageRange>priorityList,
     //                                           Map<string, List<string>> map) {
     //         return LocaleMatcher.mapEquivalents(priorityList, map);
@@ -3359,7 +3322,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return  a hash code value for this object.
     //      */
     //     override
-    //     public int hashCode() {
+    //     int hashCode() {
     //         int h = hash;
     //         if (h == 0) {
     //             h = 17;
@@ -3385,7 +3348,7 @@ public final class Locale : Cloneable, Serializable
     //      *     otherwise.
     //      */
     //     override
-    //     public boolean equals(Object obj) {
+    //     boolean equals(Object obj) {
     //         if (this is obj) {
     //             return true;
     //         }
@@ -3406,7 +3369,7 @@ public final class Locale : Cloneable, Serializable
     //      * @return a string representation of this {@code LanguageRange} object.
     //      */
     //     override
-    //     public string tostring() {
+    //     string tostring() {
     //         return (weight == MAX_WEIGHT) ? range : range ~ ";q=" ~ weight;
     //     }
     // }
@@ -3433,7 +3396,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static List<Locale> filter(List<LanguageRange> priorityList,
+    // static List<Locale> filter(List<LanguageRange> priorityList,
     //                                   Collection<Locale> locales,
     //                                   FilteringMode mode) {
     //     return LocaleMatcher.filter(priorityList, locales, mode);
@@ -3459,7 +3422,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static List<Locale> filter(List<LanguageRange> priorityList,
+    // static List<Locale> filter(List<LanguageRange> priorityList,
     //                                   Collection<Locale> locales) {
     //     return filter(priorityList, locales, FilteringMode.AUTOSELECT_FILTERING);
     // }
@@ -3494,7 +3457,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static List<string> filterTags(List<LanguageRange> priorityList,
+    // static List<string> filterTags(List<LanguageRange> priorityList,
     //                                       Collection<string> tags,
     //                                       FilteringMode mode) {
     //     return LocaleMatcher.filterTags(priorityList, tags, mode);
@@ -3528,7 +3491,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static List<string> filterTags(List<LanguageRange> priorityList,
+    // static List<string> filterTags(List<LanguageRange> priorityList,
     //                                       Collection<string> tags) {
     //     return filterTags(priorityList, tags, FilteringMode.AUTOSELECT_FILTERING);
     // }
@@ -3547,7 +3510,7 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static Locale lookup(List<LanguageRange> priorityList,
+    // static Locale lookup(List<LanguageRange> priorityList,
     //                             Collection<Locale> locales) {
     //     return LocaleMatcher.lookup(priorityList, locales);
     // }
@@ -3569,9 +3532,68 @@ public final class Locale : Cloneable, Serializable
     //  *
     //  * @since 1.8
     //  */
-    // public static string lookupTag(List<LanguageRange> priorityList,
+    // static string lookupTag(List<LanguageRange> priorityList,
     //                                Collection<string> tags) {
     //     return LocaleMatcher.lookupTag(priorityList, tags);
     // }
 
 }
+
+/**
+ * Enum for locale categories.  These locale categories are used to get/set
+ * the default locale for the specific functionality represented by the
+ * category.
+ *
+ * @see #getDefault(LocaleCategory)
+ * @see #setDefault(LocaleCategory, Locale)
+ * @since 1.7
+ */
+struct LocaleCategory {
+
+    /**
+     * Category used to represent the default locale for
+     * displaying user interfaces.
+     */
+   enum LocaleCategory DISPLAY = LocaleCategory("user.language.display",
+            "user.script.display",
+            "user.country.display",
+            "user.variant.display",
+            "user.extensions.display");
+
+    /**
+     * Category used to represent the default locale for
+     * formatting dates, numbers, and/or currencies.
+     */
+   enum LocaleCategory FORMAT = LocaleCategory("user.language.format",
+           "user.script.format",
+           "user.country.format",
+           "user.variant.format",
+           "user.extensions.format");
+
+    this(string languageKey, string scriptKey, string countryKey,
+            string variantKey, string extensionsKey) {
+        this.languageKey = languageKey;
+        this.scriptKey = scriptKey;
+        this.countryKey = countryKey;
+        this.variantKey = variantKey;
+        this.extensionsKey = extensionsKey;
+    }
+
+   string languageKey;
+   string scriptKey;
+   string countryKey;
+   string variantKey;
+   string extensionsKey;
+
+   //  bool opEquals(const LocaleCategory h) nothrow {
+   //      return this.languageKey == h.languageKey && 
+   //       // this.scriptKey == h.scriptKey &&
+   //       this.countryKey == h.countryKey;
+   //  }
+
+   //  bool opEquals(ref const LocaleCategory h) nothrow {
+   //      return this.languageKey == h.languageKey && 
+   //       // this.scriptKey == h.scriptKey &&
+   //       this.countryKey == h.countryKey;
+   //  }
+}    
