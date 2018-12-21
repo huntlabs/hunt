@@ -24,6 +24,8 @@ import hunt.time.util.common;
 // import sun.util.locale.provider.TimeZoneNameUtility;
 // import sun.util.spi.CalendarProvider;
 
+import std.datetime;
+
 /**
  * The <code>Calendar</code> class is an abstract class that provides methods
  * for converting between a specific instant in time and a set of {@link
@@ -976,9 +978,6 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
      */
     private int             serialVersionOnStream = currentSerialVersion;
 
-    // Proclaim serialization compatibility with JDK 1.1
-    enum long       serialVersionUID = -1807547505821590642L;
-
     // Mask values for calendar fields
     //@SuppressWarnings("PointlessBitwiseExpression")
     enum int ERA_MASK           = (1 << ERA);
@@ -1355,8 +1354,8 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     //     /**
     //      * Sets the locale parameter to the given {@code locale}. If no locale
     //      * is given to this {@code Calendar.Builder}, the {@linkplain
-    //      * Locale#getDefault(Locale.Category) default <code>Locale</code>}
-    //      * for {@link Locale.Category#FORMAT} will be used.
+    //      * Locale#getDefault(LocaleCategory) default <code>Locale</code>}
+    //      * for {@link LocaleCategory#FORMAT} will be used.
     //      *
     //      * <p>If no calendar type is explicitly given by a call to the
     //      * {@link #setCalendarType(String) setCalendarType} method,
@@ -1444,7 +1443,7 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     //      *             if a week date is given for the calendar type that doesn't
     //      *             support week dates.
     //      * @see Calendar#getInstance(TimeZone, Locale)
-    //      * @see Locale#getDefault(Locale.Category)
+    //      * @see Locale#getDefault(LocaleCategory)
     //      * @see TimeZone#getDefault()
     //      */
     //     Calendar build() {
@@ -1563,13 +1562,13 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
 
     /**
      * Constructs a Calendar with the default time zone
-     * and the default {@link java.util.Locale.Category#FORMAT FORMAT}
+     * and the default {@link java.util.LocaleCategory#FORMAT FORMAT}
      * locale.
      * @see     TimeZone#getDefault
      */
     // protected this()
     // {
-    //     this(TimeZone.getDefaultRef(), Locale.getDefault(Locale.Category.FORMAT));
+    //     this(TimeZone.getDefaultRef(), Locale.getDefault(LocaleCategory.FORMAT));
     //     sharedZone = true;
     // }
 
@@ -1593,7 +1592,7 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
      * Gets a calendar using the default time zone and locale. The
      * <code>Calendar</code> returned is based on the current time
      * in the default time zone with the default
-     * {@link Locale.Category#FORMAT FORMAT} locale.
+     * {@link LocaleCategory#FORMAT FORMAT} locale.
      * <p>
      * If the locale contains the time zone with "tz"
      * <a href="Locale.html#def_locale_extension">Unicode extension</a>,
@@ -1601,118 +1600,133 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
      *
      * @return a Calendar.
      */
-    // static Calendar getInstance()
-    // {
-    //     Locale aLocale = Locale.getDefault(Locale.Category.FORMAT);
-    //     return createCalendar(defaultTimeZone(aLocale), aLocale);
-    // }
+    static Calendar getInstance()
+    {
+        Locale aLocale = Locale.getDefault(LocaleCategory.FORMAT);
+        return createCalendar(defaultTimeZone(aLocale), aLocale);
+    }
 
-    // /**
-    //  * Gets a calendar using the specified time zone and default locale.
-    //  * The <code>Calendar</code> returned is based on the current time
-    //  * in the given time zone with the default
-    //  * {@link Locale.Category#FORMAT FORMAT} locale.
-    //  *
-    //  * @param zone the time zone to use
-    //  * @return a Calendar.
-    //  */
-    // static Calendar getInstance(TimeZone zone)
-    // {
-    //     return createCalendar(zone, Locale.getDefault(Locale.Category.FORMAT));
-    // }
+    /**
+     * Gets a calendar using the specified time zone and default locale.
+     * The <code>Calendar</code> returned is based on the current time
+     * in the given time zone with the default
+     * {@link LocaleCategory#FORMAT FORMAT} locale.
+     *
+     * @param zone the time zone to use
+     * @return a Calendar.
+     */
+    static Calendar getInstance(TimeZone zone)
+    {
+        return createCalendar(zone, Locale.getDefault(LocaleCategory.FORMAT));
+    }
 
-    // /**
-    //  * Gets a calendar using the default time zone and specified locale.
-    //  * The <code>Calendar</code> returned is based on the current time
-    //  * in the default time zone with the given locale.
-    //  * <p>
-    //  * If the locale contains the time zone with "tz"
-    //  * <a href="Locale.html#def_locale_extension">Unicode extension</a>,
-    //  * that time zone is used instead.
-    //  *
-    //  * @param aLocale the locale for the week data
-    //  * @return a Calendar.
-    //  */
-    // static Calendar getInstance(Locale aLocale)
-    // {
-    //     return createCalendar(defaultTimeZone(aLocale), aLocale);
-    // }
+    /**
+     * Gets a calendar using the default time zone and specified locale.
+     * The <code>Calendar</code> returned is based on the current time
+     * in the default time zone with the given locale.
+     * <p>
+     * If the locale contains the time zone with "tz"
+     * <a href="Locale.html#def_locale_extension">Unicode extension</a>,
+     * that time zone is used instead.
+     *
+     * @param aLocale the locale for the week data
+     * @return a Calendar.
+     */
+    static Calendar getInstance(Locale aLocale)
+    {
+        return createCalendar(defaultTimeZone(aLocale), aLocale);
+    }
 
-    // /**
-    //  * Gets a calendar with the specified time zone and locale.
-    //  * The <code>Calendar</code> returned is based on the current time
-    //  * in the given time zone with the given locale.
-    //  *
-    //  * @param zone the time zone to use
-    //  * @param aLocale the locale for the week data
-    //  * @return a Calendar.
-    //  */
-    // static Calendar getInstance(TimeZone zone,
-    //                                    Locale aLocale)
-    // {
-    //     return createCalendar(zone, aLocale);
-    // }
+    /**
+     * Gets a calendar with the specified time zone and locale.
+     * The <code>Calendar</code> returned is based on the current time
+     * in the given time zone with the given locale.
+     *
+     * @param zone the time zone to use
+     * @param aLocale the locale for the week data
+     * @return a Calendar.
+     */
+    static Calendar getInstance(TimeZone zone,
+                                       Locale aLocale)
+    {
+        return createCalendar(zone, aLocale);
+    }
 
-    // private static TimeZone defaultTimeZone(Locale l) {
-    //     TimeZone defaultTZ = TimeZone.getDefault();
-    //     String shortTZID = l.getUnicodeLocaleType("tz");
-    //     return shortTZID !is null ?
-    //         TimeZoneNameUtility.convertLDMLShortID(shortTZID)
-    //             .map(TimeZone::getTimeZone)
-    //             .orElse(defaultTZ) :
-    //         defaultTZ;
-    // }
+    private static TimeZone defaultTimeZone(Locale l) {
+        string tzId = System.getSystemTimeZone();
+        version(Posix) {
+            return cast(TimeZone)PosixTimeZone.getTimeZone(tzId);
+        } else version(Windows) {
+            return cast(TimeZone)WindowsTimeZone.getTimeZone(tzId);
+        } else {
+            return cast(TimeZone)LocalTime();
+        }
+        // TimeZone defaultTZ = TimeZone.getDefault();
+        // TODO: Tasks pending completion -@zxp at 12/20/2018, 7:53:18 PM
+        // 
+        // return defaultTZ;
+        // String shortTZID = l.getUnicodeLocaleType("tz");
+        // return shortTZID !is null ?
+        //     TimeZoneNameUtility.convertLDMLShortID(shortTZID)
+        //         .map(TimeZone::getTimeZone)
+        //         .orElse(defaultTZ) :
+        //     defaultTZ;
+    }
 
-    // private static Calendar createCalendar(TimeZone zone,
-    //                                        Locale aLocale)
-    // {
-    //     CalendarProvider provider =
-    //         LocaleProviderAdapter.getAdapter(CalendarProvider.class, aLocale)
-    //                              .getCalendarProvider();
-    //     if (provider !is null) {
-    //         try {
-    //             return provider.getInstance(zone, aLocale);
-    //         } catch (IllegalArgumentException iae) {
-    //             // fall back to the default instantiation
-    //         }
-    //     }
+    private static Calendar createCalendar(TimeZone zone,
+                                           Locale aLocale)
+    {
+        // CalendarProvider provider =
+        //     LocaleProviderAdapter.getAdapter(CalendarProvider.class, aLocale)
+        //                          .getCalendarProvider();
+        // if (provider !is null) {
+        //     try {
+        //         return provider.getInstance(zone, aLocale);
+        //     } catch (IllegalArgumentException iae) {
+        //         // fall back to the default instantiation
+        //     }
+        // }
 
-    //     Calendar cal = null;
+        // Calendar cal = new GregorianCalendar(zone, aLocale);
+        // return cal;
 
-    //     if (aLocale.hasExtensions()) {
-    //         String caltype = aLocale.getUnicodeLocaleType("ca");
-    //         if (caltype !is null) {
-    //             switch (caltype) {
-    //             case "buddhist":
-    //             cal = new BuddhistCalendar(zone, aLocale);
-    //                 break;
-    //             case "japanese":
-    //                 cal = new JapaneseImperialCalendar(zone, aLocale);
-    //                 break;
-    //             case "gregory":
-    //                 cal = new GregorianCalendar(zone, aLocale);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     if (cal is null) {
-    //         // If no known calendar type is explicitly specified,
-    //         // perform the traditional way to create a Calendar:
-    //         // create a BuddhistCalendar for th_TH locale,
-    //         // a JapaneseImperialCalendar for ja_JP_JP locale, or
-    //         // a GregorianCalendar for any other locales.
-    //         // NOTE: The language, country and variant strings are interned.
-    //         if (aLocale.getLanguage() == "th" && aLocale.getCountry() == "TH") {
-    //             cal = new BuddhistCalendar(zone, aLocale);
-    //         } else if (aLocale.getVariant() == "JP" && aLocale.getLanguage() == "ja"
-    //                    && aLocale.getCountry() == "JP") {
-    //             cal = new JapaneseImperialCalendar(zone, aLocale);
-    //         } else {
-    //             cal = new GregorianCalendar(zone, aLocale);
-    //         }
-    //     }
-    //     return cal;
-    // }
+        // if (aLocale.hasExtensions()) {
+        //     String caltype = aLocale.getUnicodeLocaleType("ca");
+        //     if (caltype !is null) {
+        //         switch (caltype) {
+        //         case "buddhist":
+        //         cal = new BuddhistCalendar(zone, aLocale);
+        //             break;
+        //         case "japanese":
+        //             cal = new JapaneseImperialCalendar(zone, aLocale);
+        //             break;
+        //         case "gregory":
+        //             cal = new GregorianCalendar(zone, aLocale);
+        //             break;
+        //         }
+        //     }
+        // }
+        // if (cal is null) {
+        //     // If no known calendar type is explicitly specified,
+        //     // perform the traditional way to create a Calendar:
+        //     // create a BuddhistCalendar for th_TH locale,
+        //     // a JapaneseImperialCalendar for ja_JP_JP locale, or
+        //     // a GregorianCalendar for any other locales.
+        //     // NOTE: The language, country and variant strings are interned.
+        //     if (aLocale.getLanguage() == "th" && aLocale.getCountry() == "TH") {
+        //         cal = new BuddhistCalendar(zone, aLocale);
+        //     } else if (aLocale.getVariant() == "JP" && aLocale.getLanguage() == "ja"
+        //                && aLocale.getCountry() == "JP") {
+        //         cal = new JapaneseImperialCalendar(zone, aLocale);
+        //     } else {
+        //         cal = new GregorianCalendar(zone, aLocale);
+        //     }
+        // }
+        // return cal;
+        
+        implementationMissing(false);
+        return null;
+    }
 
     // /**
     //  * Returns an array of all locales for which the <code>getInstance</code>

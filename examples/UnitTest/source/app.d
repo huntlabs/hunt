@@ -19,11 +19,13 @@ import core.thread;
 
 import hunt.concurrent.thread;
 import hunt.util.memory;
+import hunt.datetime;
 
 void main()
 {
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
+	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 	// testUnits!(BigIntegerTest);
 	// testTask();
 
@@ -31,7 +33,7 @@ void main()
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
 	// testUnits!(ThreadPoolExecutorTest);
-	testUnits!(ThreadTest);
+	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
