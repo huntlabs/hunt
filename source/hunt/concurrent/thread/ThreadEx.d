@@ -23,17 +23,140 @@ interface Interruptible {
     void interrupt(Thread t);
 }
 
+
+/**
+ * Interface for handlers invoked when a {@code Thread} abruptly
+ * terminates due to an uncaught exception.
+ * <p>When a thread is about to terminate due to an uncaught exception
+ * the Java Virtual Machine will query the thread for its
+ * {@code UncaughtExceptionHandler} using
+ * {@link #getUncaughtExceptionHandler} and will invoke the handler's
+ * {@code uncaughtException} method, passing the thread and the
+ * exception as arguments.
+ * If a thread has not had its {@code UncaughtExceptionHandler}
+ * explicitly set, then its {@code ThreadGroupEx} object acts as its
+ * {@code UncaughtExceptionHandler}. If the {@code ThreadGroupEx} object
+ * has no
+ * special requirements for dealing with the exception, it can forward
+ * the invocation to the {@linkplain #getDefaultUncaughtExceptionHandler
+ * default uncaught exception handler}.
+ *
+ * @see #setDefaultUncaughtExceptionHandler
+ * @see #setUncaughtExceptionHandler
+ * @see ThreadGroupEx#uncaughtException
+ * @since 1.5
+ */
+interface UncaughtExceptionHandler {
+    /**
+     * Method invoked when the given thread terminates due to the
+     * given uncaught exception.
+     * <p>Any exception thrown by this method will be ignored by the
+     * Java Virtual Machine.
+     * @param t the thread
+     * @param e the exception
+     */
+    void uncaughtException(Thread t, Throwable e);
+}
+
+
+/**
+ * A thread state.  A thread can be in one of the following states:
+ * <ul>
+ * <li>{@link #NEW}<br>
+ *     A thread that has not yet started is in this state.
+ *     </li>
+ * <li>{@link #RUNNABLE}<br>
+ *     A thread executing in the Java virtual machine is in this state.
+ *     </li>
+ * <li>{@link #BLOCKED}<br>
+ *     A thread that is blocked waiting for a monitor lock
+ *     is in this state.
+ *     </li>
+ * <li>{@link #WAITING}<br>
+ *     A thread that is waiting indefinitely for another thread to
+ *     perform a particular action is in this state.
+ *     </li>
+ * <li>{@link #TIMED_WAITING}<br>
+ *     A thread that is waiting for another thread to perform an action
+ *     for up to a specified waiting time is in this state.
+ *     </li>
+ * <li>{@link #TERMINATED}<br>
+ *     A thread that has exited is in this state.
+ *     </li>
+ * </ul>
+ *
+ * <p>
+ * A thread can be in only one state at a given point in time.
+ * These states are virtual machine states which do not reflect
+ * any operating system thread states.
+ *
+ * @since   1.5
+ * @see #getState
+ */
 enum ThreadState {
-    ALLOCATED,                    // Memory has been allocated but not initialized
-    INITIALIZED,                  // The thread has been initialized but yet started
-    RUNNABLE,                     // Has been started and is runnable, but not necessarily running
-    //   MONITOR_WAIT,                 // Waiting on a contended monitor lock
-    CONDVAR_WAIT,                 // Waiting on a condition variable
-    //   OBJECT_WAIT,                  // Waiting on an Object.wait() call
-    //   BREAKPOINTED,                 // Suspended at breakpoint
-    SLEEPING,                     // Thread.sleep()
-    ZOMBIE                        // All done, but not reclaimed yet
-    }
+    /**
+     * Thread state for a thread which has not yet started.
+     */
+    NEW,
+
+    /**
+     * Thread state for a runnable thread.  A thread in the runnable
+     * state is executing in the Java virtual machine but it may
+     * be waiting for other resources from the operating system
+     * such as processor.
+     */
+    RUNNABLE,
+
+    /**
+     * Thread state for a thread blocked waiting for a monitor lock.
+     * A thread in the blocked state is waiting for a monitor lock
+     * to enter a synchronized block/method or
+     * reenter a synchronized block/method after calling
+     * {@link Object#wait() Object.wait}.
+     */
+    BLOCKED,
+
+    /**
+     * Thread state for a waiting thread.
+     * A thread is in the waiting state due to calling one of the
+     * following methods:
+     * <ul>
+     *   <li>{@link Object#wait() Object.wait} with no timeout</li>
+     *   <li>{@link #join() Thread.join} with no timeout</li>
+     *   <li>{@link LockSupport#park() LockSupport.park}</li>
+     * </ul>
+     *
+     * <p>A thread in the waiting state is waiting for another thread to
+     * perform a particular action.
+     *
+     * For example, a thread that has called {@code Object.wait()}
+     * on an object is waiting for another thread to call
+     * {@code Object.notify()} or {@code Object.notifyAll()} on
+     * that object. A thread that has called {@code Thread.join()}
+     * is waiting for a specified thread to terminate.
+     */
+    WAITING,
+
+    /**
+     * Thread state for a waiting thread with a specified waiting time.
+     * A thread is in the timed waiting state due to calling one of
+     * the following methods with a specified positive waiting time:
+     * <ul>
+     *   <li>{@link #sleep Thread.sleep}</li>
+     *   <li>{@link Object#wait(long) Object.wait} with timeout</li>
+     *   <li>{@link #join(long) Thread.join} with timeout</li>
+     *   <li>{@link LockSupport#parkNanos LockSupport.parkNanos}</li>
+     *   <li>{@link LockSupport#parkUntil LockSupport.parkUntil}</li>
+     * </ul>
+     */
+    TIMED_WAITING,
+
+    /**
+     * Thread state for a terminated thread.
+     * The thread has completed execution.
+     */
+    TERMINATED
+}
 
 /**
 */
@@ -107,7 +230,7 @@ class ThreadEx : Thread {
     private void initialize() nothrow {
         _parker = Parker.allocate(this);
         blockerLock = new Object();
-        state = ThreadState.ALLOCATED;
+        state = ThreadState.NEW;
     }
 
     
@@ -118,7 +241,7 @@ class ThreadEx : Thread {
      *
      * @return  this thread's thread group.
      */
-    public final ThreadGroupEx getThreadGroup() {
+    final ThreadGroupEx getThreadGroup() {
         return group;
     }
 
@@ -139,6 +262,19 @@ class ThreadEx : Thread {
         return isRunning;
     }
 
+    /**
+     * Returns the state of this thread.
+     * This method is designed for use in monitoring of the system state,
+     * not for synchronization control.
+     *
+     * @return this thread's state.
+     * @since 1.5
+     */
+    ThreadState getState() {
+        // get current thread state
+        // return jdk.internal.misc.VM.toThreadState(threadStatus);
+        return state;
+    }
 
     /* Set the blocker field; invoked via sun.misc.SharedSecrets from java.nio code
      */
@@ -392,6 +528,104 @@ class ThreadEx : Thread {
         // return (_processor_count != 1); // AssumeMP || 
         return totalCPUs != 1;
     }
+
+    
+    
+    // null unless explicitly set
+    private UncaughtExceptionHandler uncaughtExceptionHandler;
+
+    // null unless explicitly set
+    private __gshared UncaughtExceptionHandler defaultUncaughtExceptionHandler;
+
+    /**
+     * Set the default handler invoked when a thread abruptly terminates
+     * due to an uncaught exception, and no other handler has been defined
+     * for that thread.
+     *
+     * <p>Uncaught exception handling is controlled first by the thread, then
+     * by the thread's {@link ThreadGroup} object and finally by the default
+     * uncaught exception handler. If the thread does not have an explicit
+     * uncaught exception handler set, and the thread's thread group
+     * (including parent thread groups)  does not specialize its
+     * {@code uncaughtException} method, then the default handler's
+     * {@code uncaughtException} method will be invoked.
+     * <p>By setting the default uncaught exception handler, an application
+     * can change the way in which uncaught exceptions are handled (such as
+     * logging to a specific device, or file) for those threads that would
+     * already accept whatever &quot;default&quot; behavior the system
+     * provided.
+     *
+     * <p>Note that the default uncaught exception handler should not usually
+     * defer to the thread's {@code ThreadGroup} object, as that could cause
+     * infinite recursion.
+     *
+     * @param eh the object to use as the default uncaught exception handler.
+     * If {@code null} then there is no default handler.
+     *
+     * @throws SecurityException if a security manager is present and it denies
+     *         {@link RuntimePermission}{@code ("setDefaultUncaughtExceptionHandler")}
+     *
+     * @see #setUncaughtExceptionHandler
+     * @see #getUncaughtExceptionHandler
+     * @see ThreadGroup#uncaughtException
+     * @since 1.5
+     */
+    static void setDefaultUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
+        // SecurityManager sm = System.getSecurityManager();
+        // if (sm != null) {
+        //     sm.checkPermission(
+        //         new RuntimePermission("setDefaultUncaughtExceptionHandler")
+        //             );
+        // }
+
+         defaultUncaughtExceptionHandler = eh;
+     }
+
+    /**
+     * Returns the default handler invoked when a thread abruptly terminates
+     * due to an uncaught exception. If the returned value is {@code null},
+     * there is no default.
+     * @since 1.5
+     * @see #setDefaultUncaughtExceptionHandler
+     * @return the default uncaught exception handler for all threads
+     */
+    static UncaughtExceptionHandler getDefaultUncaughtExceptionHandler(){
+        return defaultUncaughtExceptionHandler;
+    }
+
+    /**
+     * Returns the handler invoked when this thread abruptly terminates
+     * due to an uncaught exception. If this thread has not had an
+     * uncaught exception handler explicitly set then this thread's
+     * {@code ThreadGroup} object is returned, unless this thread
+     * has terminated, in which case {@code null} is returned.
+     * @since 1.5
+     * @return the uncaught exception handler for this thread
+     */
+    UncaughtExceptionHandler getUncaughtExceptionHandler() {
+        return uncaughtExceptionHandler !is null ?
+            uncaughtExceptionHandler : group;
+    }
+
+    /**
+     * Set the handler invoked when this thread abruptly terminates
+     * due to an uncaught exception.
+     * <p>A thread can take full control of how it responds to uncaught
+     * exceptions by having its uncaught exception handler explicitly set.
+     * If no such handler is set then the thread's {@code ThreadGroup}
+     * object acts as its handler.
+     * @param eh the object to use as this thread's uncaught exception
+     * handler. If {@code null} then this thread has no explicit handler.
+     * @throws  SecurityException  if the current thread is not allowed to
+     *          modify this thread.
+     * @see #setDefaultUncaughtExceptionHandler
+     * @see ThreadGroup#uncaughtException
+     * @since 1.5
+     */
+    void setUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
+        checkAccess();
+        uncaughtExceptionHandler = eh;
+    }
 }
 
 /*
@@ -614,7 +848,7 @@ class Parker {
  * and working off of that snapshot, rather than holding the thread group locked
  * while we work on the children.
  */
-class ThreadGroupEx  { //: Thread.UncaughtExceptionHandler
+class ThreadGroupEx : UncaughtExceptionHandler { 
     private ThreadGroupEx parent;
     string name;
     int maxPriority;
