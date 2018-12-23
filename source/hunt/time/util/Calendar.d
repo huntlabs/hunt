@@ -274,7 +274,7 @@ import std.datetime;
  * will intuitively expect.</p>
  *
  * @see          java.lang.System#currentTimeMillis()
- * @see          Date
+ * @see          LocalDateTime
  * @see          GregorianCalendar
  * @see          TimeZone
  * @see          java.text.DateFormat
@@ -1088,7 +1088,7 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     //      * @return this {@code Calendar.Builder}
     //      * @throws IllegalStateException if any of the field parameters have
     //      *                               already been set
-    //      * @see Calendar#setTime(Date)
+    //      * @see Calendar#setTime(LocalDateTime)
     //      * @see Calendar#setTimeInMillis(long)
     //      * @see Calendar#time
     //      */
@@ -1103,20 +1103,20 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
 
     //     /**
     //      * Sets the instant parameter to the {@code instant} value given by a
-    //      * {@link Date}. This method is equivalent to a call to
+    //      * {@link LocalDateTime}. This method is equivalent to a call to
     //      * {@link #setInstant(long) setInstant(instant.getTime())}.
     //      *
-    //      * @param instant a {@code Date} representing a millisecond offset from
+    //      * @param instant a {@code LocalDateTime} representing a millisecond offset from
     //      *                the Epoch
     //      * @return this {@code Calendar.Builder}
     //      * @throws NullPointerException  if {@code instant} is {@code null}
     //      * @throws IllegalStateException if any of the field parameters have
     //      *                               already been set
-    //      * @see Calendar#setTime(Date)
+    //      * @see Calendar#setTime(LocalDateTime)
     //      * @see Calendar#setTimeInMillis(long)
     //      * @see Calendar#time
     //      */
-    //     Builder setInstant(Date instant) {
+    //     Builder setInstant(LocalDateTime instant) {
     //         return setInstant(instant.getTime()); // NPE if instant is null
     //     }
 
@@ -1415,8 +1415,8 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     //      * calendar type is given, the locale's default calendar is created.
     //      *
     //      * <p>If the calendar type is {@code "iso8601"}, the
-    //      * {@linkplain GregorianCalendar#setGregorianChange(Date) Gregorian change date}
-    //      * of a {@link GregorianCalendar} is set to {@code Date(Long.MIN_VALUE)}
+    //      * {@linkplain GregorianCalendar#setGregorianChange(LocalDateTime) Gregorian change date}
+    //      * of a {@link GregorianCalendar} is set to {@code LocalDateTime(Long.MIN_VALUE)}
     //      * to be the <em>proleptic</em> Gregorian calendar. Its week definition
     //      * parameters are also set to be <a
     //      * href="GregorianCalendar.html#iso8601_compatible_setting">compatible
@@ -1472,7 +1472,7 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     //         case "iso8601":
     //             GregorianCalendar gcal = new GregorianCalendar(zone, locale, true);
     //             // make gcal a proleptic Gregorian
-    //             gcal.setGregorianChange(new Date(Long.MIN_VALUE));
+    //             gcal.setGregorianChange(new LocalDateTime(Long.MIN_VALUE));
     //             // and week definition to be compatible with ISO 8601
     //             setWeekDefinition(MONDAY, 4);
     //             cal = gcal;
@@ -1765,30 +1765,30 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     // protected abstract void computeFields();
 
     // /**
-    //  * Returns a <code>Date</code> object representing this
+    //  * Returns a <code>LocalDateTime</code> object representing this
     //  * <code>Calendar</code>'s time value (millisecond offset from the <a
     //  * href="#Epoch">Epoch</a>").
     //  *
-    //  * @return a <code>Date</code> representing the time value.
-    //  * @see #setTime(Date)
+    //  * @return a <code>LocalDateTime</code> representing the time value.
+    //  * @see #setTime(LocalDateTime)
     //  * @see #getTimeInMillis()
     //  */
-    // const Date getTime() {
-    //     return new Date(getTimeInMillis());
+    // const LocalDateTime getTime() {
+    //     return new LocalDateTime(getTimeInMillis());
     // }
 
     // /**
-    //  * Sets this Calendar's time with the given <code>Date</code>.
+    //  * Sets this Calendar's time with the given <code>LocalDateTime</code>.
     //  * <p>
     //  * Note: Calling <code>setTime()</code> with
-    //  * <code>Date(Long.MAX_VALUE)</code> or <code>Date(Long.MIN_VALUE)</code>
+    //  * <code>LocalDateTime(Long.MAX_VALUE)</code> or <code>LocalDateTime(Long.MIN_VALUE)</code>
     //  * may yield incorrect field values from <code>get()</code>.
     //  *
-    //  * @param date the given Date.
+    //  * @param date the given LocalDateTime.
     //  * @see #getTime()
     //  * @see #setTimeInMillis(long)
     //  */
-    // const void setTime(Date date) {
+    // const void setTime(LocalDateTime date) {
     //     setTimeInMillis(date.getTime());
     // }
 
@@ -1810,7 +1810,7 @@ abstract class Calendar : Serializable, Cloneable, Comparable!(Calendar) {
     //  * Sets this Calendar's current time from the given long value.
     //  *
     //  * @param millis the new time in UTC milliseconds from the epoch.
-    //  * @see #setTime(Date)
+    //  * @see #setTime(LocalDateTime)
     //  * @see #getTimeInMillis()
     //  */
     // void setTimeInMillis(long millis) {

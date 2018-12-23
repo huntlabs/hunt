@@ -39,7 +39,14 @@ char charAt(string s, size_t i) nothrow
     return s[i];
 }
 
-bool contains(string[] items, string item)
+
+bool contains(string items, string item)
+{
+    return items.canFind(item);
+}
+
+
+bool contains(T)(T[] items, T item)
 {
     return items.canFind(item);
 }
