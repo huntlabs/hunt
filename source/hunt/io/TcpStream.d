@@ -122,6 +122,7 @@ class TcpStream : AbstractStream {
         import std.parallelism;
         auto connectionTask = task(&doConnect, addr);
         taskPool.put(connectionTask);
+        // doConnect(addr);
     }
 
     protected override void doConnect(Address addr) {
