@@ -643,6 +643,10 @@ class ThreadEx : Thread, Runnable {
         checkAccess();
         uncaughtExceptionHandler = eh;
     }
+
+    void checkAccess() {
+
+    }
 }
 
 /*
@@ -1891,21 +1895,21 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @param   e   the uncaught exception.
      * @since   1.0
      */
-    // void uncaughtException(Thread t, Throwable e) {
-    //     if (parent !is null) {
-    //         parent.uncaughtException(t, e);
-    //     } else {
-    //         Thread.UncaughtExceptionHandler ueh =
-    //             Thread.getDefaultUncaughtExceptionHandler();
-    //         if (ueh !is null) {
-    //             ueh.uncaughtException(t, e);
-    //         } else if (!(e instanceof ThreadDeath)) {
-    //             System.err.print("Exception in thread \""
-    //                              + t.getName() + "\" ");
-    //             e.printStackTrace(System.err);
-    //         }
-    //     }
-    // }
+    void uncaughtException(Thread t, Throwable e) {
+        if (parent !is null) {
+            parent.uncaughtException(t, e);
+        } else {
+            // Thread.UncaughtExceptionHandler ueh =
+            //     Thread.getDefaultUncaughtExceptionHandler();
+            // if (ueh !is null) {
+            //     ueh.uncaughtException(t, e);
+            // } else if (!(e instanceof ThreadDeath)) {
+            //     System.err.print("Exception in thread \""
+            //                      + t.getName() + "\" ");
+            //     e.printStackTrace(System.err);
+            // }
+        }
+    }
 
     /**
      * Used by VM to control lowmem implicit suspension.

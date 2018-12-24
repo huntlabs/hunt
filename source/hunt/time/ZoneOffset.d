@@ -89,11 +89,8 @@ public final class ZoneOffset : ZoneId, TemporalAccessor, TemporalAdjuster,
      * The abs maximum seconds.
      */
      enum int MAX_SECONDS = 18 * LocalTime.SECONDS_PER_HOUR;
-    /**
-     * Serialization version.
-     */
-     enum long serialVersionUID = 2357656521762053153L;
-
+     
+     
     /**
      * The time-zone offset for UTC, with an ID of 'Z'.
      */

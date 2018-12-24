@@ -48,7 +48,6 @@ import hunt.concurrent.ThreadPoolExecutor;
 import hunt.datetime;
 import hunt.lang.common;
 import hunt.lang.exception;
-import hunt.concurrent.thread.ThreadGroupEx;
 
 import core.thread;
 import core.time;

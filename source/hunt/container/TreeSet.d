@@ -460,7 +460,10 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      */
     E pollFirst() {
         MapEntry!(E, Object) e = m.pollFirstEntry();
-        return (e is null) ? null : e.getKey();
+        static if(is(E == class) || is(E == interface)) {
+            return (e is null) ? null : e.getKey();
+        } else
+            return e.getKey();
     }
 
     /**
@@ -468,7 +471,10 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      */
     E pollLast() {
         MapEntry!(E, Object) e = m.pollLastEntry();
-        return (e is null) ? null : e.getKey();
+        static if(is(E == class) || is(E == interface)) {
+            return (e is null) ? null : e.getKey();
+        } else
+            return e.getKey();
     }
 
     /**

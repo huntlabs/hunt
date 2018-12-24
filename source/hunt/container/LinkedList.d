@@ -67,8 +67,7 @@ import std.range;
  * @param !E the type of elements held in this collection
  */
 
-class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
-{
+class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable 
     // alias remove = AbstractSequentialList!E.remove;
 
     DList!E _dlist;
@@ -89,6 +88,12 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
      * @throws NullPointerException if the specified collection is null
      */
     this(Collection!E c) {
+        this();
+        addAll(c);
+    }
+
+
+    this(E[] c) {
         this();
         addAll(c);
     }
@@ -278,28 +283,37 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
         // return true;
     }
 
-    /**
-     * Appends all of the elements in the specified collection to the end of
-     * this list, in the order that they are returned by the specified
-     * collection's iterator.  The behavior of this operation is undefined if
-     * the specified collection is modified while the operation is in
-     * progress.  (Note that this will occur if the specified collection is
-     * this list, and it's nonempty.)
-     *
-     * @param c collection containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call
-     * @throws NullPointerException if the specified collection is null
-     */
-    override bool addAll(Collection!E c) {
+    // /**
+    //  * Appends all of the elements in the specified collection to the end of
+    //  * this list, in the order that they are returned by the specified
+    //  * collection's iterator.  The behavior of this operation is undefined if
+    //  * the specified collection is modified while the operation is in
+    //  * progress.  (Note that this will occur if the specified collection is
+    //  * this list, and it's nonempty.)
+    //  *
+    //  * @param c collection containing elements to be added to this list
+    //  * @return {@code true} if this list changed as a result of the call
+    //  * @throws NullPointerException if the specified collection is null
+    //  */
+    // override bool addAll(Collection!E c) {
 
-        bool modified = c.size() > 0;
-        foreach (E e ; c) {
-            linkLast(e);
-        }
-        return modified;
+    //     bool modified = c.size() > 0;
+    //     foreach (E e ; c) {
+    //         linkLast(e);
+    //     }
+    //     return modified;
 
-        // return addAll(_size, c);
-    }
+    //     // return addAll(_size, c);
+    // }
+
+    // bool addAll(E[] c) {
+
+    //     bool modified = c.length > 0;
+    //     foreach (E e ; c) {
+    //         linkLast(e);
+    //     }
+    //     return modified;
+    // }
 
 //     /**
 //      * Inserts all of the elements in the specified collection into this
@@ -317,9 +331,9 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E //, Cloneable
 //      * @throws NullPointerException if the specified collection is null
 //      */
 
-bool addAll(int index, Collection!E c) {
-    throw new NotImplementedException();
-}
+// bool addAll(int index, Collection!E c) {
+//     throw new NotImplementedException();
+// }
 //     bool addAll(int index, Collection<E> c) {
 //         checkPositionIndex(index);
 

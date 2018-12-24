@@ -144,10 +144,6 @@ class IOException : Exception {
     mixin BasicExceptionCtors;
 }
 
-class URISyntaxException : IOException {
-    mixin BasicExceptionCtors;
-}
-
 class ClosedChannelException : IOException {
     mixin BasicExceptionCtors;
 }
@@ -161,6 +157,14 @@ class MalformedURLException : IOException {
 }
 
 class InterruptedIOException : IOException {
+    mixin BasicExceptionCtors;
+}
+
+class RemoteException : IOException {
+    mixin BasicExceptionCtors;
+}
+
+class URISyntaxException : IOException {
     mixin BasicExceptionCtors;
 }
 
