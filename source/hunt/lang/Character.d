@@ -1,4 +1,4 @@
-module hunt.lang.character.Character;
+module hunt.lang.Character;
 
 import hunt.lang.Nullable;
 

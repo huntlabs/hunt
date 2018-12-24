@@ -100,7 +100,7 @@ public final class LocalDateTime
     /**
      * Serialization version.
      */
-    private enum long serialVersionUID = 6207766400415563566L;
+    // private enum long serialVersionUID = 6207766400415563566L;
 
     /**
      * The date part.

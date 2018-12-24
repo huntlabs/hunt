@@ -1,9 +1,9 @@
-module hunt.lang.character;
+module hunt.lang.CharacterData;
 
 
-public import hunt.lang.character.Character;
-public import hunt.lang.character.CharacterData;
-public import hunt.lang.character.CharacterDataLatin1;
+public import hunt.lang.Character;
+public import hunt.lang.CharacterData.CharacterData;
+public import hunt.lang.CharacterData.CharacterDataLatin1;
 
 
 /**

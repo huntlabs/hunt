@@ -87,7 +87,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
     /**
      * Private cache of all the constants.
      */
-    __gshared DayOfWeek[] _ENUMS;
+    private __gshared DayOfWeek[] _ENUMS;
 
     // static this()
     // {
