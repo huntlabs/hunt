@@ -38,7 +38,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      *
      * @return the number of key-value mappings in this map
      */
-    int size() {
+    int size() const {
         return _size; 
     }
 
@@ -806,7 +806,7 @@ class EmptyMap(K,V) : AbstractMap!(K,V) {
     // private enum long serialVersionUID = 6428348081105594320L;
 
     override
-    int size()                          {return 0;}
+    int size() const                         {return 0;}
 
     override
     bool isEmpty()                   {return true;}

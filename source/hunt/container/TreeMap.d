@@ -2642,7 +2642,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
         return m.isEmpty();
     }
 
-    override int size() {
+    override int size() const {
         // return (fromStart && toEnd) ? m.size() : entrySet().size();
         return  m.size();
     }
