@@ -152,7 +152,7 @@ class ArrayList(E) : AbstractList!E {
      *
      * @return the number of elements in this list
      */
-    override int size() {
+    override int size() const {
         return cast(int)_array.length;
     }
 
@@ -174,7 +174,7 @@ class ArrayList(E) : AbstractList!E {
      * @param o element whose presence in this list is to be tested
      * @return <tt>true</tt> if this list contains the specified element
      */
-    override bool contains(E o) {
+    override bool contains(E o) const{
         return _array[].canFind(o);
     }
 
@@ -223,10 +223,10 @@ class ArrayList(E) : AbstractList!E {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    override E get(int index) {
+    override E get(int index) const {
         rangeCheck(index);
 
-        return _array[index];
+        return cast(E)_array[index];
     }
 
     /**
@@ -456,7 +456,7 @@ class ArrayList(E) : AbstractList!E {
      * negative: It is always used immediately prior to an array access,
      * which throws an ArrayIndexOutOfBoundsException if index is negative.
      */
-    private void rangeCheck(int index) {
+    private void rangeCheck(int index) const {
         if (index >= _array.length)
             throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
@@ -474,7 +474,7 @@ class ArrayList(E) : AbstractList!E {
      * Of the many possible refactorings of the error handling code,
      * this "outlining" performs best with both server and client VMs.
      */
-    private string outOfBoundsMsg(int index) {
+    private string outOfBoundsMsg(int index) const {
         return "Index: "~index.to!string()~", Size: " ~ to!string(size());
     }
 

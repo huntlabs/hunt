@@ -34,8 +34,8 @@ void main()
 	// testUnits!(MimeTypeTest);
 	// testUnits!(ThreadPoolExecutorTest);
 	// testUnits!(ThreadTest);
-	// testUnits!(NullableTest);
-	// testUnits!(NumberTest);
+	testUnits!(NullableTest);
+	testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
 
 	// testLockSupport01();

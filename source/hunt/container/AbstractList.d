@@ -213,7 +213,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
         if(this.size() != e2.size())
             return false;
 
-        for(int i= 0 ; i < this.size();i++)
+        for(int i= 0 ; i < this.size(); i++)
         {
             if(this.get(i)  != e2.get(i))
                 return false;
@@ -296,7 +296,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
 class EmptyList(E): AbstractList!E {
     // private static long serialVersionUID = 8842843931221139166L;
 
-    override int size() {return 0;}
+    override int size() const {return 0;}
     override bool isEmpty() {return true;}
 
     override bool contains(E obj) {return false;}

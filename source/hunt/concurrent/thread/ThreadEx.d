@@ -443,6 +443,12 @@ class ThreadEx : Thread, Runnable {
         return _interrupted;
     }
 
+    static ThreadEx currentThread() {
+        ThreadEx tex = cast(ThreadEx) Thread.getThis();
+        assert(tex !is null, "Must be a ThreadEx");
+        return tex;
+    }
+
 
     Parker parker() {
         return _parker;

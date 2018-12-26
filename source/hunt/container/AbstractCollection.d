@@ -3,6 +3,7 @@ module hunt.container.AbstractCollection;
 import hunt.container.Collection;
 import hunt.lang.common;
 import hunt.lang.exception;
+import hunt.lang.Object;
 
 import std.array;
 import std.conv;
@@ -59,7 +60,7 @@ abstract class AbstractCollection(E) : Collection!E {
         throw new NotImplementedException();
     }
 
-    abstract int size();
+    abstract int size() const;
 
     /**
      * {@inheritDoc}
@@ -122,7 +123,6 @@ abstract class AbstractCollection(E) : Collection!E {
         return true;
     }
 
-
     /**
      * {@inheritDoc}
      *
@@ -143,7 +143,7 @@ abstract class AbstractCollection(E) : Collection!E {
      */
     bool addAll(Collection!E c) {
         bool modified = false;
-        foreach (E e ; c) {
+        foreach (E e; c) {
             if (add(e))
                 modified = true;
         }
@@ -152,7 +152,7 @@ abstract class AbstractCollection(E) : Collection!E {
 
     bool addAll(E[] c) {
         bool modified = false;
-        foreach (E e ; c) {
+        foreach (E e; c) {
             if (add(e))
                 modified = true;
         }
@@ -183,10 +183,10 @@ abstract class AbstractCollection(E) : Collection!E {
     bool removeAll(Collection!E c) {
         assert(c !is null);
         bool modified = false;
-        foreach(E k; c)
-        {
-            if(this.contains(k)) {
-                this.remove(k); modified = true;
+        foreach (E k; c) {
+            if (this.contains(k)) {
+                this.remove(k);
+                modified = true;
             }
         }
 
@@ -196,12 +196,12 @@ abstract class AbstractCollection(E) : Collection!E {
     bool removeIf(Predicate!E filter) {
         assert(filter !is null);
         E[] items;
-        foreach(E item; this) {
-            if(filter(item))
+        foreach (E item; this) {
+            if (filter(item))
                 items ~= item;
         }
 
-        foreach(E item; items) {
+        foreach (E item; items) {
             remove(item);
         }
 
@@ -233,7 +233,6 @@ abstract class AbstractCollection(E) : Collection!E {
         assert(c !is null);
         bool modified = false;
 
-
         // InputRange!E it = iterator();
         // while (!it.empty) {
         //     E current = it.front();
@@ -246,23 +245,26 @@ abstract class AbstractCollection(E) : Collection!E {
         //     }
         // }
         import std.container.slist;
+
         SList!E list;
 
-        foreach(E k; this) {
-            if(!c.contains(k)) {
+        foreach (E k; this) {
+            if (!c.contains(k)) {
                 // this.remove(k);
                 list.insert(k);
             }
         }
 
         modified = !list.empty();
-        foreach(E e; list)
+        foreach (E e; list)
             this.remove(e);
 
         return modified;
     }
 
-    void clear() { throw new NotImplementedException(); }
+    void clear() {
+        throw new NotImplementedException();
+    }
 
     int opApply(scope int delegate(ref E) dg) {
         //throw new NotImplementedException();
@@ -296,12 +298,12 @@ abstract class AbstractCollection(E) : Collection!E {
      * }</pre>
      */
     E[] toArray() {
-        if(size() == 0)
+        if (size() == 0)
             return [];
 
         E[] r = new E[size()];
-        int i=0;
-        foreach(E e; this)
+        int i = 0;
+        foreach (E e; this)
             r[i++] = e;
         return r;
      }
@@ -323,18 +325,17 @@ abstract class AbstractCollection(E) : Collection!E {
      *
      * @return a string representation of this collection
      */
-    override string toString()
-    {
-        if(size() == 0)
+    override string toString() {
+        if (size() == 0)
             return "[]";
         
         Appender!string sb;
         sb.put("[");
         bool isFirst = true;
-        foreach(E e; this)
-        {
-           if(!isFirst) sb.put(", ");
-            static if(is(E == class))
+        foreach (E e; this) {
+            if (!isFirst)
+                sb.put(", ");
+            static if (is(E == class))
                 sb.put(e is this ? "(this Collection)" : e.toString());
             else
                 sb.put(e.to!string());

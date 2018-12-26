@@ -1,7 +1,6 @@
 module hunt.container.Map;
 
 import hunt.container.Collection;
-import hunt.container.Iterable;
 import hunt.container.Set;
 import hunt.lang.common;
 
@@ -19,7 +18,7 @@ interface Map(K,V) : Iterable!(K,V){
      *
      * @return the number of key-value mappings in this map
      */
-    int size();
+    int size() const;
 
     /**
      * Returns <tt>true</tt> if this map contains no key-value mappings.
