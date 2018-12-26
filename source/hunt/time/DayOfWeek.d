@@ -47,7 +47,7 @@ import hunt.time.util.common;
  *
  * @since 1.8
  */
-public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
+class DayOfWeek : TemporalAccessor, TemporalAdjuster {
 
     /**
      * The singleton instance for the day-of-week of Monday.
@@ -149,7 +149,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
         // ENUMS ~= SATURDAY;
         // ENUMS ~= SUNDAY;
     // }
-    public static DayOfWeek[] ENUMS()
+    static DayOfWeek[] ENUMS()
     {
         if(_ENUMS.length == 0)
         {
@@ -173,12 +173,12 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
         _name = name;
     }
 
-    public string name()
+    string name()
     {
         return _name;
     }
 
-    public int ordinal()
+    int ordinal()
     {
         return _ordinal;
     }
@@ -194,7 +194,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @return the day-of-week singleton, not null
      * @throws DateTimeException if the day-of-week is invalid
      */
-    public static DayOfWeek of(int dayOfWeek) {
+    static DayOfWeek of(int dayOfWeek) {
         if (dayOfWeek < 1 || dayOfWeek > 7) {
             throw new DateTimeException("Invalid value for DayOfWeek: " ~ dayOfWeek.to!string);
         }
@@ -218,7 +218,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @return the day-of-week, not null
      * @throws DateTimeException if unable to convert to a {@code DayOfWeek}
      */
-    public static DayOfWeek from(TemporalAccessor temporal) {
+    static DayOfWeek from(TemporalAccessor temporal) {
         if (cast(DayOfWeek)(temporal) !is null) {
             return cast(DayOfWeek) temporal;
         }
@@ -239,7 +239,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      *
      * @return the day-of-week, from 1 (Monday) to 7 (Sunday)
      */
-    public int getValue() {
+    int getValue() {
         return _ordinal + 1;
     }
 
@@ -257,7 +257,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @param locale  the locale to use, not null
      * @return the text value of the day-of-week, not null
      */
-    public string getDisplayName(TextStyle style, Locale locale) {
+    string getDisplayName(TextStyle style, Locale locale) {
         return new DateTimeFormatterBuilder().appendText(ChronoField.DAY_OF_WEEK, style).toFormatter(locale).format(this);
     }
 
@@ -282,7 +282,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @return true if the field is supported on this day-of-week, false if not
      */
     override
-    public bool isSupported(TemporalField field) {
+    bool isSupported(TemporalField field) {
         if (cast(ChronoField)(field) !is null) {
             return field == ChronoField.DAY_OF_WEEK;
         }
@@ -312,7 +312,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @throws UnsupportedTemporalTypeException if the field is not supported
      */
     override
-    public ValueRange range(TemporalField field) {
+    ValueRange range(TemporalField field) {
         if (field == ChronoField.DAY_OF_WEEK) {
             return field.range();
         }
@@ -356,7 +356,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @throws ArithmeticException if numeric overflow occurs
      */
     override
-    public int get(TemporalField field) {
+    int get(TemporalField field) {
         if (field == ChronoField.DAY_OF_WEEK) {
             return getValue();
         }
@@ -398,7 +398,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @throws ArithmeticException if numeric overflow occurs
      */
     override
-    public long getLong(TemporalField field) {
+    long getLong(TemporalField field) {
         if (field == ChronoField.DAY_OF_WEEK) {
             return getValue();
         } else if (cast(ChronoField)(field) !is null) {
@@ -419,7 +419,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @param days  the days to add, positive or negative
      * @return the resulting day-of-week, not null
      */
-    public DayOfWeek plus(long days) {
+    DayOfWeek plus(long days) {
         int amount = cast(int) (days % 7);
         return ENUMS[(_ordinal + (amount + 7)) % 7];
     }
@@ -435,7 +435,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @param days  the days to subtract, positive or negative
      * @return the resulting day-of-week, not null
      */
-    public DayOfWeek minus(long days) {
+    DayOfWeek minus(long days) {
         return plus(-(days % 7));
     }
 
@@ -460,7 +460,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      */
     /*@SuppressWarnings("unchecked")*/
     // override
-    public R query(R)(TemporalQuery!(R) query) {
+    R query(R)(TemporalQuery!(R) query) {
         if (query == TemporalQueries.precision()) {
             return cast(R) (ChronoUnit.DAYS);
         }
@@ -514,7 +514,7 @@ public class DayOfWeek : TemporalAccessor, TemporalAdjuster {
      * @throws ArithmeticException if numeric overflow occurs
      */
     override
-    public Temporal adjustInto(Temporal temporal) {
+    Temporal adjustInto(Temporal temporal) {
         return temporal._with(ChronoField.DAY_OF_WEEK, getValue());
     }
     

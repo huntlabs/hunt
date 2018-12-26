@@ -238,7 +238,8 @@ public final class LocalDateTime
      * @throws DateTimeException if the value of any field is _out of range,
      *  or if the day-of-month is invalid for the month-year
      */
-    public static LocalDateTime of(int year, Month month, int dayOfMonth, int hour, int minute, int second, int nanoOfSecond) {
+    public static LocalDateTime of(int year, Month month, int dayOfMonth, 
+        int hour, int minute, int second, int nanoOfSecond) {
         LocalDate date = LocalDate.of(year, month, dayOfMonth);
         LocalTime time = LocalTime.of(hour, minute, second, nanoOfSecond);
         return new LocalDateTime(date, time);
@@ -313,7 +314,8 @@ public final class LocalDateTime
      * @throws DateTimeException if the value of any field is _out of range,
      *  or if the day-of-month is invalid for the month-year
      */
-    public static LocalDateTime of(int year, int month, int dayOfMonth, int hour, int minute, int second, int nanoOfSecond) {
+    public static LocalDateTime of(int year, int month, int dayOfMonth, 
+        int hour, int minute, int second, int nanoOfSecond) {
         LocalDate date = LocalDate.of(year, month, dayOfMonth);
         LocalTime time = LocalTime.of(hour, minute, second, nanoOfSecond);
         return new LocalDateTime(date, time);
@@ -851,6 +853,10 @@ public final class LocalDateTime
         return time.getSecond();
     }
 
+    int getMillisecond() {
+        return time.getMillisecond();
+    }
+
     /**
      * Gets the nano-of-second field.
      *
@@ -1319,6 +1325,10 @@ public final class LocalDateTime
         return plusWithOverflow(date, 0, 0, seconds, 0, 1);
     }
 
+    public LocalDateTime plusMilliseconds(long milliseconds) {
+        return plusWithOverflow(date, 0, 0, 0, milliseconds * LocalTime.NANOS_PER_MILLI, 1);
+    }
+
     /**
      * Returns a copy of this {@code LocalDateTime} with the specified number of nanoseconds added.
      * !(p)
@@ -1512,6 +1522,10 @@ public final class LocalDateTime
      */
     public LocalDateTime minusSeconds(long seconds) {
         return plusWithOverflow(date, 0, 0, seconds, 0, -1);
+    }
+
+    LocalDateTime minusMilliseconds(long milliseconds) {
+        return plusWithOverflow(date, 0, 0, 0, milliseconds * LocalTime.NANOS_PER_MILLI, -1);
     }
 
     /**
@@ -1831,10 +1845,11 @@ public final class LocalDateTime
     // override  // override for Javadoc and performance
     public int compareTo(ChronoLocalDateTime!(ChronoLocalDate) other) {
         if (cast(LocalDateTime)(other) !is null) {
-            return compareTo0(cast(LocalDateTime) other);
+            return opCmp(cast(LocalDateTime) other);
         }
         return /* ChronoLocalDateTime. super.*/super_compareTo(other);
     }
+
      int super_compareTo(ChronoLocalDateTime!(ChronoLocalDate) other) {
         int cmp = toLocalDate().compareTo(other.toLocalDate());
         if (cmp == 0) {
@@ -1846,13 +1861,14 @@ public final class LocalDateTime
         return cmp;
     }
 
-    private int compareTo0(LocalDateTime other) {
+    int opCmp(LocalDateTime other) {
         int cmp = date.compareTo0(other.toLocalDate());
         if (cmp == 0) {
             cmp = time.compareTo(other.toLocalTime());
         }
         return cmp;
     }
+
     override 
     public int opCmp(ChronoLocalDateTime!(ChronoLocalDate) other) {
         if (cast(LocalDateTime)(other) !is null) {
@@ -1862,9 +1878,9 @@ public final class LocalDateTime
     }
 
     // override 
-    public int opCmp(LocalDateTime other) {
-            return compareTo0(other);
-    }
+    // public int opCmp(LocalDateTime other) {
+    //         return compareTo(other);
+    // }
     /**
      * Checks if this date-time is after the specified date-time.
      * !(p)
@@ -2084,12 +2100,17 @@ public final class LocalDateTime
      Instant toInstant(ZoneOffset offset) {
         return Instant.ofEpochSecond(toEpochSecond(offset), toLocalTime().getNano());
     }
+
     override
-     long toEpochSecond(ZoneOffset offset) {
+    long toEpochSecond(ZoneOffset offset) {
         assert(offset, "offset");
         long epochDay = toLocalDate().toEpochDay();
         long secs = epochDay * 86400 + toLocalTime().toSecondOfDay();
         secs -= offset.getTotalSeconds();
         return secs;
+    }
+
+    long toEpochMilli() {
+        return this.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 }

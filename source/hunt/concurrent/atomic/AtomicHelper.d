@@ -37,7 +37,7 @@ class AtomicHelper {
         // exchange
         // https://issues.dlang.org/show_bug.cgi?id=15007
         T v = stuff;
-        store(stuff, delta);
+        store(stuff, newValue);
         return v;
     }
 

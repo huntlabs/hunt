@@ -13,7 +13,7 @@ import hunt.logging;
 /**
 */
 class FuturePromise(T) : Future!T, Promise!T {
-	private __gshared static Exception COMPLETED;
+	private __gshared Exception COMPLETED;
     private bool _done;	
     private Exception _cause;
 	private T _result;
