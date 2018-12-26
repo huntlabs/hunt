@@ -3,6 +3,7 @@ module hunt.container;
 public import hunt.container.AbstractList;
 public import hunt.container.AbstractSet;
 public import hunt.container.AbstractMap;
+public import hunt.container.AbstractQueue;
 public import hunt.container.ArrayDeque;
 public import hunt.container.ArrayList;
 public import hunt.container.ArrayTernaryTrie;
