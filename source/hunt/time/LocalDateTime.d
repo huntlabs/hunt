@@ -1872,7 +1872,7 @@ public final class LocalDateTime
     override 
     public int opCmp(ChronoLocalDateTime!(ChronoLocalDate) other) {
         if (cast(LocalDateTime)(other) !is null) {
-            return compareTo0(cast(LocalDateTime) other);
+            return opCmp(cast(LocalDateTime) other);
         }
         return /* ChronoLocalDateTime. super.*/super_compareTo(other);
     }
@@ -1905,7 +1905,7 @@ public final class LocalDateTime
     override  // override for Javadoc and performance
     public bool isAfter(ChronoLocalDateTime!(ChronoLocalDate) other) {
         if (cast(LocalDateTime)(other) !is null) {
-            return compareTo0(cast(LocalDateTime) other) > 0;
+            return opCmp(cast(LocalDateTime) other) > 0;
         }
         return /* ChronoLocalDateTime. super.*/super_isAfter(other);
     }
@@ -1918,7 +1918,7 @@ public final class LocalDateTime
 
     public bool isAfter(LocalDateTime other) {
         if (other !is null) {
-            return compareTo0(other) > 0;
+            return opCmp(other) > 0;
         }
         return false;
     }
@@ -1946,7 +1946,7 @@ public final class LocalDateTime
     override  // override for Javadoc and performance
     public bool isBefore(ChronoLocalDateTime!(ChronoLocalDate) other) {
         if (cast(LocalDateTime)(other) !is null) {
-            return compareTo0(cast(LocalDateTime) other) < 0;
+            return opCmp(cast(LocalDateTime) other) < 0;
         }
         return /* ChronoLocalDateTime. super.*/super_isBefore(other);
     }
@@ -1960,7 +1960,7 @@ public final class LocalDateTime
 
     public bool isBefore(LocalDateTime other) {
         if (other !is null) {
-            return compareTo0(other) < 0;
+            return opCmp(other) < 0;
         }
         return false;
     }
@@ -1988,7 +1988,7 @@ public final class LocalDateTime
     override  // override for Javadoc and performance
     public bool isEqual(ChronoLocalDateTime!(ChronoLocalDate) other) {
         if (cast(LocalDateTime)(other) !is null) {
-            return compareTo0(cast(LocalDateTime) other) == 0;
+            return opCmp(cast(LocalDateTime) other) == 0;
         }
         return /* ChronoLocalDateTime. super.*/super_isEqual(other);
     }
