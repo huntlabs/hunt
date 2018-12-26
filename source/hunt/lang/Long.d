@@ -136,19 +136,6 @@ class Long : AbstractNumber!long {
         return to!long(s, radix);
     }
 
-
-    private static class LongCache {
-        private this(){}
-
-        static  Long[] cache;
-
-        static this(){
-            cache = new Long[-(-128) + 127 + 1];
-            for(int i = 0; i < cache.length; i++)
-                cache[i] = new Long(i - 128);
-        }
-    }
-
     /**
      * Returns a {@code Long} instance representing the specified
      * {@code long} value.
@@ -612,5 +599,18 @@ class Long : AbstractNumber!long {
      */
     override size_t toHash() @safe nothrow {
         return cast(int)(value ^ (value >>> 32));
+    }
+}
+
+
+private class LongCache {
+    private this(){}
+
+    __gshared  Long[] cache;
+
+    shared static this(){
+        cache = new Long[-(-128) + 127 + 1];
+        for(int i = 0; i < cache.length; i++)
+            cache[i] = new Long(i - 128);
     }
 }

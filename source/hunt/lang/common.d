@@ -150,6 +150,21 @@ alias BiConsumer = Action2;
 alias BiFunction = Func2; 
 //  alias BiFunction(T, U, R) = R delegate(T t, U u);
 
+
+/**
+ * Implementing this interface allows an object to be the target of
+ * the "for-each loop" statement. 
+ * @param (T) the type of elements returned by the iterator
+ */
+interface Iterable(T) {
+   int opApply(scope int delegate(ref T) dg);
+}
+
+interface Iterable(K, V) {
+   int opApply(scope int delegate(ref K, ref V) dg);
+}
+
+
 /**
  * A class implements the <code>Cloneable</code> interface to
  * indicate to the {@link java.lang.Object#clone()} method that it

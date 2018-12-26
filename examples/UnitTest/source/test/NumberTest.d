@@ -22,6 +22,10 @@ class NumberTest {
         Long l12 = Long.valueOf(12);
         Long l20 = new Long(20);
 
+        import std.stdio;
+        writeln(l12.value());
+        writeln(l20.value());
+
         assert(l12 > 10);
         assert(10 < l12 );
         assert(l12 < 20 );
