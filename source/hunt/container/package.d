@@ -20,7 +20,6 @@ public import hunt.container.DirectByteBuffer;
 public import hunt.container.Enumeration;
 public import hunt.container.HashMap;
 public import hunt.container.HashSet;
-public import hunt.container.Iterable;
 public import hunt.container.Iterator;
 public import hunt.container.List;
 public import hunt.container.LinkedHashMap;

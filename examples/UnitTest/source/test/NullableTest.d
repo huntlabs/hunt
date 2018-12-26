@@ -23,12 +23,12 @@ class NullableTest {
         // assert(l20 != l12);
         assert(l20 == 20 && 12 == l12 );
 
-        l12 = 30;
-        assert(l12 == 30);
-        long v = cast(long)l12;
-        assert(v == 30);
-        int intValue = cast(int)l12;
-        assert(intValue == 30);
+        // l12 = 30;
+        // assert(l12 == 30);
+        // long v = cast(long)l12;
+        // assert(v == 30);
+        // int intValue = cast(int)l12;
+        // assert(intValue == 30);
     }
 
     void testString() {

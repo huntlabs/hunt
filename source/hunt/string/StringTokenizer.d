@@ -3,10 +3,10 @@ module hunt.string.StringTokenizer;
 
 import std.string;
 
-import hunt.lang.exception;
+import hunt.lang.common;
 import hunt.lang.Character;
+import hunt.lang.exception;
 import hunt.string.common;
-import hunt.container.Iterable;
 
 /**
  * The string tokenizer class allows an application to break a

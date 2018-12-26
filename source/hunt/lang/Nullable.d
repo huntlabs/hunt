@@ -2,7 +2,7 @@ module hunt.lang.Nullable;
 
 import hunt.lang.common;
 import hunt.lang.exception;
-import hunt.lang.object;
+import hunt.lang.Object;
 
 import std.traits;
 
@@ -133,20 +133,24 @@ class Nullable(T) : INullable {
         }
     }
 
-    void opAssign(T v) {
-        _value = v;
-        _isNull = false;
-    }
+    // void opAssign(T v) {
+    //     _value = v;
+    //     _isNull = false;
+    // }
 
     // U opCast(U)() {
     //     return cast(U)_value;
     // }
 
-    bool opEquals(T v) {
+    bool opEquals(const(IObject) o) const {
+        return opEquals(cast(Object)o);
+    }
+
+    bool opEquals(T v) const {
         return this._value == v;
     }
 
-    override bool opEquals(Object o) {
+    override bool opEquals(const(Object) o) const {
         Nullable!(T) that = cast(Nullable!(T))o;
         if(that is null)
             return false;

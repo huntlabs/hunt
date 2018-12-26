@@ -186,9 +186,9 @@ class Double : AbstractNumber!double {
      *            parsable number.
      * @see       java.lang.Double#valueOf(java.lang.string)
      */
-    // Double(string s) throws NumberFormatException {
-    //     value = parseDouble(s);
-    // }
+    this(string s) {
+        super(parseDouble(s));
+    }
 
     /**
      * Returns {@code true} if this {@code Double} value is
@@ -199,6 +199,11 @@ class Double : AbstractNumber!double {
      */
     static bool isNaN(double v) {
         return isNaN(v);
+    }
+
+
+    static double parseDouble(string s) {
+        return to!double(s);
     }
 
     /**

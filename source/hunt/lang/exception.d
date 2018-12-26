@@ -352,3 +352,7 @@ class InvalidObjectException : Exception {
 class ClassCastException : Exception {
     mixin BasicExceptionCtors;
 }
+
+class SystemException : Exception {
+    mixin BasicExceptionCtors;
+}

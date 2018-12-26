@@ -129,9 +129,9 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *        If {@code null}, the {@linkplain Comparable natural
      *        ordering} of the elements will be used.
      */
-    // this(Comparator!E comparator) {
-    //     this(new TreeMap!(E, Object)(comparator));
-    // }
+    this(Comparator!E comparator) {
+        this(new TreeMap!(E, Object)(comparator));
+    }
 
     /**
      * Constructs a new tree set containing the elements in the specified
@@ -211,7 +211,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *
      * @return the number of elements in this set (its cardinality)
      */
-    override int size() {
+    override int size() const {
         return m.size();
     }
 
