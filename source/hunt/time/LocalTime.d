@@ -177,11 +177,6 @@ public final class LocalTime
     enum long NANOS_PER_DAY = NANOS_PER_HOUR * HOURS_PER_DAY;
 
     /**
-     * Serialization version.
-     */
-    private enum long serialVersionUID = 6414437269572265201L;
-
-    /**
      * The hour.
      */
     private  byte hour;
@@ -732,6 +727,10 @@ public final class LocalTime
      */
     public int getSecond() {
         return second;
+    }
+
+    int getMillisecond() {
+        return cast(int)nano/NANOS_PER_MILLI;
     }
 
     /**
