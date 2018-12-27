@@ -13,8 +13,9 @@ import hunt.container.SortedMap;
 import hunt.container.SortedSet;
 
 import hunt.lang.common;
-import hunt.util.Comparator;
 import hunt.lang.exception;
+import hunt.lang.Object;
+import hunt.util.Comparator;
 import hunt.util.functional;
 import hunt.util.Spliterator;
 
@@ -111,8 +112,8 @@ private enum bool BLACK = true;
  * @since 1.2
  */
 
-class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.io.Serializable
-{
+class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) { //, Cloneable, java.io.Serializable
+
     /**
      * The comparator used to maintain order in this tree map, or
      * null if it uses the natural ordering of its keys.
@@ -1485,7 +1486,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      * Dummy value serving as unmatchable fence key for unbounded
      * SubMapIterators
      */
-    private __gshared static Object UNBOUNDED;
+    private __gshared Object UNBOUNDED;
 
     shared static this()
     {
@@ -1502,7 +1503,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
      * @serial include
      */
     private class SubMap : AbstractMap!(K,V), SortedMap!(K,V) {
-        // private static final long serialVersionUID = -6520786458950516097L;
+
         private bool fromStart = false, toEnd = false;
         private K fromKey, toKey;
         // private Object readResolve() {
@@ -1517,6 +1518,23 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
         SortedMap!(K,V) headMap(K toKey) { throw new InternalError(); }
         SortedMap!(K,V) tailMap(K fromKey) { throw new InternalError(); }
         Comparator!K comparator() { throw new InternalError(); }
+
+        
+        override bool opEquals(IObject o) {
+            return opEquals(cast(Object) o);
+        }
+        
+        override bool opEquals(Object o) {
+            return super.opEquals(o);
+        }
+
+        override size_t toHash() @trusted nothrow {
+            return super.toHash();
+        }
+
+        override string toString() {
+            return super.toString();
+        }
 
         override K[] keySet() {
             return super.keySet();
@@ -2380,8 +2398,23 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) //, Cloneable, java.i
     //         }
     //     }
     // }
-}
 
+        override bool opEquals(IObject o) {
+            return opEquals(cast(Object) o);
+        }
+        
+        override bool opEquals(Object o) {
+            return super.opEquals(o);
+        }
+
+        override size_t toHash() @trusted nothrow {
+            return super.toHash();
+        }
+
+        override string toString() {
+            return super.toString();
+        }    
+}
 
 
 /**
@@ -2436,6 +2469,10 @@ static final class TreeMapEntry(K,V) : MapEntry!(K,V) {
         V oldValue = this.value;
         this.value = value;
         return oldValue;
+    }
+
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
     }
 
     override bool opEquals(Object o) {
@@ -2636,6 +2673,21 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
 
 
     // methods
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+    
+    override bool opEquals(Object o) {
+        return super.opEquals(o);
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+
+    override string toString() {
+        return super.toString();
+    }    
 
     override bool isEmpty() {
         // return (fromStart && toEnd) ? m.isEmpty() : entrySet().isEmpty();

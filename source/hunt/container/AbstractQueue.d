@@ -39,6 +39,7 @@ import hunt.container.AbstractCollection;
 import hunt.container.Collection;
 import hunt.container.Queue;
 import hunt.lang.exception;
+import hunt.lang.Object;
 
 
 /**
@@ -199,4 +200,19 @@ abstract class AbstractQueue(E) : AbstractCollection!(E), Queue!(E) {
         return modified;
     }
 
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+    
+    override bool opEquals(Object o) {
+        return super.opEquals(o);
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+
+    override string toString() {
+        return super.toString();
+    }
 }

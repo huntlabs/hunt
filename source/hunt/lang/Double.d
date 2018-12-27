@@ -220,6 +220,23 @@ class Double : AbstractNumber!double {
 
 
     /**
+     * Returns a {@code Double} instance representing the specified
+     * {@code double} value.
+     * If a new {@code Double} instance is not required, this method
+     * should generally be used in preference to the constructor
+     * {@link #Double(double)}, as this method is likely to yield
+     * significantly better space and time performance by caching
+     * frequently requested values.
+     *
+     * @param  d a double value.
+     * @return a {@code Double} instance representing {@code d}.
+     * @since  1.5
+     */
+    static Double valueOf(double d) {
+        return new Double(d);
+    }
+
+    /**
      * Returns a hash code for a {@code double} value; compatible with
      * {@code Double.hashCode()}.
      *

@@ -5,6 +5,7 @@ import hunt.container.Map;
 import hunt.container.Iterator;
 
 import hunt.lang.exception;
+import hunt.lang.Object;
 import hunt.string.StringBuilder;
 
 import std.algorithm;
@@ -16,8 +17,7 @@ import std.traits;
 
 /**
 */
-class HashMap(K,V) : AbstractMap!(K,V)
-{
+class HashMap(K,V) : AbstractMap!(K,V) {
 
     // private enum long serialVersionUID = 362498820763181265L;
 
@@ -137,13 +137,6 @@ class HashMap(K,V) : AbstractMap!(K,V)
      * shrinkage.
      */
     enum int TREEIFY_THRESHOLD = 8;
-
-    /**
-     * The bin count threshold for untreeifying a (split) bin during a
-     * resize operation. Should be less than TREEIFY_THRESHOLD, and at
-     * most 6 to mesh with shrinkage detection under removal.
-     */
-    enum int UNTREEIFY_THRESHOLD = 6;
 
     /**
      * The smallest table capacity for which bins may be treeified.
@@ -1329,646 +1322,655 @@ class HashMap(K,V) : AbstractMap!(K,V)
     //         }
     //     }
     // }
+  
+}
 
-    /* ------------------------------------------------------------ */
-    // Tree bins
+/* ------------------------------------------------------------ */
+// Tree bins
+
+/**
+ * Entry for Tree bins. Extends LinkedHashMap.Entry (which in turn
+ * extends Node) so can be used as extension of either regular or
+ * linked node.
+ */
+final class TreeNode(K, V) : LinkedHashMapEntry!(K, V) {
 
     /**
-     * Entry for Tree bins. Extends LinkedHashMap.Entry (which in turn
-     * extends Node) so can be used as extension of either regular or
-     * linked node.
+     * The bin count threshold for untreeifying a (split) bin during a
+     * resize operation. Should be less than TREEIFY_THRESHOLD, and at
+     * most 6 to mesh with shrinkage detection under removal.
      */
-    static final class TreeNode(K, V) : LinkedHashMapEntry!(K, V) {
-        TreeNode!(K, V) parent;  // red-black tree links
-        TreeNode!(K, V) left;
-        TreeNode!(K, V) right;
-        TreeNode!(K, V) prev;    // needed to unlink next upon deletion
-        bool red;
+    enum int UNTREEIFY_THRESHOLD = 6;
 
-        this(size_t hash, K key, V val, HashMapNode!(K, V) next) {
-            super(hash, key, val, next);
+    TreeNode!(K, V) parent;  // red-black tree links
+    TreeNode!(K, V) left;
+    TreeNode!(K, V) right;
+    TreeNode!(K, V) prev;    // needed to unlink next upon deletion
+    bool red;
+
+    this(size_t hash, K key, V val, HashMapNode!(K, V) next) {
+        super(hash, key, val, next);
+    }
+
+    /**
+     * Returns root of tree containing this node.
+     */
+    final TreeNode!(K, V) root() {
+        for (TreeNode!(K, V) r = this, p;;) {
+            if ((p = r.parent) is null)
+                return r;
+            r = p;
         }
+    }
 
-        /**
-         * Returns root of tree containing this node.
-         */
-        final TreeNode!(K, V) root() {
-            for (TreeNode!(K, V) r = this, p;;) {
-                if ((p = r.parent) is null)
-                    return r;
-                r = p;
+    /**
+     * Ensures that the given root is the first node of its bin.
+     */
+    static void moveRootToFront(K, V)(HashMapNode!(K, V)[] tab, TreeNode!(K, V) root) {
+        size_t n;
+        if (root !is null && tab !is null && (n = tab.length) > 0) {
+            size_t index = (n - 1) & root.hash;
+            TreeNode!(K, V) first = cast(TreeNode!(K, V))tab[index];
+            if (root != first) {
+                HashMapNode!(K, V) rn;
+                tab[index] = root;
+                TreeNode!(K, V) rp = root.prev;
+                if ((rn = root.next) !is null)
+                    (cast(TreeNode!(K, V))rn).prev = rp;
+                if (rp !is null)
+                    rp.next = rn;
+                if (first !is null)
+                    first.prev = root;
+                root.next = first;
+                root.prev = null;
             }
+            assert(checkInvariants(root));
         }
+    }
 
-        /**
-         * Ensures that the given root is the first node of its bin.
-         */
-        static void moveRootToFront(K, V)(HashMapNode!(K, V)[] tab, TreeNode!(K, V) root) {
-            size_t n;
-            if (root !is null && tab !is null && (n = tab.length) > 0) {
-                size_t index = (n - 1) & root.hash;
-                TreeNode!(K, V) first = cast(TreeNode!(K, V))tab[index];
-                if (root != first) {
-                    HashMapNode!(K, V) rn;
-                    tab[index] = root;
-                    TreeNode!(K, V) rp = root.prev;
-                    if ((rn = root.next) !is null)
-                        (cast(TreeNode!(K, V))rn).prev = rp;
-                    if (rp !is null)
-                        rp.next = rn;
-                    if (first !is null)
-                        first.prev = root;
-                    root.next = first;
-                    root.prev = null;
-                }
-                assert(checkInvariants(root));
-            }
-        }
-
-        /**
-         * Finds the node starting at root p with the given hash and key.
-         * The kc argument caches comparableClassFor(key) upon first use
-         * comparing keys.
-         */
-        final TreeNode!(K, V) find(size_t h, K k) {
-            TreeNode!(K, V) p = this;
-            do {
-                size_t ph; int dir; K pk;
-                TreeNode!(K, V) pl = p.left, pr = p.right, q;
-                if ((ph = p.hash) > h)
-                    p = pl;
-                else if (ph < h)
+    /**
+     * Finds the node starting at root p with the given hash and key.
+     * The kc argument caches comparableClassFor(key) upon first use
+     * comparing keys.
+     */
+    final TreeNode!(K, V) find(size_t h, K k) {
+        TreeNode!(K, V) p = this;
+        do {
+            size_t ph; int dir; K pk;
+            TreeNode!(K, V) pl = p.left, pr = p.right, q;
+            if ((ph = p.hash) > h)
+                p = pl;
+            else if (ph < h)
+                p = pr;
+            else {
+                pk = p.key;
+                if (pk == k)
+                    return p;
+                else if (pl is null)
                     p = pr;
+                else if (pr is null)
+                    p = pl;
                 else {
-                    pk = p.key;
-                    if (pk == k)
-                        return p;
-                    else if (pl is null)
-                        p = pr;
-                    else if (pr is null)
+                    // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
+                    // else { dir = std.algorithm.cmp(k, pk); }    
+
+                    // if (dir != 0)
+                    //     p = (dir < 0) ? pl : pr;
+                    // else if ((q = pr.find(h, k)) !is null)
+                    //     return q;
+                    // else
+                    //     p = pl;
+                    if(k < pk) 
                         p = pl;
-                    else {
-                        // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
-                        // else { dir = std.algorithm.cmp(k, pk); }    
-
-                        // if (dir != 0)
-                        //     p = (dir < 0) ? pl : pr;
-                        // else if ((q = pr.find(h, k)) !is null)
-                        //     return q;
-                        // else
-                        //     p = pl;
-                        if(k < pk) 
-                            p = pl;
-                        else if( k>pk) 
-                            p = pr;
-                        else if ((q = pr.find(h, k)) !is null)
-                            return q;
-                        else
-                            p = pl; 
-                    }
-                } 
-            } while (p !is null);
-            return null;
-        }
-
-        /**
-         * Calls find for root node.
-         */
-        final TreeNode!(K, V) getTreeNode(size_t h, K k) {
-            return ((parent !is null) ? root() : this).find(h, k);
-        }
-
-        /**
-         * Tie-breaking utility for ordering insertions when equal
-         * hashCodes and non-comparable. We don't require a total
-         * order, just a consistent insertion rule to maintain
-         * equivalence across rebalancings. Tie-breaking further than
-         * necessary simplifies testing a bit.
-         */
-        static int tieBreakOrder(T)(T a, T b) if(isBasicType!(T) || isSomeString!T) {
-            return (hashOf(a) <= hashOf(b) ? -1 : 1);
-        }
-
-        static int tieBreakOrder(T)(T a, T b) if(is(T == class) || is(T == interface)) {
-            int d = 0;
-            if (a is null || b is null  ||
-                (d = std.algorithm.cmp(typeid(a).name, 
-                    typeid(b).name)) == 0)
-                d = ((cast(Object)a).toHash() <= (cast(Object)b).toHash() ? -1 : 1);
-            return d;
-        }
-
-        static int tieBreakOrder(T)(T a, T b) if(is(T == struct)) {
-            int d = std.algorithm.cmp(typeid(a).name,
-                    typeid(b).name);
-            if (d == 0)
-                d = (a.toHash() <= b.toHash() ? -1 : 1);
-            return d;
-        }
-
-        /**
-         * Forms tree of the nodes linked from this node.
-         * @return root of tree
-         */
-        final void treeify(HashMapNode!(K, V)[] tab) {
-            TreeNode!(K, V) root = null;
-            for (TreeNode!(K, V) x = this, next; x !is null; x = next) {
-                next = cast(TreeNode!(K, V))x.next;
-                x.left = x.right = null;
-                if (root is null) {
-                    x.parent = null;
-                    x.red = false;
-                    root = x;
+                    else if( k>pk) 
+                        p = pr;
+                    else if ((q = pr.find(h, k)) !is null)
+                        return q;
+                    else
+                        p = pl; 
                 }
-                else {
-                    K k = x.key;
-                    size_t h = x.hash;
-                    for (TreeNode!(K, V) p = root;;) {
-                        size_t dir, ph;
-                        K pk = p.key;
-                        if ((ph = p.hash) > h)
-                            dir = -1;
-                        else if (ph < h)
-                            dir = 1;
-                        else {
-                            // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
-                            // else { dir = std.algorithm.cmp(k, pk); }
-                            if (k == pk)
-                                dir = tieBreakOrder!(K)(k, pk);
-                            else if(k > pk)
-                                dir = 1;
-                            else 
-                                dir = -1;
-                        }
+            } 
+        } while (p !is null);
+        return null;
+    }
 
-                        TreeNode!(K, V) xp = p;
-                        if ((p = (dir <= 0) ? p.left : p.right) is null) {
-                            x.parent = xp;
-                            if (dir <= 0)
-                                xp.left = x;
-                            else
-                                xp.right = x;
-                            root = balanceInsertion(root, x);
-                            break;
-                        }
-                    }
-                }
+    /**
+     * Calls find for root node.
+     */
+    final TreeNode!(K, V) getTreeNode(size_t h, K k) {
+        return ((parent !is null) ? root() : this).find(h, k);
+    }
+
+    /**
+     * Tie-breaking utility for ordering insertions when equal
+     * hashCodes and non-comparable. We don't require a total
+     * order, just a consistent insertion rule to maintain
+     * equivalence across rebalancings. Tie-breaking further than
+     * necessary simplifies testing a bit.
+     */
+    static int tieBreakOrder(T)(T a, T b) if(isBasicType!(T) || isSomeString!T) {
+        return (hashOf(a) <= hashOf(b) ? -1 : 1);
+    }
+
+    static int tieBreakOrder(T)(T a, T b) if(is(T == class) || is(T == interface)) {
+        int d = 0;
+        if (a is null || b is null  ||
+            (d = std.algorithm.cmp(typeid(a).name, 
+                typeid(b).name)) == 0)
+            d = ((cast(Object)a).toHash() <= (cast(Object)b).toHash() ? -1 : 1);
+        return d;
+    }
+
+    static int tieBreakOrder(T)(T a, T b) if(is(T == struct)) {
+        int d = std.algorithm.cmp(typeid(a).name,
+                typeid(b).name);
+        if (d == 0)
+            d = (a.toHash() <= b.toHash() ? -1 : 1);
+        return d;
+    }
+
+    /**
+     * Forms tree of the nodes linked from this node.
+     * @return root of tree
+     */
+    final void treeify(HashMapNode!(K, V)[] tab) {
+        TreeNode!(K, V) root = null;
+        for (TreeNode!(K, V) x = this, next; x !is null; x = next) {
+            next = cast(TreeNode!(K, V))x.next;
+            x.left = x.right = null;
+            if (root is null) {
+                x.parent = null;
+                x.red = false;
+                root = x;
             }
-            moveRootToFront(tab, root);
-        }
-
-        /**
-         * Returns a list of non-TreeNodes replacing those linked from
-         * this node.
-         */
-        final HashMapNode!(K, V) untreeify(HashMap!(K, V) map) {
-            HashMapNode!(K, V) hd = null, tl = null;
-            for (HashMapNode!(K, V) q = this; q !is null; q = q.next) {
-                HashMapNode!(K, V) p = map.replacementNode(q, null);
-                if (tl is null)
-                    hd = p;
-                else
-                    tl.next = p;
-                tl = p;
-            }
-            return hd;
-        }
-
-        /**
-         * Tree version of putVal.
-         */
-        final TreeNode!(K, V) putTreeVal(HashMap!(K, V) map, HashMapNode!(K, V)[] tab,
-                                       size_t h, K k, V v) {
-            // Class<?> kc = null;
-            bool searched = false;
-            TreeNode!(K, V) root = (parent !is null) ? root() : this;
-            for (TreeNode!(K, V) p = root;;) {
-                size_t ph; K pk; int dir;
-
-                if ((ph = p.hash) > h)
-                    dir = -1;
-                else if (ph < h)
-                    dir = 1;
-                else {
-                    pk = p.key;
-                    if (pk == k)
-                        return p;
+            else {
+                K k = x.key;
+                size_t h = x.hash;
+                for (TreeNode!(K, V) p = root;;) {
+                    size_t dir, ph;
+                    K pk = p.key;
+                    if ((ph = p.hash) > h)
+                        dir = -1;
+                    else if (ph < h)
+                        dir = 1;
                     else {
                         // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
                         // else { dir = std.algorithm.cmp(k, pk); }
-
-                        if(k == pk) {
-                            if (!searched) {
-                                TreeNode!(K, V) q, ch;
-                                searched = true;
-                                if (((ch = p.left) !is null &&
-                                    (q = ch.find(h, k)) !is null) ||
-                                    ((ch = p.right) !is null &&
-                                    (q = ch.find(h, k)) !is null))
-                                    return q;
-                            }
+                        if (k == pk)
                             dir = tieBreakOrder!(K)(k, pk);
-                        } else if(k > pk)
+                        else if(k > pk)
                             dir = 1;
-                        else
+                        else 
                             dir = -1;
                     }
-                }
 
-                TreeNode!(K, V) xp = p;
-                if ((p = (dir <= 0) ? p.left : p.right) is null) {
-                    HashMapNode!(K, V) xpn = xp.next;
-                    TreeNode!(K, V) x = map.newTreeNode(h, k, v, xpn);
-                    if (dir <= 0)
-                        xp.left = x;
-                    else
-                        xp.right = x;
-                    xp.next = x;
-                    x.parent = x.prev = xp;
-                    if (xpn !is null)
-                        (cast(TreeNode!(K, V))xpn).prev = x;
-                    moveRootToFront(tab, balanceInsertion(root, x));
-                    return null;
-                }
-            }
-        }
-
-        /**
-         * Removes the given node, that must be present before this call.
-         * This is messier than typical red-black deletion code because we
-         * cannot swap the contents of an interior node with a leaf
-         * successor that is pinned by "next" pointers that are accessible
-         * independently during traversal. So instead we swap the tree
-         * linkages. If the current tree appears to have too few nodes,
-         * the bin is converted back to a plain bin. (The test triggers
-         * somewhere between 2 and 6 nodes, depending on tree structure).
-         */
-        final void removeTreeNode(HashMap!(K, V) map, HashMapNode!(K, V)[] tab,
-                                  bool movable) {
-            size_t n;
-            if (tab is null || (n = tab.length) == 0)
-                return;
-            size_t index = (n - 1) & hash;
-            TreeNode!(K, V) first = cast(TreeNode!(K, V))tab[index], root = first, rl;
-            TreeNode!(K, V) succ = cast(TreeNode!(K, V))next, pred = prev;
-            if (pred is null)
-                tab[index] = first = succ;
-            else
-                pred.next = succ;
-            if (succ !is null)
-                succ.prev = pred;
-            if (first is null)
-                return;
-            if (root.parent !is null)
-                root = root.root();
-            if (root is null || root.right is null ||
-                (rl = root.left) is null || rl.left is null) {
-                tab[index] = first.untreeify(map);  // too small
-                return;
-            }
-            TreeNode!(K, V) p = this, pl = left, pr = right, replacement;
-            if (pl !is null && pr !is null) {
-                TreeNode!(K, V) s = pr, sl;
-                while ((sl = s.left) !is null) // find successor
-                    s = sl;
-                bool c = s.red; s.red = p.red; p.red = c; // swap colors
-                TreeNode!(K, V) sr = s.right;
-                TreeNode!(K, V) pp = p.parent;
-                if (s == pr) { // p was s's direct parent
-                    p.parent = s;
-                    s.right = p;
-                }
-                else {
-                    TreeNode!(K, V) sp = s.parent;
-                    if ((p.parent = sp) !is null) {
-                        if (s == sp.left)
-                            sp.left = p;
+                    TreeNode!(K, V) xp = p;
+                    if ((p = (dir <= 0) ? p.left : p.right) is null) {
+                        x.parent = xp;
+                        if (dir <= 0)
+                            xp.left = x;
                         else
-                            sp.right = p;
+                            xp.right = x;
+                        root = balanceInsertion(root, x);
+                        break;
                     }
-                    if ((s.right = pr) !is null)
-                        pr.parent = s;
                 }
-                p.left = null;
-                if ((p.right = sr) !is null)
-                    sr.parent = p;
-                if ((s.left = pl) !is null)
-                    pl.parent = s;
-                if ((s.parent = pp) is null)
-                    root = s;
-                else if (p == pp.left)
-                    pp.left = s;
-                else
-                    pp.right = s;
-                if (sr !is null)
-                    replacement = sr;
-                else
-                    replacement = p;
             }
-            else if (pl !is null)
-                replacement = pl;
-            else if (pr !is null)
-                replacement = pr;
+        }
+        moveRootToFront(tab, root);
+    }
+
+    /**
+     * Returns a list of non-TreeNodes replacing those linked from
+     * this node.
+     */
+    final HashMapNode!(K, V) untreeify(HashMap!(K, V) map) {
+        HashMapNode!(K, V) hd = null, tl = null;
+        for (HashMapNode!(K, V) q = this; q !is null; q = q.next) {
+            HashMapNode!(K, V) p = map.replacementNode(q, null);
+            if (tl is null)
+                hd = p;
             else
-                replacement = p;
-            if (replacement != p) {
-                TreeNode!(K, V) pp = replacement.parent = p.parent;
-                if (pp is null)
-                    root = replacement;
-                else if (p == pp.left)
-                    pp.left = replacement;
-                else
-                    pp.right = replacement;
-                p.left = p.right = p.parent = null;
-            }
-
-            TreeNode!(K, V) r = p.red ? root : balanceDeletion(root, replacement);
-
-            if (replacement == p) {  // detach
-                TreeNode!(K, V) pp = p.parent;
-                p.parent = null;
-                if (pp !is null) {
-                    if (p == pp.left)
-                        pp.left = null;
-                    else if (p == pp.right)
-                        pp.right = null;
-                }
-            }
-            if (movable)
-                moveRootToFront(tab, r);
+                tl.next = p;
+            tl = p;
         }
+        return hd;
+    }
 
-        /**
-         * Splits nodes in a tree bin into lower and upper tree bins,
-         * or untreeifies if now too small. Called only from resize;
-         * see above discussion about split bits and indices.
-         *
-         * @param map the map
-         * @param tab the table for recording bin heads
-         * @param index the index of the table being split
-         * @param bit the bit of hash to split on
-         */
-        final void split(HashMap!(K, V) map, HashMapNode!(K, V)[] tab, int index, int bit) {
-            TreeNode!(K, V) b = this;
-            // Relink into lo and hi lists, preserving order
-            TreeNode!(K, V) loHead = null, loTail = null;
-            TreeNode!(K, V) hiHead = null, hiTail = null;
-            int lc = 0, hc = 0;
-            for (TreeNode!(K, V) e = b, next; e !is null; e = next) {
-                next = cast(TreeNode!(K, V))e.next;
-                e.next = null;
-                if ((e.hash & bit) == 0) {
-                    if ((e.prev = loTail) is null)
-                        loHead = e;
+    /**
+     * Tree version of putVal.
+     */
+    final TreeNode!(K, V) putTreeVal(HashMap!(K, V) map, HashMapNode!(K, V)[] tab,
+                                   size_t h, K k, V v) {
+        // Class<?> kc = null;
+        bool searched = false;
+        TreeNode!(K, V) root = (parent !is null) ? root() : this;
+        for (TreeNode!(K, V) p = root;;) {
+            size_t ph; K pk; int dir;
+
+            if ((ph = p.hash) > h)
+                dir = -1;
+            else if (ph < h)
+                dir = 1;
+            else {
+                pk = p.key;
+                if (pk == k)
+                    return p;
+                else {
+                    // static if(isNumeric!(K)) { dir = std.math.cmp(cast(float)k, cast(float)pk); }
+                    // else { dir = std.algorithm.cmp(k, pk); }
+
+                    if(k == pk) {
+                        if (!searched) {
+                            TreeNode!(K, V) q, ch;
+                            searched = true;
+                            if (((ch = p.left) !is null &&
+                                (q = ch.find(h, k)) !is null) ||
+                                ((ch = p.right) !is null &&
+                                (q = ch.find(h, k)) !is null))
+                                return q;
+                        }
+                        dir = tieBreakOrder!(K)(k, pk);
+                    } else if(k > pk)
+                        dir = 1;
                     else
-                        loTail.next = e;
-                    loTail = e;
-                    ++lc;
-                }
-                else {
-                    if ((e.prev = hiTail) is null)
-                        hiHead = e;
-                    else
-                        hiTail.next = e;
-                    hiTail = e;
-                    ++hc;
+                        dir = -1;
                 }
             }
 
-            if (loHead !is null) {
-                if (lc <= UNTREEIFY_THRESHOLD)
-                    tab[index] = loHead.untreeify(map);
-                else {
-                    tab[index] = loHead;
-                    if (hiHead !is null) // (else is already treeified)
-                        loHead.treeify(tab);
-                }
-            }
-            if (hiHead !is null) {
-                if (hc <= UNTREEIFY_THRESHOLD)
-                    tab[index + bit] = hiHead.untreeify(map);
-                else {
-                    tab[index + bit] = hiHead;
-                    if (loHead !is null)
-                        hiHead.treeify(tab);
-                }
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        // Red-black tree methods, all adapted from CLR
-
-        static TreeNode!(K, V) rotateLeft(K, V)(TreeNode!(K, V) root,
-                                              TreeNode!(K, V) p) {
-            TreeNode!(K, V) r, pp, rl;
-            if (p !is null && (r = p.right) !is null) {
-                if ((rl = p.right = r.left) !is null)
-                    rl.parent = p;
-                if ((pp = r.parent = p.parent) is null)
-                    (root = r).red = false;
-                else if (pp.left == p)
-                    pp.left = r;
+            TreeNode!(K, V) xp = p;
+            if ((p = (dir <= 0) ? p.left : p.right) is null) {
+                HashMapNode!(K, V) xpn = xp.next;
+                TreeNode!(K, V) x = map.newTreeNode(h, k, v, xpn);
+                if (dir <= 0)
+                    xp.left = x;
                 else
-                    pp.right = r;
-                r.left = p;
-                p.parent = r;
+                    xp.right = x;
+                xp.next = x;
+                x.parent = x.prev = xp;
+                if (xpn !is null)
+                    (cast(TreeNode!(K, V))xpn).prev = x;
+                moveRootToFront(tab, balanceInsertion(root, x));
+                return null;
             }
-            return root;
-        }
-
-        static TreeNode!(K, V) rotateRight(K, V)(TreeNode!(K, V) root,
-                                               TreeNode!(K, V) p) {
-            TreeNode!(K, V) l, pp, lr;
-            if (p !is null && (l = p.left) !is null) {
-                if ((lr = p.left = l.right) !is null)
-                    lr.parent = p;
-                if ((pp = l.parent = p.parent) is null)
-                    (root = l).red = false;
-                else if (pp.right == p)
-                    pp.right = l;
-                else
-                    pp.left = l;
-                l.right = p;
-                p.parent = l;
-            }
-            return root;
-        }
-
-        static TreeNode!(K, V) balanceInsertion(K, V)(TreeNode!(K, V) root,
-                                                    TreeNode!(K, V) x) {
-            x.red = true;
-            for (TreeNode!(K, V) xp, xpp, xppl, xppr;;) {
-                if ((xp = x.parent) is null) {
-                    x.red = false;
-                    return x;
-                }
-                else if (!xp.red || (xpp = xp.parent) is null)
-                    return root;
-                if (xp == (xppl = xpp.left)) {
-                    if ((xppr = xpp.right) !is null && xppr.red) {
-                        xppr.red = false;
-                        xp.red = false;
-                        xpp.red = true;
-                        x = xpp;
-                    }
-                    else {
-                        if (x == xp.right) {
-                            root = rotateLeft(root, x = xp);
-                            xpp = (xp = x.parent) is null ? null : xp.parent;
-                        }
-                        if (xp !is null) {
-                            xp.red = false;
-                            if (xpp !is null) {
-                                xpp.red = true;
-                                root = rotateRight(root, xpp);
-                            }
-                        }
-                    }
-                }
-                else {
-                    if (xppl !is null && xppl.red) {
-                        xppl.red = false;
-                        xp.red = false;
-                        xpp.red = true;
-                        x = xpp;
-                    }
-                    else {
-                        if (x == xp.left) {
-                            root = rotateRight(root, x = xp);
-                            xpp = (xp = x.parent) is null ? null : xp.parent;
-                        }
-                        if (xp !is null) {
-                            xp.red = false;
-                            if (xpp !is null) {
-                                xpp.red = true;
-                                root = rotateLeft(root, xpp);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        static TreeNode!(K, V) balanceDeletion(K, V)(TreeNode!(K, V) root,
-                                                   TreeNode!(K, V) x) {
-            for (TreeNode!(K, V) xp, xpl, xpr;;)  {
-                if (x is null || x == root)
-                    return root;
-                else if ((xp = x.parent) is null) {
-                    x.red = false;
-                    return x;
-                }
-                else if (x.red) {
-                    x.red = false;
-                    return root;
-                }
-                else if ((xpl = xp.left) == x) {
-                    if ((xpr = xp.right) !is null && xpr.red) {
-                        xpr.red = false;
-                        xp.red = true;
-                        root = rotateLeft(root, xp);
-                        xpr = (xp = x.parent) is null ? null : xp.right;
-                    }
-                    if (xpr is null)
-                        x = xp;
-                    else {
-                        TreeNode!(K, V) sl = xpr.left, sr = xpr.right;
-                        if ((sr is null || !sr.red) &&
-                            (sl is null || !sl.red)) {
-                            xpr.red = true;
-                            x = xp;
-                        }
-                        else {
-                            if (sr is null || !sr.red) {
-                                if (sl !is null)
-                                    sl.red = false;
-                                xpr.red = true;
-                                root = rotateRight(root, xpr);
-                                xpr = (xp = x.parent) is null ?
-                                    null : xp.right;
-                            }
-                            if (xpr !is null) {
-                                xpr.red = (xp is null) ? false : xp.red;
-                                if ((sr = xpr.right) !is null)
-                                    sr.red = false;
-                            }
-                            if (xp !is null) {
-                                xp.red = false;
-                                root = rotateLeft(root, xp);
-                            }
-                            x = root;
-                        }
-                    }
-                }
-                else { // symmetric
-                    if (xpl !is null && xpl.red) {
-                        xpl.red = false;
-                        xp.red = true;
-                        root = rotateRight(root, xp);
-                        xpl = (xp = x.parent) is null ? null : xp.left;
-                    }
-                    if (xpl is null)
-                        x = xp;
-                    else {
-                        TreeNode!(K, V) sl = xpl.left, sr = xpl.right;
-                        if ((sl is null || !sl.red) &&
-                            (sr is null || !sr.red)) {
-                            xpl.red = true;
-                            x = xp;
-                        }
-                        else {
-                            if (sl is null || !sl.red) {
-                                if (sr !is null)
-                                    sr.red = false;
-                                xpl.red = true;
-                                root = rotateLeft(root, xpl);
-                                xpl = (xp = x.parent) is null ?
-                                    null : xp.left;
-                            }
-                            if (xpl !is null) {
-                                xpl.red = (xp is null) ? false : xp.red;
-                                if ((sl = xpl.left) !is null)
-                                    sl.red = false;
-                            }
-                            if (xp !is null) {
-                                xp.red = false;
-                                root = rotateRight(root, xp);
-                            }
-                            x = root;
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Recursive invariant check
-         */
-        static bool checkInvariants(K, V)(TreeNode!(K, V) t) {
-            TreeNode!(K, V) tp = t.parent, tl = t.left, tr = t.right,
-                tb = t.prev, tn = cast(TreeNode!(K, V))t.next;
-            if (tb !is null && tb.next != t)
-                return false;
-            if (tn !is null && tn.prev != t)
-                return false;
-            if (tp !is null && t != tp.left && t != tp.right)
-                return false;
-            if (tl !is null && (tl.parent != t || tl.hash > t.hash))
-                return false;
-            if (tr !is null && (tr.parent != t || tr.hash < t.hash))
-                return false;
-            if (t.red && tl !is null && tl.red && tr !is null && tr.red)
-                return false;
-            if (tl !is null && !checkInvariants(tl))
-                return false;
-            if (tr !is null && !checkInvariants(tr))
-                return false;
-            return true;
         }
     }
-   
+
+    /**
+     * Removes the given node, that must be present before this call.
+     * This is messier than typical red-black deletion code because we
+     * cannot swap the contents of an interior node with a leaf
+     * successor that is pinned by "next" pointers that are accessible
+     * independently during traversal. So instead we swap the tree
+     * linkages. If the current tree appears to have too few nodes,
+     * the bin is converted back to a plain bin. (The test triggers
+     * somewhere between 2 and 6 nodes, depending on tree structure).
+     */
+    final void removeTreeNode(HashMap!(K, V) map, HashMapNode!(K, V)[] tab,
+                              bool movable) {
+        size_t n;
+        if (tab is null || (n = tab.length) == 0)
+            return;
+        size_t index = (n - 1) & hash;
+        TreeNode!(K, V) first = cast(TreeNode!(K, V))tab[index], root = first, rl;
+        TreeNode!(K, V) succ = cast(TreeNode!(K, V))next, pred = prev;
+        if (pred is null)
+            tab[index] = first = succ;
+        else
+            pred.next = succ;
+        if (succ !is null)
+            succ.prev = pred;
+        if (first is null)
+            return;
+        if (root.parent !is null)
+            root = root.root();
+        if (root is null || root.right is null ||
+            (rl = root.left) is null || rl.left is null) {
+            tab[index] = first.untreeify(map);  // too small
+            return;
+        }
+        TreeNode!(K, V) p = this, pl = left, pr = right, replacement;
+        if (pl !is null && pr !is null) {
+            TreeNode!(K, V) s = pr, sl;
+            while ((sl = s.left) !is null) // find successor
+                s = sl;
+            bool c = s.red; s.red = p.red; p.red = c; // swap colors
+            TreeNode!(K, V) sr = s.right;
+            TreeNode!(K, V) pp = p.parent;
+            if (s == pr) { // p was s's direct parent
+                p.parent = s;
+                s.right = p;
+            }
+            else {
+                TreeNode!(K, V) sp = s.parent;
+                if ((p.parent = sp) !is null) {
+                    if (s == sp.left)
+                        sp.left = p;
+                    else
+                        sp.right = p;
+                }
+                if ((s.right = pr) !is null)
+                    pr.parent = s;
+            }
+            p.left = null;
+            if ((p.right = sr) !is null)
+                sr.parent = p;
+            if ((s.left = pl) !is null)
+                pl.parent = s;
+            if ((s.parent = pp) is null)
+                root = s;
+            else if (p == pp.left)
+                pp.left = s;
+            else
+                pp.right = s;
+            if (sr !is null)
+                replacement = sr;
+            else
+                replacement = p;
+        }
+        else if (pl !is null)
+            replacement = pl;
+        else if (pr !is null)
+            replacement = pr;
+        else
+            replacement = p;
+        if (replacement != p) {
+            TreeNode!(K, V) pp = replacement.parent = p.parent;
+            if (pp is null)
+                root = replacement;
+            else if (p == pp.left)
+                pp.left = replacement;
+            else
+                pp.right = replacement;
+            p.left = p.right = p.parent = null;
+        }
+
+        TreeNode!(K, V) r = p.red ? root : balanceDeletion(root, replacement);
+
+        if (replacement == p) {  // detach
+            TreeNode!(K, V) pp = p.parent;
+            p.parent = null;
+            if (pp !is null) {
+                if (p == pp.left)
+                    pp.left = null;
+                else if (p == pp.right)
+                    pp.right = null;
+            }
+        }
+        if (movable)
+            moveRootToFront(tab, r);
+    }
+
+    /**
+     * Splits nodes in a tree bin into lower and upper tree bins,
+     * or untreeifies if now too small. Called only from resize;
+     * see above discussion about split bits and indices.
+     *
+     * @param map the map
+     * @param tab the table for recording bin heads
+     * @param index the index of the table being split
+     * @param bit the bit of hash to split on
+     */
+    final void split(HashMap!(K, V) map, HashMapNode!(K, V)[] tab, int index, int bit) {
+        TreeNode!(K, V) b = this;
+        // Relink into lo and hi lists, preserving order
+        TreeNode!(K, V) loHead = null, loTail = null;
+        TreeNode!(K, V) hiHead = null, hiTail = null;
+        int lc = 0, hc = 0;
+        for (TreeNode!(K, V) e = b, next; e !is null; e = next) {
+            next = cast(TreeNode!(K, V))e.next;
+            e.next = null;
+            if ((e.hash & bit) == 0) {
+                if ((e.prev = loTail) is null)
+                    loHead = e;
+                else
+                    loTail.next = e;
+                loTail = e;
+                ++lc;
+            }
+            else {
+                if ((e.prev = hiTail) is null)
+                    hiHead = e;
+                else
+                    hiTail.next = e;
+                hiTail = e;
+                ++hc;
+            }
+        }
+
+        if (loHead !is null) {
+            if (lc <= UNTREEIFY_THRESHOLD)
+                tab[index] = loHead.untreeify(map);
+            else {
+                tab[index] = loHead;
+                if (hiHead !is null) // (else is already treeified)
+                    loHead.treeify(tab);
+            }
+        }
+        if (hiHead !is null) {
+            if (hc <= UNTREEIFY_THRESHOLD)
+                tab[index + bit] = hiHead.untreeify(map);
+            else {
+                tab[index + bit] = hiHead;
+                if (loHead !is null)
+                    hiHead.treeify(tab);
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    // Red-black tree methods, all adapted from CLR
+
+    static TreeNode!(K, V) rotateLeft(K, V)(TreeNode!(K, V) root,
+                                          TreeNode!(K, V) p) {
+        TreeNode!(K, V) r, pp, rl;
+        if (p !is null && (r = p.right) !is null) {
+            if ((rl = p.right = r.left) !is null)
+                rl.parent = p;
+            if ((pp = r.parent = p.parent) is null)
+                (root = r).red = false;
+            else if (pp.left == p)
+                pp.left = r;
+            else
+                pp.right = r;
+            r.left = p;
+            p.parent = r;
+        }
+        return root;
+    }
+
+    static TreeNode!(K, V) rotateRight(K, V)(TreeNode!(K, V) root,
+                                           TreeNode!(K, V) p) {
+        TreeNode!(K, V) l, pp, lr;
+        if (p !is null && (l = p.left) !is null) {
+            if ((lr = p.left = l.right) !is null)
+                lr.parent = p;
+            if ((pp = l.parent = p.parent) is null)
+                (root = l).red = false;
+            else if (pp.right == p)
+                pp.right = l;
+            else
+                pp.left = l;
+            l.right = p;
+            p.parent = l;
+        }
+        return root;
+    }
+
+    static TreeNode!(K, V) balanceInsertion(K, V)(TreeNode!(K, V) root,
+                                                TreeNode!(K, V) x) {
+        x.red = true;
+        for (TreeNode!(K, V) xp, xpp, xppl, xppr;;) {
+            if ((xp = x.parent) is null) {
+                x.red = false;
+                return x;
+            }
+            else if (!xp.red || (xpp = xp.parent) is null)
+                return root;
+            if (xp == (xppl = xpp.left)) {
+                if ((xppr = xpp.right) !is null && xppr.red) {
+                    xppr.red = false;
+                    xp.red = false;
+                    xpp.red = true;
+                    x = xpp;
+                }
+                else {
+                    if (x == xp.right) {
+                        root = rotateLeft(root, x = xp);
+                        xpp = (xp = x.parent) is null ? null : xp.parent;
+                    }
+                    if (xp !is null) {
+                        xp.red = false;
+                        if (xpp !is null) {
+                            xpp.red = true;
+                            root = rotateRight(root, xpp);
+                        }
+                    }
+                }
+            }
+            else {
+                if (xppl !is null && xppl.red) {
+                    xppl.red = false;
+                    xp.red = false;
+                    xpp.red = true;
+                    x = xpp;
+                }
+                else {
+                    if (x == xp.left) {
+                        root = rotateRight(root, x = xp);
+                        xpp = (xp = x.parent) is null ? null : xp.parent;
+                    }
+                    if (xp !is null) {
+                        xp.red = false;
+                        if (xpp !is null) {
+                            xpp.red = true;
+                            root = rotateLeft(root, xpp);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static TreeNode!(K, V) balanceDeletion(K, V)(TreeNode!(K, V) root,
+                                               TreeNode!(K, V) x) {
+        for (TreeNode!(K, V) xp, xpl, xpr;;)  {
+            if (x is null || x == root)
+                return root;
+            else if ((xp = x.parent) is null) {
+                x.red = false;
+                return x;
+            }
+            else if (x.red) {
+                x.red = false;
+                return root;
+            }
+            else if ((xpl = xp.left) == x) {
+                if ((xpr = xp.right) !is null && xpr.red) {
+                    xpr.red = false;
+                    xp.red = true;
+                    root = rotateLeft(root, xp);
+                    xpr = (xp = x.parent) is null ? null : xp.right;
+                }
+                if (xpr is null)
+                    x = xp;
+                else {
+                    TreeNode!(K, V) sl = xpr.left, sr = xpr.right;
+                    if ((sr is null || !sr.red) &&
+                        (sl is null || !sl.red)) {
+                        xpr.red = true;
+                        x = xp;
+                    }
+                    else {
+                        if (sr is null || !sr.red) {
+                            if (sl !is null)
+                                sl.red = false;
+                            xpr.red = true;
+                            root = rotateRight(root, xpr);
+                            xpr = (xp = x.parent) is null ?
+                                null : xp.right;
+                        }
+                        if (xpr !is null) {
+                            xpr.red = (xp is null) ? false : xp.red;
+                            if ((sr = xpr.right) !is null)
+                                sr.red = false;
+                        }
+                        if (xp !is null) {
+                            xp.red = false;
+                            root = rotateLeft(root, xp);
+                        }
+                        x = root;
+                    }
+                }
+            }
+            else { // symmetric
+                if (xpl !is null && xpl.red) {
+                    xpl.red = false;
+                    xp.red = true;
+                    root = rotateRight(root, xp);
+                    xpl = (xp = x.parent) is null ? null : xp.left;
+                }
+                if (xpl is null)
+                    x = xp;
+                else {
+                    TreeNode!(K, V) sl = xpl.left, sr = xpl.right;
+                    if ((sl is null || !sl.red) &&
+                        (sr is null || !sr.red)) {
+                        xpl.red = true;
+                        x = xp;
+                    }
+                    else {
+                        if (sl is null || !sl.red) {
+                            if (sr !is null)
+                                sr.red = false;
+                            xpl.red = true;
+                            root = rotateLeft(root, xpl);
+                            xpl = (xp = x.parent) is null ?
+                                null : xp.left;
+                        }
+                        if (xpl !is null) {
+                            xpl.red = (xp is null) ? false : xp.red;
+                            if ((sl = xpl.left) !is null)
+                                sl.red = false;
+                        }
+                        if (xp !is null) {
+                            xp.red = false;
+                            root = rotateRight(root, xp);
+                        }
+                        x = root;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Recursive invariant check
+     */
+    static bool checkInvariants(K, V)(TreeNode!(K, V) t) {
+        TreeNode!(K, V) tp = t.parent, tl = t.left, tr = t.right,
+            tb = t.prev, tn = cast(TreeNode!(K, V))t.next;
+        if (tb !is null && tb.next != t)
+            return false;
+        if (tn !is null && tn.prev != t)
+            return false;
+        if (tp !is null && t != tp.left && t != tp.right)
+            return false;
+        if (tl !is null && (tl.parent != t || tl.hash > t.hash))
+            return false;
+        if (tr !is null && (tr.parent != t || tr.hash < t.hash))
+            return false;
+        if (t.red && tl !is null && tl.red && tr !is null && tr.red)
+            return false;
+        if (tl !is null && !checkInvariants(tl))
+            return false;
+        if (tr !is null && !checkInvariants(tr))
+            return false;
+        return true;
+    }
 }
 
+    
 /**
 * Basic hash bin node, used for most entries.  (See below for
 * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
@@ -1998,6 +2000,10 @@ class HashMapNode(K, V) : MapEntry!(K, V) {
         V oldValue = value;
         value = newValue;
         return oldValue;
+    }
+
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
     }
 
     final override bool opEquals(Object o) {

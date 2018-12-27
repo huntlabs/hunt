@@ -6,6 +6,7 @@ import hunt.container.Collection;
 import hunt.container.Set;
 
 import hunt.lang.exception;
+import hunt.lang.Object;
 import hunt.lang.common;
 
 
@@ -78,6 +79,9 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
         }
     }
 
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
     /**
      * Returns the hash code value for this set.  The hash code of a set is
      * defined to be the sum of the hash codes of the elements in the set,
@@ -106,6 +110,10 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
             return 0;
         }
     }
+
+    override string toString() {
+        return super.toString();
+    }    
 
     /**
      * Removes from this set all of its elements that are contained in the

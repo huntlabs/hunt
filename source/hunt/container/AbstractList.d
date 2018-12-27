@@ -8,13 +8,12 @@ import hunt.container.AbstractCollection;
 import hunt.container.List;
 
 import hunt.lang.exception;
+import hunt.lang.Object;
 import hunt.util.functional;
-
-
 
 abstract class AbstractList(E) : AbstractCollection!E, List!E {
 
- /**
+    /**
      * The number of times this list has been <i>structurally modified</i>.
      * Structural modifications are those that change the size of the
      * list, or otherwise perturb it in such a fashion that iterations in
@@ -84,9 +83,13 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    E get(int index) { throw new UnsupportedOperationException(""); }
-    
-    E opIndex(int index) { return get(index); }
+    E get(int index) {
+        throw new UnsupportedOperationException("");
+    }
+
+    E opIndex(int index) {
+        return get(index);
+    }
 
     /**
      * {@inheritDoc}
@@ -129,10 +132,11 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws UnsupportedOperationException {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    E removeAt(int index) { throw new UnsupportedOperationException("");  }
+    E removeAt(int index) {
+        throw new UnsupportedOperationException("");
+    }
 
-    bool remove(E o) { throw new UnsupportedOperationException(""); }
-
+    // bool remove(E o) { throw new UnsupportedOperationException(""); }
 
     // Search Operations
 
@@ -146,8 +150,10 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws ClassCastException   {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    int indexOf(E o) { throw new UnsupportedOperationException(""); }
-    
+    int indexOf(E o) {
+        throw new UnsupportedOperationException("");
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -159,8 +165,9 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @throws ClassCastException   {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    int lastIndexOf(E o) { throw new UnsupportedOperationException(""); }
-
+    int lastIndexOf(E o) {
+        throw new UnsupportedOperationException("");
+    }
 
     // Bulk Operations
 
@@ -180,7 +187,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      */
     // void clear() { throw new UnsupportedOperationException(""); }
 
-      // Comparison and hashing
+    // Comparison and hashing
 
     /**
      * Compares the specified object with this list for equality.  Returns
@@ -203,23 +210,26 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      * @param o the object to be compared for equality with this list
      * @return {@code true} if the specified object is equal to this list
      */
-    override public bool opEquals(Object o) {
+    override bool opEquals(Object o) {
         if (o is this)
             return true;
-        List!E e2 = cast(List!E)o;
+        List!E e2 = cast(List!E) o;
         if (e2 is null)
             return false;
-        
-        if(this.size() != e2.size())
+
+        if (this.size() != e2.size())
             return false;
 
-        for(int i= 0 ; i < this.size(); i++)
-        {
-            if(this.get(i)  != e2.get(i))
+        for (int i = 0; i < this.size(); i++) {
+            if (this.get(i) != e2.get(i))
                 return false;
         }
- 
+
         return true;
+    }
+
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
     }
 
     /**
@@ -233,27 +243,26 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
      */
     override size_t toHash() @trusted nothrow {
         size_t hashCode = 1;
-        try
-        {
-            static if(is(E == class)) {
-            foreach (E e ; this)
-                hashCode = 31*hashCode + (e is null ? 0 : (cast(Object)e).toHash());
+        try {
+            static if (is(E == class)) {
+                foreach (E e; this)
+                    hashCode = 31 * hashCode + (e is null ? 0 : (cast(Object) e).toHash());
             } else {
-                foreach (E e ; this)
-                    hashCode = 31*hashCode + hashOf(e);
+                foreach (E e; this)
+                    hashCode = 31 * hashCode + hashOf(e);
             }
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
 
         }
-        
-    
+
         return hashCode;
     }
 
-    override int opApply(scope int delegate(ref E) dg)
-    {
+    override string toString() {
+        return super.toString();
+    }
+
+    override int opApply(scope int delegate(ref E) dg) {
         return 0;
     }
 
@@ -292,17 +301,25 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
     // }
 }
 
-
-class EmptyList(E): AbstractList!E {
+class EmptyList(E) : AbstractList!E {
     // private static long serialVersionUID = 8842843931221139166L;
 
-    override int size() const {return 0;}
-    override bool isEmpty() {return true;}
+    override int size() const {
+        return 0;
+    }
 
-    override bool contains(E obj) {return false;}
+    override bool isEmpty() {
+        return true;
+    }
+
+    override bool contains(E obj) {
+        return false;
+    }
     // override bool containsAll(Collection!E c) { return c.isEmpty(); }
 
-    override E[] toArray() { return new E[0]; }
+    override E[] toArray() {
+        return new E[0];
+    }
 
     T[] toArray(T)(T[] a) {
         if (a.length > 0)
@@ -318,9 +335,13 @@ class EmptyList(E): AbstractList!E {
         throw new UnsupportedOperationException("");
     }
 
-    override E removeAt(int index) { throw new IndexOutOfBoundsException("Index: " ~ index.to!string); }
+    override E removeAt(int index) {
+        throw new IndexOutOfBoundsException("Index: " ~ index.to!string);
+    }
 
-    override bool remove(E o) { return false; }
+    override bool remove(E o) {
+        return false;
+    }
 
     override int indexOf(E o) {
         return -1;
@@ -330,14 +351,17 @@ class EmptyList(E): AbstractList!E {
         return -1;
     }
 
-
     override bool opEquals(Object o) {
-        return (typeid(o) == typeid(List!E)) && (cast(List!E)o).isEmpty();
+        return (typeid(o) == typeid(List!E)) && (cast(List!E) o).isEmpty();
     }
 
-    int hashCode() { return 1; }
+    int hashCode() {
+        return 1;
+    }
 
-    override size_t toHash() { return 1; }
+    override size_t toHash() {
+        return 1;
+    }
 
     // override
     // bool removeIf(Predicate!E filter) {
@@ -354,8 +378,7 @@ class EmptyList(E): AbstractList!E {
     // }
 
     // Override default methods in Collection
-    override int opApply(scope int delegate(ref E) dg)
-    {
+    override int opApply(scope int delegate(ref E) dg) {
         return 0;
     }
 

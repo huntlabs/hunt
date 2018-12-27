@@ -1,15 +1,15 @@
 module hunt.container.HashSet;
 
-
 import hunt.container.AbstractSet;
 import hunt.container.Collection;
 import hunt.container.HashMap;
 import hunt.container.LinkedHashMap;
 import hunt.container.Set;
 
+import hunt.lang.Object;
+
 import std.algorithm;
 import std.range;
-
 
 /**
  * This class implements the <tt>Set</tt> interface, backed by a hash table
@@ -69,17 +69,14 @@ import std.range;
  * @see     HashMap
  * @since   1.2
  */
-class HashSet(E) : AbstractSet!E, Set!E 
-{
-    // enum long serialVersionUID = -5024744406713321676L;
+class HashSet(E) : AbstractSet!E, Set!E {
 
     protected HashMap!(E, Object) map;
 
     // Dummy value to associate with an Object in the backing Map
     private __gshared static Object PRESENT; // = new Object();
 
-    shared static this()
-    {
+    shared static this() {
         PRESENT = new Object();
     }
 
@@ -101,7 +98,7 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @throws NullPointerException if the specified collection is null
      */
     this(Collection!E c) {
-        map = new HashMap!(E, Object)(std.algorithm.max(cast(int) (c.size()/.75f) + 1, 16));
+        map = new HashMap!(E, Object)(std.algorithm.max(cast(int)(c.size() / .75f) + 1, 16));
         addAll(c);
     }
 
@@ -158,7 +155,7 @@ class HashSet(E) : AbstractSet!E, Set!E
         return map.byKey;
     }
 
-   /**
+    /**
      * Returns the number of elements in this set (its cardinality).
      *
      * @return the number of elements in this set (its cardinality)
@@ -218,7 +215,7 @@ class HashSet(E) : AbstractSet!E, Set!E
      * @return <tt>true</tt> if the set contained the specified element
      */
     override bool remove(E o) {
-        return map.remove(o)==PRESENT;
+        return map.remove(o) == PRESENT;
     }
 
     /**
@@ -228,7 +225,6 @@ class HashSet(E) : AbstractSet!E, Set!E
     override void clear() {
         map.clear();
     }
-
 
     /**
      * Returns a shallow copy of this <tt>HashSet</tt> instance: the elements
@@ -244,81 +240,6 @@ class HashSet(E) : AbstractSet!E, Set!E
     //         return newSet;
     //     } catch (CloneNotSupportedException e) {
     //         throw new InternalError(e);
-    //     }
-    // }
-
-    /**
-     * Save the state of this <tt>HashSet</tt> instance to a stream (that is,
-     * serialize it).
-     *
-     * @serialData The capacity of the backing <tt>HashMap</tt> instance
-     *             (int), and its load factor (float) are emitted, followed by
-     *             the size of the set (the number of elements it contains)
-     *             (int), followed by all of its elements (each an Object) in
-     *             no particular order.
-     */
-    // private void writeObject(java.io.ObjectOutputStream s)
-    //     throws java.io.IOException {
-    //     // Write out any hidden serialization magic
-    //     s.defaultWriteObject();
-
-    //     // Write out HashMap capacity and load factor
-    //     s.writeInt(map.capacity());
-    //     s.writeFloat(map.loadFactor());
-
-    //     // Write out size
-    //     s.writeInt(map.size());
-
-    //     // Write out all elements in the proper order.
-    //     for (E e : map.keySet())
-    //         s.writeObject(e);
-    // }
-
-    /**
-     * Reconstitute the <tt>HashSet</tt> instance from a stream (that is,
-     * deserialize it).
-     */
-    // private void readObject(java.io.ObjectInputStream s)
-    //     throws java.io.IOException, ClassNotFoundException {
-    //     // Read in any hidden serialization magic
-    //     s.defaultReadObject();
-
-    //     // Read capacity and verify non-negative.
-    //     int capacity = s.readInt();
-    //     if (capacity < 0) {
-    //         throw new InvalidObjectException("Illegal capacity: " ~
-    //                                          capacity);
-    //     }
-
-    //     // Read load factor and verify positive and non NaN.
-    //     float loadFactor = s.readFloat();
-    //     if (loadFactor <= 0 || Float.isNaN(loadFactor)) {
-    //         throw new InvalidObjectException("Illegal load factor: " ~
-    //                                          loadFactor);
-    //     }
-
-    //     // Read size and verify non-negative.
-    //     int size = s.readInt();
-    //     if (size < 0) {
-    //         throw new InvalidObjectException("Illegal size: " ~
-    //                                          size);
-    //     }
-
-    //     // Set the capacity according to the size and load factor ensuring that
-    //     // the HashMap is at least 25% full but clamping to maximum capacity.
-    //     capacity = (int) std.algorithm.min(size * std.algorithm.min(1 / loadFactor, 4.0f),
-    //             HashMap.MAXIMUM_CAPACITY);
-
-    //     // Create backing HashMap
-    //     map = (((HashSet<?>)this) instanceof LinkedHashSet ?
-    //            new LinkedHashMap!(E, Object)(capacity, loadFactor) :
-    //            new HashMap!(E, Object)(capacity, loadFactor));
-
-    //     // Read in all elements in the proper order.
-    //     for (int i=0; i<size; i++) {
-    //         
-    //             E e = (E) s.readObject();
-    //         map.put(e, PRESENT);
     //     }
     // }
 
@@ -340,10 +261,27 @@ class HashSet(E) : AbstractSet!E, Set!E
 
     override int opApply(scope int delegate(ref E) dg) {
         int result = 0;
-        foreach(E v; map.byKey) {
+        foreach (E v; map.byKey) {
             result = dg(v);
-            if(result != 0) return result;
+            if (result != 0)
+                return result;
         }
         return result;
+    }
+
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+
+    override bool opEquals(Object o) {
+        return super.opEquals(o);
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+
+    override string toString() {
+        return super.toString();
     }
 }
