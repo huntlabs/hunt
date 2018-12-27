@@ -22,6 +22,8 @@ import hunt.time.zone.ZoneRulesException;
 import hunt.time.util.common;
 import hunt.time.zone.TzdbZoneRulesProvider;
 
+version (HUNT_DEBUG) import hunt.logging.ConsoleLogger;
+
 /**
  * Provider of time-zone rules to the system.
  * !(p)
@@ -85,8 +87,8 @@ public abstract class ZoneRulesProvider {
     /**
      * The zone ID data
      */
-     static /* volatile */ Set!(string) ZONE_IDS;
-    static this()
+    __gshared Set!(string) ZONE_IDS;
+    shared static this()
     {
         ZoneRulesProvider.registerProvider(new TzdbZoneRulesProvider());
     }
@@ -253,6 +255,7 @@ public abstract class ZoneRulesProvider {
      */
     private static ZoneRulesProvider getProvider(string zoneId) {
         ZoneRulesProvider provider = ZONES.get(zoneId);
+        version (HUNT_DEBUG) tracef("zoneId=%s, ZONES.size=%d", zoneId, ZONES.size());
         if (provider is null) {
             if (ZONES.isEmpty()) {
                 throw new ZoneRulesException("No time-zone data files registered");

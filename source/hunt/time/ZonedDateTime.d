@@ -2256,9 +2256,9 @@ public  class ZonedDateTime
      *
      * @return the instance of {@code Ser}, not null
      */
-    private Object writeReplace() {
-        return new Ser(Ser.ZONE_DATE_TIME_TYPE, this);
-    }
+    // private Object writeReplace() {
+    //     return new Ser(Ser.ZONE_DATE_TIME_TYPE, this);
+    // }
 
     /**
      * Defend against malicious streams.
@@ -2271,18 +2271,18 @@ public  class ZonedDateTime
     //     throw new InvalidObjectException("Deserialization via serialization delegate");
     // }
 
-    void writeExternal(DataOutput _out) /*throws IOException*/ {
-        dateTime.writeExternal(_out);
-        offset.writeExternal(_out);
-        zone.write(_out);
-    }
+    // void writeExternal(DataOutput _out) /*throws IOException*/ {
+    //     dateTime.writeExternal(_out);
+    //     offset.writeExternal(_out);
+    //     zone.write(_out);
+    // }
 
-    static ZonedDateTime readExternal(ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
-        LocalDateTime dateTime = LocalDateTime.readExternal(_in);
-        ZoneOffset offset = ZoneOffset.readExternal(_in);
-        ZoneId zone = cast(ZoneId) Ser.read(_in);
-        return ZonedDateTime.ofLenient(dateTime, offset, zone);
-    }
+    // static ZonedDateTime readExternal(ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
+    //     LocalDateTime dateTime = LocalDateTime.readExternal(_in);
+    //     ZoneOffset offset = ZoneOffset.readExternal(_in);
+    //     ZoneId zone = cast(ZoneId) Ser.read(_in);
+    //     return ZonedDateTime.ofLenient(dateTime, offset, zone);
+    // }
 
     override
      int compareTo(ChronoZonedDateTime!(ChronoLocalDate) other) {

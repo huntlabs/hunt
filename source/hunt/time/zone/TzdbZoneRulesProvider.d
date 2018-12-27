@@ -21,6 +21,8 @@ import std.file;
 import std.path;
 import std.stdio;
 
+version (HUNT_DEBUG) import hunt.logging.ConsoleLogger;
+
 /**
  * Loads time-zone rules for 'TZDB'.
  *
@@ -55,11 +57,12 @@ final class TzdbZoneRulesProvider : ZoneRulesProvider {
 
         regionToRules = new HashMap!(string, Object)();
         //@gxc load timezone database
+        
         try {
             string resourcePath = dirName(thisExePath()) ~ "/resources";
             string resourceName = buildPath(resourcePath, "tzdb.dat");
+            version(HUNT_DEBUG) tracef("loading timezone database: %s", resourceName);
             if(!exists(resourceName)) {
-                import hunt.logging;
                 version(HUNT_DEBUG) warningf("File does not exist: %s", resourceName);
             } else {
                 File f = File(resourceName,"r");

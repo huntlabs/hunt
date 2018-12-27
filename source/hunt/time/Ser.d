@@ -122,53 +122,53 @@ final class Ser : Externalizable {
     }
 
     static void writeInternal(byte type, Object object, ObjectOutput _out) /*throws IOException*/ {
-        _out.writeByte(type);
-        switch (type) {
-            case DURATION_TYPE:
-                (cast(Duration) object).writeExternal(_out);
-                break;
-            case INSTANT_TYPE:
-                (cast(Instant) object).writeExternal(_out);
-                break;
-            case LOCAL_DATE_TYPE:
-                (cast(LocalDate) object).writeExternal(_out);
-                break;
-            case LOCAL_DATE_TIME_TYPE:
-                (cast(LocalDateTime) object).writeExternal(_out);
-                break;
-            case LOCAL_TIME_TYPE:
-                (cast(LocalTime) object).writeExternal(_out);
-                break;
-            case ZONE_REGION_TYPE:
-                (cast(ZoneRegion) object).writeExternal(_out);
-                break;
-            case ZONE_OFFSET_TYPE:
-                (cast(ZoneOffset) object).writeExternal(_out);
-                break;
-            case ZONE_DATE_TIME_TYPE:
-                (cast(ZonedDateTime) object).writeExternal(_out);
-                break;
-            case OFFSET_TIME_TYPE:
-                (cast(OffsetTime) object).writeExternal(_out);
-                break;
-            case OFFSET_DATE_TIME_TYPE:
-                (cast(OffsetDateTime) object).writeExternal(_out);
-                break;
-            case YEAR_TYPE:
-                (cast(Year) object).writeExternal(_out);
-                break;
-            case YEAR_MONTH_TYPE:
-                (cast(YearMonth) object).writeExternal(_out);
-                break;
-            case MONTH_DAY_TYPE:
-                (cast(MonthDay) object).writeExternal(_out);
-                break;
-            case PERIOD_TYPE:
-                (cast(Period) object).writeExternal(_out);
-                break;
-            default:
-                throw new InvalidClassException("Unknown serialized type");
-        }
+        // _out.writeByte(type);
+        // switch (type) {
+        //     case DURATION_TYPE:
+        //         (cast(Duration) object).writeExternal(_out);
+        //         break;
+        //     case INSTANT_TYPE:
+        //         (cast(Instant) object).writeExternal(_out);
+        //         break;
+        //     case LOCAL_DATE_TYPE:
+        //         (cast(LocalDate) object).writeExternal(_out);
+        //         break;
+        //     case LOCAL_DATE_TIME_TYPE:
+        //         (cast(LocalDateTime) object).writeExternal(_out);
+        //         break;
+        //     case LOCAL_TIME_TYPE:
+        //         (cast(LocalTime) object).writeExternal(_out);
+        //         break;
+        //     case ZONE_REGION_TYPE:
+        //         (cast(ZoneRegion) object).writeExternal(_out);
+        //         break;
+        //     case ZONE_OFFSET_TYPE:
+        //         (cast(ZoneOffset) object).writeExternal(_out);
+        //         break;
+        //     case ZONE_DATE_TIME_TYPE:
+        //         (cast(ZonedDateTime) object).writeExternal(_out);
+        //         break;
+        //     case OFFSET_TIME_TYPE:
+        //         (cast(OffsetTime) object).writeExternal(_out);
+        //         break;
+        //     case OFFSET_DATE_TIME_TYPE:
+        //         (cast(OffsetDateTime) object).writeExternal(_out);
+        //         break;
+        //     case YEAR_TYPE:
+        //         (cast(Year) object).writeExternal(_out);
+        //         break;
+        //     case YEAR_MONTH_TYPE:
+        //         (cast(YearMonth) object).writeExternal(_out);
+        //         break;
+        //     case MONTH_DAY_TYPE:
+        //         (cast(MonthDay) object).writeExternal(_out);
+        //         break;
+        //     case PERIOD_TYPE:
+        //         (cast(Period) object).writeExternal(_out);
+        //         break;
+        //     default:
+        //         throw new InvalidClassException("Unknown serialized type");
+        // }
     }
 
     //-----------------------------------------------------------------------
@@ -211,24 +211,25 @@ final class Ser : Externalizable {
     }
 
     private static Object readInternal(byte type, ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
-        switch (type) {
-            case DURATION_TYPE: return Duration.readExternal(_in);
-            case INSTANT_TYPE: return Instant.readExternal(_in);
-            case LOCAL_DATE_TYPE: return LocalDate.readExternal(_in);
-            case LOCAL_DATE_TIME_TYPE: return LocalDateTime.readExternal(_in);
-            case LOCAL_TIME_TYPE: return LocalTime.readExternal(_in);
-            case ZONE_DATE_TIME_TYPE: return ZonedDateTime.readExternal(_in);
-            case ZONE_OFFSET_TYPE: return ZoneOffset.readExternal(_in);
-            case ZONE_REGION_TYPE: return ZoneRegion.readExternal(_in);
-            case OFFSET_TIME_TYPE: return OffsetTime.readExternal(_in);
-            case OFFSET_DATE_TIME_TYPE: return OffsetDateTime.readExternal(_in);
-            case YEAR_TYPE: return Year.readExternal(_in);
-            case YEAR_MONTH_TYPE: return YearMonth.readExternal(_in);
-            case MONTH_DAY_TYPE: return MonthDay.readExternal(_in);
-            case PERIOD_TYPE: return Period.readExternal(_in);
-            default:
-                throw new Exception("Unknown serialized type");
-        }
+        // switch (type) {
+        //     case DURATION_TYPE: return Duration.readExternal(_in);
+        //     case INSTANT_TYPE: return Instant.readExternal(_in);
+        //     case LOCAL_DATE_TYPE: return LocalDate.readExternal(_in);
+        //     case LOCAL_DATE_TIME_TYPE: return LocalDateTime.readExternal(_in);
+        //     case LOCAL_TIME_TYPE: return LocalTime.readExternal(_in);
+        //     case ZONE_DATE_TIME_TYPE: return ZonedDateTime.readExternal(_in);
+        //     case ZONE_OFFSET_TYPE: return ZoneOffset.readExternal(_in);
+        //     case ZONE_REGION_TYPE: return ZoneRegion.readExternal(_in);
+        //     case OFFSET_TIME_TYPE: return OffsetTime.readExternal(_in);
+        //     case OFFSET_DATE_TIME_TYPE: return OffsetDateTime.readExternal(_in);
+        //     case YEAR_TYPE: return Year.readExternal(_in);
+        //     case YEAR_MONTH_TYPE: return YearMonth.readExternal(_in);
+        //     case MONTH_DAY_TYPE: return MonthDay.readExternal(_in);
+        //     case PERIOD_TYPE: return Period.readExternal(_in);
+        //     default:
+        //         throw new Exception("Unknown serialized type");
+        // }
+        return null;
     }
 
     /**

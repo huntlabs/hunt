@@ -815,10 +815,10 @@ public final class ZoneOffset : ZoneId, TemporalAccessor, TemporalAdjuster,
      *
      * @return the instance of {@code Ser}, not null
      */
-    private Object writeReplace()
-    {
-        return new Ser(Ser.ZONE_OFFSET_TYPE, this);
-    }
+    // private Object writeReplace()
+    // {
+    //     return new Ser(Ser.ZONE_OFFSET_TYPE, this);
+    // }
 
     /**
      * Defend against malicious streams.
@@ -831,28 +831,28 @@ public final class ZoneOffset : ZoneId, TemporalAccessor, TemporalAdjuster,
     //     throw new InvalidObjectException("Deserialization via serialization delegate");
     // }
 
-    override void write(DataOutput _out) /*throws IOException*/
-    {
-        _out.writeByte(Ser.ZONE_OFFSET_TYPE);
-        writeExternal(_out);
-    }
+    // override void write(DataOutput _out) /*throws IOException*/
+    // {
+    //     _out.writeByte(Ser.ZONE_OFFSET_TYPE);
+    //     writeExternal(_out);
+    // }
 
-    void writeExternal(DataOutput _out) /*throws IOException*/
-    {
-        int offsetSecs = _totalSeconds;
-        int offsetByte = offsetSecs % 900 == 0 ? offsetSecs / 900 : 127; // compress to -72 to +72
-        _out.writeByte(offsetByte);
-        if (offsetByte == 127)
-        {
-            _out.writeInt(offsetSecs);
-        }
-    }
+    // void writeExternal(DataOutput _out) /*throws IOException*/
+    // {
+    //     int offsetSecs = _totalSeconds;
+    //     int offsetByte = offsetSecs % 900 == 0 ? offsetSecs / 900 : 127; // compress to -72 to +72
+    //     _out.writeByte(offsetByte);
+    //     if (offsetByte == 127)
+    //     {
+    //         _out.writeInt(offsetSecs);
+    //     }
+    // }
 
-    static ZoneOffset readExternal(DataInput _in) /*throws IOException*/
-    {
-        int offsetByte = _in.readByte();
-        return (offsetByte == 127 ? ZoneOffset.ofTotalSeconds(_in.readInt())
-                : ZoneOffset.ofTotalSeconds(offsetByte * 900));
-    }
+    // static ZoneOffset readExternal(DataInput _in) /*throws IOException*/
+    // {
+    //     int offsetByte = _in.readByte();
+    //     return (offsetByte == 127 ? ZoneOffset.ofTotalSeconds(_in.readInt())
+    //             : ZoneOffset.ofTotalSeconds(offsetByte * 900));
+    // }
 
 }
