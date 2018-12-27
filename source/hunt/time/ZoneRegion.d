@@ -151,19 +151,19 @@ final class ZoneRegion : ZoneId , Serializable {
     //     throw new InvalidObjectException("Deserialization via serialization delegate");
     // }
 
-    override
-    void write(DataOutput _out) /*throws IOException*/ {
-        _out.writeByte(Ser.ZONE_REGION_TYPE);
-        writeExternal(_out);
-    }
+    // override
+    // void write(DataOutput _out) /*throws IOException*/ {
+    //     _out.writeByte(Ser.ZONE_REGION_TYPE);
+    //     writeExternal(_out);
+    // }
 
-    void writeExternal(DataOutput _out) /*throws IOException*/ {
-        _out.writeUTF(id);
-    }
+    // void writeExternal(DataOutput _out) /*throws IOException*/ {
+    //     _out.writeUTF(id);
+    // }
 
-    static ZoneId readExternal(DataInput _in) /*throws IOException*/ {
-        string id = _in.readUTF();
-        return ZoneId.of(id, false);
-    }
+    // static ZoneId readExternal(DataInput _in) /*throws IOException*/ {
+    //     string id = _in.readUTF();
+    //     return ZoneId.of(id, false);
+    // }
 
 }

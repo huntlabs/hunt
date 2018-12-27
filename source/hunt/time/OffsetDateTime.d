@@ -1953,15 +1953,15 @@ public final class OffsetDateTime
     //     throw new InvalidObjectException("Deserialization via serialization delegate");
     // }
 
-    void writeExternal(ObjectOutput _out) /*throws IOException*/ {
-        dateTime.writeExternal(_out);
-        offset.writeExternal(_out);
-    }
+    // void writeExternal(ObjectOutput _out) /*throws IOException*/ {
+    //     dateTime.writeExternal(_out);
+    //     offset.writeExternal(_out);
+    // }
 
-    static OffsetDateTime readExternal(ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
-        LocalDateTime dateTime = LocalDateTime.readExternal(_in);
-        ZoneOffset offset = ZoneOffset.readExternal(_in);
-        return OffsetDateTime.of(dateTime, offset);
-    }
+    // static OffsetDateTime readExternal(ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
+    //     LocalDateTime dateTime = LocalDateTime.readExternal(_in);
+    //     ZoneOffset offset = ZoneOffset.readExternal(_in);
+    //     return OffsetDateTime.of(dateTime, offset);
+    // }
 
 }

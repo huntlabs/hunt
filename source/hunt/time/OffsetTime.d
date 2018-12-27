@@ -1419,15 +1419,15 @@ public final class OffsetTime
     //     throw new InvalidObjectException("Deserialization via serialization delegate");
     // }
 
-    void writeExternal(ObjectOutput _out) /*throws IOException*/ {
-        time.writeExternal(_out);
-        offset.writeExternal(_out);
-    }
+    // void writeExternal(ObjectOutput _out) /*throws IOException*/ {
+    //     time.writeExternal(_out);
+    //     offset.writeExternal(_out);
+    // }
 
-    static OffsetTime readExternal(ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
-        LocalTime time = LocalTime.readExternal(_in);
-        ZoneOffset offset = ZoneOffset.readExternal(_in);
-        return OffsetTime.of(time, offset);
-    }
+    // static OffsetTime readExternal(ObjectInput _in) /*throws IOException, ClassNotFoundException*/ {
+    //     LocalTime time = LocalTime.readExternal(_in);
+    //     ZoneOffset offset = ZoneOffset.readExternal(_in);
+    //     return OffsetTime.of(time, offset);
+    // }
 
 }

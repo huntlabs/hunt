@@ -17,7 +17,7 @@ import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.UnsupportedTemporalTypeException;
 import hunt.time.zone.ZoneRules;
 import hunt.time.zone.ZoneRulesException;
-import hunt.time.zone.ZoneRulesProvider;
+// import hunt.time.zone.ZoneRulesProvider;
 import hunt.container.HashSet;
 import hunt.time.util.Locale;
 import hunt.container;
@@ -278,9 +278,9 @@ public abstract class ZoneId : Serializable {
      *
      * @return a modifiable copy of the set of zone IDs, not null
      */
-    public static Set!(string) getAvailableZoneIds() {
-        return new HashSet!(string)(ZoneRulesProvider.getAvailableZoneIds());
-    }
+    // public static Set!(string) getAvailableZoneIds() {
+    //     return new HashSet!(string)(ZoneRulesProvider.getAvailableZoneIds());
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -638,10 +638,10 @@ public abstract class ZoneId : Serializable {
      * @return the instance of {@code Ser}, not null
      */
     // this is here for serialization Javadoc
-    private Object writeReplace() {
-        return new Ser(Ser.ZONE_REGION_TYPE, this);
-    }
+    // private Object writeReplace() {
+    //     return new Ser(Ser.ZONE_REGION_TYPE, this);
+    // }
 
-    abstract void write(DataOutput _out) /*throws IOException*/;
+    // abstract void write(DataOutput _out) /*throws IOException*/;
 
 }
