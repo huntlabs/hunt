@@ -132,20 +132,20 @@ class Collections {
 
 
 
-private static class SingletonSet(E) : AbstractSet!E
+private class SingletonSet(E) : AbstractSet!E
 {
 
     private E element;
 
     this(E e) {element = e;}
 
-    bool remove(E o) {
+    override bool remove(E o) {
         return true;
     }
     override
-    int size() {return 1;}
+    int size() const {return 1;}
 
-    bool contains(E)(E o) {return o == element;}
+    override bool contains(E)(E o) {return o == element;}
 
     override
     int opApply(scope int delegate(ref E) dg) {

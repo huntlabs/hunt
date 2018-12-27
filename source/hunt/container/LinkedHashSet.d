@@ -102,7 +102,7 @@ import std.range;
  * @since   1.4
  */
 
-public class LinkedHashSet(E) : HashSet!(E) {
+class LinkedHashSet(E) : HashSet!(E) {
 
     // private static final long serialVersionUID = -2851667679971038690L;
 
@@ -115,7 +115,7 @@ public class LinkedHashSet(E) : HashSet!(E) {
      * @throws     IllegalArgumentException  if the initial capacity is less
      *               than zero, or if the load factor is nonpositive
      */
-    public this(int initialCapacity, float loadFactor) {
+    this(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor, true);
     }
 
@@ -127,7 +127,7 @@ public class LinkedHashSet(E) : HashSet!(E) {
      * @throws  IllegalArgumentException if the initial capacity is less
      *              than zero
      */
-    public this(int initialCapacity) {
+    this(int initialCapacity) {
         super(initialCapacity, .75f, true);
     }
 
@@ -135,7 +135,7 @@ public class LinkedHashSet(E) : HashSet!(E) {
      * Constructs a new, empty linked hash set with the default initial
      * capacity (16) and load factor (0.75).
      */
-    public this() {
+    this() {
         super(16, .75f, true);
     }
 
@@ -149,10 +149,16 @@ public class LinkedHashSet(E) : HashSet!(E) {
      *           this set
      * @throws NullPointerException if the specified collection is null
      */
-    public this(Collection!E c) {
+    this(Collection!E c) {
         super(std.algorithm.max(2*c.size(), 11), .75f, true);
         addAll(c);
     }
+
+    this(E[] c) {
+        super(cast(int)std.algorithm.max(2*c.length, 11), .75f, true);
+        addAll(c);
+    }
+
 
     /**
      * Creates a <em><a href="Spliterator.html#binding">late-binding</a></em>
@@ -174,7 +180,7 @@ public class LinkedHashSet(E) : HashSet!(E) {
      * @since 1.8
      */
     // override
-    // public Spliterator!(E) spliterator() {
+    // Spliterator!(E) spliterator() {
     //     return Spliterators.spliterator(this, Spliterator.DISTINCT | Spliterator.ORDERED);
     // }
 }

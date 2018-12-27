@@ -102,6 +102,11 @@ class HashSet(E) : AbstractSet!E, Set!E {
         addAll(c);
     }
 
+    this(E[] c) {
+        map = new HashMap!(E, Object)(std.algorithm.max(cast(int)(c.length / .75f) + 1, 16));
+        addAll(c);
+    }
+
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * the specified initial capacity and the specified load factor.
