@@ -10,7 +10,7 @@
  */
 module hunt.logging.Logger;
 
-import hunt.concurrent.thread.Utils;
+import hunt.concurrent.thread.Helper;
 
 import core.thread;
 

@@ -1,4 +1,4 @@
-module hunt.concurrent.thread.Utils;
+module hunt.concurrent.thread.Helper;
 
 import core.thread;
 

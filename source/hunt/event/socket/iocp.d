@@ -22,7 +22,7 @@ import hunt.event.socket.common;
 import hunt.event.core;
 import hunt.logging;
 import hunt.lang.common;
-import hunt.concurrent.thread.Utils;
+import hunt.concurrent.thread.Helper;
 
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
