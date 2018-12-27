@@ -1,9 +1,10 @@
-import std.stdio;
-
-import hunt.lang.exception;
-import hunt.util.UnitTest;
+import hunt.concurrent.thread;
+import hunt.datetime;
 import hunt.logging;
+import hunt.util.memory;
+import hunt.util.UnitTest;
 
+import test.AtomicTest;
 import test.BigIntegerTest;
 import test.JsonHelperTest;
 import test.LinkedBlockingQueueTest;
@@ -16,16 +17,14 @@ import test.ThreadPoolExecutorTest;
 import test.ThreadTest;
 
 import core.thread;
-
-import hunt.concurrent.thread;
-import hunt.util.memory;
-import hunt.datetime;
+import std.stdio;
 
 void main()
 {
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
+	testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// testTask();
 
@@ -34,8 +33,8 @@ void main()
 	// testUnits!(MimeTypeTest);
 	// testUnits!(ThreadPoolExecutorTest);
 	// testUnits!(ThreadTest);
-	testUnits!(NullableTest);
-	testUnits!(NumberTest);
+	// testUnits!(NullableTest);
+	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
 
 	// testLockSupport01();

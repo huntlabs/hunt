@@ -24,11 +24,8 @@ class AtomicHelper {
     }
 
     static T getAndAdd(T, U)(ref T stuff, U delta) {
-// TODO: Tasks pending completion -@zxp at 12/20/2018, 11:14:28 AM        
-// 
-        T v = stuff;
-        increment(stuff, delta);
-        return v;
+        T v = increment(stuff, delta);
+        return v - delta;
     }
 
     static T getAndSet(T, U)(ref T stuff, U newValue) {

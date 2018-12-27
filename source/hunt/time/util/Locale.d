@@ -1,9 +1,10 @@
 
 module hunt.time.util.Locale;
 
+import hunt.io.common;
 import hunt.lang.exception;
 import hunt.lang.common;
-import hunt.io.common;
+import hunt.logging;
 import hunt.container;
 import hunt.time.util.LocaleExtensions;
 // import java.text.MessageFormat;
@@ -895,7 +896,7 @@ final class Locale : Cloneable, Serializable
         // if (extensions is null) {
         //     extensions = getCompatibilityExtensions(language, script, country, variant);
         // }
-
+        tracef("language=%s, script=%s, country=%s, variant=%s", language, script, country, variant);
         implementationMissing(false);
         return null;
         // BaseLocale baseloc = BaseLocale.getInstance(language, script, country, variant);
