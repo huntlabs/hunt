@@ -925,7 +925,7 @@ interface MapEntry(K,V) {
      * @return <tt>true</tt> if the specified object is equal to this map
      *         entry
      */
-    bool opEquals(Object o);
+    bool opEquals(MapEntry!(K,V) o);
 
     /**
      * Returns the hash code value for this map entry.  The hash code

@@ -3,9 +3,9 @@ module hunt.container.ArrayList;
 import std.algorithm;
 import std.array;
 import std.conv;
-import std.container.array;
 
 import hunt.lang.exception;
+import hunt.container.array;
 import hunt.container.AbstractList;
 import hunt.container.Collection;
 import hunt.container.List;
