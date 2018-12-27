@@ -4,7 +4,7 @@ module hunt.lang.Object;
 */
 interface IObject {
 
-    bool opEquals(const(IObject) o) const; 
+    bool opEquals(IObject o); 
 
     string toString();
 
@@ -16,11 +16,11 @@ interface IObject {
 */
 class AbstractObject : IObject {
 
-    bool opEquals(const(IObject) o) const {
+    bool opEquals(IObject o) {
         return opEquals(cast(Object)o);
     }
 
-    override bool opEquals(const(Object) o) const {
+    override bool opEquals(Object o) {
         return this is o;
     }
 

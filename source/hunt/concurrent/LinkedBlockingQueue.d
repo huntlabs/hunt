@@ -45,6 +45,7 @@ import hunt.container.Iterator;
 import hunt.datetime;
 import hunt.lang.common;
 import hunt.lang.exception;
+import hunt.lang.Object;
 
 // import core.atomic;
 import core.sync.mutex;
@@ -1177,55 +1178,16 @@ class LinkedBlockingQueue(E) : AbstractQueue!(E), BlockingQueue!(E) {
         return removed;
     }
 
-    /**
-     * Saves this queue to a stream (that is, serializes it).
-     *
-     * @param s the stream
-     * @throws java.io.IOException if an I/O error occurs
-     * @serialData The capacity is emitted (int), followed by all of
-     * its elements (each an {@code Object}) in the proper order,
-     * followed by a null
-     */
-    // private void writeObject(java.io.ObjectOutputStream s) {
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+    
+    override bool opEquals(Object o) {
+        return super.opEquals(o);
+    }
 
-    //     fullyLock();
-    //     try {
-    //         // Write out any hidden stuff, plus capacity
-    //         s.defaultWriteObject();
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
 
-    //         // Write out all elements in the proper order.
-    //         for (Node!(E) p = head.next; p !is null; p = p.next)
-    //             s.writeObject(p.item);
-
-    //         // Use trailing null as sentinel
-    //         s.writeObject(null);
-    //     } finally {
-    //         fullyUnlock();
-    //     }
-    // }
-
-    /**
-     * Reconstitutes this queue from a stream (that is, deserializes it).
-     * @param s the stream
-     * @throws ClassNotFoundException if the class of a serialized object
-     *         could not be found
-     * @throws java.io.IOException if an I/O error occurs
-     */
-    // private void readObject(java.io.ObjectInputStream s)
-    //     throws java.io.IOException, ClassNotFoundException {
-    //     // Read in capacity, and any hidden stuff
-    //     s.defaultReadObject();
-
-    //     count.set(0);
-    //     last = head = new Node!(E)(null);
-
-    //     // Read in all elements and place in queue
-    //     for (;;) {
-        
-    //         E item = (E)s.readObject();
-    //         if (item is null)
-    //             break;
-    //         add(item);
-    //     }
-    // }
 }

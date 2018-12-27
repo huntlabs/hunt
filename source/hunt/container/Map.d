@@ -3,12 +3,13 @@ module hunt.container.Map;
 import hunt.container.Collection;
 import hunt.container.Set;
 import hunt.lang.common;
+import hunt.lang.Object;
 
 import std.range.interfaces : InputRange;
 
 /**
 */
-interface Map(K,V) : Iterable!(K,V){
+interface Map(K,V) : Iterable!(K,V), IObject {
     // Query Operations
 
     /**
@@ -225,7 +226,7 @@ interface Map(K,V) : Iterable!(K,V){
      * @param o object to be compared for equality with this map
      * @return <tt>true</tt> if the specified object is equal to this map
      */
-    bool opEquals(Object o);
+    // bool opEquals(Object o);
 
     /**
      * Returns the hash code value for this map.  The hash code of a map is
@@ -862,7 +863,7 @@ interface Map(K,V) : Iterable!(K,V){
  * @see Map#entrySet()
  * @since 1.2
  */
-interface MapEntry(K,V) {
+interface MapEntry(K,V) : IObject {
     /**
      * Returns the key corresponding to this entry.
      *
@@ -925,7 +926,7 @@ interface MapEntry(K,V) {
      * @return <tt>true</tt> if the specified object is equal to this map
      *         entry
      */
-    bool opEquals(MapEntry!(K,V) o);
+    // bool opEquals(MapEntry!(K,V) o);
 
     /**
      * Returns the hash code value for this map entry.  The hash code
@@ -943,7 +944,7 @@ interface MapEntry(K,V) {
      * @see Object#equals(Object)
      * @see #equals(Object)
      */
-    size_t toHash() @trusted nothrow;
+    // size_t toHash() @trusted nothrow;
 
     /**
      * Returns a comparator that compares {@link MapEntry} in natural order on key.

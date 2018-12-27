@@ -100,6 +100,10 @@ abstract class AbstractCollection(E) : Collection!E {
         throw new NotImplementedException();
     }
 
+    bool remove(E e) {
+        throw new NotImplementedException();
+    }
+
     // E get(int index) { throw new UnsupportedOperationException(); }
 
     // Bulk Operations
@@ -117,7 +121,7 @@ abstract class AbstractCollection(E) : Collection!E {
      * @see #contains(Object)
      */
     bool containsAll(Collection!E c) {
-        foreach (E e ; c)
+        foreach (E e; c)
             if (!contains(e))
                 return false;
         return true;
@@ -270,7 +274,7 @@ abstract class AbstractCollection(E) : Collection!E {
         //throw new NotImplementedException();
         return 0;
     }
-    
+
     // int opApply(scope int delegate(MapEntry!(E) entry) dg) {
     //     throw new NotImplementedException();
     // }
@@ -306,10 +310,17 @@ abstract class AbstractCollection(E) : Collection!E {
         foreach (E e; this)
             r[i++] = e;
         return r;
-     }
+    }
 
-    override size_t toHash() @trusted nothrow
-    {
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+
+    override bool opEquals(Object o) {
+        return super.opEquals(o);
+    }
+
+    override size_t toHash() @trusted nothrow {
         return super.toHash();
     }
 
@@ -328,7 +339,7 @@ abstract class AbstractCollection(E) : Collection!E {
     override string toString() {
         if (size() == 0)
             return "[]";
-        
+
         Appender!string sb;
         sb.put("[");
         bool isFirst = true;

@@ -225,6 +225,23 @@ class Float : AbstractNumber!float {
 
 
     /**
+     * Returns a {@code Float} instance representing the specified
+     * {@code float} value.
+     * If a new {@code Float} instance is not required, this method
+     * should generally be used in preference to the constructor
+     * {@link #Float(float)}, as this method is likely to yield
+     * significantly better space and time performance by caching
+     * frequently requested values.
+     *
+     * @param  f a float value.
+     * @return a {@code Float} instance representing {@code f}.
+     * @since  1.5
+     */
+    static Float valueOf(float f) {
+        return new Float(f);
+    }
+
+    /**
      * Returns a hash code for a {@code double} value; compatible with
      * {@code Double.hashCode()}.
      *

@@ -4,7 +4,7 @@ import hunt.lang.common;
 import hunt.lang.Object;
 import std.range;
 
-interface Collection(E) : Iterable!E {
+interface Collection(E) : Iterable!E, IObject {
     // Query Operations
 
     /**
@@ -14,7 +14,7 @@ interface Collection(E) : Iterable!E {
      *
      * @return the number of elements in this collection
      */
-    int size();
+    int size() const;
 
     /**
      * Returns <tt>true</tt> if this collection contains no elements.
@@ -305,7 +305,7 @@ interface Collection(E) : Iterable!E {
      */
     void clear();
 
-    string toString();
+    // string toString();
 
 
     // Comparison and hashing
@@ -360,7 +360,7 @@ interface Collection(E) : Iterable!E {
      * @see Object#toHash()
      * @see Object#equals(Object)
      */
-    size_t toHash() @trusted nothrow;
+    // size_t toHash() @trusted nothrow;
 
     /**
      * Creates a {@link Spliterator} over the elements in this collection.

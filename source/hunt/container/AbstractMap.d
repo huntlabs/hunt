@@ -6,6 +6,7 @@ import hunt.container.Map;
 import hunt.container.Set;
 
 import hunt.lang.exception;
+import hunt.lang.Object;
 
 import std.array;
 import std.container.array;
@@ -15,7 +16,7 @@ import std.range;
 
 /**
 */
-abstract class AbstractMap(K,V) : Map!(K,V) {
+abstract class AbstractMap(K, V) : Map!(K, V) {
 
     /**
      * The number of key-value mappings contained in this map.
@@ -39,7 +40,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return the number of key-value mappings in this map
      */
     int size() const {
-        return _size; 
+        return _size;
     }
 
     /**
@@ -106,7 +107,6 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         throw new UnsupportedOperationException();
     }
 
-
     /**
      * Returns the value to which the specified key is mapped, or
      * {@code defaultValue} if this map contains no mapping for the key.
@@ -129,7 +129,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    V getOrDefault(K k, V defaultValue) {
+    V getOrDefault(K k, V value) {
         throw new UnsupportedOperationException();
     }
 
@@ -154,12 +154,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     V putIfAbsent(K key, V value) {
         V v = V.init;
 
-        if(!containsKey(key))
+        if (!containsKey(key))
             v = put(key, value);
 
         return v;
     }
-
 
     /**
      * {@inheritDoc}
@@ -184,7 +183,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @throws NullPointerException          {@inheritDoc}
      */
     V remove(K key) {
-        
+
         throw new UnsupportedOperationException();
         // auto v = key in _dict;
 
@@ -196,9 +195,9 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         // return oldValue;
     }
 
-    bool remove(K key, V value){
+    bool remove(K key, V value) {
         V curValue = get(key);
-        if(curValue != value || !containsKey(key))
+        if (curValue != value || !containsKey(key))
             return false;
         remove(key);
         return true;
@@ -225,7 +224,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      */
     void putAll(Map!(K, V) m) {
         // for (MapEntry!(K, V) e : m.entrySet())
-        foreach(K k, V v; m)
+        foreach (K k, V v; m)
             put(k, v);
     }
 
@@ -247,7 +246,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
 
     bool replace(K key, V oldValue, V newValue) {
         V curValue = get(key);
-         if(curValue != oldValue || !containsKey(key)){
+        if (curValue != oldValue || !containsKey(key)) {
             return false;
         }
         put(key, newValue);
@@ -262,14 +261,14 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         return curValue;
     }
 
-    int opApply(scope int delegate(ref K, ref V) dg)  {
+    int opApply(scope int delegate(ref K, ref V) dg) {
         throw new NotImplementedException();
     }
-    
+
     int opApply(scope int delegate(MapEntry!(K, V) entry) dg) {
         throw new NotImplementedException();
     }
-    
+
     InputRange!K byKey() {
         throw new NotImplementedException();
     }
@@ -325,7 +324,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      */
     K[] keySet() {
         Array!K arr;
-        foreach(K key; byKey()) {
+        foreach (K key; byKey()) {
             arr.insertBack(key);
         }
         return arr.array();
@@ -356,12 +355,11 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
         // }
         // return arr.array();
         V[] arr;
-        foreach(V value; byValue()) {
+        foreach (V value; byValue()) {
             arr ~= value;
         }
         return arr;
     }
-
 
     // Comparison and hashing
 
@@ -387,10 +385,13 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @param o object to be compared for equality with this map
      * @return <tt>true</tt> if the specified object is equal to this map
      */
-     override bool opEquals(Object o)
-     {         
+    override bool opEquals(Object o) {
         throw new UnsupportedOperationException();
-     }
+    }
+
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
     // bool equals(Object o) {
     //     if (o == this)
     //         return true;
@@ -424,7 +425,6 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     //     return true;
     // }
 
-    
     // Iterator!(MapEntry!(K,V)) iterator()
     // {
     //     throw new UnsupportedOperationException();
@@ -450,15 +450,15 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      */
     override size_t toHash() @trusted nothrow {
         size_t h = 0;
-        try{
-            foreach(MapEntry!(K,V) i; this) {
+        try {
+            foreach (MapEntry!(K, V) i; this) {
                 h += i.toHash();
             }
-        // Iterator!(MapEntry!(K,V)) i = this.iterator();
-        // while (i.hasNext())
-        //     h += i.next().toHash();
+            // Iterator!(MapEntry!(K,V)) i = this.iterator();
+            // while (i.hasNext())
+            //     h += i.next().toHash();
+        } catch (Exception ex) {
         }
-        catch(Exception ex)  { }
         return h;
     }
 
@@ -475,14 +475,16 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
      * @return a string representation of this map
      */
     override string toString() {
-        if(isEmpty())
+        if (isEmpty())
             return "{}";
 
         Appender!string sb;
         sb.put("{");
         bool isFirst = true;
-        foreach(K key, V value; this) {
-            if(!isFirst) { sb.put(", "); }
+        foreach (K key, V value; this) {
+            if (!isFirst) {
+                sb.put(", ");
+            }
             sb.put(key.to!string() ~ "=" ~ value.to!string());
             isFirst = false;
         }
@@ -520,7 +522,6 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     // of a field in a subclass, they can't share representations,
     // and the amount of duplicated code is too small to warrant
     // exposing a common abstract class.
-
 
     /**
      * An Entry maintaining a key and a value.  The value may be
@@ -655,7 +656,6 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
     // }
 }
 
-
 /**
 * An Entry maintaining an immutable key and value.  This class
 * does not support method <tt>setValue</tt>.  This class may be
@@ -664,7 +664,7 @@ abstract class AbstractMap(K,V) : Map!(K,V) {
 *
 * @since 1.6
 */
-class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
+class SimpleImmutableEntry(K, V) : MapEntry!(K, V) {
 
     private K key;
     private V value;
@@ -677,7 +677,7 @@ class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
         * @param value the value represented by this entry
         */
     this(K key, V value) {
-        this.key   = key;
+        this.key = key;
         this.value = value;
     }
 
@@ -688,7 +688,7 @@ class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
         * @param entry the entry to copy
         */
     this(MapEntry!(K, V) entry) {
-        this.key   = entry.getKey();
+        this.key = entry.getKey();
         this.value = entry.getValue();
     }
 
@@ -725,31 +725,35 @@ class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
     }
 
     /**
-        * Compares the specified object with this entry for equality.
-        * Returns {@code true} if the given object is also a map entry and
-        * the two entries represent the same mapping.  More formally, two
-        * entries {@code e1} and {@code e2} represent the same mapping
-        * if<pre>
-        *   (e1.getKey()==null ?
-        *    e2.getKey()==null :
-        *    e1.getKey().equals(e2.getKey()))
-        *   &amp;&amp;
-        *   (e1.getValue()==null ?
-        *    e2.getValue()==null :
-        *    e1.getValue().equals(e2.getValue()))</pre>
-        * This ensures that the {@code equals} method works properly across
-        * different implementations of the {@code MapEntry} interface.
-        *
-        * @param o object to be compared for equality with this map entry
-        * @return {@code true} if the specified object is equal to this map
-        *         entry
-        * @see    #toHash
-        */
+    * Compares the specified object with this entry for equality.
+    * Returns {@code true} if the given object is also a map entry and
+    * the two entries represent the same mapping.  More formally, two
+    * entries {@code e1} and {@code e2} represent the same mapping
+    * if<pre>
+    *   (e1.getKey()==null ?
+    *    e2.getKey()==null :
+    *    e1.getKey().equals(e2.getKey()))
+    *   &amp;&amp;
+    *   (e1.getValue()==null ?
+    *    e2.getValue()==null :
+    *    e1.getValue().equals(e2.getValue()))</pre>
+    * This ensures that the {@code equals} method works properly across
+    * different implementations of the {@code MapEntry} interface.
+    *
+    * @param o object to be compared for equality with this map entry
+    * @return {@code true} if the specified object is equal to this map
+    *         entry
+    * @see    #toHash
+    */
     override bool opEquals(Object o) {
-        MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
-        if(e is null)
+        MapEntry!(K, V) e = cast(MapEntry!(K, V)) o;
+        if (e is null)
             return false;
         return key == e.getKey() && value == e.getValue();
+    }
+
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
     }
 
     /**
@@ -766,19 +770,19 @@ class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
         * @see    #equals
         */
     override size_t toHash() @trusted nothrow {
-        static if(is(K == class)) {
+        static if (is(K == class)) {
             size_t kHash = 0;
-            if(key !is null) kHash = key.toHash();
-        }
-        else {
+            if (key !is null)
+                kHash = key.toHash();
+        } else {
             size_t kHash = hashOf(key);
         }
-        
-        static if(is(V == class)) {
+
+        static if (is(V == class)) {
             size_t vHash = 0;
-            if(value !is null) vHash = value.toHash();
-        }
-        else {
+            if (value !is null)
+                vHash = value.toHash();
+        } else {
             size_t vHash = hashOf(value);
         }
 
@@ -799,43 +803,50 @@ class SimpleImmutableEntry(K,V) : MapEntry!(K,V) {
 
 }
 
-
 /**
 */
-class EmptyMap(K,V) : AbstractMap!(K,V) {
+class EmptyMap(K, V) : AbstractMap!(K, V) {
     // private enum long serialVersionUID = 6428348081105594320L;
 
-    override
-    int size() const                         {return 0;}
+    override int size() const {
+        return 0;
+    }
 
-    override
-    bool isEmpty()                   {return true;}
+    override bool isEmpty() {
+        return true;
+    }
 
-    override
-    bool containsKey(K key)     {return false;}
+    override bool containsKey(K key) {
+        return false;
+    }
 
     // override
     // bool containsValue(V value) {return false;}
 
-    override
-    V get(K key)                   {return V.init;}
+    override V get(K key) {
+        return V.init;
+    }
 
-    override K[] keySet() { return null; }
-    override V[] values() { return null; }
+    override K[] keySet() {
+        return null;
+    }
+
+    override V[] values() {
+        return null;
+    }
     // Collection!(V) values()              {return emptySet();}
     // Set!(MapEntry!(K,V)) entrySet()      {return emptySet();}
 
-    override
-    bool opEquals(Object o) {
-        return (typeid(o) == typeid(Map!(K,V))) && (cast(Map!(K,V))o).isEmpty();
+    override bool opEquals(Object o) {
+        return (typeid(o) == typeid(Map!(K, V))) && (cast(Map!(K, V)) o).isEmpty();
     }
 
-    override
-    size_t toHash()                      {return 0;}
+    override size_t toHash() {
+        return 0;
+    }
 
     // Override default methods in Map
-    override
-    V getOrDefault(K k, V defaultValue) {
+    override V getOrDefault(K k, V defaultValue) {
         return defaultValue;
     }
 

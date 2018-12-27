@@ -7,6 +7,7 @@ import hunt.container.Deque;
 import hunt.container.List;
 
 import hunt.lang.exception;
+import hunt.lang.Object;
 
 import std.conv;
 import std.container;
@@ -844,117 +845,30 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
         return _dlist[].array;
     }
 
-//     /**
-//      * Returns an array containing all of the elements in this list in
-//      * proper sequence (from first to last element); the runtime type of
-//      * the returned array is that of the specified array.  If the list fits
-//      * in the specified array, it is returned therein.  Otherwise, a new
-//      * array is allocated with the runtime type of the specified array and
-//      * the size of this list.
-//      *
-//      * <p>If the list fits in the specified array with room to spare (i.e.,
-//      * the array has more elements than the list), the element in the array
-//      * immediately following the end of the list is set to {@code null}.
-//      * (This is useful in determining the length of the list <i>only</i> if
-//      * the caller knows that the list does not contain any null elements.)
-//      *
-//      * <p>Like the {@link #toArray()} method, this method acts as bridge between
-//      * array-based and collection-based APIs.  Further, this method allows
-//      * precise control over the runtime type of the output array, and may,
-//      * under certain circumstances, be used to save allocation costs.
-//      *
-//      * <p>Suppose {@code x} is a list known to contain only strings.
-//      * The following code can be used to dump the list into a newly
-//      * allocated array of {@code string}:
-//      *
-//      * <pre>
-//      *     string[] y = x.toArray(new string[0]);</pre>
-//      *
-//      * Note that {@code toArray(new Object[0])} is identical in function to
-//      * {@code toArray()}.
-//      *
-//      * @param a the array into which the elements of the list are to
-//      *          be stored, if it is big enough; otherwise, a new array of the
-//      *          same runtime type is allocated for this purpose.
-//      * @return an array containing the elements of the list
-//      * @throws ArrayStoreException if the runtime type of the specified array
-//      *         is not a supertype of the runtime type of every element in
-//      *         this list
-//      * @throws NullPointerException if the specified array is null
-//      */
-// 
-//     !(T) T[] toArray(T[] a) {
-//         if (a.length < _size)
-//             a = (T[])java.lang.reflect.Array.newInstance(
-//                                 a.getClass().getComponentType(), _size);
-//         int i = 0;
-//         Object[] result = a;
-//         for (Node!E x = first; x !is null; x = x.next)
-//             result[i++] = x.item;
-
-//         if (a.length > _size)
-//             a[_size] = null;
-
-//         return a;
-//     }
-
-//     private static final long serialVersionUID = 876323262645176354L;
-
-//     /**
-//      * Saves the state of this {@code LinkedList} instance to a stream
-//      * (that is, serializes it).
-//      *
-//      * @serialData The size of the list (the number of elements it
-//      *             contains) is emitted (int), followed by all of its
-//      *             elements (each an Object) in the proper order.
-//      */
-//     private void writeObject(java.io.ObjectOutputStream s)
-//         throws java.io.IOException {
-//         // Write out any hidden serialization magic
-//         s.defaultWriteObject();
-
-//         // Write out size
-//         s.writeInt(_size);
-
-//         // Write out all elements in the proper order.
-//         for (Node!E x = first; x !is null; x = x.next)
-//             s.writeObject(x.item);
-//     }
-
-//     /**
-//      * Reconstitutes this {@code LinkedList} instance from a stream
-//      * (that is, deserializes it).
-//      */
-// 
-//     private void readObject(java.io.ObjectInputStream s)
-//         throws java.io.IOException, ClassNotFoundException {
-//         // Read in any hidden serialization magic
-//         s.defaultReadObject();
-
-//         // Read in size
-//         int _size = s.readInt();
-
-//         // Read in all elements in the proper order.
-//         for (int i = 0; i < _size; i++)
-//             linkLast((E)s.readObject());
-//     }
-
-
-    
-        override int opApply(scope int delegate(ref E) dg)
+    override int opApply(scope int delegate(ref E) dg)
+    {
+        int result = 0;
+        foreach(E v; _dlist)
         {
-            int result = 0;
-            foreach(E v; _dlist)
-            {
-                result = dg(v);
-                if(result != 0) return result;
-            }
-            return result;
+            result = dg(v);
+            if(result != 0) return result;
         }
-}
+        return result;
+    }
 
-unittest{
-        LinkedList!(string) arrl = new LinkedList!(string)();
-        arrl.add("2");
-        arrl.add("1");
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+    
+    override bool opEquals(Object o) {
+        return super.opEquals(o);
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+
+    override string toString() {
+        return super.toString();
+    }    
 }
