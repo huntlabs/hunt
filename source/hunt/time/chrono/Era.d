@@ -6,7 +6,7 @@ import hunt.time.temporal.ChronoUnit;
 
 import hunt.time.DateTimeException;
 import hunt.time.temporal.UnsupportedTemporalTypeException;
-import hunt.time.format.DateTimeFormatterBuilder;
+// import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.format.TextStyle;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.Temporal;
@@ -264,7 +264,7 @@ public interface Era : TemporalAccessor, TemporalAdjuster {
      * @param locale  the locale to use, not null
      * @return the text value of the era, not null
      */
-     string getDisplayName(TextStyle style, Locale locale);
+    //  string getDisplayName(TextStyle style, Locale locale);
     //  string getDisplayName(TextStyle style, Locale locale) {
     //     return new DateTimeFormatterBuilder().appendText(ERA, style).toFormatter(locale).format(this);
     // }

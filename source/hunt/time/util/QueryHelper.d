@@ -4,7 +4,7 @@ import hunt.time.Clock;
 import hunt.time.DateTimeException;
 import hunt.time.DayOfWeek;
 import hunt.time.Duration;
-import hunt.time.format;
+// import hunt.time.format;
 import hunt.time.Instant;
 import hunt.time.LocalDate;
 import hunt.time.LocalDateTime;
@@ -32,80 +32,80 @@ class QueryHelper
 {
     static R query(R)(TemporalAccessor t, TemporalQuery!(R) param)
     {
-        auto typeinfo = typeid(cast(Object) t);
-        // writeln("test : ", typeinfo);
-        if (typeinfo == typeid(DayOfWeek))
-        {
-            return (cast(DayOfWeek) t).query!R(param);
-        }
-        else if (typeinfo == typeid(Parsed))
-        {
-            return (cast(Parsed) t).query!R(param);
-        }
-        else if (typeinfo == typeid(Instant))
-        {
-            return (cast(Instant) t).query!R(param);
-        }
-        else if (typeinfo == typeid(LocalDate))
-        {
-            return (cast(LocalDate) t).query!R(param);
-        }
-        else if (typeinfo == typeid(LocalDateTime))
-        {
-            return (cast(LocalDateTime) t).query!R(param);
-        }
-        else if (typeinfo == typeid(LocalTime))
-        {
-            return (cast(LocalTime) t).query!R(param);
-        }
-        else if (typeinfo == typeid(Month))
-        {
-            return (cast(Month) t).query!R(param);
-        }
-        else if (typeinfo == typeid(MonthDay))
-        {
-            return (cast(MonthDay) t).query!R(param);
-        }
-        else if (typeinfo == typeid(OffsetDateTime))
-        {
-            return (cast(OffsetDateTime) t).query!R(param);
-        }
-        else if (typeinfo == typeid(OffsetTime))
-        {
-            return (cast(OffsetTime) t).query!R(param);
-        }
-        else if (typeinfo == typeid(Year))
-        {
-            return (cast(Year) t).query!R(param);
-        }
-        else if (typeinfo == typeid(YearMonth))
-        {
-            return (cast(YearMonth) t).query!R(param);
-        }
-        else if (typeinfo == typeid(ZonedDateTime))
-        {
-            return (cast(ZonedDateTime) t).query!R(param);
-        }
-        else if (typeinfo == typeid(ZoneOffset))
-        {
-            return (cast(ZoneOffset) t).query!R(param);
-        }
-        else if (typeinfo == typeid(AnonymousClass1))
-        {
-            return (cast(AnonymousClass1) t).query!R(param);
-        }
-        else if (typeinfo == typeid(AnonymousClass2))
-        {
-            return (cast(AnonymousClass2) t).query!R(param);
-        }
-        else if (typeinfo == typeid(AnonymousClass3))
-        {
-            return (cast(AnonymousClass3) t).query!R(param);
-        }
-        else if (t !is null)
-        {
-            throw new Exception("unsurpport TemporalAccessor : " ~ typeinfo.name);
-        }
+        // auto typeinfo = typeid(cast(Object) t);
+        // // writeln("test : ", typeinfo);
+        // if (typeinfo == typeid(DayOfWeek))
+        // {
+        //     return (cast(DayOfWeek) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(Parsed))
+        // {
+        //     return (cast(Parsed) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(Instant))
+        // {
+        //     return (cast(Instant) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(LocalDate))
+        // {
+        //     return (cast(LocalDate) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(LocalDateTime))
+        // {
+        //     return (cast(LocalDateTime) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(LocalTime))
+        // {
+        //     return (cast(LocalTime) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(Month))
+        // {
+        //     return (cast(Month) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(MonthDay))
+        // {
+        //     return (cast(MonthDay) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(OffsetDateTime))
+        // {
+        //     return (cast(OffsetDateTime) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(OffsetTime))
+        // {
+        //     return (cast(OffsetTime) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(Year))
+        // {
+        //     return (cast(Year) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(YearMonth))
+        // {
+        //     return (cast(YearMonth) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(ZonedDateTime))
+        // {
+        //     return (cast(ZonedDateTime) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(ZoneOffset))
+        // {
+        //     return (cast(ZoneOffset) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(AnonymousClass1))
+        // {
+        //     return (cast(AnonymousClass1) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(AnonymousClass2))
+        // {
+        //     return (cast(AnonymousClass2) t).query!R(param);
+        // }
+        // else if (typeinfo == typeid(AnonymousClass3))
+        // {
+        //     return (cast(AnonymousClass3) t).query!R(param);
+        // }
+        // else if (t !is null)
+        // {
+        //     throw new Exception("unsurpport TemporalAccessor : " ~ typeinfo.name);
+        // }
         return R.init;
     }
 }

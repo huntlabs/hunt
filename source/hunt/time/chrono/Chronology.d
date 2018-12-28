@@ -10,7 +10,7 @@ import hunt.time.LocalDate;
 import hunt.time.LocalTime;
 import hunt.time.ZoneId;
 import hunt.time.ZoneOffset;
-import hunt.time.format.DateTimeFormatterBuilder;
+// import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.format.ResolverStyle;
 import hunt.time.format.TextStyle;
 import hunt.time.temporal.ChronoField;
@@ -598,7 +598,7 @@ public interface Chronology : Comparable!(Chronology) {
      * @param locale  the locale to use, not null
      * @return the text value of the chronology, not null
      */
-     string getDisplayName(TextStyle style, Locale locale);
+    //  string getDisplayName(TextStyle style, Locale locale);
     //  string getDisplayName(TextStyle style, Locale locale) {
     //     TemporalAccessor temporal = new class TemporalAccessor{
     //         override

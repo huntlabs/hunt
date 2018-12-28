@@ -6,7 +6,7 @@ import hunt.lang.exception;
 
 import std.conv;
 import hunt.io.common;
-import hunt.time.format.DateTimeFormatterBuilder;
+// import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.format.TextStyle;
 import hunt.time.temporal.TemporalAccessor;
 import hunt.time.temporal.TemporalField;
@@ -495,9 +495,9 @@ public abstract class ZoneId : Serializable {
      * @param locale  the locale to use, not null
      * @return the text value of the zone, not null
      */
-    public string getDisplayName(TextStyle style, Locale locale) {
-        return new DateTimeFormatterBuilder().appendZoneText(style).toFormatter(locale).format(toTemporal());
-    }
+    // public string getDisplayName(TextStyle style, Locale locale) {
+    //     return new DateTimeFormatterBuilder().appendZoneText(style).toFormatter(locale).format(toTemporal());
+    // }
 
     /**
      * Converts this zone to a {@code TemporalAccessor}.

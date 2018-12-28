@@ -13,7 +13,7 @@ import hunt.io.common;
 import hunt.time.chrono.ChronoLocalDate;
 import hunt.time.chrono.IsoEra;
 import hunt.time.chrono.IsoChronology;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
@@ -50,7 +50,7 @@ import hunt.time.chrono.ChronoLocalDateTime;
 import hunt.time.chrono.ChronoLocalDateTimeImpl;
 import hunt.time.util.QueryHelper;
 import hunt.logging;
-import hunt.time.util.common;
+// import hunt.time.util.common;
 
 // import hunt.util.stream.LongStream;
 // import hunt.util.stream.Stream;
@@ -97,21 +97,55 @@ public  class LocalDate
      * The minimum supported {@code LocalDate}, '-999999999-01-01'.
      * This could be used by an application as a "far past" date.
      */
-    //public __gshared LocalDate MIN ;
+    // public __gshared LocalDate MIN ;
+    private __gshared LocalDate _MIN;
+    static LocalDate MIN() {
+        if(_MIN is null) {
+            synchronized {
+                if(_MIN is null)
+                    _MIN= LocalDate.of(Year.MIN_VALUE, 1, 1);
+            }
+        }
+        return _MIN;
+    }
+
     /**
      * The maximum supported {@code LocalDate}, '+999999999-12-31'.
      * This could be used by an application as a "far future" date.
      */
-    //public __gshared LocalDate MAX ;
+    // public __gshared LocalDate MAX ;
+    
+    private __gshared LocalDate _MAX;
+    static LocalDate MAX() {
+        if(_MAX is null) {
+            synchronized {
+                if(_MAX is null)
+                    _MAX= LocalDate.of(Year.MAX_VALUE, 1, 1);
+            }
+        }
+        return _MAX;
+    }
+    
     /**
      * The epoch year {@code LocalDate}, '1970-01-01'.
      */
-    //public __gshared LocalDate EPOCH ;
+    // public __gshared LocalDate EPOCH ;
+
+    private __gshared LocalDate _EPOCH;
+    static LocalDate EPOCH() {
+        if(_EPOCH is null) {
+            synchronized {
+                if(_EPOCH is null)
+                    _EPOCH= LocalDate.of(1970, 1, 1);
+            }
+        }
+        return _EPOCH;
+    }
 
     /**
      * Serialization version.
      */
-    private enum long serialVersionUID = 2942565459149668126L;
+    // private enum long serialVersionUID = 2942565459149668126L;
     /**
      * The number of days _in a 400 year cycle.
      */
@@ -138,13 +172,15 @@ public  class LocalDate
 
     // shared static this()
     // {
-        // MIN = LocalDate.of(Year.MIN_VALUE, 1, 1);
-        mixin(MakeGlobalVar!(LocalDate)("MIN",`LocalDate.of(Year.MIN_VALUE, 1, 1)`));
-        // MAX = LocalDate.of(Year.MAX_VALUE, 12, 31);
-        mixin(MakeGlobalVar!(LocalDate)("MAX",`LocalDate.of(Year.MAX_VALUE, 12, 31)`));
+    //     MIN = LocalDate.of(Year.MIN_VALUE, 1, 1);
+        // enum sss = MakeGlobalVar!(LocalDate)("MIN",`LocalDate.of(Year.MIN_VALUE, 1, 1)`);
+        // pragma(msg, sss);
+        // mixin(MakeGlobalVar!(LocalDate)("MIN",`LocalDate.of(Year.MIN_VALUE, 1, 1)`));
+    //     MAX = LocalDate.of(Year.MAX_VALUE, 12, 31);
+        // mixin(MakeGlobalVar!(LocalDate)("MAX",`LocalDate.of(Year.MAX_VALUE, 12, 31)`));
 
-        // EPOCH = LocalDate.of(1970, 1, 1);
-        mixin(MakeGlobalVar!(LocalDate)("EPOCH",`LocalDate.of(1970, 1, 1)`));
+    //     EPOCH = LocalDate.of(1970, 1, 1);
+        // mixin(MakeGlobalVar!(LocalDate)("EPOCH",`LocalDate.of(1970, 1, 1)`));
 
     // }
 
@@ -379,9 +415,9 @@ public  class LocalDate
      * @return the parsed local date, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static LocalDate parse(string text) {
-        return parse(text, DateTimeFormatter.ISO_LOCAL_DATE);
-    }
+    // public static LocalDate parse(string text) {
+    //     return parse(text, DateTimeFormatter.ISO_LOCAL_DATE);
+    // }
 
     /**
      * Obtains an instance of {@code LocalDate} from a text string using a specific formatter.
@@ -393,22 +429,22 @@ public  class LocalDate
      * @return the parsed local date, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static LocalDate parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!LocalDate{
-            LocalDate queryFrom(TemporalAccessor temporal)
-            {
-                assert(temporal, "temporal");
-                LocalDate date = QueryHelper.query!LocalDate(temporal , TemporalQueries.localDate());
-                if (date is null) {
-                    throw new DateTimeException("Unable to obtain LocalDate from TemporalAccessor: " ~
-                            typeid(temporal).stringof ~ " of type " ~ typeid(temporal).stringof);
-                }
-                return date;
-            }
-        });
+    // public static LocalDate parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!LocalDate{
+    //         LocalDate queryFrom(TemporalAccessor temporal)
+    //         {
+    //             assert(temporal, "temporal");
+    //             LocalDate date = QueryHelper.query!LocalDate(temporal , TemporalQueries.localDate());
+    //             if (date is null) {
+    //                 throw new DateTimeException("Unable to obtain LocalDate from TemporalAccessor: " ~
+    //                         typeid(temporal).stringof ~ " of type " ~ typeid(temporal).stringof);
+    //             }
+    //             return date;
+    //         }
+    //     });
             
-    }
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -1834,11 +1870,11 @@ public  class LocalDate
      * @return the formatted date string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-    override  // override for Javadoc and performance
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // override  // override for Javadoc and performance
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

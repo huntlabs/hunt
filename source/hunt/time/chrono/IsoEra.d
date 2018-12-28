@@ -11,7 +11,7 @@ import hunt.time.temporal.UnsupportedTemporalTypeException;
 import hunt.time.temporal.ValueRange;
 import hunt.time.temporal.Temporal;
 import hunt.time.format.TextStyle;
-import hunt.time.format.DateTimeFormatterBuilder;
+// import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.util.Locale;
 /**
  * An era _in the ISO calendar system.
@@ -186,10 +186,10 @@ public class IsoEra : Era {
         return temporal._with(ChronoField.ERA, getValue());
     }
 	
-    override
-	 string getDisplayName(TextStyle style, Locale locale) {
-        return new DateTimeFormatterBuilder().appendText(ChronoField.ERA, style).toFormatter(locale).format(this);
-    }
+    // override
+	//  string getDisplayName(TextStyle style, Locale locale) {
+    //     return new DateTimeFormatterBuilder().appendText(ChronoField.ERA, style).toFormatter(locale).format(this);
+    // }
 
     override string toString()
     {

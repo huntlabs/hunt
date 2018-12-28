@@ -13,7 +13,7 @@ import hunt.io.ObjectOutput;
 //import hunt.io.ObjectInputStream;
 import hunt.io.common;
 import hunt.time.chrono.IsoChronology;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
@@ -104,9 +104,9 @@ public final class OffsetDateTime
     // shared static this()
     // {
         // MIN = LocalDateTime.MIN.atOffset(ZoneOffset.MAX);
-        mixin(MakeGlobalVar!(OffsetDateTime)("MIN",`LocalDateTime.MIN.atOffset(ZoneOffset.MAX)`));
+        // mixin(MakeGlobalVar!(OffsetDateTime)("MIN",`LocalDateTime.MIN.atOffset(ZoneOffset.MAX)`));
         // MAX = LocalDateTime.MAX.atOffset(ZoneOffset.MIN);
-        mixin(MakeGlobalVar!(OffsetDateTime)("MAX",`LocalDateTime.MAX.atOffset(ZoneOffset.MIN)`));
+        // mixin(MakeGlobalVar!(OffsetDateTime)("MAX",`LocalDateTime.MAX.atOffset(ZoneOffset.MIN)`));
 
     // }
     /**
@@ -359,9 +359,9 @@ public final class OffsetDateTime
      * @return the parsed offset date-time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static OffsetDateTime parse(string text) {
-        return parse(text, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    }
+    // public static OffsetDateTime parse(string text) {
+    //     return parse(text, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    // }
 
     /**
      * Obtains an instance of {@code OffsetDateTime} from a text string using a specific formatter.
@@ -373,31 +373,31 @@ public final class OffsetDateTime
      * @return the parsed offset date-time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static OffsetDateTime parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!OffsetDateTime{
-            OffsetDateTime queryFrom(TemporalAccessor temporal)
-            {
-                if (cast(OffsetDateTime)(temporal) !is null) {
-                        return cast(OffsetDateTime) temporal;
-                    }
-                    try {
-                        ZoneOffset offset = ZoneOffset.from(temporal);
-                        LocalDate date = QueryHelper.query!LocalDate(temporal ,TemporalQueries.localDate());
-                        LocalTime time = QueryHelper.query!LocalTime(temporal ,TemporalQueries.localTime());
-                        if (date !is null && time !is null) {
-                            return OffsetDateTime.of(date, time, offset);
-                        } else {
-                            Instant instant = Instant.from(temporal);
-                            return OffsetDateTime.ofInstant(instant, offset);
-                        }
-                    } catch (DateTimeException ex) {
-                        throw new DateTimeException("Unable to obtain OffsetDateTime from TemporalAccessor: " ~
-                                typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
-                    }
-            }
-        });
-    }
+    // public static OffsetDateTime parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!OffsetDateTime{
+    //         OffsetDateTime queryFrom(TemporalAccessor temporal)
+    //         {
+    //             if (cast(OffsetDateTime)(temporal) !is null) {
+    //                     return cast(OffsetDateTime) temporal;
+    //                 }
+    //                 try {
+    //                     ZoneOffset offset = ZoneOffset.from(temporal);
+    //                     LocalDate date = QueryHelper.query!LocalDate(temporal ,TemporalQueries.localDate());
+    //                     LocalTime time = QueryHelper.query!LocalTime(temporal ,TemporalQueries.localTime());
+    //                     if (date !is null && time !is null) {
+    //                         return OffsetDateTime.of(date, time, offset);
+    //                     } else {
+    //                         Instant instant = Instant.from(temporal);
+    //                         return OffsetDateTime.ofInstant(instant, offset);
+    //                     }
+    //                 } catch (DateTimeException ex) {
+    //                     throw new DateTimeException("Unable to obtain OffsetDateTime from TemporalAccessor: " ~
+    //                             typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
+    //                 }
+    //         }
+    //     });
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -1679,10 +1679,10 @@ public final class OffsetDateTime
      * @return the formatted date-time string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

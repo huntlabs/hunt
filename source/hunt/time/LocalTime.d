@@ -8,7 +8,7 @@ import hunt.io.DataInput;
 import hunt.io.DataOutput;
 import hunt.lang.exception;
 import hunt.io.common;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
@@ -411,35 +411,35 @@ public final class LocalTime
      * @return the parsed local time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static LocalTime parse(string text) {
-        return parse(text, DateTimeFormatter.ISO_LOCAL_TIME);
-    }
+    // public static LocalTime parse(string text) {
+    //     return parse(text, DateTimeFormatter.ISO_LOCAL_TIME);
+    // }
 
-    /**
-     * Obtains an instance of {@code LocalTime} from a text string using a specific formatter.
-     * !(p)
-     * The text is parsed using the formatter, returning a time.
-     *
-     * @param text  the text to parse, not null
-     * @param formatter  the formatter to use, not null
-     * @return the parsed local time, not null
-     * @throws DateTimeParseException if the text cannot be parsed
-     */
-    public static LocalTime parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!LocalTime{
-            LocalTime queryFrom(TemporalAccessor temporal)
-            {
-                assert(temporal, "temporal");
-                LocalTime time =QueryHelper.query!LocalTime(temporal , TemporalQueries.localTime());
-                if (time is null) {
-                    throw new DateTimeException("Unable to obtain LocalTime from TemporalAccessor: " ~
-                            typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof);
-                }
-                return time;
-            }
-        });
-    }
+    // /**
+    //  * Obtains an instance of {@code LocalTime} from a text string using a specific formatter.
+    //  * !(p)
+    //  * The text is parsed using the formatter, returning a time.
+    //  *
+    //  * @param text  the text to parse, not null
+    //  * @param formatter  the formatter to use, not null
+    //  * @return the parsed local time, not null
+    //  * @throws DateTimeParseException if the text cannot be parsed
+    //  */
+    // public static LocalTime parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!LocalTime{
+    //         LocalTime queryFrom(TemporalAccessor temporal)
+    //         {
+    //             assert(temporal, "temporal");
+    //             LocalTime time =QueryHelper.query!LocalTime(temporal , TemporalQueries.localTime());
+    //             if (time is null) {
+    //                 throw new DateTimeException("Unable to obtain LocalTime from TemporalAccessor: " ~
+    //                         typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof);
+    //             }
+    //             return time;
+    //         }
+    //     });
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -1436,10 +1436,10 @@ public final class LocalTime
      * @return the formatted time string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

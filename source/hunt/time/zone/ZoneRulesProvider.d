@@ -77,29 +77,30 @@ public abstract class ZoneRulesProvider {
     /**
      * The set of loaded providers.
      */
-    // __gshared ArrayList!(ZoneRulesProvider) PROVIDERS;
+    __gshared ArrayList!(ZoneRulesProvider) PROVIDERS;
     /**
      * The lookup from zone ID to provider.
      */
     // // __gshared ConcurrentMap!(string, ZoneRulesProvider) ZONES;
-    // __gshared HashMap!(string, ZoneRulesProvider) ZONES;
+    __gshared HashMap!(string, ZoneRulesProvider) ZONES;
 
     /**
      * The zone ID data
      */
-    __gshared Set!(string) ZONE_IDS;
-    shared static this()
-    {
-        ZoneRulesProvider.registerProvider(new TzdbZoneRulesProvider());
-    }
+    // __gshared Set!(string) ZONE_IDS;
     // shared static this()
     // {
-        // PROVIDERS = new ArrayList!(ZoneRulesProvider)();
-        mixin(MakeGlobalVar!(ArrayList!(ZoneRulesProvider))("PROVIDERS",`new ArrayList!(ZoneRulesProvider)()`));
-        // ZONES = new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */);
-        mixin(MakeGlobalVar!(HashMap!(string, ZoneRulesProvider))("ZONES",`new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */)`));
-
+    //     ZoneRulesProvider.registerProvider(new TzdbZoneRulesProvider());
     // }
+    shared static this()
+    {
+        PROVIDERS = new ArrayList!(ZoneRulesProvider)();
+        ZONES = new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */);
+        registerProvider(new TzdbZoneRulesProvider());
+        // mixin(MakeGlobalVar!(ArrayList!(ZoneRulesProvider))("PROVIDERS",`new ArrayList!(ZoneRulesProvider)()`));
+        // mixin(MakeGlobalVar!(HashMap!(string, ZoneRulesProvider))("ZONES",`new HashMap!(string, ZoneRulesProvider)(512, 0.75f/* , 2 */)`));
+
+    }
 
     // static this(){
         ///@gxc register Zone Provider
@@ -185,9 +186,9 @@ public abstract class ZoneRulesProvider {
      *
      * @return the unmodifiable set of zone IDs, not null
      */
-    public static Set!(string) getAvailableZoneIds() {
-        return ZONE_IDS;
-    }
+    // public static Set!(string) getAvailableZoneIds() {
+    //     return ZONE_IDS;
+    // }
 
     /**
      * Gets the rules for the zone ID.
@@ -303,13 +304,13 @@ public abstract class ZoneRulesProvider {
                     ", currently loading from provider: " ~ provider.toString);
             }
         }
-        Set!(string) combinedSet = new HashSet!(string)();
-        foreach(data; ZONES.keySet()) {
-            combinedSet.add(data);
-        }
+        // Set!(string) combinedSet = new HashSet!(string)();
+        // foreach(data; ZONES.keySet()) {
+        //     combinedSet.add(data);
+        // }
         // import std.stdio;
         // writeln("zone set : ",combinedSet);
-        ZONE_IDS = /* Collections.unmodifiableSet */(combinedSet);
+        // ZONE_IDS = /* Collections.unmodifiableSet */(combinedSet);
     }
 
     /**
