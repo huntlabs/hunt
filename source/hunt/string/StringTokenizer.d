@@ -120,35 +120,37 @@ class StringTokenizer : Iterable!string {
     /**
      * Set maxDelimCodePoint to the highest char in the delimiter set.
      */
-    // private void setMaxDelimCodePoint() {
-    //     if (delimiters is null) {
-    //         maxDelimCodePoint = 0;
-    //         return;
-    //     }
+    private void setMaxDelimCodePoint() {
+        if (delimiters is null) {
+            maxDelimCodePoint = 0;
+            return;
+        }
 
-    //     int m = 0;
-    //     int c;
-    //     int count = 0;
-    //     for (int i = 0; i < delimiters.length; i += Character.charCount(c)) {
-    //         c = delimiters[i];
-    //         if (c >= Character.MIN_HIGH_SURROGATE && c <= Character.MAX_LOW_SURROGATE) {
-    //             c = delimiters.codePointAt(i);
-    //             hasSurrogates = true;
-    //         }
-    //         if (m < c)
-    //             m = c;
-    //         count++;
-    //     }
-    //     maxDelimCodePoint = m;
+        int m = 0;
+        int c;
+        int count = 0;
+        for (int i = 0; i < delimiters.length; i += Character.charCount(c)) {
+            c = delimiters[i];
+            // FIXME: Needing refactor or cleanup -@zxp at 12/28/2018, 2:53:32 PM
+            // 
+            // if (c >= Character.MIN_HIGH_SURROGATE && c <= Character.MAX_LOW_SURROGATE) {
+            //     c = delimiters.codePointAt(i);
+            //     hasSurrogates = true;
+            // }
+            if (m < c)
+                m = c;
+            count++;
+        }
+        maxDelimCodePoint = m;
 
-    //     if (hasSurrogates) {
-    //         delimiterCodePoints = new int[count];
-    //         for (int i = 0, j = 0; i < count; i++, j += Character.charCount(c)) {
-    //             c = delimiters.codePointAt(j);
-    //             delimiterCodePoints[i] = c;
-    //         }
-    //     }
-    // }
+        // if (hasSurrogates) {
+        //     delimiterCodePoints = new int[count];
+        //     for (int i = 0, j = 0; i < count; i++, j += Character.charCount(c)) {
+        //         c = delimiters.codePointAt(j);
+        //         delimiterCodePoints[i] = c;
+        //     }
+        // }
+    }
 
     /**
      * Constructs a string tokenizer for the specified string. All
@@ -180,7 +182,7 @@ class StringTokenizer : Iterable!string {
         maxPosition = cast(int)str.length;
         delimiters = delim;
         retDelims = returnDelims;
-        // setMaxDelimCodePoint();
+        setMaxDelimCodePoint();
     }
 
     /**
@@ -224,25 +226,24 @@ class StringTokenizer : Iterable!string {
      */
     private int skipDelimiters(int startPos) {
         if (delimiters is null)
-            throw new NullPointerException("");
+            throw new NullPointerException();
 
-// TODO: Tasks pending completion -@zxp at 6/21/2018, 2:23:48 PM
-// 
         int position = startPos;
-        // while (!retDelims && position < maxPosition) {
-        //     if (!hasSurrogates) {
-        //         char c = str.charAt(position);
-        //         if ((c > maxDelimCodePoint) || (delimiters.indexOf(c) < 0))
-        //             break;
-        //         position++;
-        //     } else {
-        //         int c = str.codePointAt(position);
-        //         if ((c > maxDelimCodePoint) || !isDelimiter(c)) {
-        //             break;
-        //         }
-        //         position += Character.charCount(c);
-        //     }
-        // }
+        while (!retDelims && position < maxPosition) {
+            if (!hasSurrogates) {
+                char c = str[position];
+                if ((c > maxDelimCodePoint) || (delimiters.indexOf(c) < 0))
+                    break;
+                position++;
+            } else {
+                throw new NotSupportedException();
+                // int c = str.codePointAt(position);
+                // if ((c > maxDelimCodePoint) || !isDelimiter(c)) {
+                //     break;
+                // }
+                // position += Character.charCount(c);
+            }
+        }
         return position;
     }
 
@@ -252,33 +253,36 @@ class StringTokenizer : Iterable!string {
      */
     private int scanToken(int startPos) {
         int position = startPos;
-        // TODO: Tasks pending completion -@zxp at 6/21/2018, 2:24:08 PM
-        // 
 
-        // while (position < maxPosition) {
-        //     if (!hasSurrogates) {
-        //         char c = str.charAt(position);
-        //         if ((c <= maxDelimCodePoint) && (delimiters.indexOf(c) >= 0))
-        //             break;
-        //         position++;
-        //     } else {
-        //         int c = str.codePointAt(position);
-        //         if ((c <= maxDelimCodePoint) && isDelimiter(c))
-        //             break;
-        //         position += Character.charCount(c);
-        //     }
-        // }
-        // if (retDelims && (startPos == position)) {
-        //     if (!hasSurrogates) {
-        //         char c = str.charAt(position);
-        //         if ((c <= maxDelimCodePoint) && (delimiters.indexOf(c) >= 0))
-        //             position++;
-        //     } else {
-        //         int c = str.codePointAt(position);
-        //         if ((c <= maxDelimCodePoint) && isDelimiter(c))
-        //             position += Character.charCount(c);
-        //     }
-        // }
+        while (position < maxPosition) {
+            if (!hasSurrogates) {
+                char c = str.charAt(position);
+                if ((c <= maxDelimCodePoint) && (delimiters.indexOf(c) >= 0))
+                    break;
+                position++;
+            } else {
+
+                throw new NotSupportedException();
+                // int c = str.codePointAt(position);
+                // if ((c <= maxDelimCodePoint) && isDelimiter(c))
+                //     break;
+                // position += Character.charCount(c);
+            }
+        }
+
+        if (retDelims && (startPos == position)) {
+            if (!hasSurrogates) {
+                char c = str.charAt(position);
+                if ((c <= maxDelimCodePoint) && (delimiters.indexOf(c) >= 0))
+                    position++;
+            } else {
+
+                throw new NotSupportedException();
+                // int c = str.codePointAt(position);
+                // if ((c <= maxDelimCodePoint) && isDelimiter(c))
+                //     position += Character.charCount(c);
+            }
+        }
         return position;
     }
 
@@ -359,7 +363,7 @@ class StringTokenizer : Iterable!string {
         /* delimiter string specified, so set the appropriate flag. */
         delimsChanged = true;
 
-        // setMaxDelimCodePoint();
+        setMaxDelimCodePoint();
         return nextToken();
     }
 
