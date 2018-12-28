@@ -12,6 +12,7 @@ import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
+import test.StringTokenizerTest;
 import test.TaskTest;
 import test.ThreadPoolExecutorTest;
 import test.ThreadTest;
@@ -36,6 +37,7 @@ void main()
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
+	testUnits!(StringTokenizerTest);
 
 	// testLockSupport01();
 
