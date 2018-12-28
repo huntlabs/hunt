@@ -27,7 +27,8 @@ import std.range;
 import std.traits;
 
 
-                import hunt.logging;
+version (HUNT_DEBUG) import hunt.logging.ConsoleLogger;
+
 // Red-black mechanics
 
 private enum bool RED   = false;
@@ -2516,7 +2517,6 @@ static final class TreeMapEntry(K,V) : MapEntry!(K,V) {
  * @serial include
  */
 abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K,V) {
-    // private static final long serialVersionUID = -2102997345730753016L;
     /**
      * The backing map.
      */
@@ -2533,6 +2533,8 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     K lo, hi;
     bool fromStart, toEnd;
     bool loInclusive, hiInclusive;
+
+    int sizeModCount = 0;
 
     this(TreeMap!(K,V) m,
                     bool fromStart, K lo, bool loInclusive,
@@ -2554,6 +2556,12 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
         this.toEnd = toEnd;
         this.hi = hi;
         this.hiInclusive = hiInclusive;
+
+        this._size = -1;
+        // if(fromStart && toEnd)
+        //     this._size = m.size();
+        // else
+        //     updateSize();
     }
 
     // internal utilities
@@ -2669,7 +2677,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     // abstract Spliterator!K keySpliterator();
 
     /** Returns descending iterator from the perspective of this submap */
-    abstract Iterator!K descendingKeyIterator();
+    // abstract Iterator!K descendingKeyIterator();
 
 
     // methods
@@ -2690,13 +2698,28 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     }    
 
     override bool isEmpty() {
-        // return (fromStart && toEnd) ? m.isEmpty() : entrySet().isEmpty();
-        return m.isEmpty();
+        if(fromStart && toEnd)
+            return m.isEmpty();
+        else {
+            TreeMapEntry!(K,V) n = absLowest();
+            return n is null || tooHigh(n.key);
+        }
     }
 
-    override int size() const {
-        // return (fromStart && toEnd) ? m.size() : entrySet().size();
-        return  m.size();
+    override int size() { 
+        if(fromStart && toEnd)
+            return m.size();
+        if(_size == -1 || sizeModCount != m.modCount)
+            updateSize();
+        return _size;
+    }
+
+    private void updateSize() {
+        int s = 0;
+        foreach(item; this) {
+            s++;
+        }
+        _size = s;
     }
 
     final override bool containsKey(K key) {
@@ -2706,6 +2729,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     final override V put(K key, V value) {
         if (!inRange(key))
             throw new IllegalArgumentException("key out of range");
+        // _size++;
         return m.put(key, value);
     }
 
@@ -2714,6 +2738,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     }
 
     final override V remove(K key) {
+        // _size--;
         return !inRange(key) ? null : m.remove(key);
     }
 
@@ -3161,7 +3186,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
 /**
  * @serial include
  */
-static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
+final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
     // private static final long serialVersionUID = 912986545866124060L;
 
     this(TreeMap!(K,V) m,
@@ -3225,9 +3250,9 @@ static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
     //     return new SubMapKeyIterator(absLowest(), absHighFence());
     // }
 
-    override Iterator!K descendingKeyIterator() {
-        return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
-    }
+    // override Iterator!K descendingKeyIterator() {
+    //     return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
+    // }
 
 
     override int opApply(scope int delegate(ref K, ref V) dg)  {
@@ -3281,7 +3306,7 @@ static final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
 /**
  * @serial include
  */
-static final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
+final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
     // private static final long serialVersionUID = 912986545866120460L;
     this(TreeMap!(K,V) m,
                     bool fromStart, K lo, bool loInclusive,
@@ -3342,9 +3367,9 @@ static final class DescendingSubMap(K,V)  : NavigableSubMap!(K,V) {
     //     return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
     // }
 
-    override Iterator!K descendingKeyIterator() {
-        return new SubMapKeyIterator(absLowest(), absHighFence());
-    }
+    // override Iterator!K descendingKeyIterator() {
+    //     return new SubMapKeyIterator(absLowest(), absHighFence());
+    // }
 
     // final class DescendingEntrySetView : EntrySetView {
     //     Iterator!(MapEntry!(K,V)) iterator() {

@@ -143,7 +143,7 @@ private class SingletonSet(E) : AbstractSet!E
         return true;
     }
     override
-    int size() const {return 1;}
+    int size() {return 1;}
 
     override bool contains(E)(E o) {return o == element;}
 
@@ -186,7 +186,7 @@ private static class SingletonList(E)  : AbstractList!E    {
     //     return singletonIterator(element);
     // }
 
-    override int size() const {return 1;}
+    override int size() {return 1;}
 
     override bool contains(E obj) {
         static if(is(E == class))

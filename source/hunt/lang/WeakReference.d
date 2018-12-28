@@ -104,7 +104,7 @@ class WeakReference(T) if (is(T == class) || is(T == interface)) {
      *
      * Returns: True the other object is a weak reference to the same object.
      */
-    @safe pure nothrow override bool opEquals(Object other) const {
+    @safe pure nothrow override bool opEquals(Object other) {
         if (other is this) {
             return true;
         }
@@ -117,7 +117,7 @@ class WeakReference(T) if (is(T == class) || is(T == interface)) {
     }
 
     /// ditto
-    // @trusted pure nothrow bool opEquals(const(Object) other) const {
+    // @trusted pure nothrow bool opEquals(const(Object) other) {
     //     return this.opEquals(cast(Object) other);
     // }
 }

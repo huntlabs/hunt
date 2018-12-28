@@ -165,7 +165,7 @@ class HashSet(E) : AbstractSet!E, Set!E {
      *
      * @return the number of elements in this set (its cardinality)
      */
-    override int size() const {
+    override int size() {
         return map.size();
     }
 

@@ -19,7 +19,7 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      *
      * @return the number of key-value mappings in this map
      */
-    int size() const;
+    int size();
 
     /**
      * Returns <tt>true</tt> if this map contains no key-value mappings.

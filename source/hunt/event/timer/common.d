@@ -119,7 +119,7 @@ protected:
     }
 
     /// get the index whitch is farthest with current index.
-    size_t getPrev() const {
+    size_t getPrev() {
         if (_now == 0)
             return (_list.length - 1);
         else
@@ -179,7 +179,7 @@ abstract class WheelTimer {
     }
 
     /// the time is active.
-    pragma(inline, true) final bool isActive() const {
+    pragma(inline, true) final bool isActive() {
         return _manger !is null;
     }
 

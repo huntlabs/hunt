@@ -60,7 +60,7 @@ abstract class AbstractCollection(E) : Collection!E {
         throw new NotImplementedException();
     }
 
-    abstract int size() const;
+    abstract int size();
 
     /**
      * {@inheritDoc}

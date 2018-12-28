@@ -71,7 +71,7 @@ class Assert {
     static void assertTrue(size_t line = __LINE__, string file = __FILE__)(
             string message, bool condition) {
         if (!condition) {
-            fail!(line, file)(message);
+            fail(message);
         }
     }
 
@@ -115,21 +115,21 @@ class Assert {
      * okay)
      * @see AssertionError
      */
-    static void fail(size_t line = __LINE__, string file = __FILE__)(string message) {
+    static void fail(string message) {
 
-        if (message.empty)
-            message = std.format.format("raised in %s:%s", file, line);
-        else
-            message = std.format.format("raised in %s:%s, message: %s", file, line, message);
+        // if (message.empty)
+        //     message = std.format.format("raised in %s:%s", file, line);
+        // else
+        //     message = std.format.format("raised in %s:%s, message: %s", file, line, message);
 
-        throw new AssertionError(message, file, line, cast(Throwable) null);
+        throw new AssertionError(message, cast(Throwable) null);
     }
 
     /**
      * Fails a test with no message.
      */
-    static void fail(size_t line = __LINE__, string file = __FILE__)() {
-        fail!(line, file)(null);
+    static void fail() {
+        fail(null);
     }
 
     /**
@@ -145,10 +145,10 @@ class Assert {
      */
     static void assertEquals(T, size_t line = __LINE__, string file = __FILE__)(
             string message, T expected, T actual) {
-        if (!message.empty)
-            message = std.format.format("raised in %s:%s, message: %s", file, line, message);
-        else
-            message = std.format.format("raised in %s:%s", file, line);
+        // if (!message.empty)
+        //     message = std.format.format("raised in %s:%s, message: %s", file, line, message);
+        // else
+        //     message = std.format.format("raised in %s:%s", file, line);
 
         version (HUNT_DEBUG) {
             trace("expected: ", expected);
@@ -597,7 +597,7 @@ class Assert {
     static void assertEquals(size_t line = __LINE__, string file = __FILE__)(
             string message, double expected, double actual, double delta) {
         if (doubleIsDifferent(expected, actual, delta)) {
-            failNotEquals!(double, line, file)(message, expected, actual);
+            failNotEquals!(double)(message, expected, actual);
         }
     }
 
@@ -807,9 +807,9 @@ class Assert {
             formatted = message ~ " ";
         }
         static if (is(T == class)) {
-            fail!(line, file)(formatted ~ "expected null, but was:<" ~ actual.toString() ~ ">");
+            fail(formatted ~ "expected null, but was:<" ~ actual.toString() ~ ">");
         } else {
-            fail!(line, file)(formatted ~ "expected null, but was:<" ~ to!string(actual) ~ ">");
+            fail(formatted ~ "expected null, but was:<" ~ to!string(actual) ~ ">");
         }
     }
 
@@ -876,7 +876,7 @@ class Assert {
         if (!message.empty) {
             formatted = message ~ " ";
         }
-        fail!(line, file)(formatted ~ "expected not same");
+        fail(formatted ~ "expected not same");
     }
 
     static private void failNotSame(T, size_t line = __LINE__, string file = __FILE__)(
@@ -885,13 +885,13 @@ class Assert {
         if (!message.empty) {
             formatted = message ~ " ";
         }
-        fail!(line, file)(formatted ~ "expected same:<" ~ typeid(expected)
+        fail(formatted ~ "expected same:<" ~ typeid(expected)
                 .toString() ~ "> was not:<" ~ typeid(actual).toString() ~ ">");
     }
 
-    static private void failNotEquals(T, size_t line = __LINE__, string file = __FILE__)(
+    static private void failNotEquals(T)(
             string message, T expected, T actual) {
-        fail!(line, file)(format(message, expected, actual));
+        fail(format(message, expected, actual));
     }
 
     static string format(T)(string message, T expected, T actual)
@@ -913,7 +913,7 @@ class Assert {
     // static private void failNotEquals(T, size_t line = __LINE__, string file = __FILE__)
     //     (string message, T expected, T actual)
     //         if (isNumeric!T) {
-    //     fail!(line, file)(format(message, expected, actual));
+    //     fail(format(message, expected, actual));
     // }
 
     static string format(T)(string message, T expected, T actual) if (isNumeric!T) {
@@ -1034,10 +1034,10 @@ class Assert {
             string message, T actual, T matcher) {
         // trace("actual=>", actual);
         // trace("matcher=>", matcher);
-        if (message.empty)
-            message = std.format.format("raised in %s:%s", file, line);
-        else
-            message = std.format.format("raised in %s:%s, reason: %s", file, line, message);
+        // if (message.empty)
+        //     message = std.format.format("raised in %s:%s", file, line);
+        // else
+        //     message = std.format.format("raised in %s:%s, reason: %s", file, line, message);
         assert(actual == matcher, message);
     }
 

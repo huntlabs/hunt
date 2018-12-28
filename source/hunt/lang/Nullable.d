@@ -142,15 +142,15 @@ class Nullable(T) : INullable {
     //     return cast(U)_value;
     // }
 
-    bool opEquals(const(IObject) o) const {
+    bool opEquals(const(IObject) o) {
         return opEquals(cast(Object)o);
     }
 
-    bool opEquals(T v) const {
+    bool opEquals(T v) {
         return this._value == v;
     }
 
-    override bool opEquals(const(Object) o) const {
+    override bool opEquals(const(Object) o) {
         Nullable!(T) that = cast(Nullable!(T))o;
         if(that is null)
             return false;

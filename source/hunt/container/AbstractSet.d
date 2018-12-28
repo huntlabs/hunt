@@ -194,7 +194,7 @@ class EmptySet(E) : AbstractSet!(E) {
 
     // Iterator!(E) iterator() { return emptyIterator(); }
 
-    override int size() const {return 0;}
+    override int size() {return 0;}
     override bool isEmpty() {return true;}
     override void clear() {}
 

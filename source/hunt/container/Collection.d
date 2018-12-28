@@ -14,7 +14,7 @@ interface Collection(E) : Iterable!E, IObject {
      *
      * @return the number of elements in this collection
      */
-    int size() const;
+    int size();
 
     /**
      * Returns <tt>true</tt> if this collection contains no elements.
