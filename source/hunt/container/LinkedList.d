@@ -236,7 +236,7 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the number of elements in this list
      */
-    override int size() const {
+    override int size() {
         return _size;
     }
 

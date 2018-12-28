@@ -14,6 +14,8 @@ import hunt.util.Comparator;
 import hunt.lang.exception;
 import hunt.lang.Object;
 
+import std.range;
+
 /**
  * A {@link NavigableSet} implementation based on a {@link TreeMap}.
  * The elements are ordered using their {@linkplain Comparable natural
@@ -186,9 +188,10 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *
      * @return an iterator over the elements in this set in ascending order
      */
-    // Iterator!(E) iterator() {
-    //     return m.navigableKeySet().iterator();
-    // }
+    override InputRange!(E) iterator() {
+        return m.byKey();
+        // return m.navigableKeySet().iterator();
+    }
 
     /**
      * Returns an iterator over the elements in this set in descending order.
@@ -212,7 +215,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *
      * @return the number of elements in this set (its cardinality)
      */
-    override int size() const {
+    override int size() {
         return m.size();
     }
 

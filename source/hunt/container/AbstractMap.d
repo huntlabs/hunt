@@ -23,8 +23,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      */
     protected int _size;
 
-    // protected V[K] _dict;
-
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -39,7 +37,7 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      *
      * @return the number of key-value mappings in this map
      */
-    int size() const {
+    int size() {
         return _size;
     }
 
@@ -808,7 +806,7 @@ class SimpleImmutableEntry(K, V) : MapEntry!(K, V) {
 class EmptyMap(K, V) : AbstractMap!(K, V) {
     // private enum long serialVersionUID = 6428348081105594320L;
 
-    override int size() const {
+    override int size() {
         return 0;
     }
 

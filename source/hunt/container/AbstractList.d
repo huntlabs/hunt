@@ -304,7 +304,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
 class EmptyList(E) : AbstractList!E {
     // private static long serialVersionUID = 8842843931221139166L;
 
-    override int size() const {
+    override int size() {
         return 0;
     }
 

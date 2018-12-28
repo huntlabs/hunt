@@ -307,7 +307,7 @@ class LinkedBlockingQueue(E) : AbstractQueue!(E), BlockingQueue!(E) {
      *
      * @return the number of elements in this queue
      */
-    override int size() const {
+    override int size() {
         return count;
     }
 
