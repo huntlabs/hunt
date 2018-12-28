@@ -13,7 +13,7 @@ import hunt.io.common;
 import hunt.time.chrono.ChronoLocalDateTime;
 import hunt.time.chrono.ChronoLocalDate;
 import hunt.time.chrono.Chronology;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
@@ -42,7 +42,7 @@ import hunt.time.DateTimeException;
 import hunt.time.Period;
 import hunt.time.Ser;
 import std.conv;
-import hunt.time.util.common;
+// import hunt.time.util.common;
 /**
  * A date-time without a time-zone _in the ISO-8601 calendar system,
  * such as {@code 2007-12-03T10:15:30}.
@@ -89,6 +89,16 @@ public final class LocalDateTime
      * This could be used by an application as a "far past" date-time.
      */
     // public __gshared LocalDateTime MIN;
+    private __gshared LocalDateTime _MIN;
+    static LocalDateTime MIN() {
+        if(_MIN is null) {
+            synchronized {
+                if(_MIN is null)
+                    _MIN= LocalDateTime.of(LocalDate.MIN, LocalTime.MIN);
+            }
+        }
+        return _MIN;
+    }    
     /**
      * The maximum supported {@code LocalDateTime}, '+999999999-12-31T23:59:59.999999999'.
      * This is the local date-time just before midnight at the end of the maximum date.
@@ -96,6 +106,16 @@ public final class LocalDateTime
      * This could be used by an application as a "far future" date-time.
      */
     // public __gshared LocalDateTime MAX;
+    private __gshared LocalDateTime _MAX;
+    static LocalDateTime MAX() {
+        if(_MAX is null) {
+            synchronized {
+                if(_MAX is null)
+                    _MAX= LocalDateTime.of(LocalDate.MAX, LocalTime.MAX);
+            }
+        }
+        return _MAX;
+    }    
 
     /**
      * Serialization version.
@@ -114,9 +134,9 @@ public final class LocalDateTime
     // shared static this()
     // {
         // MIN = LocalDateTime.of(LocalDate.MIN, LocalTime.MIN);
-        mixin(MakeGlobalVar!(LocalDateTime)("MIN",`LocalDateTime.of(LocalDate.MIN, LocalTime.MIN)`));
+        // mixin(MakeGlobalVar!(LocalDateTime)("MIN",`LocalDateTime.of(LocalDate.MIN, LocalTime.MIN)`));
         // MAX = LocalDateTime.of(LocalDate.MAX, LocalTime.MAX);
-        mixin(MakeGlobalVar!(LocalDateTime)("MAX",`LocalDateTime.of(LocalDate.MAX, LocalTime.MAX)`));
+        // mixin(MakeGlobalVar!(LocalDateTime)("MAX",`LocalDateTime.of(LocalDate.MAX, LocalTime.MAX)`));
 
     // }
 
@@ -431,9 +451,9 @@ public final class LocalDateTime
      * @return the parsed local date-time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static LocalDateTime parse(string text) {
-        return parse(text, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-    }
+    // public static LocalDateTime parse(string text) {
+    //     return parse(text, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    // }
 
     /**
      * Obtains an instance of {@code LocalDateTime} from a text string using a specific formatter.
@@ -445,29 +465,29 @@ public final class LocalDateTime
      * @return the parsed local date-time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static LocalDateTime parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!LocalDateTime{
-             LocalDateTime queryFrom(TemporalAccessor temporal)
-             {
-                 if (cast(LocalDateTime)(temporal) !is null) {
-                    return cast(LocalDateTime) temporal;
-                } else if (cast(ZonedDateTime)(temporal) !is null) {
-                    return (cast(ZonedDateTime) temporal).toLocalDateTime();
-                } else if (cast(OffsetDateTime)(temporal) !is null) {
-                    return (cast(OffsetDateTime) temporal).toLocalDateTime();
-                }
-                try {
-                    LocalDate date = LocalDate.from(temporal);
-                    LocalTime time = LocalTime.from(temporal);
-                    return new LocalDateTime(date, time);
-                } catch (DateTimeException ex) {
-                    throw new DateTimeException("Unable to obtain LocalDateTime from TemporalAccessor: " ~
-                            typeid(temporal).stringof ~ " of type " ~ typeid(temporal).stringof, ex);
-                }
-             }
-        });
-    }
+    // public static LocalDateTime parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!LocalDateTime{
+    //          LocalDateTime queryFrom(TemporalAccessor temporal)
+    //          {
+    //              if (cast(LocalDateTime)(temporal) !is null) {
+    //                 return cast(LocalDateTime) temporal;
+    //             } else if (cast(ZonedDateTime)(temporal) !is null) {
+    //                 return (cast(ZonedDateTime) temporal).toLocalDateTime();
+    //             } else if (cast(OffsetDateTime)(temporal) !is null) {
+    //                 return (cast(OffsetDateTime) temporal).toLocalDateTime();
+    //             }
+    //             try {
+    //                 LocalDate date = LocalDate.from(temporal);
+    //                 LocalTime time = LocalTime.from(temporal);
+    //                 return new LocalDateTime(date, time);
+    //             } catch (DateTimeException ex) {
+    //                 throw new DateTimeException("Unable to obtain LocalDateTime from TemporalAccessor: " ~
+    //                         typeid(temporal).stringof ~ " of type " ~ typeid(temporal).stringof, ex);
+    //             }
+    //          }
+    //     });
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -1773,11 +1793,11 @@ public final class LocalDateTime
      * @return the formatted date-time string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-    override  // override for Javadoc and performance
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // override  // override for Javadoc and performance
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

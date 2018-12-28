@@ -12,8 +12,8 @@ import hunt.lang.exception;
 import hunt.io.common;
 import hunt.time.chrono.Chronology;
 import hunt.time.chrono.IsoChronology;
-import hunt.time.format.DateTimeFormatter;
-import hunt.time.format.DateTimeFormatterBuilder;
+// import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.format.SignStyle;
 import hunt.time.temporal.ChronoField;
@@ -77,7 +77,7 @@ public final class YearMonth
     /**
      * Parser.
      */
-    __gshared DateTimeFormatter _PARSER ;
+    // __gshared DateTimeFormatter _PARSER ;
 
     /**
      * The year.
@@ -88,18 +88,18 @@ public final class YearMonth
      */
     private  int month;
 
-    public static ref  DateTimeFormatter PARSER()
-     {
-         if(_PARSER is null)
-         {
-             _PARSER = new DateTimeFormatterBuilder()
-            .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-            .appendLiteral('-')
-            .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-            .toFormatter();
-         }
-         return _PARSER;
-     }
+    // public static ref  DateTimeFormatter PARSER()
+    //  {
+    //      if(_PARSER is null)
+    //      {
+    //          _PARSER = new DateTimeFormatterBuilder()
+    //         .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+    //         .appendLiteral('-')
+    //         .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+    //         .toFormatter();
+    //      }
+    //      return _PARSER;
+    //  }
     // shared static this()
     // {
     //     PARSER = new DateTimeFormatterBuilder()
@@ -232,9 +232,9 @@ public final class YearMonth
      * @return the parsed year-month, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static YearMonth parse(string text) {
-        return parse(text, PARSER);
-    }
+    // public static YearMonth parse(string text) {
+    //     return parse(text, PARSER);
+    // }
 
     /**
      * Obtains an instance of {@code YearMonth} from a text string using a specific formatter.
@@ -246,27 +246,27 @@ public final class YearMonth
      * @return the parsed year-month, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static YearMonth parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!YearMonth{
-            YearMonth queryFrom(TemporalAccessor temporal)
-            {
-                if (cast(YearMonth)(temporal) !is null) {
-                    return cast(YearMonth) temporal;
-                }
-                assert(temporal, "temporal");
-                try {
-                    if ((IsoChronology.INSTANCE == Chronology.from(temporal)) == false) {
-                        temporal = LocalDate.from(temporal);
-                    }
-                    return of(temporal.get(ChronoField.YEAR), temporal.get(ChronoField.MONTH_OF_YEAR));
-                } catch (DateTimeException ex) {
-                    throw new DateTimeException("Unable to obtain YearMonth from TemporalAccessor: " ~
-                            typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
-                }
-            }
-        });
-    }
+    // public static YearMonth parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!YearMonth{
+    //         YearMonth queryFrom(TemporalAccessor temporal)
+    //         {
+    //             if (cast(YearMonth)(temporal) !is null) {
+    //                 return cast(YearMonth) temporal;
+    //             }
+    //             assert(temporal, "temporal");
+    //             try {
+    //                 if ((IsoChronology.INSTANCE == Chronology.from(temporal)) == false) {
+    //                     temporal = LocalDate.from(temporal);
+    //                 }
+    //                 return of(temporal.get(ChronoField.YEAR), temporal.get(ChronoField.MONTH_OF_YEAR));
+    //             } catch (DateTimeException ex) {
+    //                 throw new DateTimeException("Unable to obtain YearMonth from TemporalAccessor: " ~
+    //                         typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
+    //             }
+    //         }
+    //     });
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -1060,10 +1060,10 @@ public final class YearMonth
      * @return the formatted year-month string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

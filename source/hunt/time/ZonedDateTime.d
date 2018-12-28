@@ -13,7 +13,7 @@ import hunt.time.chrono.ChronoZonedDateTime;
 import hunt.time.chrono.ChronoLocalDate;
 import hunt.time.chrono.ChronoLocalDateTime;
 import hunt.time.chrono.Chronology;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
@@ -535,9 +535,9 @@ public  class ZonedDateTime
      * @return the parsed zoned date-time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static ZonedDateTime parse(string text) {
-        return parse(text, DateTimeFormatter.ISO_ZONED_DATE_TIME);
-    }
+    // public static ZonedDateTime parse(string text) {
+    //     return parse(text, DateTimeFormatter.ISO_ZONED_DATE_TIME);
+    // }
 
     /**
      * Obtains an instance of {@code ZonedDateTime} from a text string using a specific formatter.
@@ -549,32 +549,32 @@ public  class ZonedDateTime
      * @return the parsed zoned date-time, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static ZonedDateTime parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!ZonedDateTime{
-            ZonedDateTime queryFrom(TemporalAccessor temporal)
-            {
-                if (cast(ZonedDateTime)(temporal) !is null) {
-                    return cast(ZonedDateTime) temporal;
-                }
-                try {
-                    ZoneId zone = ZoneId.from(temporal);
-                    if (temporal.isSupported(ChronoField.INSTANT_SECONDS)) {
-                        long epochSecond = temporal.getLong(ChronoField.INSTANT_SECONDS);
-                        int nanoOfSecond = temporal.get(ChronoField.NANO_OF_SECOND);
-                        return create(epochSecond, nanoOfSecond, zone);
-                    } else {
-                        LocalDate date = LocalDate.from(temporal);
-                        LocalTime time = LocalTime.from(temporal);
-                        return of(date, time, zone);
-                    }
-                } catch (DateTimeException ex) {
-                    throw new DateTimeException("Unable to obtain ZonedDateTime from TemporalAccessor: " ~
-                            typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
-                }
-            }
-        });
-    }
+    // public static ZonedDateTime parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!ZonedDateTime{
+    //         ZonedDateTime queryFrom(TemporalAccessor temporal)
+    //         {
+    //             if (cast(ZonedDateTime)(temporal) !is null) {
+    //                 return cast(ZonedDateTime) temporal;
+    //             }
+    //             try {
+    //                 ZoneId zone = ZoneId.from(temporal);
+    //                 if (temporal.isSupported(ChronoField.INSTANT_SECONDS)) {
+    //                     long epochSecond = temporal.getLong(ChronoField.INSTANT_SECONDS);
+    //                     int nanoOfSecond = temporal.get(ChronoField.NANO_OF_SECOND);
+    //                     return create(epochSecond, nanoOfSecond, zone);
+    //                 } else {
+    //                     LocalDate date = LocalDate.from(temporal);
+    //                     LocalTime time = LocalTime.from(temporal);
+    //                     return of(date, time, zone);
+    //                 }
+    //             } catch (DateTimeException ex) {
+    //                 throw new DateTimeException("Unable to obtain ZonedDateTime from TemporalAccessor: " ~
+    //                         typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
+    //             }
+    //         }
+    //     });
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -2165,10 +2165,10 @@ public  class ZonedDateTime
      * @throws DateTimeException if an error occurs during printing
      */
     // override  // override for Javadoc and performance
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

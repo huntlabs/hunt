@@ -29,7 +29,8 @@ import hunt.time.temporal.TemporalQueries;
 import hunt.time.temporal.TemporalQuery;
 import hunt.time.temporal.ValueRange;
 import hunt.time.temporal.WeekFields;
-import hunt.time.zone.ZoneRulesProvider;
+// import hunt.time.zone.ZoneRulesProvider;
+import hunt.time.zone.Helper;
 
 // import hunt.util.AbstractMap.SimpleImmutableEntry;
 import hunt.container.ArrayList;
@@ -4842,7 +4843,7 @@ public final class DateTimeFormatterBuilder
                 }
                 Locale locale = context.getLocale();
                 bool isCaseSensitive = context.isCaseSensitive();
-                Set!(string) regionIds = ZoneRulesProvider.getAvailableZoneIds();
+                Set!(string) regionIds = ZoneRulesHelper.getAvailableZoneIds();
                 int regionIdsSize = regionIds.size();
 
                 Map!(Locale, MapEntry!(Integer, PrefixTree)) cached = isCaseSensitive ? cachedTree
@@ -4928,7 +4929,7 @@ public final class DateTimeFormatterBuilder
             protected PrefixTree getTree(DateTimeParseContext context)
             {
                 // prepare parse tree
-                Set!(string) regionIds = ZoneRulesProvider.getAvailableZoneIds();
+                Set!(string) regionIds = ZoneRulesHelper.getAvailableZoneIds();
                 int regionIdsSize = regionIds.size();
                 MapEntry!(Integer, PrefixTree) cached = context.isCaseSensitive()
                     ? cachedPrefixTree : cachedPrefixTreeCI;

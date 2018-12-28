@@ -7,7 +7,7 @@ import hunt.io.common;
 import hunt.time.DateTimeException;
 import hunt.time.LocalDate;
 import hunt.time.LocalTime;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
 import hunt.time.temporal.Temporal;
@@ -595,7 +595,7 @@ public interface ChronoLocalDate
      * @return the formatted date string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-     string format(DateTimeFormatter formatter);
+    //  string format(DateTimeFormatter formatter);
     //  string format(DateTimeFormatter formatter) {
     //     assert(formatter, "formatter");
     //     return formatter.format(this);

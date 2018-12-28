@@ -11,7 +11,7 @@ import hunt.lang.exception;
 import hunt.lang;
 import hunt.time.DateTimeException;
 import hunt.io.common;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.temporal.ChronoField;
 import hunt.time.temporal.ChronoUnit;
@@ -348,25 +348,25 @@ public final class Instant
      * @return the parsed instant, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static Instant parse(const string text) {
-        return DateTimeFormatter.ISO_INSTANT.parse!Instant(text, new class TemporalQuery!Instant{
-             Instant queryFrom(TemporalAccessor temporal)
-             {
-                     if (cast(Instant)(temporal) !is null) {
-                        return cast(Instant) temporal;
-                    }
-                    assert(temporal, "temporal");
-                    try {
-                        long instantSecs = temporal.getLong(ChronoField.INSTANT_SECONDS);
-                        int nanoOfSecond = temporal.get(ChronoField.NANO_OF_SECOND);
-                        return Instant.ofEpochSecond(instantSecs, nanoOfSecond);
-                    } catch (DateTimeException ex) {
-                        throw new DateTimeException("Unable to obtain Instant from TemporalAccessor: " ~
-                                typeid(temporal).stringof ~ " of type " ~ typeid(temporal).stringof, ex);
-                    }
-             }
-        });
-    }
+    // public static Instant parse(const string text) {
+    //     return DateTimeFormatter.ISO_INSTANT.parse!Instant(text, new class TemporalQuery!Instant{
+    //          Instant queryFrom(TemporalAccessor temporal)
+    //          {
+    //                  if (cast(Instant)(temporal) !is null) {
+    //                     return cast(Instant) temporal;
+    //                 }
+    //                 assert(temporal, "temporal");
+    //                 try {
+    //                     long instantSecs = temporal.getLong(ChronoField.INSTANT_SECONDS);
+    //                     int nanoOfSecond = temporal.get(ChronoField.NANO_OF_SECOND);
+    //                     return Instant.ofEpochSecond(instantSecs, nanoOfSecond);
+    //                 } catch (DateTimeException ex) {
+    //                     throw new DateTimeException("Unable to obtain Instant from TemporalAccessor: " ~
+    //                             typeid(temporal).stringof ~ " of type " ~ typeid(temporal).stringof, ex);
+    //                 }
+    //          }
+    //     });
+    // }
 
     //-----------------------------------------------------------------------
     /**
@@ -1313,7 +1313,10 @@ public final class Instant
      */
     override
     public string toString() {
-        return DateTimeFormatter.ISO_INSTANT.format(this);
+        // TODO: Tasks pending completion -@zxp at 12/27/2018, 8:05:39 PM
+        // 
+        return "TODO";
+        // return DateTimeFormatter.ISO_INSTANT.format(this);
     }
 
     // -----------------------------------------------------------------------

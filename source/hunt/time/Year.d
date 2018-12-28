@@ -12,8 +12,8 @@ import hunt.lang.exception;
 import hunt.io.common;
 import hunt.time.chrono.Chronology;
 import hunt.time.chrono.IsoChronology;
-import hunt.time.format.DateTimeFormatter;
-import hunt.time.format.DateTimeFormatterBuilder;
+// import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatterBuilder;
 import hunt.time.format.DateTimeParseException;
 import hunt.time.format.SignStyle;
 import hunt.time.temporal.ChronoField;
@@ -95,18 +95,18 @@ public final class Year
     /**
      * Parser.
      */
-     __gshared DateTimeFormatter _PARSER ;
+    //  __gshared DateTimeFormatter _PARSER ;
 
-     public static ref  DateTimeFormatter PARSER()
-     {
-         if(_PARSER is null)
-         {
-             _PARSER = new DateTimeFormatterBuilder()
-            .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-            .toFormatter();
-         }
-         return _PARSER;
-     }
+    //  public static ref  DateTimeFormatter PARSER()
+    //  {
+    //      if(_PARSER is null)
+    //      {
+    //          _PARSER = new DateTimeFormatterBuilder()
+    //         .appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+    //         .toFormatter();
+    //      }
+    //      return _PARSER;
+    //  }
 
     // shared static this()
     // {
@@ -236,9 +236,9 @@ public final class Year
      * @return the parsed year, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static Year parse(string text) {
-        return parse(text, PARSER);
-    }
+    // public static Year parse(string text) {
+    //     return parse(text, PARSER);
+    // }
 
     /**
      * Obtains an instance of {@code Year} from a text string using a specific formatter.
@@ -250,27 +250,27 @@ public final class Year
      * @return the parsed year, not null
      * @throws DateTimeParseException if the text cannot be parsed
      */
-    public static Year parse(string text, DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.parse(text, new class TemporalQuery!Year{
-            Year queryFrom(TemporalAccessor temporal)
-            {
-                if (cast(Year)(temporal) !is null) {
-                    return cast(Year) temporal;
-                }
-                assert(temporal, "temporal");
-                try {
-                    if ((IsoChronology.INSTANCE == Chronology.from(temporal)) == false) {
-                        temporal = LocalDate.from(temporal);
-                    }
-                    return of(temporal.get(ChronoField.YEAR));
-                } catch (DateTimeException ex) {
-                    throw new DateTimeException("Unable to obtain Year from TemporalAccessor: " ~
-                            typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
-                }
-            }
-        });
-    }
+    // public static Year parse(string text, DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.parse(text, new class TemporalQuery!Year{
+    //         Year queryFrom(TemporalAccessor temporal)
+    //         {
+    //             if (cast(Year)(temporal) !is null) {
+    //                 return cast(Year) temporal;
+    //             }
+    //             assert(temporal, "temporal");
+    //             try {
+    //                 if ((IsoChronology.INSTANCE == Chronology.from(temporal)) == false) {
+    //                     temporal = LocalDate.from(temporal);
+    //                 }
+    //                 return of(temporal.get(ChronoField.YEAR));
+    //             } catch (DateTimeException ex) {
+    //                 throw new DateTimeException("Unable to obtain Year from TemporalAccessor: " ~
+    //                         typeid(temporal).name ~ " of type " ~ typeid(temporal).stringof, ex);
+    //             }
+    //         }
+    //     });
+    // }
 
     //-------------------------------------------------------------------------
     /**
@@ -936,10 +936,10 @@ public final class Year
      * @return the formatted year string, not null
      * @throws DateTimeException if an error occurs during printing
      */
-    public string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // public string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 
     //-----------------------------------------------------------------------
     /**

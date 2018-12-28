@@ -68,8 +68,7 @@ class Assert {
      * okay)
      * @param condition condition to be checked
      */
-    static void assertTrue(size_t line = __LINE__, string file = __FILE__)(
-            string message, bool condition) {
+    static void assertTrue(string message, bool condition) {
         if (!condition) {
             fail(message);
         }
@@ -81,8 +80,8 @@ class Assert {
      *
      * @param condition condition to be checked
      */
-    static void assertTrue(size_t line = __LINE__, string file = __FILE__)(bool condition) {
-        assertTrue!(line, file)(null, condition);
+    static void assertTrue(bool condition) {
+        assertTrue(null, condition);
     }
 
     /**
@@ -93,9 +92,9 @@ class Assert {
      * okay)
      * @param condition condition to be checked
      */
-    static void assertFalse(size_t line = __LINE__, string file = __FILE__)(
+    static void assertFalse(
             string message, bool condition) {
-        assertTrue!(line, file)(message, !condition);
+        assertTrue(message, !condition);
     }
 
     /**
@@ -104,8 +103,8 @@ class Assert {
      *
      * @param condition condition to be checked
      */
-    static void assertFalse(size_t line = __LINE__, string file = __FILE__)(bool condition) {
-        assertFalse!(line, file)(null, condition);
+    static void assertFalse(bool condition) {
+        assertFalse(null, condition);
     }
 
     /**
@@ -594,7 +593,7 @@ class Assert {
      * <code>actual</code> for which both numbers are still
      * considered equal.
      */
-    static void assertEquals(size_t line = __LINE__, string file = __FILE__)(
+    static void assertEquals(
             string message, double expected, double actual, double delta) {
         if (doubleIsDifferent(expected, actual, delta)) {
             failNotEquals!(double)(message, expected, actual);
@@ -854,7 +853,7 @@ class Assert {
     static void assertNotSame(T, size_t line = __LINE__, string file = __FILE__)(
             string message, T unexpected, T actual) {
         if (unexpected == actual) {
-            failSame!(line, file)(message);
+            failSame(message);
         }
     }
 
@@ -871,7 +870,7 @@ class Assert {
         assertNotSame!(T, line, file)("", unexpected, actual);
     }
 
-    static private void failSame(size_t line = __LINE__, string file = __FILE__)(string message) {
+    static private void failSame(string message) {
         string formatted = "";
         if (!message.empty) {
             formatted = message ~ " ";

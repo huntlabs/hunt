@@ -33,7 +33,7 @@ import hunt.time.temporal.TemporalAmount;
 import std.conv;
 import hunt.time.temporal.UnsupportedTemporalTypeException;
 import hunt.time.DateTimeException;
-import hunt.time.format.DateTimeFormatter;
+// import hunt.time.format.DateTimeFormatter;
 import hunt.time.LocalTime;
 /**
  * A date-time with a time-zone _in the calendar neutral API.
@@ -495,11 +495,11 @@ final class ChronoZonedDateTimeImpl(D = ChronoLocalDate) if(is(D : ChronoLocalDa
         return Instant.ofEpochSecond(toEpochSecond(), toLocalTime().getNano());
     }
 	
-    override
-	 string format(DateTimeFormatter formatter) {
-        assert(formatter, "formatter");
-        return formatter.format(this);
-    }
+    // override
+	//  string format(DateTimeFormatter formatter) {
+    //     assert(formatter, "formatter");
+    //     return formatter.format(this);
+    // }
 	
     override
 	 LocalTime toLocalTime() {
