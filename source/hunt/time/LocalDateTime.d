@@ -760,7 +760,7 @@ public final class LocalDateTime
      *
      * @return the year, from MIN_YEAR to MAX_YEAR
      */
-    public int getYear() {
+    public int getYear() nothrow {
         return date.getYear();
     }
 
@@ -774,7 +774,7 @@ public final class LocalDateTime
      * @return the month-of-year, from 1 to 12
      * @see #getMonth()
      */
-    public int getMonthValue() {
+    public int getMonthValue() nothrow {
         return date.getMonthValue();
     }
 
@@ -789,7 +789,7 @@ public final class LocalDateTime
      * @return the month-of-year, not null
      * @see #getMonthValue()
      */
-    public Month getMonth() {
+    public Month getMonth() nothrow {
         return date.getMonth();
     }
 
@@ -800,7 +800,7 @@ public final class LocalDateTime
      *
      * @return the day-of-month, from 1 to 31
      */
-    public int getDayOfMonth() {
+    public int getDayOfMonth() nothrow {
         return date.getDayOfMonth();
     }
 

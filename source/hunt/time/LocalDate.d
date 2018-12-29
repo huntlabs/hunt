@@ -803,7 +803,7 @@ public  class LocalDate
      *
      * @return the year, from MIN_YEAR to MAX_YEAR
      */
-    public int getYear() {
+    public int getYear() nothrow {
         return year;
     }
 
@@ -817,7 +817,7 @@ public  class LocalDate
      * @return the month-of-year, from 1 to 12
      * @see #getMonth()
      */
-    public int getMonthValue() {
+    public int getMonthValue() nothrow {
         return month;
     }
 
@@ -832,8 +832,12 @@ public  class LocalDate
      * @return the month-of-year, not null
      * @see #getMonthValue()
      */
-    public Month getMonth() {
-        return Month.of(month);
+    public Month getMonth() nothrow {
+        try {
+            return Month.of(month);
+        } catch (Exception) {
+            return null;
+        }
     }
 
     /**
@@ -843,7 +847,7 @@ public  class LocalDate
      *
      * @return the day-of-month, from 1 to 31
      */
-    public int getDayOfMonth() {
+    public int getDayOfMonth() nothrow {
         return day;
     }
 

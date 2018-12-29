@@ -2,12 +2,11 @@
 module hunt.time.Clock;
 
 import hunt.io.common;
-import hunt.lang.exception;
 import hunt.lang;
+import hunt.time.Constants;
 import hunt.time.ZoneId;
 import hunt.time.Duration;
 import hunt.time.Instant;
-import hunt.time.LocalTime;
 import hunt.time.ZoneOffset;
 import hunt.time.util.common;
 
@@ -176,7 +175,7 @@ public abstract class Clock {
      * @since 9
      */
     public static Clock tickMillis(ZoneId zone) {
-        return new TickClock(system(zone), LocalTime.NANOS_PER_MILLI);
+        return new TickClock(system(zone), TimeConstant.NANOS_PER_MILLI);
     }
 
     //-------------------------------------------------------------------------
@@ -200,7 +199,7 @@ public abstract class Clock {
      * @return a clock that ticks _in whole seconds using the specified zone, not null
      */
     public static Clock tickSeconds(ZoneId zone) {
-        return new TickClock(system(zone), LocalTime.NANOS_PER_SECOND);
+        return new TickClock(system(zone), TimeConstant.NANOS_PER_SECOND);
     }
 
     /**
@@ -223,7 +222,7 @@ public abstract class Clock {
      * @return a clock that ticks _in whole minutes using the specified zone, not null
      */
     public static Clock tickMinutes(ZoneId zone) {
-        return new TickClock(system(zone), LocalTime.NANOS_PER_MINUTE);
+        return new TickClock(system(zone), TimeConstant.NANOS_PER_MINUTE);
     }
 
     /**

@@ -123,17 +123,23 @@ public final class OffsetDateTime
      * @see #isEqual
      */
     public static Comparator!(OffsetDateTime) timeLineOrder() {
-        return new class Comparator!(OffsetDateTime){
-            int compare(OffsetDateTime datetime1, OffsetDateTime datetime2)
+        return new class Comparator!(OffsetDateTime) {
+            int compare(OffsetDateTime datetime1, OffsetDateTime datetime2) nothrow
             {
-                if (datetime1.getOffset() == (datetime2.getOffset())) {
-                    return datetime1.toLocalDateTime().compareTo(cast(ChronoLocalDateTime!(ChronoLocalDate))(datetime2.toLocalDateTime()));
+                try {
+                    if (datetime1.getOffset() == (datetime2.getOffset())) {
+                        return datetime1.toLocalDateTime().compareTo(cast(ChronoLocalDateTime!(ChronoLocalDate))(datetime2.toLocalDateTime()));
+                    }
+                    int cmp = hunt.util.Comparator.compare(datetime1.toEpochSecond(), datetime2.toEpochSecond());
+                    if (cmp == 0) {
+                        cmp = datetime1.toLocalTime().getNano() - datetime2.toLocalTime().getNano();
+                    }
+                    return cmp;
+                } catch(Exception) {
+                    // FIXME: Needing refactor or cleanup -@zxp at 12/29/2018, 11:26:48 PM
+                    // 
+                    return 0;
                 }
-                int cmp = hunt.util.Comparator.compare(datetime1.toEpochSecond(), datetime2.toEpochSecond());
-                if (cmp == 0) {
-                    cmp = datetime1.toLocalTime().getNano() - datetime2.toLocalTime().getNano();
-                }
-                return cmp;
             }
         };
     }

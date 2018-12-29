@@ -3,6 +3,7 @@ module hunt.time;
 public import hunt.time.Init;
 public import hunt.time.chrono;
 public import hunt.time.Clock;
+public import hunt.time.Constants;
 public import hunt.time.DateTimeException;
 public import hunt.time.DayOfWeek;
 public import hunt.time.Duration;
