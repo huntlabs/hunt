@@ -115,7 +115,7 @@ interface Comparator(T) {
      * @throws ClassCastException if the arguments' types prevent them from
      *         being compared by this comparator.
      */
-    int compare(T o1, T o2);
+    int compare(T o1, T o2) nothrow;
 
     // /**
     //  * Indicates whether some other object is &quot;equal to&quot; this
