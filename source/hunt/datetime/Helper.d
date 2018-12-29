@@ -79,7 +79,7 @@ class DateTimeHelper {
     }
 
     static string getTimeAsGMT() {
-        return cast(string)*httpDate;
+        return cast(string)*timingValue;
     }
 
     alias getDateAsGMT = getTimeAsGMT;
@@ -97,8 +97,8 @@ class DateTimeHelper {
         atomicStore(_isClockRunning, false);
     }
 
-    private static shared const(char)[]* httpDate;
-    private static __gshared Thread dateThread;
+    private static shared const(char)[]* timingValue;
+    private __gshared Thread dateThread;
     private static shared bool _isClockRunning = false;
 
     shared static this() {
@@ -115,7 +115,7 @@ class DateTimeHelper {
             auto date = Clock.currTime!(ClockType.coarse)(UTC());
             size_t sz = updateDate(bufs[index], date);
             targets[index] = bufs[index].data;
-            atomicStore(httpDate, cast(shared)&targets[index]);
+            atomicStore(timingValue, cast(shared)&targets[index]);
         }
 
         tick(0);
@@ -128,6 +128,9 @@ class DateTimeHelper {
                 Thread.sleep(1.seconds);
             }
         });
+
+        dateThread.isDaemon = true;
+        startClock();
     }
 
     shared static ~this() {
