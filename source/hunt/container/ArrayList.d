@@ -9,6 +9,7 @@ import hunt.container.array;
 import hunt.container.AbstractList;
 import hunt.container.Collection;
 import hunt.container.List;
+import hunt.util.Comparator;
 
 /**
 */
@@ -650,6 +651,28 @@ class ArrayList(E) : AbstractList!E {
     // }
 
 
+
+    void sort(Comparator!E c) {
+        static if (__traits(hasMember, E, "opCmp")) {
+            int expectedModCount = modCount;
+            // Arrays.sort((E[]) elementData, 0, size, c);
+            // (a, b) => c.compare(a, b) < 0
+
+                // std.algorithm.sort!((a, b) => a<b)(_array[]);
+                // bool compare(E a, E b) {
+                //     try {
+                //         return a < b ;
+                //     } catch (Exception) {
+                //         return false ;
+                //     }
+                // }
+                std.algorithm.sort!((a, b) => c.compare(a, b) < 0)(_array[]);
+
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            modCount++;
+        }
+    }
 
 }
 

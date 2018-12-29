@@ -87,8 +87,7 @@ class DateTimeHelper {
     static shared long timestamp;
 
     static void startClock() {
-        if (!atomicLoad(_isClockRunning)) {
-            atomicStore(_isClockRunning, true);
+        if (cas(&_isClockRunning, false, true)) {
             dateThread.start();
         }
     }
