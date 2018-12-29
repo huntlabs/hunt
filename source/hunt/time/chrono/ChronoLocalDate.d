@@ -201,8 +201,14 @@ public interface ChronoLocalDate
      */
     static Comparator!(ChronoLocalDate) timeLineOrder() {
         return new class Comparator!(ChronoLocalDate) {
-            int compare(ChronoLocalDate date1, ChronoLocalDate date2) {
-                return hunt.util.Comparator.compare(date1.toEpochDay(), date2.toEpochDay());
+            int compare(ChronoLocalDate date1, ChronoLocalDate date2) nothrow {
+                try {
+                    return hunt.util.Comparator.compare(date1.toEpochDay(), date2.toEpochDay());
+                } catch(Exception) {
+                    // FIXME: Needing refactor or cleanup -@zxp at 12/29/2018, 11:28:15 PM
+                    // 
+                    return 0;
+                }
             }
         };
     }

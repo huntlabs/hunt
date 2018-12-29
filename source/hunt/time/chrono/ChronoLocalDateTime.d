@@ -82,12 +82,19 @@ public interface ChronoLocalDateTime(D) if(is(D : ChronoLocalDate))
     static Comparator!(ChronoLocalDateTime!(ChronoLocalDate)) timeLineOrder() {
         return new class Comparator!(ChronoLocalDateTime!(ChronoLocalDate)) 
         {
-            int compare(ChronoLocalDateTime!(ChronoLocalDate) dateTime1, ChronoLocalDateTime!(ChronoLocalDate) dateTime2){
-                int cmp = hunt.util.Comparator.compare(dateTime1.toLocalDate().toEpochDay(), dateTime2.toLocalDate().toEpochDay());
-                if (cmp == 0) {
-                    cmp = hunt.util.Comparator.compare(dateTime1.toLocalTime().toNanoOfDay(), dateTime2.toLocalTime().toNanoOfDay());
+            int compare(ChronoLocalDateTime!(ChronoLocalDate) dateTime1, 
+                ChronoLocalDateTime!(ChronoLocalDate) dateTime2) nothrow {
+                try {
+                    int cmp = hunt.util.Comparator.compare(dateTime1.toLocalDate().toEpochDay(), dateTime2.toLocalDate().toEpochDay());
+                    if (cmp == 0) {
+                        cmp = hunt.util.Comparator.compare(dateTime1.toLocalTime().toNanoOfDay(), dateTime2.toLocalTime().toNanoOfDay());
+                    }
+                    return cmp;
+                } catch(Exception) {
+                    // FIXME: Needing refactor or cleanup -@zxp at 12/29/2018, 11:29:43 PM
+                    // 
+                    return 0;
                 }
-                return cmp;
             }
         };
     }
