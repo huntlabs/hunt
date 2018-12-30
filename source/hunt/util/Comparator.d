@@ -1,5 +1,6 @@
 module hunt.util.Comparator;
 
+import std.traits;
 
 /**
  * A comparison function, which imposes a <i>total ordering</i> on some
@@ -501,14 +502,29 @@ interface Comparator(T) {
     // }
 }
 
-import std.traits;
-int compare(T)(T x, T y) if(isOrderingComparable!(T))
-{
-    return (x < y) ? -1 : ((x == y) ? 0 : 1);
-    // if(v1 > v2)
-    //     return 1;
-    // else if(v1 < v2)
-    //     return -1;
-    // else
-    //     return 0;
+
+int compare(T)(T x, T y) nothrow if(isOrderingComparable!(T)) {
+    try {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+    } catch(Exception) {
+        return false;
+    }
+}
+
+// FIXME: Needing refactor or cleanup -@zxp at 12/30/2018, 9:43:22 AM
+// opCmp in a class, struct or interface should be nothrow.
+bool lessThan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
+    try {
+        return a < b;
+    } catch(Exception) {
+        return false;
+    }
+}
+
+bool greaterthan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
+    try {
+        return a > b;
+    } catch(Exception) {
+        return false;
+    }
 }

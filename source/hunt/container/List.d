@@ -1,6 +1,8 @@
 module hunt.container.List;
 
 import hunt.container.Collection;
+import hunt.util.Comparator;
+import std.traits;
 
 /**
 */
@@ -155,6 +157,11 @@ interface List(E) : Collection!E {
      *         contract
      * @since 1.8
      */
+    void sort(Comparator!E c) ;
+
+    static if (isOrderingComparable!E) {
+        void sort(bool isAscending = true);
+    }
     // 
     // final void sort(Comparator<E> c) {
     //     Object[] a = this.toArray();

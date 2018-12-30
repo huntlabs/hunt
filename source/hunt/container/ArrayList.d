@@ -3,6 +3,7 @@ module hunt.container.ArrayList;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.traits;
 
 import hunt.lang.exception;
 import hunt.container.array;
@@ -650,28 +651,32 @@ class ArrayList(E) : AbstractList!E {
     //                                            ") > toIndex(" ~ toIndex ~ ")");
     // }
 
-
-
-    void sort(Comparator!E c) {
-        static if (__traits(hasMember, E, "opCmp")) {
+    static if (isOrderingComparable!E) {
+    override void sort(bool isAscending = true) {
+        
+            // https://issues.dlang.org/show_bug.cgi?id=15304
+            // std.algorithm.sort(_array[]);
+            
             int expectedModCount = modCount;
-            // Arrays.sort((E[]) elementData, 0, size, c);
-            // (a, b) => c.compare(a, b) < 0
-
-                // std.algorithm.sort!((a, b) => a<b)(_array[]);
-                // bool compare(E a, E b) {
-                //     try {
-                //         return a < b ;
-                //     } catch (Exception) {
-                //         return false ;
-                //     }
-                // }
-                std.algorithm.sort!((a, b) => c.compare(a, b) < 0)(_array[]);
-
+            if(isAscending)
+                std.algorithm.sort!(lessThan!E)(_array[]);
+            else
+                std.algorithm.sort!(greaterthan!E)(_array[]);
+                
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             modCount++;
-        }
+        } 
+    }
+
+
+    override void sort(Comparator!E c) {
+        int expectedModCount = modCount;
+        std.algorithm.sort!((a, b) => c.compare(a, b) < 0)(_array[]);
+
+        if (modCount != expectedModCount)
+            throw new ConcurrentModificationException();
+        modCount++;
     }
 
 }

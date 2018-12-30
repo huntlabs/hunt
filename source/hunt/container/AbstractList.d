@@ -2,13 +2,14 @@ module hunt.container.AbstractList;
 
 import std.algorithm;
 import std.conv;
-import std.container.array;
+import std.traits;
+// import std.container.array;
 
 import hunt.container.AbstractCollection;
 import hunt.container.List;
-
 import hunt.lang.exception;
 import hunt.lang.Object;
+import hunt.util.Comparator;
 import hunt.util.functional;
 
 abstract class AbstractList(E) : AbstractCollection!E, List!E {
@@ -252,7 +253,7 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
                     hashCode = 31 * hashCode + hashOf(e);
             }
         } catch (Exception e) {
-
+            hashCode = super.toHash();
         }
 
         return hashCode;
@@ -264,6 +265,17 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
 
     override int opApply(scope int delegate(ref E) dg) {
         return 0;
+    }
+
+
+    static if (isOrderingComparable!E) {
+        void sort(bool isAscending = true) {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    void sort(Comparator!E c) {
+        throw new UnsupportedOperationException();
     }
 
     // List!(E) opCast(C)(C c) nothrow
@@ -301,6 +313,9 @@ abstract class AbstractList(E) : AbstractCollection!E, List!E {
     // }
 }
 
+
+/**
+*/
 class EmptyList(E) : AbstractList!E {
     // private static long serialVersionUID = 8842843931221139166L;
 
@@ -355,9 +370,6 @@ class EmptyList(E) : AbstractList!E {
         return (typeid(o) == typeid(List!E)) && (cast(List!E) o).isEmpty();
     }
 
-    int hashCode() {
-        return 1;
-    }
 
     override size_t toHash() {
         return 1;
@@ -372,9 +384,6 @@ class EmptyList(E) : AbstractList!E {
     // override
     // void replaceAll(UnaryOperator!E operator) {
     //     Objects.requireNonNull(operator);
-    // }
-    // override
-    // void sort(Comparator<E> c) {
     // }
 
     // Override default methods in Collection
