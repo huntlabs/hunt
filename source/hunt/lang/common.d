@@ -190,7 +190,9 @@ interface Cloneable {
 
 
 interface Comparable(T) {
-    // int compareTo(T o);
+    // TODO: Tasks pending completion -@zxp at 12/30/2018, 10:17:44 AM
+    // 
+    // int opCmp(T o) nothrow;
     int opCmp(T o);
 }
 
@@ -568,11 +570,11 @@ size_t hashCode(T)(T[] a...) {
 */
 class CompilerHelper {
 
-    static bool isGreater(int ver) pure @safe @nogc nothrow {
+    static bool isGreaterThan(int ver) pure @safe @nogc nothrow {
         return __VERSION__ >= ver;
     }
 
-    static bool isSmaller(int ver) pure @safe @nogc nothrow {
+    static bool isLessThan(int ver) pure @safe @nogc nothrow {
         return __VERSION__ <= ver;
     }
 }

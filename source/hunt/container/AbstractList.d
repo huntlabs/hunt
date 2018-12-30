@@ -12,6 +12,8 @@ import hunt.lang.Object;
 import hunt.util.Comparator;
 import hunt.util.functional;
 
+/**
+*/
 abstract class AbstractList(E) : AbstractCollection!E, List!E {
 
     /**
