@@ -330,7 +330,7 @@ class LoopException : Exception {
 // dfmt off
 version(linux):
 // dfmt on
-static if (CompilerHelper.isSmaller(2078)) {
+static if (CompilerHelper.isLessThan(2078)) {
     version (X86) {
         enum SO_REUSEPORT = 15;
     }

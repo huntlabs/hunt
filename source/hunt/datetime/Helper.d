@@ -129,7 +129,11 @@ class DateTimeHelper {
         });
 
         dateThread.isDaemon = true;
-        startClock();
+        // FIXME: Needing refactor or cleanup -@zxp at 12/30/2018, 10:10:09 AM
+        // 
+        // It's not a good idea to launch another thread in shared static this().
+        // https://issues.dlang.org/show_bug.cgi?id=19492
+        // startClock();
     }
 
     shared static ~this() {
