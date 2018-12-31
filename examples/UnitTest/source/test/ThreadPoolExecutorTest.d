@@ -65,7 +65,7 @@ class ThreadPoolExecutorTest {
 class StringCallable : Callable!(string) {
 	string call() {
 
-		ConsoleLogger.tracef("sleeping 5 seconds on %s...", Thread.getThis().name);
+		ConsoleLogger.tracef("sleeping 5 seconds in thread %s...", Thread.getThis().name);
 		ThreadEx.sleep(5.seconds);
 		// LockSupport.park(5.seconds);
 		ConsoleLogger.trace("sleep 5 seconds done !");
@@ -76,7 +76,7 @@ class StringCallable : Callable!(string) {
 
 class IntCallable : Callable!(int) {
 	int call() {
-		ConsoleLogger.tracef("sleeping 3 seconds on %s...", Thread.getThis().name);
+		ConsoleLogger.tracef("sleeping 3 seconds in thread %s...", Thread.getThis().name);
 		ThreadEx.sleep(3.seconds);
 		// LockSupport.park(3.seconds);
 		ConsoleLogger.trace("sleep 3 seconds done !");

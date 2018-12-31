@@ -36,7 +36,7 @@
 module hunt.concurrent.Future;
 
 import hunt.lang.common;
-import std.datetime;
+import core.time;
 
 /**
  * A {@code Future} represents the result of an asynchronous
