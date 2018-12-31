@@ -1,6 +1,7 @@
 module hunt.util.Comparator;
 
 import std.traits;
+debug import hunt.logging.ConsoleLogger;
 
 /**
  * A comparison function, which imposes a <i>total ordering</i> on some
@@ -506,7 +507,8 @@ interface Comparator(T) {
 int compare(T)(T x, T y) nothrow if(isOrderingComparable!(T)) {
     try {
         return (x < y) ? -1 : ((x == y) ? 0 : 1);
-    } catch(Exception) {
+    } catch(Exception ex) {
+        debug warning(ex.msg);
         return false;
     }
 }
@@ -516,7 +518,8 @@ int compare(T)(T x, T y) nothrow if(isOrderingComparable!(T)) {
 bool lessThan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
     try {
         return a < b;
-    } catch(Exception) {
+    } catch(Exception ex) {
+        debug warning(ex.msg);
         return false;
     }
 }
@@ -524,7 +527,8 @@ bool lessThan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
 bool greaterthan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
     try {
         return a > b;
-    } catch(Exception) {
+    } catch(Exception ex) {
+        debug warning(ex.msg);
         return false;
     }
 }
