@@ -125,7 +125,9 @@ private class DefaultThreadFactory : ThreadFactory {
         Thread t = new ThreadEx(dg);
         t.name = namePrefix ~ n.to!string();
         t.isDaemon = false;
-        t.priority = Thread.PRIORITY_DEFAULT;
+        // version(Posix) {
+        //     t.priority = Thread.PRIORITY_DEFAULT;
+        // }
 
         return t;
     }
