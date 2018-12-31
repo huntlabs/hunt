@@ -25,19 +25,19 @@ void main()
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
-	testUnits!(AtomicTest);
+	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// testTask();
 
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
-	// testUnits!(ThreadPoolExecutorTest);
+	testUnits!(ThreadPoolExecutorTest);
 	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
-	testUnits!(StringTokenizerTest);
+	// testUnits!(StringTokenizerTest);
 
 	// testLockSupport01();
 

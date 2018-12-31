@@ -194,6 +194,9 @@ interface Comparable(T) {
     // 
     // int opCmp(T o) nothrow;
     int opCmp(T o);
+
+    deprecated("Use opCmp instead.")
+    alias compareTo = opCmp;
 }
 
 /**
