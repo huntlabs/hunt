@@ -12,6 +12,7 @@ import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
+import test.ScheduledThreadPoolTest;
 import test.StringTokenizerTest;
 import test.TaskTest;
 import test.ThreadPoolExecutorTest;
@@ -32,13 +33,13 @@ void main()
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
-	// testUnits!(ThreadPoolExecutorTest);
-	// testUnits!(ThreadTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
-	testUnits!(ThreadPoolExecutorTest);
+	testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(StringTokenizerTest);
+	// testUnits!(ThreadPoolExecutorTest);
+	// testUnits!(ThreadTest);
 
 	// testLockSupport01();
 

@@ -337,8 +337,7 @@ class ArrayList(E) : AbstractList!E {
     }
 
     override int lastIndexOf(E o) {
-        for(size_t i=_array.length -1; i>=0; i--)
-        {
+        for(size_t i=_array.length -1; i>=0; i--) {
             if(_array[i] == o) return cast(int)i;
         }
 

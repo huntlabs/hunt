@@ -42,6 +42,8 @@ import hunt.concurrent.ExecutorService;
 // import hunt.concurrent.ForkJoinPool;
 import hunt.concurrent.Future;
 import hunt.concurrent.LinkedBlockingQueue;
+import hunt.concurrent.ScheduledExecutorService;
+import hunt.concurrent.ScheduledThreadPoolExecutor;
 import hunt.concurrent.ThreadFactory;
 import hunt.concurrent.ThreadPoolExecutor;
 
@@ -292,33 +294,33 @@ class Executors {
     //         (new ScheduledThreadPoolExecutor(1, threadFactory));
     // }
 
-    // /**
-    //  * Creates a thread pool that can schedule commands to run after a
-    //  * given delay, or to execute periodically.
-    //  * @param corePoolSize the number of threads to keep in the pool,
-    //  * even if they are idle
-    //  * @return the newly created scheduled thread pool
-    //  * @throws IllegalArgumentException if {@code corePoolSize < 0}
-    //  */
-    // static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
-    //     return new ScheduledThreadPoolExecutor(corePoolSize);
-    // }
+    /**
+     * Creates a thread pool that can schedule commands to run after a
+     * given delay, or to execute periodically.
+     * @param corePoolSize the number of threads to keep in the pool,
+     * even if they are idle
+     * @return the newly created scheduled thread pool
+     * @throws IllegalArgumentException if {@code corePoolSize < 0}
+     */
+    static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+        return new ScheduledThreadPoolExecutor(corePoolSize);
+    }
 
-    // /**
-    //  * Creates a thread pool that can schedule commands to run after a
-    //  * given delay, or to execute periodically.
-    //  * @param corePoolSize the number of threads to keep in the pool,
-    //  * even if they are idle
-    //  * @param threadFactory the factory to use when the executor
-    //  * creates a new thread
-    //  * @return the newly created scheduled thread pool
-    //  * @throws IllegalArgumentException if {@code corePoolSize < 0}
-    //  * @throws NullPointerException if threadFactory is null
-    //  */
-    // static ScheduledExecutorService newScheduledThreadPool(
-    //         int corePoolSize, ThreadFactory threadFactory) {
-    //     return new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
-    // }
+    /**
+     * Creates a thread pool that can schedule commands to run after a
+     * given delay, or to execute periodically.
+     * @param corePoolSize the number of threads to keep in the pool,
+     * even if they are idle
+     * @param threadFactory the factory to use when the executor
+     * creates a new thread
+     * @return the newly created scheduled thread pool
+     * @throws IllegalArgumentException if {@code corePoolSize < 0}
+     * @throws NullPointerException if threadFactory is null
+     */
+    static ScheduledExecutorService newScheduledThreadPool(
+            int corePoolSize, ThreadFactory threadFactory) {
+        return new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
+    }
 
     // /**
     //  * Returns an object that delegates all defined {@link

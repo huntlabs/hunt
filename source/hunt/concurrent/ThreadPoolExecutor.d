@@ -770,8 +770,10 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * specially.
      */
     private void checkShutdownAccess() {
+        // FIXME: Needing refactor or cleanup -@zxp at 1/2/2019, 2:12:25 AM
+        // remove this
+        // debug implementationMissing(false);
         // assert mainLock.isHeldByCurrentThread();
-        implementationMissing(false);
         // SecurityManager security = System.getSecurityManager();
         // if (security !is null) {
         //     security.checkPermission(shutdownPerm);

@@ -103,4 +103,6 @@ interface RunnableScheduledFuture(V) : RunnableFuture!(V), ScheduledFuture!(V), 
 
 interface IRunnableScheduledFuture : Delayed, Runnable {
     bool isPeriodic();
+    bool cancel(bool mayInterruptIfRunning);
+    bool isCancelled();
 }

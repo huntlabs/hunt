@@ -9,6 +9,8 @@ import std.array;
 import std.conv;
 import std.range;
 
+import hunt.logging.ConsoleLogger;
+
 /**
  * This class provides a skeletal implementation of the {@code Collection}
  * interface, to minimize the effort required to implement this interface. <p>
@@ -271,8 +273,8 @@ abstract class AbstractCollection(E) : Collection!E {
     }
 
     int opApply(scope int delegate(ref E) dg) {
-        //throw new NotImplementedException();
-        return 0;
+        throw new NotImplementedException();
+        // return 0;
     }
 
     // int opApply(scope int delegate(MapEntry!(E) entry) dg) {
@@ -302,13 +304,15 @@ abstract class AbstractCollection(E) : Collection!E {
      * }</pre>
      */
     E[] toArray() {
-        if (size() == 0)
+        int s = size();
+        if (s == 0)
             return [];
 
-        E[] r = new E[size()];
+        E[] r = new E[s];
         int i = 0;
-        foreach (E e; this)
+        foreach (E e; this) {
             r[i++] = e;
+        }
         return r;
     }
 
