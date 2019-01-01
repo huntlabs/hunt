@@ -1,10 +1,12 @@
 module test.ScheduledThreadPoolTest;
 
 import hunt.concurrent.AbstractExecutorService;
+import hunt.concurrent.Delayed;
 import hunt.concurrent.exception;
 import hunt.concurrent.Executors;
 import hunt.concurrent.ExecutorService;
 import hunt.concurrent.Future;
+
 // import hunt.concurrent.LinkedBlockingQueue;
 import hunt.concurrent.ScheduledThreadPoolExecutor;
 import hunt.concurrent.ThreadPoolExecutor;
@@ -20,6 +22,7 @@ import core.time;
 import std.conv;
 import std.stdio;
 
+// https://www.cnblogs.com/huhx/p/baseusejavaScheduledExecutorService.html
 class ScheduledThreadPoolTest {
 
     void testBasicOperatoins01() {
@@ -30,73 +33,89 @@ class ScheduledThreadPoolTest {
         // trace("done.");  
     }
 
-	void doBasicOperatoins01() {
-        ScheduledThreadPoolExecutor executor = cast(ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
-        System.out.printf("Main: Starting at: %s\n", new Date());
+    void doBasicOperatoins01() {
+        ScheduledThreadPoolExecutor executor = cast(ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(
+                1);
+        tracef("Main thread starting...");
         // for (int i = 0; i < 5; i++) {
         //     StringTask task = new StringTask("StringTask " ~ i);
         //     executor.schedule(task, i, TimeUnit.SECONDS);
         // }
-        StringTask task1 = new StringTask("StringTask");
-        VoidTask task2 = new VoidTask ("VoidTask");
+        executor.scheduleAtFixedRate(new FixedRateTase(), Duration.zero, msecs(100));
 
-        tracef("The time is : " ~ new Date());
-        ScheduledFuture<string> f1 = executor.schedule(task1, 1, TimeUnit.SECONDS);
-        
-        tracef("The time is : " ~ new Date());
-        ScheduledFuture<?> f2 = executor.schedule(task2, 5 , TimeUnit.SECONDS);
-        
-        tracef("The time is : " ~ new Date());
+        IntTask task3 = new IntTask("IntTask");
+        VoidTask task2 = new VoidTask("VoidTask");
+        StringTask task1 = new StringTask("StringTask");
+
+        ScheduledFuture!(string) f1 = executor.schedule!(string)(task1, seconds(3));
+        ScheduledFuture!(void) f2 = executor.schedule(task2, seconds(5));
+        ScheduledFuture!(int) f3 = executor.schedule(task3, seconds(5));
+
+        tracef("wainting for the result... ");
         string str = f1.get();
-        
-        tracef("The time is : " ~ new Date() ~ "   =>" ~ str);
+        tracef("get the result: " ~ str);
 
         executor.shutdown();
 
         try {
-            executor.awaitTermination(1, TimeUnit.DAYS);
+            executor.awaitTermination(days(1));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            warning(e.msg);
         }
-        System.out.printf("Main: Ends at: %s\n", new Date());
+        tracef("Main thread: Ends");
     }
 }
 
-class StringTask : Callable<string> {
+class FixedRateTase : Runnable {
+    void run() {
+        trace("running at fixed rate");
+    }
+}
+
+class StringTask : Callable!string {
 
     private string name;
 
     this(string name) {
-        super();
         this.name = name;
     }
 
     string call() {
-        System.out.printf("%s: Starting at : %s\n", name, new Date());
+        tracef("Running task %s, and return a result", name);
         return "hello world";
     }
 }
 
+class IntTask : Callable!int {
 
-class VoidTask : Runnable
-{
     private string name;
- 
-    VoidTask(string name) {
+
+    this(string name) {
         this.name = name;
     }
-     
+
+    int call() {
+        tracef("Running task %s, and return a result", name);
+        return 100;
+    }
+}
+
+class VoidTask : Runnable {
+    private string name;
+
+    this(string name) {
+        this.name = name;
+    }
+
     string getName() {
         return name;
     }
- 
-    void run()
-    {
+
+    void run() {
         try {
-            tracef("Doing a task during : " ~ name ~ " - Time - " ~ new Date());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+            tracef("Running task %s", name);
+        } catch (Exception e) {
+            warning(e.msg);
         }
     }
 }

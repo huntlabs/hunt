@@ -50,7 +50,7 @@ import hunt.datetime.Helper;
 import hunt.lang.common;
 import hunt.lang.exception;
 import hunt.lang.Object;
-debug import hunt.logging.ConsoleLogger;
+import hunt.logging.ConsoleLogger;
 // import core.time;
 
 import core.atomic;
@@ -275,19 +275,26 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
         // Traverse snapshot to avoid iterator exceptions
         // TODO: implement and use efficient removeIf
         // super.getQueue().removeIf(...);
+        version(HUNT_DEBUG) tracef("Shuting down..., BlockingQueue size: %d", q.size());
         foreach (Runnable e ; q.toArray()) {
-            warning(typeid(e));
-            implementationMissing(false);
-            // RunnableScheduledFuture!V t = cast(RunnableScheduledFuture!V)e;
-            // if (t !is null) {
-            //     if ((t.isPeriodic()
-            //          ? !keepPeriodic
-            //          : (!keepDelayed && t.getDelay() > Duration.zero))
-            //         || t.isCancelled()) { // also remove if already cancelled
-            //         if (q.remove(t))
-            //             t.cancel(false);
-            //     }
-            // }
+            if(e is null) {
+                warning("e is null");
+            } else {
+                version(HUNT_DEBUG) trace(typeid(cast(Object)e));
+                IRunnableScheduledFuture t = cast(IRunnableScheduledFuture)e;
+                if (t !is null) {
+                    if ((t.isPeriodic()
+                         ? !keepPeriodic
+                         : (!keepDelayed && t.getDelay() > Duration.zero))
+                        || t.isCancelled()) { // also remove if already cancelled
+                        if (q.remove(t))
+                            t.cancel(false);
+                    }
+                } else {
+                    warning("t is null");
+                }
+            }
+                
         }
         tryTerminate();
     }
@@ -462,7 +469,7 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws NullPointerException       {@inheritDoc}
      */
     ScheduledFuture!(V) schedule(V)(Callable!(V) callable, Duration delay) {
-        if (callable is null || unit is null)
+        if (callable is null)
             throw new NullPointerException();
         RunnableScheduledFuture!(V) t = decorateTask(callable,
             new ScheduledFutureTask!(V)(callable,
@@ -1037,6 +1044,10 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
      */
     private Condition available;
 
+    this() {
+        initializeMembers();
+    }
+
     private void initializeMembers() {
         lock = new ReentrantLock();
         available = new Condition(lock);
@@ -1048,6 +1059,7 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
      */
     private static void setIndex(IRunnableScheduledFuture f, int idx) {
         IScheduledFutureTask t = cast(IScheduledFutureTask)f;
+        // tracef("index=%d, type: %s", idx, typeid(cast(Object)t));
         if (t !is null)
             t.heapIndex = idx;
     }
@@ -1066,6 +1078,7 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
             setIndex(e, k);
             k = parent;
         }
+        // tracef("k=%d, key is null: %s", k, key is null);
         queue[k] = key;
         setIndex(key, k);
     }
@@ -1138,6 +1151,7 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
 
     override bool remove(Runnable x) {
         ReentrantLock lock = this.lock;
+        trace(cast(Object)x);
         lock.lock();
         try {
             int i = indexOf(x);
@@ -1147,6 +1161,7 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
             setIndex(queue[i], -1);
             int s = --_size;
             IRunnableScheduledFuture replacement = queue[s];
+            trace("s=%d, ", s, cast(Object)replacement);
             queue[s] = null;
             if (s != i) {
                 siftDown(i, replacement);
@@ -1159,15 +1174,15 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
         }
     }
 
-    override int size() const {
-        return _size;
-        // ReentrantLock lock = this.lock;
-        // lock.lock();
-        // try {
-        //     return size;
-        // } finally {
-        //     lock.unlock();
-        // }
+    override int size() {
+        // return _size;
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            return _size;
+        } finally {
+            lock.unlock();
+        }
     }
 
     override bool isEmpty() {
@@ -1382,31 +1397,37 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
         }
     }
 
-    // Object[] toArray() {
-    //     ReentrantLock lock = this.lock;
-    //     lock.lock();
-    //     try {
-    //         return Arrays.copyOf(queue, size, Object[].class);
-    //     } finally {
-    //         lock.unlock();
-    //     }
-    // }
+    override Runnable[] toArray() {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            Runnable[] r = new Runnable[_size];
+            for(int i=0; i<_size; i++) {
+                r[i] = queue[i];
+            }
+            return r;
 
+        } finally {
+            lock.unlock();
+        }
+    }
 
-    // T[] toArray() {
-    //     ReentrantLock lock = this.lock;
-    //     lock.lock();
-    //     try {
-    //         if (a.length < size)
-    //             return  (T[]) Arrays.copyOf(queue, size, a.getClass());
-    //         System.arraycopy(queue, 0, a, 0, size);
-    //         if (a.length > size)
-    //             a[size] = null;
-    //         return a;
-    //     } finally {
-    //         lock.unlock();
-    //     }
-    // }
+    override int opApply(scope int delegate(ref Runnable) dg) {
+       if(dg is null)
+            throw new NullPointerException();
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        scope(exit) lock.unlock();
+
+        int result = 0;
+        foreach(int i; 0.._size) {
+            Runnable v = queue[i];
+            result = dg(v);
+            if(result != 0) return result;
+        }
+        return result;
+    }
+
 
     // Iterator!(Runnable) iterator() {
     //     ReentrantLock lock = this.lock;
