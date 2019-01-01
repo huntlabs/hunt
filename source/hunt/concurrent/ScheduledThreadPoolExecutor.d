@@ -1161,7 +1161,6 @@ class DelayedWorkQueue : AbstractQueue!(Runnable), BlockingQueue!(Runnable) {
             setIndex(queue[i], -1);
             int s = --_size;
             IRunnableScheduledFuture replacement = queue[s];
-            trace("s=%d, ", s, cast(Object)replacement);
             queue[s] = null;
             if (s != i) {
                 siftDown(i, replacement);

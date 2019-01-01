@@ -41,7 +41,7 @@ class ScheduledThreadPoolTest {
         //     StringTask task = new StringTask("StringTask " ~ i);
         //     executor.schedule(task, i, TimeUnit.SECONDS);
         // }
-        executor.scheduleAtFixedRate(new FixedRateTase(), Duration.zero, msecs(100));
+        executor.scheduleAtFixedRate(new FixedRateTase(), Duration.zero, seconds(1));
 
         IntTask task3 = new IntTask("IntTask");
         VoidTask task2 = new VoidTask("VoidTask");
