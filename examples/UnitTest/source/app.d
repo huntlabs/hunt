@@ -36,7 +36,7 @@ void main()
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
-	testUnits!(ScheduledThreadPoolTest);
+	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(StringTokenizerTest);
 	// testUnits!(ThreadPoolExecutorTest);
 	// testUnits!(ThreadTest);

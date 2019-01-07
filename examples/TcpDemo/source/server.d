@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
- * Developer: HuntLabs.cn
+ * Developer: HuntLabs.net
  *
  * Licensed under the Apache-2.0 License.
  *
@@ -15,7 +15,7 @@ import hunt.event;
 import hunt.io.TcpListener;
 import hunt.io.TcpStream;
 import hunt.util.timer;
-import hunt.concurrent.thread.Utils;
+import hunt.concurrent.thread.Helper;
 
 import std.socket;
 import std.functional;

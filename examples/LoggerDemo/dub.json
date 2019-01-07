@@ -4,7 +4,7 @@
 		"Putao"
 	],
 	"description": "A simple demo for hunt.util.logger.",
-	"copyright": "Copyright © 2017-2018, HuntLabs.cn",
+	"copyright": "Copyright © 2017-2018, HuntLabs.net",
 	"license": "Apache-2.0",
 	"dependencies": {
 		"hunt" : {

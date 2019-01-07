@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2015-2018  Shanghai Putao Technology Co., Ltd
  *
- * Developer: HuntLabs.cn
+ * Developer: HuntLabs.net
  *
  * Licensed under the Apache-2.0 License.
  *

@@ -1,10 +1,9 @@
 import std.stdio;
 
 import hunt.event.socket;
-import hunt.concurrent.thread.Utils;
+import hunt.concurrent.thread.Helper;
 import hunt.event;
 import hunt.io;
-import hunt.concurrent.thread.Utils;
 import hunt.lang.common;
 
 import std.getopt;
@@ -166,7 +165,7 @@ abstract class AbstractTcpServer
             return;
         debug writeln("start to listen");
 
-        for (size_t i = 0; i < _group.length; ++i)
+        for (size_t i = 0; i < _group.size; ++i)
         {
             createServer(_group[i]);
         }
@@ -224,8 +223,8 @@ class TestTcpServer : AbstractTcpServer
 
     protected void handleReceivedData(TcpStream client, in ubyte[] data)
     {
-        queue[Client] ~= data;
-        ubyte[] buffer = queue[Client];
+        queue[client] ~= data;
+        ubyte[] buffer = queue[client];
 
         totalReceived += data.length;
         if (serverCounter % (totalSize / 10 / bufferSize) == 0)
