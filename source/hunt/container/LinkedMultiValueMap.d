@@ -7,6 +7,7 @@ import hunt.container.List;
 import hunt.container.MultiValueMap;
 import hunt.container.Map;
 import hunt.container.Set;
+import hunt.lang.Object;
 
 import std.range;
 
@@ -246,6 +247,10 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	// LinkedMultiValueMap!(K, V) clone() {
 	// 	return new LinkedMultiValueMap!(K, V)(this);
 	// }
+
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object)o);
+    }
 
 	override bool opEquals(Object obj) {
 		return this.targetMap == obj;

@@ -142,7 +142,7 @@ class Nullable(T) : INullable {
     //     return cast(U)_value;
     // }
 
-    bool opEquals(const(IObject) o) {
+    bool opEquals(IObject o) {
         return opEquals(cast(Object)o);
     }
 
