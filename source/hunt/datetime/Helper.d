@@ -164,7 +164,7 @@ version (Posix) {
     import core.sys.posix.stdlib;
     import core.sys.posix.unistd;
     import core.sys.posix.fcntl;
-    import core.sys.linux.errno;
+    import core.stdc.errno;
     import core.sys.linux.unistd;
     import core.sys.posix.sys.stat;
     import core.sys.posix.dirent;
