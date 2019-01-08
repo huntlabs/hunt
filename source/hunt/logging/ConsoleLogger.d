@@ -285,3 +285,12 @@ alias error = ConsoleLogger.error;
 alias errorf = ConsoleLogger.errorf;
 // alias critical = ConsoleLogger.critical;
 // alias criticalf = ConsoleLogger.criticalf;
+
+alias logDebug = trace;
+alias logDebugf = tracef;
+alias logInfo = info;
+alias logInfof = infof;
+alias logWarning = warning;
+alias logWarningf = warningf;
+alias logError = error;
+alias logErrorf = errorf;
