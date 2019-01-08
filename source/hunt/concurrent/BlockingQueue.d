@@ -35,8 +35,8 @@
 
 module hunt.concurrent.BlockingQueue;
 
-import hunt.container.Collection;
-import hunt.container.Queue;
+import hunt.collection.Collection;
+import hunt.collection.Queue;
 import core.time;
 
 /**

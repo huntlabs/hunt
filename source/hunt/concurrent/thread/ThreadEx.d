@@ -2,8 +2,8 @@ module hunt.concurrent.thread.ThreadEx;
 
 import hunt.concurrent.thread.LockSupport;
 
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.common;
+import hunt.exception;
 // import hunt.logging.ConsoleLogger;
 import hunt.util.memory;
 

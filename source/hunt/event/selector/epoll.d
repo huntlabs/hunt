@@ -32,12 +32,12 @@ import core.sys.posix.unistd;
 import core.sys.posix.sys.resource;
 import core.sys.posix.sys.time;
 
-import hunt.lang.exception;
+import hunt.exception;
 import hunt.event.core;
 import hunt.event.socket;
 import hunt.event.timer;
 import hunt.event.timer.epoll;
-import hunt.sys.error;
+import hunt.system.error;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;

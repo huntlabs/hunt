@@ -35,7 +35,7 @@
 
 module hunt.concurrent.Executor;
 
-import hunt.lang.common;
+import hunt.common;
 
 /**
  * An object that executes submitted {@link Runnable} tasks. This

@@ -1,9 +1,9 @@
 module test.JsonHelperTest;
 
-import hunt.lang.common;
+import hunt.common;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
-import hunt.util.JsonHelper;
+import hunt.text.JsonHelper;
 
 // import hunt.util.serialize;
 import std.json;
@@ -54,7 +54,8 @@ class JsonHelperTest {
         // trace("====>", jv, "====");
 
         Greeting gt1 = JsonHelper.getAs!(Greeting)(jv);
-        // trace("====>", gt1, "====");
+        // trace("gt====>", gt, "====");
+        // trace("gt1====>", gt1, "====");
         assert(gt.content == gt1.content);
         assert(gt.creationTime == gt1.creationTime);
         assert(gt.currentTime == gt1.currentTime);

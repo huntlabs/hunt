@@ -1,8 +1,8 @@
 module test.BigIntegerTest;
 
-import hunt.math.BigInteger;
+import hunt.util.math.BigInteger;
 import hunt.logging;
-import hunt.lang.exception;
+import hunt.exception;
 
 import std.conv;
 import std.random;

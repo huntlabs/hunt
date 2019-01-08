@@ -39,13 +39,13 @@ import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.Helpers;
 import hunt.concurrent.BlockingQueue;
 
-import hunt.container.AbstractQueue;
-import hunt.container.Collection;
-import hunt.container.Iterator;
-import hunt.datetime;
-import hunt.lang.common;
-import hunt.lang.exception;
-import hunt.lang.Object;
+import hunt.collection.AbstractQueue;
+import hunt.collection.Collection;
+import hunt.collection.Iterator;
+import hunt.util.datetime;
+import hunt.common;
+import hunt.exception;
+import hunt.Object;
 
 // import core.atomic;
 import core.sync.mutex;

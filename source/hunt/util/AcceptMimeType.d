@@ -1,6 +1,6 @@
 module hunt.util.AcceptMimeType;
 
-import hunt.lang.common;
+import hunt.common;
 
 /**
  * 

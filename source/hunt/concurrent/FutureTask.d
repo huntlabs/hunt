@@ -39,8 +39,8 @@ import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.Executors;
 import hunt.concurrent.Future;
 import hunt.concurrent.thread;
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.common;
+import hunt.exception;
 
 import core.thread;
 import core.time;

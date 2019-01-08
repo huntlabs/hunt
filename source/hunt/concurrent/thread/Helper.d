@@ -3,7 +3,7 @@ module hunt.concurrent.thread.Helper;
 import core.thread;
 
 version (Posix) {
-    import hunt.sys.syscall;
+    import hunt.system.syscall;
 
     ThreadID getTid() {
         version(FreeBSD) {

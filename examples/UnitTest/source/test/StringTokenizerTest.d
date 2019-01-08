@@ -1,8 +1,8 @@
 module test.StringTokenizerTest;
 
-import hunt.string.StringTokenizer;
+import hunt.text.StringTokenizer;
 
-import hunt.lang.exception;
+import hunt.exception;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
 import hunt.util.Assert;

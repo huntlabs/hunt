@@ -1,7 +1,7 @@
 module hunt.concurrent.Locker;
 
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.common;
+import hunt.exception;
 
 /**
  * <p>

@@ -2,7 +2,7 @@ module hunt.io.ByteArrayInputStream;
 
 import hunt.io.common;
 
-import hunt.lang.exception;
+import hunt.exception;
 import std.algorithm;
 
 

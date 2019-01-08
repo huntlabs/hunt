@@ -2,10 +2,10 @@ module ArrayListDemo;
 
 import common;
 
-import hunt.container.AbstractList;
-import hunt.container.ArrayList;
-import hunt.container.Collections;
-import hunt.container.List;
+import hunt.collection.AbstractList;
+import hunt.collection.ArrayList;
+import hunt.collection.Collections;
+import hunt.collection.List;
 
 import std.stdio;
 import std.conv;

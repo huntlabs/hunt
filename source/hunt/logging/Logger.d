@@ -438,7 +438,7 @@ protected:
 
 	static string toFormat(string func, string msg, string file, size_t line, LogLevel level)
 	{
-		import hunt.datetime;
+		import hunt.util.datetime;
 		string time_prior = date("Y-m-d H:i:s");
 
 		string tid = to!string(getTid());

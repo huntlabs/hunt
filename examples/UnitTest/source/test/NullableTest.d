@@ -1,7 +1,7 @@
 module test.NullableTest;
 
-import hunt.lang.Long;
-import hunt.lang.Nullable;
+import hunt.Long;
+import hunt.Nullable;
 
 import std.conv;
 import std.stdio;

@@ -37,7 +37,7 @@ module hunt.concurrent.Delayed;
 
 import hunt.concurrent.Future;
 
-import hunt.lang.common;
+import hunt.common;
 import core.time;
 
 /**

@@ -1,12 +1,12 @@
 module BufferUtilsDemo;
 
-import hunt.container.ByteBuffer;
-import hunt.container.BufferUtils;
+import hunt.collection.ByteBuffer;
+import hunt.collection.BufferUtils;
 import hunt.logging;
 
 import hunt.util.Assert;
 import hunt.util.UnitTest;
-import hunt.lang.exception;
+import hunt.exception;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;

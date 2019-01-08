@@ -2,12 +2,12 @@ module hunt.util.MimeType;
 
 import hunt.util.AcceptMimeType;
 
-import hunt.container;
+import hunt.collection;
 import hunt.logging;
 
-import hunt.lang.Charset;
-import hunt.lang.exception;
-import hunt.string;
+import hunt.Charset;
+import hunt.exception;
+import hunt.text;
 import hunt.util.traits;
 
 import std.algorithm;

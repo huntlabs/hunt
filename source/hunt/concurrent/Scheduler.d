@@ -1,6 +1,6 @@
 module hunt.concurrent.Scheduler;
 
-import hunt.lang.common;
+import hunt.common;
 import hunt.util.Lifecycle;
 
 import core.time;

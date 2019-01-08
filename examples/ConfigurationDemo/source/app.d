@@ -50,8 +50,8 @@ void testConfig1()
 
 	assertThrown!(EmptyValueException)(conf.app.node1.node2.node3.node4.value());
 
-    assert(conf.app.subItem("package").name.value() == "Hunt package"); // use keyword as a node name
-    assert(conf["app"]["package"]["name"].value() == "Hunt package"); // use keyword as a node name
+    // assert(conf.app.subItem("package").name.value() == "Hunt package"); // use keyword as a node name
+    // assert(conf["app"]["package"]["name"].value() == "Hunt package"); // use keyword as a node name
 	
     assert(conf.app.node1.node2.node3.value() == "nothing");
     assert(conf.http.listen.value.as!long() == 100);

@@ -4,10 +4,10 @@ import hunt.util.AcceptMimeType;
 import hunt.util.MimeType;
 import hunt.util.MimeTypeUtils;
 
-import hunt.container.List;
+import hunt.collection.List;
 
 import hunt.util.Assert;
-import hunt.lang.exception;
+import hunt.exception;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;

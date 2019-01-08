@@ -14,7 +14,7 @@ module hunt.io.TcpStream;
 import hunt.event;
 
 import hunt.logging;
-import hunt.lang.common;
+import hunt.common;
 
 import std.format;
 import std.socket;

@@ -13,7 +13,7 @@ module hunt.event.timer.common;
 
 import hunt.event.core;
 import hunt.logging;
-import hunt.lang.common;
+import hunt.common;
 
 import std.datetime;
 import std.exception;

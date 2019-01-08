@@ -35,7 +35,7 @@
 
 module hunt.concurrent.Helpers;
 
-import hunt.container.Collection;
+import hunt.collection.Collection;
 
 /** Shared implementation code for hunt.concurrent. */
 class Helpers {
