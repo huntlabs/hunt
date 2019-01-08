@@ -1,18 +1,18 @@
 module TrieTest;
 
 
-import hunt.container.ArrayTernaryTrie;
-import hunt.container.ArrayTrie;
-import hunt.container.ByteBuffer;
-import hunt.container.Collection;
-import hunt.container.TreeTrie;
-import hunt.container.Trie;
+import hunt.collection.ArrayTernaryTrie;
+import hunt.collection.ArrayTrie;
+import hunt.collection.ByteBuffer;
+import hunt.collection.Collection;
+import hunt.collection.TreeTrie;
+import hunt.collection.Trie;
 
-import hunt.container.BufferUtils;
+import hunt.collection.BufferUtils;
 
 import hunt.util.UnitTest;
 import hunt.util.Assert;
-import hunt.string;
+import hunt.text;
 
 import hunt.logging;
 import std.conv;

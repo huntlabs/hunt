@@ -13,7 +13,7 @@ module hunt.io.ObjectOutput;
  * @since   1.1
  */
 import hunt.io.DataOutput;
-import hunt.lang.common;
+import hunt.common;
 
 public interface ObjectOutput : DataOutput, AutoCloseable {
     /**

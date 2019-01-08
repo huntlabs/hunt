@@ -19,7 +19,7 @@ import hunt.event.core;
 import hunt.event.socket;
 import hunt.event.timer;
 import hunt.logging;
-import hunt.sys.error;
+import hunt.system.error;
 
 import core.sys.windows.windows;
 import std.conv;

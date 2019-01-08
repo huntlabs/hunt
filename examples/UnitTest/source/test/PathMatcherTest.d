@@ -1,7 +1,7 @@
 module test.PathMatcherTest;
 
-import hunt.string.PathMatcher;
-import hunt.container;
+import hunt.text.PathMatcher;
+import hunt.collection;
 
 import hunt.util.Assert;
 import hunt.util.TypeUtils;

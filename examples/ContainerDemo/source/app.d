@@ -14,7 +14,7 @@ import SetDemo;
 import TreeMapDemo;
 import TrieTest;
 
-import hunt.datetime;
+import hunt.util.datetime;
 
 void main() {
     testUnits!(ArrayListDemo)();

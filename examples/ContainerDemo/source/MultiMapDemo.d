@@ -4,14 +4,14 @@ import std.stdio;
 import std.conv;
 import std.range;
 
-import hunt.container.ArrayList;
-import hunt.container.HashMap;
-import hunt.container.List;
-import hunt.container.Map;
-import hunt.container.MultiMap;
+import hunt.collection.ArrayList;
+import hunt.collection.HashMap;
+import hunt.collection.List;
+import hunt.collection.Map;
+import hunt.collection.MultiMap;
 
 import hunt.util.Assert;
-import hunt.string;
+import hunt.text;
 import hunt.util.TypeUtils;
 
 // alias assertTrue = Assert.assertTrue;

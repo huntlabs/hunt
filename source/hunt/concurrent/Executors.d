@@ -47,9 +47,9 @@ import hunt.concurrent.ScheduledThreadPoolExecutor;
 import hunt.concurrent.ThreadFactory;
 import hunt.concurrent.ThreadPoolExecutor;
 
-import hunt.datetime;
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.util.datetime;
+import hunt.common;
+import hunt.exception;
 
 import core.thread;
 import core.time;
@@ -62,7 +62,7 @@ import std.conv;
 // import java.security.PrivilegedAction;
 // import java.security.PrivilegedActionException;
 // import java.security.PrivilegedExceptionAction;
-// import hunt.container.Collection;
+// import hunt.collection.Collection;
 // import java.util.List;
 // import sun.security.util.SecurityConstants;
 

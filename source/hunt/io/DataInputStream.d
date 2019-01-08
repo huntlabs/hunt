@@ -3,9 +3,10 @@ module hunt.io.DataInputStream;
 import std.conv;
 import hunt.io.FilterInputStream;
 import hunt.io.DataInput;
-import hunt.lang;
+import hunt.Double;
+import hunt.Float;
 import hunt.io.common;
-import hunt.lang.exception;
+import hunt.exception;
 import hunt.io.PushbackInputStream;
 
 public

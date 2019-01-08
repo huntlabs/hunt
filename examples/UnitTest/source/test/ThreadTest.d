@@ -2,7 +2,7 @@ module test.ThreadTest;
 
 import hunt.concurrent.thread;
 import hunt.concurrent.FutureTask;
-import hunt.lang.common;
+import hunt.common;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
 

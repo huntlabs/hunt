@@ -1,9 +1,9 @@
 module TreeMapDemo;
 
-import hunt.container.HashMap;
-import hunt.container.TreeMap;
-import hunt.container.Map;
-import hunt.container.Iterator;
+import hunt.collection.HashMap;
+import hunt.collection.TreeMap;
+import hunt.collection.Map;
+import hunt.collection.Iterator;
 
 import std.stdio;
 import std.conv;

@@ -38,7 +38,7 @@ module hunt.concurrent.ThreadFactory;
 import hunt.concurrent.atomic.AtomicHelper;
 import hunt.concurrent.thread.ThreadEx;
 
-import hunt.lang.common;
+import hunt.common;
 
 import core.thread;
 import std.conv;

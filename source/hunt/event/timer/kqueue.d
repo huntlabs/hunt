@@ -11,7 +11,7 @@
  
 module hunt.event.timer.kqueue;
 
-import hunt.lang.common;
+import hunt.common;
 
 // dfmt off
 version (Kqueue) : 

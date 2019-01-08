@@ -11,13 +11,14 @@
 
 import std.stdio;
 
-import hunt.lang.common;
+import hunt.common;
 
 import hunt.logging;
 import core.thread;
 import core.time;
 import hunt.util.timer;
 import hunt.event.timer.common;
+import hunt.util.datetime;
 
 version (NativeTimer) {
 	void main() {
@@ -56,6 +57,7 @@ version (NativeTimer) {
 	import hunt.event;
 
 	void main() {
+		DateTimeHelper.startClock();
 		EventLoop loop = new EventLoop();
 
 		bool isTimer1Running = true;
@@ -68,9 +70,6 @@ version (NativeTimer) {
 			writeln("\r\nAll timers stopped (hit return to exit)");
 			getchar();
 			loop.stop();
-			// FIXME: noticed by zxp @ 4/16/2018, 1:47:45 PM
-			// core.exception.InvalidMemoryOperationError@src/core/exception.d(696): Invalid memory operation
-
 		}
 
 		int count1 = 10;

@@ -2,10 +2,10 @@ module LinkedHashMapDemo;
 
 import common;
 
-import hunt.container.LinkedHashMap;
-import hunt.container.HashMap;
-import hunt.container.Map;
-import hunt.container.Iterator;
+import hunt.collection.LinkedHashMap;
+import hunt.collection.HashMap;
+import hunt.collection.Map;
+import hunt.collection.Iterator;
 
 import std.stdio;
 import std.conv;

@@ -13,7 +13,7 @@ module hunt.io.ObjectInput;
  */
 
 import hunt.io.DataInput;
-import hunt.lang.common;
+import hunt.common;
 
 public interface ObjectInput : DataInput, AutoCloseable {
     /**

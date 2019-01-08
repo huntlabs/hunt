@@ -1,5 +1,5 @@
 import hunt.concurrent.thread;
-import hunt.datetime;
+import hunt.util.datetime;
 import hunt.logging;
 import hunt.util.memory;
 import hunt.util.UnitTest;

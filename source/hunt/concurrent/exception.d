@@ -1,6 +1,6 @@
 module hunt.concurrent.exception;
 
-import hunt.lang.exception;
+import hunt.exception;
 
 class CompletionException : Exception
 {

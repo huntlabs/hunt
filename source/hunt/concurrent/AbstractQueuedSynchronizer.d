@@ -39,10 +39,10 @@ module hunt.concurrent.AbstractQueuedSynchronizer;
 import hunt.concurrent.AbstractOwnableSynchronizer;
 import hunt.concurrent.atomic.AtomicHelper;
 
-import hunt.container.ArrayList;
-import hunt.container.Collection;
-import hunt.datetime;
-import hunt.lang.exception;
+import hunt.collection.ArrayList;
+import hunt.collection.Collection;
+import hunt.util.datetime;
+import hunt.exception;
 
 import core.thread;
 import core.sync.mutex;

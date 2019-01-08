@@ -3,8 +3,8 @@ module hunt.concurrent.CompletableFuture;
 import hunt.concurrent.Future;
 import hunt.concurrent.Promise;
 
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.common;
+import hunt.exception;
 
 /**
 * <p>A CompletableFuture that is also a Promise.</p>

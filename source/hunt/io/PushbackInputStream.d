@@ -5,8 +5,10 @@ module hunt.io.PushbackInputStream;
 
 import hunt.io.FilterInputStream;
 import hunt.io.common;
-import hunt.lang.exception;
-import hunt.lang;
+import hunt.exception;
+import hunt.Integer;
+import hunt.Long;
+import hunt.Math;
 
 public
 class PushbackInputStream : FilterInputStream {

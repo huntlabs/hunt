@@ -7,7 +7,7 @@ import hunt.io.BufferedInputStream;
 import hunt.io.BufferedOutputStream;
 import hunt.io.FileInputStream;
 import hunt.io.FileOutputStream;
-import hunt.lang.common;
+import hunt.common;
 
 // import hunt.logging;
 

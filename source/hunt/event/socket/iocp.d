@@ -17,11 +17,11 @@ version (Windows) :
 pragma(lib, "Ws2_32");
 // dfmt on
 
-import hunt.container.ByteBuffer;
+import hunt.collection.ByteBuffer;
 import hunt.event.socket.common;
 import hunt.event.core;
 import hunt.logging;
-import hunt.lang.common;
+import hunt.common;
 import hunt.concurrent.thread.Helper;
 
 import core.sys.windows.windows;
@@ -481,7 +481,7 @@ mixin template CheckIocpError() {
             return;
 
         if (ERROR_IO_PENDING != dwLastError) { // ERROR_IO_PENDING
-            import hunt.sys.error;
+            import hunt.system.error;
             warningf("erro=%d, dwLastError=%d", erro, dwLastError);
             this._error = true;
             this._erroString = getErrorMessage(dwLastError); // format("IOCP error: code=%s", dwLastError);

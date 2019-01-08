@@ -2,10 +2,10 @@ module HashSetDemo;
 
 import common;
 
-import hunt.container.HashMap;
-import hunt.container.HashSet;
-import hunt.container.Set;
-import hunt.container.Iterator;
+import hunt.collection.HashMap;
+import hunt.collection.HashSet;
+import hunt.collection.Set;
+import hunt.collection.Iterator;
 
 import std.stdio;
 import std.conv;

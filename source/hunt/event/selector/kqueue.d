@@ -19,7 +19,7 @@ version(Kqueue):
 import hunt.event.core;
 import hunt.event.socket.common;
 import hunt.event.timer.kqueue;
-import hunt.lang.common;
+import hunt.common;
 import hunt.logging;
 
 import std.exception;

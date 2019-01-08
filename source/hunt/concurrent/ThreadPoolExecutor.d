@@ -47,11 +47,11 @@ import hunt.concurrent.Future;
 import hunt.concurrent.thread.ThreadEx;
 import hunt.concurrent.ThreadFactory;
 
-import hunt.container;
-import hunt.datetime;
-import hunt.lang.Integer;
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.collection;
+import hunt.util.datetime;
+import hunt.Integer;
+import hunt.common;
+import hunt.exception;
 
 import core.sync.mutex;
 import core.sync.condition;
@@ -61,7 +61,7 @@ import std.conv;
 
 import hunt.logging.ConsoleLogger;
 
-// import hunt.container.ArrayList;
+// import hunt.collection.ArrayList;
 // import java.util.ConcurrentModificationException;
 // import java.util.HashSet;
 // import java.util.List;

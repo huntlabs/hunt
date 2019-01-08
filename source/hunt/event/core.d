@@ -12,8 +12,8 @@
 module hunt.event.core;
 
 import hunt.init;
-import hunt.lang.common;
-import hunt.lang.exception;
+import hunt.common;
+import hunt.exception;
 import hunt.logging;
 
 import core.atomic;

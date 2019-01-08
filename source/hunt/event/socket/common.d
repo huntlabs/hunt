@@ -11,11 +11,11 @@
 
 module hunt.event.socket.common;
 
-import hunt.container.ByteBuffer;
+import hunt.collection.ByteBuffer;
 import hunt.event.EventLoop;
 import hunt.event.core;
 import hunt.logging;
-import hunt.lang.common;
+import hunt.common;
 
 import std.socket;
 import std.functional;

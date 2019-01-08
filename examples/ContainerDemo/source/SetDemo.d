@@ -3,13 +3,13 @@ module SetDemo;
 import std.stdio;
 
 import hunt.util.UnitTest;
-import hunt.container.Set;
-import hunt.container.SortedSet;
-import hunt.container.TreeSet;
+import hunt.collection.Set;
+import hunt.collection.SortedSet;
+import hunt.collection.TreeSet;
 import std.conv;
 import std.range;
 
-import hunt.lang.exception;
+import hunt.exception;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
 import hunt.util.Assert;

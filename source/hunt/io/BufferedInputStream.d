@@ -2,7 +2,7 @@ module hunt.io.BufferedInputStream;
 
 import hunt.io.common;
 import hunt.io.FilterInputStream;
-import hunt.lang.exception;
+import hunt.exception;
 
 version(HUNT_DEBUG) {
     import hunt.logging;

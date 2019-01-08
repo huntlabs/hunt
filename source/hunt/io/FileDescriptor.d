@@ -1,7 +1,7 @@
 module hunt.io.FileDescriptor;
 
-import hunt.lang.exception;
-import hunt.lang.common;
+import hunt.exception;
+import hunt.common;
 
 import std.container.array;
 /**

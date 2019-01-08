@@ -3,7 +3,7 @@
 	"authors": [
 		"Putao"
 	],
-	"description": "A demo for hunt.container.",
+	"description": "A demo for hunt.collection.",
 	"copyright": "Copyright © 2017-2018, HuntLabs.net",
 	"license": "Apache-2.0",
 	"versions": ["HUNT_DEBUG"],
