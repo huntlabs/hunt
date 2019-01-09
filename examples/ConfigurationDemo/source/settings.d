@@ -91,6 +91,13 @@ class BuilderTest1Config
 }
 
 
+class ArrayTestConfig {
+    string name;
+    int[] ages;
+    string[] users;
+    ServerSettings[] servers;
+}
+
 class TestConfigEx : TestConfig
 {
     string fullName = "Putao";
