@@ -48,3 +48,4 @@ examples/UnitTest/unittest
 *.zip
 hunt-test-*
 test.config
+mixin_output.d
