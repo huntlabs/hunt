@@ -11,5 +11,9 @@
 		"hunt" : {
 			"path" : "../../"
 		}
-	}
+	},
+	"versions": [
+		"HUNT_DEBUG_CONFIG"
+	],
+	"dflags":["-mixin=mixin_output.d"]
 }
