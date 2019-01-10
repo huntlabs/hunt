@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.collection.radix;
 
 import std.stdio;
