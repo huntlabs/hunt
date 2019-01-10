@@ -1,7 +1,7 @@
 {
 	"name": "udp-demo",
 	"description": "A demo for UDP server and client.",
-	"copyright": "Copyright (C) 2015-2018, HuntLabs.net",
+	"copyright": "Copyright (C) 2015-2019, HuntLabs.net",
 	"license": "Apache-2.0",
 	"authors": [
 		"BitWorld"
