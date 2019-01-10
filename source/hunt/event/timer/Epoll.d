@@ -12,7 +12,7 @@
 module hunt.event.timer.Epoll;
 
 // dfmt off
-version (linux) : 
+version (HAVE_EPOLL) : 
 // dfmt on
 
 import hunt.io.socket.Common;

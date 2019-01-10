@@ -24,10 +24,10 @@ module hunt.event.timer;
 
 public import hunt.event.timer.Common;
 
-version (linux) {
+version (HAVE_EPOLL) {
     public import hunt.event.timer.Epoll;
-} else version (Kqueue) {
+} else version (HAVE_KQUEUE) {
     public import hunt.event.timer.Kqueue;
-} else version (Windows) {
+} else version (HAVE_IOCP) {
     public import hunt.event.timer.IOCP;
 }

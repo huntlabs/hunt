@@ -1,21 +1,31 @@
 {
     "name": "hunt",
-    "description": "A refined core library for D programming language. Including event / net / tcpstream serialize / radix-tree / timer / container / memory / buffer.",
-    "copyright": "Copyright (C) 2015-2019, HuntLabs.net",
-    "authors": [
-        "huntlabs.net"
-    ],
+    "description": "A refined core library for D programming language.",
+    "copyright": "Copyright (C) 2018-2019, HuntLabs",
+    "homepage": "https://www.huntlabs.net/",
     "license": "Apache-2.0",
     "versions-osx": [
-        "Kqueue"
+        "HAVE_KQUEUE"
     ],
     "versions-freebsd": [
-        "Kqueue"
+        "HAVE_KQUEUE"
+    ],
+    "versions-dragonflybsd": [
+        "HAVE_KQUEUE"
     ],
     "versions-openbsd": [
-        "Kqueue"
+        "HAVE_KQUEUE"
     ],
     "versions-netbsd": [
-        "Kqueue"
+        "HAVE_KQUEUE"
+    ],
+    "versions-windows": [
+        "HAVE_IOCP"
+    ],
+    "versions-linux": [
+        "HAVE_EPOLL"
+    ],
+    "versions-android": [
+        "HAVE_EPOLL"
     ]
 }

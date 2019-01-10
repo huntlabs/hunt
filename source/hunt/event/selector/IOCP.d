@@ -12,7 +12,7 @@
 module hunt.event.selector.IOCP;
 
 // dfmt off
-version (Windows) : 
+version (HAVE_IOCP) : 
 // dfmt on
 
 import hunt.io.socket.Common;

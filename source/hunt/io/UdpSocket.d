@@ -71,7 +71,7 @@ class UdpSocket : AbstractDatagramSocket
 
         _inLoop.register(this);
         _isRegistered = true;
-        version (Windows)
+        version (HAVE_IOCP)
             doRead();
     }
 

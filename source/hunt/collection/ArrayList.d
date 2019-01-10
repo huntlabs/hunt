@@ -17,7 +17,7 @@ import std.conv;
 import std.traits;
 
 import hunt.Exceptions;
-import hunt.collection.array;
+import hunt.collection.Array;
 import hunt.collection.AbstractList;
 import hunt.collection.Collection;
 import hunt.collection.List;

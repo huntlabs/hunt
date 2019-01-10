@@ -40,7 +40,7 @@ class TcpListener : AbstractListener {
     this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
         _tcpStreamoption = TcpStreamOption.createOption();
         _tcpStreamoption.bufferSize = bufferSize;
-        version (Windows)
+        version (HAVE_IOCP)
             super(loop, family, bufferSize);
         else
             super(loop, family);
@@ -108,7 +108,7 @@ class TcpListener : AbstractListener {
     override void start() {
         _inLoop.register(this);
         _isRegistered = true;
-        version (Windows)
+        version (HAVE_IOCP)
             this.doAccept();
     }
 

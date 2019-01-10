@@ -57,7 +57,7 @@ abstract class AbstractListener : AbstractSocketChannel {
             trace("new connection coming...");
         this.clearError();
         // http://man7.org/linux/man-pages/man2/accept.2.html
-        version(linux) {
+        version(HAVE_EPOLL) {
             // socket_t clientFd = cast(socket_t)(accept4(this.handle, null, null, SOCK_NONBLOCK | SOCK_CLOEXEC));
             socket_t clientFd = cast(socket_t)(accept(this.handle, null, null));
         } else {

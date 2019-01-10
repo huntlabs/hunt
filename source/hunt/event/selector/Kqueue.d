@@ -13,7 +13,7 @@ module hunt.event.selector.Kqueue;
 
 
 // dfmt off
-version(Kqueue):
+version(HAVE_KQUEUE):
 // dfmt on
 
 import hunt.io.socket.Common;

@@ -98,7 +98,7 @@ struct ArrayCOWData(T, Allocator,bool inGC = false)  if(is(T == Unqual!T))
     import core.memory : GC;
     import std.exception : enforce;
     import core.stdc.string : memcpy;
-    import hunt.collection.array : fillWithMemcpy;
+    import hunt.collection.Array : fillWithMemcpy;
 
     ~this()
     {
