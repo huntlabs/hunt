@@ -66,7 +66,8 @@ version (NativeTimer) {
 		void checkTimer() {
 			if (isTimer1Running || isTimer2Running)
 				return;
-
+// FIXME: Needing refactor or cleanup -@putao at 1/10/2019, 6:21:11 PM
+// Can't exit on mac OS
 			writeln("\r\nAll timers stopped (hit return to exit)");
 			getchar();
 			loop.stop();

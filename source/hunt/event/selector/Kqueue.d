@@ -17,14 +17,12 @@ version(Kqueue):
 // dfmt on
 
 import hunt.io.socket.Common;
-import hunt.io.socket.common;
-import hunt.event.timer.kqueue;
+import hunt.event.timer.Kqueue;
 import hunt.Exceptions;
 import hunt.logging;
 
 import std.exception;
 import std.socket;
-
 import std.string;
 
 import core.time;
