@@ -91,9 +91,15 @@ alias Func6(T1, T2, T3, T4, T5, T6, R) = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, 
 alias FuncN(T, R) = R delegate(T[] args...);
 
 
+/**
+*/
+class EventArgs {
+
+}
+
+
 alias EventHandler = void delegate(Object sender, EventArgs args);
 alias ErrorEventHandler = void delegate(string message);
-alias TickedEventHandler = void delegate(Object sender);
 
 alias SimpleEventHandler = Action;
 
@@ -159,3 +165,32 @@ alias BiConsumer = Action2;
  */
 alias BiFunction = Func2; 
 //  alias BiFunction(T, U, R) = R delegate(T t, U u);
+
+
+
+size_t hashCode(T)(T[] a...) {
+    if (a is null)
+        return 0;
+
+    size_t result = 1;
+
+    foreach (T element ; a)
+        result = 31 * result + (element == T.init ? 0 : hashOf(element));
+
+    return result;
+}
+
+
+bool hasKey(K, V)(V[K] arr, K key) {
+    auto v = key in arr;
+    return v !is null;
+}
+
+unittest {
+    string[int] arr;
+    arr[1001] = "1001";
+    arr[1002] = "1002";
+
+    assert(arr.hasKey(1001));
+    assert(!arr.hasKey(1003));
+}

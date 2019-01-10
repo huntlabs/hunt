@@ -4,13 +4,14 @@ module hunt.io.PushbackInputStream;
 
 
 import hunt.io.FilterInputStream;
-import hunt.io.common;
-import hunt.exception;
+import hunt.io.Common;
+import hunt.Exceptions;
 import hunt.Integer;
 import hunt.Long;
-import hunt.Math;
+import hunt.math.Helper;
 
-public
+/**
+*/
 class PushbackInputStream : FilterInputStream {
     /**
      * The pushback buffer.

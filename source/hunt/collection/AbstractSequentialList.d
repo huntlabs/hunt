@@ -4,7 +4,7 @@ import hunt.collection.AbstractList;
 import hunt.collection.Deque;
 import hunt.collection.List;
 
-import hunt.exception;
+import hunt.Exceptions;
 
 
 /**

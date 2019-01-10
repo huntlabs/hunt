@@ -38,7 +38,7 @@ module hunt.collection.AbstractQueue;
 import hunt.collection.AbstractCollection;
 import hunt.collection.Collection;
 import hunt.collection.Queue;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Object;
 
 

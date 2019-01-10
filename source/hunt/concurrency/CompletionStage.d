@@ -38,7 +38,7 @@ module hunt.concurrency.CompletionStage;
 // import hunt.util.functional.BiConsumer;
 // import hunt.util.functional.BiFunction;
 // import hunt.util.functional.Consumer;
-import hunt.util.functional;
+// import hunt.util.functional;
 
 /**
  * A stage of a possibly asynchronous computation, that performs an

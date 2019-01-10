@@ -47,9 +47,9 @@ import hunt.concurrency.ScheduledThreadPoolExecutor;
 import hunt.concurrency.ThreadFactory;
 import hunt.concurrency.ThreadPoolExecutor;
 
-import hunt.util.datetime;
-import hunt.common;
-import hunt.exception;
+import hunt.util.DateTime;
+import hunt.Exceptions;
+import hunt.util.Common;
 
 import core.thread;
 import core.time;

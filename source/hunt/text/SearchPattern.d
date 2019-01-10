@@ -1,6 +1,6 @@
 module hunt.text.SearchPattern;
 
-import hunt.exception;
+import hunt.Exceptions;
 
 /**
  * SearchPattern

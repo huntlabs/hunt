@@ -9,7 +9,7 @@ import hunt.collection.TreeSet;
 import std.conv;
 import std.range;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
 import hunt.Assert;

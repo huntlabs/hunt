@@ -3,10 +3,10 @@ module hunt.math.BigDecimal;
 import std.conv;
 import hunt.text.StringBuilder;
 import hunt.math.BigInteger;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Integer;
 import hunt.Long;
-import hunt.Math;
+import hunt.math.Helper;
 import hunt.Number;
 
 /**
@@ -1343,7 +1343,7 @@ class BigDecimal : Number
     //             bool augendIsZero = augend.signum() == 0;
 
     //             if (lhsIsZero || augendIsZero) {
-    //                 int preferredScale = Math.max(lhs.scale(), augend.scale());
+    //                 int preferredScale = MathHelper.max(lhs.scale(), augend.scale());
     //                 BigDecimal result;
 
     //                 if (lhsIsZero && augendIsZero)
@@ -1431,7 +1431,7 @@ class BigDecimal : Number
     //         long smallHighDigitPos = (long) small.scale - small.precision() + 1;
     //         if (smallHighDigitPos > big.scale + 2 && // big and small disjoint
     //             smallHighDigitPos > estResultUlpScale + 2) { // small digits not visible
-    //             small = BigDecimal.valueOf(small.signum(), this.checkScale(Math.max(big.scale, estResultUlpScale) + 3));
+    //             small = BigDecimal.valueOf(small.signum(), this.checkScale(MathHelper.max(big.scale, estResultUlpScale) + 3));
     //         }
 
     //         // Since addition is symmetric, preserving input order in
@@ -1706,8 +1706,8 @@ class BigDecimal : Number
         //      * precision and do a divide with the UNNECESSARY rounding
         //      * mode.
         //      */
-        //     MathContext mc = new MathContext( (int)Math.min(this.precision() +
-        //                                                     (long)Math.ceil(10.0*divisor.precision()/3.0),
+        //     MathContext mc = new MathContext( (int)MathHelper.min(this.precision() +
+        //                                                     (long)MathHelper.ceil(10.0*divisor.precision()/3.0),
         //                                                     Integer.MAX_VALUE),
         //                                       RoundingMode.UNNECESSARY);
         //     BigDecimal quotient;
@@ -1815,8 +1815,8 @@ class BigDecimal : Number
         // // integer value; then remove any fractional digits
         // import std.algorithm.comparison;
         // import std.math;
-        // int maxDigits = cast(int)Math.min(this.precision() +
-        //                               cast(long)Math.ceil(10.0*divisor.precision()/3.0) +
+        // int maxDigits = cast(int)MathHelper.min(this.precision() +
+        //                               cast(long)MathHelper.ceil(10.0*divisor.precision()/3.0) +
         //                               abs(cast(long)this.scale() - divisor.scale()) + 2,
         //                               Integer.MAX_VALUE);
         // BigDecimal quotient = this.divide(divisor, new MathContext(maxDigits,
@@ -1898,7 +1898,7 @@ class BigDecimal : Number
     //         if ((preferredScale > result.scale()) &&
     //             (precisionDiff = mc.precision - result.precision()) > 0) {
     //             return result.setScale(result.scale() +
-    //                                    Math.min(precisionDiff, preferredScale - result.scale) );
+    //                                    MathHelper.min(precisionDiff, preferredScale - result.scale) );
     //         } else {
     //             return stripZerosToMatchScale(result.intVal,result.intCompact,result.scale,preferredScale);
     //         }
@@ -2132,7 +2132,7 @@ class BigDecimal : Number
     //             assert  // Verify 0.1 <= working < 10
     //                 ONE_TENTH.compareTo(working) <= 0 && working.compareTo(TEN) < 0;
 
-    //             // Use good ole' Math.sqrt to get the initial guess for
+    //             // Use good ole' MathHelper.sqrt to get the initial guess for
     //             // the Newton iteration, good to at least 15 decimal
     //             // digits. This approach does incur the cost of a
     //             //
@@ -2156,7 +2156,7 @@ class BigDecimal : Number
     //             // low-enough precision, the post-Newton rounding logic
     //             // could be applied directly.)
 
-    //             BigDecimal guess = new BigDecimal(Math.sqrt(working.doubleValue()));
+    //             BigDecimal guess = new BigDecimal(MathHelper.sqrt(working.doubleValue()));
     //             int guessPrecision = 15;
     //             int originalPrecision = mc.getPrecision();
     //             int targetPrecision;
@@ -2178,7 +2178,7 @@ class BigDecimal : Number
     //             BigDecimal approx = guess;
     //             int workingPrecision = working.precision();
     //             do {
-    //                 int tmpPrecision = Math.max(Math.max(guessPrecision, targetPrecision + 2),
+    //                 int tmpPrecision = MathHelper.max(MathHelper.max(guessPrecision, targetPrecision + 2),
     //                                            workingPrecision);
     //                 MathContext mcTmp = new MathContext(tmpPrecision, RoundingMode.HALF_EVEN);
     //                 // approx = 0.5 * (approx + fraction / approx)
@@ -2393,7 +2393,7 @@ class BigDecimal : Number
     //             return ONE;                      // x**0 == 1 in X3.274
     //         BigDecimal lhs = this;
     //         MathContext workmc = mc;           // working settings
-    //         int mag = Math.abs(n);               // magnitude of n
+    //         int mag = MathHelper.abs(n);               // magnitude of n
     //         if (mc.precision > 0) {
     //             int elength = longDigitLength(mag); // length of n in digits
     //             if (elength > mc.precision)        // X3.274 rule
@@ -3342,7 +3342,7 @@ class BigDecimal : Number
         string str;
         if (intCompact != INFLATED)
         {
-            str = to!string(Math.abs(intCompact));
+            str = to!string(MathHelper.abs(intCompact));
         }
         else
         {
@@ -3604,9 +3604,9 @@ class BigDecimal : Number
     //                  * multiply or divide to compute the (properly
     //                  * rounded) result.
     //                  */
-    //                 if (Math.abs(intCompact) < 1L<<22 ) {
+    //                 if (MathHelper.abs(intCompact) < 1L<<22 ) {
     //                     // Don't have too guard against
-    //                     // Math.abs(MIN_VALUE) because of outer check
+    //                     // MathHelper.abs(MIN_VALUE) because of outer check
     //                     // against INFLATED.
     //                     if (scale > 0 && scale < FLOAT_10_POW.length) {
     //                         return (float)intCompact / FLOAT_10_POW[scale];
@@ -3649,9 +3649,9 @@ class BigDecimal : Number
     //                  * double multiply or divide to compute the (properly
     //                  * rounded) result.
     //                  */
-    //                 if (Math.abs(intCompact) < 1L<<52 ) {
+    //                 if (MathHelper.abs(intCompact) < 1L<<52 ) {
     //                     // Don't have too guard against
-    //                     // Math.abs(MIN_VALUE) because of outer check
+    //                     // MathHelper.abs(MIN_VALUE) because of outer check
     //                     // against INFLATED.
     //                     if (scale > 0 && scale < DOUBLE_10_POW.length) {
     //                         return (double)intCompact / DOUBLE_10_POW[scale];
@@ -3831,7 +3831,7 @@ class BigDecimal : Number
     //         int offset;  // offset is the starting index for coeff array
     //         // Get the significand as an absolute value
     //         if (intCompact != INFLATED) {
-    //             offset = sbHelper.putIntCompact(Math.abs(intCompact));
+    //             offset = sbHelper.putIntCompact(MathHelper.abs(intCompact));
     //             coeff  = sbHelper.getCompactCharArray();
     //         } else {
     //             offset = 0;
@@ -4050,7 +4050,7 @@ class BigDecimal : Number
     //             long tenpower = tab[n];
     //             if (val == 1)
     //                 return tenpower;
-    //             if (Math.abs(val) <= bounds[n])
+    //             if (MathHelper.abs(val) <= bounds[n])
     //                 return val * tenpower;
     //         }
     //         return INFLATED;
@@ -4777,7 +4777,7 @@ class BigDecimal : Number
     //      * to be closed to the preferred scale.
     //      */
     //     private static BigDecimal createAndStripZerosToMatchScale(long compactVal, int scale, long preferredScale) {
-    //         while (Math.abs(compactVal) >= 10L && scale > preferredScale) {
+    //         while (MathHelper.abs(compactVal) >= 10L && scale > preferredScale) {
     //             if ((compactVal & 1L) != 0L)
     //                 break; // odd number cannot end in 0
     //             long r = compactVal % 10L;
@@ -5149,9 +5149,9 @@ class BigDecimal : Number
     //     private static BigDecimal multiplyDivideAndRound(long dividend0, long dividend1, long divisor, int scale, int roundingMode,
     //                                                      int preferredScale) {
     //         int qsign = Long.signum(dividend0)*Long.signum(dividend1)*Long.signum(divisor);
-    //         dividend0 = Math.abs(dividend0);
-    //         dividend1 = Math.abs(dividend1);
-    //         divisor = Math.abs(divisor);
+    //         dividend0 = MathHelper.abs(dividend0);
+    //         dividend1 = MathHelper.abs(dividend1);
+    //         divisor = MathHelper.abs(divisor);
     //         // multiply dividend0 * dividend1
     //         long d0_hi = dividend0 >>> 32;
     //         long d0_lo = dividend0 & LONG_MASK;
@@ -5406,8 +5406,8 @@ class BigDecimal : Number
 
     //     private static long multiply(long x, long y){
     //                 long product = x * y;
-    //         long ax = Math.abs(x);
-    //         long ay = Math.abs(y);
+    //         long ax = MathHelper.abs(x);
+    //         long ay = MathHelper.abs(y);
     //         if (((ax | ay) >>> 31 == 0) || (y == 0) || (product / y == x)){
     //                         return product;
     //                 }

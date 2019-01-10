@@ -14,7 +14,7 @@ module hunt.util.Timer;
 import hunt.event;
 import hunt.event.timer;
 import hunt.logging;
-import hunt.common;
+import hunt.Exceptions;
 
 import core.time;
 import std.datetime;

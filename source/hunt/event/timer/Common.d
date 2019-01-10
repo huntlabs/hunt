@@ -9,11 +9,11 @@
  *
  */
 
-module hunt.event.timer.common;
+module hunt.event.timer.Common;
 
-import hunt.event.core;
+import hunt.io.socket.Common;
 import hunt.logging;
-import hunt.common;
+import hunt.Exceptions;
 
 import std.datetime;
 import std.exception;
@@ -21,6 +21,8 @@ import std.exception;
 enum CustomTimerMinTimeOut = 50; // in ms
 enum CustomTimerWheelSize = 500;
 enum CustomTimer_Next_TimeOut = cast(long)(CustomTimerMinTimeOut * (2.0 / 3.0));
+
+alias TickedEventHandler = void delegate(Object sender);
 
 alias UintObject = BaseTypeObject!uint;
 

@@ -9,17 +9,17 @@
  *
  */
 
-module hunt.event.selector.kqueue;
+module hunt.event.selector.Kqueue;
 
 
 // dfmt off
 version(Kqueue):
 // dfmt on
 
-import hunt.event.core;
-import hunt.event.socket.common;
+import hunt.io.socket.Common;
+import hunt.io.socket.common;
 import hunt.event.timer.kqueue;
-import hunt.common;
+import hunt.Exceptions;
 import hunt.logging;
 
 import std.exception;

@@ -8,11 +8,13 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
-module hunt.event;
 
-public import hunt.event.EventLoop;
-public import hunt.event.EventLoopGroup;
+module hunt.io.socket;
+
 public import hunt.io.socket.Common;
-public import hunt.event.selector;
-public import hunt.io.socket;
+
+version (Posix) {
+    public import hunt.io.socket.Posix;
+} else version (Windows) {
+    public import hunt.io.socket.IOCP;
+}

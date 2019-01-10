@@ -1,6 +1,6 @@
 module hunt.concurrency.CountingCallback;
 
-import hunt.util.functional;
+import hunt.util.Common;
 import core.atomic;
 import std.format;
 

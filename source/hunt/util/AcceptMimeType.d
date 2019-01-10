@@ -10,7 +10,7 @@
  */
  module hunt.util.AcceptMimeType;
 
-import hunt.common;
+import hunt.Functions;
 
 /**
  * 

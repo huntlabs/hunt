@@ -1,7 +1,8 @@
 module hunt.collection.Collection;
 
-import hunt.common;
+import hunt.Functions;
 import hunt.Object;
+import hunt.util.Common;
 import std.range;
 
 interface Collection(E) : Iterable!E, IObject {

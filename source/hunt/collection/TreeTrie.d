@@ -8,7 +8,7 @@ import hunt.collection.HashSet;
 import hunt.collection.List;
 import hunt.collection.Set;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.text;
 
 import std.conv;

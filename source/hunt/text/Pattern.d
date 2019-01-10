@@ -1,6 +1,6 @@
 module hunt.text.Pattern;
 
-import hunt.text.common;
+import hunt.text.Common;
 import hunt.text.StringUtils;
 
 import std.string;

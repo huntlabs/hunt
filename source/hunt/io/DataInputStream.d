@@ -5,8 +5,8 @@ import hunt.io.FilterInputStream;
 import hunt.io.DataInput;
 import hunt.Double;
 import hunt.Float;
-import hunt.io.common;
-import hunt.exception;
+import hunt.io.Common;
+import hunt.Exceptions;
 import hunt.io.PushbackInputStream;
 
 public

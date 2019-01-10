@@ -1,4 +1,4 @@
-module hunt.util.traits;
+module hunt.util.Traits;
 
 import std.meta;
 import std.traits;

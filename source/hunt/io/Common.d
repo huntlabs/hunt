@@ -1,8 +1,8 @@
-module hunt.io.common;
+module hunt.io.Common;
 
 import hunt.collection.ByteBuffer;
-import hunt.common;
-import hunt.exception;
+import hunt.Exceptions;
+import hunt.util.Common;
 import hunt.logging;
 import hunt.concurrency.CountingCallback;
 

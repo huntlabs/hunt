@@ -1,6 +1,6 @@
 module hunt.text;
 
-public import hunt.text.common;
+public import hunt.text.Common;
 public import hunt.text.PathMatcher;
 public import hunt.text.Pattern;
 public import hunt.text.PatternMatchUtils;

@@ -1,7 +1,7 @@
 module hunt.Nullable;
 
-import hunt.common;
-import hunt.exception;
+import hunt.Functions;
+import hunt.Exceptions;
 import hunt.Object;
 
 import std.traits;

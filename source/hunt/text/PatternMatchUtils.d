@@ -1,6 +1,6 @@
 module hunt.text.PatternMatchUtils;
 
-import hunt.text.common;
+import hunt.text.Common;
 
 import std.range.primitives;
 import std.string;

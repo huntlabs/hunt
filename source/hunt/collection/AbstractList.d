@@ -3,14 +3,12 @@ module hunt.collection.AbstractList;
 import std.algorithm;
 import std.conv;
 import std.traits;
-// import std.container.array;
 
 import hunt.collection.AbstractCollection;
 import hunt.collection.List;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Object;
 import hunt.util.Comparator;
-import hunt.util.functional;
 
 /**
 */

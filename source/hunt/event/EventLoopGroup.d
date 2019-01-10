@@ -11,7 +11,7 @@
 
 module hunt.event.EventLoopGroup;
 
-import hunt.util.memory;
+import hunt.util.Memory;
 import hunt.event.EventLoop;
 import hunt.logging;
 

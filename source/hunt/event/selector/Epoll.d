@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.event.selector.epoll;
+module hunt.event.selector.Epoll;
 
 // dfmt off
 version(linux):
@@ -32,12 +32,10 @@ import core.sys.posix.unistd;
 import core.sys.posix.sys.resource;
 import core.sys.posix.sys.time;
 
-import hunt.exception;
-import hunt.event.core;
-import hunt.event.socket;
+import hunt.Exceptions;
+import hunt.io.socket;
 import hunt.event.timer;
-import hunt.event.timer.epoll;
-import hunt.system.error;
+import hunt.system.Error;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;

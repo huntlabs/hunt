@@ -6,7 +6,7 @@ import hunt.collection.Collection;
 import hunt.collection.Deque;
 import hunt.collection.List;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Object;
 
 import std.conv;

@@ -9,17 +9,17 @@
  *
  */
 
-module hunt.event.selector.iocp;
+module hunt.event.selector.IOCP;
 
 // dfmt off
 version (Windows) : 
 // dfmt on
 
-import hunt.event.core;
-import hunt.event.socket;
+import hunt.io.socket.Common;
+import hunt.io.socket;
 import hunt.event.timer;
 import hunt.logging;
-import hunt.system.error;
+import hunt.system.Error;
 
 import core.sys.windows.windows;
 import std.conv;

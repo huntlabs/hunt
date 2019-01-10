@@ -1,6 +1,6 @@
 module hunt.collection.BufferUtils;
 
-import hunt.text.common;
+import hunt.text.Common;
 import hunt.text.StringBuilder;
 
 import hunt.collection.Appendable;
@@ -9,8 +9,7 @@ import hunt.collection.Collection;
 import hunt.collection.Enumeration;
 import hunt.collection.List;
 
-import hunt.exception;
-import hunt.text.common;
+import hunt.Exceptions;
 import hunt.util.TypeUtils;
 
 import std.conv;

@@ -8,20 +8,15 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.event.timer;
 
-public import hunt.event.timer.common;
+public import hunt.event.timer.Common;
 
-version (linux)
-{
-    public import hunt.event.timer.epoll;
-}
-else version (Kqueue)
-{
-    public import hunt.event.timer.kqueue;
-}
-else version (Windows)
-{
-    public import hunt.event.timer.iocp;
+version (linux) {
+    public import hunt.event.timer.Epoll;
+} else version (Kqueue) {
+    public import hunt.event.timer.Kqueue;
+} else version (Windows) {
+    public import hunt.event.timer.IOCP;
 }

@@ -9,7 +9,7 @@
  *
  */
  
-module hunt.event.task;
+module hunt.event.Task;
 
 import std.traits;
 import std.experimental.allocator;

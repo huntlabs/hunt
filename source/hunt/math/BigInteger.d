@@ -8,7 +8,7 @@ import hunt.Number;
 
 import hunt.Character;
 import hunt.text.CharacterData;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.text;
 
 import std.algorithm;

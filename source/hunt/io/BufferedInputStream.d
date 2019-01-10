@@ -1,8 +1,8 @@
 module hunt.io.BufferedInputStream;
 
-import hunt.io.common;
+import hunt.io.Common;
 import hunt.io.FilterInputStream;
-import hunt.exception;
+import hunt.Exceptions;
 
 version(HUNT_DEBUG) {
     import hunt.logging;

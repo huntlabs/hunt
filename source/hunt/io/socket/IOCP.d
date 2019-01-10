@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.event.socket.iocp;
+module hunt.io.socket.IOCP;
 
 // dfmt off
 version (Windows) : 
@@ -18,10 +18,10 @@ pragma(lib, "Ws2_32");
 // dfmt on
 
 import hunt.collection.ByteBuffer;
-import hunt.event.socket.common;
-import hunt.event.core;
+import hunt.io.socket.common;
+import hunt.io.socket.Common;
 import hunt.logging;
-import hunt.common;
+import hunt.Exceptions;
 import hunt.concurrency.thread.Helper;
 
 import core.sys.windows.windows;
@@ -481,7 +481,7 @@ mixin template CheckIocpError() {
             return;
 
         if (ERROR_IO_PENDING != dwLastError) { // ERROR_IO_PENDING
-            import hunt.system.error;
+            import hunt.system.Error;
             warningf("erro=%d, dwLastError=%d", erro, dwLastError);
             this._error = true;
             this._erroString = getErrorMessage(dwLastError); // format("IOCP error: code=%s", dwLastError);

@@ -1,6 +1,6 @@
 module hunt.Double;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Nullable;
 import hunt.Number;
 import std.conv;

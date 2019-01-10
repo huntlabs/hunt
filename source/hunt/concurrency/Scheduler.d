@@ -1,6 +1,6 @@
 module hunt.concurrency.Scheduler;
 
-import hunt.common;
+import hunt.util.Common;
 import hunt.util.Lifecycle;
 
 import core.time;

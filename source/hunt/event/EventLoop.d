@@ -11,14 +11,13 @@
 
 module hunt.event.EventLoop;
 
-import core.thread;
-import hunt.event.core;
+import hunt.io.socket.Common;
 import hunt.event.selector;
-import hunt.event.task;
+import hunt.event.Task;
 import hunt.logging;
 
-import std.parallelism;
 import core.thread;
+import std.parallelism;
 
 /**
 

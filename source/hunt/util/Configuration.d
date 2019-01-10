@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.util.configuration;
+module hunt.util.Configuration;
 
 import std.algorithm;
 import std.array;
@@ -523,7 +523,7 @@ class ConfigBuilder {
 }
 
 // version (unittest) {
-//     import hunt.util.configuration;
+//     import hunt.util.Configuration;
 
 //     @Configuration("app")
 //     class TestConfig {

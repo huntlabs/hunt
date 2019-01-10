@@ -2,7 +2,7 @@ module test.BigIntegerTest;
 
 import hunt.math.BigInteger;
 import hunt.logging;
-import hunt.exception;
+import hunt.Exceptions;
 
 import std.conv;
 import std.random;

@@ -6,7 +6,7 @@ import hunt.logging;
 
 import hunt.Assert;
 import hunt.util.UnitTest;
-import hunt.exception;
+import hunt.Exceptions;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;

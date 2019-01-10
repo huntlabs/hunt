@@ -2,7 +2,8 @@ module hunt.collection.Map;
 
 import hunt.collection.Collection;
 import hunt.collection.Set;
-import hunt.common;
+import hunt.util.Common;
+import hunt.Functions;
 import hunt.Object;
 
 import std.range.interfaces : InputRange;

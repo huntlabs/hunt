@@ -2,9 +2,9 @@ module hunt.text.PathMatcher;
 
 import hunt.collection;
 import hunt.Boolean;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Nullable;
-import hunt.text.common;
+import hunt.text.Common;
 import hunt.text.StringUtils;
 import hunt.text.StringBuilder;
 
