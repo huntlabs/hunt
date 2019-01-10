@@ -17,86 +17,100 @@ import std.datetime;
 import std.format : formattedWrite;
 import std.string;
 
-short monthToShort(Month month)
-{
+short monthToShort(Month month) {
     short resultMonth;
-    switch(month)
-    {
-        case Month.jan:
-            resultMonth = 1;
-            break;
-        case Month.feb:
-            resultMonth = 2;
-            break;
-        case Month.mar:
-            resultMonth = 3;
-            break;
-        case Month.apr:
-            resultMonth = 4;
-            break;
-        case Month.may:
-            resultMonth = 5;
-            break;
-        case Month.jun:
-            resultMonth = 6;
-            break;
-        case Month.jul:
-            resultMonth = 7;
-            break;
-        case Month.aug:
-            resultMonth = 8;
-            break;
-        case Month.sep:
-            resultMonth = 9;
-            break;
-        case Month.oct:
-            resultMonth = 10;
-            break;
-        case Month.nov:
-            resultMonth = 11;
-            break;
-        case Month.dec:
-            resultMonth = 12;
-            break;
-        default:
-            resultMonth = 0;
-            break;
+    switch (month) {
+    case Month.jan:
+        resultMonth = 1;
+        break;
+    case Month.feb:
+        resultMonth = 2;
+        break;
+    case Month.mar:
+        resultMonth = 3;
+        break;
+    case Month.apr:
+        resultMonth = 4;
+        break;
+    case Month.may:
+        resultMonth = 5;
+        break;
+    case Month.jun:
+        resultMonth = 6;
+        break;
+    case Month.jul:
+        resultMonth = 7;
+        break;
+    case Month.aug:
+        resultMonth = 8;
+        break;
+    case Month.sep:
+        resultMonth = 9;
+        break;
+    case Month.oct:
+        resultMonth = 10;
+        break;
+    case Month.nov:
+        resultMonth = 11;
+        break;
+    case Month.dec:
+        resultMonth = 12;
+        break;
+    default:
+        resultMonth = 0;
+        break;
     }
-    
+
     return resultMonth;
 }
 
-
 string dayAsString(DayOfWeek day) {
-    final switch(day) with(DayOfWeek) {
-        case mon: return "Mon";
-        case tue: return "Tue";
-        case wed: return "Wed";
-        case thu: return "Thu";
-        case fri: return "Fri";
-        case sat: return "Sat";
-        case sun: return "Sun";
+    final switch (day) with (DayOfWeek) {
+    case mon:
+        return "Mon";
+    case tue:
+        return "Tue";
+    case wed:
+        return "Wed";
+    case thu:
+        return "Thu";
+    case fri:
+        return "Fri";
+    case sat:
+        return "Sat";
+    case sun:
+        return "Sun";
     }
 }
 
-string monthAsString(Month month){
-    final switch(month) with (Month) {
-        case jan: return "Jan";
-        case feb: return "Feb";
-        case mar: return "Mar";
-        case apr: return "Apr";
-        case may: return "May";
-        case jun: return "Jun";
-        case jul: return "Jul";
-        case aug: return "Aug";
-        case sep: return "Sep";
-        case oct: return "Oct";
-        case nov: return "Nov";
-        case dec: return "Dec";
+string monthAsString(Month month) {
+    final switch (month) with (Month) {
+    case jan:
+        return "Jan";
+    case feb:
+        return "Feb";
+    case mar:
+        return "Mar";
+    case apr:
+        return "Apr";
+    case may:
+        return "May";
+    case jun:
+        return "Jun";
+    case jul:
+        return "Jul";
+    case aug:
+        return "Aug";
+    case sep:
+        return "Sep";
+    case oct:
+        return "Oct";
+    case nov:
+        return "Nov";
+    case dec:
+        return "Dec";
     }
 }
-
-
 
 enum TimeUnit : string {
     Year = "years",
@@ -289,11 +303,11 @@ version (Posix) {
         int res;
 
         /* #if defined(__linux__) */ /*
-     * Try reading the /etc/timezone file for Debian distros. There's
-     * no spec of the file format available. This parsing assumes that
-     * there's one line of an Olson tzid followed by a '\n', no
-     * leading or trailing spaces, no comments.
-     */
+        * Try reading the /etc/timezone file for Debian distros. There's
+        * no spec of the file format available. This parsing assumes that
+        * there's one line of an Olson tzid followed by a '\n', no
+        * leading or trailing spaces, no comments.
+        */
         if ((fp = fopen(ETC_TIMEZONE_FILE, "r")) !is null) {
             char[256] line;
 
@@ -315,20 +329,20 @@ version (Posix) {
         /* #endif */ /* defined(__linux__) */
 
         /*
-     * Next, try /etc/localtime to find the zone ID.
-     */
+        * Next, try /etc/localtime to find the zone ID.
+        */
         mixin(RESTARTABLE("lstat(DEFAULT_ZONEINFO_FILE, &statbuf)", "res"));
         if (res == -1) {
             return null;
         }
 
         /*
-     * If it's a symlink, get the link name and its zone ID part. (The
-     * older versions of timeconfig created a symlink as described in
-     * the Red Hat man page. It was changed in 1999 to create a copy
-     * of a zoneinfo file. It's no longer possible to get the zone ID
-     * from /etc/localtime.)
-     */
+        * If it's a symlink, get the link name and its zone ID part. (The
+        * older versions of timeconfig created a symlink as described in
+        * the Red Hat man page. It was changed in 1999 to create a copy
+        * of a zoneinfo file. It's no longer possible to get the zone ID
+        * from /etc/localtime.)
+        */
         if (S_ISLNK(statbuf.st_mode)) {
             char[PATH_MAX + 1] linkbuf;
             int len;
@@ -348,11 +362,11 @@ version (Posix) {
         }
 
         /*
-     * If it's a regular file, we need to find out the same zoneinfo file
-     * that has been copied as /etc/localtime.
-     * If initial symbolic link resolution failed, we should treat target
-     * file as a regular file.
-     */
+        * If it's a regular file, we need to find out the same zoneinfo file
+        * that has been copied as /etc/localtime.
+        * If initial symbolic link resolution failed, we should treat target
+        * file as a regular file.
+        */
         mixin(RESTARTABLE(`open(DEFAULT_ZONEINFO_FILE, O_RDONLY)`, "fd"));
         if (fd == -1) {
             return null;
@@ -483,15 +497,15 @@ version (Posix) {
 
         while ((dp = readdir(dirp)) != null) {
             /*
-         * Skip '.' and '..' (and possibly other .* files)
-         */
+            * Skip '.' and '..' (and possibly other .* files)
+            */
             if (dp.d_name[0] == '.') {
                 continue;
             }
 
             /*
-         * Skip "ROC", "posixrules", and "localtime".
-         */
+            * Skip "ROC", "posixrules", and "localtime".
+            */
             if ((strcmp(dp.d_name.ptr, "ROC") == 0) || (strcmp(dp.d_name.ptr,
                     "posixrules") == 0) || (strcmp(dp.d_name.ptr, "localtime") == 0)) {
                 continue;
@@ -596,30 +610,30 @@ version (Windows) {
     };
 
     /*
- * Registry key names
- */
+    * Registry key names
+    */
     static string[] keyNames = [("StandardName"), ("StandardName"), ("Std"), ("Std")];
 
     /*
- * Indices to keyNames[]
- */
+    * Indices to keyNames[]
+    */
     enum STANDARD_NAME = 0;
     enum STD_NAME = 2;
 
     /*
- * Calls RegQueryValueEx() to get the value for the specified key. If
- * the platform is NT, 2000 or XP, it calls the Unicode
- * version. Otherwise, it calls the ANSI version and converts the
- * value to Unicode. In this case, it assumes that the current ANSI
- * Code Page is the same as the native platform code page (e.g., Code
- * Page 932 for the Japanese Windows systems.
- *
- * `keyIndex' is an index value to the keyNames in Unicode
- * (WCHAR). `keyIndex' + 1 points to its ANSI value.
- *
- * Returns the status value. ERROR_SUCCESS if succeeded, a
- * non-ERROR_SUCCESS value otherwise.
- */
+    * Calls RegQueryValueEx() to get the value for the specified key. If
+    * the platform is NT, 2000 or XP, it calls the Unicode
+    * version. Otherwise, it calls the ANSI version and converts the
+    * value to Unicode. In this case, it assumes that the current ANSI
+    * Code Page is the same as the native platform code page (e.g., Code
+    * Page 932 for the Japanese Windows systems.
+    *
+    * `keyIndex' is an index value to the keyNames in Unicode
+    * (WCHAR). `keyIndex' + 1 points to its ANSI value.
+    *
+    * Returns the status value. ERROR_SUCCESS if succeeded, a
+    * non-ERROR_SUCCESS value otherwise.
+    */
     static LONG getValueInRegistry(HKEY hKey, int keyIndex, LPDWORD typePtr,
             LPBYTE buf, LPDWORD bufLengthPtr) {
         LONG ret;
@@ -654,8 +668,8 @@ version (Windows) {
     }
 
     /*
- * Produces custom name "GMT+hh:mm" from the given bias in buffer.
- */
+    * Produces custom name "GMT+hh:mm" from the given bias in buffer.
+    */
     static void customZoneName(LONG bias, char* buffer) {
         LONG gmtOffset;
         int sign;
@@ -676,8 +690,8 @@ version (Windows) {
     }
 
     /*
- * Gets the current time zone entry in the "Time Zones" registry.
- */
+    * Gets the current time zone entry in the "Time Zones" registry.
+    */
     static int getWinTimeZone(char* winZoneName) {
         // DYNAMIC_TIME_ZONE_INFORMATION dtzi;
         DWORD timeType;
@@ -688,9 +702,9 @@ version (Windows) {
         ULONG valueType;
 
         /*
-     * Get the dynamic time zone information so that time zone redirection
-     * can be supported. (see JDK-7044727)
-     */
+        * Get the dynamic time zone information so that time zone redirection
+        * can be supported. (see JDK-7044727)
+        */
         // timeType = GetDynamicTimeZoneInformation(&dtzi);
         // if (timeType == TIME_ZONE_ID_INVALID)
         // {
@@ -698,11 +712,11 @@ version (Windows) {
         // }
 
         /*
-     * Make sure TimeZoneKeyName is available from the API call. If
-     * DynamicDaylightTime is disabled, return a custom time zone name
-     * based on the GMT offset. Otherwise, return the TimeZoneKeyName
-     * value.
-     */
+        * Make sure TimeZoneKeyName is available from the API call. If
+        * DynamicDaylightTime is disabled, return a custom time zone name
+        * based on the GMT offset. Otherwise, return the TimeZoneKeyName
+        * value.
+        */
         // if (dtzi.TimeZoneKeyName[0] != 0)
         // {
         //     if (dtzi.DynamicDaylightTimeDisabled)
@@ -715,10 +729,10 @@ version (Windows) {
         // }
 
         /*
-     * If TimeZoneKeyName is not available, check whether StandardName
-     * is available to fall back to the older API GetTimeZoneInformation.
-     * If not, directly read the value from registry keys.
-     */
+        * If TimeZoneKeyName is not available, check whether StandardName
+        * is available to fall back to the older API GetTimeZoneInformation.
+        * If not, directly read the value from registry keys.
+        */
         // if (dtzi.StandardName[0] == 0)
         // {
         //     ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE, WIN_CURRENT_TZ_KEY, 0, KEY_READ, cast(PHKEY)&hKey);
@@ -929,13 +943,13 @@ version (Windows) {
     }
 
     /*
- * The mapping table file name.
- */
+    * The mapping table file name.
+    */
     enum string MAPPINGS_FILE = "\\lib\\tzmappings";
 
     /*
- * Index values for the mapping table.
- */
+    * Index values for the mapping table.
+    */
     enum int TZ_WIN_NAME = 0;
     enum int TZ_REGION = 1;
     enum int TZ_JAVA_NAME = 2;
@@ -943,10 +957,10 @@ version (Windows) {
     enum int TZ_NITEMS = 3; /* number of items (fields) */
 
     /*
- * Looks up the mapping table (tzmappings) and returns a Java time
- * zone ID (e.g., "America/Los_Angeles") if found. Otherwise, null is
- * returned.
- */
+    * Looks up the mapping table (tzmappings) and returns a Java time
+    * zone ID (e.g., "America/Los_Angeles") if found. Otherwise, null is
+    * returned.
+    */
     static char* matchJavaTZ(const char* java_home_dir, char* tzName) {
         int line;
         int IDmatched = 0;
@@ -997,8 +1011,8 @@ version (Windows) {
             endp = &lineBuffer[(lineBuffer.length - 1)]; ///@gxc
 
             /*
-         * Ignore comment and blank lines.
-         */
+            * Ignore comment and blank lines.
+            */
             if (*idx == '#' || *idx == '\n') {
                 continue;
             }
@@ -1055,8 +1069,8 @@ version (Windows) {
     }
 
     /*
- * Detects the platform time zone which maps to a Java time zone ID.
- */
+    * Detects the platform time zone which maps to a Java time zone ID.
+    */
     char* findTZ_md(const char* java_home_dir) {
         char[MAX_ZONE_CHAR] winZoneName;
         char* std_timezone = null;
@@ -1078,8 +1092,8 @@ version (Windows) {
     }
 
     /**
- * Returns a GMT-offset-based time zone ID.
- */
+    * Returns a GMT-offset-based time zone ID.
+    */
     char* getGMTOffsetID() {
         LONG bias = 0;
         LONG ret;
