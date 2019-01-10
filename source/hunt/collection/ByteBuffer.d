@@ -5,9 +5,10 @@ import std.container.array;
 import hunt.collection.Buffer;
 import hunt.collection.StringBuffer;
 
-import hunt.common;
+import hunt.Exceptions;
+import hunt.text.Charset;
 import hunt.text.StringBuilder;
-import hunt.exception;
+import hunt.Exceptions;
 
 import std.bitmanip;
 

@@ -1,7 +1,7 @@
 module hunt.io.FileInputStream;
 
-import hunt.exception;
-import hunt.io.common;
+import hunt.Exceptions;
+import hunt.io.Common;
 
 import std.array;
 import std.stdio;

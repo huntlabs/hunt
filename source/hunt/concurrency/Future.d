@@ -35,7 +35,7 @@
 
 module hunt.concurrency.Future;
 
-import hunt.common;
+import hunt.util.Common;
 import core.time;
 
 /**

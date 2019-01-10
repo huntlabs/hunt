@@ -7,7 +7,7 @@ import hunt.util.MimeTypeUtils;
 import hunt.collection.List;
 
 import hunt.Assert;
-import hunt.exception;
+import hunt.Exceptions;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;

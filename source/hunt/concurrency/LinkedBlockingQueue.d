@@ -42,9 +42,9 @@ import hunt.concurrency.BlockingQueue;
 import hunt.collection.AbstractQueue;
 import hunt.collection.Collection;
 import hunt.collection.Iterator;
-import hunt.util.datetime;
-import hunt.common;
-import hunt.exception;
+import hunt.util.DateTime;
+import hunt.Exceptions;
+import hunt.Functions;
 import hunt.Object;
 
 // import core.atomic;

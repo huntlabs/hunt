@@ -4,7 +4,7 @@ import std.stdio;
 import std.file;
 import std.exception;
 
-import hunt.util.configuration;
+import hunt.util.Configuration;
 
 import settings;
 

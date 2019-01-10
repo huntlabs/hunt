@@ -2,7 +2,7 @@ module test.StringTokenizerTest;
 
 import hunt.text.StringTokenizer;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
 import hunt.Assert;

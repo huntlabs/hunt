@@ -35,7 +35,7 @@
 
 module hunt.concurrency.Executor;
 
-import hunt.common;
+import hunt.Exceptions;
 
 /**
  * An object that executes submitted {@link Runnable} tasks. This

@@ -65,5 +65,5 @@ void main()
 	// udpClient.sendTo(cast(const(void)[]) "Hello world!", parseAddress("255.255.255.255", 8090));
 	udpClient.sendTo(cast(const(void)[]) "Hello world!", parseAddress("127.0.0.1", 8090));
 
-	loop.join();
+	loop.run();
 }

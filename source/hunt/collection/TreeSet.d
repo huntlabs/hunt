@@ -11,7 +11,7 @@ import hunt.collection.SortedSet;
 import hunt.collection.TreeMap;
 
 import hunt.util.Comparator;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Object;
 
 import std.range;

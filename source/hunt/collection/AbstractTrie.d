@@ -4,7 +4,7 @@ import hunt.collection.ByteBuffer;
 import hunt.collection.Set;
 import hunt.collection.Trie;
 
-import hunt.exception;
+import hunt.Exceptions;
 import std.conv;
 
 abstract class AbstractTrie(V) : Trie!(V) {

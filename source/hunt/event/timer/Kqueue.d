@@ -9,17 +9,17 @@
  *
  */
  
-module hunt.event.timer.kqueue;
+module hunt.event.timer.Kqueue;
 
-import hunt.common;
+import hunt.Exceptions;
 
 // dfmt off
 version (Kqueue) : 
 // dfmt on
 
-import hunt.event.core;
-import hunt.event.timer.common;
-import hunt.event.socket;
+import hunt.io.socket.Common;
+import hunt.event.timer.Common;
+import hunt.io.socket;
 
 import core.stdc.errno;
 import core.sys.posix.sys.types; // for ssize_t, size_t

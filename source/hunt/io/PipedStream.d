@@ -1,13 +1,13 @@
 module hunt.io.PipedStream;
 
-import hunt.io.common;
+import hunt.io.Common;
 import hunt.io.ByteArrayInputStream;
 import hunt.io.ByteArrayOutputStream;
 import hunt.io.BufferedInputStream;
 import hunt.io.BufferedOutputStream;
 import hunt.io.FileInputStream;
 import hunt.io.FileOutputStream;
-import hunt.common;
+import hunt.util.Common;
 
 // import hunt.logging;
 

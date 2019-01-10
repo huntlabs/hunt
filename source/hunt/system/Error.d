@@ -1,4 +1,4 @@
-module hunt.system.error;
+module hunt.system.Error;
 
 import core.stdc.string;
 

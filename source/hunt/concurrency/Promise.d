@@ -1,6 +1,6 @@
 module hunt.concurrency.Promise;
 
-import hunt.exception;
+import hunt.Exceptions;
 
 /**
  * <p>A callback abstraction that handles completed/failed events of asynchronous operations.</p>

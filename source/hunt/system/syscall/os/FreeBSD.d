@@ -1,4 +1,4 @@
-module hunt.system.syscall.os.freebsd;
+module hunt.system.syscall.os.FreeBSD;
 /*
  * System call numbers.
  *

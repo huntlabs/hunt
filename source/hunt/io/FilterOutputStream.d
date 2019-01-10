@@ -1,7 +1,7 @@
 module hunt.io.FilterOutputStream;
 
-import hunt.io.common;
-import hunt.exception;
+import hunt.io.Common;
+import hunt.Exceptions;
 
 version(HUNT_DEBUG) {
     import hunt.logging;

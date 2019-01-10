@@ -9,15 +9,15 @@
  *
  */
  
-module hunt.event.timer.iocp;
+module hunt.event.timer.IOCP;
 
 // dfmt off
 version (Windows) : 
 // dfmt on
 
 
-import hunt.event.core;
-import hunt.event.timer.common;
+import hunt.io.socket.Common;
+import hunt.event.timer.Common;
 
 import core.time;
 import std.datetime;

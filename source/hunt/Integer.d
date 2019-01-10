@@ -1,7 +1,7 @@
 module hunt.Integer;
 
 import hunt.Byte;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Nullable;
 import hunt.Number;
 import hunt.util.Comparator;

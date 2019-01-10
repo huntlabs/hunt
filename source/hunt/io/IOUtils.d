@@ -1,8 +1,8 @@
 module hunt.io.IOUtils;
 
-import hunt.common;
-import hunt.exception;
-import hunt.io.common;
+import hunt.Exceptions;
+import hunt.util.Common;
+import hunt.io.Common;
 
 /**
  * IO Utilities. Provides stream handling utilities in singleton Threadpool

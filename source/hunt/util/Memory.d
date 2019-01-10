@@ -1,4 +1,4 @@
-module hunt.util.memory;
+module hunt.util.Memory;
 
 import core.atomic;
 import core.memory;

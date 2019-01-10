@@ -3,7 +3,7 @@ module hunt.math.Helper;
 import std.math;
 import hunt.Integer;
 import hunt.Long;
-import hunt.exception;
+import hunt.Exceptions;
 
 /**
 */
@@ -840,8 +840,8 @@ final class MathHelper {
     // @HotSpotIntrinsicCandidate
     static long multiplyExact(long x, long y) {
         long r = x * y;
-        long ax = Math.abs(x);
-        long ay = Math.abs(y);
+        long ax = abs(x);
+        long ay = abs(y);
         if (((ax | ay) >>> 31 != 0)) {
             // Some bits greater than 2^31 that might cause overflow
             // Check the result using the divide operator

@@ -13,8 +13,8 @@ import hunt.collection.Set;
 import hunt.collection.SortedSet;
 import hunt.collection.TreeSet;
 
-import hunt.common;
-import hunt.exception;
+import hunt.Exceptions;
+import hunt.Exceptions;
 
 import std.conv;
 import std.range;

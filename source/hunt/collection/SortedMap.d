@@ -5,7 +5,7 @@ import hunt.collection.Map;
 import hunt.collection.Set;
 
 import hunt.util.Comparator;
-import hunt.common;
+import hunt.Exceptions;
 
 /**
  * A {@link Map} that further provides a <em>total ordering</em> on its keys.

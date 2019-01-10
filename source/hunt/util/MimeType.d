@@ -6,9 +6,10 @@ import hunt.collection;
 import hunt.logging;
 
 import hunt.text.Charset;
-import hunt.exception;
-import hunt.text;
-import hunt.util.traits;
+import hunt.text.Common;
+import hunt.Exceptions;
+// import hunt.text;
+import hunt.util.Traits;
 
 import std.algorithm;
 import std.array;

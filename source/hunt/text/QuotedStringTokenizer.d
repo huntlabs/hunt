@@ -7,9 +7,9 @@ import std.string;
 import hunt.collection.Appendable;
 import hunt.collection.StringBuffer;
 import hunt.text.StringTokenizer;
-import hunt.text.common;
+import hunt.text.Common;
 import hunt.text.StringBuilder;
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.util.TypeUtils;
 
 

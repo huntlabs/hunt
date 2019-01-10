@@ -409,16 +409,121 @@ interface EventListener {
 }
 
 
-size_t hashCode(T)(T[] a...) {
-    if (a is null)
-        return 0;
+/**
+ * <p>
+ * A callback abstraction that handles completed/failed events of asynchronous
+ * operations.
+ * </p>
+ * <p>
+ * <p>
+ * Semantically this is equivalent to an optimise Promise&lt;Void&gt;, but
+ * callback is a more meaningful name than EmptyPromise
+ * </p>
+ */
+interface Callback {
+    /**
+     * Instance of Adapter that can be used when the callback methods need an
+     * empty implementation without incurring in the cost of allocating a new
+     * Adapter object.
+     */
+    __gshared Callback NOOP;
 
-    size_t result = 1;
+    shared static this() {
+        NOOP = new NoopCallback();
+    }
 
-    foreach (T element ; a)
-        result = 31 * result + (element == T.init ? 0 : hashOf(element));
+    /**
+     * <p>
+     * Callback invoked when the operation completes.
+     * </p>
+     *
+     * @see #failed(Throwable)
+     */
+    void succeeded();
 
-    return result;
+    /**
+     * <p>
+     * Callback invoked when the operation fails.
+     * </p>
+     *
+     * @param x the reason for the operation failure
+     */
+    void failed(Exception x);
+
+    /**
+     * @return True if the callback is known to never block the caller
+     */
+    bool isNonBlocking();
+}
+
+/**
+*/
+class NestedCallback : Callback {
+    private Callback callback;
+
+    this(Callback callback) {
+        this.callback = callback;
+    }
+
+    this(NestedCallback nested) {
+        this.callback = nested.callback;
+    }
+
+    Callback getCallback() {
+        return callback;
+    }
+
+    void succeeded() {
+        callback.succeeded();
+    }
+
+    void failed(Exception x) {
+        callback.failed(x);
+    }
+
+    bool isNonBlocking() {
+        return callback.isNonBlocking();
+    }
+}
+
+/**
+ * <p>
+ * A callback abstraction that handles completed/failed events of asynchronous
+ * operations.
+ * </p>
+ * <p>
+ * <p>
+ * Semantically this is equivalent to an optimise Promise&lt;Void&gt;, but
+ * callback is a more meaningful name than EmptyPromise
+ * </p>
+ */
+class NoopCallback : Callback {
+    /**
+     * <p>
+     * Callback invoked when the operation completes.
+     * </p>
+     *
+     * @see #failed(Throwable)
+     */
+    void succeeded() {
+    }
+
+    /**
+     * <p>
+     * Callback invoked when the operation fails.
+     * </p>
+     *
+     * @param x the reason for the operation failure
+     */
+    void failed(Exception x) {
+    }
+
+    /**
+     * @return True if the callback is known to never block the caller
+     */
+    bool isNonBlocking() {
+        return false;
+    }
 }
 
 
@@ -435,9 +540,3 @@ class CompilerHelper {
     }
 }
 
-
-/**
-*/
-class EventArgs {
-
-}

@@ -7,7 +7,7 @@ import hunt.collection.HashSet;
 import hunt.collection.Set;
 import hunt.collection.Trie;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.text;
 
 import std.ascii;

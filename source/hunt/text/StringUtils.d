@@ -10,7 +10,7 @@ import std.uni;
 
 import hunt.collection.ArrayTrie;
 import hunt.collection.Trie;
-import hunt.text.common;
+import hunt.text.Common;
 
 /**
 */

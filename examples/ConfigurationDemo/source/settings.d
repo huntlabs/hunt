@@ -1,6 +1,6 @@
 module settings;
 
-import hunt.util.configuration;
+import hunt.util.Configuration;
 
 @Configuration("http")
 struct TestHttpConfig

@@ -1,8 +1,8 @@
 module hunt.io.ByteArrayInputStream;
 
-import hunt.io.common;
+import hunt.io.Common;
 
-import hunt.exception;
+import hunt.Exceptions;
 import std.algorithm;
 
 

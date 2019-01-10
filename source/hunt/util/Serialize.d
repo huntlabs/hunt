@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.util.serialize;
+module hunt.util.Serialize;
 
 import std.traits;
 import std.string;

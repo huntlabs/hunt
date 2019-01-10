@@ -9,18 +9,18 @@
  *
  */
 
-module hunt.event.socket.posix;
+module hunt.io.socket.Posix;
 
 // dfmt off
 version(Posix):
 
 // dfmt on
 
-import hunt.event.socket.common;
-import hunt.event.core;
-import hunt.common;
-import hunt.system.error;
 import hunt.concurrency.thread.Helper;
+import hunt.Functions;
+import hunt.io.socket.Common;
+import hunt.logging;
+import hunt.system.Error;
 
 import std.conv;
 import std.exception;
@@ -28,7 +28,6 @@ import std.format;
 import std.process;
 import std.socket;
 import std.string;
-import hunt.logging;
 
 import core.stdc.errno;
 import core.stdc.string;

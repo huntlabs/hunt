@@ -32,7 +32,7 @@ module hunt.collection.BitSet;
 // import java.util.stream.IntStream;
 // import java.util.stream.StreamSupport;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Long;
 
 import std.algorithm;

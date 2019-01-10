@@ -1,4 +1,4 @@
-module hunt.system.syscall.os.linux;
+module hunt.system.syscall.os.Linux;
 
 version(linux):
 

@@ -8,12 +8,14 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 import std.stdio;
 import hunt.logging;
+import hunt.util.DateTime;
 
-void main()
-{
+void main() {
+	DateTimeHelper.startClock();
+
 	setLoggingLevel(LogLevel.LOG_DEBUG);
 	LogConf conf;
 	conf.disableConsole = true;
@@ -21,8 +23,8 @@ void main()
 	// conf.fileName = "test.log";
 	logLoadConf(conf);
 
-	logDebug("test" , " test1 " , "test2" , conf);
-	logDebugf("%s %s %d %d " , "test" , "test1" , 12 ,13);
+	logDebug("test", " test1 ", "test2", conf);
+	logDebugf("%s %s %d %d ", "test", "test1", 12, 13);
 	trace("trace");
 	logInfo("info");
 	warning("warning");

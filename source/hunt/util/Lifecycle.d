@@ -1,6 +1,6 @@
 module hunt.util.Lifecycle;
 
-import hunt.common;
+import hunt.util.Common;
 
 /**
  * A common interface defining methods for start/stop lifecycle control.

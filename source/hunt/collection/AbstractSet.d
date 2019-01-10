@@ -5,9 +5,9 @@ import hunt.collection.AbstractCollection;
 import hunt.collection.Collection;
 import hunt.collection.Set;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Object;
-import hunt.common;
+import hunt.Exceptions;
 
 
 /**

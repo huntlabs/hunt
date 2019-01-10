@@ -9,14 +9,15 @@
  *
  */
  
-module hunt.event.timer.epoll;
+module hunt.event.timer.Epoll;
 
 // dfmt off
 version (linux) : 
 // dfmt on
 
-import hunt.event.core;
-import hunt.event.timer.common;
+import hunt.io.socket.Common;
+import hunt.event.timer.Common;
+import hunt.logging;
 
 import core.sys.posix.unistd;
 import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
@@ -24,7 +25,6 @@ import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
 import core.time;
 import std.datetime;
 import std.exception;
-import hunt.logging;
 import std.socket;
 
 /**

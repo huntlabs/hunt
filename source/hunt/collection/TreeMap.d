@@ -12,11 +12,10 @@ import hunt.collection.Set;
 import hunt.collection.SortedMap;
 import hunt.collection.SortedSet;
 
-import hunt.common;
-import hunt.exception;
+import hunt.Exceptions;
+import hunt.Functions;
 import hunt.Object;
 import hunt.util.Comparator;
-import hunt.util.functional;
 import hunt.util.Spliterator;
 
 import std.algorithm;

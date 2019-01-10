@@ -4,7 +4,7 @@ import hunt.collection.AbstractMap;
 import hunt.collection.Map;
 import hunt.collection.Iterator;
 
-import hunt.exception;
+import hunt.Exceptions;
 import hunt.Object;
 import hunt.text.StringBuilder;
 

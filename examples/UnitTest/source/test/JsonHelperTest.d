@@ -1,6 +1,6 @@
 module test.JsonHelperTest;
 
-import hunt.common;
+import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
 import hunt.text.JsonHelper;

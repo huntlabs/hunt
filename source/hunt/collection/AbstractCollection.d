@@ -1,8 +1,8 @@
 module hunt.collection.AbstractCollection;
 
 import hunt.collection.Collection;
-import hunt.common;
-import hunt.exception;
+import hunt.Exceptions;
+import hunt.Functions;
 import hunt.Object;
 
 import std.array;

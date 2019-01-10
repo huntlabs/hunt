@@ -19,7 +19,7 @@ import hunt.logging;
 import core.thread;
 import core.time;
 
-import hunt.common;
+import hunt.Functions;
 import hunt.io.TcpStream;
 
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);

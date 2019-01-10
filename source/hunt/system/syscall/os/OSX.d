@@ -1,4 +1,4 @@
-module hunt.system.syscall.os.osx;
+module hunt.system.syscall.os.OSX;
 
 version(OSX):
 

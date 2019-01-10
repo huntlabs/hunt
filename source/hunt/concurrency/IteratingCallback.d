@@ -1,9 +1,8 @@
 module hunt.concurrency.IteratingCallback;
 
-import hunt.util.functional;
 import hunt.concurrency.Locker;
-
-import hunt.exception;
+import hunt.util.Common;
+import hunt.Exceptions;
 
 import std.format;
 
