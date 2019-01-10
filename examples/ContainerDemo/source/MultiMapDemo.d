@@ -10,7 +10,7 @@ import hunt.collection.List;
 import hunt.collection.Map;
 import hunt.collection.MultiMap;
 
-import hunt.util.Assert;
+import hunt.Assert;
 import hunt.text;
 import hunt.util.TypeUtils;
 

@@ -1,15 +1,15 @@
 /*
  * Hunt - A refined core library for D programming language.
  *
- * Copyright (C) 2015-2019  Shanghai Putao Technology Co., Ltd
+ * Copyright (C) 2018-2019 HuntLabs
  *
- * Developer: HuntLabs.net
+ * Website: https://www.huntlabs.net/
  *
  * Licensed under the Apache-2.0 License.
  *
  */
- 
-module hunt.util.timer;
+
+module hunt.util.Timer;
 
 import hunt.event;
 import hunt.event.timer;
@@ -19,50 +19,41 @@ import hunt.common;
 import core.time;
 import std.datetime;
 
-
 /**
 */
-class Timer : AbstractTimer
-{
+class Timer : AbstractTimer {
 
-    this(Selector loop)
-    {
+    this(Selector loop) {
         super(loop);
         this.interval = 1000;
     }
 
-    this(Selector loop, size_t interval)
-    {
+    this(Selector loop, size_t interval) {
         super(loop);
         this.interval = interval;
     }
 
-    this(Selector loop, Duration duration)
-    {
+    this(Selector loop, Duration duration) {
         super(loop);
         this.interval = duration;
     }
 
 protected:
 
-    override void onRead()
-    {
+    override void onRead() {
         bool canRead = true;
-        while (canRead && _isRegistered)
-        {
+        while (canRead && _isRegistered) {
             canRead = readTimer((Object obj) {
                 BaseTypeObject!uint tm = cast(BaseTypeObject!uint) obj;
                 if (tm is null)
                     return;
-                while (tm.data > 0)
-                {
+                while (tm.data > 0) {
                     if (ticked !is null)
                         ticked(this);
                     tm.data--;
                 }
             });
-            if (this.isError)
-            {
+            if (this.isError) {
                 canRead = false;
                 this.close();
                 error("the Timer Read is error: ", this.erroString);
@@ -88,58 +79,49 @@ import core.time;
 
 /**
 */
-abstract class AbstractNativeTimer : ITimer
-{
+abstract class AbstractNativeTimer : ITimer {
     protected bool _isActive = false;
     protected size_t _interval = 1000;
 
     /// Timer tick handler
     TickedEventHandler ticked;
 
-    this()
-    {
+    this() {
         this(1000);
     }
 
-    this(size_t interval)
-    {
+    this(size_t interval) {
         this.interval = interval;
     }
 
-    this(Duration duration)
-    {
+    this(Duration duration) {
         this.interval = duration;
     }
 
     /// 
-    @property bool isActive()
-    {
+    @property bool isActive() {
         return _isActive;
     }
 
     /// in ms
-    @property size_t interval()
-    {
+    @property size_t interval() {
         return _interval;
     }
 
     /// ditto
-    @property ITimer interval(size_t v)
-    {
+    @property ITimer interval(size_t v) {
         _interval = v;
         return this;
     }
 
     /// ditto
-    @property ITimer interval(Duration duration)
-    {
+    @property ITimer interval(Duration duration) {
         _interval = cast(size_t) duration.total!("msecs");
         return this;
     }
 
     /// The handler will be handled in another thread.
-    ITimer onTick(TickedEventHandler handler)
-    {
+    ITimer onTick(TickedEventHandler handler) {
         this.ticked = handler;
         return this;
     }
@@ -147,8 +129,7 @@ abstract class AbstractNativeTimer : ITimer
     /// immediately: true to call first event immediately
     /// once: true to call timed event only once
     abstract void start(bool immediately = false, bool once = false);
-    void start(uint interval)
-    {
+    void start(uint interval) {
         this.interval = interval;
         start();
     }
@@ -157,56 +138,48 @@ abstract class AbstractNativeTimer : ITimer
 
     abstract void reset(bool immediately = false, bool once = false);
 
-    void reset(size_t interval)
-    {
+    void reset(size_t interval) {
         this.interval = interval;
         reset();
     }
 
-    void reset(Duration duration)
-    {
+    void reset(Duration duration) {
         this.interval = duration;
         reset();
     }
 
-    protected void onTick()
-    {
+    protected void onTick() {
         // trace("tick thread id: ", getTid());
         if (ticked !is null)
             ticked(this);
     }
 }
 
-
 /**
 * See_also:
 *	https://www.codeproject.com/articles/146617/simple-c-timer-wrapper
 *	https://msdn.microsoft.com/en-us/library/ms687003(v=vs.85)
 */
-class NativeTimer : AbstractNativeTimer
-{
+class NativeTimer : AbstractNativeTimer {
     protected HANDLE _handle = null;
 
-    this()
-    {
+    this() {
         super(1000);
     }
 
-    this(size_t interval)
-    {
+    this(size_t interval) {
         super(interval);
     }
 
-    this(Duration duration)
-    {
+    this(Duration duration) {
         super(duration);
     }
 
     /// immediately: true to call first event immediately
     /// once: true to call timed event only once
-    override void start(bool immediately = false, bool once = false)
-    {
-        version(HUNT_DEBUG) trace("main thread id: ", thisThreadID());
+    override void start(bool immediately = false, bool once = false) {
+        version (HUNT_DEBUG)
+            trace("main thread id: ", thisThreadID());
         if (_isActive)
             return;
         BOOL r = CreateTimerQueueTimer(&_handle, null, &timerProc,
@@ -216,28 +189,24 @@ class NativeTimer : AbstractNativeTimer
         _isActive = true;
     }
 
-    override void stop()
-    {
-        if (_isActive)
-        {
+    override void stop() {
+        if (_isActive) {
             DeleteTimerQueueTimer(null, _handle, null);
             _isActive = false;
         }
     }
 
-    override void reset(bool immediately = false, bool once = false)
-    {
-        if (_isActive)
-        {
+    override void reset(bool immediately = false, bool once = false) {
+        if (_isActive) {
             assert(ChangeTimerQueueTimer(null, _handle, immediately ? 0
                     : cast(int) interval, once ? 0 : cast(int) interval) != 0);
         }
     }
 
     /// https://msdn.microsoft.com/en-us/library/ms687066(v=vs.85)
-    extern (Windows) static private void timerProc(PVOID param, bool timerCalled)
-    {
-        version(HUNT_DEBUG) trace("handler thread id: ", thisThreadID());
+    extern (Windows) static private void timerProc(PVOID param, bool timerCalled) {
+        version (HUNT_DEBUG)
+            trace("handler thread id: ", thisThreadID());
         AbstractNativeTimer timer = cast(AbstractNativeTimer)(param);
         assert(timer !is null);
         timer.onTick();

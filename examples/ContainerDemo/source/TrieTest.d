@@ -11,7 +11,7 @@ import hunt.collection.Trie;
 import hunt.collection.BufferUtils;
 
 import hunt.util.UnitTest;
-import hunt.util.Assert;
+import hunt.Assert;
 import hunt.text;
 
 import hunt.logging;

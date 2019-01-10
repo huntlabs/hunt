@@ -3,7 +3,7 @@ module test.PathMatcherTest;
 import hunt.text.PathMatcher;
 import hunt.collection;
 
-import hunt.util.Assert;
+import hunt.Assert;
 import hunt.util.TypeUtils;
 
 alias assertTrue = Assert.assertTrue;
