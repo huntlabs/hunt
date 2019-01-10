@@ -13,4 +13,5 @@ module hunt.math;
 
 public import hunt.math.BigDecimal;
 public import hunt.math.BigInteger;
+public import hunt.math.Helper;
 public import hunt.math.MutableBigInteger;

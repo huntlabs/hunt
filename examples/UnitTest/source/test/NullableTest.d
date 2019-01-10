@@ -88,7 +88,8 @@ class NullableTest {
         assert("AAA 20" == sa.toString());
         assert(sa.getName() == "AAA");
 
-        Student s = cast(Student)sa;
+        Student s = sa.value;
+        assert(s !is null);
         assert(s.getName() == "AAA");
     }
 

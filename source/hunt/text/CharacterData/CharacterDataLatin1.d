@@ -11,12 +11,12 @@
 
 module hunt.text.CharacterData.CharacterDataLatin1;
 
-import hunt.Character;
+import hunt.Char;
 import hunt.text.CharacterData.CharacterData;
 
 
 /** The CharacterData class encapsulates the large tables found in
-    Java.lang.Character. */
+    Java.lang.Char. */
 
 class CharacterDataLatin1 : CharacterData {
 
@@ -151,10 +151,10 @@ class CharacterDataLatin1 : CharacterData {
 
     override int digit(int ch, int radix) {
         int value = -1;
-        if (radix >= Character.MIN_RADIX && radix <= Character.MAX_RADIX) {
+        if (radix >= Char.MIN_RADIX && radix <= Char.MAX_RADIX) {
             int val = getProperties(ch);
             int kind = val & 0x1F;
-            if (kind == Character.DECIMAL_DIGIT_NUMBER) {
+            if (kind == Char.DECIMAL_DIGIT_NUMBER) {
                 value = ch + ((val & 0x3E0) >> 5) & 0x1F;
             }
             else if ((val & 0xC00) == 0x00000C00) {
@@ -222,7 +222,7 @@ class CharacterDataLatin1 : CharacterData {
                 switch(ch) {
                     // map overflow characters
                     case 0x00B5 : mapChar = 0x039C; break;
-                    default       : mapChar = Character.ERROR; break;
+                    default       : mapChar = Char.ERROR; break;
                 }
             }
         }

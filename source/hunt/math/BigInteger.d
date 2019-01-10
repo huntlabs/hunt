@@ -17,7 +17,7 @@ import hunt.Integer;
 import hunt.Long;
 import hunt.Number;
 
-import hunt.Character;
+import hunt.Char;
 import hunt.text.CharacterData;
 import hunt.Exceptions;
 import hunt.text;
@@ -467,7 +467,7 @@ class BigInteger : Number {
         int cursor = 0, numDigits;
         int len = cast(int)val.length;
 
-        if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+        if (radix < Char.MIN_RADIX || radix > Char.MAX_RADIX)
             throw new NumberFormatException("Radix out of range");
         if (len == 0)
             throw new NumberFormatException("Zero length BigInteger");
@@ -1239,10 +1239,10 @@ class BigInteger : Number {
          * with just the very first value.  Additional values will be created
          * on demand.
          */
-        powerCache = new BigInteger[][Character.MAX_RADIX+1];
-        logCache = new double[Character.MAX_RADIX+1];
+        powerCache = new BigInteger[][Char.MAX_RADIX+1];
+        logCache = new double[Char.MAX_RADIX+1];
 
-        for (int i=Character.MIN_RADIX; i <= Character.MAX_RADIX; i++) {
+        for (int i=Char.MIN_RADIX; i <= Char.MAX_RADIX; i++) {
             powerCache[i] = [BigInteger.valueOf(i)];
             logCache[i] = std.math.log(i);
         }
@@ -3845,7 +3845,7 @@ class BigInteger : Number {
      * Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive,
      * it will default to 10 (as is the case for
      * {@code Integer.toString}).  The digit-to-character mapping
-     * provided by {@code Character.forDigit} is used, and a minus
+     * provided by {@code Char.forDigit} is used, and a minus
      * sign is prepended if appropriate.  (This representation is
      * compatible with the {@link #BigInteger(string, int) (string,
      * int)} constructor.)
@@ -3859,7 +3859,7 @@ class BigInteger : Number {
     string toString(int radix) {
         if (_signum == 0)
             return "0";
-        if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+        if (radix < Char.MIN_RADIX || radix > Char.MAX_RADIX)
             radix = 10;
 
         // If it's small enough, use smallToString.
@@ -4022,7 +4022,7 @@ class BigInteger : Number {
     /**
      * Returns the decimal string representation of this BigInteger.
      * The digit-to-character mapping provided by
-     * {@code Character.forDigit} is used, and a minus sign is
+     * {@code Char.forDigit} is used, and a minus sign is
      * prepended if appropriate.  (This representation is compatible
      * with the {@link #BigInteger(string) (string)} constructor, and
      * allows for string concatenation with Java's + operator.)
