@@ -1,7 +1,7 @@
 {
     "name": "hunt",
     "description": "A refined core library for D programming language. Include event / net / tcpstream serialize / radix-tree / timer / container / memory / buffer.",
-    "copyright": "Copyright (C) 2015-2018, HuntLabs.net",
+    "copyright": "Copyright (C) 2015-2019, HuntLabs.net",
     "authors": [
         "huntlabs.net"
     ],
