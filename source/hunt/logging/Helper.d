@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.logging.helper;
+module hunt.logging.Helper;
 
 version(HUNT_DEBUG) {
     import hunt.logging.ConsoleLogger;

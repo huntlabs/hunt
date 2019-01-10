@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.collection.radix;
+module hunt.collection.Radix;
 
 import std.stdio;
 import core.memory;

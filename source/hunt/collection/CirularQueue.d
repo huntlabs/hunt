@@ -11,11 +11,12 @@
 
 module hunt.collection.CirularQueue;
 
+import hunt.collection.Common;
+
 import core.memory;
 import std.experimental.allocator.common;
 import std.experimental.allocator.gc_allocator;
 import std.traits;
-import hunt.collection.common;
 
 /**
  * 

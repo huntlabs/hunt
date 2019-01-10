@@ -1,7 +1,7 @@
 import hunt.concurrency.thread;
 import hunt.util.DateTime;
 import hunt.logging;
-import hunt.util.Memory;
+import hunt.system.Memory;
 import hunt.util.UnitTest;
 
 import test.AtomicTest;
