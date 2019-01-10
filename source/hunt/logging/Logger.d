@@ -601,14 +601,14 @@ alias errorf = logErrorf;
 alias critical = logFatal;
 alias criticalf = logFatalf;
 
-unittest
-{
-	LogConf conf;
-	//conf.disableConsole = true;
-	//conf.level = 1;
-	logLoadConf(conf);
-	logDebug("test", " test1 ", "test2", conf);
-	logDebugf("%s %s %d %d ", "test", "test1", 12, 13);
-	logInfo("info");
-}
+// unittest
+// {
+// 	LogConf conf;
+// 	//conf.disableConsole = true;
+// 	//conf.level = 1;
+// 	logLoadConf(conf);
+// 	logDebug("test", " test1 ", "test2", conf);
+// 	logDebugf("%s %s %d %d ", "test", "test1", 12, 13);
+// 	logInfo("info");
+// }
 
