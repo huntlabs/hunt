@@ -12,7 +12,7 @@
 module hunt.text.CharacterData;
 
 
-public import hunt.Character;
+public import hunt.Char;
 public import hunt.text.CharacterData.CharacterData;
 public import hunt.text.CharacterData.CharacterDataLatin1;
 

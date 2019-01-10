@@ -15,7 +15,7 @@ module hunt.text.StringTokenizer;
 import std.string;
 
 import hunt.util.Common;
-import hunt.Character;
+import hunt.Char;
 import hunt.Exceptions;
 import hunt.text.Common;
 
@@ -140,11 +140,11 @@ class StringTokenizer : Iterable!string {
         int m = 0;
         int c;
         int count = 0;
-        for (int i = 0; i < delimiters.length; i += Character.charCount(c)) {
+        for (int i = 0; i < delimiters.length; i += Char.charCount(c)) {
             c = delimiters[i];
             // FIXME: Needing refactor or cleanup -@zxp at 12/28/2018, 2:53:32 PM
             // 
-            // if (c >= Character.MIN_HIGH_SURROGATE && c <= Character.MAX_LOW_SURROGATE) {
+            // if (c >= Char.MIN_HIGH_SURROGATE && c <= Char.MAX_LOW_SURROGATE) {
             //     c = delimiters.codePointAt(i);
             //     hasSurrogates = true;
             // }
@@ -156,7 +156,7 @@ class StringTokenizer : Iterable!string {
 
         // if (hasSurrogates) {
         //     delimiterCodePoints = new int[count];
-        //     for (int i = 0, j = 0; i < count; i++, j += Character.charCount(c)) {
+        //     for (int i = 0, j = 0; i < count; i++, j += Char.charCount(c)) {
         //         c = delimiters.codePointAt(j);
         //         delimiterCodePoints[i] = c;
         //     }
@@ -252,7 +252,7 @@ class StringTokenizer : Iterable!string {
                 // if ((c > maxDelimCodePoint) || !isDelimiter(c)) {
                 //     break;
                 // }
-                // position += Character.charCount(c);
+                // position += Char.charCount(c);
             }
         }
         return position;
@@ -277,7 +277,7 @@ class StringTokenizer : Iterable!string {
                 // int c = str.codePointAt(position);
                 // if ((c <= maxDelimCodePoint) && isDelimiter(c))
                 //     break;
-                // position += Character.charCount(c);
+                // position += Char.charCount(c);
             }
         }
 
@@ -291,7 +291,7 @@ class StringTokenizer : Iterable!string {
                 throw new NotSupportedException();
                 // int c = str.codePointAt(position);
                 // if ((c <= maxDelimCodePoint) && isDelimiter(c))
-                //     position += Character.charCount(c);
+                //     position += Char.charCount(c);
             }
         }
         return position;

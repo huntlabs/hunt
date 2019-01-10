@@ -26,15 +26,15 @@ void main()
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
-	// testUnits!(AtomicTest);
-	// testUnits!(BigIntegerTest);
+	testUnits!(AtomicTest);
+	testUnits!(BigIntegerTest);
 	// testTask();
 
-	// testUnits!(JsonHelperTest);
+	testUnits!(JsonHelperTest);
 	// testUnits!(LinkedBlockingQueueTest);
-	// testUnits!(MimeTypeTest);
-	// testUnits!(NullableTest);
-	// testUnits!(NumberTest);
+	testUnits!(MimeTypeTest);
+	testUnits!(NullableTest);
+	testUnits!(NumberTest);
 	// testUnits!(PathMatcherTest);
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(StringTokenizerTest);

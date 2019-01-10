@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.Character;
+module hunt.Char;
 
 import hunt.Nullable;
 
@@ -102,7 +102,7 @@ import hunt.Nullable;
  * @author  Ulf Zibis
  * @since   1.0
  */
-class Character : Nullable!char {
+class Char : Nullable!char {
     /**
      * The minimum radix available for conversion to and from strings.
      * The constant value of this field is the smallest value permitted
@@ -578,11 +578,11 @@ class Character : Nullable!char {
      * @return a {@code Character} instance representing {@code c}.
      * @since  1.5
      */
-    static Character valueOf(char c) {
+    static Char valueOf(char c) {
         if (c <= 127) { // must cache
             return CharacterCache.cache[cast(int)c];
         }
-        return new Character(c);
+        return new Char(c);
     }
 
     /**
@@ -646,12 +646,12 @@ private class CharacterCache {
     private this() {
     }
 
-    __gshared Character[] cache;
+    __gshared Char[] cache;
 
     shared static this() {
-        cache = new Character[127 + 1];
+        cache = new Char[127 + 1];
         for (int i = 0; i < cast(int)cache.length; i++) {
-            cache[i] = new Character(cast(char) i);
+            cache[i] = new Char(cast(char) i);
         }
     }
 }
