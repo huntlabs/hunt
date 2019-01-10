@@ -18,10 +18,9 @@ pragma(lib, "Ws2_32");
 // dfmt on
 
 import hunt.collection.ByteBuffer;
-import hunt.io.socket.common;
 import hunt.io.socket.Common;
 import hunt.logging;
-import hunt.Exceptions;
+import hunt.Functions;
 import hunt.concurrency.thread.Helper;
 
 import core.sys.windows.windows;
@@ -291,7 +290,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
      * Called by selector after data sent
      * Note: It's only for IOCP selector: 
     */
-    package(hunt.event) void onWriteDone(size_t nBytes) {
+    void onWriteDone(size_t nBytes) {
         version (HUNT_DEBUG)
             tracef("finishing writting: %d bytes", nBytes);
         if (isWriteCancelling) {

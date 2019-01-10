@@ -45,14 +45,8 @@ alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr);
 alias AcceptCallBack = void delegate(Selector loop, Socket socket) ;
 // dfmt on
 
-alias SocketChannelBase = AbstractSocketChannel;
-// alias AcceptorBase = AbstractListener;
-// alias StreamSocketBase = AbstractStream;
-// alias DatagramSocketBase = AbstractDatagramSocket;
-
-
-// dfmt on
-
+/**
+*/
 interface StreamWriteBuffer {
     // todo Write Data;
     const(ubyte)[] remaining();
@@ -69,7 +63,6 @@ interface StreamWriteBuffer {
     size_t capacity();
 }
 
-alias ChannelBase = AbstractChannel;
 
 /**
 */
@@ -352,33 +345,6 @@ class LoopException : Exception {
     mixin basicExceptionCtors;
 }
 
-// dfmt off
-version(linux):
-// dfmt on
-static if (CompilerHelper.isLessThan(2078)) {
-    version (X86) {
-        enum SO_REUSEPORT = 15;
-    }
-    else version (X86_64) {
-        enum SO_REUSEPORT = 15;
-    }
-    else version (MIPS32) {
-        enum SO_REUSEPORT = 0x0200;
-    }
-    else version (MIPS64) {
-        enum SO_REUSEPORT = 0x0200;
-    }
-    else version (PPC) {
-        enum SO_REUSEPORT = 15;
-    }
-    else version (PPC64) {
-        enum SO_REUSEPORT = 15;
-    }
-    else version (ARM) {
-        enum SO_REUSEPORT = 15;
-    }
-}
-
 
 /**
 */
@@ -621,4 +587,32 @@ Address createAddress(AddressFamily family = AddressFamily.INET,
     }
     else
         return new InternetAddress(port);
+}
+
+
+// dfmt off
+version(linux):
+// dfmt on
+static if (CompilerHelper.isLessThan(2078)) {
+    version (X86) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (X86_64) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (MIPS32) {
+        enum SO_REUSEPORT = 0x0200;
+    }
+    else version (MIPS64) {
+        enum SO_REUSEPORT = 0x0200;
+    }
+    else version (PPC) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (PPC64) {
+        enum SO_REUSEPORT = 15;
+    }
+    else version (ARM) {
+        enum SO_REUSEPORT = 15;
+    }
 }
