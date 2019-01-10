@@ -1,4 +1,4 @@
-import hunt.concurrent.thread;
+import hunt.concurrency.thread;
 import hunt.util.datetime;
 import hunt.logging;
 import hunt.util.memory;

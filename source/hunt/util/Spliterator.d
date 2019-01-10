@@ -231,11 +231,11 @@ enum SpliteratorCharacteristic {
  * <ul>
  * <li>The source cannot be structurally interfered with.
  * <br>For example, an instance of
- * {@link hunt.concurrent.CopyOnWriteArrayList} is an immutable source.
+ * {@link hunt.concurrency.CopyOnWriteArrayList} is an immutable source.
  * A Spliterator created from the source reports a characteristic of
  * {@code IMMUTABLE}.</li>
  * <li>The source manages concurrent modifications.
- * <br>For example, a key set of a {@link hunt.concurrent.ConcurrentHashMap}
+ * <br>For example, a key set of a {@link hunt.concurrency.ConcurrentHashMap}
  * is a concurrent source.  A Spliterator created from the source reports a
  * characteristic of {@code CONCURRENT}.</li>
  * <li>The mutable source provides a late-binding and fail-fast Spliterator.
@@ -335,7 +335,7 @@ enum SpliteratorCharacteristic {
  * sequentially. Here we assume that the order of processing across
  * subtasks doesn't matter; different (forked) tasks may further split
  * and process elements concurrently in undetermined order.  This
- * example uses a {@link hunt.concurrent.CountedCompleter};
+ * example uses a {@link hunt.concurrency.CountedCompleter};
  * similar usages apply to other parallel task constructions.
  *
  * <pre>{@code

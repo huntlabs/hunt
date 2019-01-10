@@ -1,7 +1,7 @@
 module test.TaskTest;
 
 // import std.stdio;
-// import hunt.concurrent.parallelism;
+// import hunt.concurrency.parallelism;
 // import std.array;
 // import core.thread;
 // import hunt.logging.ConsoleLogger;

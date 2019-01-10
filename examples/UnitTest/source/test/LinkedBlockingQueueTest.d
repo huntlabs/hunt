@@ -1,6 +1,6 @@
 module test.LinkedBlockingQueueTest;
 
-import hunt.concurrent.LinkedBlockingQueue;
+import hunt.concurrency.LinkedBlockingQueue;
 import hunt.util.datetime;
 import hunt.logging.ConsoleLogger;
 import hunt.exception;

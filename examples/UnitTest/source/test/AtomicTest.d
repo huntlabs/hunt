@@ -1,6 +1,6 @@
 module test.AtomicTest;
 
-import hunt.concurrent.atomic;
+import hunt.concurrency.atomic;
 import hunt.logging;
 
 class AtomicTest {

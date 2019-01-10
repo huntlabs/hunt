@@ -20,7 +20,7 @@ import hunt.event.socket.common;
 import hunt.event.core;
 import hunt.common;
 import hunt.system.error;
-import hunt.concurrent.thread.Helper;
+import hunt.concurrency.thread.Helper;
 
 import std.conv;
 import std.exception;

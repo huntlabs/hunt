@@ -5,7 +5,7 @@ import hunt.util.AcceptMimeType;
 import hunt.collection;
 import hunt.logging;
 
-import hunt.Charset;
+import hunt.text.Charset;
 import hunt.exception;
 import hunt.text;
 import hunt.util.traits;

@@ -585,7 +585,7 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * or atomicity properties of this method. Any implementation providing
      * atomicity guarantees must override this method and document its
      * concurrency properties. In particular, all implementations of
-     * subinterface {@link hunt.concurrent.ConcurrentMap} must document
+     * subinterface {@link hunt.concurrency.ConcurrentMap} must document
      * whether the function is applied once atomically only if the value is not
      * present.
      *
@@ -659,7 +659,7 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * or atomicity properties of this method. Any implementation providing
      * atomicity guarantees must override this method and document its
      * concurrency properties. In particular, all implementations of
-     * subinterface {@link hunt.concurrent.ConcurrentMap} must document
+     * subinterface {@link hunt.concurrency.ConcurrentMap} must document
      * whether the function is applied once atomically only if the value is not
      * present.
      *
@@ -735,7 +735,7 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * or atomicity properties of this method. Any implementation providing
      * atomicity guarantees must override this method and document its
      * concurrency properties. In particular, all implementations of
-     * subinterface {@link hunt.concurrent.ConcurrentMap} must document
+     * subinterface {@link hunt.concurrency.ConcurrentMap} must document
      * whether the function is applied once atomically only if the value is not
      * present.
      *
@@ -812,7 +812,7 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * or atomicity properties of this method. Any implementation providing
      * atomicity guarantees must override this method and document its
      * concurrency properties. In particular, all implementations of
-     * subinterface {@link hunt.concurrent.ConcurrentMap} must document
+     * subinterface {@link hunt.concurrency.ConcurrentMap} must document
      * whether the function is applied once atomically only if the value is not
      * present.
      *

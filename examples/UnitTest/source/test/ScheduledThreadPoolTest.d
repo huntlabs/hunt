@@ -1,15 +1,15 @@
 module test.ScheduledThreadPoolTest;
 
-import hunt.concurrent.AbstractExecutorService;
-import hunt.concurrent.Delayed;
-import hunt.concurrent.exception;
-import hunt.concurrent.Executors;
-import hunt.concurrent.ExecutorService;
-import hunt.concurrent.Future;
+import hunt.concurrency.AbstractExecutorService;
+import hunt.concurrency.Delayed;
+import hunt.concurrency.exception;
+import hunt.concurrency.Executors;
+import hunt.concurrency.ExecutorService;
+import hunt.concurrency.Future;
 
-import hunt.concurrent.ScheduledThreadPoolExecutor;
-import hunt.concurrent.ThreadPoolExecutor;
-import hunt.concurrent.thread;
+import hunt.concurrency.ScheduledThreadPoolExecutor;
+import hunt.concurrency.ThreadPoolExecutor;
+import hunt.concurrency.thread;
 
 import hunt.util.datetime;
 import hunt.common;

@@ -4,7 +4,7 @@
 A refined core library for D programming language.
 
 ## Modules
- * hunt.concurrent (Java concurrent alike)
+ * hunt.concurrency (Java concurrent alike)
  * hunt.collection (Java container alike)
  * hunt.event ( kqueue / epoll / iocp )
  * hunt.io ( TcpListener / TcpStream )
