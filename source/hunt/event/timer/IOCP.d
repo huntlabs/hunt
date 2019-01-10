@@ -12,7 +12,7 @@
 module hunt.event.timer.IOCP;
 
 // dfmt off
-version (Windows) : 
+version (HAVE_IOCP) : 
 // dfmt on
 
 

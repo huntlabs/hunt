@@ -14,7 +14,7 @@ module hunt.event.timer.Kqueue;
 import hunt.Exceptions;
 
 // dfmt off
-version (Kqueue) : 
+version (HAVE_KQUEUE) : 
 // dfmt on
 
 import hunt.io.socket.Common;

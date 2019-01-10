@@ -64,7 +64,7 @@ protected:
 }
 
 // dfmt off
-version (Windows) : 
+version (HAVE_IOCP) : 
 
 // dfmt on
 

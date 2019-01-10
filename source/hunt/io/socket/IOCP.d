@@ -12,7 +12,7 @@
 module hunt.io.socket.IOCP;
 
 // dfmt off
-version (Windows) : 
+version (HAVE_IOCP) : 
 
 pragma(lib, "Ws2_32");
 // dfmt on
@@ -408,7 +408,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
     protected bool _binded = false;
     protected Address _bindAddress;
 
-    version (Windows) {
+    version (HAVE_IOCP) {
         mixin CheckIocpError;
 
         void doRead() {

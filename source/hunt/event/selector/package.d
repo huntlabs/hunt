@@ -15,12 +15,12 @@ import hunt.Exceptions;
 import hunt.io.socket.Common;
 import std.conv;
 
-version (linux) {
+version (HAVE_EPOLL) {
     public import hunt.event.selector.Epoll;
-} else version (Kqueue) {
+} else version (HAVE_KQUEUE) {
     public import hunt.event.selector.Kqueue;
 
-} else version (Windows) {
+} else version (HAVE_IOCP) {
     public import hunt.event.selector.IOCP;
 } else {
     static assert(false, "unsupported platform");

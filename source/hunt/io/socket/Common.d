@@ -29,7 +29,7 @@ import std.exception;
 import std.functional;
 import std.socket;
 
-version (Windows) import SOCKETOPTIONS = core.sys.windows.winsock2;
+version (HAVE_IOCP) import SOCKETOPTIONS = core.sys.windows.winsock2;
 
 version (Posix) import SOCKETOPTIONS = core.sys.posix.sys.socket;
 
@@ -175,7 +175,7 @@ abstract class AbstractChannel : Channel {
         _isRegistered = false;
         _isClosed = true;
         _isClosing = false;
-        version (Windows) {
+        version (HAVE_IOCP) {
         }
         else {
             _inLoop.deregister(this);
@@ -461,7 +461,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
     protected Address _localAddress;
 
-    version (Windows) {
+    version (HAVE_IOCP) {
         void setRead(size_t bytes) {
             readLen = bytes;
         }

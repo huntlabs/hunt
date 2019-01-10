@@ -23,7 +23,7 @@ import std.socket;
 import core.thread;
 import core.time;
 
-version(linux) {
+version(HAVE_EPOLL) {
     import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
 }
 
@@ -151,14 +151,14 @@ class TcpStream : AbstractStream {
     // www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/
     // http://www.importnew.com/27624.html
     private void setKeepalive() {
-        version(linux) {
+        version(HAVE_EPOLL) {
             if(_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
                 this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
                     _tcpOption.keepaliveProbes);
                 // version (HUNT_DEBUG) checkKeepAlive();
             }
-        } else version(Windows) {
+        } else version(HAVE_IOCP) {
             if(_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
                 // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
@@ -170,7 +170,7 @@ class TcpStream : AbstractStream {
 
     version (HUNT_DEBUG)
     private void checkKeepAlive() {
-        version(linux) {
+        version(HAVE_EPOLL) {
         int time ;
         int ret1 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPIDLE, time);
         tracef("ret=%d, time=%d", ret1, time);
@@ -241,7 +241,7 @@ class TcpStream : AbstractStream {
             return;
         _inLoop.register(this);
         _isRegistered = true;
-        version (Windows)
+        version (HAVE_IOCP)
             this.beginRead();
     }
 
@@ -255,7 +255,7 @@ class TcpStream : AbstractStream {
 
         _writeQueue.enQueue(buffer);
 
-        version (Windows) {
+        version (HAVE_IOCP) {
             if (_isWritting) {
                 version (HUNT_DEBUG)
                     infof("Busy in writting, data buffered (%d bytes)", buffer.capacity);

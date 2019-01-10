@@ -1,21 +1,3 @@
-/**
- * This module provides an `Array` type with deterministic memory usage not
- * reliant on the GC, as an alternative to the built-in arrays.
- *
- * This module is a submodule of $(MREF std, container).
- *
- * Source: $(PHOBOSSRC std/container/array.d)
- *
- * Copyright: 2010- Andrei Alexandrescu. All rights reserved by the respective holders.
- *
- * License: Distributed under the Boost Software License, Version 1.0.
- * (See accompanying file LICENSE_1_0.txt or copy at $(HTTP
- * boost.org/LICENSE_1_0.txt)).
- *
- * Authors: $(HTTP erdani.com, Andrei Alexandrescu)
- *
- * $(SCRIPT inhibitQuickIndex = 1;)
- */
 /*
  * Hunt - A refined core library for D programming language.
  *
@@ -27,7 +9,7 @@
  *
  */
 
-module hunt.collection.array;
+module hunt.collection.Array;
 
 import core.exception : RangeError;
 import std.range.primitives;
