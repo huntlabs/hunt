@@ -4,7 +4,7 @@ import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;
 import hunt.logging;
 
-import hunt.util.Assert;
+import hunt.Assert;
 import hunt.util.UnitTest;
 import hunt.exception;
 

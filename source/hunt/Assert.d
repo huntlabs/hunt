@@ -1,4 +1,4 @@
-module hunt.util.Assert;
+module hunt.Assert;
 
 import std.algorithm;
 import std.array;

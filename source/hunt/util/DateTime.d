@@ -1,4 +1,4 @@
-module hunt.util.datetime;
+module hunt.util.DateTime;
 
 import core.atomic;
 import core.thread : Thread;

@@ -8,8 +8,8 @@
  *
  * TODO:
  *  - Handle bundled options
- */
-module hunt.util.arg;
+ */ 
+module hunt.util.Argument;
 
 /**
  * Generic argument parsing exception.

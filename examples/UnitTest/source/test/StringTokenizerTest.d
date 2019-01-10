@@ -5,7 +5,7 @@ import hunt.text.StringTokenizer;
 import hunt.exception;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
-import hunt.util.Assert;
+import hunt.Assert;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;

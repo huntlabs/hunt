@@ -1,9 +1,9 @@
 ﻿/*
  * Hunt - A refined core library for D programming language.
  *
- * Copyright (C) 2015-2019  Shanghai Putao Technology Co., Ltd
+ * Copyright (C) 2018-2019 HuntLabs
  *
- * Developer: HuntLabs.cn
+ * Website: https://www.huntlabs.net/
  *
  * Licensed under the Apache-2.0 License.
  *

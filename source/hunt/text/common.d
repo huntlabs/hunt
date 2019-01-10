@@ -71,4 +71,3 @@ bool contains(T)(T[] items, T item)
         }
         return len1 - len2;
 }
-
