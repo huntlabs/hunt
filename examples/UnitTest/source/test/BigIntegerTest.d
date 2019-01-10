@@ -1,6 +1,6 @@
 module test.BigIntegerTest;
 
-import hunt.util.math.BigInteger;
+import hunt.math.BigInteger;
 import hunt.logging;
 import hunt.exception;
 

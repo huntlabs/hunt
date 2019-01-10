@@ -1,7 +1,7 @@
 import std.stdio;
 
 import hunt.event.socket;
-import hunt.concurrent.thread.Helper;
+import hunt.concurrency.thread.Helper;
 import hunt.event;
 import hunt.io;
 import hunt.common;
