@@ -11,7 +11,7 @@
 
 module hunt.util.TypeUtils;
 
-import hunt.collection.Appendable;
+import hunt.util.Common;
 import hunt.text.StringBuilder;
 import hunt.Exceptions;
 

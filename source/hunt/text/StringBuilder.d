@@ -11,7 +11,7 @@
 
 module hunt.text.StringBuilder;
 
-import hunt.collection.Appendable;
+import hunt.util.Common;
 
 import std.ascii;
 import std.algorithm;

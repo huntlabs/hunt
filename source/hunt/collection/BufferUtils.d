@@ -14,7 +14,7 @@ module hunt.collection.BufferUtils;
 import hunt.text.Common;
 import hunt.text.StringBuilder;
 
-import hunt.collection.Appendable;
+import hunt.util.Common;
 import hunt.collection.ByteBuffer;
 import hunt.collection.Collection;
 import hunt.collection.Enumeration;

@@ -12,7 +12,7 @@
 module hunt.collection.ArrayTrie;
 
 import hunt.collection.AbstractTrie;
-import hunt.collection.Appendable;
+import hunt.util.Common;
 import hunt.collection.ByteBuffer;
 import hunt.collection.HashSet;
 import hunt.collection.Set;

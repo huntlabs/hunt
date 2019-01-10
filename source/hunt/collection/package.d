@@ -20,7 +20,6 @@ public import hunt.collection.ArrayList;
 public import hunt.collection.ArrayTernaryTrie;
 public import hunt.collection.ArrayTrie;
 public import hunt.collection.AbstractSequentialList;
-public import hunt.collection.Appendable;
 public import hunt.collection.Buffer;
 public import hunt.collection.BufferUtils;
 public import hunt.collection.ByteBuffer;

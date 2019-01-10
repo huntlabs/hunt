@@ -12,7 +12,6 @@
 module hunt.collection.DirectByteBuffer;
 
 import hunt.collection.ByteBuffer;
-import hunt.collection.DirectBuffer;
 import hunt.collection.MappedByteBuffer;
 
 /+
