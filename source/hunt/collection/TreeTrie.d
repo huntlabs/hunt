@@ -12,7 +12,6 @@
 module hunt.collection.TreeTrie;
 
 import hunt.collection.AbstractTrie;
-import hunt.collection.Appendable;
 import hunt.collection.ArrayList;
 import hunt.collection.ByteBuffer;
 import hunt.collection.HashSet;
@@ -21,6 +20,7 @@ import hunt.collection.Set;
 
 import hunt.Exceptions;
 import hunt.text;
+import hunt.util.Common;
 
 import std.conv;
 

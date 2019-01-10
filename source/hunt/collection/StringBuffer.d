@@ -11,7 +11,7 @@
 
 module hunt.collection.StringBuffer;
 
-import hunt.collection.Appendable;
+import hunt.util.Common;
 
 import std.array;
 import std.conv;

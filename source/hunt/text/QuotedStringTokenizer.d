@@ -15,12 +15,12 @@ import std.conv;
 import std.ascii;
 import std.string;
 
-import hunt.collection.Appendable;
 import hunt.collection.StringBuffer;
 import hunt.text.StringTokenizer;
 import hunt.text.Common;
 import hunt.text.StringBuilder;
 import hunt.Exceptions;
+import hunt.util.Common;
 import hunt.util.TypeUtils;
 
 
