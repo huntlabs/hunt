@@ -1,7 +1,7 @@
 module test.ThreadPoolExecutorTest;
 
 import hunt.concurrency.AbstractExecutorService;
-import hunt.concurrency.exception;
+import hunt.concurrency.Exceptions;
 import hunt.concurrency.Executors;
 import hunt.concurrency.ExecutorService;
 import hunt.concurrency.Future;

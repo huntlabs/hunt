@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.collection.common;
+module hunt.collection.Common;
 
 import core.atomic;
 import std.traits : Unqual;

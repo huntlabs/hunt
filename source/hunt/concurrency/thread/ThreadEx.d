@@ -17,7 +17,7 @@ import hunt.Exceptions;
 import hunt.Functions;
 // import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
-import hunt.util.Memory;
+import hunt.system.Memory;
 
 import core.atomic;
 import core.thread;

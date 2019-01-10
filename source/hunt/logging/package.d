@@ -17,4 +17,4 @@ version(HUNT_DEBUG) {
     public import hunt.logging.Logger;
 }
 
-public import hunt.logging.helper;
+public import hunt.logging.Helper;

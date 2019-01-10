@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.concurrency.exception;
+module hunt.concurrency.Exceptions;
 
 import hunt.Exceptions;
 

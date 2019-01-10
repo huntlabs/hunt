@@ -9,7 +9,7 @@
  *
  */
 
-module hunt.util.Memory;
+module hunt.system.Memory;
 
 import core.atomic;
 import core.memory;

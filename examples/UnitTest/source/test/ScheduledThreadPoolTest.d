@@ -2,7 +2,7 @@ module test.ScheduledThreadPoolTest;
 
 import hunt.concurrency.AbstractExecutorService;
 import hunt.concurrency.Delayed;
-import hunt.concurrency.exception;
+import hunt.concurrency.Exceptions;
 import hunt.concurrency.Executors;
 import hunt.concurrency.ExecutorService;
 import hunt.concurrency.Future;
