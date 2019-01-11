@@ -15,7 +15,7 @@ import hunt.concurrency.Future;
 import hunt.concurrency.Promise;
 
 import hunt.Exceptions;
-import hunt.Exceptions;
+import hunt.Functions;
 
 /**
 * <p>A CompletableFuture that is also a Promise.</p>
