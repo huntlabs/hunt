@@ -217,66 +217,66 @@ class NullWheelTimer : WheelTimer {
     }
 }
 
-unittest {
-    import std.datetime;
-    import std.stdio;
-    import std.conv;
-    import core.thread;
-    import std.exception;
+// unittest {
+//     import std.datetime;
+//     import std.stdio;
+//     import std.conv;
+//     import core.thread;
+//     import std.exception;
 
-    @trusted class TestWheelTimer : WheelTimer {
-        this() {
-            time = Clock.currTime();
-        }
+//     @trusted class TestWheelTimer : WheelTimer {
+//         this() {
+//             time = Clock.currTime();
+//         }
 
-        override void onTimeOut() nothrow {
-            collectException(writeln("\nname is ", name, " \tcutterTime is : ",
-                    Clock.currTime().toSimpleString(), "\t new time is : ", time.toSimpleString()));
-        }
+//         override void onTimeOut() nothrow {
+//             collectException(writeln("\nname is ", name, " \tcutterTime is : ",
+//                     Clock.currTime().toSimpleString(), "\t new time is : ", time.toSimpleString()));
+//         }
 
-        string name;
-    private:
-        SysTime time;
-    }
+//         string name;
+//     private:
+//         SysTime time;
+//     }
 
-    writeln("start");
-    TimingWheel wheel = new TimingWheel(5);
-    TestWheelTimer[] timers = new TestWheelTimer[5];
-    foreach (tm; 0 .. 5) {
-        timers[tm] = new TestWheelTimer();
-    }
+//     writeln("start");
+//     TimingWheel wheel = new TimingWheel(5);
+//     TestWheelTimer[] timers = new TestWheelTimer[5];
+//     foreach (tm; 0 .. 5) {
+//         timers[tm] = new TestWheelTimer();
+//     }
 
-    int i = 0;
-    foreach (timer; timers) {
-        timer.name = to!string(i);
-        wheel.addNewTimer(timer);
-        writeln("i  = ", i);
-        ++i;
+//     int i = 0;
+//     foreach (timer; timers) {
+//         timer.name = to!string(i);
+//         wheel.addNewTimer(timer);
+//         writeln("i  = ", i);
+//         ++i;
 
-    }
-    writeln("prevWheel(5) the _now  = ", wheel._now);
-    wheel.prevWheel(5);
-    Thread.sleep(2.seconds);
-    timers[4].stop();
-    writeln("prevWheel(5) the _now  = ", wheel._now);
-    wheel.prevWheel(5);
-    Thread.sleep(2.seconds);
-    writeln("prevWheel(3) the _now  = ", wheel._now);
-    wheel.prevWheel(3);
-    assert(wheel._now == 3);
-    timers[2].rest();
-    timers[4].rest();
-    writeln("rest prevWheel(2) the _now  = ", wheel._now);
-    wheel.prevWheel(2);
-    assert(wheel._now == 0);
+//     }
+//     writeln("prevWheel(5) the _now  = ", wheel._now);
+//     wheel.prevWheel(5);
+//     Thread.sleep(2.seconds);
+//     timers[4].stop();
+//     writeln("prevWheel(5) the _now  = ", wheel._now);
+//     wheel.prevWheel(5);
+//     Thread.sleep(2.seconds);
+//     writeln("prevWheel(3) the _now  = ", wheel._now);
+//     wheel.prevWheel(3);
+//     assert(wheel._now == 3);
+//     timers[2].rest();
+//     timers[4].rest();
+//     writeln("rest prevWheel(2) the _now  = ", wheel._now);
+//     wheel.prevWheel(2);
+//     assert(wheel._now == 0);
 
-    foreach (u; 0 .. 20) {
-        Thread.sleep(2.seconds);
-        writeln("prevWheel() the _now  = ", wheel._now);
-        wheel.prevWheel();
-    }
+//     foreach (u; 0 .. 20) {
+//         Thread.sleep(2.seconds);
+//         writeln("prevWheel() the _now  = ", wheel._now);
+//         wheel.prevWheel();
+//     }
 
-}
+// }
 
 /**
 */
