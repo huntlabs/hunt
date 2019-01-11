@@ -2,12 +2,17 @@ import std.stdio;
 
 import hunt.event;
 import hunt.io.TcpStream;
+import hunt.logging;
 
-// import hunt.logging;
+import core.thread;
+import core.time;
+import std.parallelism;
 import std.socket;
 
 void main() {
+	trace("Start test...");
 	EventLoop loop = new EventLoop();
+
 	// TcpStream client = new TcpStream(loop, AddressFamily.INET6);
 	TcpStream client = new TcpStream(loop, AddressFamily.INET);
 	int count = 10;
@@ -22,8 +27,17 @@ void main() {
 			// 		debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			// 	}));
 		} else {
-			writeln("The connection failed!");
-			loop.stop();
+			warning("The connection failed!");
+			// loop.stop();
+
+			// Thread.sleep(client.options.retryInterval);
+			// client.reconnect();
+
+			auto runTask = task((){ 
+				Thread.sleep(client.options.retryInterval);
+				client.reconnect();
+			});
+        	taskPool.put(runTask);
 		}
 	}).onDataReceived((in ubyte[] data) {
 		writeln("received data: ", cast(string) data);
@@ -38,7 +52,8 @@ void main() {
 	}).onClosed(() {
 		writeln("The connection closed!");
 		loop.stop();
-	}).connect("127.0.0.1", 8080);
+	}).connect("10.1.222.120", 8080);
+	// }).connect("127.0.0.1", 8080);
 	// }).connect("::1", 8080);
 	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8080);
 	// }).connect("fe80::2435:c2f0:4a2e:ba11%ens33", 8080);
