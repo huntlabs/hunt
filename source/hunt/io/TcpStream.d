@@ -46,6 +46,9 @@ class TcpStreamOption {
 
     size_t bufferSize = 1024*8;
 
+    int retryTimes = 5;
+    Duration retryInterval = 2.seconds;
+
 
     static TcpStreamOption createOption() {
         TcpStreamOption option = new TcpStreamOption();
@@ -68,6 +71,7 @@ class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
 
     private TcpStreamOption _tcpOption;
+    private int retryCount = 0;
 
     // for client
     this(Selector loop, AddressFamily family = AddressFamily.INET, TcpStreamOption option = null) {
@@ -78,9 +82,8 @@ class TcpStream : AbstractStream {
         super(loop, family, _tcpOption.bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
-        _isClient = false;
+        _isClient = true;
         _isConnected = false;
-        _tcpOption = TcpStreamOption.createOption();
     }
 
     // for server
@@ -119,20 +122,37 @@ class TcpStream : AbstractStream {
     void connect(Address addr) {
         if (_isConnected)
             return;
+        
+        _remoteAddress = addr;
         import std.parallelism;
         auto connectionTask = task(&doConnect, addr);
         taskPool.put(connectionTask);
         // doConnect(addr);
     }
 
+    void reconnect() {
+        if(!_isClient) {
+            throw new Exception("Only client can call this method.");
+        }
+
+        if (_isConnected || retryCount >= _tcpOption.retryTimes)
+            return;
+
+        retryCount++;
+        _isConnected = false;
+        this.socket = new Socket(this._family, SocketType.STREAM, ProtocolType.TCP);
+
+        version (HUNT_DEBUG) tracef("reconnecting %d...", retryCount);
+        connect(_remoteAddress);
+    }
+
     protected override void doConnect(Address addr) {
         try {
-            _remoteAddress = addr;
-            version (HUNT_DEBUG) tracef("connecting to %s...", _remoteAddress);
+            version (HUNT_DEBUG) tracef("connecting to %s...", addr);
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
             this.socket.blocking = true;
-            super.doConnect(_remoteAddress);
+            super.doConnect(addr);
             this.socket.blocking = false;
             _isConnected = true;
             setKeepalive();
@@ -187,18 +207,6 @@ class TcpStream : AbstractStream {
         int ret4 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, probe);
         tracef("ret=%d, interval=%d", ret4, probe);
         }
-    }
-
-    void reconnect(Address addr) {
-        if (_isConnected)
-            this.close();
-        _isConnected = false;
-        AddressFamily family = AddressFamily.INET;
-        if (this.socket !is null)
-            family = this.socket.addressFamily;
-
-        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
-        connect(addr);
     }
 
     TcpStream onConnected(ConnectionHandler cback) {

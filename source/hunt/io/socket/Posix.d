@@ -87,10 +87,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     SimpleEventHandler disconnectionHandler;
 
     protected bool _isConnected; // It's always true for server.
+    protected AddressFamily _family;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
-        version (HUNT_DEBUG)
-            trace("Buffer size for read: ", bufferSize);
+        this._family = family;
         _readBuffer = new ubyte[bufferSize];
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
