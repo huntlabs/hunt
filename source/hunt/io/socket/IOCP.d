@@ -111,6 +111,7 @@ TCP Client
 abstract class AbstractStream : AbstractSocketChannel, Stream {
     DataReceivedHandler dataReceivedHandler;
     DataWrittenHandler sentHandler;
+    protected AddressFamily _family;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         super(loop, ChannelType.TCP);
