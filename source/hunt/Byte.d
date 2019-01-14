@@ -413,3 +413,12 @@ class Byte : AbstractNumber!(byte) {
     }
 
 }
+
+
+class Bytes : Nullable!(byte[]) {
+
+    this(byte[] bs) {
+        _value = bs.dup;
+    }
+
+} 
