@@ -25,7 +25,7 @@ import hunt.collection.SortedSet;
 import hunt.collection.TreeSet;
 
 import hunt.Exceptions;
-import hunt.Exceptions;
+import hunt.Functions;
 
 import std.conv;
 import std.range;
