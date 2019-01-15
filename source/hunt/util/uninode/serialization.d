@@ -1,21 +1,24 @@
-/**
- * Copyright: (c) 2015-2018, Milofon Project.
- * License: Subject to the terms of the BSD 3-Clause License, as written in the included LICENSE.md file.
- * Author: <m.galanin@milofon.pro> Maksim Galanin
- * Date: 2018-08-15
+/*
+ * Hunt - A refined core library for D programming language.
+ *
+ * Copyright (C) 2018-2019 HuntLabs
+ *
+ * Website: https://www.huntlabs.net/
+ *
+ * Licensed under the Apache-2.0 License.
+ *
  */
 
-module hunt.util.uninode.serialization;
+module hunt.util.uninode.Serialization;
 
 import std.stdio;
-
 
 private
 {
     import hunt.util.Serialize;
     import std.traits;
     import std.json;
-    import hunt.util.uninode.core;
+    import hunt.util.uninode.Core;
 }
 
 /**
@@ -254,6 +257,4 @@ private
         }
         return data;
     }
-
 }
-

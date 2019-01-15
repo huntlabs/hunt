@@ -1,14 +1,3 @@
-/**
- * Copyright: Copyright Jason White, 2015-2016
- * License:   MIT
- * Authors:   Jason White
- *
- * Description:
- * Parses arguments.
- *
- * TODO:
- *  - Handle bundled options
- */ 
 /*
  * Hunt - A refined core library for D programming language.
  *

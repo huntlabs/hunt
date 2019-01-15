@@ -1,13 +1,15 @@
-/**
- * The module contains the object UniNode
+/*
+ * Hunt - A refined core library for D programming language.
  *
- * Copyright: (c) 2015-2018, Milofon Project.
- * License: Subject to the terms of the BSD 3-Clause License, as written in the included LICENSE.md file.
- * Author: <m.galanin@milofon.pro> Maksim Galanin
- * Date: 2018-08-14
+ * Copyright (C) 2018-2019 HuntLabs
+ *
+ * Website: https://www.huntlabs.net/
+ *
+ * Licensed under the Apache-2.0 License.
+ *
  */
 
-module hunt.util.uninode.core;
+module hunt.util.uninode.Core;
 
 private
 {
@@ -18,7 +20,6 @@ private
     import std.traits : isTraitsArray = isArray;
     import std.variant : maxSize;
 }
-
 
 /**
  * UniNode implementation
@@ -848,7 +849,6 @@ private:
     }
 }
 
-
 /**
  * Universal structure for data storage of different types
  */
@@ -865,7 +865,6 @@ struct UniNode
     }
 }
 
-
 /**
  * UniNode error class
  */
@@ -878,7 +877,6 @@ class UniNodeException : Exception
     }
 }
 
-
 /**
  * Enforce UniNodeException
  */
@@ -888,8 +886,6 @@ void enforceUniNode(T)(T value, lazy string msg = "UniNode exception",
     if (!value)
         throw new UniNodeException(msg, file, line);
 }
-
-
 
 template isUniNodeType(T, This)
 {
@@ -903,16 +899,13 @@ template isUniNodeInnerType(T)
         || is(T == typeof(null)) || isRawData!T;
 }
 
-
 private:
-
 
 template TypeEnum(U)
 {
     import std.array : join;
     mixin("enum TypeEnum : ubyte { " ~ [FieldNameTuple!U].join(", ") ~ " }");
 }
-
 
 /**
  * Check for an integer signed number
@@ -922,7 +915,6 @@ template isSignedNumeric(T)
     enum isSignedNumeric = isNumeric!T && isSigned!T && !isFloatingPoint!T;
 }
 
-
 /**
  * Check for an integer unsigned number
  */
@@ -930,7 +922,6 @@ template isUnsignedNumeric(T)
 {
     enum isUnsignedNumeric = isNumeric!T && isUnsigned!T && !isFloatingPoint!T;
 }
-
 
 /**
  * Checking for binary data
@@ -946,15 +937,11 @@ template isUniNodeArray(T, This)
     enum isUniNodeArray = isTraitsArray!T && is(Unqual!(ForeachType!T) == This);
 }
 
-
-
 template isUniNodeObject(T, This)
 {
     enum isUniNodeObject = isAssociativeArray!T
         && is(Unqual!(ForeachType!T) == This) && is(KeyType!T == string);
 }
-
-
 
 auto assumeSafe(F)(F fun) @safe
 if (isFunctionPointer!F || isDelegate!F)
@@ -967,4 +954,3 @@ if (isFunctionPointer!F || isDelegate!F)
             return fun(args);
         };
 }
-
