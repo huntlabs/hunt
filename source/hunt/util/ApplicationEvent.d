@@ -8,6 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
+
 module hunt.util.ApplicationEvent;
 
 import hunt.util.DateTime;
