@@ -4,18 +4,18 @@
 A refined core library for D programming language.
 
 ## Modules
- * hunt.concurrency (Java concurrent alike)
- * hunt.collection (Java container alike)
- * hunt.event ( kqueue / epoll / iocp )
- * hunt.io ( TcpListener / TcpStream )
+ * hunt.concurrency
+ * hunt.collection
+ * hunt.event
+ * hunt.io
  * hunt.logging
  * hunt.text
- * hunt.util (buffer configration memory radix-tree serialize timer BigIngeger etc.)
+ * hunt.util
 
 ## Platforms
  * FreeBSD
  * Windows
- * OSX
+ * macOS
  * Linux
 
 ## Libraries
