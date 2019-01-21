@@ -32,14 +32,9 @@ import std.traits;
 import std.string;
 
 
-shared static this() {
-	if(g_logger is null) {
-		LogConf conf;
-		logLoadConf(conf);
-	}
-}
 
 private:
+
 class SizeBaseRollover
 {
 
@@ -237,7 +232,6 @@ class SizeBaseRollover
 }
 
 __gshared Logger g_logger = null;
-__gshared LogLevel g_logLevel = LogLevel.LOG_DEBUG;
 
 version (Windows)
 {
@@ -248,7 +242,6 @@ version (Windows)
 	private __gshared HANDLE g_hout;
 	shared static this() {
 		g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
-		SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 	}
 }
 
@@ -256,7 +249,20 @@ version (Windows)
 */
 class Logger
 {
-	/*void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
+
+	__gshared Logger[string] g_logger;
+	static Logger createLogger(string name , LogConf conf)
+	{
+		g_logger[name] = new Logger(conf);
+		return g_logger[name];
+	}
+
+	static Logger getLogger(string name)
+	{
+		return g_logger[name];
+	}
+
+	void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
 		write(level , toFormat(func , logFormat(args) , file , line , level));
 	}
@@ -264,26 +270,6 @@ class Logger
 	void logf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
 		write(level , toFormat(func , logFormatf(args) , file , line , level));
-	}*/
-
-	void write(LogLevel level, string msg)
-	{
-		if (level >= _conf.level)
-		{
-			//#1 console 
-			//check if enableConsole or appender == AppenderConsole
-
-			if (_conf.fileName == "" || !_conf.disableConsole)
-			{
-				writeFormatColor(level, msg);
-			}
-
-			//#2 file
-			if (_conf.fileName != "")
-			{
-				send(_tid, msg);
-			}
-		}
 	}
 
 	this(LogConf conf)
@@ -305,6 +291,28 @@ class Logger
 		if(!_conf.fileName.empty)
 			_tid = spawn(&Logger.worker, data);
 	}
+
+	void write(LogLevel level, string msg)
+	{
+		if (level >= _conf.level)
+		{
+			//#1 console 
+			//check if enableConsole or appender == AppenderConsole
+
+			if (_conf.fileName == "" || !_conf.disableConsole)
+			{
+				writeFormatColor(level, msg);
+			}
+
+			//#2 file
+			if (_conf.fileName != "")
+			{
+				send(_tid, msg);
+			}
+		}
+	}
+
+
 
 protected:
 
@@ -470,9 +478,6 @@ protected:
 
 	static void writeFormatColor(LogLevel level, string msg)
 	{
-		if(level < g_logLevel)
-			return;
-
 		version (Posix)
 		{
 			string prior_color;
@@ -542,18 +547,9 @@ string code(string func, LogLevel level, bool f = false)()
 	}`;
 }
 
+
+
 public:
-
-version(Windows) {
-	void resetConsoleColor() {
-		SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-	}
-}
-
-void setLoggingLevel(LogLevel level)
-{
-	g_logLevel = level;
-}
 
 enum LogLevel
 {
@@ -601,14 +597,5 @@ alias errorf = logErrorf;
 alias critical = logFatal;
 alias criticalf = logFatalf;
 
-// unittest
-// {
-// 	LogConf conf;
-// 	//conf.disableConsole = true;
-// 	//conf.level = 1;
-// 	logLoadConf(conf);
-// 	logDebug("test", " test1 ", "test2", conf);
-// 	logDebugf("%s %s %d %d ", "test", "test1", 12, 13);
-// 	logInfo("info");
-// }
+
 

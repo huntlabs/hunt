@@ -1070,6 +1070,259 @@ T toOBJ(T)(JSONValue j)
 alias toJson = toJSON;
 alias toObject = toOBJ;
 
+
+
+////------------------------- toTextString ------
+/**
+Takes a tree of JSON values and returns the serialized string.
+
+Any Object types will be serialized in a key-sorted order.
+
+If `pretty` is false no whitespaces are generated.
+If `pretty` is true serialized string is formatted to be human-readable.
+Set the $(LREF JSONOptions.specialFloatLiterals) flag is set in `options` to encode NaN/Infinity as strings.
+*/
+string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOptions options = JSONOptions.none) @safe
+{
+	import std.array;
+	import std.conv;
+	import std.string;
+
+    auto json = appender!string();
+
+    void toStringImpl(Char)(string str) @safe
+    {
+        json.put('"');
+
+        foreach (Char c; str)
+        {
+            switch (c)
+            {
+                case '"':       json.put("\\\"");       break;
+                case '\\':      json.put("\\\\");       break;
+
+                case '/':
+                    if (!(options & JSONOptions.doNotEscapeSlashes))
+                        json.put('\\');
+                    json.put('/');
+                    break;
+
+                case '\b':      json.put("\\b");        break;
+                case '\f':      json.put("\\f");        break;
+                case '\n':      json.put("\\n");        break;
+                case '\r':      json.put("\\r");        break;
+                case '\t':      json.put("\\t");        break;
+                default:
+                {
+                    import std.ascii : isControl;
+                    import std.utf : encode;
+
+                    // Make sure we do UTF decoding iff we want to
+                    // escape Unicode characters.
+                    assert(((options & JSONOptions.escapeNonAsciiChars) != 0)
+                        == is(Char == dchar), "JSONOptions.escapeNonAsciiChars needs dchar strings");
+
+                    with (JSONOptions) if (isControl(c) ||
+                        ((options & escapeNonAsciiChars) >= escapeNonAsciiChars && c >= 0x80))
+                    {
+                        // Ensure non-BMP characters are encoded as a pair
+                        // of UTF-16 surrogate characters, as per RFC 4627.
+                        wchar[2] wchars; // 1 or 2 UTF-16 code units
+                        size_t wNum = encode(wchars, c); // number of UTF-16 code units
+                        foreach (wc; wchars[0 .. wNum])
+                        {
+                            json.put("\\u");
+                            foreach_reverse (i; 0 .. 4)
+                            {
+                                char ch = (wc >>> (4 * i)) & 0x0f;
+                                ch += ch < 10 ? '0' : 'A' - 10;
+                                json.put(ch);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        json.put(c);
+                    }
+                }
+            }
+        }
+
+        json.put('"');
+    }
+
+    void toString(string str) @safe
+    {
+        // Avoid UTF decoding when possible, as it is unnecessary when
+        // processing JSON.
+        if (options & JSONOptions.escapeNonAsciiChars)
+            toStringImpl!dchar(str);
+        else
+            toStringImpl!char(str);
+    }
+
+    void toValue(ref in JSONValue value, ulong indentLevel) @safe
+    {
+        void putTabs(ulong additionalIndent = 0)
+        {
+            if (pretty)
+                foreach (i; 0 .. indentLevel + additionalIndent)
+                    json.put("    ");
+        }
+        void putEOL()
+        {
+            if (pretty)
+                json.put('\n');
+        }
+        void putCharAndEOL(char ch)
+        {
+            json.put(ch);
+            putEOL();
+        }
+
+        final switch (value.type)
+        {
+            case JSON_TYPE.OBJECT:
+                auto obj = value.objectNoRef;
+                if (!obj.length)
+                {
+                    json.put("{}");
+                }
+                else
+                {
+                    putCharAndEOL('{');
+                    bool first = true;
+
+                    void emit(R)(R names)
+                    {
+                        foreach (name; names)
+                        {
+                            auto member = obj[name];
+                            if (!first)
+                                putCharAndEOL(',');
+                            first = false;
+                            putTabs(1);
+                            toString(name);
+                            json.put(':');
+                            if (pretty)
+                                json.put(' ');
+                            toValue(member, indentLevel + 1);
+                        }
+                    }
+
+                    import std.algorithm.sorting : sort;
+                    // @@@BUG@@@ 14439
+                    // auto names = obj.keys;  // aa.keys can't be called in @safe code
+                    auto names = new string[obj.length];
+                    size_t i = 0;
+                    foreach (k, v; obj)
+                    {
+                        names[i] = k;
+                        i++;
+                    }
+                    sort(names);
+                    emit(names);
+
+                    putEOL();
+                    putTabs();
+                    json.put('}');
+                }
+                break;
+
+            case JSON_TYPE.ARRAY:
+                auto arr = value.arrayNoRef;
+                if (arr.empty)
+                {
+                    json.put("[]");
+                }
+                else
+                {
+                    putCharAndEOL('[');
+                    foreach (i, el; arr)
+                    {
+                        if (i)
+                            putCharAndEOL(',');
+                        putTabs(1);
+                        toValue(el, indentLevel + 1);
+                    }
+                    putEOL();
+                    putTabs();
+                    json.put(']');
+                }
+                break;
+
+            case JSON_TYPE.STRING:
+                toString(value.str);
+                break;
+
+            case JSON_TYPE.INTEGER:
+                json.put(to!string(value.integer));
+                break;
+
+            case JSON_TYPE.UINTEGER:
+                json.put(to!string(value.uinteger));
+                break;
+
+            case JSON_TYPE.FLOAT:
+                import std.math : isNaN, isInfinity;
+
+                auto val = value.floating;
+
+                if (val.isNaN)
+                {
+                    if (options & JSONOptions.specialFloatLiterals)
+                    {
+                        toString(JSONFloatLiteral.nan);
+                    }
+                    else
+                    {
+                        throw new JSONException(
+                            "Cannot encode NaN. Consider passing the specialFloatLiterals flag.");
+                    }
+                }
+                else if (val.isInfinity)
+                {
+                    if (options & JSONOptions.specialFloatLiterals)
+                    {
+                        toString((val > 0) ?  JSONFloatLiteral.inf : JSONFloatLiteral.negativeInf);
+                    }
+                    else
+                    {
+                        throw new JSONException(
+                            "Cannot encode Infinity. Consider passing the specialFloatLiterals flag.");
+                    }
+                }
+                else
+                {
+                    import std.format : format;
+                    // The correct formula for the number of decimal digits needed for lossless round
+                    // trips is actually:
+                    //     ceil(log(pow(2.0, double.mant_dig - 1)) / log(10.0) + 1) == (double.dig + 2)
+                    // Anything less will round off (1 + double.epsilon)
+                    json.put("%s".format(val));
+                }
+                break;
+
+            case JSON_TYPE.TRUE:
+                json.put("true");
+                break;
+
+            case JSON_TYPE.FALSE:
+                json.put("false");
+                break;
+
+            case JSON_TYPE.NULL:
+                json.put("null");
+                break;
+        }
+    }
+
+    toValue(root, 0);
+    return json.data;
+}
+
+
+
 // only for , nested , new T
 /*
 version (unittest)
