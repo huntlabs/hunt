@@ -247,7 +247,7 @@ final class JsonHelper {
 
     // Nullable!JSONValue toJson(T)(T value) {
         // return JSONValue.init;
-    //     return toJSON(t, level, ignore);
+    //     return toJson(t, level, ignore);
     // }
 
     static JSONValue toJson(T)(T value, uint level = uint.max, bool ignore = true)
