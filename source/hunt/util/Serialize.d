@@ -788,14 +788,14 @@ size_t getsize(T)(T t )
 private:
 enum bool isFloatType(T) = isType!(T, float) || isType!(T, double);
 
-JSONValue toJSON(T)(T t, RefClass stack, uint level)
+JSONValue toJson(T)(T t, RefClass stack, uint level)
 		if (isSignedType!T || isUnsignedType!T || is(T == string) || is(T == bool) || isFloatType!T)
 {
 	return JSONValue(t);
 }
 
 // uinteger
-T toOBJ(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
+T toObject(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 {
 	if(v.type() == JSON_TYPE.UINTEGER)
 		return cast(T) v.uinteger;
@@ -804,7 +804,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 }
 
 // integer
-T toOBJ(T)(JSONValue v, RefClass stack) if (isSignedType!T)
+T toObject(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 {
 	if(v.type() == JSON_TYPE.INTEGER)
 		return cast(T) v.integer;
@@ -813,7 +813,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 }
 
 // string
-T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == string))
+T toObject(T)(JSONValue v, RefClass stack) if (is(T == string))
 {
 	if(v.type() == JSON_TYPE.STRING)
 		return v.str;
@@ -822,7 +822,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == string))
 }
 
 // bool
-T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == bool))
+T toObject(T)(JSONValue v, RefClass stack) if (is(T == bool))
 {
 	if(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE)
 		return v.type() == JSON_TYPE.TRUE;
@@ -831,7 +831,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (is(T == bool))
 }
 
 // floating
-T toOBJ(T)(JSONValue v, RefClass stack) if (isFloatType!T)
+T toObject(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 {
 	if(v.type() == JSON_TYPE.FLOAT)
 		return cast(T) v.floating;
@@ -841,33 +841,33 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 
 
 // array
-JSONValue toJSON(T)(T t, RefClass stack, uint level)
+JSONValue toJson(T)(T t, RefClass stack, uint level)
 		if (isStaticArray!T || (isDynamicArray!T && !is(T == string)))
 {
 	JSONValue[] j;
 	foreach (e; t)
 	{
-		j ~= toJSON(e, stack, level);
+		j ~= toJson(e, stack, level);
 	}
 
 	return JSONValue(j);
 }
 
-T toOBJ(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
+T toObject(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 {
 	T t;
 	if(v.type() == JSON_TYPE.ARRAY)
 	{
 		for (size_t i = 0; i < t.length; i++)
 		{
-			t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
+			t[i] = toObject!(typeof(t[i]))(v.array[i], stack);
 		}
 	}
 	return t;
 	
 }
 
-T toOBJ(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
+T toObject(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
 {
 	T t;
 	if(v.type() == JSON_TYPE.ARRAY)
@@ -875,7 +875,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string)
 		t.length = v.array.length;
 		for (size_t i = 0; i < t.length; i++)
 		{
-			t[i] = toOBJ!(typeof(t[i]))(v.array[i], stack);
+			t[i] = toObject!(typeof(t[i]))(v.array[i], stack);
 		}
 	}
 	return t;
@@ -883,7 +883,7 @@ T toOBJ(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string)
 
 // struct & class
 
-string toJSONMembers(T , bool ignore)()
+string toJsonMembers(T , bool ignore)()
 {
 	string str;
 	foreach (m; FieldNameTuple!T)
@@ -892,21 +892,21 @@ string toJSONMembers(T , bool ignore)()
 		{
 			if(!ignore || !hasUDA!(__traits(getMember , T , m) ,IGNORE ))
 			{
-				str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
+				str ~= "j[\"" ~ m ~ "\"] = toJson(t." ~ m ~ " , stack , level + 1);";
 			}	
 		}
 	}
 	return str;
 }
 
-string toJSONMembersAll(T)()
+string toJsonMembersAll(T)()
 {
 	string str;
 	foreach (m; FieldNameTuple!T)
 	{
 		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{		
-			str ~= "j[\"" ~ m ~ "\"] = toJSON(t." ~ m ~ " , stack , level + 1);";
+			str ~= "j[\"" ~ m ~ "\"] = toJson(t." ~ m ~ " , stack , level + 1);";
 		}
 	}
 	return str;
@@ -914,7 +914,7 @@ string toJSONMembersAll(T)()
 
 
 
-string toOBJMembers(T)()
+string toObjectMembers(T)()
 {
 	string str;
 	foreach (m; FieldNameTuple!T)
@@ -922,14 +922,14 @@ string toOBJMembers(T)()
 		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
 		{
 			str ~= " if ( \"" ~ m ~ "\"  in j )";
-			str ~= "t." ~ m ~ " = toOBJ!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);";
+			str ~= "t." ~ m ~ " = toObject!(typeof(t." ~ m ~ "))(j[\"" ~ m ~ "\"] , stack);";
 		}
 
 	}
 	return str;
 }
 
-JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
+JSONValue toJson(T)(T t, RefClass stack, uint level) if (is(T == struct))
 {
 	JSONValue j;
 
@@ -941,9 +941,9 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 		bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
 
 		if(ignore)
-			mixin(toJSONMembers!(T,true));
+			mixin(toJsonMembers!(T,true));
 		else
-			mixin(toJSONMembers!(T,false));
+			mixin(toJsonMembers!(T,false));
 
 
 
@@ -953,7 +953,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == struct))
 	}
 }
 
-T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == struct))
+T toObject(T)(JSONValue j, RefClass stack) if (is(T == struct))
 {
 	static if (is(T == JSONValue))
 	{
@@ -964,13 +964,13 @@ T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == struct))
 		T t;
 		if(j.type() == JSON_TYPE.OBJECT)
 		{
-			mixin(toOBJMembers!T);
+			mixin(toObjectMembers!T);
 		}
 		return t;
 	}
 }
 
-JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
+JSONValue toJson(T)(T t, RefClass stack, uint level) if (is(T == class))
 {
 	if (t is null || level >= stack.level)
 	{
@@ -985,9 +985,9 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 		bool ignore = (stack.unIgnore is null)? stack.ignore :(stack.unIgnore.ignore!T);
 
 		if(ignore)
-			mixin(toJSONMembers!(T,true));
+			mixin(toJsonMembers!(T,true));
 		else
-			mixin(toJSONMembers!(T,false));
+			mixin(toJsonMembers!(T,false));
 		return j;
 	}
 	else
@@ -998,7 +998,7 @@ JSONValue toJSON(T)(T t, RefClass stack, uint level) if (is(T == class))
 	}
 }
 
-T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == class))
+T toObject(T)(JSONValue j, RefClass stack) if (is(T == class))
 {
 	if ( j.type() != JSON_TYPE.OBJECT)
 		return T.init;
@@ -1012,23 +1012,23 @@ T toOBJ(T)(JSONValue j, RefClass stack) if (is(T == class))
 	{
 		T t = new T;
 		stack.arr ~= cast(void*) t;
-		mixin(toOBJMembers!T);
+		mixin(toObjectMembers!T);
 		return t;
 	}
 }
 
 //AssociativeArray
-JSONValue toJSON(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
+JSONValue toJson(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 {
 	JSONValue j;
 	import std.conv;
 
 	foreach (k, v; t)
-		j[to!string(k)] = toJSON(v, stack, level);
+		j[to!string(k)] = toJson(v, stack, level);
 	return j;
 }
 
-T toOBJ(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
+T toObject(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 {
 	import std.conv;
 	if ( j.type() != JSON_TYPE.OBJECT)
@@ -1036,41 +1036,34 @@ T toOBJ(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 	T t;
 	foreach (k, v; j.object)
 	{
-		t[to!(KeyType!T)(k)] = toOBJ!(ValueType!T)(v, stack);
+		t[to!(KeyType!T)(k)] = toObject!(ValueType!T)(v, stack);
 	}
 	return t;
 }
 
 public:
 
-JSONValue toJSON(T)(T t , uint level = uint.max , bool ignore = true)
+JSONValue toJson(T)(T t , uint level = uint.max , bool ignore = true)
 {
 	RefClass stack = new RefClass();
 	stack.level = level;
 	stack.ignore = ignore;
-	return toJSON!T(t, stack, 0);
+	return toJson!T(t, stack, 0);
 }
 
-JSONValue toJSON(T)(T t   , UnIgnoreArray array  ,  uint level = uint.max)
+JSONValue toJson(T)(T t   , UnIgnoreArray array  ,  uint level = uint.max)
 {
 	RefClass stack = new RefClass();
 	stack.level = level;
 	stack.unIgnore = array;
-	return toJSON!T(t, stack, 0);
+	return toJson!T(t, stack, 0);
 }
 
-
-
-T toOBJ(T)(JSONValue j)
+T toObject(T)(JSONValue j)
 {
 	RefClass stack = new RefClass();
-	return toOBJ!T(j, stack);
+	return toObject!T(j, stack);
 }
-
-alias toJson = toJSON;
-alias toObject = toOBJ;
-
-
 
 ////------------------------- toTextString ------
 /**
@@ -1332,7 +1325,7 @@ version (unittest)
 		{
 			assert(unserialize!T(serialize(t)) == t);
 			assert(serialize(t).length == getsize(t));
-			assert(toOBJ!T(toJSON(t)) == t);
+			assert(toObject!T(toJson(t)) == t);
 		}
 		struct T1
 		{
@@ -1510,7 +1503,7 @@ unittest
 		long length = bs.length;
 		bs ~= ['x', 'y'];
 		assert(toT!T(bs, index) == v && index == length);
-		assert(toOBJ!T(toJSON(v)) == v);
+		assert(toObject!T(toJson(v)) == v);
 	}
 	//test variant
 	//unsigned
