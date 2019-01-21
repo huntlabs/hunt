@@ -104,10 +104,10 @@ class StringUtils {
         return cast(byte[])s.dup;
     }
 
-    static string randomId(size_t n=10) {
+    static string randomId(size_t n=10, string str = letters) {
         import std.random : randomSample;
         import std.utf : byCodeUnit;
-        return letters.byCodeUnit.randomSample(n).to!string;
+        return str.byCodeUnit.randomSample(n).to!string;
     }
 
     // Splitting
