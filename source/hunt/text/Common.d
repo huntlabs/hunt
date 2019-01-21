@@ -71,3 +71,8 @@ int compareTo(string value, string another) {
     }
     return len1 - len2;
 }
+
+bool isEmpty(string str)
+{
+    return str.length == 0;
+}
