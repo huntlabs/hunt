@@ -784,6 +784,12 @@ size_t getsize(T)(T t )
 	return getsize!T(t, stack, 0);
 }
 
+deprecated("Using toJson instead.")
+alias toJSON = toJson;
+
+deprecated("Using toObject instead.")
+alias toOBJ = toObject;
+
 //////////////////////////////////////////////////////////////////json///////////////////////////
 private:
 enum bool isFloatType(T) = isType!(T, float) || isType!(T, double);
