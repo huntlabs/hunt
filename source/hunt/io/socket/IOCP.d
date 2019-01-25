@@ -103,7 +103,6 @@ abstract class AbstractListener : AbstractSocketChannel {
     private Socket _clientSocket;
 }
 
-alias AcceptorBase = AbstractListener;
 
 /**
 TCP Client
@@ -122,6 +121,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             trace("Buffer size for read: ", bufferSize);
         _readBuffer = new ubyte[bufferSize];
         this.socket = new TcpSocket(family);
+
+        loadWinsockExtension(this.handle);
     }
 
     mixin CheckIocpError;
@@ -158,6 +159,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     }
 
     protected void doConnect(Address addr) {
+        Address binded = createAddress(this.socket.addressFamily);
+        this.socket.bind(binded);
         _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.connect;
         int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
