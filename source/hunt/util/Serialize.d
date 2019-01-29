@@ -285,7 +285,7 @@ string getsizeMembers(T)()
 ///////////////////////////////////////////////////////////
 ///
 byte[] serialize(T)(T t, RefClass stack, uint level)
-		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T && !is(T == enum))
 {
 	byte[] data;
 	data.length = T.sizeof + 1;
@@ -295,7 +295,7 @@ byte[] serialize(T)(T t, RefClass stack, uint level)
 }
 
 T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
-		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T && !is(T == enum))
 {
 	assert(cast(byte) T.sizeof == getbasicsize(data[0]));
 
@@ -307,7 +307,7 @@ T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
 }
 
 size_t getsize(T)(T t, RefClass stack, uint level)
-		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T)
+		if (isScalarType!T && !isBigSignedType!T && !isBigUnsignedType!T && !is(T == enum))
 {
 	return T.sizeof + 1;
 }
@@ -493,7 +493,7 @@ size_t getsize(T)(T t, RefClass stack, uint level) if (isStaticArray!T)
 // data
 
 byte[] serialize(T)(T t, RefClass stack, uint level)
-		if (isDynamicArray!T && !is(T == string))
+		if (isDynamicArray!T && !is(T == string) && !is(T == enum))
 {
 	byte[1] header;
 	header[0] = 9;
@@ -514,7 +514,7 @@ byte[] serialize(T)(T t, RefClass stack, uint level)
 }
 
 T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
-		if (isDynamicArray!T && !is(T == string))
+		if (isDynamicArray!T && !is(T == string) && !is(T == enum))
 {
 	assert(data[0] == 9);
 
@@ -542,7 +542,7 @@ T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
 }
 
 size_t getsize(T)(T t, RefClass stack, uint level)
-		if (isDynamicArray!T && !is(T == string))
+		if (isDynamicArray!T && !is(T == string) && !is(T == enum) )
 {
 	long total = 1;
 	total += getbytenum(t.length);
@@ -758,6 +758,55 @@ size_t getsize(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 	return total;
 }
 
+// named enum
+// 1 type 14
+// 2 [uint] len 
+// 3 other
+byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == enum))
+{
+	byte[1] header;
+	header[0] = 14;
+	byte[] dh;
+	dh ~= cast(byte[]) header;
+	OriginalType!T v = cast(OriginalType!T)t;
+	byte[] data =  serialize(v);
+	uint len = cast(uint)data.length;
+	dh ~= toVariant(len);
+	return dh ~ data;
+}
+
+T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
+		if (is(T == enum))
+{
+	assert(data[0] == 14);
+
+	T t;
+	long index1;
+	uint len = toT!uint(data[1 .. $], index1);
+
+	parse_index = index1 + 1 + len;
+	long index = index1 + 1;
+	while (index < parse_index)
+	{
+		long out_len = 0;
+		t = cast(T)unserialize!(OriginalType!T)(data[index .. $], out_len, stack);
+		index += out_len;
+	}
+	return t;
+}
+
+size_t getsize(T)(T t, RefClass stack, uint level) if (is(T == enum))
+{
+	long total = 1;
+	
+	total += serialize(cast(OriginalType!T)t).length;
+	
+	total += getbytenum(total - 1);
+	return total;
+}
+
+
+
 public:
 
 T unserialize(T)(const byte[] data )
@@ -783,12 +832,6 @@ size_t getsize(T)(T t )
 	RefClass stack = new RefClass();
 	return getsize!T(t, stack, 0);
 }
-
-deprecated("Using toJson instead.")
-alias toJSON = toJson;
-
-deprecated("Using toObject instead.")
-alias toOBJ = toObject;
 
 //////////////////////////////////////////////////////////////////json///////////////////////////
 private:
@@ -848,7 +891,7 @@ T toObject(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 
 // array
 JSONValue toJson(T)(T t, RefClass stack, uint level)
-		if (isStaticArray!T || (isDynamicArray!T && !is(T == string)))
+		if (isStaticArray!T || (isDynamicArray!T && !is(T == string) && !is(T == enum)))
 {
 	JSONValue[] j;
 	foreach (e; t)
@@ -873,7 +916,7 @@ T toObject(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 	
 }
 
-T toObject(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string))
+T toObject(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string)&& !is(T == enum))
 {
 	T t;
 	if(v.type() == JSON_TYPE.ARRAY)
@@ -1045,6 +1088,40 @@ T toObject(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 		t[to!(KeyType!T)(k)] = toObject!(ValueType!T)(v, stack);
 	}
 	return t;
+}
+
+//enum
+JSONValue toJson(T)(T t, RefClass stack, uint level) if (is(T == enum))
+{
+	
+	auto j =  JSONValue(cast(OriginalType!T)t);
+	writeln(j.type());
+	return j;
+}
+
+T toObject(T)(JSONValue j, RefClass stack) if (is(T == enum))
+{
+	import std.conv;
+	writeln(j , " " , j.type() , typeid(T));
+	OriginalType!T val;
+	static if (is(OriginalType!T == string ))
+	{
+		if(j.type() == JSON_TYPE.STRING)
+			val = cast(OriginalType!T)j.str;
+		else
+			return T.init;
+	}
+	else static if (is(OriginalType!T == int))
+	{
+		if(j.type() == JSON_TYPE.integer)
+			val = cast(OriginalType!T)j.integer;
+		else if(j.type() == JSON_TYPE.uinteger)
+			val = cast(OriginalType!T)j.uinteger;
+		else
+			return T.init;
+	}
+
+	return cast(T)val;	
 }
 
 public:
@@ -1417,6 +1494,48 @@ version (unittest)
 			JSONValue val;
 		
 		}
+
+		enum MONTH
+		{
+			M1,
+			M2
+		}
+
+		enum WEEK : int
+		{
+			K1 = 1,
+			K2 = 2
+		}
+
+		enum DAY : string
+		{
+			D1 = "one",
+			D2 = "two"
+		}
+
+		class Date1
+		{
+			MONTH month;
+			WEEK week;
+			DAY day;
+			override bool opEquals(Object c)
+			{
+				auto date = cast(Date1) c;
+				return date.month == this.month && date.week == this.week && date.day == this.day;
+			}
+
+		}
+
+		void test_enum_ser()
+		{
+			Date1 date = new Date1();
+			date.month = MONTH.M2;
+			date.week = WEEK.K2;
+			date.day = DAY.D2;
+			test1(date);
+			
+		}
+
 		void test_json_ser()
 		{
 			J j;
@@ -1664,7 +1783,8 @@ unittest
 		string[] sa2;
 		test1(sa2);
 	}
-	//test struct \ class \ associative array
+	//test enum \ struct \ class \ associative array
+	test_enum_ser();
 	test_struct_class_array();
 	test_ref_class();
 	test_json_ser();
