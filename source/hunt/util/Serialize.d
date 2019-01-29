@@ -1148,6 +1148,12 @@ T toObject(T)(JSONValue j)
 	return toObject!T(j, stack);
 }
 
+deprecated("Using toJson instead.")
+alias toJSON = toJson;
+
+deprecated("Using toObject instead.")
+alias toOBJ = toObject;
+
 ////------------------------- toTextString ------
 /**
 Takes a tree of JSON values and returns the serialized string.
