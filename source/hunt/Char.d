@@ -12,7 +12,8 @@
 module hunt.Char;
 
 import hunt.Nullable;
-
+import hunt.Exceptions;
+import hunt.text.Common;
 /**
  * The {@code Character} class wraps a value of the primitive
  * type {@code char} in an object. An object of type
@@ -479,7 +480,7 @@ class Char : Nullable!char {
      *
      * @since 1.5
      */
-    // enum wchar MIN_HIGH_SURROGATE = '\uD800';
+    enum wchar MIN_HIGH_SURROGATE = 0xD800;
 
     /**
      * The maximum value of a
@@ -490,7 +491,7 @@ class Char : Nullable!char {
      *
      * @since 1.5
      */
-    // enum wchar MAX_HIGH_SURROGATE = '\uDBFF';
+    enum wchar MAX_HIGH_SURROGATE = 0xDBFF;
 
     /**
      * The minimum value of a
@@ -501,7 +502,7 @@ class Char : Nullable!char {
      *
      * @since 1.5
      */
-    // enum wchar MIN_LOW_SURROGATE  = '\uDC00';
+    enum wchar MIN_LOW_SURROGATE  = 0xDC00;
 
     /**
      * The maximum value of a
@@ -512,7 +513,7 @@ class Char : Nullable!char {
      *
      * @since 1.5
      */
-    // enum wchar MAX_LOW_SURROGATE  = '\uDFFF';
+    enum wchar MAX_LOW_SURROGATE  = 0xDFFF;
 
     /**
      * The minimum value of a Unicode surrogate code unit in the
@@ -520,7 +521,15 @@ class Char : Nullable!char {
      *
      * @since 1.5
      */
-    // enum wchar MIN_SURROGATE = MIN_HIGH_SURROGATE;
+    enum wchar MIN_SURROGATE = MIN_HIGH_SURROGATE;
+
+    /**
+     * The maximum value of a Unicode surrogate code unit in the
+     * UTF-16 encoding, constant {@code '\u005CuDFFF'}.
+     *
+     * @since 1.5
+     */
+    enum wchar MAX_SURROGATE = MAX_LOW_SURROGATE;
 
     /**
      * The maximum value of a Unicode surrogate code unit in the
@@ -630,16 +639,351 @@ class Char : Nullable!char {
      *         specified surrogate pair.
      * @since  1.5
      */
-    // static int toCodePoint(char high, char low) {
-    //     // Optimized form of:
-    //     // return ((high - MIN_HIGH_SURROGATE) << 10)
-    //     //         + (low - MIN_LOW_SURROGATE)
-    //     //         + MIN_SUPPLEMENTARY_CODE_POINT;
-    //     return ((high << 10) + low) + (MIN_SUPPLEMENTARY_CODE_POINT
-    //                                    - (MIN_HIGH_SURROGATE << 10)
-    //                                    - MIN_LOW_SURROGATE);
-    // }
+    static int toCodePoint(char high, char low) {
+        // Optimized form of:
+        // return ((high - MIN_HIGH_SURROGATE) << 10)
+        //         + (low - MIN_LOW_SURROGATE)
+        //         + MIN_SUPPLEMENTARY_CODE_POINT;
+        return ((high << 10) + low) + (MIN_SUPPLEMENTARY_CODE_POINT
+                                       - (MIN_HIGH_SURROGATE << 10)
+                                       - MIN_LOW_SURROGATE);
+    }
 
+     /**
+     * Determines if the specified character is an ISO control
+     * character.  A character is considered to be an ISO control
+     * character if its code is in the range {@code '\u005Cu0000'}
+     * through {@code '\u005Cu001F'} or in the range
+     * {@code '\u005Cu007F'} through {@code '\u005Cu009F'}.
+     *
+     * <p><b>Note:</b> This method cannot handle <a
+     * href="#supplementary"> supplementary characters</a>. To support
+     * all Unicode characters, including supplementary characters, use
+     * the {@link #isISOControl(int)} method.
+     *
+     * @param   ch      the character to be tested.
+     * @return  {@code true} if the character is an ISO control character;
+     *          {@code false} otherwise.
+     *
+     * @see     Character#isSpaceChar(char)
+     * @see     Character#isWhitespace(char)
+     * @since   1.1
+     */
+    public static bool isISOControl(char ch) {
+        return isISOControl(cast(int)ch);
+    }
+
+    /**
+     * Determines if the referenced character (Unicode code point) is an ISO control
+     * character.  A character is considered to be an ISO control
+     * character if its code is in the range {@code '\u005Cu0000'}
+     * through {@code '\u005Cu001F'} or in the range
+     * {@code '\u005Cu007F'} through {@code '\u005Cu009F'}.
+     *
+     * @param   codePoint the character (Unicode code point) to be tested.
+     * @return  {@code true} if the character is an ISO control character;
+     *          {@code false} otherwise.
+     * @see     Character#isSpaceChar(int)
+     * @see     Character#isWhitespace(int)
+     * @since   1.5
+     */
+    public static bool isISOControl(int codePoint) {
+        // Optimized form of:
+        //     (codePoint >= 0x00 && codePoint <= 0x1F) ||
+        //     (codePoint >= 0x7F && codePoint <= 0x9F);
+        return codePoint <= 0x9F &&
+            (codePoint >= 0x7F || (codePoint >>> 5 == 0));
+    }
+
+    /**
+     * Converts the specified character (Unicode code point) to its
+     * UTF-16 representation stored in a {@code char} array. If
+     * the specified code point is a BMP (Basic Multilingual Plane or
+     * Plane 0) value, the resulting {@code char} array has
+     * the same value as {@code codePoint}. If the specified code
+     * point is a supplementary code point, the resulting
+     * {@code char} array has the corresponding surrogate pair.
+     *
+     * @param  codePoint a Unicode code point
+     * @return a {@code char} array having
+     *         {@code codePoint}'s UTF-16 representation.
+     * @throws IllegalArgumentException if the specified
+     * {@code codePoint} is not a valid Unicode code point.
+     * @since  1.5
+     */
+    public static char[] toChars(int codePoint) {
+        if (isBmpCodePoint(codePoint)) {
+            return [ cast(char) codePoint ];
+        } else if (isValidCodePoint(codePoint)) {
+            char[] result = new char[2];
+            toSurrogates(codePoint, result, 0);
+            return result;
+        } else {
+            import std.string;
+            throw new IllegalArgumentException(
+                format("Not a valid Unicode code point: 0x%X", codePoint));
+        }
+    }
+
+    /**
+     * Determines whether the specified character (Unicode code point)
+     * is in the <a href="#BMP">Basic Multilingual Plane (BMP)</a>.
+     * Such code points can be represented using a single {@code char}.
+     *
+     * @param  codePoint the character (Unicode code point) to be tested
+     * @return {@code true} if the specified code point is between
+     *         {@link #MIN_VALUE} and {@link #MAX_VALUE} inclusive;
+     *         {@code false} otherwise.
+     * @since  1.7
+     */
+    public static bool isBmpCodePoint(int codePoint) {
+        return codePoint >>> 16 == 0;
+        // Optimized form of:
+        //     codePoint >= MIN_VALUE && codePoint <= MAX_VALUE
+        // We consistently use logical shift (>>>) to facilitate
+        // additional runtime optimizations.
+    }
+
+    /**
+     * Determines whether the specified code point is a valid
+     * <a href="http://www.unicode.org/glossary/#code_point">
+     * Unicode code point value</a>.
+     *
+     * @param  codePoint the Unicode code point to be tested
+     * @return {@code true} if the specified code point value is between
+     *         {@link #MIN_CODE_POINT} and
+     *         {@link #MAX_CODE_POINT} inclusive;
+     *         {@code false} otherwise.
+     * @since  1.5
+     */
+    public static bool isValidCodePoint(int codePoint) {
+        // Optimized form of:
+        //     codePoint >= MIN_CODE_POINT && codePoint <= MAX_CODE_POINT
+        int plane = codePoint >>> 16;
+        return plane < ((MAX_CODE_POINT + 1) >>> 16);
+    }
+
+    static void toSurrogates(int codePoint, char[] dst, int index) {
+        // We write elements "backwards" to guarantee all-or-nothing
+        dst[index+1] = lowSurrogate(codePoint);
+        dst[index] = highSurrogate(codePoint);
+    }
+
+    /**
+     * Returns the trailing surrogate (a
+     * <a href="http://www.unicode.org/glossary/#low_surrogate_code_unit">
+     * low surrogate code unit</a>) of the
+     * <a href="http://www.unicode.org/glossary/#surrogate_pair">
+     * surrogate pair</a>
+     * representing the specified supplementary character (Unicode
+     * code point) in the UTF-16 encoding.  If the specified character
+     * is not a
+     * <a href="Character.html#supplementary">supplementary character</a>,
+     * an unspecified {@code char} is returned.
+     *
+     * <p>If
+     * {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)}
+     * is {@code true}, then
+     * {@link #isLowSurrogate isLowSurrogate}{@code (lowSurrogate(x))} and
+     * {@link #toCodePoint toCodePoint}{@code (}{@link #highSurrogate highSurrogate}{@code (x), lowSurrogate(x)) == x}
+     * are also always {@code true}.
+     *
+     * @param   codePoint a supplementary character (Unicode code point)
+     * @return  the trailing surrogate code unit used to represent the
+     *          character in the UTF-16 encoding
+     * @since   1.7
+     */
+    public static char lowSurrogate(int codePoint) {
+        return cast(char) ((codePoint & 0x3ff) + MIN_LOW_SURROGATE);
+    }
+
+
+    /**
+     * Returns the leading surrogate (a
+     * <a href="http://www.unicode.org/glossary/#high_surrogate_code_unit">
+     * high surrogate code unit</a>) of the
+     * <a href="http://www.unicode.org/glossary/#surrogate_pair">
+     * surrogate pair</a>
+     * representing the specified supplementary character (Unicode
+     * code point) in the UTF-16 encoding.  If the specified character
+     * is not a
+     * <a href="Character.html#supplementary">supplementary character</a>,
+     * an unspecified {@code char} is returned.
+     *
+     * <p>If
+     * {@link #isSupplementaryCodePoint isSupplementaryCodePoint(x)}
+     * is {@code true}, then
+     * {@link #isHighSurrogate isHighSurrogate}{@code (highSurrogate(x))} and
+     * {@link #toCodePoint toCodePoint}{@code (highSurrogate(x), }{@link #lowSurrogate lowSurrogate}{@code (x)) == x}
+     * are also always {@code true}.
+     *
+     * @param   codePoint a supplementary character (Unicode code point)
+     * @return  the leading surrogate code unit used to represent the
+     *          character in the UTF-16 encoding
+     * @since   1.7
+     */
+    public static char highSurrogate(int codePoint) {
+        return cast(char) ((codePoint >>> 10)
+            + (MIN_HIGH_SURROGATE - (MIN_SUPPLEMENTARY_CODE_POINT >>> 10)));
+    }
+
+    /**
+     * Returns the code point at the given index of the
+     * {@code CharSequence}. If the {@code char} value at
+     * the given index in the {@code CharSequence} is in the
+     * high-surrogate range, the following index is less than the
+     * length of the {@code CharSequence}, and the
+     * {@code char} value at the following index is in the
+     * low-surrogate range, then the supplementary code point
+     * corresponding to this surrogate pair is returned. Otherwise,
+     * the {@code char} value at the given index is returned.
+     *
+     * @param seq a sequence of {@code char} values (Unicode code
+     * units)
+     * @param index the index to the {@code char} values (Unicode
+     * code units) in {@code seq} to be converted
+     * @return the Unicode code point at the given index
+     * @throws NullPointerException if {@code seq} is null.
+     * @throws IndexOutOfBoundsException if the value
+     * {@code index} is negative or not less than
+     * {@link CharSequence#length() seq.length()}.
+     * @since  1.5
+     */
+    public static int codePointAt(string seq, int index) {
+        char c1 = seq.charAt(index);
+        if (isHighSurrogate(c1) && ++index < seq.length) {
+            char c2 = seq.charAt(index);
+            if (isLowSurrogate(c2)) {
+                return toCodePoint(c1, c2);
+            }
+        }
+        return c1;
+    }
+
+    /**
+     * Determines if the given {@code char} value is a
+     * <a href="http://www.unicode.org/glossary/#high_surrogate_code_unit">
+     * Unicode high-surrogate code unit</a>
+     * (also known as <i>leading-surrogate code unit</i>).
+     *
+     * <p>Such values do not represent characters by themselves,
+     * but are used in the representation of
+     * <a href="#supplementary">supplementary characters</a>
+     * in the UTF-16 encoding.
+     *
+     * @param  ch the {@code char} value to be tested.
+     * @return {@code true} if the {@code char} value is between
+     *         {@link #MIN_HIGH_SURROGATE} and
+     *         {@link #MAX_HIGH_SURROGATE} inclusive;
+     *         {@code false} otherwise.
+     * @see    Character#isLowSurrogate(char)
+     * @see    Character.UnicodeBlock#of(int)
+     * @since  1.5
+     */
+    public static bool isHighSurrogate(char ch) {
+        // Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE
+        return ch >= MIN_HIGH_SURROGATE && ch < (MAX_HIGH_SURROGATE + 1);
+    }
+
+    /**
+     * Determines if the given {@code char} value is a
+     * <a href="http://www.unicode.org/glossary/#low_surrogate_code_unit">
+     * Unicode low-surrogate code unit</a>
+     * (also known as <i>trailing-surrogate code unit</i>).
+     *
+     * <p>Such values do not represent characters by themselves,
+     * but are used in the representation of
+     * <a href="#supplementary">supplementary characters</a>
+     * in the UTF-16 encoding.
+     *
+     * @param  ch the {@code char} value to be tested.
+     * @return {@code true} if the {@code char} value is between
+     *         {@link #MIN_LOW_SURROGATE} and
+     *         {@link #MAX_LOW_SURROGATE} inclusive;
+     *         {@code false} otherwise.
+     * @see    Character#isHighSurrogate(char)
+     * @since  1.5
+     */
+    public static bool isLowSurrogate(char ch) {
+        return ch >= MIN_LOW_SURROGATE && ch < (MAX_LOW_SURROGATE + 1);
+    }
+
+     /**
+     * Determines if the specified character is a letter.
+     * <p>
+     * A character is considered to be a letter if its general
+     * category type, provided by {@code Character.getType(ch)},
+     * is any of the following:
+     * <ul>
+     * <li> {@code UPPERCASE_LETTER}
+     * <li> {@code LOWERCASE_LETTER}
+     * <li> {@code TITLECASE_LETTER}
+     * <li> {@code MODIFIER_LETTER}
+     * <li> {@code OTHER_LETTER}
+     * </ul>
+     *
+     * Not all letters have case. Many characters are
+     * letters but are neither uppercase nor lowercase nor titlecase.
+     *
+     * <p><b>Note:</b> This method cannot handle <a
+     * href="#supplementary"> supplementary characters</a>. To support
+     * all Unicode characters, including supplementary characters, use
+     * the {@link #isLetter(int)} method.
+     *
+     * @param   ch   the character to be tested.
+     * @return  {@code true} if the character is a letter;
+     *          {@code false} otherwise.
+     * @see     Character#isDigit(char)
+     * @see     Character#isJavaIdentifierStart(char)
+     * @see     Character#isJavaLetter(char)
+     * @see     Character#isJavaLetterOrDigit(char)
+     * @see     Character#isLetterOrDigit(char)
+     * @see     Character#isLowerCase(char)
+     * @see     Character#isTitleCase(char)
+     * @see     Character#isUnicodeIdentifierStart(char)
+     * @see     Character#isUpperCase(char)
+     */
+    public static bool isLetter(char ch) {
+        return isLetter(cast(int)ch);
+    }
+
+    /**
+     * Determines if the specified character (Unicode code point) is a letter.
+     * <p>
+     * A character is considered to be a letter if its general
+     * category type, provided by {@link Character#getType(int) getType(codePoint)},
+     * is any of the following:
+     * <ul>
+     * <li> {@code UPPERCASE_LETTER}
+     * <li> {@code LOWERCASE_LETTER}
+     * <li> {@code TITLECASE_LETTER}
+     * <li> {@code MODIFIER_LETTER}
+     * <li> {@code OTHER_LETTER}
+     * </ul>
+     *
+     * Not all letters have case. Many characters are
+     * letters but are neither uppercase nor lowercase nor titlecase.
+     *
+     * @param   codePoint the character (Unicode code point) to be tested.
+     * @return  {@code true} if the character is a letter;
+     *          {@code false} otherwise.
+     * @see     Character#isDigit(int)
+     * @see     Character#isJavaIdentifierStart(int)
+     * @see     Character#isLetterOrDigit(int)
+     * @see     Character#isLowerCase(int)
+     * @see     Character#isTitleCase(int)
+     * @see     Character#isUnicodeIdentifierStart(int)
+     * @see     Character#isUpperCase(int)
+     * @since   1.5
+     */
+    // public static bool isLetter(int codePoint) {
+    //     return ((((1 << Char.UPPERCASE_LETTER) |
+    //         (1 << Char.LOWERCASE_LETTER) |
+    //         (1 << Char.TITLECASE_LETTER) |
+    //         (1 << Char.MODIFIER_LETTER) |
+    //         (1 << Char.OTHER_LETTER)) >> getType(codePoint)) & 1)
+    //         != 0;
+    // }
 }
 
 private class CharacterCache {
