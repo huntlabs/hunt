@@ -67,7 +67,7 @@ class MultiMap(V) : HashMap!(string, List!(V)) {
 	 *            Index of element to get.
 	 * @return Unmodifieable List of values.
 	 */
-	V getValue(string name, int i) {
+	V getValue(string name, int i=0) {
 		List!(V) vals = getValues(name);
 		if (vals is null) {
 			return V.init;
