@@ -290,6 +290,10 @@ class Byte : AbstractNumber!(byte) {
         super(value);
     }
 
+    this(int value) {
+        super(cast(byte)value);
+    }
+    
     /**
      * Constructs a newly allocated {@code Byte} object that
      * represents the {@code byte} value indicated by the
