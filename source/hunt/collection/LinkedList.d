@@ -278,21 +278,23 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      * @return {@code true} if this list contained the specified element
      */
     override bool remove(E o) {
-        // auto range = _dlist[];
-        // for ( ; !range.empty; range.popFront())
-        // {
-        //     if (range.front == o)
-        //     {
-        //         list.stableLinearRemove(take(range, 1));
-        //         return true;
-        //     }
-        // }
-
         _size--;
         modCount++;
-        // list.stableLinearRemove(take(range, 1));
+        import hunt.util.Common;
+static if(CompilerHelper.isLessThan(2077)) {
+        auto range = _dlist[];
+        for ( ; !range.empty; range.popFront())
+        {
+            if (range.front == o)
+            {
+                _dlist.stableLinearRemove(take(range, 1));
+                return true;
+            }
+        }
+        return false;
+} else {
         return _dlist.linearRemoveElement(o);
-        // return true;
+}
     }
 
     // /**

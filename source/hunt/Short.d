@@ -294,6 +294,10 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
         super(value);
     }
 
+    this(int value) {
+        super(cast(short)value);
+    }
+
     /**
      * Constructs a newly allocated {@code Short} object that
      * represents the {@code short} value indicated by the
