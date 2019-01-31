@@ -326,6 +326,7 @@ class BitSet  { // : Cloneable, java.io.Serializable
             size_t request = max(2 * len, wordsRequired);
             long[] newWords = new long[request];
             newWords[0..len] = words[0..$];
+            words = newWords;
             sizeIsSticky = false;
         }
     }
@@ -436,7 +437,7 @@ class BitSet  { // : Cloneable, java.io.Serializable
 
         size_t wordIndex = wordIndex(bitIndex);
         expandTo(wordIndex);
-
+       
         words[wordIndex] |= (1L << bitIndex); // Restores invariants
 
         checkInvariants();
