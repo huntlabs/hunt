@@ -308,7 +308,7 @@ version (Posix) {
         * there's one line of an Olson tzid followed by a '\n', no
         * leading or trailing spaces, no comments.
         */
-        if ((fp = fopen(ETC_TIMEZONE_FILE, "r")) !is null) {
+        if ((fp = core.stdc.stdio.fopen(ETC_TIMEZONE_FILE, "r")) !is null) {
             char[256] line;
 
             if (fgets(line.ptr, (line.sizeof), fp) !is null) {
