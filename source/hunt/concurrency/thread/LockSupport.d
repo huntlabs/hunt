@@ -308,12 +308,13 @@ class LockSupport {
      *        to wait until
      * @since 1.6
      */
-    // static void parkUntil(Object blocker, long deadline) {
-    //     Thread t = Thread.currentThread();
-    //     setBlocker(t, blocker);
-    //     U.park(true, deadline);
-    //     setBlocker(t, null);
-    // }
+    static void parkUntil(Object blocker, long deadline) {
+        ThreadEx t = ThreadEx.currentThread();
+        setBlocker(t, blocker);
+        // U.park(true, deadline);
+        implementationMissing(false);
+        setBlocker(t, null);
+    }
 
     /**
      * Disables the current thread for thread scheduling purposes, for up to

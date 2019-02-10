@@ -1,0 +1,145 @@
+module hunt.concurrency.ThreadLocalRandom;
+
+import hunt.concurrency.thread.ThreadEx;
+import hunt.concurrency.atomic.AtomicHelper;
+import hunt.util.DateTime;
+import std.datetime;
+
+
+/**
+ * A random number generator isolated to the current thread.  Like the
+ * global {@link java.util.Random} generator used by the {@link
+ * java.lang.Math} class, a {@code ThreadLocalRandom} is initialized
+ * with an internally generated seed that may not otherwise be
+ * modified. When applicable, use of {@code ThreadLocalRandom} rather
+ * than shared {@code Random} objects in concurrent programs will
+ * typically encounter much less overhead and contention.  Use of
+ * {@code ThreadLocalRandom} is particularly appropriate when multiple
+ * tasks (for example, each a {@link ForkJoinTask}) use random numbers
+ * in parallel in thread pools.
+ *
+ * <p>Usages of this class should typically be of the form:
+ * {@code ThreadLocalRandom.current().nextX(...)} (where
+ * {@code X} is {@code Int}, {@code Long}, etc).
+ * When all usages are of this form, it is never possible to
+ * accidentally share a {@code ThreadLocalRandom} across multiple threads.
+ *
+ * <p>This class also provides additional commonly used bounded random
+ * generation methods.
+ *
+ * <p>Instances of {@code ThreadLocalRandom} are not cryptographically
+ * secure.  Consider instead using {@link java.security.SecureRandom}
+ * in security-sensitive applications. Additionally,
+ * default-constructed instances do not use a cryptographically random
+ * seed unless the {@linkplain System#getProperty system property}
+ * {@code java.util.secureRandomSeed} is set to {@code true}.
+ *
+ * @since 1.7
+ * @author Doug Lea
+ */
+public class ThreadLocalRandom {
+
+    static shared long seeder;
+    
+    /** Generates per-thread initialization/probe field */
+    private static shared int probeGenerator;
+
+    /**
+     * The seed increment.
+     */
+    private enum long GAMMA = 0x9e3779b97f4a7c15L;
+
+    /**
+     * The increment for generating probe values.
+     */
+    private enum int PROBE_INCREMENT = 0x9e3779b9;
+
+    /**
+     * The increment of seeder per new instance.
+     */
+    private enum long SEEDER_INCREMENT = 0xbb67ae8584caa73bL;
+
+    /**
+     * The least non-zero value returned by nextDouble(). This value
+     * is scaled by a random value of 53 bits to produce a result.
+     */
+    private enum double DOUBLE_UNIT = 0x1.0p-53;  // 1.0  / (1L << 53)
+    private enum float  FLOAT_UNIT  = 0x1.0p-24f; // 1.0f / (1 << 24)
+
+    // IllegalArgumentException messages
+    enum string BAD_BOUND = "bound must be positive";
+    enum string BAD_RANGE = "bound must be greater than origin";
+    enum string BAD_SIZE  = "size must be non-negative";    
+
+    shared static this() {
+        seeder = mix64(DateTimeHelper.currentTimeMillis()) ^
+                         mix64(Clock.currStdTime()*100);
+    }
+
+    private static long mix64(long z) {
+        z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
+        z = (z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L;
+        return z ^ (z >>> 33);
+    }
+
+    private static int mix32(long z) {
+        z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
+        return cast(int)(((z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L) >>> 32);
+    }
+
+    /**
+     * Initialize Thread fields for the current thread.  Called only
+     * when Thread.threadLocalRandomProbe is zero, indicating that a
+     * thread local seed value needs to be generated. Note that even
+     * though the initialization is purely thread-local, we need to
+     * rely on (static) atomic generators to initialize the values.
+     */
+    static final void localInit() {
+        int p = AtomicHelper.increment(probeGenerator, PROBE_INCREMENT);
+        int probe = (p == 0) ? 1 : p; // skip 0
+        long seed = mix64(AtomicHelper.getAndAdd(seeder, SEEDER_INCREMENT));
+        ThreadEx t = ThreadEx.currentThread();
+        t.threadLocalRandomSeed = seed;
+        t.threadLocalRandomProbe = probe;
+    }
+
+    /**
+     * Returns the probe value for the current thread without forcing
+     * initialization. Note that invoking ThreadLocalRandom.current()
+     * can be used to force initialization on zero return.
+     */
+    static int getProbe() {
+        ThreadEx t = ThreadEx.currentThread();
+        return t.threadLocalRandomProbe;
+    }
+
+    /**
+     * Pseudo-randomly advances and records the given probe value for the
+     * given thread.
+     */
+    static int advanceProbe(int probe) {
+        probe ^= probe << 13;   // xorshift
+        probe ^= probe >>> 17;
+        probe ^= probe << 5;
+        ThreadEx t = ThreadEx.currentThread();
+        t.threadLocalRandomProbe = probe;
+        return probe;
+    }    
+
+    /**
+     * Returns the pseudo-randomly initialized or updated secondary seed.
+     */
+    static int nextSecondarySeed() {
+        int r;
+        ThreadEx t = ThreadEx.currentThread();
+        if ((r = t.threadLocalRandomSecondarySeed) != 0) {
+            r ^= r << 13;   // xorshift
+            r ^= r >>> 17;
+            r ^= r << 5; 
+        }
+        else if ((r = mix32(AtomicHelper.getAndAdd(seeder, SEEDER_INCREMENT))) == 0)
+            r = 1; // avoid zero
+        t.threadLocalRandomSecondarySeed = r;
+        return r;
+    }
+}
