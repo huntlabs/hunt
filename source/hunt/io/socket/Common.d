@@ -102,6 +102,9 @@ abstract class Selector {
 
     alias isRuning = isOpen;
 
+    /**
+        timeout: in millisecond
+    */
     protected void onLoop(scope void delegate() weakup, long timeout = -1) {
         _running = true;
         do {
@@ -112,6 +115,9 @@ abstract class Selector {
         dispose();
     }
 
+    /**
+        timeout: in millisecond
+    */
     int select(long timeout) {
         if (timeout < 0)
             throw new IllegalArgumentException("Negative timeout");
@@ -186,7 +192,7 @@ abstract class AbstractChannel : Channel {
     }
 
     protected void errorOccurred(string msg) {
-        warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
+        debug warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
         if (errorHandler !is null) {
             errorHandler(msg);
         }

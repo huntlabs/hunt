@@ -18,7 +18,7 @@ import hunt.logging;
 class EventLoopGroup {
 
     this(uint size = (totalCPUs - 1)) {
-        assert(size <= totalCPUs && size >= 0);
+        // assert(size <= totalCPUs && size >= 0);
         this._size = size > 0 ? size : 1;
         eventLoopPool = new EventLoop[this._size];
 
@@ -27,6 +27,9 @@ class EventLoopGroup {
         }
     }
 
+    /**
+        timeout: in millisecond
+    */
     void start(long timeout = -1) {
         if (_started)
             return;
