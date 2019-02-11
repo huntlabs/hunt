@@ -23,17 +23,23 @@ import std.parallelism;
 
 */
 final class EventLoop : AbstractSelector {
-    private long timeout = -1;
+    private long timeout = -1; // in millisecond
 
     this() {
         super();
     }
 
+    /**
+        timeout: in millisecond
+    */
     void run(long timeout = -1) {
         this.timeout = timeout;
         doRun();
     }
 
+    /**
+        timeout: in millisecond
+    */
     void runAsync(long timeout = -1) {
         this.timeout = timeout;
         version (HUNT_DEBUG) trace("runAsync ...");

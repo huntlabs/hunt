@@ -124,6 +124,9 @@ class AbstractSelector : Selector {
         }
     }
 
+    /**
+        timeout: in millisecond
+    */
     override protected int doSelect(long timeout) {
         epoll_event[NUM_KEVENTS] events;
         int len = 0;
@@ -154,7 +157,7 @@ class AbstractSelector : Selector {
                 channel.close();
             } else if (isError(currentEvents)) {
                 // version (HUNT_DEBUG)
-                warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
+                debug warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
                         errno, getErrorMessage(errno));
                 channel.close();
             } else if (isReadable(currentEvents)) {
@@ -163,7 +166,6 @@ class AbstractSelector : Selector {
                 AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
                 assert(wt !is null);
                 wt.onWriteDone();
-                // channel.onWrite();
             } else {
                 warningf("Undefined behavior: fd=%d, registered=%s", channel.handle, channel.isRegistered);
             }
