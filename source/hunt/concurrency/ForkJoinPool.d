@@ -39,12 +39,14 @@ import hunt.concurrency.AbstractExecutorService;
 import hunt.concurrency.atomic.AtomicHelper;
 import hunt.concurrency.Exceptions;
 import hunt.concurrency.ForkJoinTask;
+import hunt.concurrency.ForkJoinTaskHelper;
 import hunt.concurrency.ThreadLocalRandom;
 import hunt.concurrency.thread;
 
 import hunt.collection.List;
 import hunt.collection.Collection;
 import hunt.collection.Collections;
+import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 import hunt.Functions;
 import hunt.system.Memory;
@@ -1894,6 +1896,7 @@ class ForkJoinPool : AbstractExecutorService {
         if (factory is null)
             throw new NullPointerException();
         long ms = max(keepAliveTime.total!(TimeUnit.Millisecond), TIMEOUT_SLOP);
+        trace("111111");
 
         int corep = min(max(corePoolSize, parallelism), MAX_CAP);
         long c = (((cast(long)(-corep)       << TC_SHIFT) & TC_MASK) |
@@ -1916,7 +1919,8 @@ class ForkJoinPool : AbstractExecutorService {
         this.mode = m;
         this.ctl = c;
         // checkPermission();
-        workerNameLocker = new Object();        
+        workerNameLocker = new Object();     
+        trace("111111");   
     }
 
     // private static Object newInstanceFromSystemProperty(string property) {
@@ -2724,7 +2728,7 @@ class ForkJoinPool : AbstractExecutorService {
         // common = AccessController.doPrivileged(new PrivilegedAction<>() {
         //     ForkJoinPool run() {
         //         return new ForkJoinPool((byte)0); }});
-        common = new ForkJoinPool(cast(byte)0);
+        common = new ForkJoinPool(cast(byte)1);
 
         COMMON_PARALLELISM = max(common.mode & SMASK, 1);
     }

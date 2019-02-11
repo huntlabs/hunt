@@ -1050,14 +1050,16 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @since   1.0
      */
     this(ThreadGroupEx parent, string name) {
-        parent.checkAccess();
         // this(checkParentAccess(parent), parent, name);
         
         this.name = name;
-        this.maxPriority = parent.maxPriority;
-        this.daemon = parent.daemon;
-        this.parent = parent;
-        parent.add(this);
+        if(parent !is null) {
+            parent.checkAccess();
+            this.maxPriority = parent.maxPriority;
+            this.daemon = parent.daemon;
+            this.parent = parent;
+            parent.add(this);
+        }
     }
 
     // private ThreadGroupEx(Void unused, ThreadGroupEx parent, string name) {
