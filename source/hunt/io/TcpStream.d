@@ -27,6 +27,8 @@ version(HAVE_EPOLL) {
     import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
 }
 
+/**
+*/
 class TcpStreamOption {
     string ip = "127.0.0.1";
     ushort port = 8080;
@@ -256,6 +258,8 @@ class TcpStream : AbstractStream {
     void write(StreamWriteBuffer buffer) {
         assert(buffer !is null);
 
+
+// synchronized(this) {
         if (!_isConnected) {
             debug warningf("The connection (fd=%d) has been closed!", this.handle);
             return;
@@ -272,6 +276,7 @@ class TcpStream : AbstractStream {
         } else {
             onWrite();
         }
+    // }
     }
 
     /// safe for big data sending
@@ -371,8 +376,9 @@ protected:
                 version (HUNT_DEBUG)
                     tracef("writing done: %d bytes, fd: %d", nBytes, this.handle);
                 auto q = _writeQueue.deQueue();
-                if (q is null)
-                    warning("StreamWriteBuffer is null");
+                if (q is null) {
+                    debug warning("StreamWriteBuffer is null");
+                }
                 else
                     q.finish();
             }
