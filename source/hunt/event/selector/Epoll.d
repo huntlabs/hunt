@@ -49,7 +49,7 @@ shared static this() {
 /**
 */
 class AbstractSelector : Selector {
-    enum int NUM_KEVENTS = 512;
+    enum int NUM_KEVENTS = 1024;
     private int _epollFD;
     private EventChannel _event;
 
@@ -140,16 +140,37 @@ class AbstractSelector : Selector {
             len = iepoll(_epollFD, events.ptr, events.length, cast(int)timeout);
         }
 
-        foreach (i; 0 .. len) {
+        if(len <=0)
+            return 0;
+
+        // 
+        import std.parallelism;
+        import std.range : iota;
+        // void doJob() {
+            // foreach (i; 0 .. len) 
+            foreach(i; parallel(iota(0, len), 30))
+            {
             AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
             if (channel is null) {
-                warningf("channel is null");
+                    debug warningf("channel is null");
                 continue;
             }
 
             uint currentEvents = events[i].events;
             version (HUNT_DEBUG) infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
+                 
+                // taskPool.put(task(&handeChannel, channel, currentEvents));
+                handeChannel(channel, currentEvents);
+            }
+        // }
+
+        // taskPool.put(task(&doJob));
+
+        return len;
+    }
+
+    private void handeChannel(AbstractChannel channel, uint currentEvents) {
             if (isClosed(currentEvents)) {
                 version (HUNT_DEBUG)
                 tracef("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
@@ -170,9 +191,6 @@ class AbstractSelector : Selector {
                 warningf("Undefined behavior: fd=%d, registered=%s", channel.handle, channel.isRegistered);
             }
         }
-
-        return len;
-    }
 
     private int iepoll(int epfd, epoll_event* events, int numfds, int timeout) {
         long start, now;
