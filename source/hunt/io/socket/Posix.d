@@ -122,7 +122,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (_error) {
                 this._erroString = getErrorMessage(errno);
             } else {
-                debug warningf("write warning: fd=%s, errno=%d, message=%s", this.handle,
+                debug warningf("warning on read: fd=%s, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
             }
 
@@ -178,7 +178,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (this._error) {
                 this._erroString = lastSocketError();
 
-                warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
+                warningf("error on write: fd=%s, errno=%d, message=%s", this.handle,
                         errno, this._erroString);
 
                 if(errno == ECONNRESET) {
@@ -187,7 +187,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                     this.close();
                 }
             } else {
-                debug warningf("write error: fd=%s, errno=%d, message=%s", this.handle,
+                debug warningf("error on write: fd=%s, errno=%d, message=%s", this.handle,
                         errno, lastSocketError());
 
                 if (canWriteAgain && !_isClosed) {
@@ -235,7 +235,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (_error) {
                 this._erroString = getErrorMessage(errno);
             } else {
-                debug warningf("warning for write: fd=%d, errno=%d, message=%s", this.handle,
+                debug warningf("warning on write: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
             }
 
