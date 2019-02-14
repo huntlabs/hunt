@@ -17,12 +17,11 @@ import hunt.logging;
 
 class EventLoopGroup {
 
-    this(uint size = (totalCPUs - 1)) {
-        // assert(size <= totalCPUs && size >= 0);
-        this._size = size > 0 ? size : 1;
-        eventLoopPool = new EventLoop[this._size];
+    this(size_t size = (totalCPUs - 1)) {
+        size_t _size = size > 0 ? size : 1;
+        eventLoopPool = new EventLoop[_size];
 
-        foreach (i; 0 .. this._size) {
+        foreach (i; 0 .. _size) {
             eventLoopPool[i] = new EventLoop();
         }
     }
@@ -34,8 +33,8 @@ class EventLoopGroup {
         if (_started)
             return;
         _started = true;
-        foreach (i; 0 .. this._size) {
-            eventLoopPool[i].runAsync(timeout);
+        foreach (pool; eventLoopPool) {
+            pool.runAsync(timeout);
         }
     }
 
@@ -44,8 +43,8 @@ class EventLoopGroup {
             trace("stopping EventLoopGroup...");
         if (!_started)
             return;
-        foreach (i; 0 .. this._size) {
-            eventLoopPool[i].stop();
+        foreach (pool; eventLoopPool) {
+            pool.stop();
         }
         _started = false;
 
@@ -54,30 +53,30 @@ class EventLoopGroup {
     }
 
     @property size_t size() {
-        return _size;
+        return eventLoopPool.length;
     }
 
     EventLoop nextLoop() {
         import core.atomic;
-        int index = atomicOp!"+="(_loopIndex, 1);
+        size_t index = atomicOp!"+="(_loopIndex, 1);
         if(index > 10000) {
             index = 0;
             atomicStore(_loopIndex, 0);
         }
-        index %= _size;
+        index %= eventLoopPool.length;
         return eventLoopPool[index];
     }
     private shared int _loopIndex;
 
     EventLoop opIndex(size_t index) {
-        auto i = index % _size;
+        auto i = index % eventLoopPool.length;
         return eventLoopPool[i];
     }
 
     int opApply(scope int delegate(EventLoop) dg) {
         int ret = 0;
-        foreach (i; 0 .. this._size) {
-            ret = dg(eventLoopPool[i]);
+        foreach (pool; eventLoopPool) {
+            ret = dg(pool);
             if (ret)
                 break;
         }
@@ -86,8 +85,5 @@ class EventLoopGroup {
 
 private:
     bool _started;
-    uint _size;
-
     EventLoop[] eventLoopPool;
-
 }
