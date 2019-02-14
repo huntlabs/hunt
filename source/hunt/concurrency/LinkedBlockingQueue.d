@@ -319,7 +319,7 @@ class LinkedBlockingQueue(E) : AbstractQueue!(E), BlockingQueue!(E) {
         static if(is(E == class) || is(E == string)) {
             if (e is null) throw new NullPointerException();
         }
-        int c;
+        int c = 0;
         Node!(E) node = new Node!(E)(e);
         Mutex putLock = this.putLock;
         putLock.lock();
@@ -360,7 +360,7 @@ class LinkedBlockingQueue(E) : AbstractQueue!(E), BlockingQueue!(E) {
             if (e is null) throw new NullPointerException();
         }
 
-        int c;
+        int c = 0;
         Mutex putLock = this.putLock;
         putLock.lock();
         try {
