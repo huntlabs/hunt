@@ -1896,7 +1896,6 @@ class ForkJoinPool : AbstractExecutorService {
         if (factory is null)
             throw new NullPointerException();
         long ms = max(keepAliveTime.total!(TimeUnit.Millisecond), TIMEOUT_SLOP);
-        trace("111111");
 
         int corep = min(max(corePoolSize, parallelism), MAX_CAP);
         long c = (((cast(long)(-corep)       << TC_SHIFT) & TC_MASK) |

@@ -9,7 +9,7 @@ import test.BigIntegerTest;
 import test.JsonHelperTest;
 import test.ForkJoinPoolTest;
 import test.LinkedBlockingQueueTest;
-import test.MimeTypeTest;
+// import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
@@ -22,17 +22,24 @@ import test.ThreadTest;
 import core.thread;
 import std.stdio;
 
+import benchmark.LinkedBlockingQueueBench;
+
 void main()
 {
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
+
+
+	LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
+	b.bench();
+
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// // testTask();
 
 	// testUnits!(JsonHelperTest);
-	testUnits!(LinkedBlockingQueueTest);
+	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
