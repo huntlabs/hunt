@@ -9,13 +9,14 @@ import test.BigIntegerTest;
 import test.JsonHelperTest;
 import test.ForkJoinPoolTest;
 import test.LinkedBlockingQueueTest;
-// import test.MimeTypeTest;
+import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
 import test.ScheduledThreadPoolTest;
 import test.StringTokenizerTest;
 import test.TaskTest;
+import test.TaskPoolTest;
 import test.ThreadPoolExecutorTest;
 import test.ThreadTest;
 
@@ -30,9 +31,11 @@ void main()
 	writeln("CPU: ", totalCPUs);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 
+	testUnits!(TaskPoolTest);
 
-	LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
-	b.bench();
+
+	// LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
+	// b.bench();
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);

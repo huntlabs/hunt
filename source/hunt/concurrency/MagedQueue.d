@@ -41,6 +41,7 @@ class MagedBlockingQueue(T) : Queue!T {
     private Cons!T tail;
     private Mutex head_lock;
     private Mutex tail_lock;
+    private shared bool isWaking = false;
 
     /** Wait queue for waiting takes */
     private Condition notEmpty;
@@ -77,10 +78,23 @@ class MagedBlockingQueue(T) : Queue!T {
                 this.head = scnd;
                 return hd.value;
             } else {
+                if(isWaking)
+                    return T.init;
                 notEmpty.wait();
             }
         }
         assert(0);
+    }
+
+    void wakeup() {
+        this.head_lock.lock();
+        scope (exit)
+            this.head_lock.unlock();
+        if(isWaking)
+            return;
+        // cas(isWaking, false, true);
+        atomicStore(isWaking, true);
+        notEmpty.notify();
     }
 
     bool tryDequeue(out T e) {

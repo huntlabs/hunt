@@ -109,7 +109,7 @@ abstract class Selector {
         _running = true;
         do {
             // version (HUNT_DEBUG) trace("Selector rolled once.");
-            weakup();
+            // weakup();
             lockAndDoSelect(timeout);
         } while (_running);
         dispose();
@@ -135,7 +135,7 @@ abstract class Selector {
     protected abstract int doSelect(long timeout);
 
     private int lockAndDoSelect(long timeout) {
-        synchronized (this) {
+        // synchronized (this) {
             // if (!isOpen())
             //     throw new ClosedSelectorException();
             // synchronized (publicKeys) {
@@ -144,7 +144,7 @@ abstract class Selector {
             //     }
             // }
             return doSelect(timeout);
-        }
+        // }
     }
 }
 

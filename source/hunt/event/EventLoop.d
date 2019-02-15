@@ -87,9 +87,9 @@ final class EventLoop : AbstractSelector {
     }
 
     EventLoop postTask(AbstractTask task) {
-        synchronized (this) {
-            _queue.enQueue(task);
-        }
+        // synchronized (this) {
+        //     _queue.enQueue(task);
+        // }
         return this;
     }
 
@@ -103,15 +103,15 @@ final class EventLoop : AbstractSelector {
     }
 
     protected void onWeakUp() {
-        TaskQueue queue;
-        synchronized (this) {
-            queue = _queue;
-            _queue = TaskQueue();
-        }
-        while (!queue.empty) {
-            auto task = queue.deQueue();
-            task.job();
-        }
+        // TaskQueue queue;
+        // synchronized (this) {
+        //     queue = _queue;
+        //     _queue = TaskQueue();
+        // }
+        // while (!queue.empty) {
+        //     auto task = queue.deQueue();
+        //     task.job();
+        // }
     }
 
 private:
