@@ -148,7 +148,8 @@ class AbstractSelector : Selector {
         import std.range : iota;
         // void doJob() {
             // foreach (i; 0 .. len) 
-            foreach(i; parallel(iota(0, len), 30))
+            // foreach(i; parallel(iota(0, len), cast(int)(len/taskPool.size() + 1)))
+            foreach(i; parallel(iota(0, len), 25))
             {
             AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
             if (channel is null) {
