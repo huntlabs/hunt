@@ -13,7 +13,6 @@ module hunt.event.EventLoop;
 
 import hunt.io.socket.Common;
 import hunt.event.selector;
-import hunt.event.Task;
 import hunt.logging;
 
 import core.thread;
@@ -57,7 +56,7 @@ final class EventLoop : AbstractSelector {
         } else {
             version (HUNT_DEBUG) trace("running eventloop...");
             _thread = Thread.getThis();
-            onLoop(&onWeakUp, timeout);
+            onLoop(&onWakeUp, timeout);
         }
     }
 
@@ -86,23 +85,23 @@ final class EventLoop : AbstractSelector {
         return _thread is Thread.getThis();
     }
 
-    EventLoop postTask(AbstractTask task) {
-        // synchronized (this) {
-        //     _queue.enQueue(task);
-        // }
-        return this;
-    }
+    // EventLoop postTask(AbstractTask task) {
+    //     // synchronized (this) {
+    //     //     _queue.enQueue(task);
+    //     // }
+    //     return this;
+    // }
 
-    static AbstractTask createTask(alias fun, Args...)(Args args) {
-        return newTask!(fun, Args)(args);
-    }
+    // static AbstractTask createTask(alias fun, Args...)(Args args) {
+    //     return newTask!(fun, Args)(args);
+    // }
 
-    static AbstractTask createTask(F, Args...)(F delegateOrFp, Args args)
-            if (is(typeof(delegateOrFp(args)))) {
-        return newTask(F, Args)(delegateOrFp, args);
-    }
+    // static AbstractTask createTask(F, Args...)(F delegateOrFp, Args args)
+    //         if (is(typeof(delegateOrFp(args)))) {
+    //     return newTask(F, Args)(delegateOrFp, args);
+    // }
 
-    protected void onWeakUp() {
+    protected void onWakeUp() {
         // TaskQueue queue;
         // synchronized (this) {
         //     queue = _queue;
@@ -116,5 +115,5 @@ final class EventLoop : AbstractSelector {
 
 private:
     Thread _thread;
-    TaskQueue _queue;
+    // TaskQueue _queue;
 }
