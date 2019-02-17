@@ -86,6 +86,19 @@ class MagedBlockingQueue(T) : Queue!T {
         assert(0);
     }
 
+    bool isEmpty() {
+        return this.head is this.tail;
+    }
+
+    void clear() {
+        this.head_lock.lock();
+        scope (exit)
+            this.head_lock.unlock();
+        
+        auto n = new Cons!T();
+        this.head = this.tail = n;
+    }
+
     void wakeup() {
         this.head_lock.lock();
         scope (exit)

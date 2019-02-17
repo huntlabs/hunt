@@ -11,12 +11,14 @@
 
 module hunt.io.socket.Common;
 
-import hunt.collection.ByteBuffer;
+// import hunt.collection.ByteBuffer;
+import hunt.concurrency.MagedQueue;
+import hunt.concurrency.TaskPool;
 import hunt.event.EventLoop;
 import hunt.Exceptions;
 import hunt.Functions;
 import hunt.logging;
-
+import hunt.system.Memory;
 import hunt.util.Common;
 import hunt.Version;
 
@@ -45,6 +47,35 @@ alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr);
 alias AcceptCallBack = void delegate(Selector loop, Socket socket) ;
 // dfmt on
 
+@property TaskPool ioWorkersPool() @trusted {
+    import std.concurrency : initOnce;
+
+    __gshared TaskPool pool;
+    return initOnce!pool({
+        auto p = new TaskPool(defaultPoolThreads);
+        p.isDaemon = true;
+        return p;
+    }());
+}
+
+private shared uint _defaultPoolThreads = uint.max;
+
+/**
+These properties get and set the number of worker threads in the `TaskPool`
+instance returned by `taskPool`.  The default value is `totalCPUs` - 1.
+Calling the setter after the first call to `taskPool` does not changes
+number of worker threads in the instance returned by `taskPool`.
+*/
+@property uint defaultPoolThreads() @trusted {
+    const local = atomicLoad(_defaultPoolThreads);
+    return local < uint.max ? local : totalCPUs - 1;
+}
+
+/// Ditto
+@property void defaultPoolThreads(uint newVal) @trusted {
+    atomicStore(_defaultPoolThreads, newVal);
+}
+
 /**
 */
 interface StreamWriteBuffer {
@@ -63,7 +94,6 @@ interface StreamWriteBuffer {
     size_t capacity();
 }
 
-
 /**
 */
 interface Channel {
@@ -76,7 +106,6 @@ http://tutorials.jenkov.com/java-nio/selectors.html
 abstract class Selector {
 
     protected shared bool _running;
-    // protected shared bool _isOpen = true;
 
     abstract bool register(AbstractChannel channel);
 
@@ -86,7 +115,8 @@ abstract class Selector {
 
     void stop() {
         atomicStore(_running, false);
-        version (HUNT_DEBUG) trace("Selector stopped.");
+        version (HUNT_DEBUG)
+            trace("Selector stopped.");
     }
 
     abstract void dispose();
@@ -105,13 +135,14 @@ abstract class Selector {
     /**
         timeout: in millisecond
     */
-    protected void onLoop(scope void delegate() weakup, long timeout = -1) {
+    protected void onLoop(scope void delegate() wakeup, long timeout = -1) {
         _running = true;
         do {
             // version (HUNT_DEBUG) trace("Selector rolled once.");
-            // weakup();
+            wakeup();
             lockAndDoSelect(timeout);
-        } while (_running);
+        }
+        while (_running);
         dispose();
     }
 
@@ -136,14 +167,14 @@ abstract class Selector {
 
     private int lockAndDoSelect(long timeout) {
         // synchronized (this) {
-            // if (!isOpen())
-            //     throw new ClosedSelectorException();
-            // synchronized (publicKeys) {
-            //     synchronized (publicSelectedKeys) {
-            //         return doSelect(timeout);
-            //     }
-            // }
-            return doSelect(timeout);
+        // if (!isOpen())
+        //     throw new ClosedSelectorException();
+        // synchronized (publicKeys) {
+        //     synchronized (publicSelectedKeys) {
+        //         return doSelect(timeout);
+        //     }
+        // }
+        return doSelect(timeout);
         // }
     }
 }
@@ -182,13 +213,13 @@ abstract class AbstractChannel : Channel {
         _isClosed = true;
         _isClosing = false;
         version (HAVE_IOCP) {
-        }
-        else {
+        } else {
             _inLoop.deregister(this);
         }
         clear();
 
-        version (HUNT_DEBUG) tracef("closed [fd=%d]...", this.handle);
+        version (HUNT_DEBUG)
+            tracef("closed [fd=%d]...", this.handle);
     }
 
     protected void errorOccurred(string msg) {
@@ -225,8 +256,7 @@ abstract class AbstractChannel : Channel {
             onClose();
             version (HUNT_DEBUG)
                 tracef("channel[fd=%d] closed...", this.handle);
-        }
-        else {
+        } else {
             debug warningf("The channel[fd=%d] has already been closed", this.handle);
         }
     }
@@ -351,7 +381,6 @@ class LoopException : Exception {
     mixin basicExceptionCtors;
 }
 
-
 /**
 */
 interface Stream {
@@ -362,14 +391,16 @@ interface Stream {
 */
 abstract class AbstractSocketChannel : AbstractChannel {
 
-    protected bool _isWritting = false;
+    protected shared bool _isWritting = false;
 
     this(Selector loop, ChannelType type) {
         super(loop, type);
     }
 
     // Busy with reading or writting
-    protected bool isBusy() { return false; }
+    protected bool isBusy() {
+        return false;
+    }
 
     protected @property void socket(Socket s) {
         this.handle = s.handle();
@@ -388,19 +419,23 @@ abstract class AbstractSocketChannel : AbstractChannel {
     protected Socket _socket;
 
     override void close() {
-        if(_isClosing) {
-            debug warning("already closed [fd=%d]", this.handle);
+        if (_isClosing) {
+            debug warningf("already closed [fd=%d]", this.handle);
             return;
         }
         _isClosing = true;
-        version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
+        version (HUNT_DEBUG)
+            tracef("closing [fd=%d]...", this.handle);
 
-        if(isBusy) {
+        if (isBusy) {
             import std.parallelism;
-            version (HUNT_DEBUG) warning("Close operation delayed");
+
+            version (HUNT_DEBUG)
+                warning("Close operation delayed");
             auto theTask = task(() {
-                while(isBusy) {
-                    version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
+                while (isBusy) {
+                    version (HUNT_DEBUG)
+                        infof("waitting for idle [fd=%d]...", this.handle);
                     // Thread.sleep(20.msecs);
                 }
                 super.close();
@@ -531,70 +566,74 @@ private:
     DataWrittenHandler _sentHandler;
 }
 
-/**
-*/
-struct WriteBufferQueue {
-    StreamWriteBuffer front() nothrow @safe {
-        return _first;
-    }
 
-    bool empty() nothrow @safe {
-        return _first is null;
-    }
+alias WritingBufferQueue = MagedBlockingQueue!StreamWriteBuffer;
 
-    void clear() {
-        StreamWriteBuffer current = _first;
-        while (current !is null) {
-            _first = current.next;
-            current.next = null;
-            current = _first;
-        }
+// class WriteBufferQueue : MagedBlockingQueue!StreamWriteBuffer {
 
-        _first = null;
-        _last = null;
-    }
-
-    void enQueue(StreamWriteBuffer wsite) {
-        assert(wsite);
-        if (_last) {
-            _last.next = wsite;
-        } else {
-            _first = wsite;
-        }
-        wsite.next = null;
-        _last = wsite;
-    }
-
-    StreamWriteBuffer deQueue() {
-        // assert(_first && _last);
-        StreamWriteBuffer wsite = _first;
-        if (_first !is null)
-            _first = _first.next;
-
-        if (_first is null)
-            _last = null;
-
-        return wsite;
-    }
-
-private:
-    StreamWriteBuffer _last = null;
-    StreamWriteBuffer _first = null;
-}
-
+// }
 
 /**
 */
-Address createAddress(AddressFamily family = AddressFamily.INET, 
-    ushort port=InternetAddress.PORT_ANY) {
+// struct WriteBufferQueue {
+//     StreamWriteBuffer front() nothrow @safe {
+//         return _first;
+//     }
+
+//     bool empty() nothrow @safe {
+//         return _first is null;
+//     }
+
+//     void clear() {
+//         StreamWriteBuffer current = _first;
+//         while (current !is null) {
+//             _first = current.next;
+//             current.next = null;
+//             current = _first;
+//         }
+
+//         _first = null;
+//         _last = null;
+//     }
+
+//     void enQueue(StreamWriteBuffer wsite) {
+//         assert(wsite);
+//         if (_last) {
+//             _last.next = wsite;
+//         } else {
+//             _first = wsite;
+//         }
+//         wsite.next = null;
+//         _last = wsite;
+//     }
+
+//     StreamWriteBuffer deQueue() {
+//         // assert(_first && _last);
+//         StreamWriteBuffer wsite = _first;
+//         if (_first !is null)
+//             _first = _first.next;
+
+//         if (_first is null)
+//             _last = null;
+
+//         return wsite;
+//     }
+
+// private:
+//     StreamWriteBuffer _last = null;
+//     StreamWriteBuffer _first = null;
+// }
+
+/**
+*/
+Address createAddress(AddressFamily family = AddressFamily.INET,
+        ushort port = InternetAddress.PORT_ANY) {
     if (family == AddressFamily.INET6) {
         // addr = new Internet6Address(port); // bug on windows
         return new Internet6Address("::", port);
-    }
-    else
+    } else
         return new InternetAddress(port);
 }
-
 
 // dfmt off
 version(linux):
@@ -602,23 +641,17 @@ version(linux):
 static if (CompilerHelper.isLessThan(2078)) {
     version (X86) {
         enum SO_REUSEPORT = 15;
-    }
-    else version (X86_64) {
+    } else version (X86_64) {
         enum SO_REUSEPORT = 15;
-    }
-    else version (MIPS32) {
+    } else version (MIPS32) {
         enum SO_REUSEPORT = 0x0200;
-    }
-    else version (MIPS64) {
+    } else version (MIPS64) {
         enum SO_REUSEPORT = 0x0200;
-    }
-    else version (PPC) {
+    } else version (PPC) {
         enum SO_REUSEPORT = 15;
-    }
-    else version (PPC64) {
+    } else version (PPC64) {
         enum SO_REUSEPORT = 15;
-    }
-    else version (ARM) {
+    } else version (ARM) {
         enum SO_REUSEPORT = 15;
     }
 }

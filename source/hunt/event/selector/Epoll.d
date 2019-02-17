@@ -19,7 +19,6 @@ version(HAVE_EPOLL):
 import std.exception;
 import std.socket;
 import std.string;
-import hunt.logging;
 
 import core.time;
 import core.stdc.string;
@@ -34,6 +33,7 @@ import core.sys.posix.sys.time;
 
 import hunt.Exceptions;
 import hunt.io.socket;
+import hunt.logging;
 import hunt.event.timer;
 import hunt.system.Error;
 
@@ -143,13 +143,27 @@ class AbstractSelector : Selector {
         if(len <=0)
             return 0;
 
+        // import std.parallelism;
+        // import std.range : iota;
+        //     // foreach(i; parallel(iota(0, len), cast(int)(len/taskPool.size() + 1)))
+        //     foreach(i; parallel(iota(0, len), 25))
+        //     {
+        //     AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+        //     if (channel is null) {
+        //             debug warningf("channel is null");
+        //         continue;
+        //     }
+
+        //     uint currentEvents = events[i].events;
+        //     version (HUNT_DEBUG) infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
+
+        //         // taskPool.put(task(&handeChannel, channel, currentEvents));
+        //         handeChannel(channel, currentEvents);
+        //     }
+
         // 
-        import std.parallelism;
-        import std.range : iota;
-        // void doJob() {
-            // foreach (i; 0 .. len) 
-            // foreach(i; parallel(iota(0, len), cast(int)(len/taskPool.size() + 1)))
-            foreach(i; parallel(iota(0, len), 25))
+        import hunt.concurrency.TaskPool;
+            foreach (i; 0 .. len) 
             {
             AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
             if (channel is null) {
@@ -160,13 +174,10 @@ class AbstractSelector : Selector {
             uint currentEvents = events[i].events;
             version (HUNT_DEBUG) infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
-                 
-                // taskPool.put(task(&handeChannel, channel, currentEvents));
+                // ioWorkersPool.put(makeTask(&handeChannel, channel, currentEvents));
                 handeChannel(channel, currentEvents);
             }
-        // }
 
-        // taskPool.put(task(&doJob));
 
         return len;
     }
@@ -174,7 +185,7 @@ class AbstractSelector : Selector {
     private void handeChannel(AbstractChannel channel, uint currentEvents) {
             if (isClosed(currentEvents)) {
                 version (HUNT_DEBUG)
-                tracef("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
+                infof("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
                         errno, getErrorMessage(errno));
                 channel.close();
             } else if (isError(currentEvents)) {
@@ -183,7 +194,10 @@ class AbstractSelector : Selector {
                         errno, getErrorMessage(errno));
                 channel.close();
             } else if (isReadable(currentEvents)) {
-                channel.onRead();
+                // channel.onRead();
+                version (HUNT_DEBUG) tracef("channel reading: fd=%d", channel.handle);
+                import hunt.concurrency.TaskPool;
+                ioWorkersPool.put(makeTask(&channel.onRead));
             } else if (isWritable(currentEvents)) {
                 AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
                 assert(wt !is null);

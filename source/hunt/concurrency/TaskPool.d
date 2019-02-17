@@ -46,13 +46,11 @@ private bool atomicCasUbyte(T)(ref T stuff, T testVal, T newVal)
     return core.atomic.cas(cast(shared)&stuff, testVal, newVal);
 }
 
-alias TaskFun = bool function(AbstractTask);
 
 /**
 */
 class AbstractTask : Runnable {
 
-    // TaskFun _runTask;
     Throwable exception;
     ubyte taskStatus = TaskStatus.ready;
 
@@ -69,19 +67,14 @@ class AbstractTask : Runnable {
     }
 
     abstract protected void onRun();
-    // protected void onRun() {
-
-    // }
 
     bool done() @property {
         if (atomicReadUbyte(taskStatus) == TaskStatus.done) {
             if (exception) {
                 throw exception;
             }
-
             return true;
         }
-
         return false;
     }
 }
@@ -179,6 +172,8 @@ private final class ParallelismThread : Thread {
     TaskPool pool;
 }
 
+/**
+*/
 enum PoolState : ubyte {
     running,
     finishing,
@@ -224,10 +219,13 @@ class TaskPool {
     this() {
         this(totalCPUs - 1);
     }
+    
     /**
     Allows for custom number of worker threads.
     */
     this(size_t nWorkers) {
+        if (nWorkers == 0)
+            nWorkers = 1;
         taskQueue = new MagedBlockingQueue!(AbstractTask)();
 
         queueMutex = new Mutex(this);
@@ -241,6 +239,21 @@ class TaskPool {
             poolThread = new ParallelismThread(&startWorkLoop);
             poolThread.pool = this;
             poolThread.start();
+        }
+    }
+
+    bool isDaemon() @property @trusted {
+        // queueLock();
+        // scope(exit) queueUnlock();
+        return pool[0].isDaemon;
+    }
+
+    /// Ditto
+    void isDaemon(bool newVal) @property @trusted {
+        // queueLock();
+        // scope(exit) queueUnlock();
+        foreach (thread; pool) {
+            thread.isDaemon = newVal;
         }
     }
 
@@ -274,8 +287,6 @@ class TaskPool {
 
     private void doJob(AbstractTask job) {
         // assert(job.taskStatus == TaskStatus.processing);
-        // assert(job.next is null);
-        // assert(job.prev is null);
 
         scope (exit) {
             // if (!isSingleTask)
