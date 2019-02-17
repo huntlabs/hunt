@@ -29,6 +29,7 @@ import std.process;
 import std.socket;
 import std.string;
 
+import core.atomic;
 import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
@@ -92,6 +93,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
         _readBuffer = new ubyte[bufferSize];
+        _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
         setFlag(ChannelFlag.Write, true);
@@ -122,7 +124,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             if (_error) {
                 this._erroString = getErrorMessage(errno);
             } else {
-                debug warningf("warning on read: fd=%s, errno=%d, message=%s", this.handle,
+                debug warningf("warning on read: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
             }
 
@@ -220,6 +222,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     Try to write a block of data.
     */
     protected ptrdiff_t tryWrite(const ubyte[] data) {
+
+        this.clearError();
+
         const nBytes = this.socket.send(data);
         version (HUNT_DEBUG)
             tracef("actually sent : %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
@@ -254,7 +259,71 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 this._erroString = getErrorMessage(errno);
             }
         }
+
+        if (this.isError) {
+            string msg = format("Socket error on write: fd=%d, message=%s",
+                    this.handle, this.erroString);
+            debug errorf(msg);
+            errorOccurred(msg);
+        }
+
         return 0;
+    }
+
+
+    override void onWrite() {
+        // if (!_isConnected) {
+        //     _isConnected = true;
+        //     _remoteAddress = socket.remoteAddress();
+
+        //     debug warning("Why here?");
+
+        //     if (_connectionHandler)
+        //         _connectionHandler(true);
+        //     return;
+        // }
+
+        if(_writeQueue.isEmpty()) {
+            version (HUNT_DEBUG) warningf("The _writeQueue is empty: [fd=%d]", this.handle);
+            return;
+        }
+
+        if(!cas(&_isWritting, false, true)) {
+            version (HUNT_DEBUG) warningf("Busy in writting: [fd=%d]", this.handle);
+            return;
+        }
+
+        version (HUNT_DEBUG)
+            tracef("start to write [fd=%d]", this.handle);
+
+        StreamWriteBuffer writeBuffer;
+        bool haveBuffer = _writeQueue.tryDequeue(writeBuffer);
+        while(_isRegistered && !isWriteCancelling && haveBuffer) {
+            version (HUNT_DEBUG)
+                tracef("writing a buffer [fd=%d]", this.handle);
+
+            const(ubyte)[] data = writeBuffer.remaining();
+            while(_isRegistered && !isWriteCancelling && data.length > 0) {
+                size_t nBytes = tryWrite(data);
+                if (nBytes > 0) {
+                    version (HUNT_DEBUG)
+                        tracef("writing: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+                    writeBuffer.pop(nBytes);                        
+                    data = writeBuffer.remaining();
+                }
+            }
+
+            if(_isRegistered && !isWriteCancelling)
+                writeBuffer.finish();
+
+            version (HUNT_DEBUG) {
+                tracef("buffer writing done: [fd=%d]", this.handle);
+                tracef("_writeQueue is empty: %s, [fd=%d]", _writeQueue.isEmpty(), this.handle);
+            }
+            haveBuffer = _writeQueue.tryDequeue(writeBuffer);
+        }
+
+        atomicStore(_isWritting, false);
     }
 
     protected void doConnect(Address addr) {
@@ -268,12 +337,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     override void onWriteDone() {
         // notified by kqueue selector when data writing done
         version (HUNT_DEBUG)
-            tracef("done with data writing");
+            tracef("data writing done [fd=%d]", this.handle,);
     }
 
     // protected UbyteArrayObject _readBuffer;
     private const(ubyte)[] _readBuffer;
-    protected WriteBufferQueue _writeQueue;
+    protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
 
     /**

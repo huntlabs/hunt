@@ -11,8 +11,9 @@
 
 module hunt.io.TcpStream;
 
+import hunt.io.socket.Common;
+import hunt.concurrency.MagedQueue;
 import hunt.event;
-
 import hunt.logging;
 import hunt.Functions;
 
@@ -20,6 +21,8 @@ import std.format;
 import std.socket;
 import std.exception;
 import std.socket;
+
+import core.atomic;
 import core.thread;
 import core.time;
 
@@ -258,25 +261,22 @@ class TcpStream : AbstractStream {
     void write(StreamWriteBuffer buffer) {
         assert(buffer !is null);
 
-
-// synchronized(this) {
         if (!_isConnected) {
-            debug warningf("The connection (fd=%d) has been closed!", this.handle);
+            debug warningf("The connection (fd=%d) is down! No data is written.", this.handle);
             return;
         }
 
-        _writeQueue.enQueue(buffer);
+        version (HUNT_DEBUG)
+            infof("data buffered (%d bytes): fd=%d",  buffer.capacity, this.handle);
 
+        _writeQueue.enqueue(buffer);
+        
         version (HAVE_IOCP) {
-            if (_isWritting) {
-                version (HUNT_DEBUG)
-                    infof("Busy in writting, data buffered (%d bytes)", buffer.capacity);
-            } else
-                tryWrite();
+            if (!_isWritting)  tryWrite();
         } else {
             onWrite();
         }
-    // }
+
     }
 
     /// safe for big data sending
@@ -295,9 +295,16 @@ class TcpStream : AbstractStream {
         this.socket.shutdown(SocketShutdown.SEND);
     }
 
+
 protected:
     bool _isClient;
     ConnectionHandler _connectionHandler;
+
+    void resetWrittingStatus() {
+        _writeQueue.clear();
+        atomicStore(_isWritting, false);
+        isWriteCancelling = false;
+    }
 
     override void onRead() {
         version (HUNT_DEBUG)
@@ -323,14 +330,14 @@ protected:
 
     override void onClose() {
         version (HUNT_DEBUG) {
-            if (!_writeQueue.empty) {
-                warning("Some data has not been sent yet.");
+            if (!_writeQueue.isEmpty) {
+                warningf("Some data has not been sent yet: fd=%d", this.handle);
             }
 
             infof("connection closed with: %s", this.remoteAddress);
         }
 
-        _writeQueue.clear();
+        resetWrittingStatus();
         _isConnected = false;
         this.socket.shutdown(SocketShutdown.BOTH);
         this.socket.close();
@@ -340,56 +347,4 @@ protected:
             closeHandler();
     }
 
-    override void onWrite() {
-        if (!_isConnected) {
-            _isConnected = true;
-            _remoteAddress = socket.remoteAddress();
-
-            if (_connectionHandler)
-                _connectionHandler(true);
-            return;
-        }
-
-        // bool canWrite = true;
-        version (HUNT_DEBUG)
-            tracef("start to write [fd=%d]", this.handle);
-
-        while (_isRegistered && !isWriteCancelling && !_writeQueue.empty) {
-            version (HUNT_DEBUG)
-                tracef("writting [fd=%d]...", this.handle);
-
-            StreamWriteBuffer writeBuffer = _writeQueue.front();
-            const(ubyte[]) data = writeBuffer.remaining();
-            if (data.length == 0) {
-                auto q = _writeQueue.deQueue();
-                if (q is null)
-                    warning("StreamWriteBuffer is null");
-                else
-                    q.finish();
-                // _writeQueue.deQueue().finish();
-                continue;
-            }
-
-            this.clearError();
-            size_t nBytes = tryWrite(data);
-            if (nBytes > 0 && writeBuffer.pop(nBytes)) {
-                version (HUNT_DEBUG)
-                    tracef("writing done: %d bytes, fd: %d", nBytes, this.handle);
-                auto q = _writeQueue.deQueue();
-                if (q is null) {
-                    debug warning("StreamWriteBuffer is null");
-                }
-                else
-                    q.finish();
-            }
-
-            if (this.isError) {
-                string msg = format("Socket error on write: fd=%d, message=%s",
-                        this.handle, this.erroString);
-                debug errorf(msg);
-                errorOccurred(msg);
-                break;
-            }
-        }
-    }
 }

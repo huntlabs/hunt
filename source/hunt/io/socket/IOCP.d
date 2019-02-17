@@ -120,6 +120,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         version (HUNT_DEBUG)
             trace("Buffer size for read: ", bufferSize);
         _readBuffer = new ubyte[bufferSize];
+        _writeQueue = new WritingBufferQueue();
         this.socket = new TcpSocket(family);
 
         loadWinsockExtension(this.handle);
@@ -345,7 +346,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     bool _isConnected; //if server side always true.
     SimpleEventHandler disconnectionHandler;
 
-    protected WriteBufferQueue _writeQueue;
+    protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
     private const(ubyte)[] _readBuffer;
     private const(ubyte)[] sendDataBuffer;
