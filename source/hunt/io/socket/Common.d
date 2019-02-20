@@ -89,6 +89,7 @@ interface StreamWriteBuffer {
     void finish();
 
     StreamWriteBuffer next();
+    
     void next(StreamWriteBuffer);
 
     size_t capacity();
@@ -420,7 +421,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
     override void close() {
         if (_isClosing) {
-            debug warningf("already closed [fd=%d]", this.handle);
+            // debug warningf("already closed [fd=%d]", this.handle);
             return;
         }
         _isClosing = true;

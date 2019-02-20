@@ -1,5 +1,6 @@
 module hunt.concurrency.MagedQueue;
 
+import core.thread;
 import core.sync.semaphore : Semaphore;
 import core.sync.condition;
 import core.sync.mutex : Mutex;
@@ -30,15 +31,15 @@ interface Queue(T) {
     bool tryDequeue(out T e);
 }
 
-private static class Cons(T) {
-    public Cons!T nxt;
-    public T value;
+private static class QueueNode(T) {
+    QueueNode!T nxt;
+    T value;
 }
 
 /** blocking multi-producer multi-consumer queue  */
 class MagedBlockingQueue(T) : Queue!T {
-    private Cons!T head;
-    private Cons!T tail;
+    private QueueNode!T head;
+    private QueueNode!T tail;
     private Mutex head_lock;
     private Mutex tail_lock;
     private shared bool isWaking = false;
@@ -47,7 +48,7 @@ class MagedBlockingQueue(T) : Queue!T {
     private Condition notEmpty;
 
     this() {
-        auto n = new Cons!T();
+        auto n = new QueueNode!T();
         this.head = this.tail = n;
         this.head_lock = new Mutex();
         this.tail_lock = new Mutex();
@@ -55,7 +56,7 @@ class MagedBlockingQueue(T) : Queue!T {
     }
 
     void enqueue(T t) {
-        auto end = new Cons!T();
+        auto end = new QueueNode!T();
         this.tail_lock.lock();
         scope (exit)
             this.tail_lock.unlock();
@@ -86,30 +87,6 @@ class MagedBlockingQueue(T) : Queue!T {
         assert(0);
     }
 
-    bool isEmpty() {
-        return this.head is this.tail;
-    }
-
-    void clear() {
-        this.head_lock.lock();
-        scope (exit)
-            this.head_lock.unlock();
-        
-        auto n = new Cons!T();
-        this.head = this.tail = n;
-    }
-
-    void wakeup() {
-        this.head_lock.lock();
-        scope (exit)
-            this.head_lock.unlock();
-        if(isWaking)
-            return;
-        // cas(isWaking, false, true);
-        atomicStore(isWaking, true);
-        notEmpty.notify();
-    }
-
     bool tryDequeue(out T e) {
         this.head_lock.lock();
         scope (exit)
@@ -123,21 +100,40 @@ class MagedBlockingQueue(T) : Queue!T {
         }
         return false;
     }
+
+    bool isEmpty() {
+        return this.head is this.tail;
+    }
+
+    void clear() {
+        this.head_lock.lock();
+        scope (exit)
+            this.head_lock.unlock();
+        
+        auto n = new QueueNode!T();
+        this.head = this.tail = n;
+    }
+
+    void wakeup() {
+        if(cas(&isWaking, false, true))
+            notEmpty.notify();
+    }
 }
 
 /** non-blocking multi-producer multi-consumer queue  */
 class MagedNonBlockingQueue(T) : Queue!T {
-    private shared(Cons!T) head;
-    private shared(Cons!T) tail;
+    private shared(QueueNode!T) head;
+    private shared(QueueNode!T) tail;
+    private shared bool isWaking = false;
 
     this() {
-        shared n = new Cons!T();
+        shared n = new QueueNode!T();
         this.head = this.tail = n;
     }
 
     void enqueue(T t) {
-        shared end = new Cons!T();
-        end.value = t;
+        shared end = new QueueNode!T();
+        end.value = cast(shared)t;
         while (true) {
             auto tl = tail;
             auto cur = tl.nxt;
@@ -146,7 +142,7 @@ class MagedNonBlockingQueue(T) : Queue!T {
                 cas(&this.tail, tl, cur);
                 continue;
             }
-            shared(Cons!T) dummy = null;
+            shared(QueueNode!T) dummy = null;
             if (cas(&tl.nxt, dummy, end)) {
                 // successfull enqueued new end node
                 break;
@@ -157,6 +153,7 @@ class MagedNonBlockingQueue(T) : Queue!T {
     T dequeue() {
         T e = void;
         while (!tryDequeue(e)) {
+            Thread.yield();
         }
         // tryDequeue(e);
         return e;
@@ -174,10 +171,20 @@ class MagedNonBlockingQueue(T) : Queue!T {
             }
         } else {
             if (cas(&this.head, dummy, nxt)) {
-                e = nxt.value;
+                e = cast(T)nxt.value;
                 return true;
             }
         }
         return false;
+    }
+
+
+    bool isEmpty() {
+        return this.head is this.tail;
+    }
+
+    void clear() {        
+        shared n = new QueueNode!T();
+        this.head = this.tail = n;
     }
 }

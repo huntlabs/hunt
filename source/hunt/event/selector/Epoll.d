@@ -36,6 +36,7 @@ import hunt.io.socket;
 import hunt.logging;
 import hunt.event.timer;
 import hunt.system.Error;
+import hunt.concurrency.TaskPool;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
@@ -61,7 +62,7 @@ class AbstractSelector : Selector {
          */
         // _epollFD = epoll_create1(0);
         _epollFD = epoll_create(256);
-        if(_epollFD < 0)
+        if (_epollFD < 0)
             throw new IOException("epoll_create failed");
         _event = new EpollEventChannel(this);
         register(_event);
@@ -74,8 +75,9 @@ class AbstractSelector : Selector {
     override void dispose() {
         if (isDisposed)
             return;
-        
-        version (HUNT_DEBUG) tracef("disposing selector[fd=%d]...", _epollFD);
+
+        version (HUNT_DEBUG)
+            tracef("disposing selector[fd=%d]...", _epollFD);
         isDisposed = true;
         _event.close();
         core.sys.posix.unistd.close(_epollFD);
@@ -84,16 +86,18 @@ class AbstractSelector : Selector {
     private bool isDisposed = false;
 
     override void stop() {
-        if(_running) {
+        if (_running) {
             super.stop();
-            version (HUNT_DEBUG) tracef("notice that selector[fd=%d] stopped", _epollFD);
-            _event.call(); 
+            version (HUNT_DEBUG)
+                tracef("notice that selector[fd=%d] stopped", _epollFD);
+            _event.call();
         }
     }
 
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
-        version (HUNT_DEBUG) tracef("register channel: fd=%d", channel.handle);
+        version (HUNT_DEBUG)
+            tracef("register channel: fd=%d", channel.handle);
 
         if (channel.type == ChannelType.Timer) {
             auto wt = cast(AbstractTimer) channel;
@@ -101,7 +105,7 @@ class AbstractSelector : Selector {
                 wt.setTimer();
         }
 
-        if(epollCtl(channel, EPOLL_CTL_ADD)) {
+        if (epollCtl(channel, EPOLL_CTL_ADD)) {
             _event.setNext(channel);
             return true;
         } else {
@@ -110,13 +114,14 @@ class AbstractSelector : Selector {
         }
     }
 
-    override bool reregister(AbstractChannel channel) {        
+    override bool reregister(AbstractChannel channel) {
         return epollCtl(channel, EPOLL_CTL_MOD);
     }
 
     override bool deregister(AbstractChannel channel) {
-        if(epollCtl(channel, EPOLL_CTL_DEL)) {
-            version (HUNT_DEBUG) tracef("deregister channel: fd=%d", channel.handle);
+        if (epollCtl(channel, EPOLL_CTL_DEL)) {
+            version (HUNT_DEBUG)
+                tracef("deregister channel: fd=%d", channel.handle);
             return true;
         } else {
             warningf("deregister channel failed: fd=%d", channel.handle);
@@ -131,81 +136,89 @@ class AbstractSelector : Selector {
         epoll_event[NUM_KEVENTS] events;
         int len = 0;
 
-        if(timeout <= 0) { /* Indefinite or no wait */
+        if (timeout <= 0) { /* Indefinite or no wait */
             do {
                 // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
-                len = epoll_wait(_epollFD, events.ptr, events.length, cast(int)timeout);
-            } while((len == -1) && (errno == EINTR));
+                len = epoll_wait(_epollFD, events.ptr, events.length, cast(int) timeout);
+            }
+            while ((len == -1) && (errno == EINTR));
         } else { /* Bounded wait; bounded restarts */
-            len = iepoll(_epollFD, events.ptr, events.length, cast(int)timeout);
+            len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
-        if(len <=0)
+        if (len <= 0)
             return 0;
 
-        // import std.parallelism;
-        // import std.range : iota;
-        //     // foreach(i; parallel(iota(0, len), cast(int)(len/taskPool.size() + 1)))
-        //     foreach(i; parallel(iota(0, len), 25))
-        //     {
-        //     AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-        //     if (channel is null) {
-        //             debug warningf("channel is null");
-        //         continue;
-        //     }
+        version (HUNT_IO_PARALLELWORKER) {
+            import std.parallelism;
+            import std.range : iota;
 
-        //     uint currentEvents = events[i].events;
-        //     version (HUNT_DEBUG) infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
+            foreach (i; parallel(iota(0, len), cast(int)(len / taskPool.size() + 1)))
+                foreach (i; parallel(iota(0, len), 25)) {
+                    AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+                    if (channel is null) {
+                        debug warningf("channel is null");
+                        continue;
+                    }
 
-        //         // taskPool.put(task(&handeChannel, channel, currentEvents));
-        //         handeChannel(channel, currentEvents);
-        //     }
+                    uint currentEvents = events[i].events;
+                    version (HUNT_DEBUG)
+                        infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
-        // 
-        import hunt.concurrency.TaskPool;
-            foreach (i; 0 .. len) 
-            {
-            AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-            if (channel is null) {
+                    handeChannel(channel, currentEvents);
+                }
+
+        } else {
+            foreach (i; 0 .. len) {
+                AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+                if (channel is null) {
                     debug warningf("channel is null");
-                continue;
-            }
+                    continue;
+                }
 
-            uint currentEvents = events[i].events;
-            version (HUNT_DEBUG) infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
+                uint currentEvents = events[i].events;
+                version (HUNT_DEBUG)
+                    infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
-                // ioWorkersPool.put(makeTask(&handeChannel, channel, currentEvents));
+                // taskPool.put(task(&handeChannel, channel, currentEvents));
+                // ioWorkersPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
                 handeChannel(channel, currentEvents);
             }
-
-
+        }
         return len;
     }
 
     private void handeChannel(AbstractChannel channel, uint currentEvents) {
-            if (isClosed(currentEvents)) {
-                version (HUNT_DEBUG)
-                infof("channel closed: fd=%d, errno=%d, message=%s", channel.handle,
-                        errno, getErrorMessage(errno));
-                channel.close();
-            } else if (isError(currentEvents)) {
-                // version (HUNT_DEBUG)
-                debug warningf("channel error: fd=%s, errno=%d, message=%s", channel.handle,
-                        errno, getErrorMessage(errno));
-                channel.close();
-            } else if (isReadable(currentEvents)) {
-                // channel.onRead();
-                version (HUNT_DEBUG) tracef("channel reading: fd=%d", channel.handle);
-                import hunt.concurrency.TaskPool;
-                ioWorkersPool.put(makeTask(&channel.onRead));
-            } else if (isWritable(currentEvents)) {
-                AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-                assert(wt !is null);
-                wt.onWriteDone();
+        if (isClosed(currentEvents)) {
+            version (HUNT_DEBUG)
+                infof("channel closed: fd=%d, errno=%d, message=%s",
+                        channel.handle, errno, getErrorMessage(errno));
+            channel.close();
+        } else if (isError(currentEvents)) {
+            // version (HUNT_DEBUG)
+            debug warningf("channel error: fd=%s, errno=%d, message=%s",
+                    channel.handle, errno, getErrorMessage(errno));
+            channel.close();
+        } else if (isReadable(currentEvents)) {
+            version (HUNT_DEBUG)
+                tracef("channel reading: fd=%d", channel.handle);
+
+            version (HUNT_IO_WORKERPOOL) {
+                ioWorkersPool.put(cast(int)channel.handle, makeTask(&channel.onRead));
+                // import std.parallelism;
+                // taskPool.put(task(&channel.onRead));
             } else {
-                warningf("Undefined behavior: fd=%d, registered=%s", channel.handle, channel.isRegistered);
+                channel.onRead();
             }
+        } else if (isWritable(currentEvents)) {
+            AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
+            assert(wt !is null);
+            wt.onWriteDone();
+        } else {
+            warningf("Undefined behavior: fd=%d, registered=%s",
+                    channel.handle, channel.isRegistered);
         }
+    }
 
     private int iepoll(int epfd, epoll_event* events, int numfds, int timeout) {
         long start, now;
@@ -237,7 +250,7 @@ class AbstractSelector : Selector {
 
     // https://blog.csdn.net/ljx0305/article/details/4065058
     private static bool isError(uint events) nothrow {
-        return (events & EPOLLERR ) != 0;
+        return (events & EPOLLERR) != 0;
     }
 
     private static bool isClosed(uint events) nothrow {
@@ -277,7 +290,8 @@ class AbstractSelector : Selector {
         int res = 0;
         do {
             res = epoll_ctl(_epollFD, opcode, fd, &ev);
-        } while((res == -1) && (errno == EINTR));
+        }
+        while ((res == -1) && (errno == EINTR));
 
         /*
          * A channel may be registered with several Selectors. When each Selector
@@ -293,10 +307,9 @@ class AbstractSelector : Selector {
             warning("epoll_ctl failed");
             return false;
         } else
-            return true;        
+            return true;
     }
 }
-
 
 /**
 */
@@ -313,21 +326,25 @@ class EpollEventChannel : EventChannel {
     }
 
     override void call() {
-        version (HUNT_DEBUG) tracef("calling event [fd=%d]...%s", this.handle, eventLoop.isRuning);
+        version (HUNT_DEBUG)
+            tracef("calling event [fd=%d]...%s", this.handle, eventLoop.isRuning);
         ulong value = 1;
         core.sys.posix.unistd.write(this.handle, &value, value.sizeof);
     }
 
     override void onRead() {
-        version (HUNT_DEBUG) tracef("channel reading [fd=%d]...", this.handle);
+        version (HUNT_DEBUG)
+            tracef("channel reading [fd=%d]...", this.handle);
         this.clearError();
         ulong value;
         ssize_t n = core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
-        version (HUNT_DEBUG) tracef("channel read done: %d bytes, fd=%d", n, this.handle);
+        version (HUNT_DEBUG)
+            tracef("channel read done: %d bytes, fd=%d", n, this.handle);
     }
 
     override protected void onClose() {
-        version (HUNT_DEBUG) tracef("close event channel [fd=%d]...", this.handle);
+        version (HUNT_DEBUG)
+            tracef("close event channel [fd=%d]...", this.handle);
         core.sys.posix.unistd.close(this.handle);
     }
 }
