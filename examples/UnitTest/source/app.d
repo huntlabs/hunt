@@ -9,13 +9,13 @@ import test.BigIntegerTest;
 import test.JsonHelperTest;
 import test.ForkJoinPoolTest;
 import test.LinkedBlockingQueueTest;
+import test.MagedQueueTest;
 import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
 import test.ScheduledThreadPoolTest;
 import test.StringTokenizerTest;
-import test.TaskTest;
 import test.TaskPoolTest;
 import test.ThreadPoolExecutorTest;
 import test.ThreadTest;
@@ -24,6 +24,7 @@ import core.thread;
 import std.stdio;
 
 import benchmark.LinkedBlockingQueueBench;
+import test.MagedQueueTest;
 
 void main()
 {
@@ -31,7 +32,8 @@ void main()
 	writeln("CPU: ", totalCPUs);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 
-	testUnits!(TaskPoolTest);
+	// testUnits!(TaskPoolTest);
+	testUnits!(MagedQueueTest);
 
 
 	// LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();

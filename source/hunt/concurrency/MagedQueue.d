@@ -102,7 +102,7 @@ class MagedBlockingQueue(T) : Queue!T {
     }
 
     bool isEmpty() {
-        return this.head is this.tail;
+        return this.head.nxt is null;
     }
 
     void clear() {
@@ -163,24 +163,20 @@ class MagedNonBlockingQueue(T) : Queue!T {
         auto dummy = this.head;
         auto tl = this.tail;
         auto nxt = dummy.nxt;
-        if (dummy is tl) {
-            if (nxt is null) { /* queue empty */
-                return false;
-            } else { /* tail is obsolete */
-                cas(&this.tail, tl, nxt);
-            }
-        } else {
-            if (cas(&this.head, dummy, nxt)) {
-                e = cast(T)nxt.value;
-                return true;
-            }
+
+        if(nxt is null)
+            return false;
+        
+        if (cas(&this.head, dummy, nxt)) {
+            e = cast(T)nxt.value;
+            return true;
         }
-        return false;
+        return tryDequeue(e);
     }
 
 
     bool isEmpty() {
-        return this.head is this.tail;
+        return this.head.nxt is null;
     }
 
     void clear() {        

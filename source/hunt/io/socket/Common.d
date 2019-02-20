@@ -568,7 +568,7 @@ private:
 }
 
 
-alias WritingBufferQueue = MagedBlockingQueue!StreamWriteBuffer;
+alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
 
 // class WriteBufferQueue : MagedBlockingQueue!StreamWriteBuffer {
 
