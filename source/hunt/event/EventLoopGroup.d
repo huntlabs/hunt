@@ -14,6 +14,7 @@ module hunt.event.EventLoopGroup;
 import hunt.system.Memory;
 import hunt.event.EventLoop;
 import hunt.logging;
+import std.stdio;
 
 class EventLoopGroup {
 
@@ -22,11 +23,11 @@ class EventLoopGroup {
         eventLoopPool = new EventLoop[_size];
 
         version(HUNT_IO_WORKERPOOL) {
-            trace("EventLoop works in WorkerPool model");
+            writeln("EventLoop works in WorkerPool model");
         } else version(HUNT_IO_PARALLELWORKER) {
-            trace("EventLoop works in ParallelWorker model");
+            writeln("EventLoop works in ParallelWorker model");
         } else {
-            trace("EventLoop works in NoWorker model");
+            writeln("EventLoop works in NoWorker model");
         }
 
         foreach (i; 0 .. _size) {

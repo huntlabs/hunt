@@ -167,11 +167,11 @@ This class serves two purposes:
 private final class ParallelismThread : Thread {
     this(void delegate() dg) {
         super(dg);
-        taskQueue = new MagedBlockingQueue!(AbstractTask)();
+        taskQueue = new MagedNonBlockingQueue!(AbstractTask)();
     }
 
     TaskPool pool;
-    MagedBlockingQueue!(AbstractTask) taskQueue;
+    MagedNonBlockingQueue!(AbstractTask) taskQueue;
 }
 
 /**

@@ -262,7 +262,7 @@ class TcpStream : AbstractStream {
         assert(buffer !is null);
 
         if (!_isConnected) {
-            debug warningf("The connection (fd=%d) is down! No data is written.", this.handle);
+            debug warningf("The connection (fd=%d) is down! Data can't be written.", this.handle);
             return;
         }
 

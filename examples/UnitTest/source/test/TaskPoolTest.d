@@ -22,7 +22,7 @@ class TaskPoolTest {
         TaskPool taskPool = new TaskPool(5);
 
         // taskPool.put(new Task!(doSomething, string)("test01"));
-        taskPool.put(makeTask!(doSomething)("task00"));
+        taskPool.put(0, makeTask!(doSomething)("task00"));
 
         // foreach(i; 0..30) {
         //     taskPool.put(makeTask(&doTask, format("task%02d", i)));
@@ -36,7 +36,7 @@ class TaskPoolTest {
                 int len = count/nthread;
                 int start = n * len;
                 for(int j=start; j<start+len; j++) {
-                    taskPool.put(makeTask(&doTask, format("task%02d", j)));
+                    taskPool.put(j, makeTask(&doTask, format("task%02d", j)));
                 }
             });
             t.start();
