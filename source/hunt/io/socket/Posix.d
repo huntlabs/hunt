@@ -19,7 +19,7 @@ version(Posix):
 import hunt.concurrency.thread.Helper;
 import hunt.Functions;
 import hunt.io.socket.Common;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
 
 import std.conv;
@@ -82,17 +82,19 @@ abstract class AbstractListener : AbstractSocketChannel {
 }
 
 /**
-TCP Client
+TCP Peer
 */
 abstract class AbstractStream : AbstractSocketChannel, Stream {
     SimpleEventHandler disconnectionHandler;
+
+    enum BufferSize = 4096;
 
     protected bool _isConnected; // It's always true for server.
     protected AddressFamily _family;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
-        _readBuffer = new ubyte[bufferSize];
+        // _readBuffer = new ubyte[bufferSize];
         _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
@@ -105,13 +107,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
-        ptrdiff_t len = this.socket.receive(cast(void[]) this._readBuffer);
+        ubyte[BufferSize] _readBuffer;
+        ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         version (HUNT_DEBUG)
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
         if (len > 0) {
             if (dataReceivedHandler !is null)
-                dataReceivedHandler(this._readBuffer[0 .. len]);
+                dataReceivedHandler(_readBuffer[0 .. len]);
 
             // It's prossible that more data are wainting for read in inner buffer.
             if (len == _readBuffer.length)
@@ -158,65 +161,65 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     Warning: It will try the best to write all the data.   
     TODO: create a test
     */
-    protected void tryWriteAll(in ubyte[] data) {
-        const nBytes = this.socket.send(data);
-        version (HUNT_DEBUG)
-            tracef("actually sent bytes: %d / %d", nBytes, data.length);
+    // protected void tryWriteAll(in ubyte[] data) {
+    //     const nBytes = this.socket.send(data);
+    //     version (HUNT_DEBUG)
+    //         tracef("actually sent bytes: %d / %d", nBytes, data.length);
 
-        if (nBytes > 0) {
-            if (canWriteAgain && nBytes < data.length) { //  && writeRetries < writeRetryLimit
-                // version (HUNT_DEBUG)
-                writeRetries++;
-                tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
-                        writeRetries, nBytes, data.length - nBytes, data.length);
-                if (writeRetries > writeRetryLimit)
-                    warning("You are writting a big block of data!!!");
+    //     if (nBytes > 0) {
+    //         if (canWriteAgain && nBytes < data.length) { //  && writeRetries < writeRetryLimit
+    //             // version (HUNT_DEBUG)
+    //             writeRetries++;
+    //             tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
+    //                     writeRetries, nBytes, data.length - nBytes, data.length);
+    //             if (writeRetries > writeRetryLimit)
+    //                 warning("You are writting a big block of data!!!");
 
-                tryWriteAll(data[nBytes .. $]);
-            } else
-                writeRetries = 0;
-        } else if (nBytes == Socket.ERROR) {
-            this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
-            if (this._error) {
-                this._erroString = lastSocketError();
+    //             tryWriteAll(data[nBytes .. $]);
+    //         } else
+    //             writeRetries = 0;
+    //     } else if (nBytes == Socket.ERROR) {
+    //         this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
+    //         if (this._error) {
+    //             this._erroString = lastSocketError();
 
-                warningf("error on write: fd=%s, errno=%d, message=%s", this.handle,
-                        errno, this._erroString);
+    //             warningf("error on write: fd=%s, errno=%d, message=%s", this.handle,
+    //                     errno, this._erroString);
 
-                if(errno == ECONNRESET) {
-                    // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
-                    onDisconnected();
-                    this.close();
-                }
-            } else {
-                debug warningf("error on write: fd=%s, errno=%d, message=%s", this.handle,
-                        errno, lastSocketError());
+    //             if(errno == ECONNRESET) {
+    //                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
+    //                 onDisconnected();
+    //                 this.close();
+    //             }
+    //         } else {
+    //             debug warningf("error on write: fd=%s, errno=%d, message=%s", this.handle,
+    //                     errno, lastSocketError());
 
-                if (canWriteAgain && !_isClosed) {
-                    import core.thread;
-                    import core.time;
+    //             if (canWriteAgain && !_isClosed) {
+    //                 import core.thread;
+    //                 import core.time;
 
-                    writeRetries++;
-                    tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
-                            writeRetries, nBytes, data.length - nBytes, data.length);
-                    if (writeRetries > writeRetryLimit)
-                        warning("You are writting a Big block of data!!!");
-                    warning("Wait for a 100 msecs to try again");
-                    Thread.sleep(100.msecs);
-                    tryWriteAll(data);
-                }
-            }
-        } else {
-            version (HUNT_DEBUG) {
-                warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
-                assert(false, "Undefined behavior!");
-            }
-            else {
-                this._error = true;
-                this._erroString = lastSocketError();
-            }
-        }
-    }
+    //                 writeRetries++;
+    //                 tracef("[%d] rewrite: written %d, remaining: %d, total: %d",
+    //                         writeRetries, nBytes, data.length - nBytes, data.length);
+    //                 if (writeRetries > writeRetryLimit)
+    //                     warning("You are writting a Big block of data!!!");
+    //                 warning("Wait for a 100 msecs to try again");
+    //                 Thread.sleep(100.msecs);
+    //                 tryWriteAll(data);
+    //             }
+    //         }
+    //     } else {
+    //         version (HUNT_DEBUG) {
+    //             warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
+    //             assert(false, "Undefined behavior!");
+    //         }
+    //         else {
+    //             this._error = true;
+    //             this._erroString = lastSocketError();
+    //         }
+    //     }
+    // }
 
     /**
     Try to write a block of data.
@@ -298,12 +301,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
         StreamWriteBuffer writeBuffer;
         bool haveBuffer = _writeQueue.tryDequeue(writeBuffer);
-        while(_isRegistered && !isWriteCancelling && haveBuffer) {
+        while(!_isClosing && !isWriteCancelling && haveBuffer) {
             version (HUNT_DEBUG)
                 tracef("writing a buffer [fd=%d]", this.handle);
 
             const(ubyte)[] data = writeBuffer.remaining();
-            while(_isRegistered && !isWriteCancelling && data.length > 0) {
+            while(!_isClosing && !isWriteCancelling && data.length > 0) {
                 size_t nBytes = tryWrite(data);
                 if (nBytes > 0) {
                     version (HUNT_DEBUG)
@@ -313,7 +316,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 }
             }
 
-            if(_isRegistered && !isWriteCancelling)
+            if(!_isClosing && !isWriteCancelling)
                 writeBuffer.finish();
 
             version (HUNT_DEBUG) {
@@ -340,8 +343,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             tracef("data writing done [fd=%d]", this.handle,);
     }
 
-    // protected UbyteArrayObject _readBuffer;
-    private const(ubyte)[] _readBuffer;
+    // private const(ubyte)[] _readBuffer;
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
 

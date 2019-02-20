@@ -167,9 +167,11 @@ This class serves two purposes:
 private final class ParallelismThread : Thread {
     this(void delegate() dg) {
         super(dg);
+        taskQueue = new MagedBlockingQueue!(AbstractTask)();
     }
 
     TaskPool pool;
+    MagedBlockingQueue!(AbstractTask) taskQueue;
 }
 
 /**
@@ -184,7 +186,7 @@ enum PoolState : ubyte {
 */
 class TaskPool {
 
-    private MagedBlockingQueue!(AbstractTask) taskQueue;
+    // private MagedNonBlockingQueue!(AbstractTask) taskQueue;
 
     private ParallelismThread[] pool;
     private PoolState status = PoolState.running;
@@ -226,7 +228,7 @@ class TaskPool {
     this(size_t nWorkers) {
         if (nWorkers == 0)
             nWorkers = 1;
-        taskQueue = new MagedBlockingQueue!(AbstractTask)();
+        // taskQueue = new MagedNonBlockingQueue!(AbstractTask)();
 
         queueMutex = new Mutex(this);
         waiterMutex = new Mutex();
@@ -243,15 +245,11 @@ class TaskPool {
     }
 
     bool isDaemon() @property @trusted {
-        // queueLock();
-        // scope(exit) queueUnlock();
         return pool[0].isDaemon;
     }
 
     /// Ditto
     void isDaemon(bool newVal) @property @trusted {
-        // queueLock();
-        // scope(exit) queueUnlock();
         foreach (thread; pool) {
             thread.isDaemon = newVal;
         }
@@ -273,7 +271,7 @@ class TaskPool {
     // finish() is called with the blocking variable set to true.
     private void executeWorkLoop() {
         while (atomicReadUbyte(status) != PoolState.stopNow) {
-            AbstractTask task = taskQueue.dequeue();
+            AbstractTask task = pool[threadIndex].taskQueue.dequeue();
             if (task is null) {
                 if (atomicReadUbyte(status) == PoolState.finishing) {
                     atomicSetUbyte(status, PoolState.stopNow);
@@ -288,15 +286,15 @@ class TaskPool {
     private void doJob(AbstractTask job) {
         // assert(job.taskStatus == TaskStatus.processing);
 
-        scope (exit) {
-            // if (!isSingleTask)
-            {
-                waiterLock();
-                scope (exit)
-                    waiterUnlock();
-                notifyWaiters();
-            }
-        }
+        // scope (exit) {
+        //     // if (!isSingleTask)
+        //     {
+        //         waiterLock();
+        //         scope (exit)
+        //             waiterUnlock();
+        //         notifyWaiters();
+        //     }
+        // }
         job.run();
     }
 
@@ -326,14 +324,7 @@ class TaskPool {
     }
 
     private void waitUntilCompletion() {
-        // if (isSingleTask)
-        // {
-        //     singleTaskThread.join();
-        // }
-        // else
-        {
-            waiterCondition.wait();
-        }
+        waiterCondition.wait();
     }
 
     private void notifyWaiters() {
@@ -358,7 +349,7 @@ class TaskPool {
         if (blocking) {
             // Use this thread as a worker until everything is finished.
             // stopWorkLoop();
-            taskQueue.wakeup();
+            // taskQueue.wakeup();
             executeWorkLoop();
 
             foreach (t; pool) {
@@ -377,7 +368,11 @@ class TaskPool {
         }
     }
 
-    void put(AbstractTask task) {
-        taskQueue.enqueue(task);
+    void put(int factor, AbstractTask task) {
+        int nWorkers = cast(int)pool.length;
+        if(factor<0) factor = -factor;
+        int i = factor % nWorkers;
+        // tracef("factor=%d, index=%d", factor, i);
+        pool[i].taskQueue.enqueue(task);
     }
 }
