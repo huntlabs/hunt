@@ -181,7 +181,7 @@ class AbstractSelector : Selector {
                     infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
                 // taskPool.put(task(&handeChannel, channel, currentEvents));
-                // ioWorkersPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
+                // workerPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
                 handeChannel(channel, currentEvents);
             }
         }
@@ -204,9 +204,7 @@ class AbstractSelector : Selector {
                 tracef("channel reading: fd=%d", channel.handle);
 
             version (HUNT_IO_WORKERPOOL) {
-                ioWorkersPool.put(cast(int)channel.handle, makeTask(&channel.onRead));
-                // import std.parallelism;
-                // taskPool.put(task(&channel.onRead));
+                workerPool.put(cast(int)channel.handle, makeTask(&channel.onRead));
             } else {
                 channel.onRead();
             }

@@ -65,6 +65,10 @@ class EventLoopGroup {
         return eventLoopPool.length;
     }
 
+    EventLoop nextLoop(size_t factor) {
+       return eventLoopPool[factor % eventLoopPool.length];
+    }
+
     EventLoop nextLoop() {
         import core.atomic;
         size_t index = atomicOp!"+="(_loopIndex, 1);

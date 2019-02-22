@@ -59,7 +59,7 @@ void test_run1(HuntQueue.Queue!long q, uint threads) {
 /***
   Benchmark like Maged and Michael.
 */
-void test_run2(hunt.concurrency.MagedQueue.Queue!long q, uint threads) {
+void test_run2(hunt.concurrency.SimpleQueue.Queue!long q, uint threads) {
     const count = MagedMichaelOpCount / threads;
     Thread[] ts;
     foreach (i; 0 .. threads) {

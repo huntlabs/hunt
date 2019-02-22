@@ -12,7 +12,7 @@
 module hunt.io.TcpStream;
 
 import hunt.io.socket.Common;
-import hunt.concurrency.MagedQueue;
+import hunt.concurrency.SimpleQueue;
 import hunt.event;
 import hunt.logging;
 import hunt.Functions;

@@ -1,6 +1,6 @@
 module hunt.concurrency.TaskPool;
 
-import hunt.concurrency.MagedQueue;
+import hunt.concurrency.SimpleQueue;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Memory;
 import hunt.util.Common;
@@ -167,11 +167,11 @@ This class serves two purposes:
 private final class ParallelismThread : Thread {
     this(void delegate() dg) {
         super(dg);
-        taskQueue = new MagedNonBlockingQueue!(AbstractTask)();
+        taskQueue = new NonBlockingQueue!(AbstractTask)();
     }
 
     TaskPool pool;
-    MagedNonBlockingQueue!(AbstractTask) taskQueue;
+    NonBlockingQueue!(AbstractTask) taskQueue;
 }
 
 /**
@@ -185,8 +185,6 @@ enum PoolState : ubyte {
 /**
 */
 class TaskPool {
-
-    // private MagedNonBlockingQueue!(AbstractTask) taskQueue;
 
     private ParallelismThread[] pool;
     private PoolState status = PoolState.running;
@@ -228,7 +226,6 @@ class TaskPool {
     this(size_t nWorkers) {
         if (nWorkers == 0)
             nWorkers = 1;
-        // taskQueue = new MagedNonBlockingQueue!(AbstractTask)();
 
         queueMutex = new Mutex(this);
         waiterMutex = new Mutex();
