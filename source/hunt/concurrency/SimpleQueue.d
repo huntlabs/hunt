@@ -1,4 +1,4 @@
-module hunt.concurrency.MagedQueue;
+module hunt.concurrency.SimpleQueue;
 
 import core.thread;
 import core.sync.semaphore : Semaphore;
@@ -37,7 +37,7 @@ private static class QueueNode(T) {
 }
 
 /** blocking multi-producer multi-consumer queue  */
-class MagedBlockingQueue(T) : Queue!T {
+class BlockingQueue(T) : Queue!T {
     private QueueNode!T head;
     private QueueNode!T tail;
     private Mutex head_lock;
@@ -121,7 +121,7 @@ class MagedBlockingQueue(T) : Queue!T {
 }
 
 /** non-blocking multi-producer multi-consumer queue  */
-class MagedNonBlockingQueue(T) : Queue!T {
+class NonBlockingQueue(T) : Queue!T {
     private shared(QueueNode!T) head;
     private shared(QueueNode!T) tail;
     private shared bool isWaking = false;
@@ -174,13 +174,64 @@ class MagedNonBlockingQueue(T) : Queue!T {
         return tryDequeue(e);
     }
 
-
     bool isEmpty() {
         return this.head.nxt is null;
     }
 
     void clear() {        
         shared n = new QueueNode!T();
+        this.head = this.tail = n;
+    }
+}
+
+
+/**
+*/
+class SimpleQueue(T) : Queue!T {
+    private QueueNode!T head;
+    private QueueNode!T tail;
+
+    this() {
+        auto n = new QueueNode!T();
+        this.head = this.tail = n;
+    }
+
+    void enqueue(T t) {
+        auto end = new QueueNode!T();
+        end.value = t;
+        
+        auto tl = this.tail;
+        this.tail = end;
+        tl.value = t;
+        tl.nxt = end; // acces
+        
+    }
+
+    T dequeue() {
+        T e = void;
+        while (!tryDequeue(e)) {
+        }
+        // tryDequeue(e);
+        return e;
+    }
+
+    bool tryDequeue(out T e) {
+        auto nxt = this.head.nxt;
+        if(nxt is null)
+            return false;
+        
+        this.head = nxt;
+        e = cast(T)nxt.value;
+        return true;
+    }
+
+
+    bool isEmpty() {
+        return this.head.nxt is null;
+    }
+
+    void clear() {        
+        auto n = new QueueNode!T();
         this.head = this.tail = n;
     }
 }

@@ -12,7 +12,7 @@
 module hunt.io.socket.Common;
 
 // import hunt.collection.ByteBuffer;
-import hunt.concurrency.MagedQueue;
+import hunt.concurrency.SimpleQueue;
 import hunt.concurrency.TaskPool;
 import hunt.event.EventLoop;
 import hunt.Exceptions;
@@ -47,7 +47,7 @@ alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr);
 alias AcceptCallBack = void delegate(Selector loop, Socket socket) ;
 // dfmt on
 
-@property TaskPool ioWorkersPool() @trusted {
+@property TaskPool workerPool() @trusted {
     import std.concurrency : initOnce;
 
     __gshared TaskPool pool;
@@ -567,12 +567,16 @@ private:
     DataWrittenHandler _sentHandler;
 }
 
+version(HUNT_IO_WORKERPOOL) {
+    alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
+} else {
+    alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
+}
 
-alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
+// alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
+// alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
+// alias WritingBufferQueue = MagedBlockingQueue!StreamWriteBuffer;
 
-// class WriteBufferQueue : MagedBlockingQueue!StreamWriteBuffer {
-
-// }
 
 /**
 */

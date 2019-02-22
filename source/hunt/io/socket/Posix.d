@@ -320,8 +320,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
                 writeBuffer.finish();
 
             version (HUNT_DEBUG) {
-                tracef("buffer writing done: [fd=%d]", this.handle);
-                tracef("_writeQueue is empty: %s, [fd=%d]", _writeQueue.isEmpty(), this.handle);
+                tracef("buffer writing done: [fd=%d], writeQueue is empty: %s", 
+                    this.handle, _writeQueue.isEmpty());
+                // tracef("_writeQueue is empty: %s, [fd=%d]", _writeQueue.isEmpty(), this.handle);
             }
             haveBuffer = _writeQueue.tryDequeue(writeBuffer);
         }
