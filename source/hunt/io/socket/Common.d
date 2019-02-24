@@ -384,9 +384,9 @@ class LoopException : Exception {
 
 /**
 */
-interface Stream {
+// interface Stream {
 
-}
+// }
 
 /**
 */
@@ -577,57 +577,6 @@ version(HUNT_IO_WORKERPOOL) {
 // alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
 // alias WritingBufferQueue = MagedBlockingQueue!StreamWriteBuffer;
 
-
-/**
-*/
-// struct WriteBufferQueue {
-//     StreamWriteBuffer front() nothrow @safe {
-//         return _first;
-//     }
-
-//     bool empty() nothrow @safe {
-//         return _first is null;
-//     }
-
-//     void clear() {
-//         StreamWriteBuffer current = _first;
-//         while (current !is null) {
-//             _first = current.next;
-//             current.next = null;
-//             current = _first;
-//         }
-
-//         _first = null;
-//         _last = null;
-//     }
-
-//     void enQueue(StreamWriteBuffer wsite) {
-//         assert(wsite);
-//         if (_last) {
-//             _last.next = wsite;
-//         } else {
-//             _first = wsite;
-//         }
-//         wsite.next = null;
-//         _last = wsite;
-//     }
-
-//     StreamWriteBuffer deQueue() {
-//         // assert(_first && _last);
-//         StreamWriteBuffer wsite = _first;
-//         if (_first !is null)
-//             _first = _first.next;
-
-//         if (_first is null)
-//             _last = null;
-
-//         return wsite;
-//     }
-
-// private:
-//     StreamWriteBuffer _last = null;
-//     StreamWriteBuffer _first = null;
-// }
 
 /**
 */

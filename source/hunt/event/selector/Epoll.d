@@ -60,8 +60,8 @@ class AbstractSelector : Selector {
          * epoll_create expects a size as a hint to the kernel about how to
          * dimension internal structures. We can't predict the size in advance.
          */
-        // _epollFD = epoll_create1(0);
-        _epollFD = epoll_create(256);
+        _epollFD = epoll_create1(0);
+        // _epollFD = epoll_create(256);
         if (_epollFD < 0)
             throw new IOException("epoll_create failed");
         _event = new EpollEventChannel(this);
@@ -89,7 +89,7 @@ class AbstractSelector : Selector {
         if (_running) {
             super.stop();
             version (HUNT_DEBUG)
-                tracef("notice that selector[fd=%d] stopped", _epollFD);
+                tracef("selector[fd=%d] stopped", _epollFD);
             _event.call();
         }
     }
@@ -129,11 +129,12 @@ class AbstractSelector : Selector {
         }
     }
 
+    epoll_event[NUM_KEVENTS] events;
+
     /**
         timeout: in millisecond
     */
     override protected int doSelect(long timeout) {
-        epoll_event[NUM_KEVENTS] events;
         int len = 0;
 
         if (timeout <= 0) { /* Indefinite or no wait */
