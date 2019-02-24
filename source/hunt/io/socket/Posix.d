@@ -34,6 +34,12 @@ import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 
+
+extern(C) {
+    ssize_t read(int, scope void*, size_t);
+    ssize_t write(int __fd, const void *__buf, size_t __n);
+}  
+
 // extern (C) nothrow @nogc {
 //     int     accept4(int, sockaddr*, socklen_t*, int);
 // }
@@ -84,7 +90,7 @@ abstract class AbstractListener : AbstractSocketChannel {
 /**
 TCP Peer
 */
-abstract class AbstractStream : AbstractSocketChannel, Stream {
+abstract class AbstractStream : AbstractSocketChannel {
     SimpleEventHandler disconnectionHandler;
 
     enum BufferSize = 4096;
@@ -94,7 +100,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
-        // _readBuffer = new ubyte[bufferSize];
+        _readBuffer = new ubyte[bufferSize];
         _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
@@ -107,8 +113,9 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
-        ubyte[BufferSize] _readBuffer;
-        ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
+        // ubyte[BufferSize] _readBuffer;
+        // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
+        ptrdiff_t len = read(this.socket.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
         version (HUNT_DEBUG)
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
@@ -221,6 +228,33 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     //     }
     // }
 
+    // private size_t doWrite(const ubyte[] data) {
+    //     size_t total = 0;
+    //     ptrdiff_t s = 0;
+    //     // buf += offset;
+    //     size_t length = data.length;
+
+    //     while (total != length) {
+    //         errno = 0;
+    //         s = write(this.handle, data.ptr + total, length - total);
+    //         version (HUNT_DEBUG)
+    //             tracef("write to fd %d, written %d, with offset %d and length %d\n", this.handle, s, 0, length);
+
+    //         if (s == -1) {
+    // //            fprintf(stderr, "write error on fd %d, %d %s\n", fd, errno, strerror(errno));
+    //             if (errno != EAGAIN) {
+    //                 debug warningf("warning on write: fd=%d, errno=%d, message=%s", this.handle,
+    //                     errno, getErrorMessage(errno));
+    //             }
+    //             return total;
+    //         }
+
+    //         total += s;
+    //     }
+
+    //     return total;
+    // }
+
     /**
     Try to write a block of data.
     */
@@ -229,6 +263,8 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         this.clearError();
 
         const nBytes = this.socket.send(data);
+        // const nBytes = doWrite(data);
+
         version (HUNT_DEBUG)
             tracef("actually sent : %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
@@ -344,7 +380,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
             tracef("data writing done [fd=%d]", this.handle,);
     }
 
-    // private const(ubyte)[] _readBuffer;
+    private const(ubyte)[] _readBuffer;
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
 
@@ -403,6 +439,8 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
         auto data = this._readBuffer.data;
         scope (exit)
             this._readBuffer.data = data;
+        // auto len = this.socket.receiveFrom(this._readBuffer.data, this._readBuffer.addr);
+
         auto len = this.socket.receiveFrom(this._readBuffer.data, this._readBuffer.addr);
         if (len > 0) {
             this._readBuffer.data = this._readBuffer.data[0 .. len];
