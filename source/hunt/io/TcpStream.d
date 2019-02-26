@@ -107,6 +107,22 @@ class TcpStream : AbstractStream {
         setKeepalive();
     }
 
+    this(Selector loop, socket_t fd, TcpStreamOption option = null) {
+        if(option is null)
+           _tcpOption = TcpStreamOption.createOption();
+        else
+            _tcpOption = option;
+        super(loop, AddressFamily.INET, _tcpOption.bufferSize);
+        // this.socket = socket;
+        // _remoteAddress = socket.remoteAddress();
+        // _localAddress = socket.localAddress();
+        this.handle = fd;
+
+        _isClient = false;
+        _isConnected = true;
+        // setKeepalive();
+    }
+
     void options(TcpStreamOption option) @property {
         assert(option !is null);
         this._tcpOption = option;
@@ -280,11 +296,23 @@ class TcpStream : AbstractStream {
     }
 
     /// safe for big data sending
-    void write(const ubyte[] data, DataWrittenHandler handler = null) {
+    void write(const(ubyte)[] data, DataWrittenHandler handler = null) {
         if (data.length == 0)
             return;
 
-        write(new SocketStreamBuffer(data, handler));
+        if (_writeQueue.isEmpty()) {
+            while (!_isClosing && !isWriteCancelling && data.length > 0) {
+                size_t nBytes = tryWrite(data);
+                if (nBytes > 0) {
+                    version (HUNT_DEBUG)
+                        tracef("writing: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+                    data = data[nBytes..$];
+                }
+            }
+        } else {
+            write(new SocketStreamBuffer(data, handler));
+        }
+
     }
 
     void shutdownInput() {
@@ -339,10 +367,16 @@ protected:
 
         resetWrittingStatus();
         _isConnected = false;
-        this.socket.shutdown(SocketShutdown.BOTH);
-        this.socket.close();
+        if(this.socket !is null) {
+            this.socket.shutdown(SocketShutdown.BOTH);
+            this.socket.close();
+        } else {
+            import core.sys.posix.unistd;
+            core.sys.posix.unistd.close(this.handle);
+        }
         super.onClose();
 
+        version (HUNT_DEBUG) infof("notify TCP stream down fd=%d", this.handle);
         if (closeHandler)
             closeHandler();
     }
