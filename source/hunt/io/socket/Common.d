@@ -220,7 +220,7 @@ abstract class AbstractChannel : Channel {
         clear();
 
         version (HUNT_DEBUG)
-            tracef("closed [fd=%d]...", this.handle);
+            tracef("Channel closed [fd=%d]...", this.handle);
     }
 
     protected void errorOccurred(string msg) {
