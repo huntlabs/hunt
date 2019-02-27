@@ -110,7 +110,7 @@ abstract class Selector {
 
     abstract bool register(AbstractChannel channel);
 
-    abstract bool reregister(AbstractChannel channel);
+    // abstract bool reregister(AbstractChannel channel);
 
     abstract bool deregister(AbstractChannel channel);
 
@@ -141,7 +141,7 @@ abstract class Selector {
         do {
             // version (HUNT_DEBUG) trace("Selector rolled once.");
             wakeup();
-            lockAndDoSelect(timeout);
+            doSelect(timeout);
         }
         while (_running);
         dispose();
@@ -153,31 +153,31 @@ abstract class Selector {
     int select(long timeout) {
         if (timeout < 0)
             throw new IllegalArgumentException("Negative timeout");
-        return lockAndDoSelect((timeout == 0) ? -1 : timeout);
+        return doSelect((timeout == 0) ? -1 : timeout);
     }
 
     int select() {
-        return select(0);
+        return doSelect(0);
     }
 
     int selectNow() {
-        return lockAndDoSelect(0);
+        return doSelect(0);
     }
 
     protected abstract int doSelect(long timeout);
 
-    private int lockAndDoSelect(long timeout) {
-        // synchronized (this) {
-        // if (!isOpen())
-        //     throw new ClosedSelectorException();
-        // synchronized (publicKeys) {
-        //     synchronized (publicSelectedKeys) {
-        //         return doSelect(timeout);
-        //     }
-        // }
-        return doSelect(timeout);
-        // }
-    }
+    // private int lockAndDoSelect(long timeout) {
+    //     // synchronized (this) {
+    //     // if (!isOpen())
+    //     //     throw new ClosedSelectorException();
+    //     // synchronized (publicKeys) {
+    //     //     synchronized (publicSelectedKeys) {
+    //     //         return doSelect(timeout);
+    //     //     }
+    //     // }
+    //     return doSelect(timeout);
+    //     // }
+    // }
 }
 
 /**
@@ -220,7 +220,7 @@ abstract class AbstractChannel : Channel {
         clear();
 
         version (HUNT_DEBUG)
-            tracef("Channel closed [fd=%d]...", this.handle);
+            tracef("channel closed [fd=%d]...", this.handle);
     }
 
     protected void errorOccurred(string msg) {
@@ -298,39 +298,6 @@ private:
     AbstractChannel _next;
 }
 
-/**
-*/
-class EventChannel : AbstractChannel {
-    this(Selector loop) {
-        super(loop, ChannelType.Event);
-    }
-
-    void call() {
-        assert(false);
-    }
-
-    // override void close() {
-    //     if(_isClosing)
-    //         return;
-    //     _isClosing = true;
-    //     version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
-
-    //     if(isBusy) {
-    //         import std.parallelism;
-    //         version (HUNT_DEBUG) warning("Close operation delayed");
-    //         auto theTask = task(() {
-    //             while(isBusy) {
-    //                 version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
-    //                 // Thread.sleep(20.msecs);
-    //             }
-    //             super.close();
-    //         });
-    //         taskPool.put(theTask);
-    //     } else {
-    //         super.close();
-    //     }
-    // }
-}
 
 mixin template OverrideErro() {
     bool isError() {
