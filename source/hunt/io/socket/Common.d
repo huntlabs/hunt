@@ -11,7 +11,7 @@
 
 module hunt.io.socket.Common;
 
-// import hunt.collection.ByteBuffer;
+import hunt.collection.ByteBuffer;
 import hunt.concurrency.SimpleQueue;
 import hunt.concurrency.TaskPool;
 import hunt.event.EventLoop;
@@ -36,7 +36,7 @@ version (HAVE_IOCP) import SOCKETOPTIONS = core.sys.windows.winsock2;
 version (Posix) import SOCKETOPTIONS = core.sys.posix.sys.socket;
 
 alias ReadCallBack = void delegate(Object obj);
-alias DataReceivedHandler = void delegate(const ubyte[] data);
+alias DataReceivedHandler = void delegate(ByteBuffer buffer);
 alias DataWrittenHandler = void delegate(const ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
 

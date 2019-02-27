@@ -16,6 +16,7 @@ version(Posix):
 
 // dfmt on
 
+import hunt.collection.ByteBuffer;
 import hunt.concurrency.thread.Helper;
 import hunt.Functions;
 import hunt.io.socket.Common;
@@ -34,6 +35,8 @@ import core.stdc.errno;
 import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
+
+
 
 
 extern (C) nothrow @nogc {
@@ -93,15 +96,18 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     protected bool _isConnected; // It's always true for server.
     protected AddressFamily _family;
+    protected ByteBuffer _bufferForRead;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
-        _readBuffer = new ubyte[bufferSize];
+        // _readBuffer = new ubyte[bufferSize];
+        _bufferForRead = ByteBuffer.allocate(bufferSize);
+        _readBuffer = cast(ubyte[])_bufferForRead.array();
         _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
-        setFlag(ChannelFlag.Read, true);
-        setFlag(ChannelFlag.Write, true);
-        setFlag(ChannelFlag.ETMode, true);
+        // setFlag(ChannelFlag.Read, true);
+        // setFlag(ChannelFlag.Write, true);
+        // setFlag(ChannelFlag.ETMode, true);
     }
 
     /**
@@ -116,8 +122,11 @@ abstract class AbstractStream : AbstractSocketChannel {
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
         if (len > 0) {
-            if (dataReceivedHandler !is null)
-                dataReceivedHandler(_readBuffer[0 .. len]);
+            if (dataReceivedHandler !is null) {
+                _bufferForRead.position(cast(int)len);
+                _bufferForRead.flip();
+                dataReceivedHandler(_bufferForRead);
+            }
 
             // size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
 
@@ -159,11 +168,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (disconnectionHandler !is null)
             disconnectionHandler();
     }
-
-    protected bool canWriteAgain = true;
-    int writeRetryLimit = 5;
-    private int writeRetries = 0;
-
 
     /**
     Try to write a block of data.
