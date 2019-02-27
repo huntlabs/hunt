@@ -107,22 +107,6 @@ class TcpStream : AbstractStream {
         setKeepalive();
     }
 
-    this(Selector loop, socket_t fd, TcpStreamOption option = null) {
-        if(option is null)
-           _tcpOption = TcpStreamOption.createOption();
-        else
-            _tcpOption = option;
-        super(loop, AddressFamily.INET, _tcpOption.bufferSize);
-        // this.socket = socket;
-        // _remoteAddress = socket.remoteAddress();
-        // _localAddress = socket.localAddress();
-        this.handle = fd;
-
-        _isClient = false;
-        _isConnected = true;
-        // setKeepalive();
-    }
-
     void options(TcpStreamOption option) @property {
         assert(option !is null);
         this._tcpOption = option;
@@ -204,7 +188,7 @@ class TcpStream : AbstractStream {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
                 // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
                 //     _tcpOption.keepaliveProbes);
-                version (HUNT_DEBUG) checkKeepAlive();
+                // version (HUNT_DEBUG) checkKeepAlive();
             }
         }
     }
@@ -240,12 +224,6 @@ class TcpStream : AbstractStream {
         return this;
     }
 
-    // TcpStream onDataWritten(DataWrittenHandler handler)
-    // {
-    //     sentHandler = handler;
-    //     return this;
-    // }
-
     TcpStream onClosed(SimpleEventHandler handler) {
         closeHandler = handler;
         return this;
@@ -276,10 +254,9 @@ class TcpStream : AbstractStream {
 
     void write(StreamWriteBuffer buffer) {
         assert(buffer !is null);
-
-        if (!_isConnected) {
-            debug warningf("The connection (fd=%d) is down! Data can't be written.", this.handle);
-            return;
+   
+        if(!_isConnected) {
+            throw new Exception("The connection is down!");
         }
 
         version (HUNT_DEBUG)
@@ -292,27 +269,48 @@ class TcpStream : AbstractStream {
         } else {
             onWrite();
         }
-
     }
 
-    /// safe for big data sending
+    /**
+    */
     void write(const(ubyte)[] data, DataWrittenHandler handler = null) {
-        if (data.length == 0)
+        if (data.length == 0 || !_isConnected)
             return;
+        
+        if(!_isConnected) {
+            throw new Exception("The connection is down!");
+        }
 
-        if (_writeQueue.isEmpty()) {
-            while (!_isClosing && !isWriteCancelling && data.length > 0) {
-                size_t nBytes = tryWrite(data);
+        if (_writeQueue.isEmpty() && !_isWritting) {
+            version (HUNT_DEBUG)
+                tracef("write data directly, fd=%d", this.handle);
+            _isWritting = true;
+            scope(exit) {
+                _isWritting = false;
+            }
+
+            const(ubyte)[] d = data;
+
+            while (!_isClosing && !isWriteCancelling && d.length > 0) {
+                size_t nBytes = tryWrite(d);
                 if (nBytes > 0) {
                     version (HUNT_DEBUG)
-                        tracef("writing: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
-                    data = data[nBytes..$];
+                        tracef("writing: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                    d = d[nBytes..$];
+                } else {
+                    version (HUNT_DEBUG)
+                        warning("buffering remaining data");
+                    _writeQueue.enqueue(new SocketStreamBuffer(d));
+                    break;
                 }
             }
+            
+            if(handler !is null)
+                handler(data, data.length);
+
         } else {
             write(new SocketStreamBuffer(data, handler));
         }
-
     }
 
     void shutdownInput() {

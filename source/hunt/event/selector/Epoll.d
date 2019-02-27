@@ -47,164 +47,32 @@ shared static this() {
     fdLimit = fileLimit.rlim_max;
 }
 
-
-class Scope {
-    int sfd;
-    int efd;
-    epoll_event event;
-    epoll_event[] events;
-    uint[] eventTypes;
-}
-
-// struct EventRecord {
-//     int fd;
-//     int type;
-// }
-
-Scope initEpoll(int maxEvents) {
-
-	int efd = epoll_create1(0);
-	// efd = epoll_create(256);
-	if (efd < 0)
-		throw new Exception("epoll_create failed");
-
-	Scope sc = new Scope();
-	sc.efd = efd;
-	sc.events = new epoll_event[maxEvents];
-    sc.eventTypes = new uint[maxEvents];
-
-	return sc;	
-}
-
-
-int waitForEvents(Scope sc, int timeout) {
-    int n, i, s, j = 0;
-    epoll_event[] events = sc.events;
-    int sfd = sc.sfd;
-    int efd = sc.efd;
-    int e;
-
-    if(timeout >= 0)
-        n = epoll_wait(efd, events.ptr, cast(int)events.length, timeout);
-    else
-        n = epoll_wait(efd, events.ptr, cast(int)events.length, -1);
-
-   version (HUNT_DEBUG) tracef("get %d events on epoll %d", n, efd);
-    for (i = 0; i < n; i++) {
-        e = events[i].events;
-        int fd = events[i].data.fd;
-        version (HUNT_DEBUG) tracef("fd: %d, event: %d, epoll: %d", fd, e, efd);
-        if ((e & EPOLLERR) || (e & EPOLLHUP) || (e & EPOLLRDHUP) || (!(e & EPOLLIN) && !(e & EPOLLOUT))) {
-            /* An error has occured on this fd, or the socket is not
-               ready for reading (why were we notified then?) */
-           version (HUNT_DEBUG)  {
-                warningf("connection closed for fd %d, event: %d", fd, e);
-                int       error = 0;
-                socklen_t errlen = error.sizeof;
-                if (getsockopt(fd, SOL_SOCKET, SO_ERROR, cast(void *)&error, &errlen) == 0) {
-                    version (HUNT_DEBUG) errorf("error = %s", strerror(error));
-                }
-           }
-           sc.eventTypes[i] = 3; // close connection
-//            close(fd);
-        } else if (sfd == fd) {
-            sc.eventTypes[i] = 0; // 0 - new connection
-        } else {
-           sc.eventTypes[i] = e; // 1-read; 4-write; 5-read and write
-            version (HUNT_DEBUG) {
-                if(events[i].events & EPOLLOUT)
-                    tracef("write data on descriptor %d", cast(int)fd);
-                else
-                    tracef("read data on descriptor %d", fd);
-            } 
-        }
-    }
-
-    return n;
-}
-
-int waitForChannelEvents(Scope sc, int timeout) {
-    int n, i, s, j = 0;
-    epoll_event[] events = sc.events;
-    int sfd = sc.sfd;
-    int efd = sc.efd;
-    int e;
-
-    if(timeout >= 0)
-        n = epoll_wait(efd, events.ptr, cast(int)events.length, timeout);
-    else
-        n = epoll_wait(efd, events.ptr, cast(int)events.length, -1);
-
-    version (HUNT_DEBUG) tracef("get %d events on epoll %d", n, efd);
-    for (i = 0; i < n; i++) {
-        e = events[i].events;
-        AbstractChannel channel = cast(AbstractChannel)events[i].data.ptr;
-        int fd = cast(int)channel.handle;
-        // int fd = events[i].data.fd;
-        version (HUNT_DEBUG) tracef("fd: %d, event: %d, epoll: %d", fd, e, efd);
-        if ((e & EPOLLERR) || (e & EPOLLHUP) || (e & EPOLLRDHUP) || (!(e & EPOLLIN) && !(e & EPOLLOUT))) {
-            /* An error has occured on this fd, or the socket is not
-               ready for reading (why were we notified then?) */
-           version (HUNT_DEBUG)  {
-                infof("connection closed for fd %d, event: %d", fd, e);
-                int       error = 0;
-                socklen_t errlen = error.sizeof;
-                if (getsockopt(fd, SOL_SOCKET, SO_ERROR, cast(void *)&error, &errlen) == 0) {
-                    
-                    version (HUNT_DEBUG) errorf("error = %s", getErrorMessage(error));
-                    // import core.stdc.string;
-                    // auto ss = strerror(error);
-                    // version (HUNT_DEBUG) errorf("error xxxx= %s", ss[0 .. ss.strlen].idup);
-                }
-           }
-           sc.eventTypes[i] = 3; // close connection
-//            close(fd);
-        } else if (sfd == fd) {
-            sc.eventTypes[i] = 0; // 0 - new connection
-        } else {
-           sc.eventTypes[i] = e; // 1-read; 4-write; 5-read and write
-            // version (HUNT_DEBUG) {
-            //     if(events[i].events & EPOLLOUT)
-            //         tracef("write data on descriptor %d", cast(int)fd);
-            //     else
-            //         tracef("read data on descriptor %d", fd);
-            // } 
-        }
-    }
-
-    return n;
-}
-
 /**
 */
 class AbstractSelector : Selector {
     enum int NUM_KEVENTS = 1024;
     private int _epollFD;
-    // private EventChannel _event;
+    AbstractChannel[] channels;
+    epoll_event[NUM_KEVENTS] events;
 
     protected size_t number;
     protected size_t divider;
 
-	Scope sc;
-
-    this(size_t number, size_t divider) {
+    this(size_t number, size_t divider, size_t maxChannels = 1500) {
         // http://man7.org/linux/man-pages/man2/epoll_create.2.html
         /*
          * epoll_create expects a size as a hint to the kernel about how to
          * dimension internal structures. We can't predict the size in advance.
          */
-        // _epollFD = epoll_create1(0);
-        // // _epollFD = epoll_create(256);
-        // if (_epollFD < 0)
-        //     throw new IOException("epoll_create failed");
-        // _event = new EpollEventChannel(this);
-        // register(_event);
+        _epollFD = epoll_create1(0);
+        // _epollFD = epoll_create(256);
+        if (_epollFD < 0)
+            throw new IOException("epoll_create failed");
+
         this.number = number;
         this.divider = divider;
 
-		sc = initEpoll(100);
-
-        channels = new AbstractChannel[1500];
+        channels = new AbstractChannel[maxChannels];
     }
 
     ~this() {
@@ -216,10 +84,10 @@ class AbstractSelector : Selector {
             return;
 
         version (HUNT_DEBUG)
-            tracef("disposing selector[fd=%d]...", sc.efd);
+            tracef("disposing selector[fd=%d]...", _epollFD);
         isDisposed = true;
         // _event.close();
-        core.sys.posix.unistd.close(sc.efd);
+        core.sys.posix.unistd.close(_epollFD);
     }
 
     private bool isDisposed = false;
@@ -228,83 +96,68 @@ class AbstractSelector : Selector {
         if (_running) {
             super.stop();
             version (HUNT_DEBUG)
-                tracef("selector[fd=%d] stopped", sc.efd);
+                tracef("selector[fd=%d] stopped", _epollFD);
             // _event.call();
         }
     }
 
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
+        int infd = cast(int) channel.handle;
         version (HUNT_DEBUG)
-            tracef("register channel: fd=%d", channel.handle);
+            tracef("register channel: fd=%d", infd);
 
-        // if (channel.type == ChannelType.Timer) {
-        //     auto wt = cast(AbstractTimer) channel;
-        //     if (wt !is null)
-        //         wt.setTimer();
-        // }
-
-        errno = 0;
-        int infd = cast(int)channel.handle;
-        size_t index = cast(size_t) (infd / divider);
-        if(index>=channels.length) {
+        size_t index = cast(size_t)(infd / divider);
+        if (index >= channels.length) {
             debug warningf("expanding channels uplimit to %d", index);
             import std.algorithm : max;
+
             size_t length = max(cast(size_t)(index * 3 / 2), 16);
             AbstractChannel[] arr = new AbstractChannel[length];
-            arr[0..channels.length] = channels[0..$];
+            arr[0 .. channels.length] = channels[0 .. $];
             channels = arr;
         }
         channels[index] = channel;
+
         epoll_event e;
 
         // e.data.fd = infd;
         e.data.ptr = cast(void*) channel;
         e.events = EPOLLIN | EPOLLET | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLOUT;
-        int s = epoll_ctl(sc.efd, EPOLL_CTL_ADD, infd, &e);
+        int s = epoll_ctl(_epollFD, EPOLL_CTL_ADD, infd, &e);
         if (s == -1) {
-            error("epoll_ctl on attach");
+            debug warningf("failed to register channel: fd=%d", infd);
             return false;
+        } else {
+            return true;
         }
-
-        // tracef("fd=%d, count=%d",  infd, channels.length);
-
-        return true;
-
         // if (epollCtl(channel, EPOLL_CTL_ADD)) {
         //     // _event.setNext(channel);
         //     return true;
         // } else {
-        //     warningf("register channell failed: fd=%d", channel.handle);
+        //     debug warningf("failed to register channel: fd=%d", infd);
         //     return false;
         // }
     }
 
-    // AbstractChannel[int] channels;
-    AbstractChannel[] channels;
-
-    override bool reregister(AbstractChannel channel) {
-        return epollCtl(channel, EPOLL_CTL_MOD);
-    }
+    // override bool reregister(AbstractChannel channel) {
+    //     return epollCtl(channel, EPOLL_CTL_MOD);
+    // }
 
     override bool deregister(AbstractChannel channel) {
-        // if (epollCtl(channel, EPOLL_CTL_DEL)) {
-        //     version (HUNT_DEBUG)
-        //         tracef("deregister channel: fd=%d", channel.handle);
-        //     return true;
-        // } else {
-        //     warningf("deregister channel failed: fd=%d", channel.handle);
-        //     return false;
-        // }
-        // channels.remove(cast(int)channel.handle);
-        size_t index = cast(size_t) (channel.handle / divider);
-        debug tracef("deregister channel: fd=%d, index=%d", channel.handle, index);
+        size_t fd = cast(size_t) channel.handle;
+        size_t index = cast(size_t)(fd / divider);
+        version (HUNT_DEBUG)
+            tracef("deregister channel: fd=%d, index=%d", fd, index);
         channels[index] = null;
-        // trace(channels.length);
-        return true;
-    }
 
-    epoll_event[NUM_KEVENTS] events;
+        if (epollCtl(channel, EPOLL_CTL_DEL)) {
+            return true;
+        } else {
+            warningf("deregister channel failed: fd=%d", fd);
+            return false;
+        }
+    }
 
     /**
         timeout: in millisecond
@@ -312,118 +165,115 @@ class AbstractSelector : Selector {
     override protected int doSelect(long timeout) {
         int len = 0;
 
-        // if (timeout <= 0) { /* Indefinite or no wait */
-        //     do {
-        //         // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
-        //         len = epoll_wait(_epollFD, events.ptr, events.length, cast(int) timeout);
-        //     }
-        //     while ((len == -1) && (errno == EINTR));
-        // } else { /* Bounded wait; bounded restarts */
-        //     len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
-        // }
-        // len = waitForEvents(sc, 500);
-        debug {
-            len = waitForChannelEvents(sc, -1); 
-        } else {
-            len = waitForChannelEvents(sc, 500);
+        if (timeout <= 0) { /* Indefinite or no wait */
+            do {
+                // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
+                len = epoll_wait(_epollFD, events.ptr, events.length, cast(int) timeout);
+            }
+            while ((len == -1) && (errno == EINTR));
+        } else { /* Bounded wait; bounded restarts */
+            len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
         if (len <= 0)
             return 0;
 
         foreach (i; 0 .. len) {
-            AbstractChannel channel = cast(AbstractChannel)sc.events[i].data.ptr;
-            uint currentEvents = sc.eventTypes[i]; // events[i].events;
-            // int fd = sc.events[i].data.fd;
-            // int fd = 
-
-            // version (HUNT_DEBUG)
-            // debug    infof("handling event: events=%d, fd=%d", currentEvents, fd);
-                
-            // size_t index = cast(size_t) (fd / divider);
-            // auto channel = fd in channels;
-            // auto channel = channels[index];
+            AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
             if (channel is null) {
-                // debug warningf("channel is null, fd=%d, index=%d, events=%d", fd, index, currentEvents);
-                continue;
+                debug warningf("channel is null");
+            } else {
+                // uint currentEvents = events[i].events;
+
+                // taskPool.put(task(&handeChannel, channel, currentEvents));
+                // workerPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
+                // handeChannel(channel, events[i].events);
+                handeChannelEvent(channel, events[i].events);
             }
-
-
-            // taskPool.put(task(&handeChannel, channel, currentEvents));
-            // workerPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
-            // handeChannel(channel, currentEvents);
-            handeChannelEvent(channel, currentEvents);
         }
+
         return len;
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint event) {
+        version (HUNT_DEBUG)
+        infof("handling event: events=%d, fd=%d", event, channel.handle);
+
         try {
-            if (event == 1) {
-                // connection.readyToRead = true;
-                channel.onRead();
-            } else if (event == 4) {
-                // onWrite(connection);
-                AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-                assert(wt !is null);
-                wt.onWriteDone();
-            } else if (event == 5) {
-                // onWrite(connection);
-                // connection.readyToRead = true;
-                // onRead(connection);
-                assert(channel !is null);
-                // trace(typeid(channel));
-                AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-                assert(wt !is null);
-                wt.onWriteDone();
-                channel.onRead();
-            } else if (event == 3) {
+            if (isClosed(event)) {
+                /* An error has occured on this fd, or the socket is not
+                    ready for reading (why were we notified then?) */
+                debug {
+                    if (isError(event)) {
+                        warningf("channel error: fd=%s, event=%d, errno=%d, message=%s",
+                                channel.handle, event, errno, getErrorMessage(errno));
+                    } else {
+                        version (HUNT_DEBUG) infof("channel closed: fd=%d, errno=%d, message=%s",
+                                    channel.handle, errno, getErrorMessage(errno));
+                    }
+                }   
                 channel.close();
+            } else if (event == EPOLLIN) {
+                version (HUNT_DEBUG)
+                    tracef("channel read event: fd=%d", channel.handle);
+                channel.onRead();
+            } else if (event == EPOLLOUT) {
+                version (HUNT_DEBUG)
+                    tracef("channel write event: fd=%d", channel.handle);
+                // AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
+                // assert(wt !is null);
+                // channel.onWrite();
+            } else if (event == (EPOLLIN | EPOLLOUT)) {
+                version (HUNT_DEBUG)
+                    tracef("channel read and write: fd=%d", channel.handle);
+                // AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
+                // assert(wt !is null);
+                // channel.onWrite();
+                channel.onRead();
             } else {
-                debug warningf("this thread only for read/write/close events, event: %d" , event);
+                debug warningf("this thread only for read/write/close events, event: %d", event);
             }
         } catch (Exception e) {
-
-                debug warningf("channel error: fd=%s, errno=%d, message=%s",
-                    channel.handle, errno, getErrorMessage(errno));
-                error(e.msg);
-            // try {
-            //     onError(connection, e);
-            // } catch (IOException ignored) {
-            // }
-        }
-    }
-    
-
-    private void handeChannel(AbstractChannel channel, uint currentEvents) {
-        if (isClosed(currentEvents)) {
-            version (HUNT_DEBUG)
-                infof("channel closed: fd=%d, errno=%d, message=%s",
+            debug {
+                errorf("error while handing channel: fd=%s, errno=%d, message=%s",
                         channel.handle, errno, getErrorMessage(errno));
-            channel.close();
-        } else if (isError(currentEvents)) {
-            // version (HUNT_DEBUG)
-            debug warningf("channel error: fd=%s, errno=%d, message=%s",
-                    channel.handle, errno, getErrorMessage(errno));
-            channel.close();
-        } else if (isReadable(currentEvents)) {
-            version (HUNT_DEBUG)
-                tracef("channel reading: fd=%d", channel.handle);
-
-            version (HUNT_IO_WORKERPOOL) {
-                workerPool.put(cast(int)channel.handle, makeTask(&channel.onRead));
-            } else {
-                channel.onRead();
+                error(e.msg);
             }
-        } else if (isWritable(currentEvents)) {
-            AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-            assert(wt !is null);
-            wt.onWriteDone();
-        } else {
-            warningf("Undefined behavior: fd=%d, registered=%s",
-                    channel.handle, channel.isRegistered);
         }
     }
+
+    // private void handeChannel(AbstractChannel channel, uint currentEvents) {
+    //     // version (HUNT_DEBUG)
+    //         infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
+
+    //     if (isClosed(currentEvents)) {
+    //         version (HUNT_DEBUG)
+    //             infof("channel closed: fd=%d, errno=%d, message=%s",
+    //                     channel.handle, errno, getErrorMessage(errno));
+    //         channel.close();
+    //     } else if (isError(currentEvents)) {
+    //         // version (HUNT_DEBUG)
+    //         debug warningf("channel error: fd=%s, errno=%d, message=%s",
+    //                 channel.handle, errno, getErrorMessage(errno));
+    //         channel.close();
+    //     } else if (isReadable(currentEvents)) {
+    //         version (HUNT_DEBUG)
+    //             tracef("channel reading: fd=%d", channel.handle);
+
+    //         version (HUNT_IO_WORKERPOOL) {
+    //             workerPool.put(cast(int)channel.handle, makeTask(&channel.onRead));
+    //         } else {
+    //             channel.onRead();
+    //         }
+    //     } else if (isWritable(currentEvents)) {
+    //         AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
+    //         assert(wt !is null);
+    //         wt.onWriteDone();
+    //     } else {
+    //         warningf("Undefined behavior: fd=%d, registered=%s",
+    //                 channel.handle, channel.isRegistered);
+    //     }
+    // }
 
     private int iepoll(int epfd, epoll_event* events, int numfds, int timeout) {
         long start, now;
@@ -458,8 +308,10 @@ class AbstractSelector : Selector {
         return (events & EPOLLERR) != 0;
     }
 
-    private static bool isClosed(uint events) nothrow {
-        return (events & (EPOLLHUP | EPOLLRDHUP)) != 0;
+    private static bool isClosed(uint e) nothrow {
+        // return (events & (EPOLLHUP | EPOLLRDHUP)) != 0;
+        return ((e & EPOLLERR) || (e & EPOLLHUP) || (e & EPOLLRDHUP)
+                || (!(e & EPOLLIN) && !(e & EPOLLOUT))) != 0;
     }
 
     private static bool isReadable(uint events) nothrow {
@@ -518,41 +370,41 @@ class AbstractSelector : Selector {
 
 /**
 */
-class EpollEventChannel : EventChannel {
-    this(Selector loop) {
-        super(loop);
-        setFlag(ChannelFlag.Read, true);
-        this.handle = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-        _isRegistered = true;
-    }
+// class EpollEventChannel : EventChannel {
+//     this(Selector loop) {
+//         super(loop);
+//         setFlag(ChannelFlag.Read, true);
+//         this.handle = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+//         _isRegistered = true;
+//     }
 
-    ~this() {
-        close();
-    }
+//     ~this() {
+//         close();
+//     }
 
-    override void call() {
-        version (HUNT_DEBUG)
-            tracef("calling event [fd=%d]...%s", this.handle, eventLoop.isRuning);
-        ulong value = 1;
-        core.sys.posix.unistd.write(this.handle, &value, value.sizeof);
-    }
+//     override void call() {
+//         version (HUNT_DEBUG)
+//             tracef("calling event [fd=%d]...%s", this.handle, eventLoop.isRuning);
+//         ulong value = 1;
+//         core.sys.posix.unistd.write(this.handle, &value, value.sizeof);
+//     }
 
-    override void onRead() {
-        version (HUNT_DEBUG)
-            tracef("channel reading [fd=%d]...", this.handle);
-        this.clearError();
-        ulong value;
-        ssize_t n = core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
-        version (HUNT_DEBUG)
-            tracef("channel read done: %d bytes, fd=%d", n, this.handle);
-    }
+//     override void onRead() {
+//         version (HUNT_DEBUG)
+//             tracef("channel reading [fd=%d]...", this.handle);
+//         this.clearError();
+//         ulong value;
+//         ssize_t n = core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
+//         version (HUNT_DEBUG)
+//             tracef("channel read done: %d bytes, fd=%d", n, this.handle);
+//     }
 
-    override protected void onClose() {
-        version (HUNT_DEBUG)
-            tracef("close event channel [fd=%d]...", this.handle);
-        core.sys.posix.unistd.close(this.handle);
-    }
-}
+//     override protected void onClose() {
+//         version (HUNT_DEBUG)
+//             tracef("close event channel [fd=%d]...", this.handle);
+//         core.sys.posix.unistd.close(this.handle);
+//     }
+// }
 
 enum {
     EFD_SEMAPHORE = 0x1,
