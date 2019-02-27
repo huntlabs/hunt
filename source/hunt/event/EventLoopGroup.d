@@ -24,14 +24,12 @@ class EventLoopGroup {
 
         version(HUNT_IO_WORKERPOOL) {
             writeln("EventLoop works in WorkerPool model");
-        } else version(HUNT_IO_PARALLELWORKER) {
-            writeln("EventLoop works in ParallelWorker model");
         } else {
             writeln("EventLoop works in NoWorker model");
         }
 
         foreach (i; 0 .. _size) {
-            eventLoopPool[i] = new EventLoop();
+            eventLoopPool[i] = new EventLoop(i, _size);
         }
     }
 
