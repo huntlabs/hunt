@@ -982,6 +982,10 @@ abstract class ByteBuffer : Buffer
         return cast(string) hb;
     }
 
+    byte[] getValidData() {
+        return hb[0..limit];
+    }
+
 
     /**
      * Returns a string summarizing the state of this buffer.
