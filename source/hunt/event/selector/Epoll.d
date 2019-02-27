@@ -138,9 +138,9 @@ int waitForChannelEvents(Scope sc, int timeout) {
     version (HUNT_DEBUG) tracef("get %d events on epoll %d", n, efd);
     for (i = 0; i < n; i++) {
         e = events[i].events;
-        // AbstractChannel channel = cast(AbstractChannel)events[i].data.ptr;
-        // int fd = cast(int)channel.handle;
-        int fd = events[i].data.fd;
+        AbstractChannel channel = cast(AbstractChannel)events[i].data.ptr;
+        int fd = cast(int)channel.handle;
+        // int fd = events[i].data.fd;
         version (HUNT_DEBUG) tracef("fd: %d, event: %d, epoll: %d", fd, e, efd);
         if ((e & EPOLLERR) || (e & EPOLLHUP) || (e & EPOLLRDHUP) || (!(e & EPOLLIN) && !(e & EPOLLOUT))) {
             /* An error has occured on this fd, or the socket is not
@@ -182,9 +182,12 @@ class AbstractSelector : Selector {
     private int _epollFD;
     // private EventChannel _event;
 
+    protected size_t number;
+    protected size_t divider;
+
 	Scope sc;
 
-    this() {
+    this(size_t number, size_t divider) {
         // http://man7.org/linux/man-pages/man2/epoll_create.2.html
         /*
          * epoll_create expects a size as a hint to the kernel about how to
@@ -196,8 +199,12 @@ class AbstractSelector : Selector {
         //     throw new IOException("epoll_create failed");
         // _event = new EpollEventChannel(this);
         // register(_event);
+        this.number = number;
+        this.divider = divider;
 
 		sc = initEpoll(100);
+
+        channels = new AbstractChannel[1500];
     }
 
     ~this() {
@@ -239,11 +246,20 @@ class AbstractSelector : Selector {
 
         errno = 0;
         int infd = cast(int)channel.handle;
-        channels[infd] = channel;
+        size_t index = cast(size_t) (infd / divider);
+        if(index>=channels.length) {
+            debug warningf("expanding channels uplimit to %d", index);
+            import std.algorithm : max;
+            size_t length = max(cast(size_t)(index * 3 / 2), 16);
+            AbstractChannel[] arr = new AbstractChannel[length];
+            arr[0..channels.length] = channels[0..$];
+            channels = arr;
+        }
+        channels[index] = channel;
         epoll_event e;
 
-        e.data.fd = infd;
-        // e.data.ptr = cast(void*) channel;
+        // e.data.fd = infd;
+        e.data.ptr = cast(void*) channel;
         e.events = EPOLLIN | EPOLLET | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLOUT;
         int s = epoll_ctl(sc.efd, EPOLL_CTL_ADD, infd, &e);
         if (s == -1) {
@@ -264,7 +280,8 @@ class AbstractSelector : Selector {
         // }
     }
 
-    AbstractChannel[int] channels;
+    // AbstractChannel[int] channels;
+    AbstractChannel[] channels;
 
     override bool reregister(AbstractChannel channel) {
         return epollCtl(channel, EPOLL_CTL_MOD);
@@ -279,7 +296,10 @@ class AbstractSelector : Selector {
         //     warningf("deregister channel failed: fd=%d", channel.handle);
         //     return false;
         // }
-        channels.remove(cast(int)channel.handle);
+        // channels.remove(cast(int)channel.handle);
+        size_t index = cast(size_t) (channel.handle / divider);
+        debug tracef("deregister channel: fd=%d, index=%d", channel.handle, index);
+        channels[index] = null;
         // trace(channels.length);
         return true;
     }
@@ -312,23 +332,27 @@ class AbstractSelector : Selector {
             return 0;
 
         foreach (i; 0 .. len) {
-            int fd = sc.events[i].data.fd;
-            // AbstractChannel channel = cast(AbstractChannel)sc.events[i].data.ptr;
+            AbstractChannel channel = cast(AbstractChannel)sc.events[i].data.ptr;
+            uint currentEvents = sc.eventTypes[i]; // events[i].events;
+            // int fd = sc.events[i].data.fd;
+            // int fd = 
 
-            auto channel = fd in channels;
+            // version (HUNT_DEBUG)
+            // debug    infof("handling event: events=%d, fd=%d", currentEvents, fd);
+                
+            // size_t index = cast(size_t) (fd / divider);
+            // auto channel = fd in channels;
+            // auto channel = channels[index];
             if (channel is null) {
-                debug warningf("channel is null");
+                // debug warningf("channel is null, fd=%d, index=%d, events=%d", fd, index, currentEvents);
                 continue;
             }
 
-            uint currentEvents = sc.eventTypes[i]; // events[i].events;
-            version (HUNT_DEBUG)
-                infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
 
             // taskPool.put(task(&handeChannel, channel, currentEvents));
             // workerPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
             // handeChannel(channel, currentEvents);
-            handeChannelEvent(*channel, currentEvents);
+            handeChannelEvent(channel, currentEvents);
         }
         return len;
     }
