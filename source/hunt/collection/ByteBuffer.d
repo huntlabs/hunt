@@ -98,9 +98,9 @@ abstract class ByteBuffer : Buffer {
      * @throws  IllegalArgumentException
      *          If the <tt>capacity</tt> is a negative integer
      */
-    deprecated("Using BufferUtils.allocateDirect instead.") static ByteBuffer allocateDirect(
-            int capacity) {
-        return null;
+    deprecated("Using BufferUtils.allocateDirect instead.")
+    static ByteBuffer allocateDirect(int capacity) {
+        throw new NotSupportedException("deprecated");
     }
 
     /**
@@ -120,10 +120,9 @@ abstract class ByteBuffer : Buffer {
      *          If the <tt>capacity</tt> is a negative integer
      */
 
-    deprecated("Using BufferUtils.allocate instead.") static ByteBuffer allocate(size_t capacity) {
-        // if (capacity < 0)
-        //     throw new IllegalArgumentException("");
-        return null;
+    deprecated("Using BufferUtils.allocate instead.") 
+    static ByteBuffer allocate(size_t capacity) {
+        throw new NotSupportedException("deprecated");
     }
 
     /**
@@ -157,9 +156,9 @@ abstract class ByteBuffer : Buffer {
      *          If the preconditions on the <tt>offset</tt> and <tt>length</tt>
      *          parameters do not hold
      */
-    deprecated("Using BufferUtils.toBuffer instead.") static ByteBuffer wrap(
-            byte[] array, int offset, int length) {
-        return null;
+    deprecated("Using BufferUtils.toBuffer instead.")
+    static ByteBuffer wrap(byte[] array, int offset, int length) {
+        throw new NotSupportedException("deprecated");
     }
 
     /**
@@ -178,9 +177,9 @@ abstract class ByteBuffer : Buffer {
      *
      * @return  The new byte buffer
      */
-    deprecated("Using BufferUtils.toBuffer instead.") static ByteBuffer wrap(byte[] array) {
-        // return wrap(array, 0, cast(int)array.length);
-        return null;
+    deprecated("Using BufferUtils.toBuffer instead.")
+    static ByteBuffer wrap(byte[] array) {        
+        throw new NotSupportedException("deprecated");
     }
 
     /**
