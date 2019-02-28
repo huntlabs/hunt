@@ -54,7 +54,6 @@ class TcpStreamOption {
     int retryTimes = 5;
     Duration retryInterval = 2.seconds;
 
-
     static TcpStreamOption createOption() {
         TcpStreamOption option = new TcpStreamOption();
         option.isKeepalive = true;

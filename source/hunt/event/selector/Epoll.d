@@ -86,7 +86,6 @@ class AbstractSelector : Selector {
         version (HUNT_DEBUG)
             tracef("disposing selector[fd=%d]...", _epollFD);
         isDisposed = true;
-        // _event.close();
         core.sys.posix.unistd.close(_epollFD);
     }
 
@@ -175,20 +174,27 @@ class AbstractSelector : Selector {
             len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
-        if (len <= 0)
-            return 0;
-
-        foreach (i; 0 .. len) {
-            AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-            if (channel is null) {
-                debug warningf("channel is null");
+        if (len > 0) {
+            if(defaultPoolThreads > 0) {  // using worker thread
+                foreach (i; 0 .. len) {
+                    AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+                    if (channel is null) {
+                        debug warningf("channel is null");
+                    } else {
+                        uint currentEvents = events[i].events;
+                        workerPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
+                    }
+                }
             } else {
-                // uint currentEvents = events[i].events;
-
-                // taskPool.put(task(&handeChannel, channel, currentEvents));
-                // workerPool.put(cast(int)channel.handle, makeTask(&handeChannel, channel, currentEvents));
-                // handeChannel(channel, events[i].events);
-                handeChannelEvent(channel, events[i].events);
+                foreach (i; 0 .. len) {
+                    AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+                    if (channel is null) {
+                        debug warningf("channel is null");
+                    } else {
+                        // handeChannel(channel, events[i].events);
+                        handeChannelEvent(channel, events[i].events);
+                    }
+                }
             }
         }
 
@@ -211,7 +217,11 @@ class AbstractSelector : Selector {
                         version (HUNT_DEBUG) infof("channel closed: fd=%d, errno=%d, message=%s",
                                     channel.handle, errno, getErrorMessage(errno));
                     }
-                }   
+                }
+                // FIXME: Needing refactor or cleanup -@zxp at 2/28/2019, 3:25:24 PM   
+                // May be triggered twice for a channel, for example:
+                // events=8197, fd=13
+                // events=8221, fd=13
                 channel.close();
             } else if (event == EPOLLIN) {
                 version (HUNT_DEBUG)
@@ -220,14 +230,10 @@ class AbstractSelector : Selector {
             } else if (event == EPOLLOUT) {
                 version (HUNT_DEBUG)
                     tracef("channel write event: fd=%d", channel.handle);
-                // AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-                // assert(wt !is null);
                 // channel.onWrite();
             } else if (event == (EPOLLIN | EPOLLOUT)) {
                 version (HUNT_DEBUG)
                     tracef("channel read and write: fd=%d", channel.handle);
-                // AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-                // assert(wt !is null);
                 // channel.onWrite();
                 channel.onRead();
             } else {
@@ -235,9 +241,8 @@ class AbstractSelector : Selector {
             }
         } catch (Exception e) {
             debug {
-                errorf("error while handing channel: fd=%s, errno=%d, message=%s",
-                        channel.handle, errno, getErrorMessage(errno));
-                error(e.msg);
+                errorf("error while handing channel: fd=%s, message=%s",
+                        channel.handle, e.msg);
             }
         }
     }
@@ -309,9 +314,8 @@ class AbstractSelector : Selector {
     }
 
     private static bool isClosed(uint e) nothrow {
-        // return (events & (EPOLLHUP | EPOLLRDHUP)) != 0;
-        return ((e & EPOLLERR) || (e & EPOLLHUP) || (e & EPOLLRDHUP)
-                || (!(e & EPOLLIN) && !(e & EPOLLOUT))) != 0;
+        return (e & EPOLLERR) != 0 || (e & EPOLLHUP) != 0 || (e & EPOLLRDHUP) != 0
+                || (!(e & EPOLLIN) && !(e & EPOLLOUT)) != 0;
     }
 
     private static bool isReadable(uint events) nothrow {

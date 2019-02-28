@@ -22,12 +22,6 @@ class EventLoopGroup {
         size_t _size = size > 0 ? size : 1;
         eventLoopPool = new EventLoop[_size];
 
-        version(HUNT_IO_WORKERPOOL) {
-            writeln("EventLoop works in WorkerPool model");
-        } else {
-            writeln("EventLoop works in NoWorker model");
-        }
-
         foreach (i; 0 .. _size) {
             eventLoopPool[i] = new EventLoop(i, _size);
         }

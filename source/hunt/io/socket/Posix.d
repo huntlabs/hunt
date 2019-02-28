@@ -103,6 +103,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         this._family = family;
         // _readBuffer = new ubyte[bufferSize];
         _bufferForRead = BufferUtils.allocate(bufferSize);
+        _bufferForRead.limit(cast(int)bufferSize);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
         _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
@@ -124,8 +125,8 @@ abstract class AbstractStream : AbstractSocketChannel {
 
         if (len > 0) {
             if (dataReceivedHandler !is null) {
-                _bufferForRead.position(cast(int)len);
-                _bufferForRead.flip();
+                _bufferForRead.limit(cast(int)len);
+                _bufferForRead.position(0);
                 dataReceivedHandler(_bufferForRead);
             }
 
