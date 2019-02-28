@@ -2,7 +2,7 @@ module test.TaskPoolTest;
 
 import hunt.concurrency.TaskPool;
 import hunt.logging.ConsoleLogger;
-import hunt.concurrency.MagedQueue;
+import hunt.concurrency.SimpleQueue;
 import hunt.system.Memory;
 import hunt.util.Common;
 

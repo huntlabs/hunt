@@ -3,7 +3,7 @@ module benchmark.LinkedBlockingQueueBench;
 import hunt.concurrency.LinkedBlockingQueue;
 import hunt.concurrency.BlockingQueue;
 import HuntQueue = hunt.collection.Queue;
-import hunt.concurrency.MagedQueue;
+import hunt.concurrency.SimpleQueue;
 
 import hunt.util.DateTime;
 import hunt.logging.ConsoleLogger;
@@ -96,8 +96,8 @@ class LinkedBlockingQueueBench {
         // trace(lq.size());
 
         void f0() { test_run1(lq,            writers); }
-        void f2() { test_run2(new MagedBlockingQueue!long(),                writers); }
-        void f3() { test_run2(new MagedNonBlockingQueue!long(),             writers); }
+        void f2() { test_run2(new hunt.concurrency.SimpleQueue.BlockingQueue!long(),                writers); }
+        void f3() { test_run2(new hunt.concurrency.SimpleQueue.NonBlockingQueue!long(),             writers); }
 
         auto r = benchmark!(baseline, f0, f2, f3)(3);
         auto base = r[0];

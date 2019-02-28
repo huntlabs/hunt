@@ -135,7 +135,7 @@ uint totalCPUsImpl() @nogc nothrow @trusted {
 
 /**
 */
-size_t getPageSize() @safe pure nothrow @nogc {
+size_t pageSize() @safe pure nothrow @nogc {
     return _pageSize;
 }
 

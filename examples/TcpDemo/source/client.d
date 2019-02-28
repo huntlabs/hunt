@@ -1,5 +1,5 @@
-import std.stdio;
 
+import hunt.collection.ByteBuffer;
 import hunt.event;
 import hunt.io.TcpStream;
 import hunt.logging;
@@ -8,6 +8,8 @@ import core.thread;
 import core.time;
 import std.parallelism;
 import std.socket;
+import std.stdio;
+
 
 void main() {
 	trace("Start test...");
@@ -39,10 +41,11 @@ void main() {
 			});
         	taskPool.put(runTask);
 		}
-	}).onDataReceived((in ubyte[] data) {
-		writeln("received data: ", cast(string) data);
+	}).onDataReceived((ByteBuffer buffer) {
+		byte[] data = buffer.getRawData();
+		writeln("received data: ", cast(string)data);
 		if (--count > 0) {
-			client.write(data, (in ubyte[] wdata, size_t size) {
+			client.write(cast(ubyte[])data, (in ubyte[] wdata, size_t size) {
 				debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			});
 			// client.write(new SocketStreamBuffer(data.dup, (in ubyte[] wdata, size_t size) {
