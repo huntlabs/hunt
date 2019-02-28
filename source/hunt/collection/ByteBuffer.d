@@ -11,26 +11,22 @@
 
 module hunt.collection.ByteBuffer;
 
-import std.container.array;
-
 import hunt.collection.Buffer;
 import hunt.collection.StringBuffer;
-
 import hunt.Exceptions;
 import hunt.text.Charset;
 import hunt.text.StringBuilder;
-import hunt.Exceptions;
 
-import std.bitmanip;
 
-abstract class ByteBuffer : Buffer
-{
+/**
+*/
+abstract class ByteBuffer : Buffer {
     protected byte[] hb; // Non-null only for heap buffers
-    
+
     protected int offset;
 
-    bool bigEndian = true;                                  // package-private
-        
+    bool bigEndian = true; // package-private
+
     // bool nativeByteOrder                             // package-private
     //     = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
 
@@ -65,13 +61,11 @@ abstract class ByteBuffer : Buffer
         return this;
     }
 
-
     // Creates a new buffer with the given mark, position, limit, capacity,
     // backing array, and array offset
     //
     this(int mark, int pos, int lim, int cap, // package-private
-            byte[] hb, int offset)
-    {
+            byte[] hb, int offset) {
         super(mark, pos, lim, cap);
         this.hb = hb;
         this.offset = offset;
@@ -79,8 +73,7 @@ abstract class ByteBuffer : Buffer
 
     // Creates a new buffer with the given mark, position, limit, and capacity
     //
-    this(int mark, int pos, int lim, int cap)
-    { // package-private
+    this(int mark, int pos, int lim, int cap) { // package-private
         this(mark, pos, lim, cap, null, 0);
     }
 
@@ -105,8 +98,9 @@ abstract class ByteBuffer : Buffer
      * @throws  IllegalArgumentException
      *          If the <tt>capacity</tt> is a negative integer
      */
-    static ByteBuffer allocateDirect(int capacity) {
-        return new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity);
+    deprecated("Using BufferUtils.allocateDirect instead.") static ByteBuffer allocateDirect(
+            int capacity) {
+        return null;
     }
 
     /**
@@ -125,10 +119,11 @@ abstract class ByteBuffer : Buffer
      * @throws  IllegalArgumentException
      *          If the <tt>capacity</tt> is a negative integer
      */
-    static ByteBuffer allocate(size_t capacity) {
+
+    deprecated("Using BufferUtils.allocate instead.") static ByteBuffer allocate(size_t capacity) {
         // if (capacity < 0)
         //     throw new IllegalArgumentException("");
-        return new HeapByteBuffer(cast(int)capacity, cast(int)capacity);
+        return null;
     }
 
     /**
@@ -162,14 +157,9 @@ abstract class ByteBuffer : Buffer
      *          If the preconditions on the <tt>offset</tt> and <tt>length</tt>
      *          parameters do not hold
      */
-    static ByteBuffer wrap(byte[] array,
-                                    int offset, int length)
-    {
-        try {
-            return new HeapByteBuffer(array, offset, length);
-        } catch (IllegalArgumentException x) {
-            throw new IndexOutOfBoundsException("");
-        }
+    deprecated("Using BufferUtils.toBuffer instead.") static ByteBuffer wrap(
+            byte[] array, int offset, int length) {
+        return null;
     }
 
     /**
@@ -188,10 +178,10 @@ abstract class ByteBuffer : Buffer
      *
      * @return  The new byte buffer
      */
-    static ByteBuffer wrap(byte[] array) {
-        return wrap(array, 0, cast(int)array.length);
+    deprecated("Using BufferUtils.toBuffer instead.") static ByteBuffer wrap(byte[] array) {
+        // return wrap(array, 0, cast(int)array.length);
+        return null;
     }
-
 
     /**
      * Creates a new byte buffer whose content is a shared subsequence of
@@ -256,7 +246,6 @@ abstract class ByteBuffer : Buffer
      */
     abstract ByteBuffer asReadOnlyBuffer();
 
-
     // -- Singleton get/put methods --
 
     /**
@@ -304,8 +293,6 @@ abstract class ByteBuffer : Buffer
      */
     abstract byte get(int index);
 
-
-
     /**
      * Absolute <i>put</i> method&nbsp;&nbsp;<i>(optional operation)</i>.
      *
@@ -328,7 +315,6 @@ abstract class ByteBuffer : Buffer
      *          If this buffer is read-only
      */
     abstract ByteBuffer put(int index, byte b);
-
 
     // -- Bulk get operations --
 
@@ -383,7 +369,7 @@ abstract class ByteBuffer : Buffer
      *          parameters do not hold
      */
     ByteBuffer get(byte[] dst, int offset, int length) {
-        checkBounds(offset, length, cast(int)dst.length);
+        checkBounds(offset, length, cast(int) dst.length);
         if (length > remaining())
             throw new BufferUnderflowException("");
         int end = offset + length;
@@ -412,9 +398,8 @@ abstract class ByteBuffer : Buffer
      *          remaining in this buffer
      */
     ByteBuffer get(byte[] dst) {
-        return get(dst, 0, cast(int)dst.length);
+        return get(dst, 0, cast(int) dst.length);
     }
-
 
     // -- Bulk put operations --
 
@@ -524,7 +509,7 @@ abstract class ByteBuffer : Buffer
      *          If this buffer is read-only
      */
     ByteBuffer put(byte[] src, int offset, int length) {
-        checkBounds(offset, length, cast(int)src.length);
+        checkBounds(offset, length, cast(int) src.length);
         if (length > remaining())
             throw new BufferOverflowException("");
         int end = offset + length;
@@ -556,11 +541,11 @@ abstract class ByteBuffer : Buffer
      *          If this buffer is read-only
      */
     final ByteBuffer put(byte[] src) {
-        return put(src, 0, cast(int)src.length);
+        return put(src, 0, cast(int) src.length);
     }
 
     final ByteBuffer put(string src) {
-        return put(cast(byte[])src, 0, cast(int)src.length);
+        return put(cast(byte[]) src, 0, cast(int) src.length);
     }
 
     /**
@@ -723,7 +708,6 @@ abstract class ByteBuffer : Buffer
      */
     abstract ByteBuffer putInt(int index, int value);
 
-
     // -- Other stuff --
 
     /**
@@ -845,7 +829,6 @@ abstract class ByteBuffer : Buffer
      */
     // abstract bool isDirect();
 
-
     /**
      * Relative <i>get</i> method for reading an int value.
      *
@@ -859,11 +842,10 @@ abstract class ByteBuffer : Buffer
      *          If there are fewer than four bytes
      *          remaining in this buffer
      */
-    T get(T)() if( !is(T == byte))
-    {
+    T get(T)() if (!is(T == byte)) {
         enum len = T.sizeof;
         int index = ix(nextGetIndex(len));
-        ubyte[len] bytes = cast(ubyte[])hb[index .. index+len];
+        ubyte[len] bytes = cast(ubyte[]) hb[index .. index + len];
         return bigEndianToNative!T(bytes);
     }
 
@@ -883,14 +865,13 @@ abstract class ByteBuffer : Buffer
      *          or not smaller than the buffer's limit,
      *          minus three
      */
-    T get(T)(int index) if( !is(T == byte))
-    {
+    T get(T)(int index) if (!is(T == byte)) {
         enum len = T.sizeof;
         int i = ix(checkIndex(index, len));
-        ubyte[len] bytes = cast(ubyte[])hb[i .. i+len];
+        ubyte[len] bytes = cast(ubyte[]) hb[i .. i + len];
         return bigEndianToNative!T(bytes);
     }
-    
+
     /**
      * Relative <i>put</i> method for writing a short
      * value&nbsp;&nbsp;<i>(optional operation)</i>.
@@ -911,18 +892,16 @@ abstract class ByteBuffer : Buffer
      * @throws  ReadOnlyBufferException
      *          If this buffer is read-only
      */
-    ByteBuffer put(T)(T value) if( !is(T == byte))
-    {
+    ByteBuffer put(T)(T value) if (!is(T == byte)) {
         enum len = T.sizeof;
         int index = ix(nextPutIndex(len));
         ubyte[len] bytes = nativeToBigEndian(value);
-        hb[index .. index+len] = cast(byte[])bytes[0 .. $];
+        hb[index .. index + len] = cast(byte[]) bytes[0 .. $];
         // byte* ptr = cast(byte*)&value;
         // byte[] data = ptr[0..T.sizeof];
         // put(data, 0, cast(int)data.length);
         return this;
     }
-
 
     /**
      * Absolute <i>put</i> method for writing a short
@@ -947,8 +926,7 @@ abstract class ByteBuffer : Buffer
      * @throws  ReadOnlyBufferException
      *          If this buffer is read-only
      */
-    ByteBuffer put(T)(int index, T value) if( !is(T == byte))
-    {
+    ByteBuffer put(T)(int index, T value) if (!is(T == byte)) {
         // byte* ptr = cast(byte*)&value;
         // byte[] data = ptr[0..T.sizeof];
         // // put(data, 0, data.length);
@@ -958,13 +936,12 @@ abstract class ByteBuffer : Buffer
         enum len = T.sizeof;
         int i = ix(checkIndex(index, len));
         ubyte[len] bytes = nativeToBigEndian(value);
-        hb[i .. i+len] = cast(byte[])bytes[0 .. $];
-        
+        hb[i .. i + len] = cast(byte[]) bytes[0 .. $];
+
         return this;
     }
 
-    protected int ix(int i)
-    {
+    protected int ix(int i) {
         return i + offset;
     }
 
@@ -972,28 +949,24 @@ abstract class ByteBuffer : Buffer
     //     return offset + i;
     // }
 
-    string getString(size_t offset, size_t len)
-    {
-        return cast(string) hb[offset..offset+len];
+    string getString(size_t offset, size_t len) {
+        return cast(string) hb[offset .. offset + len];
     }
 
-    string getString()
-    {
-        return cast(string) hb;
+    string getString() {
+        return cast(string) hb[position .. limit];
     }
 
-    byte[] getValidData() {
-        return hb[0..limit];
+    byte[] getRawData() {
+        return hb[position .. limit];
     }
-
 
     /**
      * Returns a string summarizing the state of this buffer.
      *
      * @return  A summary string
      */
-    override string toString()
-    {
+    override string toString() {
         StringBuffer sb = new StringBuffer();
         // sb.append(getClass().getName());
         sb.append("[pos=");
@@ -1007,301 +980,6 @@ abstract class ByteBuffer : Buffer
     }
 
 }
-
-
-/**
-*/
-class HeapByteBuffer : ByteBuffer
-{
-
-    // For speed these fields are actually declared in X-Buffer;
-    // these declarations are here as documentation
-    /*
-
-    protected final byte[] hb;
-    protected final int offset;
-
-    */
-
-    this(int cap, int lim)
-    { // package-private
-
-        super(-1, 0, lim, cap, new byte[cap], 0);
-        /*
-        hb = new byte[cap];
-        offset = 0;
-        */
-    }
-
-    this(byte[] buf, int off, int len)
-    { // package-private
-
-        super(-1, off, off + len, cast(int)buf.length, buf, 0);
-        /*
-        hb = buf;
-        offset = 0;
-        */
-    }
-
-    protected this(byte[] buf, int mark, int pos, int lim, int cap, int off)
-    {
-
-        super(mark, pos, lim, cap, buf, off);
-        /*
-        hb = buf;
-        offset = off;
-        */
-
-    }
-
-    override ByteBuffer slice()
-    {
-        return new HeapByteBuffer(hb, -1, 0, this.remaining(),
-                this.remaining(), this.position() + offset);
-    }
-
-    override ByteBuffer duplicate()
-    {
-        return new HeapByteBuffer(hb, this.markValue(), this.position(),
-                this.limit(), this.capacity(), offset);
-    }
-
-    override ByteBuffer asReadOnlyBuffer()
-    {
-        return new HeapByteBuffer(hb, this.markValue(), this.position(),
-                this.limit(), this.capacity(), offset);
-    }
-
-
-    override byte get()
-    {
-        return hb[ix(nextGetIndex())];
-    }
-
-    override byte get(int i)
-    {
-        return hb[ix(checkIndex(i))];
-    }
-
-    override ByteBuffer get(byte[] dst, int offset, int length)
-    {
-        checkBounds(offset, length, cast(int)dst.length);
-        if (length > remaining())
-            throw new BufferUnderflowException("");
-        // System.arraycopy(hb, ix(position()), dst, offset, length);
-        int sourcePos = ix(position());
-        dst[offset .. offset+length] = hb[sourcePos .. sourcePos + length];
-        position(position() + length);
-        return this;
-    }
-
-    override bool isDirect()
-    {
-        return false;
-    }
-
-    override bool isReadOnly()
-    {
-        return false;
-    }
-
-    override ByteBuffer put(byte x)
-    {
-
-        hb[ix(nextPutIndex())] = x;
-        return this;
-
-    }
-
-    override ByteBuffer put(int i, byte x)
-    {
-        hb[ix(checkIndex(i))] = x;
-        return this;
-    }
-
-    override ByteBuffer put(byte[] src, int offset, int length)
-    {
-
-        checkBounds(offset, length, cast(int)src.length);
-        if (length > remaining())
-            throw new BufferOverflowException("");
-        // System.arraycopy(src, offset, hb, ix(position()), length);
-        int newPos = ix(position());
-        hb[newPos .. newPos+length] = src[offset .. offset+length];
-
-        position(position() + length);
-        return this;
-
-    }
-
-    override ByteBuffer put(ByteBuffer src)
-    {
-        if (typeid(src) == typeid(HeapByteBuffer))
-        {
-            if (src is this)
-                throw new IllegalArgumentException("");
-            HeapByteBuffer sb = cast(HeapByteBuffer) src;
-            int n = sb.remaining();
-            if (n > remaining())
-                throw new BufferOverflowException("");
-            // System.arraycopy(sb.hb, sb.ix(sb.position()), hb, ix(position()), n);
-            
-            int sourcePos = sb.ix(sb.position());
-            int targetPos = ix(position());
-            hb[targetPos .. targetPos+n] = sb.hb[sourcePos .. sourcePos+n];
-
-            sb.position(sb.position() + n);
-            position(position() + n);
-        }
-        else if (src.isDirect())
-        {
-            int n = src.remaining();
-            if (n > remaining())
-                throw new BufferOverflowException("");
-            src.get(hb, ix(position()), n);
-            position(position() + n);
-        }
-        else
-        {
-            super.put(src);
-        }
-        return this;
-
-    }
-
-    // short
-
-    private static short makeShort(byte b1, byte b0) {
-        return cast(short)((b1 << 8) | (b0 & 0xff));
-    }
-    private static byte short1(short x) { return cast(byte)(x >> 8); }
-    private static byte short0(short x) { return cast(byte)(x     ); }
-
-    override short getShort() {
-        int index = ix(nextGetIndex(2));
-        // short r = 0;
-        // short* ptr = &r;
-        // ptr[0]=hb[index+1]; // bigEndian
-        // ptr[1]=hb[index]; 
-        if(bigEndian)
-            return makeShort(hb[index], hb[index+1]);
-        else
-            return makeShort(hb[index+1], hb[index]);
-    }
-
-    override short getShort(int i) {
-        int index = ix(checkIndex(i, 2));
-        if(bigEndian)
-            return makeShort(hb[index], hb[index+1]);
-        else
-            return makeShort(hb[index+1], hb[index]);
-    }
-
-    override ByteBuffer putShort(short x) {
-        int index = ix(nextPutIndex(2));
-        if(bigEndian)
-        {
-            hb[index] = short1(x);
-            hb[index+1] = short0(x);
-        }
-        else
-        {
-            hb[index] = short0(x);
-            hb[index+1] = short1(x);
-        }
-
-        return this;
-    }
-
-    override ByteBuffer putShort(int i, short x) {
-        int index = ix(checkIndex(i, 2));
-        if(bigEndian)
-        {
-            hb[index] = short1(x);
-            hb[index+1] = short0(x);
-        }
-        else
-        {
-            hb[index] = short0(x);
-            hb[index+1] = short1(x);
-        }
-        return this;
-    }
-
-
-    // int
-    override int getInt() {
-        auto index = ix(nextGetIndex(4));
-        return _getInt(index);
-    }
-
-    override int getInt(int i) {
-        auto index = ix(checkIndex(i, 4));
-        return _getInt(index);
-    }
-
-    version(LittleEndian)
-    private int _getInt(size_t index) {
-        if(bigEndian)
-            return makeInt(hb[index], hb[index+1], hb[index+2], hb[index+3]);
-        else
-            return makeInt(hb[index+3], hb[index+2],hb[index+1], hb[index]);
-    }
-
-    private static int makeInt(byte b3, byte b2, byte b1, byte b0) {
-        return  ((b3       ) << 24) | ((b2 & 0xff) << 16) |
-                ((b1 & 0xff) <<  8) | (b0 & 0xff      );
-    }
-
-    override ByteBuffer putInt(int x) {
-        putIntUnaligned(hb, ix(nextPutIndex(4)), x, bigEndian);
-        return this;
-    }
-
-    override ByteBuffer putInt(int i, int x) {
-        putIntUnaligned(hb, ix(checkIndex(i, 4)), x, bigEndian);
-        return this;
-    }
-
-    version(LittleEndian)
-    private static void putIntUnaligned(byte[] hb, int offset, int x, bool bigEndian) {
-        if(bigEndian)
-        {
-            hb[offset] = int3(x);
-            hb[offset+1] = int2(x);
-            hb[offset+2] = int1(x);
-            hb[offset+3] = int0(x);
-        }
-        else
-        {
-            hb[offset] = int0(x);
-            hb[offset+1] = int1(x);
-            hb[offset+2] = int2(x);
-            hb[offset+3] = int3(x);
-        }
-    }
-
-    private static byte int3(int x) { return cast(byte)(x >> 24); }
-    private static byte int2(int x) { return cast(byte)(x >> 16); }
-    private static byte int1(int x) { return cast(byte)(x >>  8); }
-    private static byte int0(int x) { return cast(byte)(x      ); }
-
-    override ByteBuffer compact()
-    {
-        int sourceIndex = ix(position());
-        int targetIndex = ix(0);
-        int len = remaining();
-        hb[targetIndex .. targetIndex+len] = hb[sourceIndex .. sourceIndex+len];
-
-        position(remaining());
-        limit(capacity());
-        discardMark();
-        return this;
-
-    }
-}
-
-
 
 /**
  * A direct byte buffer whose content is a memory-mapped region of a file.
@@ -1482,7 +1160,6 @@ class HeapByteBuffer : ByteBuffer
 //     private void force0(FileDescriptor fd, long address, long length);
 // }
 
-
 // interface DirectBuffer {
 
 //     long address();
@@ -1491,4 +1168,3 @@ class HeapByteBuffer : ByteBuffer
 
 //     // Cleaner cleaner();
 // }
-
