@@ -261,6 +261,7 @@ class TcpStream : AbstractStream {
         version (HUNT_DEBUG)
             infof("data buffered (%d bytes): fd=%d",  buffer.capacity, this.handle);
 
+        initializeWriteQueue();
         _writeQueue.enqueue(buffer);
         
         version (HAVE_IOCP) {
@@ -280,7 +281,7 @@ class TcpStream : AbstractStream {
             throw new Exception("The connection is down!");
         }
 
-        if (_writeQueue.isEmpty() && !_isWritting) {
+        if ((_writeQueue is null || _writeQueue.isEmpty()) && !_isWritting) {
             version (HUNT_DEBUG)
                 tracef("write data directly, fd=%d", this.handle);
             _isWritting = true;
@@ -299,6 +300,7 @@ class TcpStream : AbstractStream {
                 } else {
                     version (HUNT_DEBUG)
                         warning("buffering remaining data");
+                    initializeWriteQueue();
                     _writeQueue.enqueue(new SocketStreamBuffer(d));
                     break;
                 }
@@ -325,8 +327,9 @@ protected:
     bool _isClient;
     ConnectionHandler _connectionHandler;
 
-    void resetWrittingStatus() {
-        _writeQueue.clear();
+    void resetWriteStatus() {
+        if(_writeQueue !is null)
+            _writeQueue.clear();
         atomicStore(_isWritting, false);
         isWriteCancelling = false;
     }
@@ -355,25 +358,25 @@ protected:
 
     override void onClose() {
         version (HUNT_DEBUG) {
-            if (!_writeQueue.isEmpty) {
+            if (_writeQueue !is null && !_writeQueue.isEmpty) {
                 warningf("Some data has not been sent yet: fd=%d", this.handle);
             }
 
-            infof("connection closed with: %s", this.remoteAddress);
+            infof("close connection with: %s", this.remoteAddress);
         }
 
-        resetWrittingStatus();
+        resetWriteStatus();
         _isConnected = false;
-        if(this.socket !is null) {
-            this.socket.shutdown(SocketShutdown.BOTH);
-            this.socket.close();
-        } else {
-            import core.sys.posix.unistd;
-            core.sys.posix.unistd.close(this.handle);
-        }
+        // if(this.socket is null) {
+        //     import core.sys.posix.unistd;
+        //     core.sys.posix.unistd.close(this.handle);
+        // } else {
+        //     this.socket.shutdown(SocketShutdown.BOTH);
+        //     this.socket.close();
+        // }
         super.onClose();
 
-        version (HUNT_DEBUG) infof("notify TCP stream down fd=%d", this.handle);
+        version (HUNT_DEBUG) infof("notify TCP stream down: fd=%d", this.handle);
         if (closeHandler)
             closeHandler();
     }

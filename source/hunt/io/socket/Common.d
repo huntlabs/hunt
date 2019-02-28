@@ -91,7 +91,7 @@ interface StreamWriteBuffer {
     void finish();
 
     StreamWriteBuffer next();
-    
+
     void next(StreamWriteBuffer);
 
     size_t capacity();
@@ -213,7 +213,6 @@ abstract class AbstractChannel : Channel {
 
     protected void onClose() {
         _isRegistered = false;
-        // _isClosed = true;
         _isClosing = false;
         version (HAVE_IOCP) {
         } else {
@@ -299,7 +298,6 @@ private:
     AbstractChannel _priv;
     AbstractChannel _next;
 }
-
 
 mixin template OverrideErro() {
     bool isError() {
@@ -536,7 +534,7 @@ private:
     DataWrittenHandler _sentHandler;
 }
 
-version(HUNT_IO_WORKERPOOL) {
+version (HUNT_IO_WORKERPOOL) {
     alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
 } else {
     alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
@@ -545,7 +543,6 @@ version(HUNT_IO_WORKERPOOL) {
 // alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
 // alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
 // alias WritingBufferQueue = MagedBlockingQueue!StreamWriteBuffer;
-
 
 /**
 */

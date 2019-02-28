@@ -101,11 +101,10 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
-        // _readBuffer = new ubyte[bufferSize];
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.limit(cast(int)bufferSize);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
-        _writeQueue = new WritingBufferQueue();
+        // _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         // setFlag(ChannelFlag.Read, true);
         // setFlag(ChannelFlag.Write, true);
@@ -163,6 +162,17 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         return isDone;
+    }
+
+    override protected void onClose() {
+        if(this.socket is null) {
+            import core.sys.posix.unistd;
+            core.sys.posix.unistd.close(this.handle);
+        } else {
+            this.socket.shutdown(SocketShutdown.BOTH);
+            this.socket.close();
+        }
+        super.close();
     }
 
     protected void onDisconnected() {
@@ -228,7 +238,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     override void onWrite() {
 
-        if(_writeQueue.isEmpty()) {
+        if(_writeQueue is null || _writeQueue.isEmpty()) {
             version (HUNT_DEBUG) warningf("The _writeQueue is empty: [fd=%d]", this.handle);
             return;
         }
@@ -299,6 +309,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     private const(ubyte)[] _readBuffer;
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
+
+    protected void initializeWriteQueue() {
+        if (_writeQueue is null) {
+            _writeQueue = new WritingBufferQueue();
+        }
+    }
 
     /**
     * Warning: The received data is stored a inner buffer. For a data safe, 

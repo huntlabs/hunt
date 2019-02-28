@@ -96,7 +96,6 @@ class AbstractSelector : Selector {
             super.stop();
             version (HUNT_DEBUG)
                 tracef("selector[fd=%d] stopped", _epollFD);
-            // _event.call();
         }
     }
 

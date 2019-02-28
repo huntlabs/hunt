@@ -34,7 +34,7 @@ class EventLoopGroup {
         if (_started)
             return;
         _started = true;
-        foreach (pool; eventLoopPool) {
+        foreach (EventLoop pool; eventLoopPool) {
             pool.runAsync(timeout);
         }
     }
