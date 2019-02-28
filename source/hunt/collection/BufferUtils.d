@@ -18,6 +18,7 @@ import hunt.util.Common;
 import hunt.collection.ByteBuffer;
 import hunt.collection.Collection;
 import hunt.collection.Enumeration;
+import hunt.collection.HeapByteBuffer;
 import hunt.collection.List;
 
 import hunt.Exceptions;
@@ -25,6 +26,7 @@ import hunt.util.TypeUtils;
 
 import std.conv;
 import std.range;
+
 
 /**
  * Buffer utility methods.
@@ -103,7 +105,7 @@ class BufferUtils {
         ];
 
     shared static this() {
-        EMPTY_BUFFER = ByteBuffer.wrap(new byte[0]);
+        EMPTY_BUFFER = toBuffer(new byte[0]);
         EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
     }
     /* ------------------------------------------------------------ */
@@ -117,7 +119,7 @@ class BufferUtils {
      * @return Buffer
      */
     static ByteBuffer allocate(size_t capacity) {
-        ByteBuffer buf = ByteBuffer.allocate(capacity);
+        ByteBuffer buf = new HeapByteBuffer(cast(int)capacity, cast(int)capacity);
         buf.limit(0);
         return buf;
     }
@@ -133,7 +135,7 @@ class BufferUtils {
      * @return Buffer
      */
     static ByteBuffer allocateDirect(int capacity) {
-        ByteBuffer buf = ByteBuffer.allocateDirect(capacity);
+        ByteBuffer buf = new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity); 
         buf.limit(0);
         return buf;
     }
@@ -798,13 +800,13 @@ class BufferUtils {
     }
 
     static ByteBuffer toBuffer(int value) {
-        ByteBuffer buf = ByteBuffer.allocate(32);
+        ByteBuffer buf = allocate(32);
         putDecInt(buf, value);
         return buf;
     }
 
     static ByteBuffer toBuffer(long value) {
-        ByteBuffer buf = ByteBuffer.allocate(32);
+        ByteBuffer buf = allocate(32);
         putDecLong(buf, value);
         return buf;
     }
@@ -842,7 +844,11 @@ class BufferUtils {
     static ByteBuffer toBuffer(byte[] array, int offset, int length) {
         if (array is null)
             return EMPTY_BUFFER;
-        return ByteBuffer.wrap(array, offset, length);
+        try {
+            return new HeapByteBuffer(array, offset, length);
+        } catch (IllegalArgumentException x) {
+            throw new IndexOutOfBoundsException("");
+        }
     }
 
     static ByteBuffer toDirectBuffer(string s) {
@@ -1116,7 +1122,7 @@ class BufferUtils {
             //     copy[0.. capacity] = b[offset .. offset+capacity];
             // else
             copy[0 .. remaining] = b[offset .. $];
-            return ByteBuffer.wrap(copy, buffer.position(), buffer.remaining());
+            return toBuffer(copy, buffer.position(), buffer.remaining());
         }
 
         throw new UnsupportedOperationException();
@@ -1220,7 +1226,7 @@ class BufferUtils {
 
     static ByteBuffer toHeapBuffer(ByteBuffer buf) {
         if (buf.isDirect()) {
-            ByteBuffer heapBuffer = ByteBuffer.allocate(buf.remaining());
+            ByteBuffer heapBuffer = allocate(buf.remaining());
             heapBuffer.put(buf.slice()).flip();
             return heapBuffer;
         } else {

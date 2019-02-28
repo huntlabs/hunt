@@ -16,6 +16,7 @@ version(Posix):
 
 // dfmt on
 
+import hunt.collection.BufferUtils;
 import hunt.collection.ByteBuffer;
 import hunt.concurrency.thread.Helper;
 import hunt.Functions;
@@ -101,7 +102,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
         // _readBuffer = new ubyte[bufferSize];
-        _bufferForRead = ByteBuffer.allocate(bufferSize);
+        _bufferForRead = BufferUtils.allocate(bufferSize);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
         _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
