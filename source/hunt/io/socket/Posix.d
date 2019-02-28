@@ -235,11 +235,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         return 0;
     }
 
-
     override void onWrite() {
-
         if(_writeQueue is null || _writeQueue.isEmpty()) {
-            version (HUNT_DEBUG) warningf("The _writeQueue is empty: [fd=%d]", this.handle);
+            // version (HUNT_DEBUG) tracef("The _writeQueue is empty: [fd=%d]", this.handle);
             return;
         }
 

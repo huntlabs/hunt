@@ -229,11 +229,11 @@ class AbstractSelector : Selector {
             } else if (event == EPOLLOUT) {
                 version (HUNT_DEBUG)
                     tracef("channel write event: fd=%d", channel.handle);
-                // channel.onWrite();
+                channel.onWrite();
             } else if (event == (EPOLLIN | EPOLLOUT)) {
                 version (HUNT_DEBUG)
                     tracef("channel read and write: fd=%d", channel.handle);
-                // channel.onWrite();
+                channel.onWrite();
                 channel.onRead();
             } else {
                 debug warningf("this thread only for read/write/close events, event: %d", event);

@@ -90,9 +90,9 @@ interface StreamWriteBuffer {
     // do send finish
     void finish();
 
-    StreamWriteBuffer next();
+    // StreamWriteBuffer next();
 
-    void next(StreamWriteBuffer);
+    // void next(StreamWriteBuffer);
 
     size_t capacity();
 }
@@ -515,13 +515,13 @@ class SocketStreamBuffer : StreamWriteBuffer {
         _buffer = null;
     }
 
-    StreamWriteBuffer next() {
-        return _next;
-    }
+    // StreamWriteBuffer next() {
+    //     return _next;
+    // }
 
-    void next(StreamWriteBuffer v) {
-        _next = v;
-    }
+    // void next(StreamWriteBuffer v) {
+    //     _next = v;
+    // }
 
     size_t capacity() {
         return _buffer.length;
