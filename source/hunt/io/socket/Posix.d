@@ -377,9 +377,8 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
         return false;
     }
 
-    override void onWriteDone() {
-        // notified by kqueue selector when data writing done or a new connection coming
+    override void onWrite() {
         version (HUNT_DEBUG)
-            tracef("data writing done [fd=%d]", this.handle);
+            tracef("try to write [fd=%d]", this.handle);
     }
 }

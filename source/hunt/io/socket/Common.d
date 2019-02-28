@@ -146,6 +146,7 @@ abstract class Selector {
             doSelect(timeout);
         }
         while (_running);
+        version (HUNT_DEBUG) trace("Selector loop existed.");
         dispose();
     }
 

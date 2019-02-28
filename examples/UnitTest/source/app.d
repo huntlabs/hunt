@@ -30,32 +30,34 @@ void main()
 {
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
+	writeln("Memory page: ", pageSize);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 
-	// testUnits!(TaskPoolTest);
+
 	testUnits!(MagedQueueTest);
 
+	testUnits!(AtomicTest);
+	testUnits!(BigIntegerTest);
+	testUnits!(JsonHelperTest);
+	testUnits!(LinkedBlockingQueueTest);
+	testUnits!(MimeTypeTest);
+	testUnits!(NullableTest);
+	testUnits!(NumberTest);
+	// TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
+	// 
+	// testUnits!(PathMatcherTest); 
+	testUnits!(StringTokenizerTest);
+	testUnits!(ThreadTest);
 
+	// These tests belown will block the test procession.
+
+	// testUnits!(TaskPoolTest);
 	// LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
 	// b.bench();
-
-	// testUnits!(AtomicTest);
-	// testUnits!(BigIntegerTest);
-	// // testTask();
-
-	// testUnits!(JsonHelperTest);
-	// testUnits!(LinkedBlockingQueueTest);
-	// testUnits!(MimeTypeTest);
-	// testUnits!(NullableTest);
-	// testUnits!(NumberTest);
-	// testUnits!(PathMatcherTest);
-	// testUnits!(ScheduledThreadPoolTest);
-	// testUnits!(StringTokenizerTest);
-	// testUnits!(ThreadPoolExecutorTest);
-	// testUnits!(ThreadTest);
-
+	// testTask();
 	// testLockSupport01();
-
+	// testUnits!(ScheduledThreadPoolTest);
+	// testUnits!(ThreadPoolExecutorTest);
 }
 
 

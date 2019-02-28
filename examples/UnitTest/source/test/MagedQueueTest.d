@@ -1,12 +1,12 @@
 module test.MagedQueueTest;
 
-import hunt.concurrency.MagedQueue;
+import hunt.concurrency.SimpleQueue;
 
 class MagedQueueTest {
 
     void testBasic1() {
 
-        MagedNonBlockingQueue!long q = new MagedNonBlockingQueue!long();
+        NonBlockingQueue!long q = new NonBlockingQueue!long();
         assert(q.isEmpty());
         long v;
 

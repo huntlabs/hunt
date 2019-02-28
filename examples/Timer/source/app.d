@@ -71,6 +71,7 @@ version (NativeTimer) {
 			writeln("\r\nAll timers stopped (hit return to exit)");
 			getchar();
 			loop.stop();
+			// thread_joinAll();
 		}
 
 		int count1 = 10;
@@ -102,6 +103,6 @@ version (NativeTimer) {
 			}
 		}).start();
 
-		loop.run();
+		loop.run(100);
 	}
 }

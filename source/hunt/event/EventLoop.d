@@ -73,6 +73,7 @@ final class EventLoop : AbstractSelector {
         
         version (HUNT_DEBUG) trace("Stopping event loop...");
         if(isLoopThread()) {
+            version (HUNT_DEBUG) trace("Try to stopping event loop in another thread");
             auto stopTask = task(&stop);
             taskPool.put(stopTask);
         } else {
