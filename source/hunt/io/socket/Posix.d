@@ -38,8 +38,6 @@ import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
 
-
-
 extern (C) nothrow @nogc {
     int     accept4(int, sockaddr*, socklen_t*, int);
 }
@@ -133,7 +131,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
             // It's prossible that there are more data waitting for read in the read I/O space.
             if (len == _readBuffer.length) {
-                debug infof("Need read again");
+                version (HUNT_DEBUG) infof("Need read again");
                 isDone = false;
             }
         } else if (len == Socket.ERROR) {
