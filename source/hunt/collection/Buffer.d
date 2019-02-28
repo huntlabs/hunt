@@ -14,6 +14,7 @@ module hunt.collection.Buffer;
 import hunt.Exceptions;
 
 import std.conv;
+import std.format;
 
 abstract class Buffer
 {
@@ -73,7 +74,8 @@ abstract class Buffer
      */
     final Buffer position(int newPosition) {
         if ((newPosition > _limit) || (newPosition < 0))
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException(
+                    format("Out of range: %d is included in (0, %d)", newPosition, _limit));
         _position = newPosition;
         if (_mark > _position) _mark = -1;
         return this;

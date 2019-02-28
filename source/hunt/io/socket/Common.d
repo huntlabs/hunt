@@ -58,7 +58,9 @@ alias AcceptCallBack = void delegate(Selector loop, Socket socket) ;
     }());
 }
 
-private shared uint _defaultPoolThreads = uint.max;
+// __gshared bool useWorkerThread = false;
+
+private shared uint _defaultPoolThreads = 0;
 
 /**
 These properties get and set the number of worker threads in the `TaskPool`
@@ -188,7 +190,7 @@ abstract class AbstractChannel : Channel {
 
     protected bool _isRegistered = false;
     protected bool _isClosing = false;
-    protected bool _isClosed = false;
+    protected shared bool _isClosed = false;
 
     this(Selector loop, ChannelType type) {
         this._inLoop = loop;
@@ -211,7 +213,7 @@ abstract class AbstractChannel : Channel {
 
     protected void onClose() {
         _isRegistered = false;
-        _isClosed = true;
+        // _isClosed = true;
         _isClosing = false;
         version (HAVE_IOCP) {
         } else {
@@ -251,7 +253,7 @@ abstract class AbstractChannel : Channel {
     }
 
     void close() {
-        if (!_isClosed) {
+        if (cas(&_isClosed, false, true)) {
             version (HUNT_DEBUG)
                 tracef("channel[fd=%d] closing...", this.handle);
             onClose();

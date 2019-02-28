@@ -559,7 +559,7 @@ enum LogLevel
 	LOG_ERROR = 3,
 	LOG_FATAL = 4,
 	LOG_Off = 5
-};
+}
 
 struct LogConf
 {
