@@ -24,7 +24,6 @@ import std.parallelism;
 final class EventLoop : AbstractSelector {
     private long timeout = -1; // in millisecond
 
-
     this() {
         super(0, 1);
     }

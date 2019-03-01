@@ -113,27 +113,22 @@ class AbstractSelector : Selector {
         epoll_event e;
 
         // e.data.fd = infd;
-        e.data.ptr = cast(void*) channel;
-        e.events = EPOLLIN | EPOLLET | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLOUT;
-        int s = epoll_ctl(_epollFD, EPOLL_CTL_ADD, infd, &e);
-        if (s == -1) {
-            debug warningf("failed to register channel: fd=%d", infd);
-            return false;
-        } else {
-            return true;
-        }
-        // if (epollCtl(channel, EPOLL_CTL_ADD)) {
-        //     // _event.setNext(channel);
-        //     return true;
-        // } else {
+        // e.data.ptr = cast(void*) channel;
+        // e.events = EPOLLIN | EPOLLET | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLOUT;
+        // int s = epoll_ctl(_epollFD, EPOLL_CTL_ADD, infd, &e);
+        // if (s == -1) {
         //     debug warningf("failed to register channel: fd=%d", infd);
         //     return false;
+        // } else {
+        //     return true;
         // }
+        if (epollCtl(channel, EPOLL_CTL_ADD)) {
+            return true;
+        } else {
+            debug warningf("failed to register channel: fd=%d", infd);
+            return false;
+        }
     }
-
-    // override bool reregister(AbstractChannel channel) {
-    //     return epollCtl(channel, EPOLL_CTL_MOD);
-    // }
 
     override bool deregister(AbstractChannel channel) {
         size_t fd = cast(size_t) channel.handle;
@@ -326,8 +321,8 @@ class AbstractSelector : Selector {
             ev.events |= EPOLLIN;
         if (channel.hasFlag(ChannelFlag.Write))
             ev.events |= EPOLLOUT;
-        if (channel.hasFlag(ChannelFlag.OneShot))
-            ev.events |= EPOLLONESHOT;
+        // if (channel.hasFlag(ChannelFlag.OneShot))
+        //     ev.events |= EPOLLONESHOT;
         if (channel.hasFlag(ChannelFlag.ETMode))
             ev.events |= EPOLLET;
         return ev;
