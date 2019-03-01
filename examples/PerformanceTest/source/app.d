@@ -189,7 +189,7 @@ class TestTcpServer : AbstractTcpServer {
         super(address, thread);
     }
 
-    override protected void onConnectionAccepted(TcpListener sender, TcpStream client) {
+    protected override void onConnectionAccepted(TcpListener sender, TcpStream client) {
         client.onDataReceived((ByteBuffer buffer) {
             handleReceivedData(client, cast(ubyte[]) buffer.getRawData());
         }).onClosed(() { onClientClosed(client); }).onError((string msg) {

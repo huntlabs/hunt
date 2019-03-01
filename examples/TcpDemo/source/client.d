@@ -21,9 +21,9 @@ void main() {
 	client.onConnected((bool isSucceeded) {
 		if (isSucceeded) {
 			writeln("connected with: ", client.remoteAddress.toString());
-			client.write(cast(const(ubyte[])) "Hello world!", (in ubyte[] wdata, size_t size) {
-				debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
-			});
+			string data = "Hello world!";
+			debug writeln("sending: size=", data.length, "  content: ", data);
+			client.write(cast(const(ubyte[])) data);
 			// client.write(new SocketStreamBuffer(cast(const(ubyte[])) "hello world!",
 			// 	(in ubyte[] wdata, size_t size) {
 			// 		debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
@@ -41,21 +41,27 @@ void main() {
 			});
         	taskPool.put(runTask);
 		}
+	}).onDataWritten((Object obj) {
+		writefln("Data write done");
 	}).onDataReceived((ByteBuffer buffer) {
 		byte[] data = buffer.getRawData();
 		writeln("received data: ", cast(string)data);
 		if (--count > 0) {
-			client.write(cast(ubyte[])data, (in ubyte[] wdata, size_t size) {
-				debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
-			});
+			debug writeln("sending: size=", data.length, "  content: ", cast(string) data);
+			client.write(cast(ubyte[])data);
 			// client.write(new SocketStreamBuffer(data.dup, (in ubyte[] wdata, size_t size) {
 			// 		debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			// 	}));
+		} else {
+			client.close();
 		}
 	}).onClosed(() {
 		writeln("The connection closed!");
 		loop.stop();
-	}).connect("127.0.0.1", 8080);
+	}).onError((string msg){
+		writefln("error occurred: %s", msg);
+	})
+	.connect("127.0.0.1", 8080);
 	// }).connect("::1", 8080);
 	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8080);
 	// }).connect("fe80::2435:c2f0:4a2e:ba11%ens33", 8080);
@@ -63,9 +69,9 @@ void main() {
 	loop.run();
 
 	// loop.runAsync(20);
-	// writeln("The app will exit in 10 seconds!");
+	// writeln("The app will exit in 5 seconds!");
 	// import core.thread;
 	// import core.time;
-	// Thread.sleep(10.seconds);
+	// Thread.sleep(5.seconds);
 	// loop.stop();	
 }

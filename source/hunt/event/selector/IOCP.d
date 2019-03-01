@@ -27,11 +27,13 @@ import std.conv;
 /**
 */
 class AbstractSelector : Selector {
-    this() {
+
+    this(size_t number, size_t divider, size_t maxChannels = 1500) {
+        super(number, divider, maxChannels);
         _iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 0);
         if (_iocpHandle is null)
             errorf("CreateIoCompletionPort failed: %d\n", GetLastError());
-        _event = new EventChannel(this);
+        // _event = new EventChannel(this);
         _timer.init();
     }
 
@@ -58,17 +60,13 @@ class AbstractSelector : Selector {
             version (HUNT_DEBUG)
                 trace("Run CreateIoCompletionPort on socket: ", fd);
 
-            _event.setNext(channel);
+            // _event.setNext(channel);
             CreateIoCompletionPort(cast(HANDLE) fd, _iocpHandle,
                     cast(size_t)(cast(void*) channel), 0);
         } else {
             warningf("Can't register a channel: %s", ct);
         }
         return true;
-    }
-
-    override bool reregister(AbstractChannel channel) {
-        throw new LoopException("IOCP does not support reregister!");
     }
 
     override bool deregister(AbstractChannel channel) {
@@ -84,21 +82,21 @@ class AbstractSelector : Selector {
         return true;
     }
 
-    void weakUp() {
-        IocpContext _data;
-        _data.channel = _event;
-        _data.operation = IocpOperation.event;
+    // void weakUp() {
+    //     IocpContext _data;
+    //     // _data.channel = _event;
+    //     _data.operation = IocpOperation.event;
 
-        // PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
-        PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
-    }
+    //     // PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
+    //     PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
+    // }
 
-    override void onLoop(scope void delegate() weakup, long timeout = -1) {
+    override void onLoop(long timeout = -1) {
         _timer.init();
-        super.onLoop(weakup, timeout);
+        super.onLoop(timeout);
     }
 
-    override protected int doSelect(long t) {
+    protected override int doSelect(long t) {
         auto timeout = _timer.doWheel();
         OVERLAPPED* overlapped;
         ULONG_PTR key = 0;
@@ -120,24 +118,22 @@ class AbstractSelector : Selector {
             if (erro == WAIT_TIMEOUT || erro == ERROR_OPERATION_ABORTED) // 
                 return ret;
             
-            debug errorf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
+            debug warningf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
             assert(ev !is null);
-            // if (ev !is null) {
             AbstractChannel channel = ev.channel;
             if (channel !is null && !channel.isClosed())
                 channel.close();
-            // }
         } else if (ev is null || ev.channel is null)
             warning("ev is null or ev.watche is null");
         else
-            handleIocpOperation(ev.operation, ev.channel, bytes);
+            handleChannelEvent(ev.operation, ev.channel, bytes);
         return ret;
     }
 
-    private void handleIocpOperation(IocpOperation op, AbstractChannel channel, DWORD bytes) {
+    private void handleChannelEvent(IocpOperation op, AbstractChannel channel, DWORD bytes) {
 
         version (HUNT_DEBUG)
-            info("ev.operation: ", op);
+            infof("ev.operation: %s, fd=%d", op, channel.handle);
 
         switch (op) {
         case IocpOperation.accept:
@@ -156,7 +152,7 @@ class AbstractSelector : Selector {
             channel.onRead();
             break;
         case IocpOperation.close:
-            warning("close: ",);
+            warningf("close: %d", channel.handle);
             break;
         default:
             warning("unsupported operation type: ", op);
@@ -166,7 +162,8 @@ class AbstractSelector : Selector {
 
     override void stop() {
         super.stop();
-        weakUp();
+        // weakUp();
+        PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
     }
 
     void handleTimer() {
@@ -215,6 +212,6 @@ class AbstractSelector : Selector {
 
 private:
     HANDLE _iocpHandle;
-    EventChannel _event;
+    // EventChannel _event;
     CustomTimer _timer;
 }

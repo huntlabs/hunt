@@ -15,7 +15,7 @@ module hunt.event.timer.IOCP;
 version (HAVE_IOCP) : 
 // dfmt on
 
-
+import hunt.Functions;
 import hunt.io.socket.Common;
 import hunt.event.timer.Common;
 
@@ -38,7 +38,7 @@ class AbstractTimer : TimerChannelBase
         _readBuffer = new UintObject();
     }
 
-    bool readTimer(scope ReadCallBack read)
+    bool readTimer(scope SimpleActionHandler read)
     {
         this.clearError();
         this._readBuffer.data = 1;

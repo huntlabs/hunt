@@ -61,7 +61,7 @@ final class EventLoop : AbstractSelector {
         } else {
             version (HUNT_DEBUG) trace("running eventloop...");
             _thread = Thread.getThis();
-            onLoop(&onWakeUp, timeout);
+            onLoop(timeout);
         }
     }
 
@@ -107,17 +107,17 @@ final class EventLoop : AbstractSelector {
     //     return newTask(F, Args)(delegateOrFp, args);
     // }
 
-    protected void onWakeUp() {
-        // TaskQueue queue;
-        // synchronized (this) {
-        //     queue = _queue;
-        //     _queue = TaskQueue();
-        // }
-        // while (!queue.empty) {
-        //     auto task = queue.deQueue();
-        //     task.job();
-        // }
-    }
+    // protected void onWakeUp() {
+    //     // TaskQueue queue;
+    //     // synchronized (this) {
+    //     //     queue = _queue;
+    //     //     _queue = TaskQueue();
+    //     // }
+    //     // while (!queue.empty) {
+    //     //     auto task = queue.deQueue();
+    //     //     task.job();
+    //     // }
+    // }
 
 private:
     Thread _thread;

@@ -35,10 +35,11 @@ version (HAVE_IOCP) import SOCKETOPTIONS = core.sys.windows.winsock2;
 
 version (Posix) import SOCKETOPTIONS = core.sys.posix.sys.socket;
 
-alias ReadCallBack = void delegate(Object obj);
+// alias ReadCallBack = void delegate(Object sender);
 alias DataReceivedHandler = void delegate(ByteBuffer buffer);
-alias DataWrittenHandler = void delegate(const ubyte[] data, size_t size);
+// alias DataWrittenHandler = void delegate(const ubyte[] data, size_t size);
 alias AcceptHandler = void delegate(Socket socket);
+alias ErrorEventHandler = Action1!(string);
 
 alias ConnectionHandler = void delegate(bool isSucceeded);
 
@@ -109,10 +110,18 @@ http://tutorials.jenkov.com/java-nio/selectors.html
 abstract class Selector {
 
     protected shared bool _running;
+    
+    protected size_t number;
+    protected size_t divider;
+    protected AbstractChannel[] channels;
+
+    this(size_t number, size_t divider, size_t maxChannels = 1500) {
+        this.number = number;
+        this.divider = divider;
+        channels = new AbstractChannel[maxChannels];
+    }
 
     abstract bool register(AbstractChannel channel);
-
-    // abstract bool reregister(AbstractChannel channel);
 
     abstract bool deregister(AbstractChannel channel);
 
@@ -138,11 +147,11 @@ abstract class Selector {
     /**
         timeout: in millisecond
     */
-    protected void onLoop(scope void delegate() wakeup, long timeout = -1) {
+    protected void onLoop(long timeout = -1) {
         _running = true;
         do {
             // version (HUNT_DEBUG) trace("Selector rolled once.");
-            wakeup();
+            // wakeup();
             doSelect(timeout);
         }
         while (_running);
@@ -396,18 +405,18 @@ abstract class AbstractSocketChannel : AbstractChannel {
         version (HUNT_DEBUG)
             tracef("closing [fd=%d]...", this.handle);
 
-        if (isBusy) {
+        if (isBusy()) {
             import std.parallelism;
 
             version (HUNT_DEBUG)
                 warning("Close operation delayed");
             auto theTask = task(() {
-                while (isBusy) {
-                    version (HUNT_DEBUG)
-                        infof("waitting for idle [fd=%d]...", this.handle);
+                super.close();
+                while (isBusy()) {
+                    // version (HUNT_DEBUG)
+                    //     infof("waitting for idle [fd=%d]...", this.handle);
                     // Thread.sleep(20.msecs);
                 }
-                super.close();
             });
             taskPool.put(theTask);
         } else {
@@ -491,10 +500,9 @@ abstract class AbstractSocketChannel : AbstractChannel {
 */
 class SocketStreamBuffer : StreamWriteBuffer {
 
-    this(const(ubyte)[] data, DataWrittenHandler handler = null) {
+    this(const(ubyte)[] data) {
         _buffer = data;
         _pos = 0;
-        _sentHandler = handler;
     }
 
     const(ubyte)[] remaining() {
@@ -510,29 +518,16 @@ class SocketStreamBuffer : StreamWriteBuffer {
     }
 
     void finish() {
-        if (_sentHandler)
-            _sentHandler(_buffer, _pos);
-        _sentHandler = null;
         _buffer = null;
     }
-
-    // StreamWriteBuffer next() {
-    //     return _next;
-    // }
-
-    // void next(StreamWriteBuffer v) {
-    //     _next = v;
-    // }
 
     size_t capacity() {
         return _buffer.length;
     }
 
 private:
-    StreamWriteBuffer _next;
     size_t _pos = 0;
     const(ubyte)[] _buffer;
-    DataWrittenHandler _sentHandler;
 }
 
 version (HUNT_IO_WORKERPOOL) {

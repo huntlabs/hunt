@@ -213,13 +213,18 @@ class TcpStream : AbstractStream {
         }
     }
 
-    TcpStream onConnected(ConnectionHandler cback) {
-        _connectionHandler = cback;
+    TcpStream onConnected(ConnectionHandler handler) {
+        _connectionHandler = handler;
         return this;
     }
 
     TcpStream onDataReceived(DataReceivedHandler handler) {
         dataReceivedHandler = handler;
+        return this;
+    }
+
+    TcpStream onDataWritten(SimpleActionHandler handler) {
+        dataWriteDoneHandler = handler;
         return this;
     }
 
@@ -263,17 +268,18 @@ class TcpStream : AbstractStream {
 
         initializeWriteQueue();
         _writeQueue.enqueue(buffer);
+        onWrite();
         
-        version (HAVE_IOCP) {
-            if (!_isWritting)  tryWrite();
-        } else {
-            onWrite();
-        }
+        // version (HAVE_IOCP) {
+        //     if (!_isWritting)  tryWrite();
+        // } else {
+        //     onWrite();
+        // }
     }
 
     /**
     */
-    void write(const(ubyte)[] data, DataWrittenHandler handler = null) {
+    void write(const(ubyte)[] data) {
         if (data.length == 0 || !_isConnected)
             return;
         
@@ -284,10 +290,10 @@ class TcpStream : AbstractStream {
         if ((_writeQueue is null || _writeQueue.isEmpty()) && !_isWritting) {
             version (HUNT_DEBUG)
                 tracef("write data directly, fd=%d", this.handle);
-            _isWritting = true;
-            scope(exit) {
-                _isWritting = false;
-            }
+            // _isWritting = true;
+            // scope(exit) {
+            //     _isWritting = false;
+            // }
 
             const(ubyte)[] d = data;
 
@@ -306,11 +312,11 @@ class TcpStream : AbstractStream {
                 }
             }
             
-            if(handler !is null)
-                handler(data, data.length);
+            // if(dataWriteDoneHandler !is null)
+            //     dataWriteDoneHandler(this);
 
         } else {
-            write(new SocketStreamBuffer(data, handler));
+            write(new SocketStreamBuffer(data));
         }
     }
 
@@ -352,7 +358,8 @@ protected:
                     this.handle, this.erroString);
             // version (HUNT_DEBUG)
             debug errorf(msg);
-            errorOccurred(msg);
+            if(!isClosed)
+                errorOccurred(msg);
         }
     }
 

@@ -52,13 +52,11 @@ shared static this() {
 class AbstractSelector : Selector {
     enum int NUM_KEVENTS = 1024;
     private int _epollFD;
-    AbstractChannel[] channels;
     epoll_event[NUM_KEVENTS] events;
 
-    protected size_t number;
-    protected size_t divider;
-
     this(size_t number, size_t divider, size_t maxChannels = 1500) {
+        super(number, divider, maxChannels);
+
         // http://man7.org/linux/man-pages/man2/epoll_create.2.html
         /*
          * epoll_create expects a size as a hint to the kernel about how to
@@ -68,11 +66,6 @@ class AbstractSelector : Selector {
         // _epollFD = epoll_create(256);
         if (_epollFD < 0)
             throw new IOException("epoll_create failed");
-
-        this.number = number;
-        this.divider = divider;
-
-        channels = new AbstractChannel[maxChannels];
     }
 
     ~this() {
@@ -160,7 +153,7 @@ class AbstractSelector : Selector {
     /**
         timeout: in millisecond
     */
-    override protected int doSelect(long timeout) {
+    protected override int doSelect(long timeout) {
         int len = 0;
 
         if (timeout <= 0) { /* Indefinite or no wait */
@@ -402,7 +395,7 @@ class AbstractSelector : Selector {
 //             tracef("channel read done: %d bytes, fd=%d", n, this.handle);
 //     }
 
-//     override protected void onClose() {
+//     protected override void onClose() {
 //         version (HUNT_DEBUG)
 //             tracef("close event channel [fd=%d]...", this.handle);
 //         core.sys.posix.unistd.close(this.handle);

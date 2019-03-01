@@ -162,7 +162,8 @@ abstract class AbstractStream : AbstractSocketChannel {
         return isDone;
     }
 
-    override protected void onClose() {
+    protected override void onClose() {
+        _isWritting = false;
         if(this.socket is null) {
             import core.sys.posix.unistd;
             core.sys.posix.unistd.close(this.handle);
@@ -170,7 +171,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             this.socket.shutdown(SocketShutdown.BOTH);
             this.socket.close();
         }
-        super.close();
+        super.onClose();
     }
 
     protected void onDisconnected() {
@@ -362,7 +363,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
     protected bool _binded = false;
     protected Address _bindAddress;
 
-    protected bool tryRead(scope ReadCallBack read) {
+    protected bool tryRead(scope SimpleActionHandler read) {
         this._readBuffer.addr = createAddress(this.socket.addressFamily, 0);
         auto data = this._readBuffer.data;
         scope (exit)
