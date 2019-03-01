@@ -364,43 +364,6 @@ class AbstractSelector : Selector {
     }
 }
 
-/**
-*/
-// class EpollEventChannel : EventChannel {
-//     this(Selector loop) {
-//         super(loop);
-//         setFlag(ChannelFlag.Read, true);
-//         this.handle = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-//         _isRegistered = true;
-//     }
-
-//     ~this() {
-//         close();
-//     }
-
-//     override void call() {
-//         version (HUNT_DEBUG)
-//             tracef("calling event [fd=%d]...%s", this.handle, eventLoop.isRuning);
-//         ulong value = 1;
-//         core.sys.posix.unistd.write(this.handle, &value, value.sizeof);
-//     }
-
-//     override void onRead() {
-//         version (HUNT_DEBUG)
-//             tracef("channel reading [fd=%d]...", this.handle);
-//         this.clearError();
-//         ulong value;
-//         ssize_t n = core.sys.posix.unistd.read(this.handle, &value, value.sizeof);
-//         version (HUNT_DEBUG)
-//             tracef("channel read done: %d bytes, fd=%d", n, this.handle);
-//     }
-
-//     protected override void onClose() {
-//         version (HUNT_DEBUG)
-//             tracef("close event channel [fd=%d]...", this.handle);
-//         core.sys.posix.unistd.close(this.handle);
-//     }
-// }
 
 enum {
     EFD_SEMAPHORE = 0x1,

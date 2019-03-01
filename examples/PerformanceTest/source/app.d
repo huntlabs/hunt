@@ -18,6 +18,7 @@ import std.parallelism;
 import std.socket;
 
 __gshared size_t totalSize = 50 * 1024 * 1024 + 1;
+// __gshared size_t totalSize = 1024 + 1;
 __gshared size_t bufferSize = 4096;
 __gshared ushort port = 8080;
 
@@ -27,6 +28,7 @@ int clientCounter = 0;
 
 void main(string[] args) {
     Tid worker = spawn(&workerFunc);
+    // Thread workerThread = new Thread(&workerFunc);
 
     GetoptResult o = getopt(args, "port|p", "Port (default 8080)", &port);
     if (o.helpWanted) {
@@ -36,12 +38,17 @@ void main(string[] args) {
 
     TestTcpServer testServer = new TestTcpServer("0.0.0.0", port, totalCPUs);
     testServer.started = () {
-        writefln("All the servers is listening on %s.", testServer.bindingAddress.toString());
+        writefln("All the servers are listening on %s.", testServer.bindingAddress.toString());
         worker.send(1);
+        // workerThread.start();
     };
 
     testServer.start();
-    worker.send(0);
+
+    // workerThread.start();
+    // worker.send(0);
+
+    thread_joinAll();
 }
 
 void launchClient() {
@@ -50,6 +57,12 @@ void launchClient() {
     const WatchedValue2 = 23;
     const WatchedValue3 = 4;
 
+    TcpSocket socket = new TcpSocket();
+    socket.blocking = true;
+    // socket.bind(new InternetAddress("127.0.0.1", 0));
+    socket.connect(new InternetAddress("127.0.0.1", port));
+
+    debug writefln("[Client] generating data...");
     size_t middleIndex = totalSize / 2;
     ubyte[] sendingBuffer = new ubyte[totalSize];
     for (size_t i = 0; i < totalSize; i++)
@@ -58,13 +71,14 @@ void launchClient() {
     // sendingBuffer[middleIndex] = WatchedValue2;
     // sendingBuffer[$ - 1] = WatchedValue3;
 
-    TcpSocket socket = new TcpSocket();
-    socket.blocking = true;
-    socket.bind(new InternetAddress("0.0.0.0", 0));
-    socket.connect(new InternetAddress("127.0.0.1", port));
     size_t offset = 0;
+    size_t step = 1024 * 4;
     for (size_t len = 0; offset < sendingBuffer.length; offset += len) {
-        len = socket.send(sendingBuffer[offset .. $]);
+        size_t endIndex = offset + step;
+        if (endIndex > sendingBuffer.length)
+            endIndex = sendingBuffer.length;
+
+        len = socket.send(sendingBuffer[offset .. endIndex]);
         debug writefln("[Client] sending: offset=%d, lenght=%d", offset, len);
     }
 
@@ -76,7 +90,8 @@ void launchClient() {
         if (len == 0)
             break;
 
-        if (clientCounter % (totalSize / 10 / bufferSize) == 0)
+        size_t n = (totalSize / 10 / bufferSize);
+        if (n == 0 || clientCounter % n == 0)
             writefln("[Client] Current=%d, Accumulated=%d", len, offset + len);
         clientCounter++;
     }
@@ -106,7 +121,7 @@ void workerFunc() {
         try {
             int m = receiveOnly!int();
             if (m == 1) {
-                // Thread.sleep(500.msecs);
+                Thread.sleep(3500.msecs);
                 launchClient();
                 writeln("[Client] done.");
                 isDone = true;
@@ -118,7 +133,7 @@ void workerFunc() {
             writeln("The owner has terminated.");
             isDone = true;
         } catch (Exception ex) {
-            writeln("[Client] Exception thrown", ex.message);
+            warning("[Client] Exception thrown: ", ex.message);
             isDone = true;
         }
     }
@@ -192,9 +207,9 @@ class TestTcpServer : AbstractTcpServer {
     protected override void onConnectionAccepted(TcpListener sender, TcpStream client) {
         client.onDataReceived((ByteBuffer buffer) {
             handleReceivedData(client, cast(ubyte[]) buffer.getRawData());
-        }).onClosed(() { onClientClosed(client); }).onError((string msg) {
-            writeln("Error on client: ", msg);
-        });
+        }).onClosed(() { onClientClosed(client); }).onDataWritten((Object obj) {
+            writeln("[Server] test succeeded");
+        }).onError((string msg) { warning("Error on client: ", msg); });
     }
 
     protected void handleReceivedData(TcpStream client, in ubyte[] data) {
@@ -202,14 +217,15 @@ class TestTcpServer : AbstractTcpServer {
         ubyte[] buffer = queue[client];
 
         totalReceived += data.length;
-        if (serverCounter % (totalSize / 10 / bufferSize) == 0) {
-            writefln("[Server] [%d] Received bytes (tid-%d): Current=%d, Accumulated=%d",
+        size_t n = (totalSize / 10 / bufferSize);
+        if (n == 0 || serverCounter % (totalSize / 10 / bufferSize) == 0) {
+            tracef("[Server] [%d] Received bytes (tid-%d): Current=%d, Accumulated=%d",
                     serverCounter, getTid(), data.length, totalReceived);
         }
         serverCounter++;
 
         if (buffer.length >= totalSize) {
-            writefln("[Server] reading done. Counter=%d, Accumulated=%d",
+            tracef("[Server] reading done. Counter=%d, Accumulated=%d",
                     serverCounter, buffer.length);
             onRequest(client, buffer);
         }
@@ -221,15 +237,7 @@ class TestTcpServer : AbstractTcpServer {
         size_t sendLength = data.length;
 
         writefln("[Server] start writing on thread %s, totalSize=%d", getTid(), sendLength);
-
-        client.write(ret_data, (in ubyte[] d, size_t len) {
-            writefln("[Server] fininshed writing on thread %s, size=%d", getTid(), len);
-
-            if (sendLength != len)
-                writefln("[Server] test failed: shoud=%d actual=%d", sendLength, len);
-            else
-                writeln("[Server] test succeeded");
-        });
+        client.write(ret_data);
     }
 
     protected void onClientClosed(TcpStream client) {
