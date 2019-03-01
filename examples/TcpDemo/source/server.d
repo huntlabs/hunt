@@ -48,21 +48,20 @@ void main()
 			// debug writefln("received: %(%02X %)", data);
 			// const(ubyte)[] sentData = bigData;	// big data test
 			const(ubyte)[] sentData = data; // echo test
-			client.write(sentData, (in ubyte[] wdata, size_t nBytes) {
-				debug writefln("thread: %s, sent bytes: %d", getTid(), nBytes);
-
-				if (sentData.length > nBytes)
-					writefln("remaining bytes: ", sentData.length - nBytes);
-			});
+			client.write(sentData);
 
 			// client.write(new SocketStreamBuffer(data, (in ubyte[] wdata, size_t size) {
 			// 	debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			// }));
+		}).onDataWritten((Object obj) {
+			writefln("Data write done");
 		}).onDisconnected(() {
 			debug writefln("client disconnected: %s", client.remoteAddress.toString());
 		}).onClosed(() {
 			debug writefln("connection closed, local: %s, remote: %s",
 			client.localAddress.toString(), client.remoteAddress.toString());
+		}).onError((string msg){
+			writefln("error occurred: %s", msg);
 		});
 	}).start();
 

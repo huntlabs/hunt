@@ -637,11 +637,11 @@ class ThreadPoolExecutor : AbstractExecutorService {
         // The value 0 represents the unlocked state.
         // The value 1 represents the locked state.
 
-        override protected bool isHeldExclusively() {
+        protected override bool isHeldExclusively() {
             return getState() != 0;
         }
 
-        override protected bool tryAcquire(int unused) {
+        protected override bool tryAcquire(int unused) {
             if (compareAndSetState(0, 1)) { 
                 setExclusiveOwnerThread(Thread.getThis());
                 return true;
@@ -649,7 +649,7 @@ class ThreadPoolExecutor : AbstractExecutorService {
             return false;
         }
 
-        override protected bool tryRelease(int unused) {
+        protected override bool tryRelease(int unused) {
             setExclusiveOwnerThread(null);
             setState(0);
             return true;

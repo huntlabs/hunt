@@ -18,6 +18,7 @@ pragma(lib, "Ws2_32");
 // dfmt on
 
 import hunt.collection.ByteBuffer;
+import hunt.collection.BufferUtils;
 import hunt.io.socket.Common;
 import hunt.logging;
 import hunt.Functions;
@@ -93,6 +94,10 @@ abstract class AbstractListener : AbstractSocketChannel {
     }
 
     override void onClose() {
+        
+        // version (HUNT_DEBUG)
+        //     tracef("_isWritting=%s", _isWritting);
+        // _isWritting = false;
         // assert(false, "");
         // TODO: created by Administrator @ 2018-3-27 15:51:52
     }
@@ -107,19 +112,27 @@ abstract class AbstractListener : AbstractSocketChannel {
 /**
 TCP Client
 */
-abstract class AbstractStream : AbstractSocketChannel, Stream {
-    DataReceivedHandler dataReceivedHandler;
-    DataWrittenHandler sentHandler;
+abstract class AbstractStream : AbstractSocketChannel {
+
+    // data event handlers
+    protected DataReceivedHandler dataReceivedHandler;
+    protected SimpleActionHandler dataWriteDoneHandler;
+
     protected AddressFamily _family;
+    protected ByteBuffer _bufferForRead;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         super(loop, ChannelType.TCP);
-        setFlag(ChannelFlag.Read, true);
-        setFlag(ChannelFlag.Write, true);
+        // setFlag(ChannelFlag.Read, true);
+        // setFlag(ChannelFlag.Write, true);
 
         version (HUNT_DEBUG)
             trace("Buffer size for read: ", bufferSize);
-        _readBuffer = new ubyte[bufferSize];
+        // _readBuffer = new ubyte[bufferSize];
+        
+        _bufferForRead = BufferUtils.allocate(bufferSize);
+        _bufferForRead.clear();
+        _readBuffer = cast(ubyte[])_bufferForRead.array();
         _writeQueue = new WritingBufferQueue();
         this.socket = new TcpSocket(family);
 
@@ -136,8 +149,32 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     }
 
     override void onWrite() {
-        _inWrite = false;
-        super.onWrite();
+        // _inWrite = false;
+        // super.onWrite();
+        if (_isWritting) {
+            version (HUNT_DEBUG) warning("Busy in writting: ");
+            return;
+        }
+
+        if(_writeQueue is null || _writeQueue.isEmpty()) {
+            version (HUNT_DEBUG)
+                trace("The write queue is empty.");
+            return;
+        }
+
+        tryNextWrite();
+    }
+    
+    protected override void onClose() {
+        _isWritting = false;
+        if(this.socket is null) {
+            import core.sys.windows.winsock2;
+            .closesocket(this.handle);
+        } else {
+            this.socket.shutdown(SocketShutdown.BOTH);
+            this.socket.close();
+        }
+        super.onClose();
     }
 
     protected void beginRead() {
@@ -150,7 +187,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         DWORD dwFlags = 0;
 
         version (HUNT_DEBUG)
-            tracef("start receiving by handle[fd=%d] ", this.socket.handle);
+            tracef("start receiving [fd=%d] ", this.socket.handle);
 
         // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
         int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
@@ -178,7 +215,7 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         _iocpwrite.operation = IocpOperation.write;
         version (HUNT_DEBUG) {
             size_t bufferLength = sendDataBuffer.length;
-            tracef("To be written %d nbytes by handle[fd=%d]", bufferLength, this.socket.handle());
+            tracef("To write %d nbytes: fd=%d", bufferLength, this.socket.handle());
             // trace(cast(string) data);
             if (bufferLength > 32)
                 tracef("%(%02X %) ...", sendDataBuffer[0 .. 32]);
@@ -212,11 +249,14 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         if (readLen > 0) {
             // import std.stdio;
             // writefln("length=%d, data: %(%02X %)", readLen, _readBuffer[0 .. readLen]);
-
-            if (dataReceivedHandler !is null)
-                dataReceivedHandler(this._readBuffer[0 .. readLen]);
             version (HUNT_DEBUG)
-                tracef("reading done: %d nbytes", this.readLen);
+                tracef("reading done: %d nbytes", readLen);
+
+            if (dataReceivedHandler !is null) {
+                _bufferForRead.limit(cast(int)readLen);
+                _bufferForRead.position(0);
+                dataReceivedHandler(_bufferForRead);
+            }
 
             // continue reading
             this.beginRead();
@@ -240,12 +280,10 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
 
     // private ThreadID lastThreadID;
 
-    /// 
-    // TODO: created by Administrator @ 2018-4-18 10:15:20
-    // Send a big block of data
+    // try to write a block of data directly
     protected size_t tryWrite(const ubyte[] data) {
         if (_isWritting) {
-            warning("Busy in writting on thread: ");
+            version (HUNT_DEBUG) warning("Busy in writting on thread: ");
             return 0;
         }
         version (HUNT_DEBUG)
@@ -259,30 +297,41 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         return nBytes;
     }
 
-    protected void tryWrite() {
-        if (_writeQueue.empty)
+    // try to write a block of data from the write queue
+    private void tryNextWrite() {
+        if(_writeQueue is null || _writeQueue.isEmpty()) {
+            _isWritting = false;
+            version (HUNT_DEBUG)
+                tracef("All data are written done！fd=%d", this.handle);
+            if(dataWriteDoneHandler !is null)
+                dataWriteDoneHandler(this);
             return;
-
-        version (HUNT_DEBUG)
-            trace("start writting...");
-        _isWritting = true;
+        } 
         clearError();
 
-        writeBuffer = _writeQueue.front();
+        bool haveBuffer = _writeQueue.tryDequeue(writeBuffer);
+        if(!haveBuffer) {
+            version (HUNT_DEBUG)
+                warning("No buffer in queue");
+            return;
+        }
         const(ubyte)[] data = writeBuffer.remaining();
         setWriteBuffer(data);
         size_t nBytes = doWrite();
+
+        version (HUNT_DEBUG)
+            tracef("written data: %d bytes", nBytes);
 
         if (nBytes < data.length) { // to fix the corrupted data 
             version (HUNT_DEBUG)
                 warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
             sendDataBuffer = data.dup;
-        }
+        }        
     }
 
     private void setWriteBuffer(in ubyte[] data) {
         version (HUNT_DEBUG)
-            tracef("data length: %d nbytes", data.length);
+            tracef("buffering data temporarily: %d bytes, fd=%d", data.length, this.handle);
         // trace(cast(string) data);
         // tracef("%(%02X %)", data);
 
@@ -297,38 +346,60 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
     */
     void onWriteDone(size_t nBytes) {
         version (HUNT_DEBUG)
-            tracef("finishing writting: %d bytes", nBytes);
+            tracef("write once done: %d bytes, isWriteCancelling=%s", nBytes, isWriteCancelling);
         if (isWriteCancelling) {
             _isWritting = false;
             isWriteCancelling = false;
-            _writeQueue.clear(); // clean the data buffer 
+            if(_writeQueue !is null)
+                _writeQueue.clear(); // clean the data buffer 
+            sendDataBuffer = null;
             return;
         }
 
-        if (writeBuffer.pop(nBytes)) {
-            if (_writeQueue.deQueue() is null) {
+        if(writeBuffer is null) {
+            if(sendDataBuffer.length == nBytes) {
+                _isWritting = false;
+                isWriteCancelling = false;
                 version (HUNT_DEBUG)
-                    warning("_writeQueue is empty!");
+                    tracef("try next write");
+                tryNextWrite();
+            } else {
+                version (HUNT_DEBUG)
+                    tracef("continue to write remaining data: %d bytes", sendDataBuffer.length - nBytes);
+                
+                setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
+                doWrite();
             }
+        } else {
+            if (writeBuffer.pop(nBytes)) {
+                // if (_writeQueue.deQueue() is null) {
+                //     version (HUNT_DEBUG)
+                //         warning("_writeQueue is empty!");
+                // }
+                writeBuffer.finish();
+                version (HUNT_DEBUG)
+                    tracef("try next write");
 
-            writeBuffer.finish();
-            _isWritting = false;
+                tryNextWrite();
+            } else // if (sendDataBuffer.length > nBytes) 
+            {
+                // version (HUNT_DEBUG)
+                version (HUNT_DEBUG)
+                    tracef("continue to write remaining data: %d bytes", sendDataBuffer.length - nBytes);
+                // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
+                // sendDataBuffer corrupted
+                // const(ubyte)[] data = writeBuffer.remaining();
+                // tracef("%(%02X %)", data);
+                // tracef("%(%02X %)", sendDataBuffer);
+                setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
+                nBytes = doWrite();
+            }
+        }
+    }
 
-            version (HUNT_DEBUG)
-                tracef("writting done: %d bytes", nBytes);
-
-            tryWrite();
-        } else // if (sendDataBuffer.length > nBytes) 
-        {
-            // version (HUNT_DEBUG)
-            tracef("remaining nbytes: %d", sendDataBuffer.length - nBytes);
-            // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
-            // sendDataBuffer corrupted
-            // const(ubyte)[] data = writeBuffer.remaining();
-            // tracef("%(%02X %)", data);
-            // tracef("%(%02X %)", sendDataBuffer);
-            setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
-            nBytes = doWrite();
+    private void notifyDataWrittenDone() {
+        if(dataWriteDoneHandler !is null && (_writeQueue is null || _writeQueue.isEmpty())) {
+            dataWriteDoneHandler(this);
         }
     }
 
@@ -341,6 +412,12 @@ abstract class AbstractStream : AbstractSocketChannel, Stream {
         _isClosed = true;
         if (disconnectionHandler !is null)
             disconnectionHandler();
+    }
+
+    protected void initializeWriteQueue() {
+        if (_writeQueue is null) {
+            _writeQueue = new WritingBufferQueue();
+        }
     }
 
     bool _isConnected; //if server side always true.
@@ -447,7 +524,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
             return tmpaddr;
         }
 
-        bool tryRead(scope ReadCallBack read) {
+        bool tryRead(scope SimpleActionHandler read) {
             this.clearError();
             if (this.readLen == 0) {
                 read(null);

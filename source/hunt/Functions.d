@@ -99,10 +99,9 @@ class EventArgs {
 }
 
 
-alias EventHandler = void delegate(Object sender, EventArgs args);
-alias ErrorEventHandler = void delegate(string message);
-
+alias EventHandler = Action2!(Object, EventArgs); 
 alias SimpleEventHandler = Action;
+alias SimpleActionHandler = Action1!(Object);
 
 /**
  * Represents an operation that accepts a single input argument and returns no

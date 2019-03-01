@@ -140,7 +140,7 @@ class AbstractSelector : Selector {
         return true;
     }
 
-    override protected int doSelect(long timeout) {
+    protected override int doSelect(long timeout) {
         timespec ts;
         timespec *tsp;
         // timeout is in milliseconds. Convert to struct timespec.

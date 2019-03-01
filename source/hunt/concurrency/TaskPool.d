@@ -128,7 +128,7 @@ class Task(alias fun, Args...) : AbstractTask {
         }
     }
 
-    override protected void onRun() {
+    protected override void onRun() {
         impl(this);
     }
 }
