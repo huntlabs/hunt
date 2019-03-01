@@ -126,9 +126,10 @@ abstract class Selector {
     abstract bool deregister(AbstractChannel channel);
 
     void stop() {
-        atomicStore(_running, false);
-        version (HUNT_DEBUG)
-            trace("Selector stopped.");
+        if(cas(&_running, true, false)) {
+            version (HUNT_DEBUG)
+                trace("Selector stopped.");
+        }
     }
 
     abstract void dispose();
@@ -403,7 +404,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
         }
         _isClosing = true;
         version (HUNT_DEBUG)
-            tracef("closing [fd=%d]...", this.handle);
+            tracef("socket channel closing [fd=%d]...", this.handle);
 
         if (isBusy()) {
             import std.parallelism;
@@ -413,8 +414,8 @@ abstract class AbstractSocketChannel : AbstractChannel {
             auto theTask = task(() {
                 super.close();
                 while (isBusy()) {
-                    // version (HUNT_DEBUG)
-                    //     infof("waitting for idle [fd=%d]...", this.handle);
+                    version (HUNT_DEBUG)
+                        infof("waitting for idle [fd=%d]...", this.handle);
                     // Thread.sleep(20.msecs);
                 }
             });

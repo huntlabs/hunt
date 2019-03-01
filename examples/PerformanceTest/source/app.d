@@ -17,7 +17,7 @@ import std.getopt;
 import std.parallelism;
 import std.socket;
 
-__gshared size_t totalSize = 50 * 1024 * 1024 + 1;
+__gshared size_t totalSize = 50 * 1024 * 1024 + 1;  // 50M
 // __gshared size_t totalSize = 1024 + 1;
 __gshared size_t bufferSize = 4096;
 __gshared ushort port = 8080;
@@ -52,7 +52,7 @@ void main(string[] args) {
 }
 
 void launchClient() {
-    writeln("launching client.");
+    writeln("[Client] connecting to server...");
     const WatchedValue1 = 1;
     const WatchedValue2 = 23;
     const WatchedValue3 = 4;
@@ -79,7 +79,9 @@ void launchClient() {
             endIndex = sendingBuffer.length;
 
         len = socket.send(sendingBuffer[offset .. endIndex]);
-        debug writefln("[Client] sending: offset=%d, lenght=%d", offset, len);
+        // if(offset % (step*100) == 0) {
+        //     debug writefln("[Client] sending: offset=%d, lenght=%d", offset, len);
+        // }
     }
 
     ubyte[] receivedBuffer = new ubyte[totalSize];
@@ -121,7 +123,7 @@ void workerFunc() {
         try {
             int m = receiveOnly!int();
             if (m == 1) {
-                Thread.sleep(3500.msecs);
+                Thread.sleep(500.msecs);
                 launchClient();
                 writeln("[Client] done.");
                 isDone = true;

@@ -66,7 +66,7 @@ void main() {
 	// }).connect("fe80::b6f0:24f9:9b3b:9f28%ens33", 8080);
 	// }).connect("fe80::2435:c2f0:4a2e:ba11%ens33", 8080);
 
-	loop.run();
+	loop.run(100);
 
 	// loop.runAsync(20);
 	// writeln("The app will exit in 5 seconds!");
