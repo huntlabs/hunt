@@ -84,13 +84,13 @@ class AbstractSelector : Selector {
 
     private bool isDisposed = false;
 
-    override void stop() {
-        if (_running) {
-            super.stop();
-            version (HUNT_DEBUG)
-                tracef("selector[fd=%d] stopped", _epollFD);
-        }
-    }
+    // override void stop() {
+    //     if (_running) {
+    //         super.stop();
+    //         version (HUNT_DEBUG)
+    //             tracef("selector[fd=%d] stopped", _epollFD);
+    //     }
+    // }
 
     override bool register(AbstractChannel channel) {
         assert(channel !is null);

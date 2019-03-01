@@ -15,6 +15,7 @@ module hunt.event.timer.Epoll;
 version (HAVE_EPOLL) : 
 // dfmt on
 
+import hunt.Functions;
 import hunt.io.socket.Common;
 import hunt.event.timer.Common;
 import hunt.logging;
@@ -62,7 +63,7 @@ abstract class AbstractTimer : TimerChannelBase {
         return true;
     }
 
-    bool readTimer(scope ReadCallBack read) {
+    bool readTimer(scope SimpleActionHandler read) {
         this.clearError();
         uint value;
         core.sys.posix.unistd.read(this.handle, &value, 8);
