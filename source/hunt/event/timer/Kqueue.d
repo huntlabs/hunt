@@ -8,15 +8,16 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
-module hunt.event.timer.Kqueue;
 
-import hunt.Exceptions;
+module hunt.event.timer.Kqueue;
 
 // dfmt off
 version (HAVE_KQUEUE) : 
 // dfmt on
 
+
+import hunt.Exceptions;
+import hunt.Functions;
 import hunt.io.socket.Common;
 import hunt.event.timer.Common;
 import hunt.io.socket;
@@ -33,10 +34,8 @@ import std.socket;
 
 /**
 */
-class AbstractTimer : TimerChannelBase
-{
-    this(Selector loop)
-    {
+class AbstractTimer : TimerChannelBase {
+    this(Selector loop) {
         super(loop);
         setFlag(ChannelFlag.Read, true);
         _sock = new Socket(AddressFamily.UNIX, SocketType.STREAM);
@@ -44,14 +43,11 @@ class AbstractTimer : TimerChannelBase
         _readBuffer = new UintObject();
     }
 
-    ~this()
-    {
+    ~this() {
         close();
     }
 
-
-    bool readTimer(scope ReadCallBack read)
-    {
+    bool readTimer(scope SimpleActionHandler read) {
         this.clearError();
         this._readBuffer.data = 1;
         if (read)

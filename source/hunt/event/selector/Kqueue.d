@@ -40,11 +40,13 @@ import core.sys.posix.time;
 class AbstractSelector : Selector {
     // kevent array size
     enum int NUM_KEVENTS = 128;
+    private bool isDisposed = false;
+    private Kevent[NUM_KEVENTS] events;
+    private int _kqueueFD;
 
-    this() {
+    this(size_t number, size_t divider, size_t maxChannels = 1500) {
+        super(number, divider, maxChannels);
         _kqueueFD = kqueue();
-        _event = new KqueueEventChannel(this);
-        register(_event);
     }
 
     ~this() {
@@ -55,14 +57,15 @@ class AbstractSelector : Selector {
         if (isDisposed)
             return;
         isDisposed = true;
-        deregister(_event);
         core.sys.posix.unistd.close(_kqueueFD);
     }
 
-    private bool isDisposed = false;
-
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
+        
+        const int fd = channel.handle;
+        version (HUNT_DEBUG)
+            tracef("register channel: fd=%d, type=%s", fd, channel.type);
 
         int err = -1;
         if (channel.type == ChannelType.Timer) {
@@ -76,7 +79,6 @@ class AbstractSelector : Selector {
             err = kevent(_kqueueFD, &ev, 1, null, 0, null);
         }
         else {
-            const int fd = channel.handle;
             if (fd < 0)
                 return false;
             Kevent[2] ev = void;
@@ -98,12 +100,7 @@ class AbstractSelector : Selector {
         if (err < 0) {
             return false;
         }
-        _event.setNext(channel);
         return true;
-    }
-
-    override bool reregister(AbstractChannel channel) {
-        throw new LoopException("The Kqueue does not support reregister!");
     }
 
     override bool deregister(AbstractChannel channel) {
@@ -152,7 +149,7 @@ class AbstractSelector : Selector {
             // 100000001000L. To avoid this problem, clamp the timeout arbitrarily
             // to the maximum value of a 32-bit signed integer which is
             // approximately 25 days in milliseconds.
-            const int timeoutMax = int.max; // Integer.MAX_VALUE
+            const int timeoutMax = int.max;
             if (timeout > timeoutMax) {
                 timeout = timeoutMax;
             }
@@ -164,12 +161,13 @@ class AbstractSelector : Selector {
         }        
 
         // auto tspec = timespec(1, 1000 * 10);
-        Kevent[NUM_KEVENTS] events;
         int result = kevent(_kqueueFD, null, 0, events.ptr, events.length, tsp);
+
         foreach (i; 0 .. result) {
             AbstractChannel channel = cast(AbstractChannel)(events[i].udata);
             ushort eventFlags = events[i].flags;
-            // info("eventFlags: ", eventFlags);
+            version (HUNT_DEBUG)
+            infof("handling event: events=%d, fd=%d", eventFlags, channel.handle);
 
             if (eventFlags & EV_ERROR) {
                 warningf("channel[fd=%d] has a error.", channel.handle);
@@ -183,26 +181,31 @@ class AbstractSelector : Selector {
             }
 
             short filter = events[i].filter;
+            handeChannelEvent(channel, filter);
+        }
+        return result;
+    }
+
+    private void handeChannelEvent(AbstractChannel channel, uint filter) {
+        version (HUNT_DEBUG)
+        infof("handling event: events=%d, fd=%d", filter, channel.handle);
+        try {
             if(filter == EVFILT_TIMER) {
                 channel.onRead();
-                continue;
             } else if (filter == EVFILT_WRITE) {
-                AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-                assert(wt !is null);
-                wt.onWriteDone();
+                channel.onWrite();
             } else if (filter == EVFILT_READ) {
                 channel.onRead();
             } else {
                 warningf("Unhandled channel fileter: %d", filter);
             }
+        } catch(Exception e) {
+            errorf("error while handing channel: fd=%s, message=%s",
+                        channel.handle, e.msg);
         }
-        return result;
     }
-
-private:
-    int _kqueueFD;
-    EventChannel _event;
 }
+
 
 /**
 */
@@ -237,6 +240,40 @@ class KqueueEventChannel : EventChannel {
     // mixin OverrideErro;
 
     Socket[2] _pair;
+}
+
+/**
+*/
+class EventChannel : AbstractChannel {
+    this(Selector loop) {
+        super(loop, ChannelType.Event);
+    }
+
+    void call() {
+        assert(false);
+    }
+
+    // override void close() {
+    //     if(_isClosing)
+    //         return;
+    //     _isClosing = true;
+    //     version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
+
+    //     if(isBusy) {
+    //         import std.parallelism;
+    //         version (HUNT_DEBUG) warning("Close operation delayed");
+    //         auto theTask = task(() {
+    //             while(isBusy) {
+    //                 version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
+    //                 // Thread.sleep(20.msecs);
+    //             }
+    //             super.close();
+    //         });
+    //         taskPool.put(theTask);
+    //     } else {
+    //         super.close();
+    //     }
+    // }
 }
 
 enum : short {

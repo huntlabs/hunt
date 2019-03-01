@@ -27,6 +27,7 @@ int serverCounter = 0;
 int clientCounter = 0;
 
 void main(string[] args) {
+
     Tid worker = spawn(&workerFunc);
     // Thread workerThread = new Thread(&workerFunc);
 
@@ -207,11 +208,17 @@ class TestTcpServer : AbstractTcpServer {
     }
 
     protected override void onConnectionAccepted(TcpListener sender, TcpStream client) {
+        // dfmt off
         client.onDataReceived((ByteBuffer buffer) {
             handleReceivedData(client, cast(ubyte[]) buffer.getRawData());
-        }).onClosed(() { onClientClosed(client); }).onDataWritten((Object obj) {
+        }).onClosed(() { 
+            onClientClosed(client); 
+        }).onDataWritten((Object obj) {
             writeln("[Server] test succeeded");
-        }).onError((string msg) { warning("Error on client: ", msg); });
+        }).onError((string msg) { 
+            warning("Error on client: ", msg); 
+        });
+        // dfmt on
     }
 
     protected void handleReceivedData(TcpStream client, in ubyte[] data) {
@@ -221,7 +228,7 @@ class TestTcpServer : AbstractTcpServer {
         totalReceived += data.length;
         size_t n = (totalSize / 10 / bufferSize);
         if (n == 0 || serverCounter % (totalSize / 10 / bufferSize) == 0) {
-            tracef("[Server] [%d] Received bytes (tid-%d): Current=%d, Accumulated=%d",
+            tracef("[Server] [%d] Received bytes (tid-%s): Current=%d, Accumulated=%d",
                     serverCounter, getTid(), data.length, totalReceived);
         }
         serverCounter++;

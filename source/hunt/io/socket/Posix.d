@@ -105,9 +105,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         _readBuffer = cast(ubyte[])_bufferForRead.array();
         // _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
-        // setFlag(ChannelFlag.Read, true);
-        // setFlag(ChannelFlag.Write, true);
-        // setFlag(ChannelFlag.ETMode, true);
+        setFlag(ChannelFlag.Read, true);
+        setFlag(ChannelFlag.Write, true);
+        setFlag(ChannelFlag.ETMode, true);
     }
 
     /**
@@ -201,7 +201,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             // check more error status
             // EPIPE/Broken pipe: 
             // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
-            this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
+            this._error = (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK);
             if (_error) {
                 this._erroString = getErrorMessage(errno);
             } else {
@@ -298,11 +298,11 @@ abstract class AbstractStream : AbstractSocketChannel {
         isWriteCancelling = true;
     }
 
-    override void onWriteDone() {
-        // notified by kqueue selector when data writing done or a new connection coming
-        version (HUNT_DEBUG)
-            tracef("data writing done [fd=%d]", this.handle);
-    }
+    // override void onWriteDone() {
+    //     // notified by kqueue selector when data writing done or a new connection coming
+    //     version (HUNT_DEBUG)
+    //         tracef("data writing done [fd=%d]", this.handle);
+    // }
 
     private const(ubyte)[] _readBuffer;
     protected WritingBufferQueue _writeQueue;
