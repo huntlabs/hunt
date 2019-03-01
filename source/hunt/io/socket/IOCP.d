@@ -144,7 +144,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     override void onRead() {
         version (HUNT_DEBUG)
             trace("ready to read");
-        _inRead = false;
         super.onRead();
     }
 
@@ -178,7 +177,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     protected void beginRead() {
-        _inRead = true;
         _dataReadBuffer.len = cast(uint) _readBuffer.length;
         _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
         _iocpread.channel = this;
@@ -208,7 +206,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     private uint doWrite() {
-        _inWrite = true;
         DWORD dwFlags = 0;
         DWORD dwSent = 0;
         _iocpwrite.channel = this;
@@ -434,9 +431,6 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     private WSABUF _dataReadBuffer;
     private WSABUF _dataWriteBuffer;
-
-    private bool _inWrite;
-    private bool _inRead;
 }
 
 /**
