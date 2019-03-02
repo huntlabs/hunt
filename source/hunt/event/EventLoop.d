@@ -90,35 +90,7 @@ final class EventLoop : AbstractSelector {
         return _thread is Thread.getThis();
     }
 
-    // EventLoop postTask(AbstractTask task) {
-    //     // synchronized (this) {
-    //     //     _queue.enQueue(task);
-    //     // }
-    //     return this;
-    // }
-
-    // static AbstractTask createTask(alias fun, Args...)(Args args) {
-    //     return newTask!(fun, Args)(args);
-    // }
-
-    // static AbstractTask createTask(F, Args...)(F delegateOrFp, Args args)
-    //         if (is(typeof(delegateOrFp(args)))) {
-    //     return newTask(F, Args)(delegateOrFp, args);
-    // }
-
-    // protected void onWakeUp() {
-    //     // TaskQueue queue;
-    //     // synchronized (this) {
-    //     //     queue = _queue;
-    //     //     _queue = TaskQueue();
-    //     // }
-    //     // while (!queue.empty) {
-    //     //     auto task = queue.deQueue();
-    //     //     task.job();
-    //     // }
-    // }
 
 private:
     Thread _thread;
-    // TaskQueue _queue;
 }
