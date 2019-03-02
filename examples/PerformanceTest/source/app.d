@@ -17,7 +17,7 @@ import std.getopt;
 import std.parallelism;
 import std.socket;
 
-__gshared size_t totalSize = 50 * 1024 * 1024 + 9;  // 50M
+__gshared size_t totalSize = 50 * 1024 * 1024 + 9; // 50M
 // __gshared size_t totalSize = 1024 + 1;
 __gshared size_t bufferSize = 4096;
 __gshared ushort port = 8080;

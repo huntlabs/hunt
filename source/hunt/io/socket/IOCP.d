@@ -24,6 +24,7 @@ import hunt.logging;
 import hunt.Functions;
 import hunt.concurrency.thread.Helper;
 
+import core.atomic;
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
 import core.sys.windows.mswsock;
@@ -147,17 +148,15 @@ abstract class AbstractStream : AbstractSocketChannel {
         super.onRead();
     }
 
-    override void onWrite() {
-        // _inWrite = false;
-        // super.onWrite();
-        if (_isWritting) {
-            version (HUNT_DEBUG) warning("Busy in writting: ");
-            return;
-        }
+    override void onWrite() {        
+        version (HUNT_DEBUG)
+            tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
 
-        if(_writeQueue is null || _writeQueue.isEmpty()) {
-            version (HUNT_DEBUG)
-                trace("The write queue is empty.");
+        if(!_isWritting)
+            return;
+        if(_isClosing && isWriteCancelling) {
+            version (HUNT_DEBUG) infof("Write cancelled, fd=%d", this.handle);
+            resetWriteStatus();
             return;
         }
 
@@ -275,17 +274,15 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
     }
 
-    // private ThreadID lastThreadID;
-
     // try to write a block of data directly
     protected size_t tryWrite(const ubyte[] data) {
-        if (_isWritting) {
-            version (HUNT_DEBUG) warning("Busy in writting on thread: ");
-            return 0;
-        }
+        // if (_isWritting) {
+        //     version (HUNT_DEBUG) warning("Busy in writting on thread: ");
+        //     return 0;
+        // }
         version (HUNT_DEBUG)
             trace("start to write");
-        _isWritting = true;
+        // _isWritting = true;
 
         clearError();
         setWriteBuffer(data);
@@ -296,12 +293,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     // try to write a block of data from the write queue
     private void tryNextWrite() {
-        if(_writeQueue is null || _writeQueue.isEmpty()) {
-            _isWritting = false;
-            version (HUNT_DEBUG)
-                tracef("All data are written done！fd=%d", this.handle);
-            if(dataWriteDoneHandler !is null)
-                dataWriteDoneHandler(this);
+        if(checkAllWriteDone()){
             return;
         } 
         clearError();
@@ -324,6 +316,19 @@ abstract class AbstractStream : AbstractSocketChannel {
                 warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
             sendDataBuffer = data.dup;
         }        
+    }
+    
+    protected bool checkAllWriteDone() {
+        if(_writeQueue is null || _writeQueue.isEmpty()) {
+            resetWriteStatus();        
+            version (HUNT_DEBUG)
+                tracef("All data are written out. fd=%d", this.handle);
+            if(dataWriteDoneHandler !is null)
+                dataWriteDoneHandler(this);
+            return true;
+        }
+
+        return false;
     }
     
     void resetWriteStatus() {
@@ -350,25 +355,26 @@ abstract class AbstractStream : AbstractSocketChannel {
      * Note: It's only for IOCP selector: 
     */
     void onWriteDone(size_t nBytes) {
-        version (HUNT_DEBUG)
-            tracef("write out once: %d bytes, isWriteCancelling=%s", nBytes, isWriteCancelling);
+            infof("xxxx: %s, len: %d", sendDataBuffer is null, sendDataBuffer.length);
+        version (HUNT_DEBUG) {
+            tracef("write out once: %d bytes, isWritting: %s, writeBuffer: %s, isWriteCancelling:%s",
+                 nBytes, _isWritting, writeBuffer is null, isWriteCancelling);
+        }
+
+        if(!_isWritting)
+            return;
+
         if (isWriteCancelling) {
-            _isWritting = false;
-            isWriteCancelling = false;
-            if(_writeQueue !is null)
-                _writeQueue.clear(); // clean the data buffer 
-            sendDataBuffer = null;
+            resetWriteStatus();
             return;
         }
 
         if(writeBuffer is null) {
             if(sendDataBuffer.length == nBytes) {
-                _isWritting = false;
-                isWriteCancelling = false;
                 version (HUNT_DEBUG)
                     tracef("try next write");
                 tryNextWrite();
-            } else {
+            } else if(sendDataBuffer.length > 0) {
                 version (HUNT_DEBUG)
                     tracef("continue to write remaining data: %d bytes", sendDataBuffer.length - nBytes);
                 
@@ -377,11 +383,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             }
         } else {
             if (writeBuffer.pop(nBytes)) {
-                // if (_writeQueue.deQueue() is null) {
-                //     version (HUNT_DEBUG)
-                //         warning("_writeQueue is empty!");
-                // }
-                writeBuffer.finish();
+                writeBuffer.clear();
                 version (HUNT_DEBUG)
                     tracef("try next write");
 
