@@ -89,14 +89,18 @@ abstract class AbstractListener : AbstractSocketChannel {
 TCP Peer
 */
 abstract class AbstractStream : AbstractSocketChannel {
+    enum BufferSize = 4096;
+    private const(ubyte)[] _readBuffer;
+    private StreamWriteBuffer writeBuffer;
+
     protected SimpleEventHandler disconnectionHandler;
     protected SimpleActionHandler dataWriteDoneHandler;
-
-    enum BufferSize = 4096;
 
     protected bool _isConnected; // It's always true for server.
     protected AddressFamily _family;
     protected ByteBuffer _bufferForRead;
+    protected WritingBufferQueue _writeQueue;
+    protected bool isWriteCancelling = false;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
@@ -239,6 +243,26 @@ abstract class AbstractStream : AbstractSocketChannel {
         return 0;
     }
 
+    private bool tryNextWrite(StreamWriteBuffer buffer) {
+        const(ubyte)[] data = buffer.remaining();
+        version (HUNT_DEBUG)
+            tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
+        if(data.length == 0)
+            return true;
+
+        size_t nBytes = tryWrite(data);
+        version (HUNT_DEBUG)
+            tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+        if (nBytes > 0 && buffer.pop(nBytes)) {
+            version (HUNT_DEBUG)
+                tracef("A buffer is written out. fd=%d", this.handle);
+            buffer.clear();
+            return true;
+        }
+
+        return false;        
+    }
+
     void resetWriteStatus() {
         if(_writeQueue !is null)
             _writeQueue.clear();
@@ -260,7 +284,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         if(writeBuffer !is null) {
-            if(tryWriteNextBuffer(writeBuffer)) {
+            if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;
             } else {
                 version (HUNT_DEBUG) tracef("waiting to try again...", this.handle);
@@ -277,7 +301,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             tracef("start to write [fd=%d], writeBuffer: %s", this.handle, writeBuffer is null);
 
         if(_writeQueue.tryDequeue(writeBuffer)) {
-            if(tryWriteNextBuffer(writeBuffer)) {
+            if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;  
                 checkAllWriteDone();            
             } else {
@@ -301,28 +325,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         return false;
     }
 
-    private bool tryWriteNextBuffer(StreamWriteBuffer buffer) {
-        const(ubyte)[] data = buffer.remaining();
-        version (HUNT_DEBUG)
-            tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
-        if(data.length == 0)
-            return true;
-
-        size_t nBytes = tryWrite(data);
-        version (HUNT_DEBUG)
-            tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
-        if (nBytes > 0 && buffer.pop(nBytes)) {
-            version (HUNT_DEBUG)
-                tracef("A buffer is written out. fd=%d", this.handle);
-            buffer.clear();
-            return true;
-        }
-
-        return false;        
-    }
-
-    private StreamWriteBuffer writeBuffer;
-
     protected void doConnect(Address addr) {
         this.socket.connect(addr);
     }
@@ -331,15 +333,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         isWriteCancelling = true;
     }
 
-    // override void onWriteDone() {
-    //     // notified by kqueue selector when data writing done or a new connection coming
-    //     version (HUNT_DEBUG)
-    //         tracef("data writing done [fd=%d]", this.handle);
-    // }
-
-    private const(ubyte)[] _readBuffer;
-    protected WritingBufferQueue _writeQueue;
-    protected bool isWriteCancelling = false;
 
     protected void initializeWriteQueue() {
         if (_writeQueue is null) {

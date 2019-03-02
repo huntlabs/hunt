@@ -219,7 +219,7 @@ class AbstractSelector : Selector {
                     tracef("channel write event: fd=%d", channel.handle);
                 channel.onWrite();
             } else if (event == (EPOLLIN | EPOLLOUT)) {
-                // version (HUNT_DEBUG)
+                version (HUNT_DEBUG)
                     tracef("channel read and write: fd=%d", channel.handle);
                 channel.onWrite();
                 channel.onRead();
