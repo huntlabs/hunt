@@ -164,7 +164,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     protected override void onClose() {
-        _isWritting = false;
+        version (HUNT_DEBUG) {
+            infof("_isWritting=%s, writeBuffer: %s, _writeQueue: %s", _isWritting, writeBuffer is null, 
+                _writeQueue is null || _writeQueue.isEmpty());
+        }
+        resetWriteStatus();
+
         if(this.socket is null) {
             import core.sys.posix.unistd;
             core.sys.posix.unistd.close(this.handle);
@@ -185,12 +190,11 @@ abstract class AbstractStream : AbstractSocketChannel {
     Try to write a block of data.
     */
     protected ptrdiff_t tryWrite(const ubyte[] data) {
-
-        this.clearError();
-
+        clearError();
         // const nBytes = this.socket.send(data);
+        version (HUNT_DEBUG)
+            tracef("try to writ: %d bytes, fd=%d", data.length, this.handle);
         const nBytes = write(this.handle, data.ptr, data.length);
-
         version (HUNT_DEBUG)
             tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
@@ -202,7 +206,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             // EPIPE/Broken pipe: 
             // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
             this._error = (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK);
-            if (_error) {
+            if (this._error) {
                 this._erroString = getErrorMessage(errno);
             } else {
                 debug warningf("warning on write: fd=%d, errno=%d, message=%s", this.handle,
@@ -235,60 +239,89 @@ abstract class AbstractStream : AbstractSocketChannel {
         return 0;
     }
 
+    void resetWriteStatus() {
+        if(_writeQueue !is null)
+            _writeQueue.clear();
+        atomicStore(_isWritting, false);
+        isWriteCancelling = false;
+        writeBuffer = null;
+    }
+
     override void onWrite() {
-        if(_writeQueue is null || _writeQueue.isEmpty()) {
-            // version (HUNT_DEBUG) tracef("The _writeQueue is empty: [fd=%d]", this.handle);
+        version (HUNT_DEBUG)
+            tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
+
+        if(!_isWritting)
+            return;
+        if(_isClosing && isWriteCancelling) {
+            version (HUNT_DEBUG) infof("Write cancelled, fd=%d", this.handle);
+            resetWriteStatus();
             return;
         }
 
-        if(_isWritting) {
-            version (HUNT_DEBUG) warningf("Busy in writting: [fd=%d]", this.handle);
+        if(writeBuffer !is null) {
+            if(tryWriteNextBuffer(writeBuffer)) {
+                writeBuffer = null;
+            } else {
+                version (HUNT_DEBUG) tracef("waiting to try again...", this.handle);
+                return;
+            }
+            tracef("running here, fd=%d", this.handle);
+        }
+
+        if(checkAllWriteDone()) {
             return;
         }
-        _isWritting = true;
-        scope(exit) {
-            _isWritting = false;
-        }
-
-
-        // if(!cas(&_isWritting, false, true)) {
-        //     version (HUNT_DEBUG) warningf("Busy in writting: [fd=%d]", this.handle);
-        //     return;
-        // }
 
         version (HUNT_DEBUG)
-            tracef("start to write [fd=%d]", this.handle);
+            tracef("start to write [fd=%d], writeBuffer: %s", this.handle, writeBuffer is null);
 
-        StreamWriteBuffer writeBuffer;
-        bool haveBuffer = _writeQueue.tryDequeue(writeBuffer);
-        while(!_isClosing && !isWriteCancelling && haveBuffer) {
+        if(_writeQueue.tryDequeue(writeBuffer)) {
+            if(tryWriteNextBuffer(writeBuffer)) {
+                writeBuffer = null;  
+                checkAllWriteDone();            
+            } else {
+                tracef("waiting to try again: fd=%d", this.handle);
+            }
             version (HUNT_DEBUG)
-                tracef("writing a buffer [fd=%d]", this.handle);
+                tracef("running here, fd=%d", this.handle);
+        }
+    }
 
-            const(ubyte)[] data = writeBuffer.remaining();
-            while(!_isClosing && !isWriteCancelling && data.length > 0) {
-                size_t nBytes = tryWrite(data);
-                if (nBytes > 0) {
-                    version (HUNT_DEBUG)
-                        tracef("writing: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
-                    writeBuffer.pop(nBytes);                        
-                    data = writeBuffer.remaining();
-                }
-            }
-
-            if(!_isClosing && !isWriteCancelling)
-                writeBuffer.finish();
-
-            version (HUNT_DEBUG) {
-                tracef("buffer writing done: [fd=%d], writeQueue is empty: %s", 
-                    this.handle, _writeQueue.isEmpty());
-                // tracef("_writeQueue is empty: %s, [fd=%d]", _writeQueue.isEmpty(), this.handle);
-            }
-            haveBuffer = _writeQueue.tryDequeue(writeBuffer);
+    protected bool checkAllWriteDone() {
+        if(_writeQueue is null || _writeQueue.isEmpty()) {
+            resetWriteStatus();        
+            version (HUNT_DEBUG)
+                tracef("All data are written out. fd=%d", this.handle);
+            if(dataWriteDoneHandler !is null)
+                dataWriteDoneHandler(this);
+            return true;
         }
 
-        // atomicStore(_isWritting, false);
+        return false;
     }
+
+    private bool tryWriteNextBuffer(StreamWriteBuffer buffer) {
+        const(ubyte)[] data = buffer.remaining();
+        version (HUNT_DEBUG)
+            tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
+        if(data.length == 0)
+            return true;
+
+        size_t nBytes = tryWrite(data);
+        version (HUNT_DEBUG)
+            tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+        if (nBytes > 0 && buffer.pop(nBytes)) {
+            version (HUNT_DEBUG)
+                tracef("A buffer is written out. fd=%d", this.handle);
+            buffer.clear();
+            return true;
+        }
+
+        return false;        
+    }
+
+    private StreamWriteBuffer writeBuffer;
 
     protected void doConnect(Address addr) {
         this.socket.connect(addr);

@@ -17,7 +17,7 @@ import std.getopt;
 import std.parallelism;
 import std.socket;
 
-__gshared size_t totalSize = 50 * 1024 * 1024 + 1;  // 50M
+__gshared size_t totalSize = 50 * 1024 * 1024 + 9;  // 50M
 // __gshared size_t totalSize = 1024 + 1;
 __gshared size_t bufferSize = 4096;
 __gshared ushort port = 8080;
@@ -101,11 +101,9 @@ void launchClient() {
 
     writefln("[Client] received: counter=%d, length=%d, buffer[0]=%d, buffer[$/2]=%d, buffer[$-1]=%d", clientCounter,
             offset, receivedBuffer[0], receivedBuffer[middleIndex], receivedBuffer[$ - 1]);
-    socket.shutdown(SocketShutdown.BOTH);
-    socket.close();
 
-    debug writefln("[Client]Peeking received buffer[0 .. 1024]: %(%02X %)",
-            receivedBuffer[0 .. 1024]);
+    // debug writefln("[Client]Peeking received buffer[0 .. 1024]: %(%02X %)",
+    //         receivedBuffer[0 .. 1024]);
     import std.format;
 
     for (size_t i = 0; i < totalSize; i++)
@@ -116,6 +114,11 @@ void launchClient() {
     writeln("[Client] test succeeded");
     // else
     //     writefln("[Client] test failed");
+
+    writeln("[Client] The connection will be shutdown in one second.");
+    Thread.sleep(1.seconds);
+    socket.shutdown(SocketShutdown.BOTH);
+    socket.close();
 }
 
 void workerFunc() {
@@ -228,13 +231,13 @@ class TestTcpServer : AbstractTcpServer {
         totalReceived += data.length;
         size_t n = (totalSize / 10 / bufferSize);
         if (n == 0 || serverCounter % (totalSize / 10 / bufferSize) == 0) {
-            tracef("[Server] [%d] Received bytes (tid-%s): Current=%d, Accumulated=%d",
+            writefln("[Server] [%d] Received bytes (tid-%s): Current=%d, Accumulated=%d",
                     serverCounter, getTid(), data.length, totalReceived);
         }
         serverCounter++;
 
         if (buffer.length >= totalSize) {
-            tracef("[Server] reading done. Counter=%d, Accumulated=%d",
+            writefln("[Server] reading done. Counter=%d, Accumulated=%d",
                     serverCounter, buffer.length);
             onRequest(client, buffer);
         }

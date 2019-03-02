@@ -325,6 +325,14 @@ abstract class AbstractStream : AbstractSocketChannel {
             sendDataBuffer = data.dup;
         }        
     }
+    
+    void resetWriteStatus() {
+        if(_writeQueue !is null)
+            _writeQueue.clear();
+        atomicStore(_isWritting, false);
+        isWriteCancelling = false;
+        sendDataBuffer = null;
+    }
 
     private void setWriteBuffer(in ubyte[] data) {
         version (HUNT_DEBUG)
@@ -343,7 +351,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     */
     void onWriteDone(size_t nBytes) {
         version (HUNT_DEBUG)
-            tracef("write once done: %d bytes, isWriteCancelling=%s", nBytes, isWriteCancelling);
+            tracef("write out once: %d bytes, isWriteCancelling=%s", nBytes, isWriteCancelling);
         if (isWriteCancelling) {
             _isWritting = false;
             isWriteCancelling = false;

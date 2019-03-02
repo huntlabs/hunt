@@ -88,12 +88,7 @@ interface StreamWriteBuffer {
     // add send offiset and return is empty
     bool pop(size_t size);
 
-    // do send finish
-    void finish();
-
-    // StreamWriteBuffer next();
-
-    // void next(StreamWriteBuffer);
+    void clear();
 
     size_t capacity();
 }
@@ -110,7 +105,6 @@ http://tutorials.jenkov.com/java-nio/selectors.html
 abstract class Selector {
 
     protected shared bool _running;
-    
     protected size_t number;
     protected size_t divider;
     protected AbstractChannel[] channels;
@@ -518,8 +512,9 @@ class SocketStreamBuffer : StreamWriteBuffer {
             return false;
     }
 
-    void finish() {
+    void clear() {
         _buffer = null;
+        _pos = 0;
     }
 
     size_t capacity() {
