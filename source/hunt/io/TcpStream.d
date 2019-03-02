@@ -11,6 +11,8 @@
 
 module hunt.io.TcpStream;
 
+import hunt.collection.ByteBuffer;
+import hunt.collection.BufferUtils;
 import hunt.io.socket.Common;
 import hunt.concurrency.SimpleQueue;
 import hunt.event;
@@ -256,7 +258,7 @@ class TcpStream : AbstractStream {
             this.beginRead();
     }
 
-    void write(StreamWriteBuffer buffer) {
+    void write(ByteBuffer buffer) {
         assert(buffer !is null);
    
         if(!_isConnected) {
@@ -309,12 +311,12 @@ class TcpStream : AbstractStream {
                     version (HUNT_DEBUG)
                         warningf("buffering remaining data: %d bytes, fd=%d", d.length, this.handle);
                     initializeWriteQueue();
-                    _writeQueue.enqueue(new SocketStreamBuffer(d));
+                    _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[])d));
                     break;
                 }
             }
         } else {
-            write(new SocketStreamBuffer(data));
+            write(BufferUtils.toBuffer(cast(byte[])data));
         }
     }
 

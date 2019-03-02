@@ -63,7 +63,6 @@ abstract class ByteBuffer : Buffer {
 
     // Creates a new buffer with the given mark, position, limit, capacity,
     // backing array, and array offset
-    //
     this(int mark, int pos, int lim, int cap, // package-private
             byte[] hb, int offset) {
         super(mark, pos, lim, cap);
@@ -72,7 +71,6 @@ abstract class ByteBuffer : Buffer {
     }
 
     // Creates a new buffer with the given mark, position, limit, and capacity
-    //
     this(int mark, int pos, int lim, int cap) { // package-private
         this(mark, pos, lim, cap, null, 0);
     }
@@ -952,11 +950,12 @@ abstract class ByteBuffer : Buffer {
         return cast(string) hb[offset .. offset + len];
     }
 
+    deprecated("Using getRemaining instead.")
     string getString() {
         return cast(string) hb[position .. limit];
     }
 
-    byte[] getRawData() {
+    byte[] getRemaining() {
         return hb[position .. limit];
     }
 

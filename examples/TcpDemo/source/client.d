@@ -44,7 +44,7 @@ void main() {
 	}).onDataWritten((Object obj) {
 		writefln("Data write done");
 	}).onDataReceived((ByteBuffer buffer) {
-		byte[] data = buffer.getRawData();
+		byte[] data = buffer.getRemaining();
 		writeln("received data: ", cast(string)data);
 		if (--count > 0) {
 			debug writeln("sending: size=", data.length, "  content: ", cast(string) data);

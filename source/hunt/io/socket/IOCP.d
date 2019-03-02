@@ -434,7 +434,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool isWriteCancelling = false;
     private const(ubyte)[] _readBuffer;
     private const(ubyte)[] sendDataBuffer;
-    private StreamWriteBuffer writeBuffer;
+    private ByteBuffer writeBuffer;
 
     private IocpContext _iocpread;
     private IocpContext _iocpwrite;

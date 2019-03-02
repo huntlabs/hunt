@@ -43,7 +43,7 @@ void main()
 	listener.bind(8080).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {
 		debug writefln("new connection from: %s", client.remoteAddress.toString());
 		client.onDataReceived((ByteBuffer buffer) {
-			ubyte[] data = cast(ubyte[])buffer.getRawData();
+			ubyte[] data = cast(ubyte[])buffer.getRemaining();
 			debug writeln("received bytes: ", data.length);
 			// debug writefln("received: %(%02X %)", data);
 			// const(ubyte)[] sentData = bigData;	// big data test
