@@ -91,7 +91,7 @@ TCP Peer
 abstract class AbstractStream : AbstractSocketChannel {
     enum BufferSize = 4096;
     private const(ubyte)[] _readBuffer;
-    private StreamWriteBuffer writeBuffer;
+    private ByteBuffer writeBuffer;
 
     protected SimpleEventHandler disconnectionHandler;
     protected SimpleActionHandler dataWriteDoneHandler;
@@ -243,8 +243,8 @@ abstract class AbstractStream : AbstractSocketChannel {
         return 0;
     }
 
-    private bool tryNextWrite(StreamWriteBuffer buffer) {
-        const(ubyte)[] data = buffer.remaining();
+    private bool tryNextWrite(ByteBuffer buffer) {
+        const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
         version (HUNT_DEBUG)
             tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
         if(data.length == 0)
@@ -253,11 +253,14 @@ abstract class AbstractStream : AbstractSocketChannel {
         size_t nBytes = tryWrite(data);
         version (HUNT_DEBUG)
             tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
-        if (nBytes > 0 && buffer.pop(nBytes)) {
-            version (HUNT_DEBUG)
-                tracef("A buffer is written out. fd=%d", this.handle);
-            buffer.clear();
-            return true;
+        if (nBytes > 0) {
+            buffer.position(cast(int)nBytes);
+            if(buffer.hasRemaining()) {
+                version (HUNT_DEBUG)
+                    tracef("A buffer is written out. fd=%d", this.handle);
+                buffer.clear();
+                return true;
+            }
         }
 
         return false;        

@@ -79,19 +79,6 @@ number of worker threads in the instance returned by `taskPool`.
     atomicStore(_defaultPoolThreads, newVal);
 }
 
-/**
-*/
-interface StreamWriteBuffer {
-    // todo Write Data;
-    const(ubyte)[] remaining();
-
-    // add send offiset and return is empty
-    bool pop(size_t size);
-
-    void clear();
-
-    size_t capacity();
-}
 
 /**
 */
@@ -174,16 +161,16 @@ abstract class Selector {
     protected abstract int doSelect(long timeout);
 
     // private int lockAndDoSelect(long timeout) {
-    //     // synchronized (this) {
-    //     // if (!isOpen())
-    //     //     throw new ClosedSelectorException();
-    //     // synchronized (publicKeys) {
-    //     //     synchronized (publicSelectedKeys) {
-    //     //         return doSelect(timeout);
-    //     //     }
-    //     // }
+    //     synchronized (this) {
+    //     if (!isOpen())
+    //         throw new ClosedSelectorException();
+    //     synchronized (publicKeys) {
+    //         synchronized (publicSelectedKeys) {
+    //             return doSelect(timeout);
+    //         }
+    //     }
     //     return doSelect(timeout);
-    //     // }
+    //     }
     // }
 }
 
@@ -350,10 +337,6 @@ final class BaseTypeObject(T) {
     T data;
 }
 
-class LoopException : Exception {
-    mixin basicExceptionCtors;
-}
-
 /**
 */
 // interface Stream {
@@ -491,50 +474,15 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
 }
 
-/**
-*/
-class SocketStreamBuffer : StreamWriteBuffer {
-
-    this(const(ubyte)[] data) {
-        _buffer = data;
-        _pos = 0;
-    }
-
-    const(ubyte)[] remaining() {
-        return _buffer[_pos .. $];
-    }
-
-    bool pop(size_t size) {
-        _pos += size;
-        if (_pos >= _buffer.length)
-            return true;
-        else
-            return false;
-    }
-
-    void clear() {
-        _buffer = null;
-        _pos = 0;
-    }
-
-    size_t capacity() {
-        return _buffer.length;
-    }
-
-private:
-    size_t _pos = 0;
-    const(ubyte)[] _buffer;
-}
-
 version (HUNT_IO_WORKERPOOL) {
-    alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
+    alias WritingBufferQueue = MagedNonBlockingQueue!ByteBuffer;
 } else {
-    alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
+    alias WritingBufferQueue = SimpleQueue!ByteBuffer;
 }
 
-// alias WritingBufferQueue = MagedNonBlockingQueue!StreamWriteBuffer;
-// alias WritingBufferQueue = SimpleQueue!StreamWriteBuffer;
-// alias WritingBufferQueue = MagedBlockingQueue!StreamWriteBuffer;
+// alias WritingBufferQueue = MagedNonBlockingQueue!ByteBuffer;
+// alias WritingBufferQueue = SimpleQueue!ByteBuffer;
+// alias WritingBufferQueue = MagedBlockingQueue!ByteBuffer;
 
 /**
 */
