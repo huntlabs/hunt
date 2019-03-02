@@ -265,7 +265,7 @@ class TcpStream : AbstractStream {
 
         version (HUNT_DEBUG)
             infof("data buffered (%d bytes): fd=%d",  buffer.capacity, this.handle);
-
+        _isWritting = true;
         initializeWriteQueue();
         _writeQueue.enqueue(buffer);
         onWrite();
@@ -288,33 +288,31 @@ class TcpStream : AbstractStream {
         }
 
         if ((_writeQueue is null || _writeQueue.isEmpty()) && !_isWritting) {
-            version (HUNT_DEBUG)
-                tracef("write data directly, fd=%d", this.handle);
-            // _isWritting = true;
-            // scope(exit) {
-            //     _isWritting = false;
-            // }
-
+            _isWritting = true;
             const(ubyte)[] d = data;
 
             while (!_isClosing && !isWriteCancelling && d.length > 0) {
+            version (HUNT_DEBUG)
+                tracef("write data directly, fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
-                if (nBytes > 0) {
+                
+                if(nBytes == d.length) {
                     version (HUNT_DEBUG)
-                        tracef("writing: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                        tracef("write out once: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                    checkAllWriteDone();
+                    break;
+                } else if (nBytes > 0) {
+                    version (HUNT_DEBUG)
+                        tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     d = d[nBytes..$];
                 } else {
                     version (HUNT_DEBUG)
-                        warning("buffering remaining data");
+                        warningf("buffering remaining data: %d bytes, fd=%d", d.length, this.handle);
                     initializeWriteQueue();
                     _writeQueue.enqueue(new SocketStreamBuffer(d));
                     break;
                 }
             }
-            
-            // if(dataWriteDoneHandler !is null)
-            //     dataWriteDoneHandler(this);
-
         } else {
             write(new SocketStreamBuffer(data));
         }
@@ -333,12 +331,7 @@ protected:
     bool _isClient;
     ConnectionHandler _connectionHandler;
 
-    void resetWriteStatus() {
-        if(_writeQueue !is null)
-            _writeQueue.clear();
-        atomicStore(_isWritting, false);
-        isWriteCancelling = false;
-    }
+
 
     override void onRead() {
         version (HUNT_DEBUG)
