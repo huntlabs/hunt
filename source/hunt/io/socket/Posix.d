@@ -254,11 +254,11 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_DEBUG)
             tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
         if (nBytes > 0) {
-            buffer.position(cast(int)nBytes);
-            if(buffer.hasRemaining()) {
+            buffer.nextGetIndex(cast(int)nBytes);
+            if(!buffer.hasRemaining()) {
                 version (HUNT_DEBUG)
                     tracef("A buffer is written out. fd=%d", this.handle);
-                buffer.clear();
+                // buffer.clear();
                 return true;
             }
         }
@@ -275,8 +275,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     override void onWrite() {
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG) {
             tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
+            if(writeBuffer !is null) {
+                infof("writeBuffer: %s", writeBuffer.toString());
+            }
+        }
 
         if(!_isWritting)
             return;
@@ -290,9 +294,11 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;
             } else {
-                version (HUNT_DEBUG) tracef("waiting to try again...", this.handle);
+                version (HUNT_DEBUG) 
+                tracef("waiting to try again... fd=%d, %s", this.handle, writeBuffer.toString());
                 return;
             }
+            version (HUNT_DEBUG)
             tracef("running here, fd=%d", this.handle);
         }
 
@@ -308,6 +314,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 writeBuffer = null;  
                 checkAllWriteDone();            
             } else {
+            version (HUNT_DEBUG)
                 tracef("waiting to try again: fd=%d", this.handle);
             }
             version (HUNT_DEBUG)

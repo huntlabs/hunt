@@ -381,9 +381,9 @@ abstract class AbstractStream : AbstractSocketChannel {
                 doWrite();
             }
         } else {
-            writeBuffer.position(cast(int)nBytes);
-            if (writeBuffer.hasRemaining()) {
-                writeBuffer.clear();
+            writeBuffer.nextGetIndex(cast(int)nBytes);
+            if (!writeBuffer.hasRemaining()) {
+                // writeBuffer.clear();
                 version (HUNT_DEBUG)
                     tracef("try next write");
 

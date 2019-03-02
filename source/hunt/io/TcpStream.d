@@ -28,7 +28,7 @@ import core.atomic;
 import core.thread;
 import core.time;
 
-version(HAVE_EPOLL) {
+version (HAVE_EPOLL) {
     import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
 }
 
@@ -51,7 +51,7 @@ class TcpStreamOption {
 
     bool isKeepalive = false;
 
-    size_t bufferSize = 1024*8;
+    size_t bufferSize = 1024 * 8;
 
     int retryTimes = 5;
     Duration retryInterval = 2.seconds;
@@ -59,10 +59,10 @@ class TcpStreamOption {
     static TcpStreamOption createOption() {
         TcpStreamOption option = new TcpStreamOption();
         option.isKeepalive = true;
-        option.keepaliveTime = 15; 
-        option.keepaliveInterval = 3; 
+        option.keepaliveTime = 15;
+        option.keepaliveInterval = 3;
         option.keepaliveProbes = 5;
-        option.bufferSize = 1024*8;
+        option.bufferSize = 1024 * 8;
         return option;
     }
 
@@ -81,8 +81,8 @@ class TcpStream : AbstractStream {
 
     // for client
     this(Selector loop, AddressFamily family = AddressFamily.INET, TcpStreamOption option = null) {
-        if(option is null)
-           _tcpOption = TcpStreamOption.createOption();
+        if (option is null)
+            _tcpOption = TcpStreamOption.createOption();
         else
             _tcpOption = option;
         super(loop, family, _tcpOption.bufferSize);
@@ -94,8 +94,8 @@ class TcpStream : AbstractStream {
 
     // for server
     this(Selector loop, Socket socket, TcpStreamOption option = null) {
-        if(option is null)
-           _tcpOption = TcpStreamOption.createOption();
+        if (option is null)
+            _tcpOption = TcpStreamOption.createOption();
         else
             _tcpOption = option;
         super(loop, socket.addressFamily, _tcpOption.bufferSize);
@@ -128,16 +128,17 @@ class TcpStream : AbstractStream {
     void connect(Address addr) {
         if (_isConnected)
             return;
-        
+
         _remoteAddress = addr;
         import std.parallelism;
+
         auto connectionTask = task(&doConnect, addr);
         taskPool.put(connectionTask);
         // doConnect(addr);
     }
 
     void reconnect() {
-        if(!_isClient) {
+        if (!_isClient) {
             throw new Exception("Only client can call this method.");
         }
 
@@ -148,13 +149,15 @@ class TcpStream : AbstractStream {
         _isConnected = false;
         this.socket = new Socket(this._family, SocketType.STREAM, ProtocolType.TCP);
 
-        version (HUNT_DEBUG) tracef("reconnecting %d...", retryCount);
+        version (HUNT_DEBUG)
+            tracef("reconnecting %d...", retryCount);
         connect(_remoteAddress);
     }
 
     protected override void doConnect(Address addr) {
         try {
-            version (HUNT_DEBUG) tracef("connecting to %s...", addr);
+            version (HUNT_DEBUG)
+                tracef("connecting to %s...", addr);
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
             this.socket.blocking = true;
@@ -170,22 +173,21 @@ class TcpStream : AbstractStream {
 
         if (_connectionHandler !is null)
             _connectionHandler(_isConnected);
-        
-    }
 
+    }
 
     // www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/
     // http://www.importnew.com/27624.html
     private void setKeepalive() {
-        version(HAVE_EPOLL) {
-            if(_tcpOption.isKeepalive) {
+        version (HAVE_EPOLL) {
+            if (_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
-                this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
-                    _tcpOption.keepaliveProbes);
+                this.setOption(SocketOptionLevel.TCP,
+                        cast(SocketOption) TCP_KEEPCNT, _tcpOption.keepaliveProbes);
                 // version (HUNT_DEBUG) checkKeepAlive();
             }
-        } else version(HAVE_IOCP) {
-            if(_tcpOption.isKeepalive) {
+        } else version (HAVE_IOCP) {
+            if (_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
                 // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
                 //     _tcpOption.keepaliveProbes);
@@ -194,24 +196,23 @@ class TcpStream : AbstractStream {
         }
     }
 
-    version (HUNT_DEBUG)
-    private void checkKeepAlive() {
-        version(HAVE_EPOLL) {
-        int time ;
-        int ret1 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPIDLE, time);
-        tracef("ret=%d, time=%d", ret1, time);
+    version (HUNT_DEBUG) private void checkKeepAlive() {
+        version (HAVE_EPOLL) {
+            int time;
+            int ret1 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPIDLE, time);
+            tracef("ret=%d, time=%d", ret1, time);
 
-        int interval;
-        int ret2 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPINTVL, interval);
-        tracef("ret=%d, interval=%d", ret2, interval);
+            int interval;
+            int ret2 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPINTVL, interval);
+            tracef("ret=%d, interval=%d", ret2, interval);
 
-        int isKeep;
-        int ret3 = getOption(SocketOptionLevel.SOCKET, SocketOption.KEEPALIVE, isKeep);
-        tracef("ret=%d, keepalive=%s", ret3, isKeep==1);
+            int isKeep;
+            int ret3 = getOption(SocketOptionLevel.SOCKET, SocketOption.KEEPALIVE, isKeep);
+            tracef("ret=%d, keepalive=%s", ret3, isKeep == 1);
 
-        int probe;
-        int ret4 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, probe);
-        tracef("ret=%d, interval=%d", ret4, probe);
+            int probe;
+            int ret4 = getOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, probe);
+            tracef("ret=%d, interval=%d", ret4, probe);
         }
     }
 
@@ -260,18 +261,18 @@ class TcpStream : AbstractStream {
 
     void write(ByteBuffer buffer) {
         assert(buffer !is null);
-   
-        if(!_isConnected) {
+
+        if (!_isConnected) {
             throw new Exception("The connection is down!");
         }
 
         version (HUNT_DEBUG)
-            infof("data buffered (%d bytes): fd=%d",  buffer.capacity, this.handle);
+            infof("data buffered (%d bytes): fd=%d", buffer.capacity, this.handle);
         _isWritting = true;
         initializeWriteQueue();
         _writeQueue.enqueue(buffer);
         onWrite();
-        
+
         // version (HAVE_IOCP) {
         //     if (!_isWritting)  tryWrite();
         // } else {
@@ -284,8 +285,8 @@ class TcpStream : AbstractStream {
     void write(const(ubyte)[] data) {
         if (data.length == 0 || !_isConnected)
             return;
-        
-        if(!_isConnected) {
+
+        if (!_isConnected) {
             throw new Exception("The connection is down!");
         }
 
@@ -294,29 +295,30 @@ class TcpStream : AbstractStream {
             const(ubyte)[] d = data;
 
             while (!_isClosing && !isWriteCancelling && d.length > 0) {
-            version (HUNT_DEBUG)
-                tracef("write data directly, fd=%d, %d bytes", this.handle, d.length);
+                version (HUNT_DEBUG)
+                    tracef("write data directly, fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
-                
-                if(nBytes == d.length) {
+
+                if (nBytes == d.length) {
                     version (HUNT_DEBUG)
-                        tracef("write out once: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                        tracef("write out once: %d / %d bytes, fd=%d", nBytes,
+                                d.length, this.handle);
                     checkAllWriteDone();
                     break;
                 } else if (nBytes > 0) {
                     version (HUNT_DEBUG)
                         tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
-                    d = d[nBytes..$];
+                    d = d[nBytes .. $];
                 } else {
                     version (HUNT_DEBUG)
                         warningf("buffering remaining data: %d bytes, fd=%d", d.length, this.handle);
                     initializeWriteQueue();
-                    _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[])d));
+                    _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
                     break;
                 }
             }
         } else {
-            write(BufferUtils.toBuffer(cast(byte[])data));
+            write(BufferUtils.toBuffer(cast(byte[]) data));
         }
     }
 
@@ -328,12 +330,9 @@ class TcpStream : AbstractStream {
         this.socket.shutdown(SocketShutdown.SEND);
     }
 
-
 protected:
     bool _isClient;
     ConnectionHandler _connectionHandler;
-
-
 
     override void onRead() {
         version (HUNT_DEBUG)
@@ -353,7 +352,7 @@ protected:
                     this.handle, this.erroString);
             // version (HUNT_DEBUG)
             debug errorf(msg);
-            if(!isClosed)
+            if (!isClosed)
                 errorOccurred(msg);
         }
     }
@@ -378,7 +377,8 @@ protected:
         // }
         super.onClose();
 
-        version (HUNT_DEBUG) infof("notify TCP stream down: fd=%d", this.handle);
+        version (HUNT_DEBUG)
+            infof("notify TCP stream down: fd=%d", this.handle);
         if (closeHandler)
             closeHandler();
     }
