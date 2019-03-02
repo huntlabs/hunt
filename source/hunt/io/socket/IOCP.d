@@ -304,7 +304,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 warning("No buffer in queue");
             return;
         }
-        const(ubyte)[] data = writeBuffer.remaining();
+        const(ubyte)[] data = cast(const(ubyte)[])writeBuffer.getRemaining();
         setWriteBuffer(data);
         size_t nBytes = doWrite();
 
@@ -355,7 +355,6 @@ abstract class AbstractStream : AbstractSocketChannel {
      * Note: It's only for IOCP selector: 
     */
     void onWriteDone(size_t nBytes) {
-            infof("xxxx: %s, len: %d", sendDataBuffer is null, sendDataBuffer.length);
         version (HUNT_DEBUG) {
             tracef("write out once: %d bytes, isWritting: %s, writeBuffer: %s, isWriteCancelling:%s",
                  nBytes, _isWritting, writeBuffer is null, isWriteCancelling);
@@ -382,7 +381,8 @@ abstract class AbstractStream : AbstractSocketChannel {
                 doWrite();
             }
         } else {
-            if (writeBuffer.pop(nBytes)) {
+            writeBuffer.position(cast(int)nBytes);
+            if (writeBuffer.hasRemaining()) {
                 writeBuffer.clear();
                 version (HUNT_DEBUG)
                     tracef("try next write");
