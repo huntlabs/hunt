@@ -2,28 +2,20 @@ module hunt.io.channel.iocp.AbstractListener;
 
 // dfmt off
 version (HAVE_IOCP) : 
-
-pragma(lib, "Ws2_32");
 // dfmt on
 
-import hunt.collection.ByteBuffer;
-import hunt.collection.BufferUtils;
+import hunt.event.selector.Selector;
+import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
-import hunt.logging;
+import hunt.io.channel.iocp.Common;
+import hunt.logging.ConsoleLogger;
 import hunt.Functions;
-import hunt.concurrency.thread.Helper;
 
-import core.atomic;
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
 import core.sys.windows.mswsock;
 
-import std.conv;
-import std.exception;
-import std.format;
-import std.process;
 import std.socket;
-import std.stdio;
 
 
 

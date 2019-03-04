@@ -17,7 +17,6 @@ import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 
 import core.time;
-import std.datetime;
 
 /**
 */
@@ -65,14 +64,12 @@ protected:
 
 // dfmt off
 version (HAVE_IOCP) : 
-
 // dfmt on
 
 import std.datetime;
 import std.exception;
 import std.process;
 
-import hunt.logging;
 import core.sys.windows.windows;
 import core.thread;
 import core.time;

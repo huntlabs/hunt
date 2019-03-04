@@ -1,31 +1,32 @@
 module hunt.io.channel.iocp.AbstractDatagramSocket;
 
-
 // dfmt off
 version (HAVE_IOCP) : 
 // dfmt on
 
-
-import hunt.collection.ByteBuffer;
-import hunt.collection.BufferUtils;
+// import hunt.collection.ByteBuffer;
+// import hunt.collection.BufferUtils;
+import hunt.event.selector.Selector;
+import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
-import hunt.concurrency.thread.Helper;
 
-import core.atomic;
+// import hunt.concurrency.thread.Helper;
+
+// import core.atomic;
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
 import core.sys.windows.mswsock;
 
-import std.conv;
-import std.exception;
-import std.format;
-import std.process;
+// import std.conv;
+// import std.exception;
+// import std.format;
+// import std.process;
 import std.socket;
-import std.stdio;
 
+// import std.stdio;
 
 /**
 UDP Socket
@@ -35,7 +36,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
     this(Selector loop, AddressFamily family = AddressFamily.INET) {
         super(loop, ChannelType.UDP);
         setFlag(ChannelFlag.Read, true);
-        setFlag(ChannelFlag.ETMode, false);
+        // setFlag(ChannelFlag.ETMode, false);
 
         this.socket = new UdpSocket(family);
         _readBuffer = new UdpDataObject();
@@ -78,63 +79,61 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
     protected bool _binded = false;
     protected Address _bindAddress;
 
-    version (HAVE_IOCP) {
-        mixin CheckIocpError;
+    mixin CheckIocpError;
 
-        void doRead() {
-            version (HUNT_DEBUG)
-                trace("Receiving......");
+    void doRead() {
+        version (HUNT_DEBUG)
+            trace("Receiving......");
 
-            _dataReadBuffer.len = cast(uint) _readBuffer.data.length;
-            _dataReadBuffer.buf = cast(char*) _readBuffer.data.ptr;
-            _iocpread.channel = this;
-            _iocpread.operation = IocpOperation.read;
-            remoteAddrLen = cast(int) bindAddr().nameLen();
+        _dataReadBuffer.len = cast(uint) _readBuffer.data.length;
+        _dataReadBuffer.buf = cast(char*) _readBuffer.data.ptr;
+        _iocpread.channel = this;
+        _iocpread.operation = IocpOperation.read;
+        remoteAddrLen = cast(int) bindAddr().nameLen();
 
-            DWORD dwReceived = 0;
-            DWORD dwFlags = 0;
+        DWORD dwReceived = 0;
+        DWORD dwFlags = 0;
 
-            int nRet = WSARecvFrom(cast(SOCKET) this.handle, &_dataReadBuffer,
-                    cast(uint) 1, &dwReceived, &dwFlags, cast(SOCKADDR*)&remoteAddr, &remoteAddrLen,
-                    &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-            checkErro(nRet, SOCKET_ERROR);
-        }
-
-        Address buildAddress() {
-            Address tmpaddr;
-            if (remoteAddrLen == 32) {
-                sockaddr_in* addr = cast(sockaddr_in*)(&remoteAddr);
-                tmpaddr = new InternetAddress(*addr);
-            } else {
-                sockaddr_in6* addr = cast(sockaddr_in6*)(&remoteAddr);
-                tmpaddr = new Internet6Address(*addr);
-            }
-            return tmpaddr;
-        }
-
-        bool tryRead(scope SimpleActionHandler read) {
-            this.clearError();
-            if (this.readLen == 0) {
-                read(null);
-            } else {
-                ubyte[] data = this._readBuffer.data;
-                this._readBuffer.data = data[0 .. this.readLen];
-                this._readBuffer.addr = this.buildAddress();
-                scope (exit)
-                    this._readBuffer.data = data;
-                read(this._readBuffer);
-                this._readBuffer.data = data;
-                if (this.isRegistered)
-                    this.doRead();
-            }
-            return false;
-        }
-
-        IocpContext _iocpread;
-        WSABUF _dataReadBuffer;
-
-        sockaddr remoteAddr;
-        int remoteAddrLen;
+        int nRet = WSARecvFrom(cast(SOCKET) this.handle, &_dataReadBuffer,
+                cast(uint) 1, &dwReceived, &dwFlags, cast(SOCKADDR*)&remoteAddr, &remoteAddrLen,
+                &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+        checkErro(nRet, SOCKET_ERROR);
     }
+
+    Address buildAddress() {
+        Address tmpaddr;
+        if (remoteAddrLen == 32) {
+            sockaddr_in* addr = cast(sockaddr_in*)(&remoteAddr);
+            tmpaddr = new InternetAddress(*addr);
+        } else {
+            sockaddr_in6* addr = cast(sockaddr_in6*)(&remoteAddr);
+            tmpaddr = new Internet6Address(*addr);
+        }
+        return tmpaddr;
+    }
+
+    bool tryRead(scope SimpleActionHandler read) {
+        this.clearError();
+        if (this.readLen == 0) {
+            read(null);
+        } else {
+            ubyte[] data = this._readBuffer.data;
+            this._readBuffer.data = data[0 .. this.readLen];
+            this._readBuffer.addr = this.buildAddress();
+            scope (exit)
+                this._readBuffer.data = data;
+            read(this._readBuffer);
+            this._readBuffer.data = data;
+            if (this.isRegistered)
+                this.doRead();
+        }
+        return false;
+    }
+
+    IocpContext _iocpread;
+    WSABUF _dataReadBuffer;
+
+    sockaddr remoteAddr;
+    int remoteAddrLen;
 
 }
