@@ -30,6 +30,7 @@ public import hunt.collection.DirectByteBuffer;
 public import hunt.collection.Enumeration;
 public import hunt.collection.HashMap;
 public import hunt.collection.HashSet;
+public import hunt.collection.HeapByteBuffer;
 public import hunt.collection.Iterator;
 public import hunt.collection.List;
 public import hunt.collection.LinkedHashMap;
