@@ -16,7 +16,7 @@ module hunt.event.selector.Kqueue;
 version(HAVE_KQUEUE):
 // dfmt on
 
-import hunt.io.socket.Common;
+import hunt.io.channel.Common;
 import hunt.event.timer.Kqueue;
 import hunt.Exceptions;
 import hunt.logging;
@@ -236,8 +236,6 @@ class KqueueEventChannel : EventChannel {
 
         super.onRead();
     }
-
-    // mixin OverrideErro;
 
     Socket[2] _pair;
 }

@@ -15,8 +15,8 @@ module hunt.event.selector.IOCP;
 version (HAVE_IOCP) : 
 // dfmt on
 
-import hunt.io.socket.Common;
-import hunt.io.socket;
+import hunt.io.channel.Common;
+import hunt.io.channel;
 import hunt.event.timer;
 import hunt.logging;
 import hunt.system.Error;

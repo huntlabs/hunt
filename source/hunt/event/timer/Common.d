@@ -11,8 +11,10 @@
 
 module hunt.event.timer.Common;
 
-import hunt.io.socket.Common;
-import hunt.logging;
+import hunt.event.selector.Selector;
+import hunt.io.channel.AbstractChannel;
+import hunt.io.channel.Common;
+import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 
 import std.datetime;

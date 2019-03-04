@@ -11,12 +11,14 @@
 
 module hunt.io.TcpStream;
 
+
 import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;
-import hunt.io.socket.Common;
+import hunt.event.selector.Selector;
+import hunt.io.channel.Common;
 import hunt.concurrency.SimpleQueue;
 import hunt.event;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 import hunt.Functions;
 
 import std.format;
@@ -168,7 +170,7 @@ class TcpStream : AbstractStream {
             _localAddress = this.socket.localAddress();
             start();
         } catch (Exception ex) {
-            warning(ex.message);
+            warningf("Exception: %s, Message: %s", typeid(ex), ex.message);
         }
 
         if (_connectionHandler !is null)

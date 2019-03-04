@@ -13,6 +13,5 @@ module hunt.event;
 
 public import hunt.event.EventLoop;
 public import hunt.event.EventLoopGroup;
-public import hunt.io.socket.Common;
 public import hunt.event.selector;
-public import hunt.io.socket;
+public import hunt.io.channel;

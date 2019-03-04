@@ -31,9 +31,10 @@ import core.sys.posix.unistd;
 import core.sys.posix.sys.resource;
 import core.sys.posix.sys.time;
 
+import hunt.event.selector.Selector;
 import hunt.Exceptions;
-import hunt.io.socket;
-import hunt.logging;
+import hunt.io.channel;
+import hunt.logging.ConsoleLogger;
 import hunt.event.timer;
 import hunt.system.Error;
 import hunt.concurrency.TaskPool;
@@ -228,8 +229,8 @@ class AbstractSelector : Selector {
             }
         } catch (Exception e) {
             debug {
-                errorf("error while handing channel: fd=%s, message=%s",
-                        channel.handle, e.msg);
+                errorf("error while handing channel: fd=%s, exception=%s, message=%s",
+                        channel.handle, typeid(e), e.msg);
             }
         }
     }
