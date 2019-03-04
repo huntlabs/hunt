@@ -15,6 +15,7 @@ module hunt.event.selector.IOCP;
 version (HAVE_IOCP) : 
 // dfmt on
 
+import hunt.event.selector.Selector;
 import hunt.io.channel.Common;
 import hunt.io.channel;
 import hunt.event.timer;
@@ -33,7 +34,6 @@ class AbstractSelector : Selector {
         _iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 0);
         if (_iocpHandle is null)
             errorf("CreateIoCompletionPort failed: %d\n", GetLastError());
-        // _event = new EventChannel(this);
         _timer.init();
     }
 
@@ -212,6 +212,5 @@ class AbstractSelector : Selector {
 
 private:
     HANDLE _iocpHandle;
-    // EventChannel _event;
     CustomTimer _timer;
 }

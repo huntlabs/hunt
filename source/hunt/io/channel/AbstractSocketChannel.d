@@ -8,6 +8,7 @@ import hunt.logging.ConsoleLogger;
 import core.time;
 import std.functional;
 import std.socket;
+import core.stdc.stdint;
 
 /**
 */
