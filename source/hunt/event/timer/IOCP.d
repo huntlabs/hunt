@@ -8,7 +8,7 @@
  * Licensed under the Apache-2.0 License.
  *
  */
- 
+
 module hunt.event.timer.IOCP;
 
 // dfmt off
@@ -19,19 +19,13 @@ import hunt.event.selector.Selector;
 import hunt.event.timer.Common;
 import hunt.Functions;
 import hunt.io.channel.Common;
-import hunt.logging.ConsoleLogger;
 
 import core.time;
-import std.datetime;
-import std.exception;
-
 
 /**
 */
-class AbstractTimer : TimerChannelBase
-{
-    this(Selector loop)
-    {
+class AbstractTimer : TimerChannelBase {
+    this(Selector loop) {
         super(loop);
         setFlag(ChannelFlag.Read, true);
         _timer = new HuntWheelTimer();
@@ -39,8 +33,7 @@ class AbstractTimer : TimerChannelBase
         _readBuffer = new UintObject();
     }
 
-    bool readTimer(scope SimpleActionHandler read)
-    {
+    bool readTimer(scope SimpleActionHandler read) {
         this.clearError();
         this._readBuffer.data = 1;
         if (read)
@@ -48,29 +41,18 @@ class AbstractTimer : TimerChannelBase
         return false;
     }
 
-    // override void start(bool immediately = false, bool once = false)
-    // {
-    //     this.setTimerOut();
-    //     super.start(immediately, once);
-    // }
-
-    private void onTimerTimeout(Object) 
-    {        
+    private void onTimerTimeout(Object) {
         _timer.rest(wheelSize);
         this.onRead();
     }
 
-    override void stop()
-    {
+    override void stop() {
         _timer.stop();
         super.stop();
     }
 
-    
-    bool setTimerOut()
-    {
-        if (_interval > 0)
-        {
+    bool setTimerOut() {
+        if (_interval > 0) {
             _interval = _interval > 20 ? _interval : 20;
             auto size = _interval / CustomTimerMinTimeOut;
             const auto superfluous = _interval % CustomTimerMinTimeOut;
@@ -83,8 +65,9 @@ class AbstractTimer : TimerChannelBase
         return false;
     }
 
-
-    @property HuntWheelTimer timer() { return _timer; }
+    @property HuntWheelTimer timer() {
+        return _timer;
+    }
 
     UintObject _readBuffer;
 
