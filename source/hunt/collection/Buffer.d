@@ -371,13 +371,13 @@ abstract class Buffer
      */
     final int checkIndex(int i) {                       // package-private
         if ((i < 0) || (i >= _limit))
-            throw new IndexOutOfBoundsException("");
+            throw new IndexOutOfBoundsException("Out of range");
         return i;
     }
 
     final int checkIndex(int i, int nb) {               // package-private
         if ((i < 0) || (nb > _limit - i))
-            throw new IndexOutOfBoundsException("");
+            throw new IndexOutOfBoundsException("Out of range");
         return i;
     }
 
@@ -398,6 +398,6 @@ abstract class Buffer
 
     static void checkBounds(int off, int len, int size) { // package-private
         if ((off | len | (off + len) | (size - (off + len))) < 0)
-            throw new IndexOutOfBoundsException("");
+            throw new IndexOutOfBoundsException("Out of range");
     }
 }

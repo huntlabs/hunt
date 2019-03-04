@@ -16,7 +16,7 @@ version (HAVE_IOCP) :
 // dfmt on
 
 import hunt.Functions;
-import hunt.io.socket.Common;
+import hunt.io.channel.Common;
 import hunt.event.timer.Common;
 
 import core.time;
@@ -84,7 +84,6 @@ class AbstractTimer : TimerChannelBase
 
 
     @property HuntWheelTimer timer() { return _timer; }
-    // mixin OverrideErro;
 
     UintObject _readBuffer;
 

@@ -21,6 +21,7 @@ import core.time;
 
 import hunt.Functions;
 import hunt.io.TcpStream;
+import hunt.util.Common;
 
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
 alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, size_t bufferSize);
@@ -155,5 +156,28 @@ class TcpListener : AbstractListener {
                 this.close();
             }
         }
+    }
+}
+
+
+
+// dfmt off
+version(linux):
+// dfmt on
+static if (CompilerHelper.isLessThan(2078)) {
+    version (X86) {
+        enum SO_REUSEPORT = 15;
+    } else version (X86_64) {
+        enum SO_REUSEPORT = 15;
+    } else version (MIPS32) {
+        enum SO_REUSEPORT = 0x0200;
+    } else version (MIPS64) {
+        enum SO_REUSEPORT = 0x0200;
+    } else version (PPC) {
+        enum SO_REUSEPORT = 15;
+    } else version (PPC64) {
+        enum SO_REUSEPORT = 15;
+    } else version (ARM) {
+        enum SO_REUSEPORT = 15;
     }
 }

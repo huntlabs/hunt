@@ -11,9 +11,7 @@
 
 module hunt.event.selector;
 
-import hunt.Exceptions;
-import hunt.io.socket.Common;
-import std.conv;
+public import hunt.event.selector.Selector;
 
 version (HAVE_EPOLL) {
     public import hunt.event.selector.Epoll;

@@ -18,9 +18,9 @@ version (HAVE_KQUEUE) :
 
 import hunt.Exceptions;
 import hunt.Functions;
-import hunt.io.socket.Common;
+import hunt.io.channel.Common;
 import hunt.event.timer.Common;
-import hunt.io.socket;
+import hunt.io.channel;
 
 import core.stdc.errno;
 import core.sys.posix.sys.types; // for ssize_t, size_t

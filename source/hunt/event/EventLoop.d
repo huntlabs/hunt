@@ -11,7 +11,7 @@
 
 module hunt.event.EventLoop;
 
-import hunt.io.socket.Common;
+import hunt.io.channel.Common;
 import hunt.event.selector;
 import hunt.logging;
 

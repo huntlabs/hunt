@@ -9,12 +9,14 @@
  *
  */
 
-module hunt.io.socket;
+module hunt.io.channel;
 
-public import hunt.io.socket.Common;
+public import hunt.io.channel.AbstractChannel;
+public import hunt.io.channel.AbstractSocketChannel;
+public import hunt.io.channel.Common;
 
 version (Posix) {
-    public import hunt.io.socket.Posix;
+    public import hunt.io.channel.posix;
 } else version (Windows) {
-    public import hunt.io.socket.IOCP;
+    public import hunt.io.channel.iocp;
 }

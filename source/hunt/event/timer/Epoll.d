@@ -15,10 +15,11 @@ module hunt.event.timer.Epoll;
 version (HAVE_EPOLL) : 
 // dfmt on
 
-import hunt.Functions;
-import hunt.io.socket.Common;
+import hunt.event.selector.Selector;
 import hunt.event.timer.Common;
-import hunt.logging;
+import hunt.Functions;
+import hunt.io.channel.Common;
+import hunt.logging.ConsoleLogger;
 
 import core.sys.posix.unistd;
 import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
