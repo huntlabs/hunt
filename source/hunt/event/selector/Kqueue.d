@@ -11,15 +11,16 @@
 
 module hunt.event.selector.Kqueue;
 
-
 // dfmt off
 version(HAVE_KQUEUE):
 // dfmt on
 
+import hunt.event.selector.Selector;
+import hunt.io.channel.AbstractChannel;
 import hunt.io.channel.Common;
 import hunt.event.timer.Kqueue;
 import hunt.Exceptions;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 
 import std.exception;
 import std.socket;

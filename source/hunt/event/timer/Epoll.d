@@ -19,14 +19,11 @@ import hunt.event.selector.Selector;
 import hunt.event.timer.Common;
 import hunt.Functions;
 import hunt.io.channel.Common;
-import hunt.logging.ConsoleLogger;
 
 import core.sys.posix.unistd;
 import core.sys.posix.time : itimerspec, CLOCK_MONOTONIC;
 
 import core.time;
-import std.datetime;
-import std.exception;
 import std.socket;
 
 /**

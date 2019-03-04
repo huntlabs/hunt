@@ -15,21 +15,12 @@ module hunt.event.timer.Kqueue;
 version (HAVE_KQUEUE) : 
 // dfmt on
 
-
-import hunt.Exceptions;
+import hunt.event.selector.Selector;
 import hunt.Functions;
-import hunt.io.channel.Common;
 import hunt.event.timer.Common;
 import hunt.io.channel;
 
-import core.stdc.errno;
-import core.sys.posix.sys.types; // for ssize_t, size_t
-import core.sys.posix.netinet.tcp;
-import core.sys.posix.netinet.in_;
 import core.sys.posix.time;
-import core.sys.posix.unistd;
-
-import std.exception;
 import std.socket;
 
 /**
