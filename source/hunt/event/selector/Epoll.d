@@ -197,12 +197,12 @@ class AbstractSelector : Selector {
             if (isClosed(event)) {
                 /* An error has occured on this fd, or the socket is not
                     ready for reading (why were we notified then?) */
-                debug {
+                version (HUNT_DEBUG) {
                     if (isError(event)) {
                         warningf("channel error: fd=%s, event=%d, errno=%d, message=%s",
                                 channel.handle, event, errno, getErrorMessage(errno));
                     } else {
-                        version (HUNT_DEBUG) infof("channel closed: fd=%d, errno=%d, message=%s",
+                        infof("channel closed: fd=%d, errno=%d, message=%s",
                                     channel.handle, errno, getErrorMessage(errno));
                     }
                 }
