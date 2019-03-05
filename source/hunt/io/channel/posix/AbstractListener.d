@@ -5,16 +5,14 @@ version(Posix):
 // dfmt on
 
 import hunt.event.selector.Selector;
-// import hunt.Functions;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.logging.ConsoleLogger;
-// import hunt.system.Error;
 
 import std.conv;
 import std.socket;
 
-import core.sys.posix.sys.socket : accept;
+import core.sys.posix.sys.socket;
 
 
 /**
