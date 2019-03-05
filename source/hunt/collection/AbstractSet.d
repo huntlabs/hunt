@@ -17,8 +17,8 @@ import hunt.collection.Collection;
 import hunt.collection.Set;
 
 import hunt.Exceptions;
+import hunt.Functions;
 import hunt.Object;
-import hunt.Exceptions;
 
 
 /**
