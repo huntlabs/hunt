@@ -221,6 +221,7 @@ class ConsoleLogger {
         if (level < g_logLevel)
             return;
 
+        import std.exception;
         version (Posix) {
             string prior_color;
             switch (level) with (LogLevel) {
@@ -237,7 +238,6 @@ class ConsoleLogger {
             default:
                 prior_color = string.init;
             }
-            import std.exception;
             collectException(writeln(prior_color ~ msg ~ PRINT_COLOR_NONE));
             
         } else version (Windows) {
@@ -259,7 +259,9 @@ class ConsoleLogger {
                 color = defaultColor;
             }
 
-            ConsoleHelper.writeWithAttribute(msg, color);
+            collectException(ConsoleHelper.writeWithAttribute(msg, color));
+        } else {
+            assert(false, "Unsupported OS.");
         }
     }
 }
