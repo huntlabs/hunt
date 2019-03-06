@@ -36,17 +36,8 @@ version (Windows) {
     import core.sys.windows.wincon;
     import core.sys.windows.winbase;
     import core.sys.windows.windef;
+    import hunt.system.WindowsHelper;
 
-    private __gshared HANDLE g_hout;
-    
-    shared static this() {
-        g_hout = GetStdHandle(STD_OUTPUT_HANDLE);
-        SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    }
-
-    void resetConsoleColor() {
-        SetConsoleTextAttribute(g_hout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    }
 }
 
 version (Posix) {
@@ -249,11 +240,7 @@ class ConsoleLogger {
             import std.exception;
             collectException(writeln(prior_color ~ msg ~ PRINT_COLOR_NONE));
             
-        }
-        else version (Windows) {
-            import std.windows.charset;
-            import core.stdc.stdio;
-
+        } else version (Windows) {
             enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
 
             ushort color;
@@ -272,15 +259,7 @@ class ConsoleLogger {
                 color = defaultColor;
             }
 
-            SetConsoleTextAttribute(g_hout, color);
-            
-            try {
-                printf("%s\n", toMBSz(msg));
-            } catch (Exception) {
-            }
-
-            if (color != defaultColor)
-                SetConsoleTextAttribute(g_hout, defaultColor);
+            ConsoleHelper.writeWithAttribute(msg, color);
         }
     }
 }

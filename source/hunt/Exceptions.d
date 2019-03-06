@@ -19,16 +19,34 @@ void implementationMissing(string name = __FUNCTION__, string file = __FILE__, i
     if (canThrow)
         throw new Exception("Implementation missing: " ~ name, file, line);
     else {
-        version (HUNT_DEBUG) {
-            import hunt.logging;
-
-            warningf("Implementation missing %s, in %s:%d", name, file, line);
-        }
-        else {
+        version (Posix) {
             import std.stdio;
 
-            stderr.writefln("======> Implementation missing %s, in %s:%d", name, file, line);
+            enum PRINT_COLOR_NONE = "\033[m";
+            enum PRINT_COLOR_YELLOW = "\033[1;33m";
+            stderr.writefln(PRINT_COLOR_YELLOW ~ "Implementation missing %s, in %s:%d" ~ PRINT_COLOR_NONE,
+                    name, file, line);
+        } else {
+            import hunt.system.WindowsHelper;
+            ConsoleHelper.writeWithAttribute(msg, FOREGROUND_GREEN | FOREGROUND_RED);
         }
+
+        // version (HUNT_DEBUG) {
+        //     // import hunt.logging.ConsoleLogger;
+
+        //     // warningf("Implementation missing %s, in %s:%d", name, file, line);
+
+        //     version(Posix) {
+        //         enum PRINT_COLOR_NONE = "\033[m";
+        //         enum PRINT_COLOR_YELLOW = "\033[1;33m";
+        //         stderr.writefln(PRINT_COLOR_YELLOW ~ "Implementation missing %s, in %s:%d" ~ PRINT_COLOR_NONE,
+        //              name, file, line);
+        //     }
+        // }
+        // else {
+
+        //     stderr.writefln("======> Implementation missing %s, in %s:%d", name, file, line);
+        // }
     }
 }
 
@@ -120,7 +138,7 @@ class ParseException : Exception {
      * @param s the detail message
      * @param errorOffset the position where the error is found while parsing.
      */
-    public this(string s, int errorOffset=-1) {
+    public this(string s, int errorOffset = -1) {
         super(s);
         this.errorOffset = errorOffset;
     }
@@ -130,7 +148,7 @@ class ParseException : Exception {
      *
      * @return the position where the error was found
      */
-    public int getErrorOffset () {
+    public int getErrorOffset() {
         return errorOffset;
     }
 
@@ -365,5 +383,9 @@ class ClassCastException : Exception {
 }
 
 class SystemException : Exception {
+    mixin BasicExceptionCtors;
+}
+
+class SQLException : Exception {
     mixin BasicExceptionCtors;
 }
