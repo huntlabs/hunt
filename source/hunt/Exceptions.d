@@ -26,9 +26,14 @@ void implementationMissing(string name = __FUNCTION__, string file = __FILE__, i
             enum PRINT_COLOR_YELLOW = "\033[1;33m";
             stderr.writefln(PRINT_COLOR_YELLOW ~ "Implementation missing %s, in %s:%d" ~ PRINT_COLOR_NONE,
                     name, file, line);
-        } else {
+        } else version(Windows) {
             import hunt.system.WindowsHelper;
+            import core.sys.windows.wincon;
+            import std.format;
+            string msg = format("Implementation missing %s, in %s:%d", name, file, line);
             ConsoleHelper.writeWithAttribute(msg, FOREGROUND_GREEN | FOREGROUND_RED);
+        } else {
+            assert(false, "Unsupported OS.");
         }
 
         // version (HUNT_DEBUG) {

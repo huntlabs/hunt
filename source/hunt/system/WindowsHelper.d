@@ -30,7 +30,7 @@ struct ConsoleHelper {
     }
 
     static void setTextAttribute(ushort attr) nothrow {
-        SetConsoleTextAttribute(g_hout, color);
+        SetConsoleTextAttribute(g_hout, attr);
     }
 
     static void write(string msg) nothrow {
@@ -38,9 +38,9 @@ struct ConsoleHelper {
     }
 
     static void writeWithAttribute(string msg, ushort attr = defaultColor) nothrow {
-        setTextAttribute(color);
+        setTextAttribute(attr);
         collectException(printf("%s\n", toMBSz(msg)));
-        if (color != defaultColor)
+        if ((attr & defaultColor) != defaultColor)
             ConsoleHelper.resetColor();
     }
 }
