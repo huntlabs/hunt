@@ -410,7 +410,7 @@ class Byte : AbstractNumber!(byte) {
         if (i < MIN_VALUE || i > MAX_VALUE)
         {
             throw new Exception(
-                    "Value " ~s ~ " out of range from input ");
+                    "Value " ~ s ~ " out of range from input ");
         }
 
          return cast(byte)i;

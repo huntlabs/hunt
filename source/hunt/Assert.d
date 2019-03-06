@@ -155,11 +155,6 @@ class Assert {
      */
     static void assertEquals(T, size_t line = __LINE__, string file = __FILE__)(
             string message, T expected, T actual) {
-        // if (!message.empty)
-        //     message = std.format.format("raised in %s:%s, message: %s", file, line, message);
-        // else
-        //     message = std.format.format("raised in %s:%s", file, line);
-
         version (HUNT_DEBUG) {
             trace("expected: ", expected);
             trace("actual: ", actual);
