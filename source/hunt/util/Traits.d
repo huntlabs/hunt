@@ -15,6 +15,10 @@ import std.meta;
 import std.traits;
 import std.typecons;
 
+import std.array;
+import std.string;
+import std.conv;
+
 mixin template GetConstantValues(T) if (is(T == struct) || is(T == class))
 {
     static T[] values()
@@ -80,4 +84,123 @@ template isPublic(alias T)
 {
 	enum protection =  __traits(getProtection,T);
 	enum isPublic = (protection == "public");
+}
+
+
+
+/**
+name: xXX will map to T's memeber function void setXXX()
+*/
+void setProperty(T, Args...)(ref T p, string name, Args value) 
+    if(is(T == class) || is(T == struct)) {
+
+	// pragma(msg, "Args: " ~ Args.stringof);
+
+	if (name.empty) {
+		throw new Exception("Name can't be empty");
+	}
+
+	string currentMember = "set" ~ toUpper(name[0 .. 1]) ~ name[1 .. $];
+	foreach (memberName; __traits(allMembers, T)) {
+		// pragma(msg, "Member: " ~ memberName);
+
+		if (currentMember == memberName) {
+			// writeln("setting: " ~ currentMember);
+			// writefln("value length: %d, name: %s", value.length, value.stringof);
+			// foreach (i, s; value) {
+			// 	writefln("value[%d] type: %s, value: %s", i, typeid(s), s);
+			// }
+			static if (is(typeof(__traits(getMember, T, memberName)) == function)) {
+				// pragma(msg, "Function: " ~ memberName);
+
+				foreach (PT; __traits(getOverloads, T, memberName)) {
+					// pragma(msg, "overload function: " ~ memberName);
+
+					enum memberParams = ParameterIdentifierTuple!PT;
+					static if (Args.length == memberParams.length) {
+						alias memberParamTypes = Parameters!PT;
+
+						static if (__traits(isSame, memberParamTypes, Args)) {
+							__traits(getMember, p, memberName)(value);
+						} else {
+							enum string str = generateSetter!(PT, p.stringof, memberName, value.stringof, Args)();
+							// pragma(msg, "== code == " ~ str);
+							static if (str.length > 0) {
+								mixin(str);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+private string generateSetter(alias T, string objectName, string memeberName,
+		string parameterName, Args...)() {
+	string str;
+	import std.conv;
+
+	enum memberParams = ParameterIdentifierTuple!T;
+
+	str ~= objectName ~ "." ~ memeberName ~ "(";
+	alias memberParamTypes = Parameters!T;
+
+	bool isFirst = true;
+
+	static foreach (int i; 0 .. memberParams.length) {
+		if (isFirst)
+			isFirst = false;
+		else {
+			str ~= ", ";
+		}
+
+		static if (is(memberParamTypes[i] == Args[i])) {
+			str ~= parameterName ~ "[" ~ to!string(i) ~ "]";
+		} else {
+			str ~= "to!(" ~ memberParamTypes[i].stringof ~ ")(" ~ parameterName ~ "[" ~ to!string(
+					i) ~ "])";
+		}
+
+	}
+	str ~= ");";
+	return str;
+}
+
+unittest {
+
+struct Foo {
+	string name = "dog";
+	int bar = 42;
+	int baz = 31337;
+
+	void setBar(int value) {
+		// writefln("setting: value=%d", value);
+		bar = value;
+	}
+
+	void setBar(string name, int value) {
+		// writefln("setting: name=%s, value=%d", name, value);
+        this.name = name;
+        this.bar = value;
+	}
+
+	int getBar() {
+		return bar;
+	}
+}
+
+	Foo foo;
+
+	setProperty(foo, "bar", 12);
+	assert(foo.bar == 12);
+	setProperty(foo, "bar", "112");
+	assert(foo.bar == 112);
+
+	setProperty(foo, "bar", "age", 16);
+	assert(foo.name == "age");
+	assert(foo.bar == 16);
+	setProperty(foo, "bar", "age", "36");
+	assert(foo.name == "age");
+	assert(foo.bar == 36);
 }
