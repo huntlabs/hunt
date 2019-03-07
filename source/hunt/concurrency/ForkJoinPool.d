@@ -1918,8 +1918,7 @@ class ForkJoinPool : AbstractExecutorService {
         this.mode = m;
         this.ctl = c;
         // checkPermission();
-        workerNameLocker = new Object();     
-        trace("111111");   
+        workerNameLocker = new Object(); 
     }
 
     // private static Object newInstanceFromSystemProperty(string property) {

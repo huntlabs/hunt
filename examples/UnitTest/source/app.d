@@ -14,6 +14,7 @@ import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
 import test.PathMatcherTest;
+import test.PropertySetterTest;
 import test.ScheduledThreadPoolTest;
 import test.StringTokenizerTest;
 import test.TaskPoolTest;
@@ -33,6 +34,7 @@ void main()
 	writeln("Memory page: ", pageSize);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 
+	testPropertySetter();
 
 	testUnits!(MagedQueueTest);
 
@@ -59,6 +61,7 @@ void main()
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
 }
+
 
 
 
