@@ -55,21 +55,21 @@ class SetDemo {
         
         // trace(sm.toString());
 
-        InputRange!int i = sm.iterator();
-        int k;
-        k = (i.front());
-        assertEquals(two, k);
-        i.popFront();
-        k = (i.front());
-        assertEquals(three, k);
-        i.popFront();
-        k = (i.front());
-        assertEquals(four, k);
-        i.popFront();
-        k = (i.front());
-        assertEquals(five, k);
-        i.popFront();
-        assertTrue(i.empty());
+        // InputRange!int i = sm.iterator();
+        // int k;
+        // k = (i.front());
+        // assertEquals(two, k);
+        // i.popFront();
+        // k = (i.front());
+        // assertEquals(three, k);
+        // i.popFront();
+        // k = (i.front());
+        // assertEquals(four, k);
+        // i.popFront();
+        // k = (i.front());
+        // assertEquals(five, k);
+        // i.popFront();
+        // assertTrue(i.empty());
 
         SortedSet!int ssm = sm.tailSet(four);
         // trace(ssm.toString());

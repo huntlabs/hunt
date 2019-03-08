@@ -199,10 +199,10 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *
      * @return an iterator over the elements in this set in ascending order
      */
-    override InputRange!(E) iterator() {
-        return m.byKey();
-        // return m.navigableKeySet().iterator();
-    }
+    // override InputRange!(E) iterator() {
+    //     return m.byKey();
+    //     // return m.navigableKeySet().iterator();
+    // }
 
     /**
      * Returns an iterator over the elements in this set in descending order.
