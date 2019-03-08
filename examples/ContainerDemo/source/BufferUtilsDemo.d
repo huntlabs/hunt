@@ -37,7 +37,7 @@ class BufferUtilsDemo {
 
         string[] str = ["0", "42", "43", "-44", "-45", to!string(int.min), to!string(int.max)];
 
-        ByteBuffer buffer = ByteBuffer.allocate(24);
+        ByteBuffer buffer = BufferUtils.allocate(24);
 
         for (int i = 0; i < val.length; i++) {
             BufferUtils.clearToFill(buffer);
@@ -52,7 +52,7 @@ class BufferUtilsDemo {
 
         string[] str = ["0", "42", "43", "-44", "-45", to!string(long.min), to!string(long.max)];
 
-        ByteBuffer buffer = ByteBuffer.allocate(50);
+        ByteBuffer buffer = BufferUtils.allocate(50);
 
         for (int i = 0; i < val.length; i++) {
             BufferUtils.clearToFill(buffer);
@@ -67,7 +67,7 @@ class BufferUtilsDemo {
 
         string[] str = ["0", "2A", "2B", "-2C", "-2D", "-80000000", "7FFFFFFF"];
 
-        ByteBuffer buffer = ByteBuffer.allocate(50);
+        ByteBuffer buffer = BufferUtils.allocate(50);
 
         for (int i = 0; i < val.length; i++) {
             BufferUtils.clearToFill(buffer);

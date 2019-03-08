@@ -18,6 +18,7 @@ import std.typecons;
 import std.array;
 import std.string;
 import std.conv;
+import std.stdio;
 
 mixin template GetConstantValues(T) if (is(T == struct) || is(T == class))
 {
@@ -89,10 +90,12 @@ template isPublic(alias T)
 
 
 /**
-name: xXX will map to T's memeber function void setXXX()
+* Params
+*	name = xXX will map to T's memeber function void setXXX()
 */
 void setProperty(T, Args...)(ref T p, string name, Args value) 
-    if(is(T == class) || is(T == struct)) {
+    if(is(T == class) || is(T == struct) || is(T == interface)) {
+	enum string MethodPrefix = "set";
 
 	// pragma(msg, "Args: " ~ Args.stringof);
 
@@ -100,40 +103,57 @@ void setProperty(T, Args...)(ref T p, string name, Args value)
 		throw new Exception("Name can't be empty");
 	}
 
-	string currentMember = "set" ~ toUpper(name[0 .. 1]) ~ name[1 .. $];
+	enum PrefixLength = MethodPrefix.length;
+	string currentMember = MethodPrefix ~ toUpper(name[0 .. 1]) ~ name[1 .. $];
+	bool isSuccess = false;
+
 	foreach (memberName; __traits(allMembers, T)) {
 		// pragma(msg, "Member: " ~ memberName);
 
-		if (currentMember == memberName) {
-			// writeln("setting: " ~ currentMember);
-			// writefln("value length: %d, name: %s", value.length, value.stringof);
-			// foreach (i, s; value) {
-			// 	writefln("value[%d] type: %s, value: %s", i, typeid(s), s);
-			// }
-			static if (is(typeof(__traits(getMember, T, memberName)) == function)) {
-				// pragma(msg, "Function: " ~ memberName);
+		static if (memberName.length > PrefixLength && memberName[0 .. PrefixLength] == MethodPrefix) {
+			// writeln("checking: ", memberName);
+			if (!isSuccess && currentMember == memberName) {
+				isSuccess = true;
+				// writefln("value length: %d, name: %s", value.length, value.stringof);
+				// foreach (i, s; value) {
+				// 	writefln("value[%d] type: %s, value: %s", i, typeid(s), s);
+				// }
+				static if (is(typeof(__traits(getMember, T, memberName)) == function)) {
+					// pragma(msg, "Function: " ~ memberName);
 
-				foreach (PT; __traits(getOverloads, T, memberName)) {
-					// pragma(msg, "overload function: " ~ memberName);
+					foreach (PT; __traits(getOverloads, T, memberName)) {
+						// pragma(msg, "overload function: " ~ memberName);
 
-					enum memberParams = ParameterIdentifierTuple!PT;
-					static if (Args.length == memberParams.length) {
-						alias memberParamTypes = Parameters!PT;
+						enum memberParams = ParameterIdentifierTuple!PT;
+						static if (Args.length == memberParams.length) {
+							alias memberParamTypes = Parameters!PT;
 
-						static if (__traits(isSame, memberParamTypes, Args)) {
-							__traits(getMember, p, memberName)(value);
-						} else {
-							enum string str = generateSetter!(PT, p.stringof, memberName, value.stringof, Args)();
-							// pragma(msg, "== code == " ~ str);
-							static if (str.length > 0) {
-								mixin(str);
+							static if (__traits(isSame, memberParamTypes, Args)) {
+								__traits(getMember, p, memberName)(value);
+							} else {
+								enum string str = generateSetter!(PT, p.stringof, memberName,
+											value.stringof, Args)();
+								// pragma(msg, "== code == " ~ str);
+
+								static if (str.length > 0) {
+									mixin(str);
+								}
 							}
 						}
 					}
 				}
 			}
+		} else {
+			// writeln("skipping: ", memberName);
+			// pragma(msg, "skipping: " ~ memberName);
+
 		}
 	}
+
+	if(!isSuccess) {
+		writefln("Can't find member %s in %s", currentMember, typeid(T));
+	}
+	// assert(false, T.stringof ~ " has no member " ~ name);
 }
 
 private string generateSetter(alias T, string objectName, string memeberName,
