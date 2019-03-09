@@ -11,14 +11,14 @@
 
 module hunt.util.Traits;
 
-import std.meta;
-import std.traits;
-import std.typecons;
-
+import std.algorithm : canFind;
 import std.array;
+import std.conv : to;
+import std.meta;
+import std.typecons;
 import std.string;
-import std.conv;
-import std.stdio;
+import std.traits;
+import hunt.logging.ConsoleLogger;
 
 mixin template GetConstantValues(T) if (is(T == struct) || is(T == class))
 {
@@ -88,19 +88,19 @@ template isPublic(alias T)
 }
 
 
+enum string[] FixedObjectMembers = ["toString", "opCmp", "opEquals", "Monitor", "factory"];
 
 /**
 * Params
 *	name = xXX will map to T's memeber function void setXXX()
 */
-void setProperty(T, Args...)(ref T p, string name, Args value) 
-    if(is(T == class) || is(T == struct) || is(T == interface)) {
-	enum string MethodPrefix = "set";
 
+bool setProperty(T, Args...)(ref T p, string name, Args value) {
+	enum string MethodPrefix = "set";
 	// pragma(msg, "Args: " ~ Args.stringof);
 
 	if (name.empty) {
-		throw new Exception("Name can't be empty");
+		throw new Exception("The name can't be empty");
 	}
 
 	enum PrefixLength = MethodPrefix.length;
@@ -110,14 +110,13 @@ void setProperty(T, Args...)(ref T p, string name, Args value)
 	foreach (memberName; __traits(allMembers, T)) {
 		// pragma(msg, "Member: " ~ memberName);
 
-		static if (memberName.length > PrefixLength && memberName[0 .. PrefixLength] == MethodPrefix) {
-			// writeln("checking: ", memberName);
+		static if(is(T == class) && FixedObjectMembers.canFind(memberName) ) {
+			// pragma(msg, "skipping fixed Object member: " ~ memberName);
+		} else static if (memberName.length > PrefixLength && 
+			memberName[0 .. PrefixLength] == MethodPrefix) {
+			// tracef("checking: %s", memberName);
+			
 			if (!isSuccess && currentMember == memberName) {
-				isSuccess = true;
-				// writefln("value length: %d, name: %s", value.length, value.stringof);
-				// foreach (i, s; value) {
-				// 	writefln("value[%d] type: %s, value: %s", i, typeid(s), s);
-				// }
 				static if (is(typeof(__traits(getMember, T, memberName)) == function)) {
 					// pragma(msg, "Function: " ~ memberName);
 
@@ -127,43 +126,55 @@ void setProperty(T, Args...)(ref T p, string name, Args value)
 						enum memberParams = ParameterIdentifierTuple!PT;
 						static if (Args.length == memberParams.length) {
 							alias memberParamTypes = Parameters!PT;
+							isSuccess = true;
+							
+							// tracef("try to execute method %s, with value: %s", memberName, value.stringof);
+							// foreach (i, s; value) {
+							// 	tracef("value[%d] type: %s, actual value: %s", i, typeid(s), s);
+							// }
 
 							static if (__traits(isSame, memberParamTypes, Args)) {
 								__traits(getMember, p, memberName)(value);
 							} else {
-								enum string str = generateSetter!(PT, p.stringof, memberName,
-											value.stringof, Args)();
+								enum string str = generateSetter!(PT,
+											p.stringof ~ "." ~ memberName, value.stringof, Args)();
 								// pragma(msg, "== code == " ~ str);
 
 								static if (str.length > 0) {
 									mixin(str);
 								}
 							}
-						}
+						} 
+					}
+
+					if (!isSuccess) {
+						warningf("Mismatch member %s in %s for parameter size %d", 
+							currentMember, typeid(T), Args.length);
+					} else {
+						return true;
 					}
 				}
 			}
 		} else {
-			// writeln("skipping: ", memberName);
 			// pragma(msg, "skipping: " ~ memberName);
-
 		}
 	}
 
-	if(!isSuccess) {
-		writefln("Can't find member %s in %s", currentMember, typeid(T));
+	if (!isSuccess) {
+		warningf("Failed to set member %s in %s", currentMember, typeid(T));
+		// assert(false, T.stringof ~ " has no member " ~ currentMember);
 	}
-	// assert(false, T.stringof ~ " has no member " ~ name);
+	return isSuccess;
 }
 
-private string generateSetter(alias T, string objectName, string memeberName,
-		string parameterName, Args...)() {
+/**
+*/
+private string generateSetter(alias T, string callerName, string parameterName, argumentTypes...)() {
 	string str;
 	import std.conv;
 
 	enum memberParams = ParameterIdentifierTuple!T;
-
-	str ~= objectName ~ "." ~ memeberName ~ "(";
+	str ~= callerName ~ "(";
 	alias memberParamTypes = Parameters!T;
 
 	bool isFirst = true;
@@ -171,11 +182,10 @@ private string generateSetter(alias T, string objectName, string memeberName,
 	static foreach (int i; 0 .. memberParams.length) {
 		if (isFirst)
 			isFirst = false;
-		else {
+		else
 			str ~= ", ";
-		}
 
-		static if (is(memberParamTypes[i] == Args[i])) {
+		static if (is(memberParamTypes[i] == argumentTypes[i])) {
 			str ~= parameterName ~ "[" ~ to!string(i) ~ "]";
 		} else {
 			str ~= "to!(" ~ memberParamTypes[i].stringof ~ ")(" ~ parameterName ~ "[" ~ to!string(
@@ -187,28 +197,27 @@ private string generateSetter(alias T, string objectName, string memeberName,
 	return str;
 }
 
+
 unittest {
 
-struct Foo {
-	string name = "dog";
-	int bar = 42;
-	int baz = 31337;
+	struct Foo {
+		string name = "dog";
+		int bar = 42;
+		int baz = 31337;
 
-	void setBar(int value) {
-		// writefln("setting: value=%d", value);
-		bar = value;
-	}
+		void setBar(int value) {
+			bar = value;
+		}
 
-	void setBar(string name, int value) {
-		// writefln("setting: name=%s, value=%d", name, value);
-        this.name = name;
-        this.bar = value;
-	}
+		void setBar(string name, int value) {
+			this.name = name;
+			this.bar = value;
+		}
 
-	int getBar() {
-		return bar;
+		int getBar() {
+			return bar;
+		}
 	}
-}
 
 	Foo foo;
 
@@ -217,10 +226,10 @@ struct Foo {
 	setProperty(foo, "bar", "112");
 	assert(foo.bar == 112);
 
-	setProperty(foo, "bar", "age", 16);
+	foo.setProperty("bar", "age", 16);
 	assert(foo.name == "age");
 	assert(foo.bar == 16);
-	setProperty(foo, "bar", "age", "36");
+	foo.setProperty("bar", "age", "36");
 	assert(foo.name == "age");
 	assert(foo.bar == 36);
 }
