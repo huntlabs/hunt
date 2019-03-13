@@ -262,6 +262,9 @@ enum ThreadState {
  */
 class ThreadEx : Thread, Runnable {
 
+    /* What will be run. */
+    private Runnable target;
+
     Object parkBlocker;
     ThreadState state;
     
@@ -316,18 +319,18 @@ class ThreadEx : Thread, Runnable {
     this(ThreadGroupEx group, Runnable target, string name,  size_t sz = 0) {
         this.name = name;
         this.group = group;
-        if(target !is null) {
-            this({ target.run(); }, sz);
-        } else {
-            this({}, sz);
-        }
+        this.target = target;
+        super(&run, sz);
+        initialize();
     }
 
+    deprecated("Not supported anymore.")
     this(void function() fn, size_t sz = 0) nothrow {
         super(fn, sz);
         initialize();
     }
 
+    deprecated("Not supported anymore.")
     this(void delegate() dg, size_t sz = 0) nothrow {
         super(dg , sz);
         initialize();
@@ -337,6 +340,7 @@ class ThreadEx : Thread, Runnable {
         blocker = null;
         blockerLock = null;
         parkBlocker = null;
+        target = null;
         _parker = null;
     }
 
@@ -372,9 +376,15 @@ class ThreadEx : Thread, Runnable {
      * @see     #start()
      * @see     #stop()
      * @see     #Thread(ThreadGroup, Runnable, String)
+     * See_also:
+     *  https://stackoverflow.com/questions/8579657/whats-the-difference-between-thread-start-and-runnable-run
      */
     void run() {
-        super.start();
+        // super.start();
+        info("Trying to run a target...");
+        if (target !is null) {
+            target.run();
+        }
     }
 
 
