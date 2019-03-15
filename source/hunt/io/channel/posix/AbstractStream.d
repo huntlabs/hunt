@@ -22,6 +22,8 @@ import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
+enum string ResponseData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
+
 /**
 TCP Peer
 */
@@ -63,13 +65,17 @@ abstract class AbstractStream : AbstractSocketChannel {
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
         if (len > 0) {
-            if (dataReceivedHandler !is null) {
-                _bufferForRead.limit(cast(int)len);
-                _bufferForRead.position(0);
-                dataReceivedHandler(_bufferForRead);
-            }
+            // if (dataReceivedHandler !is null) {
+            //     _bufferForRead.limit(cast(int)len);
+            //     _bufferForRead.position(0);
+            //     dataReceivedHandler(_bufferForRead);
+            // }
 
-            // size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
+            size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
+
+            if(nBytes < ResponseData.length) {
+                warning("data lost");
+            }
 
             // It's prossible that there are more data waitting for read in the read I/O space.
             if (len == _readBuffer.length) {

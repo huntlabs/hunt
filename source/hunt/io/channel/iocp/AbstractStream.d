@@ -125,7 +125,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_DEBUG) {
             size_t bufferLength = sendDataBuffer.length;
             tracef("To write %d nbytes: fd=%d", bufferLength, this.socket.handle());
-            // trace(cast(string) data);
             if (bufferLength > 32)
                 tracef("%(%02X %) ...", sendDataBuffer[0 .. 32]);
             else
