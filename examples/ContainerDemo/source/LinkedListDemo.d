@@ -13,10 +13,10 @@ import std.conv;
 import std.range;
 
 // http://www.java2novice.com/java-collections-and-util/arraylist/
-class LinkedListDemo
-{
-    void testBasicOperations()
-    {
+class LinkedListDemo {
+
+
+    void testBasicOperations() {
         LinkedList!(string) arrl = new LinkedList!(string)();
         //adding elements to the end
         arrl.add("First");
@@ -26,7 +26,6 @@ class LinkedListDemo
 
         assert(arrl.size == 4);
         assert(arrl.getLast() == "Random");
-
 
         writeln("Actual LinkedList:" ~ arrl.toString());
 
@@ -56,7 +55,8 @@ class LinkedListDemo
         assert(arrl.size() == 9);
         writeln(arrl);
 
-        assert(arrl.toString() == "[First, Second, Third, Random, one, two, I am last, I am last - 1, I am last - 2]", arrl.toString());
+        assert(arrl.toString() == "[First, Second, Third, Random, one, two, I am last, I am last - 1, I am last - 2]",
+                arrl.toString());
 
         // writeln("Actual LinkedList:"+arrl);
         arrl.clear();
@@ -65,8 +65,7 @@ class LinkedListDemo
 
     }
 
-    void testRemove()
-    {
+    void testRemove() {
         LinkedList!(string) arrl = new LinkedList!(string)();
         arrl.add("First");
         arrl.add("Second");
@@ -90,7 +89,8 @@ class LinkedListDemo
         writeln("After remove(index) method call:");
         writeln(arrl);
         assert(arrl.size == 8);
-        assert(arrl.toString() == "[Second, Third, four, five, six, seven, eight, nine]", arrl.toString());
+        assert(arrl.toString() == "[Second, Third, four, five, six, seven, eight, nine]",
+                arrl.toString());
 
         writeln("\nRemov(object) method:" ~ arrl.remove("six").to!string());
         writeln("After remove(object) method call:");
@@ -112,14 +112,16 @@ class LinkedListDemo
         assert(arrl.size == 4);
         assert(arrl.toString() == "[Third, four, five, seven]", arrl.toString());
 
+        writeln("\nremove a nonexisted member");
+        assert(!(arrl.remove("First")));
+        assert(arrl.size == 4);
 
         // writeln("removeLastOccurrence() method:" ~ arrl.removeLastOccurrence("five"));
         // writeln("After removeLastOccurrence() method call:");
         // writeln(arrl);
     }
 
-    void testContains()
-    {
+    void testContains() {
         LinkedList!(string) arrl = new LinkedList!(string)();
         //adding elements to the end
         arrl.add("First");
@@ -138,8 +140,7 @@ class LinkedListDemo
                 .to!string());
     }
 
-    void testPushPop()
-    {
+    void testPushPop() {
         LinkedList!(string) arrl = new LinkedList!(string)();
         arrl.add("First");
         arrl.add("Second");

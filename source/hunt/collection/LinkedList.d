@@ -19,6 +19,7 @@ import hunt.collection.List;
 
 import hunt.Exceptions;
 import hunt.Object;
+import hunt.util.Common;
 
 import std.conv;
 import std.container;
@@ -278,23 +279,28 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      * @return {@code true} if this list contained the specified element
      */
     override bool remove(E o) {
-        _size--;
-        modCount++;
-        import hunt.util.Common;
-static if(CompilerHelper.isLessThan(2077)) {
-        auto range = _dlist[];
-        for ( ; !range.empty; range.popFront())
-        {
-            if (range.front == o)
-            {
-                _dlist.stableLinearRemove(take(range, 1));
+        static if(CompilerHelper.isLessThan(2077)) {
+                auto range = _dlist[];
+                for ( ; !range.empty; range.popFront())
+                {
+                    if (range.front == o)
+                    {
+                        _dlist.stableLinearRemove(take(range, 1));
+                        _size--;
+                        modCount++;
+                        return true;
+                    }
+                }
+                return false;
+        } else {
+            if(_dlist.linearRemoveElement(o)) {
+                _size--;
+                modCount++;
                 return true;
+            }   else {
+                return false;
             }
         }
-        return false;
-} else {
-        return _dlist.linearRemoveElement(o);
-}
     }
 
     // /**
