@@ -508,12 +508,12 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      *
      * @return a shallow copy of this map
      */
-    // protected Object clone() throws CloneNotSupportedException {
-    //     AbstractMap<?,?> result = (AbstractMap<?,?>)super.clone();
-    //     result.keySet = null;
-    //     result.values = null;
-    //     return result;
-    // }
+    protected Object clone() {
+        AbstractMap!(K, V) result = cast(AbstractMap!(K, V))(typeid(this).create());
+        // result.keySet = null;
+        // result.values = null;
+        return result;
+    }
 
     /**
      * Utility method for SimpleEntry and SimpleImmutableEntry.

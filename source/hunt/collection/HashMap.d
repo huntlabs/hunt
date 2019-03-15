@@ -740,6 +740,27 @@ class HashMap(K,V) : AbstractMap!(K,V) {
         return false;
     }
 
+
+    /**
+     * Returns a shallow copy of this {@code HashMap} instance: the keys and
+     * values themselves are not cloned.
+     *
+     * @return a shallow copy of this map
+     */
+    override
+    Object clone() {
+        HashMap!(K,V) result;
+        try {
+            result = cast(HashMap!(K,V))super.clone();
+        } catch (CloneNotSupportedException e) {
+            // this shouldn't happen, since we are Cloneable
+            throw new InternalError(e);
+        }
+        result.reinitialize();
+        result.putMapEntries(this, false);
+        return result;
+    }
+
     /* ------------------------------------------------------------ */
     // iterators
 
