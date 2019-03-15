@@ -166,6 +166,10 @@ class ParseException : Exception {
     private int errorOffset;
 }
 
+class CloneNotSupportedException : Exception {
+    mixin BasicExceptionCtors;
+}
+
 class TimeoutException : Exception {
     mixin BasicExceptionCtors;
 }
@@ -392,5 +396,12 @@ class SystemException : Exception {
 }
 
 class SQLException : Exception {
+    mixin BasicExceptionCtors;
+}
+
+
+// =====================
+
+class IncompatibleClassChangeError : Error {
     mixin BasicExceptionCtors;
 }
