@@ -65,17 +65,17 @@ abstract class AbstractStream : AbstractSocketChannel {
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
         if (len > 0) {
-            // if (dataReceivedHandler !is null) {
-            //     _bufferForRead.limit(cast(int)len);
-            //     _bufferForRead.position(0);
-            //     dataReceivedHandler(_bufferForRead);
-            // }
-
-            size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
-
-            if(nBytes < ResponseData.length) {
-                warning("data lost");
+            if (dataReceivedHandler !is null) {
+                _bufferForRead.limit(cast(int)len);
+                _bufferForRead.position(0);
+                dataReceivedHandler(_bufferForRead);
             }
+
+            // size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
+
+            // if(nBytes < ResponseData.length) {
+            //     warning("data lost");
+            // }
 
             // It's prossible that there are more data waitting for read in the read I/O space.
             if (len == _readBuffer.length) {
