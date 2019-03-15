@@ -2,17 +2,20 @@ module SetDemo;
 
 import std.stdio;
 
+import common;
 import hunt.util.UnitTest;
 import hunt.collection.Set;
 import hunt.collection.SortedSet;
 import hunt.collection.TreeSet;
-import std.conv;
-import std.range;
 
 import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
+import hunt.util.Common;
 import hunt.Assert;
+
+import std.conv;
+import std.range;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;
@@ -52,7 +55,7 @@ class SetDemo {
         assertTrue(sm.contains(3));
         assertTrue(sm.contains(4));
         assertTrue(sm.contains(5));
-        
+
         // trace(sm.toString());
 
         // InputRange!int i = sm.iterator();
@@ -77,7 +80,7 @@ class SetDemo {
         assertEquals(five, ssm.last());
         trace("ssm: ", ssm.toString());
         trace("sm: ", sm.toString());
-        trace("set: ", set.toString());        
+        trace("set: ", set.toString());
         assertTrue(ssm.remove(four));
         assertEquals(1, ssm.size());
         assertEquals(3, sm.size());
@@ -102,6 +105,8 @@ class SetDemo {
         ts.add("one");
         ts.add("two");
         ts.add("three");
+
+        assert(ts.size() == 3);
         writeln("Elements: " ~ ts.toString());
         writeln("First element: " ~ ts.first());
 
@@ -115,6 +120,7 @@ class SetDemo {
         //remove one string
         ts.remove("two");
         writeln("Elements: " ~ ts.toString());
+        assert(ts.size() == 2);
 
         //delete all elements from set
         ts.clear();
@@ -123,6 +129,41 @@ class SetDemo {
         values = ts.toArray();
         assert(values == []);
         assert(ts.size() == 0);
+    }
+
+    void testTreeSetWithClass() {
+
+        TreeSet!Person treeSet = new TreeSet!Person();
+        treeSet.add(new Person("albert", 8));
+        treeSet.add(new Person("bob", 5));
+        treeSet.add(new Person("bob", 13));
+
+        foreach (Person person; treeSet) {
+            writeln(person.toString());
+        }
+
+        assert(treeSet.size() == 3, treeSet.size().to!string());
+        Person p = treeSet.first();
+        treeSet.remove(p);
+        assert(treeSet.size() == 2);
+    }
+
+    void testTreeSetWithComparator() {
+        
+        ComparatorByPrice com = new ComparatorByPrice();
+
+        TreeSet!(Price) ts = new TreeSet!(Price)(com);
+        ts.add(new Price("Banana", 20));
+        ts.add(new Price("Apple", 40));
+        ts.add(new Price("Orange", 30));
+        assert(ts.size() == 3, ts.size().to!string());
+        foreach (Price p; ts) {
+            writeln(p.toString());
+        }
+
+        Price p = ts.first();
+        ts.remove(p);
+        assert(ts.size == 2);
     }
 
     void testSubset() {
@@ -152,11 +193,36 @@ class SetDemo {
 
 }
 
-// class MyStrComp : Comparator<string>{
+import std.format;
+import hunt.util.Comparator;
 
-//     @Override
-//     public int compare(string str1, string str2) {
-//         return str1.compareTo(str2);
-//     }
+class Person : Comparable!Person {
 
-// }
+    string name;
+    int age;
+
+    this(string n, int a) {
+        name = n;
+        age = a;
+    }
+
+    override string toString() {
+        return format("Name is %s, Age is %d", name, age);
+    }
+
+    int opCmp(Person o) {
+        int nameComp = compare(this.name, o.name);
+        return (nameComp != 0 ? nameComp : compare(this.age, o.age));
+    }
+
+    alias opCmp = Object.opCmp;
+
+}
+
+class ComparatorByPrice : Comparator!Price{
+
+     int compare(Price v1, Price v2) nothrow {
+        return .compare(v1.getPrice, v2.getPrice);
+    }
+
+}

@@ -11,7 +11,7 @@ import std.range;
 
 class TreeMapDemo {
 
-    void testTreeMap() {
+    void testBasicOperation() {
         /* This is how to declare TreeMap */
         TreeMap!(int, string) tmap = new TreeMap!(int, string)();
 
@@ -52,5 +52,9 @@ class TreeMapDemo {
         foreach (size_t index, string value; tmap.byValue) {
             writefln("value[%d] is: %s ", index, value);
         }
+    }
+
+    void testElementWithClass() {
+        
     }
 }

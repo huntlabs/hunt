@@ -520,7 +520,7 @@ int compare(T)(T x, T y) nothrow if(isOrderingComparable!(T)) {
         return (x < y) ? -1 : ((x == y) ? 0 : 1);
     } catch(Exception ex) {
         debug warning(ex.msg);
-        return false;
+        return 0;
     }
 }
 
