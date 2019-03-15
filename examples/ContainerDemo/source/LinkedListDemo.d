@@ -23,6 +23,11 @@ class LinkedListDemo
         arrl.add("Second");
         arrl.add("Third");
         arrl.add("Random");
+
+        assert(arrl.size == 4);
+        assert(arrl.getLast() == "Random");
+
+
         writeln("Actual LinkedList:" ~ arrl.toString());
 
         writeln("First Element: " ~ arrl.element());
@@ -32,9 +37,6 @@ class LinkedListDemo
 
         writeln("Last Element: " ~ arrl.getLast());
         writeln("Last Element: " ~ arrl.peekLast());
-
-        assert(arrl.size == 4);
-        assert(arrl.getLast() == "Random");
 
         List!(string) list = new ArrayList!(string)();
         list.add("one");
@@ -96,6 +98,7 @@ class LinkedListDemo
         assert(arrl.size == 7, arrl.size().to!string());
 
         writeln("\nremoveFirst() method:" ~ arrl.removeFirst());
+        assert(arrl.size == 6, arrl.size().to!string());
         writeln("After removeFirst() method call:");
         writeln(arrl);
 

@@ -20,7 +20,7 @@ class Price {
         this.item = item;
     }
 
-    int getPrice() {
+    int getPrice() nothrow {
         return price;
     }
 

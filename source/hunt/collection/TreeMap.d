@@ -123,7 +123,8 @@ private enum bool BLACK = true;
  * @since 1.2
  */
 
-class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) { //, Cloneable, java.io.Serializable
+class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) 
+    if(isOrderingComparable!K) { //, Cloneable
 
     /**
      * The comparator used to maintain order in this tree map, or
@@ -587,13 +588,7 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) { //, Cloneable, java
             K k = key;
             do {
                 parent = t;
-                // _cmp = k.compareTo(t.key);
-                
-                // static if(isNumeric!(K))
-                //     _cmp = std.math.cmp(cast(float)k, cast(float)t.key);
-                // else
-                //     _cmp = std.algorithm.cmp(k, t.key);
-                _cmp = compare(k, t.key);
+                _cmp = hunt.util.Comparator.compare(k, t.key);
 
                 if (_cmp < 0)
                     t = t.left;
