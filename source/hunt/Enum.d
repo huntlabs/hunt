@@ -4,6 +4,8 @@ import hunt.Exceptions;
 import hunt.util.Common;
 import hunt.util.Comparator;
 
+import std.traits;
+
 /**
 */
 interface Enum(E) : Comparable!E {
@@ -11,18 +13,37 @@ interface Enum(E) : Comparable!E {
     string name();
 
     int ordinal();
+
+    string toString();
 }
 
 /**
  * This is the common base class of all enumeration types.
  */
 abstract class AbstractEnum(E) : Enum!E {
+
+    /**
+     * Sole constructor.  Programmers cannot invoke this constructor.
+     * It is for use by code emitted by the compiler in response to
+     * enum type declarations.
+     *
+     * @param name - The name of this enum constant, which is the identifier
+     *               used to declare it.
+     * @param ordinal - The ordinal of this enumeration constant (its position
+     *         in the enum declaration, where the initial constant is assigned
+     *         an ordinal of zero).
+     */
+    protected this(string name, int ordinal) {
+        this._name = name;
+        this._ordinal = ordinal;
+    }
+    
     /**
      * The name of this enum constant, as declared in the enum declaration.
      * Most programmers should use the {@link #toString} method rather than
      * accessing this field.
      */
-    private string _name;
+    protected string _name;
 
     /**
      * Returns the name of this enum constant, exactly as declared in its
@@ -49,7 +70,7 @@ abstract class AbstractEnum(E) : Enum!E {
      * for use by sophisticated enum-based data structures, such as
      * {@link java.util.EnumSet} and {@link java.util.EnumMap}.
      */
-    private int _ordinal;
+    protected int _ordinal;
 
     /**
      * Returns the ordinal of this enumeration constant (its position
@@ -64,22 +85,6 @@ abstract class AbstractEnum(E) : Enum!E {
      */
     final int ordinal() {
         return _ordinal;
-    }
-
-    /**
-     * Sole constructor.  Programmers cannot invoke this constructor.
-     * It is for use by code emitted by the compiler in response to
-     * enum type declarations.
-     *
-     * @param name - The name of this enum constant, which is the identifier
-     *               used to declare it.
-     * @param ordinal - The ordinal of this enumeration constant (its position
-     *         in the enum declaration, where the initial constant is assigned
-     *         an ordinal of zero).
-     */
-    protected this(string name, int ordinal) {
-        this._name = name;
-        this._ordinal = ordinal;
     }
 
     /**
@@ -122,7 +127,7 @@ abstract class AbstractEnum(E) : Enum!E {
      *
      * @return (never returns)
      */
-    // protected final Object clone() throws CloneNotSupportedException {
+    // protected final Object clone() {
     //     throw new CloneNotSupportedException();
     // }
 
@@ -140,67 +145,61 @@ abstract class AbstractEnum(E) : Enum!E {
         Enum!E self = this;
         if (other is null)
             throw new NullPointerException();
-        // if (self.getClass() != other.getClass() && // optimization
-        //     self.getDeclaringClass() != other.getDeclaringClass())
-        //     throw new ClassCastException();
         return compare(self.ordinal, other.ordinal);
     }
+}
 
-    /**
-     * Returns the Class object corresponding to this enum constant's
-     * enum type.  Two enum constants e1 and  e2 are of the
-     * same enum type if and only if
-     *   e1.getDeclaringClass() == e2.getDeclaringClass().
-     * (The value returned by this method may differ from the one returned
-     * by the {@link Object#getClass} method for enum constants with
-     * constant-specific class bodies.)
-     *
-     * @return the Class object corresponding to this enum constant's
-     *     enum type
-     */
-    // @SuppressWarnings("unchecked")
-    // final Class<E> getDeclaringClass() {
-    //     Class<?> clazz = getClass();
-    //     Class<?> zuper = clazz.getSuperclass();
-    //     return (zuper == Enum.class) ? (Class<E>)clazz : (Class<E>)zuper;
-    // }
 
-    /**
-     * Returns the enum constant of the specified enum type with the
-     * specified name.  The name must match exactly an identifier used
-     * to declare an enum constant in this type.  (Extraneous whitespace
-     * characters are not permitted.)
-     *
-     * <p>Note that for a particular enum type {@code T}, the
-     * implicitly declared {@code static T valueOf(string)}
-     * method on that enum may be used instead of this method to map
-     * from a name to the corresponding enum constant.  All the
-     * constants of an enum type can be obtained by calling the
-     * implicit {@code static T[] values()} method of that
-     * type.
-     *
-     * @param <T> The enum type whose constant is to be returned
-     * @param enumType the {@code Class} object of the enum type from which
-     *      to return a constant
-     * @param name the name of the constant to return
-     * @return the enum constant of the specified enum type with the
-     *      specified name
-     * @throws IllegalArgumentException if the specified enum type has
-     *         no constant with the specified name, or the specified
-     *         class object does not represent an enum type
-     * @throws NullPointerException if {@code enumType} or {@code name}
-     *         is null
-     * @since 1.5
-     */
-    // static <T extends Enum<T>> T valueOf(Class<T> enumType,
-    //                                             string name) {
-    //     T result = enumType.enumConstantDirectory().get(name);
-    //     if (result != null)
-    //         return result;
-    //     if (name == null)
-    //         throw new NullPointerException("Name is null");
-    //     throw new IllegalArgumentException(
-    //         "No enum constant " + enumType.getCanonicalName() + "." + name);
-    // }
 
+
+
+/**
+ * Returns the enum constant of the specified enum type with the
+ * specified name.  The name must match exactly an identifier used
+ * to declare an enum constant in this type.  (Extraneous whitespace
+ * characters are not permitted.)
+ *
+ * <p>Note that for a particular enum type {@code T}, the
+ * implicitly declared {@code static T valueOf(string)}
+ * method on that enum may be used instead of this method to map
+ * from a name to the corresponding enum constant.  All the
+ * constants of an enum type can be obtained by calling the
+ * implicit {@code static T[] values()} method of that
+ * type.
+ *
+ * @param <T> The enum type whose constant is to be returned
+ * @param enumType the {@code Class} object of the enum type from which
+ *      to return a constant
+ * @param name the name of the constant to return
+ * @return the enum constant of the specified enum type with the
+ *      specified name
+ * @throws IllegalArgumentException if the specified enum type has
+ *         no constant with the specified name, or the specified
+ *         class object does not represent an enum type
+ */    
+T valueOf(T)(string name, T defaultValue = T.init) if(is(T : Enum!(T))) {
+    static if(hasStaticMember!(T, "values")) {
+            enum string code = generateLocator!(T, "values", name.stringof, defaultValue.stringof)();
+            mixin(code);
+    } else {
+        static assert(false, "Can't find static member values in " ~ fullyQualifiedName!T ~ ".");
+    }
+}
+
+ private string generateLocator(T, string memberName, string paramName, string defaultValue)() 
+    if(is(T : Enum!(T))) {
+    import std.format;
+    string s;
+
+    s = format(`foreach(T t; T.%1$s) {
+            if(t.name() == %2$s)
+                return t;
+        }
+        debug {
+            throw new IllegalArgumentException("Can't locate the member: " ~ %2$s ~ " in " ~ typeid(T).name ~ ".%1$s");
+        } else {
+            return %3$s;
+        }`, memberName, paramName, defaultValue);
+
+    return s;
 }
