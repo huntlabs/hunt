@@ -1,6 +1,9 @@
 module common;
 
 import std.conv;
+import std.format;
+import hunt.util.Comparator;
+
 
 class Price {
 
@@ -45,4 +48,36 @@ class Price {
     override string toString() {
         return "item: " ~ item ~ "  price: " ~ price.to!string();
     }
+}
+
+
+class Person : Comparable!Person {
+
+    string name;
+    int age;
+
+    this(string n, int a) {
+        name = n;
+        age = a;
+    }
+
+    override string toString() {
+        return format("Name is %s, Age is %d", name, age);
+    }
+
+    int opCmp(Person o) {
+        int nameComp = compare(this.name, o.name);
+        return (nameComp != 0 ? nameComp : compare(this.age, o.age));
+    }
+
+    alias opCmp = Object.opCmp;
+
+}
+
+class ComparatorByPrice : Comparator!Price{
+
+     int compare(Price v1, Price v2) nothrow {
+        return .compare(v1.getPrice, v2.getPrice);
+    }
+
 }

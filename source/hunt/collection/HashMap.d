@@ -18,6 +18,7 @@ import hunt.collection.Iterator;
 import hunt.Exceptions;
 import hunt.Object;
 import hunt.text.StringBuilder;
+import hunt.util.Traits;
 
 import std.algorithm;
 import std.conv;
@@ -749,9 +750,12 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      */
     override
     Object clone() {
+        implementationMissing(false);
         HashMap!(K,V) result;
         try {
             result = cast(HashMap!(K,V))super.clone();
+            // enum string s = generateObjectClone!(HashMap!(K,V), this.stringof, result.stringof);
+            // mixin(s);
         } catch (CloneNotSupportedException e) {
             // this shouldn't happen, since we are Cloneable
             throw new InternalError(e);
