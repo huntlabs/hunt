@@ -18,6 +18,7 @@ import hunt.collection.Set;
 
 import hunt.Exceptions;
 import hunt.Object;
+import hunt.util.Traits;
 
 import std.array;
 import std.container.array;
@@ -509,7 +510,10 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * @return a shallow copy of this map
      */
     protected Object clone() {
+        implementationMissing(false);
         AbstractMap!(K, V) result = cast(AbstractMap!(K, V))(typeid(this).create());
+        // enum string s = generateObjectClone!(AbstractMap!(K, V), this.stringof, result.stringof);
+        // mixin(s);
         // result.keySet = null;
         // result.values = null;
         return result;
