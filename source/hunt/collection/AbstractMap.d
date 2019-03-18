@@ -510,7 +510,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * @return a shallow copy of this map
      */
     protected Object clone() {
-        implementationMissing(false);
         AbstractMap!(K, V) result = cast(AbstractMap!(K, V))(typeid(this).create());
         // enum string s = generateObjectClone!(AbstractMap!(K, V), this.stringof, result.stringof);
         // mixin(s);
