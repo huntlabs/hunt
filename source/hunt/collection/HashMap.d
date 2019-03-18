@@ -750,7 +750,6 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      */
     override
     Object clone() {
-        implementationMissing(false);
         HashMap!(K,V) result;
         try {
             result = cast(HashMap!(K,V))super.clone();
