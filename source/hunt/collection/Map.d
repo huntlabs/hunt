@@ -13,9 +13,10 @@ module hunt.collection.Map;
 
 import hunt.collection.Collection;
 import hunt.collection.Set;
-import hunt.util.Common;
+import hunt.Exceptions;
 import hunt.Functions;
 import hunt.Object;
+import hunt.util.Common;
 
 import std.range.interfaces : InputRange;
 
@@ -875,7 +876,7 @@ interface Map(K,V) : Iterable!(K,V), IObject {
  * @see Map#entrySet()
  * @since 1.2
  */
-interface MapEntry(K,V) : IObject {
+interface MapEntry(K,V) : IObject, Comparable!(MapEntry!(K,V)) {
     /**
      * Returns the key corresponding to this entry.
      *
@@ -1029,4 +1030,102 @@ interface MapEntry(K,V) : IObject {
     //     return (Comparator<MapEntry<K, V>> & Serializable)
     //         (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());
     // }
+}
+
+import std.conv;
+abstract class AbstractMapEntry(K, V) : MapEntry!(K,V) {
+    
+    package K key;
+    package V value;
+
+    this(K key, V value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    /**
+    * Returns the key.
+    *
+    * @return the key
+    */
+    K getKey() {
+        return key;
+    }
+
+    /**
+    * Returns the value associated with the key.
+    *
+    * @return the value associated with the key
+    */
+    V getValue() {
+        return value;
+    }
+
+    /**
+    * Replaces the value currently associated with the key with the given
+    * value.
+    *
+    * @return the value associated with the key before this method was
+    *         called
+    */
+    V setValue(V value) {
+        V oldValue = this.value;
+        this.value = value;
+        return oldValue;
+    }
+
+    /**
+    * Returns a string representation of this map entry.  This
+    * implementation returns the string representation of this
+    * entry's key followed by the equals character ("<tt>=</tt>")
+    * followed by the string representation of this entry's value.
+    *
+    * @return a string representation of this map entry
+    */
+    override string toString() {
+        return key.to!string() ~ "=" ~ value.to!string();
+    }
+
+    /**
+    * Compares the specified object with this entry for equality.
+    * Returns {@code true} if the given object is also a map entry and
+    * the two entries represent the same mapping.  More formally, two
+    * entries {@code e1} and {@code e2} represent the same mapping
+    * if<pre>
+    *   (e1.getKey()==null ?
+    *    e2.getKey()==null :
+    *    e1.getKey().equals(e2.getKey()))
+    *   &amp;&amp;
+    *   (e1.getValue()==null ?
+    *    e2.getValue()==null :
+    *    e1.getValue().equals(e2.getValue()))</pre>
+    * This ensures that the {@code equals} method works properly across
+    * different implementations of the {@code MapEntry} interface.
+    *
+    * @param o object to be compared for equality with this map entry
+    * @return {@code true} if the specified object is equal to this map
+    *         entry
+    * @see    #toHash
+    */
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+
+    override bool opEquals(Object o) {
+        if (o is this)
+            return true;
+            
+        MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
+        if (e !is null) {
+            if (key == e.getKey() && value == e.getValue())
+                return true;
+        }
+        return false;
+    }
+
+    int opCmp(MapEntry!(K, V) o) {
+        throw new NotImplementedException("opCmp");
+    }
+
+    alias opCmp = Object.opCmp;
 }
