@@ -2427,67 +2427,32 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
 * Node in the Tree.  Doubles as a means to pass key-value pairs back to
 * user (see MapEntry).
 */
-
-static final class TreeMapEntry(K,V) : MapEntry!(K,V) {
-    K key;
-    V value;
+final class TreeMapEntry(K,V) : AbstractMapEntry!(K,V) {
     TreeMapEntry!(K,V) left;
     TreeMapEntry!(K,V) right;
     TreeMapEntry!(K,V) parent;
     bool color = BLACK;
 
     /**
-        * Make a new cell with given key, value, and parent, and with
-        * {@code null} child links, and BLACK color.
-        */
+    * Make a new cell with given key, value, and parent, and with
+    * {@code null} child links, and BLACK color.
+    */
     this(K key, V value, TreeMapEntry!(K,V) parent) {
-        this.key = key;
-        this.value = value;
+        super(key, value);
         this.parent = parent;
     }
 
-    /**
-        * Returns the key.
-        *
-        * @return the key
-        */
-    K getKey() {
-        return key;
-    }
+    // bool opEquals(IObject o) {
+    //     return opEquals(cast(Object) o);
+    // }
 
-    /**
-        * Returns the value associated with the key.
-        *
-        * @return the value associated with the key
-        */
-    V getValue() {
-        return value;
-    }
+    // override bool opEquals(Object o) {
+    //     MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
+    //     if (e is null)
+    //         return false;
 
-    /**
-        * Replaces the value currently associated with the key with the given
-        * value.
-        *
-        * @return the value associated with the key before this method was
-        *         called
-        */
-    V setValue(V value) {
-        V oldValue = this.value;
-        this.value = value;
-        return oldValue;
-    }
-
-    bool opEquals(IObject o) {
-        return opEquals(cast(Object) o);
-    }
-
-    override bool opEquals(Object o) {
-        MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
-        if (e is null)
-            return false;
-
-        return key == e.getKey() && value == e.getValue();
-    }
+    //     return key == e.getKey() && value == e.getValue();
+    // }
 
     override size_t toHash() @trusted nothrow {
         // int keyHash = (key is null ? 0 : key.hashCode());
@@ -2512,9 +2477,6 @@ static final class TreeMapEntry(K,V) : MapEntry!(K,V) {
         return kHash ^ vHash;
     }
 
-    override string toString() {
-        return key.to!string() ~ "=" ~ value.to!string();
-    }
 }
 
 

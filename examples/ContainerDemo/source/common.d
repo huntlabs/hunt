@@ -2,6 +2,7 @@ module common;
 
 import std.conv;
 import std.format;
+import hunt.util.Common;
 import hunt.util.Comparator;
 
 

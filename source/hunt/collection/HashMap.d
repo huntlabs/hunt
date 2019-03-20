@@ -346,7 +346,6 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      * true (relayed to method afterNodeInsertion).
      */
     final void putMapEntries(Map!(K, V) m, bool evict) {
-        // throw new NotImplementedException("");
         int s = m.size();
         if (s > 0) {
             if (table is null) { // pre-size
@@ -358,10 +357,7 @@ class HashMap(K,V) : AbstractMap!(K,V) {
             }
             else if (s > threshold)
                 resize();
-            // for (MapEntry!(K, V) e : m.entrySet()) {
             foreach(K key, V value; m) {
-                // K key = e.getKey();
-                // V value = e.getValue();
                 putVal(hash(key), key, value, false, evict);
             }
         }
@@ -2002,48 +1998,37 @@ final class TreeNode(K, V) : LinkedHashMapEntry!(K, V) {
 * Basic hash bin node, used for most entries.  (See below for
 * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
 */
-class HashMapNode(K, V) : MapEntry!(K, V) {
+class HashMapNode(K, V) : AbstractMapEntry!(K,V) {
     package size_t hash;
-    package K key;
-    package V value;
     package HashMapNode!(K, V) next;
 
     this(size_t hash, K key, V value, HashMapNode!(K, V) next) {
+        super(key, value);
         this.hash = hash;
-        this.key = key;
-        this.value = value;
         this.next = next;
     }
-
-    final K getKey()        { return key; }
-    final V getValue()      { return value; }
-    final override string toString() { return format("%s=%s", key, value); }
+    // final override string toString() { return format("%s=%s", key, value); }
 
     final override size_t toHash() @trusted nothrow {
         return hashOf(key) ^ hashOf(value);
     }
 
-    final V setValue(V newValue) {
-        V oldValue = value;
-        value = newValue;
-        return oldValue;
-    }
+    // bool opEquals(IObject o) {
+    //     return opEquals(cast(Object) o);
+    // }
 
-    bool opEquals(IObject o) {
-        return opEquals(cast(Object) o);
-    }
-
-    final override bool opEquals(Object o) {
-        if (o is this)
-            return true;
+    // final override bool opEquals(Object o) {
+    //     if (o is this)
+    //         return true;
             
-        MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
-        if (e !is null) {
-            if (key == e.getKey() && value == e.getValue())
-                return true;
-        }
-        return false;
-    }
+    //     MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
+    //     if (e !is null) {
+    //         if (key == e.getKey() && value == e.getValue())
+    //             return true;
+    //     }
+    //     return false;
+    // }
+    
 }
 
 

@@ -21,7 +21,8 @@ import hunt.Object;
 import hunt.util.Traits;
 
 import std.array;
-import std.container.array;
+// import std.container.array;
+import hunt.collection.Array;
 import std.conv;
 import std.exception;
 import std.range;
@@ -676,10 +677,7 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
 *
 * @since 1.6
 */
-class SimpleImmutableEntry(K, V) : MapEntry!(K, V) {
-
-    private K key;
-    private V value;
+class SimpleImmutableEntry(K, V) : AbstractMapEntry!(K, V) {
 
     /**
         * Creates an entry representing a mapping from the specified
@@ -689,8 +687,7 @@ class SimpleImmutableEntry(K, V) : MapEntry!(K, V) {
         * @param value the value represented by this entry
         */
     this(K key, V value) {
-        this.key = key;
-        this.value = value;
+        super(key, value);
     }
 
     /**
@@ -700,73 +697,23 @@ class SimpleImmutableEntry(K, V) : MapEntry!(K, V) {
         * @param entry the entry to copy
         */
     this(MapEntry!(K, V) entry) {
-        this.key = entry.getKey();
-        this.value = entry.getValue();
+        super(entry.getKey(), entry.getValue());
     }
 
     /**
-        * Returns the key corresponding to this entry.
-        *
-        * @return the key corresponding to this entry
-        */
-    K getKey() {
-        return key;
-    }
-
-    /**
-        * Returns the value corresponding to this entry.
-        *
-        * @return the value corresponding to this entry
-        */
-    V getValue() {
-        return value;
-    }
-
-    /**
-        * Replaces the value corresponding to this entry with the specified
-        * value (optional operation).  This implementation simply throws
-        * <tt>UnsupportedOperationException</tt>, as this class implements
-        * an <i>immutable</i> map entry.
-        *
-        * @param value new value to be stored in this entry
-        * @return (Does not return)
-        * @throws UnsupportedOperationException always
-        */
-    V setValue(V value) {
+    * Replaces the value corresponding to this entry with the specified
+    * value (optional operation).  This implementation simply throws
+    * <tt>UnsupportedOperationException</tt>, as this class implements
+    * an <i>immutable</i> map entry.
+    *
+    * @param value new value to be stored in this entry
+    * @return (Does not return)
+    * @throws UnsupportedOperationException always
+    */
+    override V setValue(V value) {
         throw new UnsupportedOperationException();
     }
 
-    /**
-    * Compares the specified object with this entry for equality.
-    * Returns {@code true} if the given object is also a map entry and
-    * the two entries represent the same mapping.  More formally, two
-    * entries {@code e1} and {@code e2} represent the same mapping
-    * if<pre>
-    *   (e1.getKey()==null ?
-    *    e2.getKey()==null :
-    *    e1.getKey().equals(e2.getKey()))
-    *   &amp;&amp;
-    *   (e1.getValue()==null ?
-    *    e2.getValue()==null :
-    *    e1.getValue().equals(e2.getValue()))</pre>
-    * This ensures that the {@code equals} method works properly across
-    * different implementations of the {@code MapEntry} interface.
-    *
-    * @param o object to be compared for equality with this map entry
-    * @return {@code true} if the specified object is equal to this map
-    *         entry
-    * @see    #toHash
-    */
-    override bool opEquals(Object o) {
-        MapEntry!(K, V) e = cast(MapEntry!(K, V)) o;
-        if (e is null)
-            return false;
-        return key == e.getKey() && value == e.getValue();
-    }
-
-    bool opEquals(IObject o) {
-        return opEquals(cast(Object) o);
-    }
 
     /**
         * Returns the hash code value for this map entry.  The hash code
@@ -800,19 +747,6 @@ class SimpleImmutableEntry(K, V) : MapEntry!(K, V) {
 
         return kHash ^ vHash;
     }
-
-    /**
-        * Returns a string representation of this map entry.  This
-        * implementation returns the string representation of this
-        * entry's key followed by the equals character ("<tt>=</tt>")
-        * followed by the string representation of this entry's value.
-        *
-        * @return a string representation of this map entry
-        */
-    override string toString() {
-        return key.to!string() ~ "=" ~ value.to!string();
-    }
-
 }
 
 /**
