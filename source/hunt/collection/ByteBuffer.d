@@ -16,6 +16,7 @@ import hunt.collection.StringBuffer;
 import hunt.Exceptions;
 import hunt.text.Charset;
 import hunt.text.StringBuilder;
+import std.bitmanip;
 
 
 /**
