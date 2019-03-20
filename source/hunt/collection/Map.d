@@ -1128,4 +1128,9 @@ abstract class AbstractMapEntry(K, V) : MapEntry!(K,V) {
     }
 
     alias opCmp = Object.opCmp;
+
+
+    override size_t toHash() @trusted nothrow {
+        return hashOf(key) ^ hashOf(value);
+    }
 }
