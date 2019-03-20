@@ -2007,36 +2007,15 @@ class HashMapNode(K, V) : AbstractMapEntry!(K,V) {
         this.hash = hash;
         this.next = next;
     }
-    // final override string toString() { return format("%s=%s", key, value); }
-
-    final override size_t toHash() @trusted nothrow {
-        return hashOf(key) ^ hashOf(value);
-    }
-
-    // bool opEquals(IObject o) {
-    //     return opEquals(cast(Object) o);
-    // }
-
-    // final override bool opEquals(Object o) {
-    //     if (o is this)
-    //         return true;
-            
-    //     MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
-    //     if (e !is null) {
-    //         if (key == e.getKey() && value == e.getValue())
-    //             return true;
-    //     }
-    //     return false;
-    // }
-    
 }
 
 
 /**
 * HashMap.Node subclass for normal LinkedHashMap entries.
 */
-static class LinkedHashMapEntry(K, V) : HashMapNode!(K, V) {
+class LinkedHashMapEntry(K, V) : HashMapNode!(K, V) {
     LinkedHashMapEntry!(K, V) before, after;
+
     this(size_t hash, K key, V value, HashMapNode!(K, V) next) {
         super(hash, key, value, next);
     }

@@ -31,6 +31,7 @@ import hunt.util.Spliterator;
 
 import std.algorithm;
 import std.conv;
+// import std.concurrency : initOnce;
 import std.exception;
 import std.math;
 import std.range;
@@ -1492,12 +1493,12 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * Dummy value serving as unmatchable fence key for unbounded
      * SubMapIterators
      */
-    private __gshared Object UNBOUNDED;
+    // private __gshared Object UNBOUNDED;
 
-    shared static this()
-    {
-        UNBOUNDED = new Object();
-    }
+    // shared static this()
+    // {
+    //     UNBOUNDED = new Object();
+    // }
 
     /**
      * This class exists solely for the sake of serialization
@@ -2441,18 +2442,6 @@ final class TreeMapEntry(K,V) : AbstractMapEntry!(K,V) {
         super(key, value);
         this.parent = parent;
     }
-
-    // bool opEquals(IObject o) {
-    //     return opEquals(cast(Object) o);
-    // }
-
-    // override bool opEquals(Object o) {
-    //     MapEntry!(K, V) e = cast(MapEntry!(K, V))o;
-    //     if (e is null)
-    //         return false;
-
-    //     return key == e.getKey() && value == e.getValue();
-    // }
 
     override size_t toHash() @trusted nothrow {
         // int keyHash = (key is null ? 0 : key.hashCode());
