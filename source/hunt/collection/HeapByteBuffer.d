@@ -95,9 +95,9 @@ class HeapByteBuffer : ByteBuffer {
     override ByteBuffer put(byte[] src, int offset, int length) {
 
         checkBounds(offset, length, cast(int) src.length);
+
         if (length > remaining())
-            throw new BufferOverflowException("");
-        // System.arraycopy(src, offset, hb, ix(position()), length);
+            throw new BufferOverflowException();
         int newPos = ix(position());
         hb[newPos .. newPos + length] = src[offset .. offset + length];
 
@@ -109,12 +109,11 @@ class HeapByteBuffer : ByteBuffer {
     override ByteBuffer put(ByteBuffer src) {
         if (typeid(src) == typeid(HeapByteBuffer)) {
             if (src is this)
-                throw new IllegalArgumentException("");
+                throw new IllegalArgumentException();
             HeapByteBuffer sb = cast(HeapByteBuffer) src;
             int n = sb.remaining();
             if (n > remaining())
                 throw new BufferOverflowException("");
-            // System.arraycopy(sb.hb, sb.ix(sb.position()), hb, ix(position()), n);
 
             int sourcePos = sb.ix(sb.position());
             int targetPos = ix(position());
@@ -252,11 +251,13 @@ class HeapByteBuffer : ByteBuffer {
         int sourceIndex = ix(position());
         int targetIndex = ix(0);
         int len = remaining();
-        hb[targetIndex .. targetIndex + len] = hb[sourceIndex .. sourceIndex + len];
-
-        position(remaining());
-        limit(capacity());
-        discardMark();
+        // tracef("hb.length=%d, remaining=%d, targetIndex=%d, sourceIndex=%d", hb.length, len, targetIndex, sourceIndex) ;
+        if(targetIndex != sourceIndex) {
+            hb[targetIndex .. targetIndex + len] = hb[sourceIndex .. sourceIndex + len];
+            position(len);
+            limit(capacity());
+            discardMark();
+        }
         return this;
 
     }

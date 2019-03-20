@@ -120,7 +120,9 @@ class BufferUtils {
      */
     static ByteBuffer allocate(size_t capacity) {
         ByteBuffer buf = new HeapByteBuffer(cast(int)capacity, cast(int)capacity);
-        buf.limit(0);
+        // FIXME: Needing refactor or cleanup -@zxp at 3/20/2019, 5:49:08 PM
+        // 
+        // buf.limit(0);
         return buf;
     }
 
