@@ -38,18 +38,19 @@ abstract class AbstractTimer : TimerChannelBase {
         setFlag(ChannelFlag.Read, true);
         _readBuffer = new UintObject();
         this.handle = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
-        setTimer();
+        // setTimer();
     }
 
     ~this() {
         close();
     }
 
-    bool setTimer() {
+    private bool setTimer() {
         itimerspec its;
         ulong sec, nsec;
-        sec = time / 1000;
-        nsec = (time % 1000) * 1_000_000;
+        sec = time() / 1000;
+        nsec = (time() % 1000) * 1_000_000;
+
         its.it_value.tv_sec = cast(typeof(its.it_value.tv_sec)) sec;
         its.it_value.tv_nsec = cast(typeof(its.it_value.tv_nsec)) nsec;
         its.it_interval.tv_sec = its.it_value.tv_sec;
@@ -69,6 +70,11 @@ abstract class AbstractTimer : TimerChannelBase {
         if (read)
             read(this._readBuffer);
         return false;
+    }
+
+    override void start(bool immediately = false, bool once = false) {
+        setTimer();
+        super.start();
     }
 
     UintObject _readBuffer;
