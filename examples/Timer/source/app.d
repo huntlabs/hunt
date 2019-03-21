@@ -67,7 +67,7 @@ version (NativeTimer) {
 			if (isTimer1Running || isTimer2Running)
 				return;
 // FIXME: Needing refactor or cleanup -@putao at 1/10/2019, 6:21:11 PM
-// Can't exit on mac OS
+// Can't exit nicely
 			writeln("\r\nAll timers stopped (hit return to exit)");
 			getchar();
 			loop.stop();
@@ -89,7 +89,7 @@ version (NativeTimer) {
 			}
 		}
 
-		new Timer(loop, 1.seconds).onTick(&onTimerTick).start();
+		new Timer(loop, 200.msecs).onTick(&onTimerTick).start();
 
 		int count2 = 5;
 		new Timer(loop).interval(2.seconds).onTick(delegate void(Object sender) {
