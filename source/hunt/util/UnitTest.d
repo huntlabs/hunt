@@ -11,6 +11,8 @@
 
 module hunt.util.UnitTest;
 
+import hunt.util.Traits;
+
 void testUnits(T)() {
 	enum v = generateUnitTests!T;
 	// pragma(msg, v);
@@ -28,30 +30,34 @@ string generateUnitTests(T)() {
 	string str;
 	str ~= `import std.stdio;
 writeln("=================================");
-writeln("testing ` ~ fullTypeName ~ `     ");
+writeln("Module: ` ~ fullTypeName ~ `     ");
 writeln("=================================");
 
 `;
 	str ~= "import " ~ memberModuleName ~ ";\n";
 	str ~= "auto t = new " ~ T.stringof ~ "();\n";
 
-	foreach (memberName; __traits(derivedMembers, T)) {
+	foreach (memberName; __traits(allMembers, T)) {
 		// pragma(msg, "member: " ~ memberName);
-		enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
-		static if (memberProtection == "private"
-				|| memberProtection == "protected" 
-				|| memberProtection == "export") {
-			// version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
+		static if (is(T == class) && FixedObjectMembers.canFind(memberName)) {
+			// pragma(msg, "skipping fixed Object member: " ~ memberName);
 		} else {
-			import std.meta : Alias;
-			alias currentMember = Alias!(__traits(getMember, T, memberName));
-			static if (memberName.startsWith("test") 
-					|| memberName.endsWith("Test")
-					|| hasUDA!(currentMember, Test)) {
-				alias memberType = typeof(currentMember);
-				static if (is(memberType == function)) {
-					str ~= `writeln("\n========> running: ` ~ memberName ~ "\");\n";
-					str ~= "t." ~ memberName ~ "();\n";
+			enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
+			static if (memberProtection == "private"
+					|| memberProtection == "protected" 
+					|| memberProtection == "export") {
+				// version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
+			} else {
+				import std.meta : Alias;
+				alias currentMember = Alias!(__traits(getMember, T, memberName));
+				static if (memberName.startsWith("test") 
+						|| memberName.endsWith("Test")
+						|| hasUDA!(currentMember, Test)) {
+					alias memberType = typeof(currentMember);
+					static if (is(memberType == function)) {
+						str ~= `writeln("\n========> testing: ` ~ memberName ~ "\");\n";
+						str ~= "t." ~ memberName ~ "();\n";
+					}
 				}
 			}
 		}
