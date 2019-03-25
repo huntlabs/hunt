@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "examples/UnitTest"
+		},
+		{
+			"path": "examples/Timer"
 		}
 	]
 }

@@ -28,25 +28,30 @@ import std.datetime;
 */
 class FuturePromise(T) : Future!T, Promise!T {
 	private __gshared Exception COMPLETED;
-    private shared bool _done;	
-    private Exception _cause;
+	private shared bool _done;
+	private Exception _cause;
 	private T _result;
 	private string _id;
 	private Mutex _doneLocker;
-    private Condition _doneCondition;
+	private Condition _doneCondition;
 
-    shared static this() {
-        COMPLETED = new Exception("");
-    }
+	shared static this() {
+		COMPLETED = new Exception("");
+	}
 
-    this() {
+	this() {
 		_doneLocker = new Mutex();
 		_doneCondition = new Condition(_doneLocker);
-    }
+	}
 
-    string id() { return _id; }
-	void id(string id) { _id = id; }
-    
+	string id() {
+		return _id;
+	}
+
+	void id(string id) {
+		_id = id;
+	}
+
 	void succeeded(T result) {
 		if (cas(&_done, false, true)) {
 			_result = result;
@@ -55,16 +60,15 @@ class FuturePromise(T) : Future!T, Promise!T {
 		}
 	}
 
-	
 	void failed(Exception cause) {
-        if (cas(&_done, false, true)) {
+		if (cas(&_done, false, true)) {
 			_cause = cause;
 			_doneCondition.notifyAll();
 		}
 	}
-	
+
 	bool cancel(bool mayInterruptIfRunning) {
-        if (cas(&_done, false, true)) {
+		if (cas(&_done, false, true)) {
 			_result = T.init;
 			_cause = new CancellationException("");
 			_doneCondition.notifyAll();
@@ -73,7 +77,6 @@ class FuturePromise(T) : Future!T, Promise!T {
 		return false;
 	}
 
-	
 	bool isCancelled() {
 		if (_done) {
 			try {
@@ -85,30 +88,29 @@ class FuturePromise(T) : Future!T, Promise!T {
 		}
 		return false;
 	}
-	
+
 	bool isDone() {
-		return _done; 
+		return _done;
 	}
 
-    T get() {
-		// if(!_done)
-		// 	throw new ExecutionException("Not done yet.");
-		// while(!_done) {
-		// 	version(HUNT_DEBUG) warning("Waiting for a promise...");
-		// 	// FIXME: Needing refactor or cleanup -@zxp at 9/10/2018, 2:11:03 PM
-		// 	// 
-		// 	Thread.sleep(20.msecs);
-		// }
+	T get() {
 
-        _doneLocker.lock();
-        scope (exit)
-            _doneLocker.unlock();
-		version(HUNT_DEBUG) info("Waiting for a promise...");
-		_doneCondition.wait();
-		version(HUNT_DEBUG) info("Got a promise");
-		
-		if(_cause is null) {
-			version(HUNT_DEBUG) warning("no cause!");
+		version (HUNT_DEBUG)
+			infof("promise status: isDone=%s", _done);
+		if (!_done) {
+			_doneLocker.lock();
+			scope (exit)
+				_doneLocker.unlock();
+			version (HUNT_DEBUG)
+				info("Waiting for a promise...");
+			_doneCondition.wait();
+		}
+		version (HUNT_DEBUG)
+			info("Got a promise");
+
+		if (_cause is null) {
+			version (HUNT_DEBUG)
+				warning("no cause!");
 			new ExecutionException("no cause!");
 		}
 
@@ -117,43 +119,40 @@ class FuturePromise(T) : Future!T, Promise!T {
 		CancellationException c = cast(CancellationException) _cause;
 		if (c !is null)
 			throw c;
-		version(HUNT_DEBUG) warning(_cause.msg);
+		version (HUNT_DEBUG)
+			warning(_cause.msg);
 		throw new ExecutionException(_cause.msg);
 	}
 
-    T get(Duration timeout) {
-		// MonoTime before = MonoTime.currTime;
-		// while(!_done) {
-		// 	version(HUNT_DEBUG) warning("Waiting for a promise...");
-		// 	// FIXME: Needing refactor or cleanup -@zxp at 9/10/2018, 2:15:52 PM
-		// 	// 
-		// 	Thread.sleep(20.msecs);
-		// 	Duration timeElapsed = MonoTime.currTime - before;
-		// 	if(timeElapsed > timeout)
-		// 		break;
-		// }
-		
-		version(HUNT_DEBUG) info("Waiting for a promise...");
-		if(!_doneCondition.wait(timeout))
-			throw new TimeoutException();
+	T get(Duration timeout) {
+		version (HUNT_DEBUG)
+			infof("promise status: isDone=%s", _done);
+		if (!_done) {
+			_doneLocker.lock();
+			scope (exit)
+				_doneLocker.unlock();
 
-		version(HUNT_DEBUG) infof("promise status: isDone=%s", _done);
+			version (HUNT_DEBUG)
+				infof("Waiting for a promise in %s...", timeout);
+			if (!_doneCondition.wait(timeout))
+				throw new TimeoutException();
+		}
+
 		if (_cause == COMPLETED)
 			return _result;
-		
+
 		TimeoutException t = cast(TimeoutException) _cause;
 		if (t !is null)
 			throw t;
-			
+
 		CancellationException c = cast(CancellationException) _cause;
 		if (c !is null)
 			throw c;
 
-		throw new ExecutionException(_cause.msg);        
-    }
-	
-    override
-	string toString() {
+		throw new ExecutionException(_cause.msg);
+	}
+
+	override string toString() {
 		return format("FutureCallback@%x{%b,%b,%s}", toHash(), _done, _cause == COMPLETED, _result);
 	}
 }
