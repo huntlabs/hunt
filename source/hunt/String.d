@@ -938,7 +938,7 @@ final class String : Nullable!string {
         if (charset == null) throw new NullPointerException();
         return StringCoding.encode(charset, coder(), value);
      }
-
+++/
     /**
      * Encodes this {@code String} into a sequence of bytes using the
      * platform's default charset, storing the result into a new byte array.
@@ -953,9 +953,11 @@ final class String : Nullable!string {
      * @since      1.1
      */
     public byte[] getBytes() {
-        return StringCoding.encode(coder(), value);
+        // return StringCoding.encode(coder(), value);
+        return cast(byte[])_value.dup;
     }
 
+/++
     /**
      * Compares this string to the specified object.  The result is {@code
      * true} if and only if the argument is not {@code null} and is a {@code
@@ -2750,7 +2752,7 @@ final class String : Nullable!string {
     public static String format(Locale l, String format, Object... args) {
         return new Formatter(l).format(format, args).toString();
     }
-
+++/
     /**
      * Returns the string representation of the {@code Object} argument.
      *
@@ -2761,9 +2763,11 @@ final class String : Nullable!string {
      * @see     java.lang.Object#toString()
      */
     public static String valueOf(Object obj) {
-        return (obj == null) ? "null" : obj.toString();
+        string str = (obj is null) ? "null" : obj.toString();
+        return new String(str);
     }
 
+/++
     /**
      * Returns the string representation of the {@code char} array
      * argument. The contents of the character array are copied; subsequent

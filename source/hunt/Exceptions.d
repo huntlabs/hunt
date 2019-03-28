@@ -83,6 +83,10 @@ mixin template BasicExceptionCtors() {
     // mixin basicExceptionCtors;
 }
 
+class ClassNotFoundException : Exception {
+    mixin BasicExceptionCtors;
+}
+
 class NotImplementedException : Exception {
     mixin BasicExceptionCtors;
 }
