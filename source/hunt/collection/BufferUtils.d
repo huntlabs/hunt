@@ -105,7 +105,7 @@ class BufferUtils {
         ];
 
     shared static this() {
-        EMPTY_BUFFER = toBuffer(new byte[0]);
+        EMPTY_BUFFER = new HeapByteBuffer(new byte[0], 0, 0); 
         EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
     }
     /* ------------------------------------------------------------ */
