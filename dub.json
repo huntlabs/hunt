@@ -2,7 +2,7 @@
     "name": "hunt",
     "description": "A refined core library for D programming language.",
     "copyright": "Copyright (C) 2018-2019, HuntLabs",
-    "homepage": "https://www.huntlabs.net/",
+    "homepage": "https://www.huntlabs.net",
     "license": "Apache-2.0",
     "versions-osx": [
         "HAVE_KQUEUE"
