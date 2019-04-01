@@ -12,10 +12,10 @@
 module hunt.io.Common;
 
 import hunt.collection.ByteBuffer;
-import hunt.Exceptions;
-import hunt.util.Common;
-import hunt.logging;
 import hunt.concurrency.CountingCallback;
+import hunt.Exceptions;
+import hunt.logging;
+import hunt.util.Common;
 
 import std.algorithm;
 
