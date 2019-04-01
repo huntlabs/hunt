@@ -324,13 +324,13 @@ class ThreadEx : Thread, Runnable {
         initialize();
     }
 
-    deprecated("Not supported anymore.")
+    // deprecated("Not supported anymore.")
     this(void function() fn, size_t sz = 0) nothrow {
         super(fn, sz);
         initialize();
     }
 
-    deprecated("Not supported anymore.")
+    // deprecated("Not supported anymore.")
     this(void delegate() dg, size_t sz = 0) nothrow {
         super(dg , sz);
         initialize();
