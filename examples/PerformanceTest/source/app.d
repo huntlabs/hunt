@@ -212,11 +212,11 @@ class TestTcpServer : AbstractTcpServer {
 
     protected override void onConnectionAccepted(TcpListener sender, TcpStream client) {
         // dfmt off
-        client.onDataReceived((ByteBuffer buffer) {
+        client.onReceived((ByteBuffer buffer) {
             handleReceivedData(client, cast(ubyte[]) buffer.getRemaining());
         }).onClosed(() { 
             onClientClosed(client); 
-        }).onDataWritten((Object obj) {
+        }).onWritten((Object obj) {
             writeln("[Server] test succeeded");
         }).onError((string msg) { 
             warning("Error on client: ", msg); 

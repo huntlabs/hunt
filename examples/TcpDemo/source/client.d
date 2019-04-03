@@ -41,9 +41,9 @@ void main() {
 			});
         	taskPool.put(runTask);
 		}
-	}).onDataWritten((Object obj) {
+	}).onWritten((Object obj) {
 		writefln("Data write done");
-	}).onDataReceived((ByteBuffer buffer) {
+	}).onReceived((ByteBuffer buffer) {
 		byte[] data = buffer.getRemaining();
 		writeln("received data: ", cast(string)data);
 		if (--count > 0) {

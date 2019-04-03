@@ -42,7 +42,7 @@ void main()
 
 	listener.bind(8080).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {
 		debug writefln("new connection from: %s", client.remoteAddress.toString());
-		client.onDataReceived((ByteBuffer buffer) {
+		client.onReceived((ByteBuffer buffer) {
 			ubyte[] data = cast(ubyte[])buffer.getRemaining();
 			debug writeln("received bytes: ", data.length);
 			// debug writefln("received: %(%02X %)", data);
@@ -53,7 +53,7 @@ void main()
 			// client.write(new SocketStreamBuffer(data, (in ubyte[] wdata, size_t size) {
 			// 	debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			// }));
-		}).onDataWritten((Object obj) {
+		}).onWritten((Object obj) {
 			writefln("Data write done");
 		}).onDisconnected(() {
 			debug writefln("client disconnected: %s", client.remoteAddress.toString());
