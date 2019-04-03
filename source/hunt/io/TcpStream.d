@@ -223,11 +223,6 @@ class TcpStream : AbstractStream {
         return this;
     }
 
-    TcpStream onDataReceived(DataReceivedHandler handler) {
-        dataReceivedHandler = handler;
-        return this;
-    }
-
     deprecated("Using onReceived instead.")
     alias onDataReceived = onReceived;
 

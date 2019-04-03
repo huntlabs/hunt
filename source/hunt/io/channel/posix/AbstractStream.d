@@ -59,15 +59,11 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
-        // LOGI("xxxxxxxxxxx");
         // ubyte[BufferSize] _readBuffer;
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
         version (HUNT_DEBUG)
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
-
-        
-        // LOGI("yyyyyyyyyyyy");
 
         if (len > 0) {
             if (dataReceivedHandler !is null) {
