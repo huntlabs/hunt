@@ -42,6 +42,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool isWriteCancelling = false;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
+        // LOGE("0000000000000");
         this._family = family;
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.limit(cast(int)bufferSize);
@@ -58,11 +59,15 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
+        // LOGI("xxxxxxxxxxx");
         // ubyte[BufferSize] _readBuffer;
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
         version (HUNT_DEBUG)
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
+
+        
+        // LOGI("yyyyyyyyyyyy");
 
         if (len > 0) {
             if (dataReceivedHandler !is null) {
