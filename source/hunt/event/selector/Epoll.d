@@ -23,7 +23,7 @@ import std.string;
 import core.time;
 import core.stdc.string;
 import core.stdc.errno;
-import core.sys.posix.sys.types; // for ssize_t, size_t
+import core.sys.posix.sys.types;
 import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
@@ -112,7 +112,7 @@ class AbstractSelector : Selector {
         }
         channels[index] = channel;
 
-        epoll_event e;
+        // epoll_event e;
 
         // e.data.fd = infd;
         // e.data.ptr = cast(void*) channel;
@@ -360,63 +360,3 @@ class AbstractSelector : Selector {
             return true;
     }
 }
-
-
-// enum {
-//     EFD_SEMAPHORE = 0x1,
-//     EFD_CLOEXEC = 0x80000,
-//     EFD_NONBLOCK = 0x800
-// }
-
-// enum {
-//     EPOLL_CLOEXEC = 0x80000,
-//     EPOLL_NONBLOCK = 0x800
-// }
-
-// enum {
-//     EPOLLIN = 0x001,
-//     EPOLLPRI = 0x002,
-//     EPOLLOUT = 0x004,
-//     EPOLLRDNORM = 0x040,
-//     EPOLLRDBAND = 0x080,
-//     EPOLLWRNORM = 0x100,
-//     EPOLLWRBAND = 0x200,
-//     EPOLLMSG = 0x400,
-//     EPOLLERR = 0x008,
-//     EPOLLHUP = 0x010,
-//     EPOLLRDHUP = 0x2000, // since Linux 2.6.17
-//     EPOLLONESHOT = 1u << 30,
-//     EPOLLET = 1u << 31
-// }
-
-// /* Valid opcodes ( "op" parameter ) to issue to epoll_ctl().  */
-// enum {
-//     EPOLL_CTL_ADD = 1, // Add a file descriptor to the interface.
-//     EPOLL_CTL_DEL = 2, // Remove a file descriptor from the interface.
-//     EPOLL_CTL_MOD = 3, // Change file descriptor epoll_event structure.
-// }
-
-// dfmt off
-// extern (C) : @system : nothrow :
-
-// align(1) struct epoll_event {
-// align(1):
-//     uint events;
-//     epoll_data data;
-// }
-
-// union epoll_data {
-//     void* ptr;
-//     int fd;
-//     uint u32;
-//     ulong u64;
-// }
-
-// // dfmt on
-
-// int epoll_create(int size);
-// int epoll_create1(int flags);
-// int epoll_ctl(int epfd, int op, int fd, epoll_event* event);
-// int epoll_wait(int epfd, epoll_event* events, int maxevents, int timeout);
-
-// socket_t eventfd(uint initval, int flags);
