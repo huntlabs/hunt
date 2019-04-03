@@ -223,12 +223,6 @@ class TcpStream : AbstractStream {
         return this;
     }
 
-    deprecated("Using onReceived instead.")
-    alias onDataReceived = onReceived;
-
-    deprecated("Using onWrited instead.")
-    alias onDataWritten = onWrited;
-    
     TcpStream onReceived(DataReceivedHandler handler) {
         dataReceivedHandler = handler;
         return this;
@@ -238,6 +232,7 @@ class TcpStream : AbstractStream {
         dataWriteDoneHandler = handler;
         return this;
     }
+    alias onWritten = onWrited;
 
     TcpStream onClosed(SimpleEventHandler handler) {
         closeHandler = handler;

@@ -17,6 +17,7 @@ A refined core library for D programming language.
  * Windows
  * macOS
  * Linux
+ * Android
 
 ## Libraries
  * [hunt-net](https://github.com/huntlabs/hunt-net) – An asynchronous event-driven network library written in D.
