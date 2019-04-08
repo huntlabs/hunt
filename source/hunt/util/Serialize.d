@@ -245,7 +245,7 @@ string serializeMembers(T)()
 string unserializeMembers(T)()
 {
 	string str;
-	str ~= "long parse = 0; ";
+	// str ~= "long parse = 0; ";
 	foreach (m; FieldNameTuple!T)
 	{
 		static if (__traits(getProtection, __traits(getMember, T, m)) == "public")
@@ -626,6 +626,9 @@ byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == class))
 		if (t !is null)
 		{
 			stack.map[t.toHash()] = stack.map.length;
+			static foreach(S; BaseClassesTuple!(T)) {
+				mixin(serializeMembers!S());
+			}
 			mixin(serializeMembers!T());
 		}
 		uint len = cast(uint) data.length;
@@ -658,7 +661,18 @@ T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
 		parse_index = index1 + 1 + len;
 		long index = index1 + 1;
 		stack.arr ~= cast(void*) t;
+
+		long parse = 0; 
+
+		static foreach(S; BaseClassesTuple!(T)) {
+			pragma(msg, S.stringof);
+
+			// enum s = unserializeMembers!S();
+			pragma(msg, unserializeMembers!S());
+			mixin(unserializeMembers!S());
+		}
 		mixin(unserializeMembers!T());
+
 		return t;
 	}
 	else
