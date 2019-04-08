@@ -50,6 +50,16 @@ interface Cloneable {
 }
 
 
+/**
+*/
+interface Serializable {
+
+    ubyte[] serialize();
+
+    void deserialize(ubyte[] data);
+}
+
+
 interface Comparable(T) {
     // TODO: Tasks pending completion -@zxp at 12/30/2018, 10:17:44 AM
     // 
