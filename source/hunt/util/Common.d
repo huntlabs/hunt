@@ -56,7 +56,7 @@ interface Serializable {
 
     ubyte[] serialize();
 
-    void deserialize(ubyte[] data);
+    // void deserialize(ubyte[] data);
 }
 
 

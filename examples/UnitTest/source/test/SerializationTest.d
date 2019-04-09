@@ -1,6 +1,7 @@
 module test.SerializationTest;
 
 import hunt.logging.ConsoleLogger;
+import hunt.util.Common;
 import hunt.util.Serialize;
 
 import std.conv;
@@ -21,23 +22,53 @@ class SerializationTest {
     //     assert(d == data, d.to!string());
     // }
 
-    void testClassInherit() {
+
+    void testSerializable() {
         B b = new B();
+        b.id = 2;
         b.name = "Bob";
         b.age = 20;
         b.height = 1.8f;
 
-        byte[] bytes = serialize(b);
+        ubyte[] bytes = b.serialize();
+        // version(HUNT_DEBUG) tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
 
-        tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
+        B b1 = unserialize!B(cast(byte[])bytes);
+        version(HUNT_DEBUG) trace(b1.toString());
+        assert(b1 !is b);
+        assert(b1 == b);
 
-        B b1 = unserialize!B(bytes);
-        // trace(getsize(b));
-        // trace(getsize(a));
-        trace(b.toString());
-        trace(b1.toString());
-        assert(b == b1);
+        A a = unserialize!A(cast(byte[])bytes);
+        version(HUNT_DEBUG) trace(a.toString());
+
+        assert(a.name == b.name && a.id == b.id);
+
+        // a = new A();
+        // a.name = "Bob";
+        
+        // bytes = a.serialize();
+        // tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
+
+        // trace(b.toString());
     }
+
+    // void testClassInherit() {
+    //     B b = new B();
+    //     b.name = "Bob";
+    //     b.age = 20;
+    //     b.height = 1.8f;
+
+    //     byte[] bytes = serialize(b);
+
+    //     tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
+
+    //     B b1 = unserialize!B(bytes);
+    //     // trace(getsize(b));
+    //     // trace(getsize(a));
+    //     trace(b.toString());
+    //     trace(b1.toString());
+    //     assert(b == b1);
+    // }
 
     // void testClass1() {
     //     School school = new School();
@@ -68,41 +99,26 @@ void test1(T)(T t) {
     assert(toObject!T(toJson(t)) == t);
 }
 
-struct T1 {
-    bool b;
-    byte ib;
-    ubyte ub;
-    short ish;
-    ushort ush;
-    int ii;
-    uint ui;
-    long il;
-    ulong ul;
-    string s;
-    uint[10] sa;
-    long[] sb;
-}
 
-struct T2 {
-    string n;
-    T1[] t;
-}
-
-struct T3 {
-    T1 t1;
-    T2 t2;
-    string[] name;
-}
-
-class A {
+class A : Serializable {
+    int id;
     string name;
 
     override string toString() {
-        return format("name=%s", name);
+        return format("id=%d, name=%s", id, name);
     }
+
+    mixin SerializationMember!(typeof(this));
+
+    // abstract void test();
 }
 
-class B : A {
+
+class B1 : A {
+    // mixin SerializationMember!(typeof(this));
+}
+
+class B : B1 {
     int age;
     float height;
 
@@ -113,13 +129,20 @@ class B : A {
         if(b is null) 
             return false;
         
-        return b.name == this.name && b.age == this.age;
+        return b.name == this.name && b.age == this.age && b.id == this.id && b.height == this.height;
     }
 
     override string toString() {
         return format("name=%s, age=%d, height=%0.1f", name, age, height);
     }
+
+    mixin SerializationMember!(typeof(this));
+
+    // override void test() {
+
+    // }
 }
+
 
 
 class C {
@@ -170,6 +193,7 @@ class User {
     }
 }
 
+
 struct J {
     string data;
     JSONValue val;
@@ -200,4 +224,30 @@ class Date1 {
         return date.month == this.month && date.week == this.week && date.day == this.day;
     }
 
+}
+
+struct T1 {
+    bool b;
+    byte ib;
+    ubyte ub;
+    short ish;
+    ushort ush;
+    int ii;
+    uint ui;
+    long il;
+    ulong ul;
+    string s;
+    uint[10] sa;
+    long[] sb;
+}
+
+struct T2 {
+    string n;
+    T1[] t;
+}
+
+struct T3 {
+    T1 t1;
+    T2 t2;
+    string[] name;
 }

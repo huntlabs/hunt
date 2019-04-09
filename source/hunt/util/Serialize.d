@@ -608,7 +608,7 @@ size_t getsize(T)(T t, RefClass stack, uint level) if (is(T == struct))
 // 1 type 12
 // id variant
 
-byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == class))
+byte[] serialize(T, bool isRecursive=true)(T t, RefClass stack, uint level) if (is(T == class))
 {
 	byte[1] header;
 	size_t* id = null;
@@ -626,8 +626,10 @@ byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == class))
 		if (t !is null)
 		{
 			stack.map[t.toHash()] = stack.map.length;
-			static foreach(S; BaseClassesTuple!(T)) {
-				mixin(serializeMembers!S());
+			static if(isRecursive) {
+				static foreach(S; BaseClassesTuple!(T)) {
+					mixin(serializeMembers!S());
+				}
 			}
 			mixin(serializeMembers!T());
 		}
@@ -647,7 +649,7 @@ byte[] serialize(T)(T t, RefClass stack, uint level) if (is(T == class))
 }
 
 T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
-		if (is(T == class))
+		if (is(T == class) && !isAbstractClass!T)
 {
 	assert(data[0] == 11 || data[0] == 12);
 
@@ -665,10 +667,6 @@ T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
 		long parse = 0; 
 
 		static foreach(S; BaseClassesTuple!(T)) {
-			pragma(msg, S.stringof);
-
-			// enum s = unserializeMembers!S();
-			pragma(msg, unserializeMembers!S());
 			mixin(unserializeMembers!S());
 		}
 		mixin(unserializeMembers!T());
@@ -835,10 +833,16 @@ T unserialize(T)(const byte[] data, out long parse_index )
 	return unserialize!T(data, parse_index, stack);
 }
 
-byte[] serialize(T)(T t )
+byte[] serialize(T)(T t ) if (!is(T == class))
 {
 	RefClass stack = new RefClass();
 	return serialize!T(t, stack, 0);
+}
+
+byte[] serialize(T, bool isRecursive=true)(T t ) if (is(T == class))
+{
+	RefClass stack = new RefClass();
+	return serialize!(T, isRecursive)(t, stack, 0);
 }
 
 size_t getsize(T)(T t )
@@ -1417,6 +1421,45 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
     return json.data;
 }
 
+
+mixin template SerializationMember(T) {
+	import std.traits;
+
+    alias baseClasses = BaseClassesTuple!T;
+
+    static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {
+        ubyte[] serialize() {
+            auto bytes = cast(ubyte[]).serialize!(T, false)(this);
+            // tracef("this level, length: %d, data: %(%02X %)", bytes.length, bytes);
+            return bytes;
+        }
+        
+		// void deserialize(ubyte[] data) {
+
+    	// }
+    } else {
+		// pragma(msg, T.stringof);
+        override ubyte[] serialize() {
+            auto bytes = cast(ubyte[]).serialize!(T, false)(this);
+            // tracef("this level, length: %d, data: %(%02X %)", bytes.length, bytes);
+            
+            ubyte[] data = super.serialize();
+            data[1] = cast(ubyte)(data[1] + bytes.length - 2);
+            data ~= bytes[2..$];
+            // tracef("length: %d, data: %(%02X %)", data.length, data);
+
+            // auto bytes = cast(ubyte[]).serialize(this);
+            // tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
+            return data;
+        }    
+
+		// override void deserialize(ubyte[] data) {
+
+    	// }
+    }
+
+
+}
 
 
 // only for , nested , new T
