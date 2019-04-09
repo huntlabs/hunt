@@ -338,6 +338,11 @@ class HashMap(K,V) : AbstractMap!(K,V) {
         putMapEntries(m, false);
     }
 
+    this(V[K] m) {
+        this.loadFactor = DEFAULT_LOAD_FACTOR;
+        putMapEntries(m, false);
+    }
+
     /**
      * Implements Map.putAll and Map constructor
      *
@@ -347,6 +352,24 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      */
     final void putMapEntries(Map!(K, V) m, bool evict) {
         int s = m.size();
+        if (s > 0) {
+            if (table is null) { // pre-size
+                float ft = (cast(float)s / loadFactor) + 1.0F;
+                int t = ((ft < cast(float)MAXIMUM_CAPACITY) ?
+                         cast(int)ft : MAXIMUM_CAPACITY);
+                if (t > threshold)
+                    threshold = tableSizeFor(t);
+            }
+            else if (s > threshold)
+                resize();
+            foreach(K key, V value; m) {
+                putVal(hash(key), key, value, false, evict);
+            }
+        }
+    }
+
+    final void putMapEntries(V[K] m, bool evict) {
+        int s = cast(int)m.length;
         if (s > 0) {
             if (table is null) { // pre-size
                 float ft = (cast(float)s / loadFactor) + 1.0F;
