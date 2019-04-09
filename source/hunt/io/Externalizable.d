@@ -16,7 +16,7 @@ import hunt.io.ObjectOutput;
 import hunt.io.ObjectInput;
 import hunt.io.Common;
 
-public interface Externalizable : Serializable {
+public interface Externalizable  { // : Serializable
     /**
      * The object implements the writeExternal method to save its contents
      * by calling the methods of DataOutput for its primitive values or
