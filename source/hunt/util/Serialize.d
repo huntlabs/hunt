@@ -651,6 +651,9 @@ byte[] serialize(T, bool isRecursive=true)(T t, RefClass stack, uint level) if (
 T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
 		if (is(T == class) && !isAbstractClass!T)
 {
+	if(data.length < 2)
+		return T.init;
+		
 	assert(data[0] == 11 || data[0] == 12);
 
 	if (data[0] == 11)
