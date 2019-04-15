@@ -29,7 +29,6 @@ A refined core library for D programming language.
 | Identifier | Description | 
 |--------|--------|
 | HUNT_DEBUG |  Used to output debug messages |
-| HUNT_DEPRECATION |  Used to print wanrning message for some deprecated APIs |
 
 ## Benchmarks
 ![Benchmark](docs/images/benchmark.png)
