@@ -17,15 +17,16 @@ import core.stdc.stdlib;
 import core.runtime;
 import core.thread;
 
-import std.stdio;
+import std.conv;
 import std.datetime;
+import std.exception;
 import std.format;
 import std.range;
-import std.conv;
 import std.regex;
+import std.stdio;
+import std.string;
 import std.typecons;
 import std.traits;
-import std.string;
 
 // ThreadID getTid()
 // {
@@ -273,34 +274,37 @@ class ConsoleLogger {
         if (level < g_logLevel)
             return;
 
-        import std.exception;
-
         version (Posix) {
             version (Android) {
                 string prior_color;
+                android_LogPriority logPrioity = android_LogPriority.ANDROID_LOG_INFO;
                 switch (level) with (LogLevel) {
                 case Error:
                 case Fatal:
                     prior_color = PRINT_COLOR_RED;
-                    collectException(__android_log_write(android_LogPriority.ANDROID_LOG_ERROR,
-                            LOG_TAG, toStringz(prior_color ~ msg ~ PRINT_COLOR_NONE)));
+                    logPrioity = android_LogPriority.ANDROID_LOG_ERROR;
                     break;
                 case Warning:
                     prior_color = PRINT_COLOR_YELLOW;
-                    collectException(__android_log_write(android_LogPriority.ANDROID_LOG_WARN,
-                            LOG_TAG, toStringz(prior_color ~ msg ~ PRINT_COLOR_NONE)));
+                    logPrioity = android_LogPriority.ANDROID_LOG_WARN;
                     break;
                 case Info:
                     prior_color = PRINT_COLOR_GREEN;
-                    collectException(__android_log_write(android_LogPriority.ANDROID_LOG_INFO,
-                            LOG_TAG, toStringz(prior_color ~ msg ~ PRINT_COLOR_NONE)));
                     break;
                 default:
                     prior_color = string.init;
-                    collectException(__android_log_write(android_LogPriority.ANDROID_LOG_INFO,
-                            LOG_TAG, toStringz(prior_color ~ msg ~ PRINT_COLOR_NONE)));
                 }
-                // collectException(writeln(prior_color ~ msg ~ PRINT_COLOR_NONE));
+
+                try {
+                    __android_log_write(logPrioity,
+                            LOG_TAG, toStringz(prior_color ~ msg ~ PRINT_COLOR_NONE));
+                } catch(Exception ex) {
+                    collectException( {
+                        write(PRINT_COLOR_RED); 
+                        write(ex); 
+                        writeln(PRINT_COLOR_NONE); 
+                    }());
+                }
 
             } else {
                 string prior_color;
@@ -318,7 +322,15 @@ class ConsoleLogger {
                 default:
                     prior_color = string.init;
                 }
-                collectException(writeln(prior_color ~ msg ~ PRINT_COLOR_NONE));
+                try {
+                    writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
+                } catch(Exception ex) {
+                    collectException( {
+                        write(PRINT_COLOR_RED); 
+                        write(ex); 
+                        writeln(PRINT_COLOR_NONE); 
+                    }());
+                }
             }
 
         } else version (Windows) {
@@ -340,7 +352,7 @@ class ConsoleLogger {
                 color = defaultColor;
             }
 
-            collectException(ConsoleHelper.writeWithAttribute(msg, color));
+            ConsoleHelper.writeWithAttribute(msg, color);
         } else {
             assert(false, "Unsupported OS.");
         }
