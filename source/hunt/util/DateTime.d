@@ -194,8 +194,6 @@ class DateTimeHelper {
      * @return  the difference, measured in milliseconds, between
      *          the current time and midnight, January 1, 1970 UTC.
      */
-    version(HUNT_DEPRECATION)
-    deprecated("Warning: The return value has not been not a standard time anymore.")
     static long currentTimeMillis() @trusted @property {
         version (Windows) {
             import core.sys.windows.winbase;
