@@ -33,15 +33,31 @@ struct ConsoleHelper {
         SetConsoleTextAttribute(g_hout, attr);
     }
 
-    static void write(string msg) nothrow {
-        collectException(printf("%s\n", toMBSz(msg)));
+    static void write(lazy string msg) nothrow {
+        try {
+            printf("%s\n", toMBSz(msg));
+        } catch(Exception ex) {
+            collectException( {
+                setTextAttribute(FOREGROUND_RED);
+                write(ex); 
+                setTextAttribute(defaultColor);
+            }());
+        }
     }
 
-    static void writeWithAttribute(string msg, ushort attr = defaultColor) nothrow {
+    static void writeWithAttribute(lazy string msg, ushort attr = defaultColor) nothrow {
         setTextAttribute(attr);
-        collectException(printf("%s\n", toMBSz(msg)));
-        if ((attr & defaultColor) != defaultColor)
-            ConsoleHelper.resetColor();
+        try {
+            printf("%s\n", toMBSz(msg));
+            if ((attr & defaultColor) != defaultColor)
+                resetColor();
+        } catch(Exception ex) {
+            collectException( {
+                setTextAttribute(FOREGROUND_RED);
+                write(ex); 
+                setTextAttribute(defaultColor);
+            }());
+        }
     }
 }
 
