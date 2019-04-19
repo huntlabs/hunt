@@ -902,7 +902,8 @@ class BufferUtils {
      * Convert Buffer to string ID independent of content
      */
     private static void idString(ByteBuffer buffer, StringBuilder ot) {
-        ot.append(typeof(buffer).stringof);
+        // ot.append(typeof(buffer).stringof);
+        ot.append(typeid(buffer).name);
         ot.append("@");
         if (buffer.hasArray() && buffer.arrayOffset() == 4) {
             ot.append('T');
