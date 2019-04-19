@@ -15,7 +15,7 @@ import hunt.concurrency.Future;
 import hunt.concurrency.Promise;
 
 import hunt.Exceptions;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 
 import core.atomic;
 import core.sync.condition;
@@ -94,7 +94,6 @@ class FuturePromise(T) : Future!T, Promise!T {
 	}
 
 	T get() {
-
 		version (HUNT_DEBUG)
 			infof("promise status: isDone=%s", _done);
 		if (!_done) {
