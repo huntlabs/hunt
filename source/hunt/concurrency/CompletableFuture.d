@@ -17,6 +17,12 @@ import hunt.concurrency.Promise;
 import hunt.Exceptions;
 import hunt.Functions;
 
+import hunt.logging.ConsoleLogger;
+
+import core.atomic;
+import core.sync.condition;
+import core.sync.mutex;
+
 /**
 * <p>A CompletableFuture that is also a Promise.</p>
 *
@@ -51,8 +57,13 @@ class Completable(S) : CompletableFuture!S , Promise!S {
 
 /**
 */
-class CompletableFuture(T)
-{
+class CompletableFuture(T) {
+
+	private Mutex _doneLocker;
+	private Condition _doneCondition;
+
+    private T result; 
+    private shared bool m_isDone;
 
     /**
      * If not already completed, sets the value returned by {@link
@@ -63,15 +74,21 @@ class CompletableFuture(T)
      * to transition to a completed state, else {@code false}
      */
     bool complete(T value) {
-        completeValue(value);
-        postComplete();
-        return false;
+        if (cas(&m_isDone, false, true)) {
+            version(HUNT_DEBUG) trace("here");
+            completeValue(value);
+            _doneCondition.notifyAll();
+            postComplete();
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    private T result; 
-    private bool m_isDone;
-
-    this() { }
+    this() { 
+		_doneLocker = new Mutex();
+		_doneCondition = new Condition(_doneLocker);
+    }
 
     this(T r) {
         completeValue(r);
@@ -89,6 +106,14 @@ class CompletableFuture(T)
     }
 
     T get() {
+        if (!m_isDone) {
+			_doneLocker.lock();
+			scope (exit)
+				_doneLocker.unlock();
+			version (HUNT_DEBUG)
+				info("Waiting for a promise...");
+			_doneCondition.wait();
+		}
         return result;
     }    
 
