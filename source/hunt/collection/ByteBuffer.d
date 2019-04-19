@@ -706,6 +706,88 @@ abstract class ByteBuffer : Buffer {
      */
     abstract ByteBuffer putInt(int index, int value);
 
+
+    /**
+     * Relative <i>get</i> method for reading a long value.
+     *
+     * <p> Reads the next eight bytes at this buffer's current position,
+     * composing them into a long value according to the current byte order,
+     * and then increments the position by eight.  </p>
+     *
+     * @return  The long value at the buffer's current position
+     *
+     * @throws  BufferUnderflowException
+     *          If there are fewer than eight bytes
+     *          remaining in this buffer
+     */
+    abstract long getLong();
+
+    /**
+     * Relative <i>put</i> method for writing a long
+     * value&nbsp;&nbsp;<i>(optional operation)</i>.
+     *
+     * <p> Writes eight bytes containing the given long value, in the
+     * current byte order, into this buffer at the current position, and then
+     * increments the position by eight.  </p>
+     *
+     * @param  value
+     *         The long value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  BufferOverflowException
+     *          If there are fewer than eight bytes
+     *          remaining in this buffer
+     *
+     * @throws  ReadOnlyBufferException
+     *          If this buffer is read-only
+     */
+    abstract ByteBuffer putLong(long value);
+
+    /**
+     * Absolute <i>get</i> method for reading a long value.
+     *
+     * <p> Reads eight bytes at the given index, composing them into a
+     * long value according to the current byte order.  </p>
+     *
+     * @param  index
+     *         The index from which the bytes will be read
+     *
+     * @return  The long value at the given index
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If {@code index} is negative
+     *          or not smaller than the buffer's limit,
+     *          minus seven
+     */
+    abstract long getLong(int index);
+
+    /**
+     * Absolute <i>put</i> method for writing a long
+     * value&nbsp;&nbsp;<i>(optional operation)</i>.
+     *
+     * <p> Writes eight bytes containing the given long value, in the
+     * current byte order, into this buffer at the given index.  </p>
+     *
+     * @param  index
+     *         The index at which the bytes will be written
+     *
+     * @param  value
+     *         The long value to be written
+     *
+     * @return  This buffer
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If {@code index} is negative
+     *          or not smaller than the buffer's limit,
+     *          minus seven
+     *
+     * @throws  ReadOnlyBufferException
+     *          If this buffer is read-only
+     */
+    abstract ByteBuffer putLong(int index, long value);
+
+
     // -- Other stuff --
 
     /**
@@ -951,13 +1033,9 @@ abstract class ByteBuffer : Buffer {
         return cast(string) hb[offset .. offset + len];
     }
 
-    deprecated("Using getRemaining instead.")
-    string getString() {
-        return cast(string) hb[position .. limit];
-    }
 
     byte[] getRemaining() {
-        return hb[position .. limit];
+        return hb[offset + position() .. offset + limit()];
     }
 
     /**
