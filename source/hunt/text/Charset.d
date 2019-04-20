@@ -43,10 +43,3 @@ struct StandardCharsets {
     enum string UTF_16 = "UTF-16";
 }
 
-
-/**
-*/
-enum ByteOrder {
-    BigEndian,
-    LittleEndian
-}

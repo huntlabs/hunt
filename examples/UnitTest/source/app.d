@@ -6,6 +6,7 @@ import hunt.util.UnitTest;
 
 import test.AtomicTest;
 import test.BigIntegerTest;
+import test.ByteBufferTest;
 import test.JsonHelperTest;
 import test.ForkJoinPoolTest;
 import test.LinkedBlockingQueueTest;
@@ -36,34 +37,35 @@ void main()
 	writeln("Memory page: ", pageSize);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 
-	// testPropertySetter();
+	testPropertySetter();
 
-	// testUnits!(MagedQueueTest);
+	testUnits!(MagedQueueTest);
 
-	// testUnits!(AtomicTest);
-	// testUnits!(BigIntegerTest);
-	// testUnits!(JsonHelperTest);
-	// testUnits!(LinkedBlockingQueueTest);
-	// testUnits!(MimeTypeTest);
-	// testUnits!(NullableTest);
-	// testUnits!(NumberTest);
-	// // TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
-	// // 
-	// // testUnits!(PathMatcherTest); 
-	// testUnits!(StringTokenizerTest);
-	// testUnits!(ThreadTest);
+	testUnits!(AtomicTest);
+	testUnits!(BigIntegerTest);
+	testUnits!(JsonHelperTest);
+	testUnits!(LinkedBlockingQueueTest);
+	testUnits!(MimeTypeTest);
+	testUnits!(NullableTest);
+	testUnits!(NumberTest);
+	// TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
+	// 
+	// testUnits!(PathMatcherTest); 
+	testUnits!(StringTokenizerTest);
+	testUnits!(ThreadTest);
 
-	// // These tests belown will block the test procession.
+	// These tests belown will block the test procession.
 
-	// // testUnits!(TaskPoolTest);
-	// // LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
-	// // b.bench();
-	// // testTask();
-	// // testLockSupport01();
-	// // testUnits!(ScheduledThreadPoolTest);
-	// // testUnits!(ThreadPoolExecutorTest);
+	// testUnits!(TaskPoolTest);
+	// LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
+	// b.bench();
+	// testTask();
+	// testLockSupport01();
+	// testUnits!(ScheduledThreadPoolTest);
+	// testUnits!(ThreadPoolExecutorTest);
 
 	testUnits!(SerializationTest);
+	testUnits!(ByteBufferTest);
 }
 
 

@@ -11,11 +11,12 @@
 
 module hunt.collection.ByteBuffer;
 
+import hunt.Byte;
 import hunt.collection.Buffer;
 import hunt.collection.StringBuffer;
 import hunt.Exceptions;
-import hunt.text.Charset;
 import hunt.text.StringBuilder;
+
 import std.bitmanip;
 
 
@@ -26,7 +27,7 @@ abstract class ByteBuffer : Buffer {
 
     protected int offset;
 
-    bool bigEndian = true; // package-private
+    protected bool bigEndian = true; // package-private
 
     // bool nativeByteOrder                             // package-private
     //     = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
@@ -1025,9 +1026,9 @@ abstract class ByteBuffer : Buffer {
         return i + offset;
     }
 
-    // protected long byteOffset(long i) {
-    //     return offset + i;
-    // }
+    protected long byteOffset(long i) {
+        return offset + i;
+    }
 
     string getString(size_t offset, size_t len) {
         return cast(string) hb[offset .. offset + len];

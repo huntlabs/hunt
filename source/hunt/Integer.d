@@ -459,7 +459,7 @@ class Integer : AbstractNumber!int
      *
      * @since 1.5
      */
-    enum int SIZE = int.sizeof * Byte.SIZE; // 32;
+    enum int SIZE = BYTES * Byte.SIZE; // 32;
 
     /**
      * The number of bytes used to represent an {@code int} value in two's
@@ -467,7 +467,7 @@ class Integer : AbstractNumber!int
      *
      * @since 1.8
      */
-    enum int BYTES = int.sizeof; // SIZE / Byte.SIZE;
+    enum int BYTES = int.sizeof; 
 
     /**
      * Returns the value obtained by rotating the two's complement binary
@@ -489,7 +489,7 @@ class Integer : AbstractNumber!int
      *     specified number of bits.
      * @since 1.5
      */
-    public static int rotateLeft(int i, int distance)
+    static int rotateLeft(int i, int distance)
     {
         return (i << distance) | (i >>> -distance);
     }
@@ -514,9 +514,24 @@ class Integer : AbstractNumber!int
      *     specified number of bits.
      * @since 1.5
      */
-    public static int rotateRight(int i, int distance)
+    static int rotateRight(int i, int distance)
     {
         return (i >>> distance) | (i << -distance);
     }
 
+    /**
+     * Returns the value obtained by reversing the order of the bytes in the
+     * two's complement representation of the specified {@code int} value.
+     *
+     * @param i the value whose bytes are to be reversed
+     * @return the value obtained by reversing the bytes in the specified
+     *     {@code int} value.
+     * @since 1.5
+     */
+    static int reverseBytes(int i) {
+        return (i << 24)            |
+               ((i & 0xff00) << 8)  |
+               ((i >>> 8) & 0xff00) |
+               (i >>> 24);
+    }
 }

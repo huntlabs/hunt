@@ -567,7 +567,6 @@ class Long : AbstractNumber!long {
         return n - ((x << 1) >>> 31);
     }
 
-
      /**
      * Returns the number of one-bits in the two's complement binary
      * representation of the specified {@code long} value.  This function is
@@ -578,7 +577,7 @@ class Long : AbstractNumber!long {
      *     representation of the specified {@code long} value.
      * @since 1.5
      */
-     static int bitCount(long i) {
+    static int bitCount(long i) {
         // HD, Figure 5-14
         i = i - ((i >>> 1) & 0x5555555555555555L);
         i = (i & 0x3333333333333333L) + ((i >>> 2) & 0x3333333333333333L);
@@ -587,6 +586,21 @@ class Long : AbstractNumber!long {
         i = i + (i >>> 16);
         i = i + (i >>> 32);
         return cast(int)i & 0x7f;
+    }
+
+    /**
+     * Returns the value obtained by reversing the order of the bytes in the
+     * two's complement representation of the specified {@code long} value.
+     *
+     * @param i the value whose bytes are to be reversed
+     * @return the value obtained by reversing the bytes in the specified
+     *     {@code long} value.
+     * @since 1.5
+     */
+    static long reverseBytes(long i) {
+        i = (i & 0x00ff00ff00ff00ffL) << 8 | (i >>> 8) & 0x00ff00ff00ff00ffL;
+        return (i << 48) | ((i & 0xffff0000L) << 16) |
+            ((i >>> 16) & 0xffff0000L) | (i >>> 48);
     }
 
     override int opCmp(Object o) {

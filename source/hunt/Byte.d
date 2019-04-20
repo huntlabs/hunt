@@ -395,7 +395,7 @@ class Byte : AbstractNumber!(byte) {
      *
      * @since 1.5
      */
-    static enum int SIZE = 8;
+    enum int SIZE = 8;
 
     /**
      * The number of bytes used to represent a {@code byte} value in two's
@@ -403,7 +403,7 @@ class Byte : AbstractNumber!(byte) {
      *
      * @since 1.8
      */
-    static enum int BYTES = byte.sizeof;
+    enum int BYTES = byte.sizeof;
 
     static byte parseByte(string s)  {
         auto i = to!int(s);
@@ -419,10 +419,20 @@ class Byte : AbstractNumber!(byte) {
 }
 
 
+/**
+*/
 class Bytes : Nullable!(byte[]) {
 
     this(byte[] bs) {
-        _value = bs.dup;
+        _value = bs; // bs.dup;
     }
 
 } 
+
+
+/**
+*/
+enum ByteOrder {
+    BigEndian,
+    LittleEndian
+}
