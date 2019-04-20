@@ -333,7 +333,7 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      * complement binary form.
      * @since 1.5
      */
-    static const int SIZE = 16;
+    enum int SIZE = 16;
 
     /**
      * The number of bytes used to represent a {@code short} value in two's
@@ -341,7 +341,7 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      *
      * @since 1.8
      */
-    static  int BYTES = SIZE / Byte.SIZE;
+    enum int BYTES = SIZE / Byte.SIZE;
 
     /**
      * Returns the value obtained by reversing the order of the bytes in the
