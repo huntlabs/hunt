@@ -435,8 +435,10 @@ class ConfigBuilder {
     private void loadConfig(string filename) {
         _value = new ConfigurationItem("");
 
-        if (!exists(filename))
+        if (!exists(filename)) {
+            warning("The config file does not exist: " ~ filename);
             return;
+        }
 
         auto f = File(filename, "r");
         if (!f.isOpen())

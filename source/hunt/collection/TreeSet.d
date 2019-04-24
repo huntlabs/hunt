@@ -26,6 +26,7 @@ import hunt.Exceptions;
 import hunt.Object;
 
 import std.range;
+import std.concurrency : initOnce;
 
 /**
  * A {@link NavigableSet} implementation based on a {@link TreeMap}.
@@ -99,12 +100,11 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
     private NavigableMap!(E, Object) m;
 
     // Dummy value to associate with an Object in the backing Map
-    private __gshared static Object PRESENT;
-
-    shared static this()
-    {
-        PRESENT = new Object();
+    private __gshared Object PRESENT() {
+        __gshared Object p;
+        return initOnce!p(new Object());
     }
+
 
     /**
      * Constructs a set backed by the specified navigable map.
@@ -189,7 +189,7 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
             if(result != 0) return result;
         } 
         
-        if (expectedModCount !is m.size()) 
+        if (expectedModCount != m.size()) 
             throw new ConcurrentModificationException();
         return result;
     }
