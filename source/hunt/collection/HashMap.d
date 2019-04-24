@@ -406,7 +406,14 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      */
     override V get(K key) {
         HashMapNode!(K, V) e = getNode(hash(key), key);
-        return e is null ? V.init : e.value;
+        static if(is(V == class) || is(V == interface)) {
+            return e is null ? V.init : e.value;
+        } else {
+            if(e is null) {
+                throw new NoSuchElementException(key.to!string());
+            }
+            return e.value;
+        }
     }
 
     /**
