@@ -18,6 +18,7 @@ import std.meta;
 import std.typecons;
 import std.string;
 import std.traits;
+
 import hunt.logging.ConsoleLogger;
 
 enum string[] FixedObjectMembers = ["toString", "opCmp", "opEquals", "Monitor", "factory"];
@@ -78,6 +79,43 @@ template isPublic(alias T) {
 	enum protection = __traits(getProtection, T);
 	enum isPublic = (protection == "public");
 }
+
+
+mixin template CloneMemberTemplate(T, alias cloneHandler = null) 	{
+	import std.traits;
+	alias baseClasses = BaseClassesTuple!T;
+
+	static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {
+		T clone() {
+			T copy = cast(T)typeid(this).create();
+			__copyFieldsTo(copy);
+			return copy;
+		}
+	} else {
+		override T clone() {
+			T copy = cast(T)super.clone();
+			__copyFieldsTo(copy);
+			return copy;
+		}
+	}
+
+	private void __copyFieldsTo(T copy) {
+		assert(copy !is null);	
+
+		static foreach (string fieldName; FieldNameTuple!T) {
+			__traits(getMember, copy, fieldName) = __traits(getMember, this, fieldName);
+			version(HUNT_DEBUG_MORE) {
+				tracef("cloning field: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
+			}
+		}
+
+		static if(cloneHandler !is null) {
+			cloneHandler(this, copy);
+		}
+	}
+}
+
+
 
 /**
 */
