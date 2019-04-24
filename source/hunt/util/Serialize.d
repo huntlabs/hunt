@@ -1425,6 +1425,8 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
 }
 
 
+/**
+*/
 mixin template SerializationMember(T) {
 	import std.traits;
 

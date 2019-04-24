@@ -1,24 +1,22 @@
 module common;
 
+import hunt.util.Common;
 import hunt.util.Traits;
 
 import std.conv;
 import std.traits;
 import std.stdio;
 
-class FruitBase {
+class FruitBase : Cloneable {
     string description;
 
     this() {
-
+        description = "It's a base";
     }
 
-    Object clone() {
-        FruitBase copy = cast(FruitBase)typeid(this).create();
-        enum string s = generateObjectClone!(FruitBase, this.stringof, copy.stringof);
-        mixin(s);
-        return copy;
-    }
+    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
+        writeln("Checking description. Its value is: " ~ from.description);
+    });
 }
 
 class Fruit : FruitBase {
@@ -52,13 +50,12 @@ class Fruit : FruitBase {
         this.price = price;
     }
 
-    override Fruit clone() {
-        Fruit f = cast(Fruit)super.clone();
-        assert(f !is null);
-        enum string s = generateObjectClone!(Fruit, this.stringof, f.stringof);
-        mixin(s);
-        return f;
-    }
+    // mixin CloneMemberTemplate!(typeof(this));
+
+    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
+        writefln("Checking description. The last value is: %s", to.description);
+        to.description = "description: " ~ from.description;
+    });
 
     override size_t toHash() @trusted nothrow {
         size_t hashcode = 0;
@@ -80,15 +77,18 @@ class Fruit : FruitBase {
 }
 
 
-unittest {
+void testClone() {
 	Fruit f1 = new Fruit("Apple", 9.5f);
 	f1.description = "normal apple";
 
 	Fruit f2 = f1.clone();
-	writeln(f2.toString());
+	writeln("Cloned fruit: ", f2.toString());
+
 	assert(f1.getName() == f2.getName());
 	assert(f1.getPrice() == f2.getPrice());
-	assert(f1.description == f2.description);
+    // writeln("f1.description: ", f1.description);
+    // writeln("f2.description: ", f2.description);
+	assert("description: " ~ f1.description == f2.description);
 	
 	f1.setName("Peach");
 

@@ -37,35 +37,37 @@ void main()
 	writeln("Memory page: ", pageSize);
 	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
 
-	testPropertySetter();
+	testClone();
 
-	testUnits!(MagedQueueTest);
+	// testPropertySetter();
 
-	testUnits!(AtomicTest);
-	testUnits!(BigIntegerTest);
-	testUnits!(JsonHelperTest);
-	testUnits!(LinkedBlockingQueueTest);
-	testUnits!(MimeTypeTest);
-	testUnits!(NullableTest);
-	testUnits!(NumberTest);
-	// TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
-	// 
-	// testUnits!(PathMatcherTest); 
-	testUnits!(StringTokenizerTest);
-	testUnits!(ThreadTest);
+	// testUnits!(MagedQueueTest);
 
-	// These tests belown will block the test procession.
+	// testUnits!(AtomicTest);
+	// testUnits!(BigIntegerTest);
+	// testUnits!(JsonHelperTest);
+	// testUnits!(LinkedBlockingQueueTest);
+	// testUnits!(MimeTypeTest);
+	// testUnits!(NullableTest);
+	// testUnits!(NumberTest);
+	// // TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
+	// // 
+	// // testUnits!(PathMatcherTest); 
+	// testUnits!(StringTokenizerTest);
+	// testUnits!(ThreadTest);
 
-	// testUnits!(TaskPoolTest);
-	// LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
-	// b.bench();
-	// testTask();
-	// testLockSupport01();
-	// testUnits!(ScheduledThreadPoolTest);
-	// testUnits!(ThreadPoolExecutorTest);
+	// // These tests belown will block the test procession.
 
-	testUnits!(SerializationTest);
-	testUnits!(ByteBufferTest);
+	// // testUnits!(TaskPoolTest);
+	// // LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
+	// // b.bench();
+	// // testTask();
+	// // testLockSupport01();
+	// // testUnits!(ScheduledThreadPoolTest);
+	// // testUnits!(ThreadPoolExecutorTest);
+
+	// testUnits!(SerializationTest);
+	// testUnits!(ByteBufferTest);
 }
 
 
