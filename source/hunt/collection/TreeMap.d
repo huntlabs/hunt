@@ -2861,7 +2861,8 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
     mixin template SubMapInputRange() {
         TreeMapEntry!(K,V) lastReturned;
         TreeMapEntry!(K,V) next;
-        K fenceKey;
+        // K fenceKey;
+        TreeMapEntry!(K,V) _fence;
         int expectedModCount;
 
         this(TreeMapEntry!(K,V) first,
@@ -2869,16 +2870,17 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
             expectedModCount = m.modCount;
             lastReturned = null;
             next = first;
-            fenceKey = fence is null ? K.init : fence.key;
+            // fenceKey = fence is null ? K.init : fence.key;
+            _fence = fence;
         }
 
         final bool empty() {
-            return next is null || next.key == fenceKey;
+            return next is null || (_fence !is null && next.key == _fence.key);
         }
 
         final void popFront() {
             TreeMapEntry!(K,V) e = next;
-            if (e is null || e.key == fenceKey) {
+            if (e is null || (_fence !is null && e.key == _fence.key)) {
                 throw new NoSuchElementException();
             }
             
@@ -2976,40 +2978,46 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
 
     abstract class SubMapIterator(T) : Iterator!T {
         TreeMapEntry!(K,V) lastReturned;
-        TreeMapEntry!(K,V) next;
-        K fenceKey;
+        TreeMapEntry!(K,V) _next;
+        // K fenceKey;
+        TreeMapEntry!(K,V) _fence;
         int expectedModCount;
 
         this(TreeMapEntry!(K,V) first,
                        TreeMapEntry!(K,V) fence) {
             expectedModCount = m.modCount;
             lastReturned = null;
-            next = first;
-            fenceKey = fence is null ? K.init : fence.key;
+            _next = first;
+            _fence = fence;
         }
 
         final bool hasNext() {
-            return next !is null && next.key  !is  fenceKey;
+            if(_fence is null) {
+                return _next !is null;
+            } else {
+                return _next !is null && _next.key != _fence.key;
+            }
         }
 
         final TreeMapEntry!(K,V) nextEntry() {
-            TreeMapEntry!(K,V) e = next;
-            if (e is null || e.key == fenceKey)
+            TreeMapEntry!(K,V) e = _next;
+            if (e is null || ( _fence !is null && _next.key == _fence.key))
                 throw new NoSuchElementException();
-            if (m.modCount  !is  expectedModCount)
+
+            if (m.modCount != expectedModCount)
                 throw new ConcurrentModificationException();
-            next = successor(e);
+            _next = successor(e);
             lastReturned = e;
             return e;
         }
 
         final TreeMapEntry!(K,V) prevEntry() {
-            TreeMapEntry!(K,V) e = next;
-            if (e is null || e.key == fenceKey)
+            TreeMapEntry!(K,V) e = _next;
+            if (e is null || ( _fence !is null && _next.key == _fence.key))
                 throw new NoSuchElementException();
-            if (m.modCount  !is  expectedModCount)
+            if (m.modCount != expectedModCount)
                 throw new ConcurrentModificationException();
-            next = predecessor(e);
+            _next = predecessor(e);
             lastReturned = e;
             return e;
         }
@@ -3021,7 +3029,7 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
                 throw new ConcurrentModificationException();
             // deleted entries are replaced by their successors
             if (lastReturned.left !is null && lastReturned.right !is null)
-                next = lastReturned;
+                _next = lastReturned;
             m.deleteEntry(lastReturned);
             lastReturned = null;
             expectedModCount = m.modCount;
@@ -3143,7 +3151,6 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
  * @serial include
  */
 final class AscendingSubMap(K,V) : NavigableSubMap!(K,V) {
-    // private static final long serialVersionUID = 912986545866124060L;
 
     this(TreeMap!(K,V) m,
                     bool fromStart, K lo, bool loInclusive,

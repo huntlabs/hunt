@@ -47,6 +47,15 @@ class SetDemo {
         return q;
     }
 
+    void testSimpleTailSet() {
+        TreeSet!int set = new TreeSet!int();
+        set.add(0);
+        SortedSet!int sm = set.tailSet(0);
+        assert(sm.size() == 1);
+        sm = set.tailSet(1);
+        assert(sm.size() == 0);
+    }
+
     void testTailSetContents() {
         TreeSet!int set = set5();
         SortedSet!int sm = set.tailSet(two);
