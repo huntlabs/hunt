@@ -774,21 +774,10 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      *
      * @return a shallow copy of this map
      */
-    override
-    Object clone() {
-        HashMap!(K,V) result;
-        try {
-            result = cast(HashMap!(K,V))super.clone();
-            // enum string s = generateObjectClone!(HashMap!(K,V), this.stringof, result.stringof);
-            // mixin(s);
-        } catch (CloneNotSupportedException e) {
-            // this shouldn't happen, since we are Cloneable
-            throw new InternalError(e);
-        }
-        result.reinitialize();
-        result.putMapEntries(this, false);
-        return result;
-    }
+    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
+        to.reinitialize();
+        to.putMapEntries(from, false);
+    });
 
     /* ------------------------------------------------------------ */
     // iterators

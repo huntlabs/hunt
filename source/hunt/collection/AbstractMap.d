@@ -510,14 +510,13 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      *
      * @return a shallow copy of this map
      */
-    protected Object clone() {
-        AbstractMap!(K, V) result = cast(AbstractMap!(K, V))(typeid(this).create());
-        // enum string s = generateObjectClone!(AbstractMap!(K, V), this.stringof, result.stringof);
-        // mixin(s);
-        // result.keySet = null;
-        // result.values = null;
-        return result;
-    }
+     mixin CloneMemberTemplate!(typeof(this));
+    // protected Object clone() {
+    //     AbstractMap!(K, V) result = cast(AbstractMap!(K, V))(typeid(this).create());
+    //     // result.keySet = null;
+    //     // result.values = null;
+    //     return result;
+    // }
 
     /**
      * Utility method for SimpleEntry and SimpleImmutableEntry.
