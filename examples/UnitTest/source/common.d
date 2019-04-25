@@ -11,7 +11,7 @@ class FruitBase : Cloneable {
     string description;
 
     this() {
-        description = "It's a base";
+        description = "It's the base";
     }
 
     mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {

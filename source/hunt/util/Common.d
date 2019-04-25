@@ -47,7 +47,7 @@ interface Iterable(K, V) {
  * reflectively, there is no guarantee that it will succeed.
  */
 interface Cloneable {
-    // Object clone();
+    Object clone();
 }
 
 

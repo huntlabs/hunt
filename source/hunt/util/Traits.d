@@ -81,6 +81,8 @@ template isPublic(alias T) {
 }
 
 
+/**
+*/
 mixin template CloneMemberTemplate(T, alias cloneHandler = null) 	{
 	import std.traits;
 	alias baseClasses = BaseClassesTuple!T;
@@ -115,21 +117,6 @@ mixin template CloneMemberTemplate(T, alias cloneHandler = null) 	{
 	}
 }
 
-
-
-/**
-*/
-string generateObjectClone(T, string fromName, string toName)()
-		if (is(T == struct) || is(T == union) || is(T == class)) {
-
-	string s;
-	static foreach (string fieldName; FieldNameTuple!T) {
-		// pragma(msg, fieldName);
-		s ~= toName ~ "." ~ fieldName ~ " = " ~ fromName ~ "." ~ fieldName ~ ";\n";
-	}
-
-	return s;
-}
 
 /**
 * Params
