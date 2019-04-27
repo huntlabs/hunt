@@ -1,7 +1,8 @@
 import hunt.concurrency.thread;
-import hunt.util.DateTime;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
+import hunt.system.Locale;
 import hunt.system.Memory;
+import hunt.util.DateTime;
 import hunt.util.UnitTest;
 
 import test.AtomicTest;
@@ -28,16 +29,24 @@ import core.thread;
 import std.stdio;
 
 import benchmark.LinkedBlockingQueueBench;
-import test.MagedQueueTest;
+
 
 void main()
 {
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
 	writeln("Memory page: ", pageSize);
-	writeln("TimeZone ID: ", DateTimeHelper.getSystemTimeZoneId());
+	writeln("TimeZone: ", DateTimeHelper.getSystemTimeZoneId());
+	writeln("Locale(ALL): ", Locale.set(LocaleCategory.ALL));
 
-	testClone();
+	// testClone();
+
+    Locale le = Locale.parse(LocaleCategory.CTYPE);
+	if(le !is null) {
+		trace(le);
+		le = Locale.parse(LocaleCategory.MESSAGES);
+		trace(le);
+	}
 
 	// testPropertySetter();
 
