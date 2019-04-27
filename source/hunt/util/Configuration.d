@@ -224,12 +224,18 @@ __gshared const string[] reservedWords = [
 /**
 */
 class ConfigBuilder {
+
+    this() {
+    }
+
+
     this(string filename, string section = "") {
         if (!exists(filename) || isDir(filename))
             throw new Exception("The config file does not exist: " ~ filename);
         _section = section;
         loadConfig(filename);
     }
+
 
     ConfigurationItem subItem(string name) {
         return _value.subItem(name);
@@ -245,6 +251,80 @@ class ConfigBuilder {
 
     ConfigurationItem opIndex(string s) {
         return _value.subItem(s);
+    }
+
+    /**
+     * Searches for the property with the specified key in this property list.
+     * If the key is not found in this property list, the default property list,
+     * and its defaults, recursively, are then checked. The method returns
+     * {@code null} if the property is not found.
+     *
+     * @param   key   the property key.
+     * @return  the value in this property list with the specified key value.
+     */
+    string getProperty(string key) {
+        return _itemMap.get(key, "");
+    }
+
+    /**
+     * Searches for the property with the specified key in this property list.
+     * If the key is not found in this property list, the default property list,
+     * and its defaults, recursively, are then checked. The method returns
+     * {@code null} if the property is not found.
+     *
+     * @param   key   the property key.
+     * @return  the value in this property list with the specified key value.
+     * @see     #setProperty
+     * @see     #defaults
+     */
+    string getProperty(string key, string defaultValue) {
+        return _itemMap.get(key, defaultValue);
+    }
+
+    bool hasProperty(string key) {
+        auto p = key in _itemMap;
+        return p !is null;
+    }
+
+    alias setProperty = setValue;
+
+    void setValue(string key, string value) {
+
+        version (HUNT_DEBUG_CONFIG)
+            tracef("setting item: key=%s, value=%s", key, value);
+        _itemMap[key] = value;
+
+        string currentPath;
+        string[] list = split(key, '.');
+        ConfigurationItem cvalue = _value;
+        foreach (str; list) {
+            if (str.length == 0)
+                continue;
+
+            if (canFind(reservedWords, str)) {
+                warningf("Found a reserved word: %s. It may cause some errors.", str);
+            }
+
+            if (currentPath.empty)
+                currentPath = str;
+            else
+                currentPath = currentPath ~ "." ~ str;
+
+            // version (HUNT_DEBUG_CONFIG)
+            //     tracef("checking node: path=%s", currentPath);
+            ConfigurationItem tvalue = cvalue._map.get(str, null);
+            if (tvalue is null) {
+                tvalue = new ConfigurationItem(str);
+                tvalue._fullPath = currentPath;
+                cvalue.apppendChildNode(str, tvalue);
+                version (HUNT_DEBUG_CONFIG)
+                    tracef("new node: key=%s, parent=%s, node=%s", key, cvalue.fullPath, str);
+            }
+            cvalue = tvalue;
+        }
+
+        if (cvalue !is _value)
+            cvalue._value = value;
     }
 
     T build(T, string nodeName = "")() {
@@ -482,46 +562,10 @@ class ConfigBuilder {
             return line[0 .. index];
     }
 
-    private void setValue(string key, string value) {
-
-        version (HUNT_DEBUG_CONFIG)
-            tracef("checking node: key=%s, value=%s", key, value);
-
-        string currentPath;
-        string[] list = split(key, '.');
-        ConfigurationItem cvalue = _value;
-        foreach (str; list) {
-            if (str.length == 0)
-                continue;
-
-            if (canFind(reservedWords, str)) {
-                warningf("Found a reserved word: %s. It may cause some errors.", str);
-            }
-
-            if (currentPath.empty)
-                currentPath = str;
-            else
-                currentPath = currentPath ~ "." ~ str;
-
-            // version (HUNT_DEBUG_CONFIG)
-            //     tracef("checking node: path=%s", currentPath);
-            ConfigurationItem tvalue = cvalue._map.get(str, null);
-            if (tvalue is null) {
-                tvalue = new ConfigurationItem(str);
-                tvalue._fullPath = currentPath;
-                cvalue.apppendChildNode(str, tvalue);
-                version (HUNT_DEBUG_CONFIG)
-                    tracef("new node: key=%s, parent=%s, node=%s", key, cvalue.fullPath, str);
-            }
-            cvalue = tvalue;
-        }
-
-        if (cvalue !is _value)
-            cvalue._value = value;
-    }
-
+    
     private string _section;
     private ConfigurationItem _value;
+    private string[string] _itemMap;
 }
 
 // version (unittest) {

@@ -5,6 +5,7 @@ import std.file;
 import std.exception;
 
 import hunt.util.Configuration;
+import hunt.logging.ConsoleLogger;
 
 import settings;
 
@@ -48,7 +49,7 @@ void testApplicationConfig() {
 }
 
 void testConfig1() {
-	auto conf = new ConfigBuilder("test.config");
+	ConfigBuilder conf = new ConfigBuilder("test.config");
 
 	assertThrown!(EmptyValueException)(conf.app.node1.node2.node3.node4.value());
 
@@ -63,6 +64,12 @@ void testConfig1() {
 	assert(conf.app.time.as!float() == 0.25);
 	string buildMode = conf.app.buildMode.value();
 	assert(buildMode == "default");
+
+	assert(conf.getProperty("name") == "GlobleConfiguration");
+	assert(conf.getProperty("name___x", "default") == "default");
+	assert(conf.getProperty("name___x").empty());
+	assert(conf.getProperty("app.buildMode") == "default");
+
 }
 
 void testConfig2() {
@@ -71,6 +78,7 @@ void testConfig2() {
 	assert(conf.http.listen.as!long() == 100);
 	string buildMode = conf.app.buildMode.value();
 	assert(buildMode == "dev");
+	assert(conf.getProperty("app.buildMode") == "dev");
 }
 
 void testConfigBuilder1() {
