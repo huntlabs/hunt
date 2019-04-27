@@ -2,6 +2,7 @@ import hunt.concurrency.thread;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Locale;
 import hunt.system.Memory;
+import hunt.system.TimeZone;
 import hunt.util.DateTime;
 import hunt.util.UnitTest;
 
@@ -36,7 +37,7 @@ void main()
 	writeln("Thread id: ", Thread.getThis().id);
 	writeln("CPU: ", totalCPUs);
 	writeln("Memory page: ", pageSize);
-	writeln("TimeZone: ", DateTimeHelper.getSystemTimeZoneId());
+	writeln("TimeZone: ", getSystemTimeZoneId());
 	writeln("Locale(ALL): ", Locale.set(LocaleCategory.ALL));
 
 	// testClone();

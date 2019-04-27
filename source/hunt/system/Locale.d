@@ -4,6 +4,7 @@ import hunt.Functions;
 import hunt.logging.ConsoleLogger;
 
 import core.stdc.locale;
+import std.format;
 import std.process;
 import std.string;
 
@@ -326,9 +327,14 @@ see_also:
 class Locale {
     string language;
     string country;
-    string script;
-    string variant;
     string encoding;
+    string variant;
+    string script;
+
+    override string toString() {
+        return format("language=%s, country=%s, encoding=%s, variant=%s, script=%s",
+            language, country, encoding, variant, script);
+    }
 
     static string set(LocaleCategory cat, string locale="") {
         char* p = setlocale(cast(int)cat, locale.toStringz());
