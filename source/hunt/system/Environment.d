@@ -37,7 +37,11 @@ struct Environment {
         string rootPath = dirName(thisExePath());
         string fileName = buildPath(rootPath, defaultConfigFile);
         if (exists(fileName)) {
-            this.props = new ConfigBuilder(fileName, defaultSettingSection);
+            if(isDir(fileName)) {
+                    throw new Exception("You can't load config from a directory: " ~ fileName);
+            } else {
+                this.props = new ConfigBuilder(fileName, defaultSettingSection);
+            }
         } else {
             this.props = new ConfigBuilder();
         }
@@ -55,20 +59,20 @@ struct Environment {
         }
         Locale le = Locale.parse(LocaleCategory.MESSAGES);
         if (le !is null) {
-            if (!props.hasProperty("user.language")) {
+            if (!props.hasProperty("user.language") && le.language !is null) {
                 props.setProperty("user.language", le.language);
             }
-            if (!props.hasProperty("user.country")) {
+            if (!props.hasProperty("user.country") && le.country !is null) {
                 props.setProperty("user.country", le.country);
             }
-            if (!props.hasProperty("user.variant")) {
+            if (!props.hasProperty("user.variant") && le.variant !is null) {
                 props.setProperty("user.variant", le.variant);
             }
-            if (!props.hasProperty("user.encoding")) {
-                props.setProperty("user.encoding", le.encoding);
-            }
-            if (!props.hasProperty("user.script")) {
+            if (!props.hasProperty("user.script") && le.script !is null) {
                 props.setProperty("user.script", le.script);
+            }
+            if (!props.hasProperty("user.encoding") && le.encoding !is null) {
+                props.setProperty("user.encoding", le.encoding);
             }
         }
     }

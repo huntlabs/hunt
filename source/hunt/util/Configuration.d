@@ -226,6 +226,7 @@ __gshared const string[] reservedWords = [
 class ConfigBuilder {
 
     this() {
+        _value = new ConfigurationItem("");
     }
 
 
@@ -233,6 +234,8 @@ class ConfigBuilder {
         if (!exists(filename) || isDir(filename))
             throw new Exception("The config file does not exist: " ~ filename);
         _section = section;
+        _value = new ConfigurationItem("");
+
         loadConfig(filename);
     }
 
@@ -513,8 +516,6 @@ class ConfigBuilder {
     }
 
     private void loadConfig(string filename) {
-        _value = new ConfigurationItem("");
-
         if (!exists(filename)) {
             warning("The config file does not exist: " ~ filename);
             return;
