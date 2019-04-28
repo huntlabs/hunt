@@ -329,8 +329,11 @@ version(linux) {
     ];
 
 }
+
+
 // dfmt on
 
+version(Posix) :
 /**
 see_also:
     https://linux.die.net/man/3/setlocale
@@ -346,7 +349,6 @@ class Locale {
         return format("language=%s, country=%s, encoding=%s, variant=%s, script=%s",
             language, country, encoding, variant, script);
     }
-version(Posix) {
 
      static Locale getUserDefault() {
         string info = set(LocaleCategory.ALL);
@@ -582,40 +584,57 @@ version(Posix) {
 
         return locale;
     }
+}
 
-} else version(Windows) {
+version(Windows) :
 
-    import core.sys.windows.winbase;
-    import core.sys.windows.w32api;
-    import core.sys.windows.winnls;
-    import core.sys.windows.winnt;
-    import core.stdc.stdio;
-    import core.stdc.stdlib;
-    import core.stdc.string;
+import core.sys.windows.winbase;
+import core.sys.windows.w32api;
+import core.sys.windows.winnls;
+import core.sys.windows.winnt;
+import core.stdc.stdio;
+import core.stdc.stdlib;
+import core.stdc.string;
 
-    static if (_WIN32_WINNT >= 0x0600) {
-        enum : LCTYPE {
-            LOCALE_SNAME                  = 0x0000005c,   // locale name (ie: en-us)
-            LOCALE_SDURATION              = 0x0000005d,   // time duration format, eg "hh:mm:ss"
-            LOCALE_SSHORTESTDAYNAME1      = 0x00000060,   // Shortest day name for Monday
-            LOCALE_SSHORTESTDAYNAME2      = 0x00000061,   // Shortest day name for Tuesday
-            LOCALE_SSHORTESTDAYNAME3      = 0x00000062,   // Shortest day name for Wednesday
-            LOCALE_SSHORTESTDAYNAME4      = 0x00000063,   // Shortest day name for Thursday
-            LOCALE_SSHORTESTDAYNAME5      = 0x00000064,   // Shortest day name for Friday
-            LOCALE_SSHORTESTDAYNAME6      = 0x00000065,   // Shortest day name for Saturday
-            LOCALE_SSHORTESTDAYNAME7      = 0x00000066,   // Shortest day name for Sunday
-            LOCALE_SISO639LANGNAME2       = 0x00000067,   // 3 character ISO abbreviated language name, eg "eng"
-            LOCALE_SISO3166CTRYNAME2      = 0x00000068,   // 3 character ISO country/region name, eg "USA"
-            LOCALE_SNAN                   = 0x00000069,   // Not a Number, eg "NaN"
-            LOCALE_SPOSINFINITY           = 0x0000006a,   // + Infinity, eg "infinity"
-            LOCALE_SNEGINFINITY           = 0x0000006b,   // - Infinity, eg "-infinity"
-            LOCALE_SSCRIPTS               = 0x0000006c,   // Typical scripts in the locale: ; delimited script codes, eg "Latn;"
-            LOCALE_SPARENT                = 0x0000006d,   // Fallback name for resources, eg "en" for "en-US"
-            LOCALE_SCONSOLEFALLBACKNAME   = 0x0000006e    // Fallback name for within the console for Unicode Only locales, eg "en" for bn-IN
-        }
- 
+static if (_WIN32_WINNT >= 0x0600) {
+    enum : LCTYPE {
+        LOCALE_SNAME                  = 0x0000005c,   // locale name (ie: en-us)
+        LOCALE_SDURATION              = 0x0000005d,   // time duration format, eg "hh:mm:ss"
+        LOCALE_SSHORTESTDAYNAME1      = 0x00000060,   // Shortest day name for Monday
+        LOCALE_SSHORTESTDAYNAME2      = 0x00000061,   // Shortest day name for Tuesday
+        LOCALE_SSHORTESTDAYNAME3      = 0x00000062,   // Shortest day name for Wednesday
+        LOCALE_SSHORTESTDAYNAME4      = 0x00000063,   // Shortest day name for Thursday
+        LOCALE_SSHORTESTDAYNAME5      = 0x00000064,   // Shortest day name for Friday
+        LOCALE_SSHORTESTDAYNAME6      = 0x00000065,   // Shortest day name for Saturday
+        LOCALE_SSHORTESTDAYNAME7      = 0x00000066,   // Shortest day name for Sunday
+        LOCALE_SISO639LANGNAME2       = 0x00000067,   // 3 character ISO abbreviated language name, eg "eng"
+        LOCALE_SISO3166CTRYNAME2      = 0x00000068,   // 3 character ISO country/region name, eg "USA"
+        LOCALE_SNAN                   = 0x00000069,   // Not a Number, eg "NaN"
+        LOCALE_SPOSINFINITY           = 0x0000006a,   // + Infinity, eg "infinity"
+        LOCALE_SNEGINFINITY           = 0x0000006b,   // - Infinity, eg "-infinity"
+        LOCALE_SSCRIPTS               = 0x0000006c,   // Typical scripts in the locale: ; delimited script codes, eg "Latn;"
+        LOCALE_SPARENT                = 0x0000006d,   // Fallback name for resources, eg "en" for "en-US"
+        LOCALE_SCONSOLEFALLBACKNAME   = 0x0000006e    // Fallback name for within the console for Unicode Only locales, eg "en" for bn-IN
     }
 
+}
+
+/**
+see_also:
+    https://linux.die.net/man/3/setlocale
+*/
+class Locale {
+    string language;
+    string country;
+    string encoding;
+    string variant;
+    string script;
+
+    override string toString() {
+        return format("language=%s, country=%s, encoding=%s, variant=%s, script=%s",
+            language, country, encoding, variant, script);
+    }
+    
     static Locale getUserDefault() {
         /*
          * query the system for the current system default locale
@@ -805,8 +824,4 @@ version(Posix) {
 
         return encoding;
     }
-} else {
-    static assert(false, "Unsupported OS");
-}
-
-}
+} 
