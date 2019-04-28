@@ -14,7 +14,7 @@ version(Posix) {
     enum _NL_CTYPE_CODESET_NAME = 14;
     alias CODESET = _NL_CTYPE_CODESET_NAME;
 
-    extern(C) {
+    extern(C) pure nothrow @nogc {
         char * nl_langinfo (int __item);
     }
 
