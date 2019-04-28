@@ -262,7 +262,7 @@ version(linux) {
     /*
      * Linux/Solaris language string to ISO639 string mapping table.
      */
-    string[string] languageNames = [
+    enum string[string] languageNames = [
         "C" : "en",
         "POSIX" : "en",
         "cz" : "cs",
