@@ -11,6 +11,7 @@ import test.BigIntegerTest;
 import test.ByteBufferTest;
 import test.JsonHelperTest;
 import test.ForkJoinPoolTest;
+import test.LocaleTest;
 import test.LinkedBlockingQueueTest;
 import test.MagedQueueTest;
 import test.MimeTypeTest;
@@ -56,6 +57,7 @@ void main()
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// testUnits!(JsonHelperTest);
+	testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
 	// testUnits!(NullableTest);
