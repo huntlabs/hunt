@@ -5,6 +5,7 @@ version (Windows):
 // dfmt on
 
 import std.exception;
+import std.stdio;
 import std.windows.charset;
 
 import core.sys.windows.wincon;
@@ -39,7 +40,7 @@ struct ConsoleHelper {
         } catch(Exception ex) {
             collectException( {
                 setTextAttribute(FOREGROUND_RED);
-                write(ex); 
+                writeln(ex); 
                 setTextAttribute(defaultColor);
             }());
         }
@@ -54,7 +55,7 @@ struct ConsoleHelper {
         } catch(Exception ex) {
             collectException( {
                 setTextAttribute(FOREGROUND_RED);
-                write(ex); 
+                writeln(ex); 
                 setTextAttribute(defaultColor);
             }());
         }

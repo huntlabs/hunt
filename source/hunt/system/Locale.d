@@ -191,7 +191,18 @@ version(linux) {
         "YU" : "CS"  // YU has been removed from ISO 3166
     ];    
 
+    enum LocaleCategory {
+        ALL = LC_ALL,
+        COLLATE = LC_COLLATE,
+        CTYPE = LC_CTYPE,
+        MONETARY  = LC_MONETARY,
+        NUMERIC = LC_NUMERIC,
+        TIME = LC_TIME,
+        MESSAGES = LC_MESSAGES
+    }
+
  } else {
+
 	enum string[string] localeAliases = [
 		"ar" : "ar_EG",
 		"be" : "be_BY",
@@ -298,7 +309,16 @@ version(linux) {
      */
     enum string[string] countryNames = [
         "YU" : "CS"  // YU has been removed from ISO 3166
-    ];     
+    ];
+
+    enum LocaleCategory {
+        ALL = LC_ALL,
+        COLLATE = LC_COLLATE,
+        CTYPE = LC_CTYPE,
+        MONETARY  = LC_MONETARY,
+        NUMERIC = LC_NUMERIC,
+        TIME = LC_TIME
+    }   
  }
 
 /*
@@ -309,16 +329,6 @@ enum string[string] variantNames = [
 ];
 
 // dfmt on
-
-enum LocaleCategory {
-    ALL = LC_ALL,
-    COLLATE = LC_COLLATE,
-    CTYPE = LC_CTYPE,
-    MONETARY  = LC_MONETARY,
-    NUMERIC = LC_NUMERIC,
-    TIME = LC_TIME,
-    MESSAGES = LC_MESSAGES
-}
 
 /**
 see_also:
@@ -335,29 +345,51 @@ class Locale {
         return format("language=%s, country=%s, encoding=%s, variant=%s, script=%s",
             language, country, encoding, variant, script);
     }
+version(Posix) {
+
+     static Locale getUserDefault() {
+        string info = set(LocaleCategory.ALL);
+        version (HUNT_DEBUG) {
+            tracef("Locale(ALL):%s ", info);
+        }
+        return query(LocaleCategory.MESSAGES);
+    }
+
+    static Locale getSystemDefault() {
+        string info = set(LocaleCategory.ALL);
+        version (HUNT_DEBUG) {
+            tracef("Locale(ALL):%s ", info);
+        }
+        return query(LocaleCategory.CTYPE);
+    }
+
+    static Locale getUserUI() {
+        return getUserDefault();
+    }
 
     static string set(LocaleCategory cat, string locale="") {
         char* p = setlocale(cast(int)cat, locale.toStringz());
         return cast(string)fromStringz(p);
     }
 
-
-    static Locale parse(LocaleCategory cat) {
-        string std_language, std_country, std_encoding, std_script, std_variant;
+    static Locale query(LocaleCategory cat) {
         char* lc = setlocale(cast(int)cat, null);
         if(lc is null) {
             return null;
         }
 
+        string localInfo = cast(string)fromStringz(lc);
+        version(HUNT_DEBUG) tracef("category=%s, locale: %s", cat, localInfo);
+        return parse(localInfo);
+    }
 
-        string lcString = cast(string)fromStringz(lc);
-        version(HUNT_DEBUG) tracef("category=%s, locale: %s", cat, lcString);
-
-        // lcString = "zh_CN.UTF-8@nynorsk";  // for test
-        if(lcString.empty || lcString == "C" || lcString == "POSIX") {
-            lcString = "en_US";
+    static Locale parse(string localInfo) {
+        string std_language, std_country, std_encoding, std_script, std_variant;
+        // localInfo = "zh_CN.UTF-8@nynorsk";  // for test
+        if(localInfo.empty || localInfo == "C" || localInfo == "POSIX") {
+            localInfo = "en_US";
         }
-        string temp = lcString;
+        string temp = localInfo;
 
         /*
          * locale string format in Solaris is
@@ -381,15 +413,15 @@ class Locale {
         
         string encoding_variant;
         /* Copy the leading '.' */
-        ptrdiff_t index = lcString.indexOf('.');
+        ptrdiff_t index = localInfo.indexOf('.');
         if(index == -1) {
             /* Copy the leading '@' */
-            index = lcString.indexOf('@'); 
+            index = localInfo.indexOf('@'); 
         }
     
         if(index >= 0) {
-            encoding_variant = lcString[index .. $];
-            temp = lcString[0..index];
+            encoding_variant = localInfo[index .. $];
+            temp = localInfo[0..index];
         }
 
         string language = temp;
@@ -552,6 +584,233 @@ class Locale {
 
         return locale;
     }
+
+} else version(Windows) {
+
+    import core.sys.windows.winbase;
+    import core.sys.windows.w32api;
+    import core.sys.windows.winnls;
+    import core.sys.windows.winnt;
+    import core.stdc.stdio;
+    import core.stdc.stdlib;
+    import core.stdc.string;
+
+    static if (_WIN32_WINNT >= 0x0600) {
+        enum : LCTYPE {
+            LOCALE_SNAME                  = 0x0000005c,   // locale name (ie: en-us)
+            LOCALE_SDURATION              = 0x0000005d,   // time duration format, eg "hh:mm:ss"
+            LOCALE_SSHORTESTDAYNAME1      = 0x00000060,   // Shortest day name for Monday
+            LOCALE_SSHORTESTDAYNAME2      = 0x00000061,   // Shortest day name for Tuesday
+            LOCALE_SSHORTESTDAYNAME3      = 0x00000062,   // Shortest day name for Wednesday
+            LOCALE_SSHORTESTDAYNAME4      = 0x00000063,   // Shortest day name for Thursday
+            LOCALE_SSHORTESTDAYNAME5      = 0x00000064,   // Shortest day name for Friday
+            LOCALE_SSHORTESTDAYNAME6      = 0x00000065,   // Shortest day name for Saturday
+            LOCALE_SSHORTESTDAYNAME7      = 0x00000066,   // Shortest day name for Sunday
+            LOCALE_SISO639LANGNAME2       = 0x00000067,   // 3 character ISO abbreviated language name, eg "eng"
+            LOCALE_SISO3166CTRYNAME2      = 0x00000068,   // 3 character ISO country/region name, eg "USA"
+            LOCALE_SNAN                   = 0x00000069,   // Not a Number, eg "NaN"
+            LOCALE_SPOSINFINITY           = 0x0000006a,   // + Infinity, eg "infinity"
+            LOCALE_SNEGINFINITY           = 0x0000006b,   // - Infinity, eg "-infinity"
+            LOCALE_SSCRIPTS               = 0x0000006c,   // Typical scripts in the locale: ; delimited script codes, eg "Latn;"
+            LOCALE_SPARENT                = 0x0000006d,   // Fallback name for resources, eg "en" for "en-US"
+            LOCALE_SCONSOLEFALLBACKNAME   = 0x0000006e    // Fallback name for within the console for Unicode Only locales, eg "en" for bn-IN
+        }
+ 
+    }
+
+    static Locale getUserDefault() {
+        /*
+         * query the system for the current system default locale
+         * (which is a Windows LCID value),
+         */
+        LCID userDefaultLCID = GetUserDefaultLCID();
+        return query(userDefaultLCID);
+    }
+
+    static Locale getSystemDefault() {
+        LCID systemDefaultLCID = GetSystemDefaultLCID();
+        return query(systemDefaultLCID);
+    }
+
+    static Locale getUserUI() {
+        LCID userDefaultLCID = GetUserDefaultLCID();
+        LCID userDefaultUILang = GetUserDefaultUILanguage();   
+        // Windows UI Language selection list only cares "language"
+        // information of the UI Language. For example, the list
+        // just lists "English" but it actually means "en_US", and
+        // the user cannot select "en_GB" (if exists) in the list.
+        // So, this hack is to use the user LCID region information
+        // for the UI Language, if the "language" portion of those
+        // two locales are the same.
+        if (PRIMARYLANGID(LANGIDFROMLCID(userDefaultLCID)) ==
+            PRIMARYLANGID(LANGIDFROMLCID(userDefaultUILang))) {
+            userDefaultUILang = userDefaultLCID;
+        }
+        return query(userDefaultUILang);        
+    }
+
+    static Locale query(LCID lcid) {
+        Locale locale = new Locale();
+
+        enum PROPSIZE = 9;      // eight-letter + null terminator
+        enum SNAMESIZE = 86;    // max number of chars for LOCALE_SNAME is 85
+
+        size_t len;
+        static if (_WIN32_WINNT >= 0x0600) {
+            /* script */
+            char[SNAMESIZE] tmp;
+            char[PROPSIZE] script;
+            if (GetLocaleInfoA(lcid, LOCALE_SNAME, tmp.ptr, SNAMESIZE) == 0) {
+                script[0] = '\0';
+            } else if(sscanf(tmp.ptr, "%*[a-z\\-]%1[A-Z]%[a-z]", script.ptr, script.ptr+1) == 0) {
+                script[0] = '\0';
+            }
+            
+            // writefln("script=[%s]", script);
+            len = strlen(script.ptr);
+            if(len == 4) {
+                locale.script = cast(string)fromStringz(script.ptr);
+            }
+        }
+
+        /* country */
+        char[PROPSIZE] country;
+        if (GetLocaleInfoA(lcid, LOCALE_SISO3166CTRYNAME, country.ptr, PROPSIZE) == 0 ) {
+            static if (_WIN32_WINNT >= 0x0600) {
+                if(GetLocaleInfoA(lcid, LOCALE_SISO3166CTRYNAME2, country.ptr, PROPSIZE) == 0) {
+                    country[0] = '\0';
+                }
+            } else {
+                country[0] = '\0';
+            }
+        }
+
+        /* language */
+        char[PROPSIZE] language;
+        if (GetLocaleInfoA(lcid, LOCALE_SISO639LANGNAME, language.ptr, PROPSIZE) == 0) {
+            static if (_WIN32_WINNT >= 0x0600) {
+                if(GetLocaleInfoA(lcid, LOCALE_SISO639LANGNAME2, language.ptr, PROPSIZE) == 0) {
+                    language[0] = '\0';
+                }
+            } else {
+                language[0] = '\0';
+            }
+        }
+
+        len = strlen(language.ptr);
+        if(len == 0) {
+            /* defaults to en_US */
+            locale.language = "en";
+            locale.country = "US";
+        } else {
+            locale.language = cast(string)language[0..len].dup;
+            len = strlen(country.ptr);
+            if(len > 0)
+                locale.country = cast(string)country[0..len].dup;
+        }
+        // writefln("language=[%s], %s", language, locale.language);
+        // writefln("country=[%s], %s", country, locale.country);
+
+        /* variant */
+
+        /* handling for Norwegian */
+        if (locale.language == "nb") {
+            locale.language = "no";
+            locale.country = "NO";
+        } else if (locale.language == "nn") {
+            locale.language = "no";
+            locale.country = "NO";
+            locale.variant = "NY";
+        }
+
+        /* encoding */
+        locale.encoding = getEncodingInternal(lcid);
+        return locale;
+    }       
+    
+    static string getEncodingFromLangID(LANGID langID) {
+        return getEncodingInternal(MAKELCID(langID, SORT_DEFAULT));
+    }
+
+    private static string getEncodingInternal(LCID lcid) {
+        string encoding;
+        int codepage;
+        char[16] ret;
+        if (GetLocaleInfoA(lcid, LOCALE_IDEFAULTANSICODEPAGE,
+                        ret.ptr, 14) == 0) {
+            codepage = 1252;
+        } else {
+            codepage = atoi(ret.ptr);
+        }
+        // import std.stdio;
+        // writefln("codepage=%d, ret: [%(%02X %)]", codepage, cast(ubyte[])ret);
+
+        size_t len = strlen(ret.ptr);
+        switch (codepage) {
+        case 0:
+            encoding = "UTF-8";
+            break;
+        case 874:     /*  9:Thai     */
+        case 932:     /* 10:Japanese */
+        case 949:     /* 12:Korean Extended Wansung */
+        case 950:     /* 13:Chinese (Taiwan, Hongkong, Macau) */
+        case 1361:    /* 15:Korean Johab */
+            encoding = "MS" ~ cast(string)ret[0..len].dup;
+            break;
+        case 936:
+            encoding = "GBK";
+            break;
+        case 54936:
+            encoding = "GB18030";
+            break;
+        default:
+            encoding = "Cp" ~ cast(string)ret[0..len].dup;
+            break;
+        }
+
+        //Traditional Chinese Windows should use MS950_HKSCS_XP as the
+        //default encoding, if HKSCS patch has been installed.
+        // "old" MS950 0xfa41 -> u+e001
+        // "new" MS950 0xfa41 -> u+92db
+        if (encoding == "MS950") {
+            CHAR[2]  mbChar = [cast(char)0xfa, cast(char)0x41];
+            WCHAR  unicodeChar;
+            MultiByteToWideChar(CP_ACP, 0, mbChar.ptr, 2, &unicodeChar, 1);
+            if (unicodeChar == 0x92db) {
+                encoding = "MS950_HKSCS_XP";
+            }
+        } else {
+            //SimpChinese Windows should use GB18030 as the default
+            //encoding, if gb18030 patch has been installed (on windows
+            //2000/XP, (1)Codepage 54936 will be available
+            //(2)simsun18030.ttc will exist under system fonts dir )
+            if (encoding == "GBK" && IsValidCodePage(54936)) {
+                char[MAX_PATH + 1] systemPath;
+                enum string gb18030Font = "\\FONTS\\SimSun18030.ttc";
+                // if(GetWindowsDirectory(systemPath.ptr, MAX_PATH + 1) != 0) {
+                //     import std.path;
+                //     import std.file;
+                    
+                // }
+
+                FILE *f = NULL;
+                if (GetWindowsDirectoryA(systemPath.ptr, MAX_PATH + 1) != 0 &&
+                    strlen(systemPath.ptr) + gb18030Font.length < MAX_PATH + 1) {
+                    strcat(systemPath.ptr, gb18030Font);
+                    if ((f = fopen(systemPath.ptr, "r")) != NULL) {
+                        fclose(f);
+                        encoding = "GB18030";
+                    }
+                }
+            }
+        }
+
+        return encoding;
+    }
+} else {
+    static assert(false, "Unsupported OS");
+}
+
 }
 
 enum _NL_CTYPE_CODESET_NAME = 14;
