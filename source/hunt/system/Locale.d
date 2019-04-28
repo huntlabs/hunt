@@ -311,29 +311,25 @@ version(linux) {
     ]; 
  }
 
-    enum LocaleCategory {
-        ALL = LC_ALL,
-        COLLATE = LC_COLLATE,
-        CTYPE = LC_CTYPE,
-        MONETARY  = LC_MONETARY,
-        NUMERIC = LC_NUMERIC,
-        TIME = LC_TIME,
-        MESSAGES = LC_MESSAGES
-    }
-
-    /*
-     * Linux/Solaris variant string to Java variant name mapping table.
-     */
-    enum string[string] variantNames = [
-        "nynorsk" : "NY",
-    ];
-
+enum LocaleCategory {
+    ALL = LC_ALL,
+    COLLATE = LC_COLLATE,
+    CTYPE = LC_CTYPE,
+    MONETARY  = LC_MONETARY,
+    NUMERIC = LC_NUMERIC,
+    TIME = LC_TIME,
+    MESSAGES = LC_MESSAGES
 }
 
+/*
+    * Linux/Solaris variant string to Java variant name mapping table.
+    */
+enum string[string] variantNames = [
+    "nynorsk" : "NY",
+];
 
 // dfmt on
 
-version(Posix) :
 /**
 see_also:
     https://linux.die.net/man/3/setlocale
@@ -586,7 +582,7 @@ class Locale {
     }
 }
 
-version(Windows) :
+} else version(Windows) {
 
 import core.sys.windows.winbase;
 import core.sys.windows.w32api;
@@ -596,6 +592,7 @@ import core.stdc.stdio;
 import core.stdc.stdlib;
 import core.stdc.string;
 
+// dfmt off
 static if (_WIN32_WINNT >= 0x0600) {
     enum : LCTYPE {
         LOCALE_SNAME                  = 0x0000005c,   // locale name (ie: en-us)
@@ -618,6 +615,8 @@ static if (_WIN32_WINNT >= 0x0600) {
     }
 
 }
+
+// dfmt on
 
 /**
 see_also:
@@ -825,3 +824,7 @@ class Locale {
         return encoding;
     }
 } 
+
+} else {
+    static assert(false, "Unsupported OS");
+}
