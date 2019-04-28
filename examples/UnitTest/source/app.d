@@ -41,10 +41,10 @@ void main()
 	writeln("TimeZone: ", getSystemTimeZoneId());
 	writeln("Locale: ", Locale.getUserDefault());
 
-	// testClone();
+	// // testClone();
 
-	trace(Locale.getUserUI());
-	trace(Locale.getSystemDefault());
+	// trace(Locale.getUserUI());
+	// trace(Locale.getSystemDefault());
 
 	// testPropertySetter();
 

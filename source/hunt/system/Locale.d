@@ -357,9 +357,6 @@ version(Posix) {
 
     static Locale getSystemDefault() {
         string info = set(LocaleCategory.ALL);
-        version (HUNT_DEBUG) {
-            tracef("Locale(ALL):%s ", info);
-        }
         return query(LocaleCategory.CTYPE);
     }
 
@@ -463,10 +460,10 @@ version(Posix) {
             encoding = encoding[0 .. index];
         }
 
-        version(HUNT_DEBUG) {
-            tracef("language=%s, country=%s, variant=%s, encoding=%s", 
-                language, country, variant, encoding);
-        }
+        // version(HUNT_DEBUG) {
+        //     tracef("language=%s, country=%s, variant=%s, encoding=%s", 
+        //         language, country, variant, encoding);
+        // }
 
         /* Normalize the language name */
         if(language.empty() ) {
