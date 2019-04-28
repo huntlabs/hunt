@@ -49,32 +49,38 @@ struct Environment {
         initializeNativeProperties();
     }
 
+// dfmt off
+    private static void setupI18nBaseProperties(Locale locale) {
+        if (locale !is null) {
+            if (!props.hasProperty("user.language") && locale.language !is null) {
+                props.setProperty("user.language", locale.language);
+            }
+            if (!props.hasProperty("user.country") && locale.country !is null) {
+                props.setProperty("user.country", locale.country);
+            }
+            if (!props.hasProperty("user.variant") && locale.variant !is null) {
+                props.setProperty("user.variant", locale.variant);
+            }
+            if (!props.hasProperty("user.script") && locale.script !is null) {
+                props.setProperty("user.script", locale.script);
+            }
+            if (!props.hasProperty("user.encoding") && locale.encoding !is null) {
+                props.setProperty("user.encoding", locale.encoding);
+            }
+        } else {
+            if (!props.hasProperty("user.language"))
+                props.setProperty("user.language", "en");
+            if (!props.hasProperty("user.encoding"))
+                props.setProperty("user.encoding", "ISO8859-1");
+        }
+    }
+    
     private static void initializeNativeProperties() {
         /* Determine the language, country, variant, and encoding from the host,
          * and store these in the user.language, user.country, user.variant and
          * file.encoding system properties. */
-        string localeString = Locale.set(LocaleCategory.ALL);
-        version (HUNT_DEBUG) {
-            tracef("Locale(ALL):%s ", localeString);
-        }
-        Locale le = Locale.parse(LocaleCategory.MESSAGES);
-        if (le !is null) {
-            if (!props.hasProperty("user.language") && le.language !is null) {
-                props.setProperty("user.language", le.language);
-            }
-            if (!props.hasProperty("user.country") && le.country !is null) {
-                props.setProperty("user.country", le.country);
-            }
-            if (!props.hasProperty("user.variant") && le.variant !is null) {
-                props.setProperty("user.variant", le.variant);
-            }
-            if (!props.hasProperty("user.script") && le.script !is null) {
-                props.setProperty("user.script", le.script);
-            }
-            if (!props.hasProperty("user.encoding") && le.encoding !is null) {
-                props.setProperty("user.encoding", le.encoding);
-            }
-        }
+        setupI18nBaseProperties(Locale.getUserDefault());
     }
+// dfmt on
 
 }

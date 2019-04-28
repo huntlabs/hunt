@@ -180,7 +180,7 @@ version (Posix) {
 
             // #if defined(_AIX)
             //         /* On AIX do the platform to Java mapping. */
-            //         javatz = mapPlatformToJavaTimezone(java_home_dir, tz);
+            //         javatz = mapPlatformToJavaTimezone(home_dir, tz);
             //         if (freetz !is  null) {
             //             free((void *) freetz);
             //         }
@@ -740,11 +740,11 @@ version (Windows) {
             }
         }
 
-        mapFileName = cast(char*) malloc(strlen(java_home_dir) + strlen(MAPPINGS_FILE) + 1);
+        mapFileName = cast(char*) malloc(strlen(home_dir) + strlen(MAPPINGS_FILE) + 1);
         if (mapFileName == null) {
             return null;
         }
-        strcpy(mapFileName, java_home_dir);
+        strcpy(mapFileName, home_dir);
         strcat(mapFileName, MAPPINGS_FILE);
 
         if ((fp = fopen(mapFileName, "r")) == null) {

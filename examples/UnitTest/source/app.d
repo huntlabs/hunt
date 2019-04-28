@@ -39,16 +39,12 @@ void main()
 	writeln("CPU: ", totalCPUs);
 	writeln("Memory page: ", pageSize);
 	writeln("TimeZone: ", getSystemTimeZoneId());
-	writeln("Locale(ALL): ", Locale.set(LocaleCategory.ALL));
+	writeln("Locale: ", Locale.getUserDefault());
 
 	// testClone();
 
-    Locale le = Locale.parse(LocaleCategory.CTYPE);
-	if(le !is null) {
-		trace(le);
-		le = Locale.parse(LocaleCategory.MESSAGES);
-		trace(le);
-	}
+	trace(Locale.getUserUI());
+	trace(Locale.getSystemDefault());
 
 	// testPropertySetter();
 
