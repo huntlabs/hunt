@@ -9,6 +9,15 @@ import std.process;
 import std.string;
 
 // dfmt off
+version(Posix) {
+
+    enum _NL_CTYPE_CODESET_NAME = 14;
+    alias CODESET = _NL_CTYPE_CODESET_NAME;
+
+    extern(C) {
+        char * nl_langinfo (int __item);
+    }
+
 version(linux) {
     /*
      * Mappings from partial locale names to full locale names
@@ -189,17 +198,7 @@ version(linux) {
     enum string[string] countryNames = [
         "RN" : "US", // used on Linux : not clear what it stands for
         "YU" : "CS"  // YU has been removed from ISO 3166
-    ];    
-
-    enum LocaleCategory {
-        ALL = LC_ALL,
-        COLLATE = LC_COLLATE,
-        CTYPE = LC_CTYPE,
-        MONETARY  = LC_MONETARY,
-        NUMERIC = LC_NUMERIC,
-        TIME = LC_TIME,
-        MESSAGES = LC_MESSAGES
-    }
+    ];   
 
  } else {
 
@@ -309,7 +308,8 @@ version(linux) {
      */
     enum string[string] countryNames = [
         "YU" : "CS"  // YU has been removed from ISO 3166
-    ];
+    ]; 
+ }
 
     enum LocaleCategory {
         ALL = LC_ALL,
@@ -317,17 +317,18 @@ version(linux) {
         CTYPE = LC_CTYPE,
         MONETARY  = LC_MONETARY,
         NUMERIC = LC_NUMERIC,
-        TIME = LC_TIME
-    }   
- }
+        TIME = LC_TIME,
+        MESSAGES = LC_MESSAGES
+    }
 
-/*
- * Linux/Solaris variant string to Java variant name mapping table.
- */
-enum string[string] variantNames = [
-    "nynorsk" : "NY",
-];
+    /*
+     * Linux/Solaris variant string to Java variant name mapping table.
+     */
+    enum string[string] variantNames = [
+        "nynorsk" : "NY",
+    ];
 
+}
 // dfmt on
 
 /**
@@ -808,11 +809,4 @@ version(Posix) {
     static assert(false, "Unsupported OS");
 }
 
-}
-
-enum _NL_CTYPE_CODESET_NAME = 14;
-alias CODESET = _NL_CTYPE_CODESET_NAME;
-
-extern(C) {
-    char * nl_langinfo (int __item);
 }
