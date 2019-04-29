@@ -1026,7 +1026,7 @@ abstract class ByteBuffer : Buffer {
         return i + offset;
     }
 
-    protected long byteOffset(long i) {
+    protected size_t byteOffset(size_t i) {
         return offset + i;
     }
 
