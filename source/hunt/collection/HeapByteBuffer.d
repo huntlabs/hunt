@@ -250,24 +250,24 @@ class HeapByteBuffer : ByteBuffer {
     // dfmt off
 
 
-    private static void putShortParts(byte[] buf, long offset, byte i0, byte i1) {
+    private static void putShortParts(byte[] buf, size_t offset, byte i0, byte i1) {
         buf[offset + 0] = pick(i0, i1);
         buf[offset + 1] = pick(i1, i0);
     }
 
-    private static void putIntParts(byte[] buf, long offset, short i0, short i1) {
+    private static void putIntParts(byte[] buf, size_t offset, short i0, short i1) {
         _putShort(buf, offset + 0, pick(i0, i1));
         _putShort(buf, offset + 2, pick(i1, i0));
     }
 
-    private static void putIntParts(byte[] buf, long offset, byte i0, byte i1, byte i2, byte i3) {
+    private static void putIntParts(byte[] buf, size_t offset, byte i0, byte i1, byte i2, byte i3) {
         buf[offset + 0] = pick(i0, i3);
         buf[offset + 1] = pick(i1, i2);
         buf[offset + 2] = pick(i2, i1);
         buf[offset + 3] = pick(i3, i0);
     }
     
-    private static void putIntUnaligned(byte[] buf, long offset, int x) {
+    private static void putIntUnaligned(byte[] buf, size_t offset, int x) {
         if ((offset & 3) == 0) {
             _putInt(buf, offset, x);
         } else if ((offset & 1) == 0) {
@@ -283,12 +283,12 @@ class HeapByteBuffer : ByteBuffer {
         }
     }
 
-    private static void putIntUnaligned(byte[] buf, long offset, int x, bool bigEndian) {
+    private static void putIntUnaligned(byte[] buf, size_t offset, int x, bool bigEndian) {
         putIntUnaligned(buf, offset, convEndian(bigEndian, x));
     }
 
 
-    private static int getIntUnaligned(byte[] buf, long offset) {
+    private static int getIntUnaligned(byte[] buf, size_t offset) {
         if ((offset & 3) == 0) {
             return _getInt(buf, offset);
         } else if ((offset & 1) == 0) {
@@ -302,7 +302,7 @@ class HeapByteBuffer : ByteBuffer {
         }
     }
 
-    private static int getIntUnaligned(byte[] buf, long offset, bool bigEndian) {
+    private static int getIntUnaligned(byte[] buf, size_t offset, bool bigEndian) {
         return convEndian(bigEndian, getIntUnaligned(buf, offset));
     }    
 
@@ -339,7 +339,7 @@ class HeapByteBuffer : ByteBuffer {
      *         {@link NullPointerException}
      * @since 9
      */
-    private static long getLongUnaligned(byte[] buf, long offset) {
+    private static long getLongUnaligned(byte[] buf, size_t offset) {
         if ((offset & 7) == 0) {
             return _getLong(buf, offset);
         } else if ((offset & 3) == 0) {
@@ -373,7 +373,7 @@ class HeapByteBuffer : ByteBuffer {
      * @return the value fetched from the indicated object
      * @since 9
      */
-    private static long getLongUnaligned(byte[] hb,  long offset, bool bigEndian) {
+    private static long getLongUnaligned(byte[] hb,  size_t offset, bool bigEndian) {
         return convEndian(bigEndian, getLongUnaligned(hb, offset));
     }
 
@@ -388,14 +388,14 @@ class HeapByteBuffer : ByteBuffer {
      *         {@link NullPointerException}
      * @since 9
      */
-    private static void putLongUnaligned(byte[] buf, long offset, long x, bool bigEndian) {
+    private static void putLongUnaligned(byte[] buf, size_t offset, long x, bool bigEndian) {
         putLongUnaligned(buf, offset, convEndian(bigEndian, x));
     }
 
     // These methods write integers to memory from smaller parts
     // provided by their caller.  The ordering in which these parts
     // are written is the native endianness of this platform.
-    private static void putLongParts(byte[] buf, long offset, byte i0, byte i1, byte i2, 
+    private static void putLongParts(byte[] buf, size_t offset, byte i0, byte i1, byte i2, 
         byte i3, byte i4, byte i5, byte i6, byte i7) {
         buf[offset + 0] = pick(i0, i7);
         buf[offset + 1] = pick(i1, i6);
@@ -407,19 +407,19 @@ class HeapByteBuffer : ByteBuffer {
         buf[offset + 7] = pick(i7, i0);
     }
 
-    private static void putLongParts(byte[] buf, long offset, short i0, short i1, short i2, short i3) {
+    private static void putLongParts(byte[] buf, size_t offset, short i0, short i1, short i2, short i3) {
         _putShort(buf, offset + 0, pick(i0, i3));
         _putShort(buf, offset + 2, pick(i1, i2));
         _putShort(buf, offset + 4, pick(i2, i1));
         _putShort(buf, offset + 6, pick(i3, i0));
     }
 
-    private static void putLongParts(byte[] buf, long offset, int i0, int i1) {
+    private static void putLongParts(byte[] buf, size_t offset, int i0, int i1) {
         _putInt(buf, offset + 0, pick(i0, i1));
         _putInt(buf, offset + 4, pick(i1, i0));
     }
 
-    private static void putLongUnaligned(byte[] hb, long offset, long x) {
+    private static void putLongUnaligned(byte[] hb, size_t offset, long x) {
         if ((offset & 7) == 0) {
             _putLong(hb, offset, x);
         } else if ((offset & 3) == 0) {
@@ -445,34 +445,34 @@ class HeapByteBuffer : ByteBuffer {
         }
     }
 
-    private static short _getShort(byte[] buf, long offset) {
+    private static short _getShort(byte[] buf, size_t offset) {
         short* ptr = cast(short*)(buf.ptr + offset);
         return *ptr;
     }
 
-    private static void _putShort(byte[] buf, long offset, short x) {
+    private static void _putShort(byte[] buf, size_t offset, short x) {
         buf[offset] = short0(x);
         buf[offset + 1] = short1(x);
     }
 
-    private static int _getInt(byte[] buf, long offset) {
+    private static int _getInt(byte[] buf, size_t offset) {
         int* ptr = cast(int*)(buf.ptr + offset);
         return *ptr;
     }
 
-    private static void _putInt(byte[] buf, long offset, int x) {
+    private static void _putInt(byte[] buf, size_t offset, int x) {
         buf[offset] = int0(x);
         buf[offset + 1] = int1(x);
         buf[offset + 2] = int2(x);
         buf[offset + 3] = int3(x);
     }
 
-    private static long _getLong(byte[] buf, long offset) {
+    private static long _getLong(byte[] buf, size_t offset) {
         long* ptr = cast(long*)(buf.ptr + offset);
         return *ptr;
     }
 
-    private static void  _putLong(byte[] buf, long offset, long x) {
+    private static void  _putLong(byte[] buf, size_t offset, long x) {
         buf[offset] = long0(x);
         buf[offset + 1] = long1(x);
         buf[offset + 2] = long2(x);
