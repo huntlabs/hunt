@@ -75,6 +75,30 @@ abstract class AbstractCompletableFuture {
     Object result;       // Either the result or boxed AltResult
     Completion stack;    // Top of Treiber stack of dependent actions
 
+    /** The encoding of the null value. */
+    __gshared AltResult NIL; // = new AltResult(null);
+
+    /* ------------- Async task preliminaries -------------- */
+
+    protected __gshared bool USE_COMMON_POOL;
+
+    /**
+     * Default executor -- ForkJoinPool.commonPool() unless it cannot
+     * support parallelism.
+     */
+    protected __gshared Executor ASYNC_POOL;
+
+    shared static this() {
+        NIL = new AltResult(null);
+        USE_COMMON_POOL = (ForkJoinPool.getCommonPoolParallelism() > 1);
+        if(USE_COMMON_POOL){
+            ASYNC_POOL = ForkJoinPool.commonPool();
+        } else {
+            ASYNC_POOL = new ThreadPerTaskExecutor();
+        }
+        // ASYNC_POOL = USE_COMMON_POOL ? ForkJoinPool.commonPool() : new ThreadPerTaskExecutor();
+    }
+
     abstract void bipush(AbstractCompletableFuture b, BiCompletion c);
     abstract void cleanStack();
     abstract bool completeExceptionally(Throwable ex);
@@ -90,6 +114,116 @@ abstract class AbstractCompletableFuture {
     bool isDone() {
         return result !is null;
     }
+
+    /**
+     * Null-checks user executor argument, and translates uses of
+     * commonPool to ASYNC_POOL in case parallelism disabled.
+     */
+    static Executor screenExecutor(Executor e) {
+        if (!USE_COMMON_POOL && e is ForkJoinPool.commonPool())
+            return ASYNC_POOL;
+        if (e is null) throw new NullPointerException();
+        return e;
+    }
+
+
+    /**
+     * Returns a new CompletableFuture that is asynchronously completed
+     * by a task running in the {@link ForkJoinPool#commonPool()} with
+     * the value obtained by calling the given Supplier.
+     *
+     * @param supplier a function returning the value to be used
+     * to complete the returned CompletableFuture
+     * @param <U> the function's return type
+     * @return the new CompletableFuture
+     */
+    static CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier) {
+        return asyncSupplyStage(ASYNC_POOL, supplier);
+    }
+
+    /**
+     * Returns a new CompletableFuture that is asynchronously completed
+     * by a task running in the given executor with the value obtained
+     * by calling the given Supplier.
+     *
+     * @param supplier a function returning the value to be used
+     * to complete the returned CompletableFuture
+     * @param executor the executor to use for asynchronous execution
+     * @param <U> the function's return type
+     * @return the new CompletableFuture
+     */
+    static CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier,
+                                                       Executor executor) {
+        return asyncSupplyStage(screenExecutor(executor), supplier);
+    }
+
+    /**
+     * Returns a new CompletableFuture that is asynchronously completed
+     * by a task running in the {@link ForkJoinPool#commonPool()} after
+     * it runs the given action.
+     *
+     * @param runnable the action to run before completing the
+     * returned CompletableFuture
+     * @return the new CompletableFuture
+     */
+    static CompletableFuture!(Void) runAsync(Runnable runnable) {
+        return asyncRunStage(ASYNC_POOL, runnable);
+    }
+
+
+    static CompletableFuture!(Void) runAsync(Action act) {
+        return asyncRunStage(ASYNC_POOL, new class Runnable {
+            void run() {
+                act();
+            }
+        });
+    }
+
+    /**
+     * Returns a new CompletableFuture that is asynchronously completed
+     * by a task running in the given executor after it runs the given
+     * action.
+     *
+     * @param runnable the action to run before completing the
+     * returned CompletableFuture
+     * @param executor the executor to use for asynchronous execution
+     * @return the new CompletableFuture
+     */
+    static CompletableFuture!(Void) runAsync(Runnable runnable,
+                                                   Executor executor) {
+        return asyncRunStage(screenExecutor(executor), runnable);
+    }
+
+    /**
+     * Returns a new CompletableFuture that is already completed with
+     * the given value.
+     *
+     * @param value the value
+     * @param <U> the type of the value
+     * @return the completed CompletableFuture
+     */
+    static CompletableFuture!(U) completedFuture(U)(U value) {
+        return new CompletableFuture!(U)((value is null) ? NIL : value);
+    }    
+
+    /* ------------- Zero-input Async forms -------------- */
+
+    static CompletableFuture!(U) asyncSupplyStage(U)(Executor e,
+                                                     Supplier!(U) f) {
+        if (f is null) throw new NullPointerException();
+        CompletableFuture!(U) d = new CompletableFuture!(U)();
+        e.execute(new AsyncSupply!(U)(d, f));
+        return d;
+    }
+
+
+    static CompletableFuture!(Void) asyncRunStage(Executor e, Runnable f) {
+        if (f is null) throw new NullPointerException();
+        CompletableFuture!(Void) d = new CompletableFuture!(Void)();
+        e.execute(new AsyncRun(d, f));
+        return d;
+    }
+
 }
 
 /**
@@ -312,17 +446,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     // Object result;       // Either the result or boxed AltResult
     // Completion stack;    // Top of Treiber stack of dependent actions
 
-    shared static this() {
-        NIL = new AltResult(null);
-        USE_COMMON_POOL = (ForkJoinPool.getCommonPoolParallelism() > 1);
-        if(USE_COMMON_POOL){
-            ASYNC_POOL = ForkJoinPool.commonPool();
-        } else {
-            ASYNC_POOL = new ThreadPerTaskExecutor();
-        }
-        // ASYNC_POOL = USE_COMMON_POOL ? ForkJoinPool.commonPool() : new ThreadPerTaskExecutor();
-    }
-
     final bool internalComplete(Object r) { // CAS from null to r
         return AtomicHelper.compareAndSet(this.result, null, r);
     }
@@ -343,9 +466,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     /* ------------- Encoding and decoding outcomes -------------- */
-
-    /** The encoding of the null value. */
-    __gshared AltResult NIL; // = new AltResult(null);
 
     /** Completes with the null value, unless already completed. */
     final bool completeNull() {
@@ -490,28 +610,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         }
         return r;
     }
-
-    /* ------------- Async task preliminaries -------------- */
-
-    private __gshared bool USE_COMMON_POOL;
-
-    /**
-     * Default executor -- ForkJoinPool.commonPool() unless it cannot
-     * support parallelism.
-     */
-    private __gshared Executor ASYNC_POOL;
-
-    /**
-     * Null-checks user executor argument, and translates uses of
-     * commonPool to ASYNC_POOL in case parallelism disabled.
-     */
-    static Executor screenExecutor(Executor e) {
-        if (!USE_COMMON_POOL && e is ForkJoinPool.commonPool())
-            return ASYNC_POOL;
-        if (e is null) throw new NullPointerException();
-        return e;
-    }
-
 
     /* ------------- Base Completion classes and operations -------------- */
 
@@ -1201,24 +1299,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 
-    /* ------------- Zero-input Async forms -------------- */
-
-    static CompletableFuture!(U) asyncSupplyStage(U)(Executor e,
-                                                     Supplier!(U) f) {
-        if (f is null) throw new NullPointerException();
-        CompletableFuture!(U) d = new CompletableFuture!(U)();
-        e.execute(new AsyncSupply!(U)(d, f));
-        return d;
-    }
-
-
-    static CompletableFuture!(Void) asyncRunStage(Executor e, Runnable f) {
-        if (f is null) throw new NullPointerException();
-        CompletableFuture!(Void) d = new CompletableFuture!(Void)();
-        e.execute(new AsyncRun(d, f));
-        return d;
-    }
-
     /* ------------- Signallers -------------- */
 
     /**
@@ -1322,75 +1402,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         this.result = r;
     }
 
-    /**
-     * Returns a new CompletableFuture that is asynchronously completed
-     * by a task running in the {@link ForkJoinPool#commonPool()} with
-     * the value obtained by calling the given Supplier.
-     *
-     * @param supplier a function returning the value to be used
-     * to complete the returned CompletableFuture
-     * @param <U> the function's return type
-     * @return the new CompletableFuture
-     */
-    static CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier) {
-        return asyncSupplyStage(ASYNC_POOL, supplier);
-    }
-
-    /**
-     * Returns a new CompletableFuture that is asynchronously completed
-     * by a task running in the given executor with the value obtained
-     * by calling the given Supplier.
-     *
-     * @param supplier a function returning the value to be used
-     * to complete the returned CompletableFuture
-     * @param executor the executor to use for asynchronous execution
-     * @param <U> the function's return type
-     * @return the new CompletableFuture
-     */
-    static CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier,
-                                                       Executor executor) {
-        return asyncSupplyStage(screenExecutor(executor), supplier);
-    }
-
-    /**
-     * Returns a new CompletableFuture that is asynchronously completed
-     * by a task running in the {@link ForkJoinPool#commonPool()} after
-     * it runs the given action.
-     *
-     * @param runnable the action to run before completing the
-     * returned CompletableFuture
-     * @return the new CompletableFuture
-     */
-    static CompletableFuture!(Void) runAsync(Runnable runnable) {
-        return asyncRunStage(ASYNC_POOL, runnable);
-    }
-
-    /**
-     * Returns a new CompletableFuture that is asynchronously completed
-     * by a task running in the given executor after it runs the given
-     * action.
-     *
-     * @param runnable the action to run before completing the
-     * returned CompletableFuture
-     * @param executor the executor to use for asynchronous execution
-     * @return the new CompletableFuture
-     */
-    static CompletableFuture!(Void) runAsync(Runnable runnable,
-                                                   Executor executor) {
-        return asyncRunStage(screenExecutor(executor), runnable);
-    }
-
-    /**
-     * Returns a new CompletableFuture that is already completed with
-     * the given value.
-     *
-     * @param value the value
-     * @param <U> the type of the value
-     * @return the completed CompletableFuture
-     */
-    static CompletableFuture!(U) completedFuture(U)(U value) {
-        return new CompletableFuture!(U)((value is null) ? NIL : value);
-    }
 
 
     /**
@@ -2041,7 +2052,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     CompletableFuture!(T) orTimeout(Duration timeout) {
         if (result is null) {
             ScheduledFuture!(Void) f = Delayer.delay(new Timeout(this), timeout);
-            whenComplete((Object ignore, Throwable ex) {
+            whenComplete((T ignore, Throwable ex) {
                 if (ex is null && f !is null && !f.isDone())
                     f.cancel(false);
             });
@@ -2067,7 +2078,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
           ScheduledFuture!(Void) f = 
             Delayer.delay(new DelayedCompleter!(T)(this, value), timeout);
 
-            whenComplete((Object ignore, Throwable ex) {
+            whenComplete((T ignore, Throwable ex) {
                 if (ex is null && f !is null && !f.isDone())
                     f.cancel(false);
             });            
@@ -2314,7 +2325,7 @@ final class UniAccept(T) : UniCompletion {
         CompletableFuture!(Void) d; CompletableFuture!(T) a;
         Object r; Throwable x; Consumer!(T) f;
         if ((d = cast(CompletableFuture!(Void))dep) is null || (f = fn) is null
-            || (a = cast(CompletableFuture!(Void))src) is null || (r = a.result) is null)
+            || (a = cast(CompletableFuture!(T))src) is null || (r = a.result) is null)
             return null;
         tryComplete: if (d.result is null) {
             AltResult ar = cast(AltResult)r;
@@ -2354,7 +2365,7 @@ final class UniRun(T) : UniCompletion {
         CompletableFuture!(Void) d; CompletableFuture!(T) a;
         Object r; Throwable x; Runnable f;
         if ((d = cast(CompletableFuture!(Void))dep) is null || (f = fn) is null
-            || (a = cast(CompletableFuture!(Void))src) is null || (r = a.result) is null)
+            || (a = cast(CompletableFuture!(T))src) is null || (r = a.result) is null)
             return null;
         if (d.result is null) {
             AltResult ar = cast(AltResult)r;
@@ -2694,8 +2705,8 @@ static final class OrAccept(T,U : T) : BiCompletion {
         CompletableFuture!(U) b;
         Object r; Throwable x; Consumer!(T) f;
         if ((d = cast(CompletableFuture!(Void))dep) is null || (f = fn) is null
-            || (a = cast(CompletableFuture!(Void))src) is null 
-            || (b = cast(CompletableFuture!(Void))snd) is null
+            || (a = cast(CompletableFuture!(T))src) is null 
+            || (b = cast(CompletableFuture!(U))snd) is null
             || ((r = a.result) is null && (r = b.result) is null))
             return null;
         tryComplete: if (d.result is null) {

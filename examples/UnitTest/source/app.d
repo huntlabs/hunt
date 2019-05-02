@@ -9,6 +9,7 @@ import hunt.util.UnitTest;
 import test.AtomicTest;
 import test.BigIntegerTest;
 import test.ByteBufferTest;
+import test.CompletableFutureTest;
 import test.JsonHelperTest;
 import test.ForkJoinPoolTest;
 import test.LocaleTest;
@@ -52,8 +53,9 @@ void main()
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
+	testUnits!(CompletableFutureTest);
 	// testUnits!(JsonHelperTest);
-	testUnits!(LocaleTest);
+	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
 	// testUnits!(NullableTest);
