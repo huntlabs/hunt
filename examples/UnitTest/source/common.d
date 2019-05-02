@@ -24,7 +24,7 @@ class Fruit : FruitBase {
     private string name;
     private float price;
 
-    protected this() {
+    this() {
         name = "unnamed";
         price = 0;
     }

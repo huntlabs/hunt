@@ -380,8 +380,7 @@ class ThreadEx : Thread, Runnable {
      *  https://stackoverflow.com/questions/8579657/whats-the-difference-between-thread-start-and-runnable-run
      */
     void run() {
-        // super.start();
-        info("Trying to run a target...");
+        infof("Trying to run a target (%s null)...", target is null ? "is" : "is not");
         if (target !is null) {
             target.run();
         }
