@@ -222,7 +222,6 @@ interface Callable(V) {
  * <a href="package-summary.html#MemoryVisibility"><i>happen-before</i></a>
  * its execution begins, perhaps in another thread.
  *
- * @since 1.5
  * @author Doug Lea
  */
 interface Executor {

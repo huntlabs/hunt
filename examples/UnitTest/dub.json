@@ -3,8 +3,9 @@
     "authors": [
         "Hunt Labs"
     ],
-	"description": "All the unittests for hunt-http.",
+	"description": "All the unittests for hunt.",
 	"copyright": "Copyright (C) 2015-2019, HuntLabs.net",
+	"homepage": "https://www.huntlabs.net",
 	"license": "Apache-2.0",
 	"dependencies": {
 		"hunt" :{"path": "../../"}

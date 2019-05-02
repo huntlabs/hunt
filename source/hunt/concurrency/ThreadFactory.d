@@ -96,10 +96,10 @@ private class DefaultThreadFactory : ThreadFactory {
     }
 
     
-    Thread newThread(Action dg ) {
+    ThreadEx newThread(Action dg ) {
         int n = AtomicHelper.getAndIncrement(threadNumber);
 
-        Thread t = new ThreadEx(dg);
+        ThreadEx t = new ThreadEx(dg);
         t.name = namePrefix ~ n.to!string();
         t.isDaemon = false;
         // version(Posix) {

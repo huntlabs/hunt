@@ -20,13 +20,14 @@ import hunt.collection.ArrayList;
 import hunt.collection.Collection;
 import hunt.collection.Iterator;
 import hunt.collection.List;
-import hunt.util.DateTime;
+import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 import hunt.util.Common;
+import hunt.util.DateTime;
 
 import std.datetime;
 
-version(HUNT_DEBUG) import hunt.logging;
+alias Void = Object;
 
 /**
  * Provides default implementations of {@link ExecutorService}
@@ -98,9 +99,10 @@ abstract class AbstractExecutorService : ExecutorService {
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    Future!(void) submit(Runnable task) {
+    Future!(Void) submit(Runnable task) {
         if (task is null) throw new NullPointerException();
-        RunnableFuture!(void) ftask = new FutureTask!(void)(task);
+        // RunnableFuture!(Void) ftask = new FutureTask!(Void)(task);
+        RunnableFuture!(Void) ftask = newTaskFor!(Void)(task, cast(Void)null);
         execute(ftask);
         return ftask;
     }
