@@ -135,3 +135,9 @@ class ObjectUtils {
 
 
 }
+
+
+bool isInstanceOf(T, S)(S obj) if(is(S == class) || is(S == interface)) {
+	T t = cast(T)obj;
+	return t !is null;
+}

@@ -15,7 +15,7 @@ import core.atomic;
 
 class AtomicHelper {
     static void store(T)(ref T stuff, T newVal) {
-        core.atomic.atomicStore(*(cast(shared)&stuff), newVal);
+        core.atomic.atomicStore(*(cast(shared)&stuff), cast(shared)newVal);
     }
 
     static T load(T)(ref T val) {

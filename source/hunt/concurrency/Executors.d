@@ -512,7 +512,7 @@ class Executors {
      *         scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    static Future!(void) submit(ExecutorService es, Runnable task) {
+    static Future!(Void) submit(ExecutorService es, Runnable task) {
 
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 

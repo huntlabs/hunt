@@ -46,6 +46,7 @@ import std.datetime;
 // import hunt.concurrency.locks.ReentrantLock;
 
 alias ReentrantLock = Mutex;
+alias Void = Object;
 
 interface IScheduledFutureTask {
     void heapIndex(int index);
@@ -429,14 +430,14 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    ScheduledFuture!(void) schedule(Runnable command, Duration delay) {
+    ScheduledFuture!(Void) schedule(Runnable command, Duration delay) {
         if (command is null)
             throw new NullPointerException();
         long n = atomicOp!"+="(sequencer, 1);
         n--;
-        RunnableScheduledFuture!(void) t = decorateTask(command,
-            new ScheduledFutureTask!(void)(command, triggerTime(delay), n, this));
-        delayedExecute!(void)(t);
+        RunnableScheduledFuture!(Void) t = decorateTask(command,
+            new ScheduledFutureTask!(Void)(command, cast(Void)null, triggerTime(delay), n, this));
+        delayedExecute!(Void)(t);
         return t;
     }
 
@@ -582,7 +583,7 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    override Future!void submit(Runnable task) {
+    override Future!Void submit(Runnable task) {
         return schedule(task, Duration.zero);
     }
 
