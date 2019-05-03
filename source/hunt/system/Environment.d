@@ -1,5 +1,6 @@
 module hunt.system.Environment;
 
+import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Locale;
 import hunt.util.Configuration;
@@ -7,6 +8,7 @@ import hunt.util.Configuration;
 import core.stdc.locale;
 import core.stdc.string;
 
+import std.concurrency : initOnce;
 import std.file;
 import std.path;
 import std.string;
@@ -16,41 +18,48 @@ struct Environment {
     __gshared string defaultConfigFile = "hunt.config";
     __gshared string defaultSettingSection = "";
 
+    private __gshared ConfigBuilder _props;
+
     static ConfigBuilder getProperties() {
-        if (props is null) {
-            initializeProperties();
+        if (_props is null) {
+            return initOnce!(_props)({
+                ConfigBuilder props;
+                string rootPath = dirName(thisExePath());
+                string fileName = buildPath(rootPath, defaultConfigFile);
+                if (exists(fileName)) {
+                    if(isDir(fileName)) {
+                            throw new Exception("You can't load config from a directory: " ~ fileName);
+                    } else {
+                        props = new ConfigBuilder(fileName, defaultSettingSection);
+                    }
+                } else {
+                    props = new ConfigBuilder();
+                }
+                initializeProperties(props);
+                return props;
+            }());
+        } else {
+            return _props;
         }
-        return props;
     }
 
     static void setProperties(ConfigBuilder props) {
         if (props is null) {
-            initializeProperties();
+            throw new NullPointerException();
         } else {
-            this.props = props;
+            this._props = props;
         }
     }
 
-    private __gshared ConfigBuilder props;
-
-    private static void initializeProperties() {
-        string rootPath = dirName(thisExePath());
-        string fileName = buildPath(rootPath, defaultConfigFile);
-        if (exists(fileName)) {
-            if(isDir(fileName)) {
-                    throw new Exception("You can't load config from a directory: " ~ fileName);
-            } else {
-                this.props = new ConfigBuilder(fileName, defaultSettingSection);
-            }
-        } else {
-            this.props = new ConfigBuilder();
-        }
-
-        initializeNativeProperties();
+    private static void initializeProperties(ConfigBuilder props) {
+        /* Determine the language, country, variant, and encoding from the host,
+         * and store these in the user.language, user.country, user.variant and
+         * file.encoding system properties. */
+        setupI18nBaseProperties(props, Locale.getUserDefault());
     }
 
 // dfmt off
-    private static void setupI18nBaseProperties(Locale locale) {
+    private static void setupI18nBaseProperties(ConfigBuilder props, Locale locale) {
         if (locale !is null) {
             if (!props.hasProperty("user.language") && locale.language !is null) {
                 props.setProperty("user.language", locale.language);
@@ -75,12 +84,6 @@ struct Environment {
         }
     }
     
-    private static void initializeNativeProperties() {
-        /* Determine the language, country, variant, and encoding from the host,
-         * and store these in the user.language, user.country, user.variant and
-         * file.encoding system properties. */
-        setupI18nBaseProperties(Locale.getUserDefault());
-    }
 // dfmt on
 
 }
