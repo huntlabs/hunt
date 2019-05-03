@@ -49,8 +49,10 @@ import hunt.collection.Collections;
 import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 import hunt.Functions;
+import hunt.system.Environment;
 import hunt.system.Memory;
 import hunt.util.Common;
+import hunt.util.Configuration;
 import hunt.util.DateTime;
 
 import core.atomic;
@@ -61,6 +63,7 @@ import std.algorithm;
 import std.array;
 import std.conv;
 import std.datetime;
+import std.random;
 
 alias ReentrantLock = Mutex;
 
@@ -1462,11 +1465,16 @@ class ForkJoinPool : AbstractExecutorService {
      * @param task the task. Caller must ensure non-null.
      */
     final void externalPush(IForkJoinTask task) {
-        int r;                                // initialize caller's probe
-        if ((r = ThreadLocalRandom.getProbe()) == 0) {
-            ThreadLocalRandom.localInit();
-            r = ThreadLocalRandom.getProbe();
-        }
+        auto rnd = Random();
+        int r = rnd.front();
+        // FIXME: Needing refactor or cleanup -@zxp at 5/3/2019, 4:50:21 PM
+        // 
+        // initialize caller's probe
+        // if ((r = ThreadLocalRandom.getProbe()) == 0) {
+        //     ThreadLocalRandom.localInit();
+        //     r = ThreadLocalRandom.getProbe();
+        // }
+
         for (;;) {
             WorkQueue q;
             int md = mode, n;
@@ -1492,7 +1500,7 @@ class ForkJoinPool : AbstractExecutorService {
                 }
             }
             else if (!q.tryLockPhase()) // move if busy
-                r = ThreadLocalRandom.advanceProbe(r);
+                r = rnd.front(); // ThreadLocalRandom.advanceProbe(r);
             else {
                 if (q.lockedPush(task))
                     signalWork();
@@ -1504,6 +1512,19 @@ class ForkJoinPool : AbstractExecutorService {
     /**
      * Pushes a possibly-external submission.
      */
+    private IForkJoinTask externalSubmit(IForkJoinTask task) {
+        if (task is null)
+            throw new NullPointerException();
+        ForkJoinWorkerThread w = cast(ForkJoinWorkerThread)Thread.getThis(); 
+        WorkQueue q;
+        if ( w !is null && w.pool is this &&
+            (q = w.workQueue) !is null)
+            q.push(task);
+        else
+            externalPush(task);
+        return task;
+    }
+
     private ForkJoinTask!(T) externalSubmit(T)(ForkJoinTask!(T) task) {
         if (task is null)
             throw new NullPointerException();
@@ -1921,63 +1942,66 @@ class ForkJoinPool : AbstractExecutorService {
         workerNameLocker = new Object(); 
     }
 
-    // private static Object newInstanceFromSystemProperty(string property) {
-    //     string className = System.getProperty(property);
-    //     return (className is null)
-    //         ? null
-    //         : ClassLoader.getSystemClassLoader().loadClass(className)
-    //         .getConstructor().newInstance();
-    // }
+    private static Object newInstanceFrom(string className) {
+        return (className.empty) ? null : Object.factory(className);
+    }
 
     /**
      * Constructor for common pool using parameters possibly
      * overridden by system properties
      */
-    // private this(byte forCommonPoolOnly) {
-    //     int parallelism = -1;
-    //     ForkJoinWorkerThreadFactory fac = null;
-    //     UncaughtExceptionHandler handler = null;
-    //     try {  // ignore exceptions in accessing/parsing properties
-    //         string pp = System.getProperty
-    //             ("hunt.concurrency.ForkJoinPool.common.parallelism");
-    //         if (pp !is null)
-    //             parallelism = Integer.parseInt(pp);
-    //         fac = (ForkJoinWorkerThreadFactory) newInstanceFromSystemProperty(
-    //             "hunt.concurrency.ForkJoinPool.common.threadFactory");
-    //         handler = (UncaughtExceptionHandler) newInstanceFromSystemProperty(
-    //             "hunt.concurrency.ForkJoinPool.common.exceptionHandler");
-    //     } catch (Exception ignore) {
-    //     }
+    private this(byte forCommonPoolOnly) {
+        int parallelism = -1;
+        ForkJoinWorkerThreadFactory fac = null;
+        UncaughtExceptionHandler handler = null;
+        try {  // ignore exceptions in accessing/parsing properties
+            ConfigBuilder config = Environment.getProperties();
+            string pp = config.getProperty("hunt.concurrency.ForkJoinPool.common.parallelism");
+            if (!pp.empty) {
+                parallelism = pp.to!int();
+            }
 
-    //     if (fac is null) {
-    //         if (System.getSecurityManager() is null)
-    //             fac = defaultForkJoinWorkerThreadFactory;
-    //         else // use security-managed default
-    //             fac = new InnocuousForkJoinWorkerThreadFactory();
-    //     }
-    //     if (parallelism < 0 && // default 1 less than #cores
-    //         (parallelism = Runtime.getRuntime().availableProcessors() - 1) <= 0)
-    //         parallelism = 1;
-    //     if (parallelism > MAX_CAP)
-    //         parallelism = MAX_CAP;
+            string className = config.getProperty("hunt.concurrency.ForkJoinPool.common.threadFactory");
+            fac = cast(ForkJoinWorkerThreadFactory) newInstanceFrom(className);
 
-    //     long c = (((cast(long)(-parallelism) << TC_SHIFT) & TC_MASK) |
-    //               ((cast(long)(-parallelism) << RC_SHIFT) & RC_MASK));
-    //     int b = ((1 - parallelism) & SMASK) | (COMMON_MAX_SPARES << SWIDTH);
-    //     int n = (parallelism > 1) ? parallelism - 1 : 1;
-    //     n |= n >>> 1; n |= n >>> 2; n |= n >>> 4; n |= n >>> 8; n |= n >>> 16;
-    //     n = (n + 1) << 1;
+            className = config.getProperty("hunt.concurrency.ForkJoinPool.common.exceptionHandler");
+            handler = cast(UncaughtExceptionHandler) newInstanceFrom(className);
+        } catch (Exception ignore) {
+            version(HUNT_DEBUG) {
+                warning(ignore);
+            }
+        }
 
-    //     this.workerNamePrefix = "ForkJoinPool.commonPool-worker-";
-    //     this.workQueues = new WorkQueue[n];
-    //     this.factory = fac;
-    //     this.ueh = handler;
-    //     this.saturate = null;
-    //     this.keepAlive = DEFAULT_KEEPALIVE;
-    //     this.bounds = b;
-    //     this.mode = parallelism;
-    //     this.ctl = c;
-    // }
+        if (fac is null) {
+            // if (System.getSecurityManager() is null)
+                fac = defaultForkJoinWorkerThreadFactory;
+            // else // use security-managed default
+            //     fac = new InnocuousForkJoinWorkerThreadFactory();
+        }
+        if (parallelism < 0 && // default 1 less than #cores
+            (parallelism = totalCPUs - 1) <= 0)
+            parallelism = 1;
+        if (parallelism > MAX_CAP)
+            parallelism = MAX_CAP;
+
+        long c = (((cast(long)(-parallelism) << TC_SHIFT) & TC_MASK) |
+                  ((cast(long)(-parallelism) << RC_SHIFT) & RC_MASK));
+        int b = ((1 - parallelism) & SMASK) | (COMMON_MAX_SPARES << SWIDTH);
+        int n = (parallelism > 1) ? parallelism - 1 : 1;
+        n |= n >>> 1; n |= n >>> 2; n |= n >>> 4; n |= n >>> 8; n |= n >>> 16;
+        n = (n + 1) << 1;
+
+        this.workerNamePrefix = "ForkJoinPool.commonPool-worker-";
+        this.workerNameLocker = new Object(); 
+        this.workQueues = new WorkQueue[n];
+        this.factory = fac;
+        this.ueh = handler;
+        this.saturate = null;
+        this.keepAlive = DEFAULT_KEEPALIVE;
+        this.bounds = b;
+        this.mode = parallelism;
+        this.ctl = c;
+    }
 
     /**
      * Returns the common pool instance. This pool is statically
@@ -2032,8 +2056,8 @@ class ForkJoinPool : AbstractExecutorService {
      *         scheduled for execution
      */
     void execute(IForkJoinTask task) {
-        implementationMissing(false);
-        // externalSubmit(task);
+        // implementationMissing(false);
+        externalSubmit(task);
     }
 
     // AbstractExecutorService methods
@@ -2047,10 +2071,11 @@ class ForkJoinPool : AbstractExecutorService {
         if (task is null)
             throw new NullPointerException();
         IForkJoinTask job = cast(IForkJoinTask) task;
-        if (job is null) // avoid re-wrap
+        if (job is null) { // avoid re-wrap
+            warning("job is null");
             job = new RunnableExecuteAction(task);
-        // externalSubmit(job);
-        implementationMissing(false);
+        }
+        externalSubmit(job);
     }
 
     /**
@@ -2691,46 +2716,24 @@ class ForkJoinPool : AbstractExecutorService {
         return new AdaptedCallable!(T)(callable);
     }
 
-    // VarHandle mechanics
-    // private static final VarHandle CTL;
-    // private static final VarHandle MODE;
-    // static final VarHandle QA;
-
     shared static this() {
-        // try {
-        //     MethodHandles.Lookup l = MethodHandles.lookup();
-        //     CTL = l.findVarHandle(ForkJoinPool.class, "ctl", long.class);
-        //     MODE = l.findVarHandle(ForkJoinPool.class, "mode", int.class);
-        //     QA = MethodHandles.arrayElementVarHandle(ForkJoinTask[].class);
-        // } catch (ReflectiveOperationException e) {
-        //     throw new ExceptionInInitializerError(e);
-        // }
-
-        // Reduce the risk of rare disastrous classloading in first call to
-        // LockSupport.park: https://bugs.openjdk.java.net/browse/JDK-8074773
-        // Class<?> ensureLoaded = LockSupport.class;
-
         int commonMaxSpares = DEFAULT_COMMON_MAX_SPARES;
-        // try {
-        //     string p = System.getProperty
-        //         ("hunt.concurrency.ForkJoinPool.common.maximumSpares");
-        //     if (p !is null)
-        //         commonMaxSpares = Integer.parseInt(p);
-        // } catch (Exception ignore) {}
+        try {
+            ConfigBuilder config = Environment.getProperties();
+            string p = config.getProperty
+                ("hunt.concurrency.ForkJoinPool.common.maximumSpares");
+            if (!p.empty())
+                commonMaxSpares = p.to!int();
+        } catch (Exception ignore) {
+            version(HUNT_DEBUG) warning(ignore.toString());
+        }
         COMMON_MAX_SPARES = commonMaxSpares;
 
         defaultForkJoinWorkerThreadFactory =
             new DefaultForkJoinWorkerThreadFactory();
-        // modifyThreadPermission = new RuntimePermission("modifyThread");
-
-        // common = AccessController.doPrivileged(new PrivilegedAction<>() {
-        //     ForkJoinPool run() {
-        //         return new ForkJoinPool((byte)0); }});
-        common = new ForkJoinPool(cast(byte)1);
-
+        common = new ForkJoinPool(cast(byte)0);
         COMMON_PARALLELISM = max(common.mode & SMASK, 1);
     }
-
 }
 
 

@@ -53,24 +53,19 @@ import hunt.util.Common;
 import hunt.util.DateTime;
 import hunt.util.ObjectUtils;
 
+import hunt.logging.ConsoleLogger;
+
 import core.time;
 import std.conv;
 
-// import java.lang.invoke.MethodHandles;
-// import java.lang.invoke.VarHandle;
-// import java.util.concurrent.locks.LockSupport;
-// import java.util.function.BiConsumer;
-// import java.util.function.BiFunction;
-// import java.util.function.Consumer;
-// import java.util.function.Function;
-// import java.util.function.Supplier;
 
-
-    // Modes for Completion.tryFire. Signedness matters.
+// Modes for Completion.tryFire. Signedness matters.
 enum int SYNC   =  0;
 enum int ASYNC  =  1;
 enum int NESTED = -1;
 
+/**
+*/
 abstract class AbstractCompletableFuture {
     Object result;       // Either the result or boxed AltResult
     Completion stack;    // Top of Treiber stack of dependent actions
@@ -167,16 +162,16 @@ abstract class AbstractCompletableFuture {
      * @return the new CompletableFuture
      */
     static CompletableFuture!(Void) runAsync(Runnable runnable) {
-        return asyncRunStage(ASYNC_POOL, runnable);
+        if(runnable is null) 
+            throw new NullPointerException();
+        return asyncRunStage(ASYNC_POOL, { runnable.run(); });
     }
 
 
     static CompletableFuture!(Void) runAsync(Action act) {
-        return asyncRunStage(ASYNC_POOL, new class Runnable {
-            void run() {
-                act();
-            }
-        });
+        if(act is null) 
+            throw new NullPointerException();
+        return asyncRunStage(ASYNC_POOL, act);
     }
 
     /**
@@ -191,7 +186,9 @@ abstract class AbstractCompletableFuture {
      */
     static CompletableFuture!(Void) runAsync(Runnable runnable,
                                                    Executor executor) {
-        return asyncRunStage(screenExecutor(executor), runnable);
+        if(runnable is null) 
+            throw new NullPointerException();
+        return asyncRunStage(screenExecutor(executor), { runnable.run(); });
     }
 
     /**
@@ -217,7 +214,7 @@ abstract class AbstractCompletableFuture {
     }
 
 
-    static CompletableFuture!(Void) asyncRunStage(Executor e, Runnable f) {
+    static CompletableFuture!(Void) asyncRunStage(Executor e, Action f) {
         if (f is null) throw new NullPointerException();
         CompletableFuture!(Void) d = new CompletableFuture!(Void)();
         e.execute(new AsyncRun(d, f));
@@ -488,7 +485,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      * Returns the encoding of the given (non-null) exception as a
      * wrapped CompletionException unless it is one already.
      */
-    static AltResult encodeThrowable(Throwable x) {
+    private static AltResult encodeThrowable(Throwable x) {
         CompletionException ex = cast(CompletionException)x;
         if(ex is null) {
             return new AltResult(new CompletionException(x));
@@ -2847,9 +2844,10 @@ final class AsyncSupply(T) : ForkJoinTask!(Void),
 
 
    
-static final class AsyncRun : ForkJoinTask!(Void), Runnable, AsynchronousCompletionTask {
-    CompletableFuture!(Void) dep; Runnable fn;
-    this(CompletableFuture!(Void) dep, Runnable fn) {
+final class AsyncRun : ForkJoinTask!(Void), Runnable, AsynchronousCompletionTask {
+    CompletableFuture!(Void) dep; Action fn;
+    
+    this(CompletableFuture!(Void) dep, Action fn) {
         this.dep = dep; this.fn = fn;
     }
 
@@ -2858,14 +2856,15 @@ static final class AsyncRun : ForkJoinTask!(Void), Runnable, AsynchronousComplet
     final override bool exec() { run(); return false; }
 
     void run() {
-        CompletableFuture!(Void) d; Runnable f;
+        CompletableFuture!(Void) d; Action f;
         if ((d = dep) !is null && (f = fn) !is null) {
             dep = null; fn = null;
             if (d.result is null) {
                 try {
-                    f.run();
+                    f();
                     d.completeNull();
                 } catch (Throwable ex) {
+                    warning(ex);
                     d.completeThrowable(ex);
                 }
             }

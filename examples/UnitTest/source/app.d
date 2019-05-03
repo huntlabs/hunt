@@ -53,11 +53,11 @@ void main()
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
-	// testUnits!(CompletableFutureTest);
+	testUnits!(CompletableFutureTest);
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
-	testUnits!(MimeTypeTest);
+	// testUnits!(MimeTypeTest);
 	// testUnits!(NullableTest);
 	// testUnits!(NumberTest);
 	// // TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
