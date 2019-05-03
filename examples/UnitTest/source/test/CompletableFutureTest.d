@@ -32,13 +32,13 @@ https://github.com/manouti/completablefuture-examples
 class CompletableFutureTest {
 
     void testCompletedFuture01() {
-        CompletableFuture!String cf = AbstractCompletableFuture.completedFuture(new String("message"));
+        CompletableFuture!String cf = completedFuture(new String("message"));
         assertTrue(cf.isDone());
         assertEquals(new String("message"), cf.getNow(null));
     }
 
     void testRunAsync() {
-        CompletableFuture!Void cf = AbstractCompletableFuture.runAsync(() {
+        CompletableFuture!Void cf = runAsync(() {
             info("running...");
             assertTrue(ThreadEx.currentThread().isDaemon());
             randomSleep();
