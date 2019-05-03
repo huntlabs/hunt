@@ -48,16 +48,32 @@ class CompletableFutureTest {
     //     assertTrue(cf.isDone());
     // }
 
-    void testThenApply() {
-        CompletableFuture!String cf = completedFuture(new String("message"))
-            .thenApply!(String)( delegate String (String s) {
-                // assertFalse(Thread.getThis().isDaemon());
-                trace(s.toString());
-                return s.toUpperCase();
-        });
-        String value = cf.getNow(null);
-        trace(value.toString());
-        assertEquals(new String("MESSAGE"), value);
+    // void testThenApply() {
+    //     CompletableFuture!String cf = completedFuture(new String("message"))
+    //         .thenApply!(String)( delegate String (String s) {
+    //             // assertFalse(Thread.getThis().isDaemon());
+    //             trace(s.toString());
+    //             return s.toUpperCase();
+    //         });
+    //     String value = cf.getNow(null);
+    //     trace(value.toString());
+    //     assertEquals(new String("MESSAGE"), value);
+    // }
+
+    void testThenApplyAsync() {
+        void doTest() {
+            CompletableFuture!String cf = completedFuture(new String("message"))
+                .thenApplyAsync!(String)(delegate String (String s) {
+                    assertTrue(Thread.getThis().isDaemon());
+                    randomSleep();
+                    return s.toUpperCase();
+                });
+            assertNull(cf.getNow(null));
+            assertEquals(new String("MESSAGE"), cf.join());
+        }
+
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
     }
 
     private static void randomSleep() {
