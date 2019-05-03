@@ -31,17 +31,16 @@ https://github.com/manouti/completablefuture-examples
 */
 class CompletableFutureTest {
 
-    // void testCompletedFuture01() {
-    //     CompletableFuture!String cf = AbstractCompletableFuture.completedFuture(new String("message"));
-    //     assertTrue(cf.isDone());
-    //     assertEquals(new String("message"), cf.getNow(null));
-    // }
+    void testCompletedFuture01() {
+        CompletableFuture!String cf = AbstractCompletableFuture.completedFuture(new String("message"));
+        assertTrue(cf.isDone());
+        assertEquals(new String("message"), cf.getNow(null));
+    }
 
     void testRunAsync() {
         CompletableFuture!Void cf = AbstractCompletableFuture.runAsync(() {
+            info("running...");
             assertTrue(ThreadEx.currentThread().isDaemon());
-            // FIXME: Needing refactor or cleanup -@zxp at 5/2/2019, 10:41:12 PM
-            // 
             randomSleep();
         });
         assertFalse(cf.isDone());
@@ -55,8 +54,10 @@ class CompletableFutureTest {
             int r = uniform(0, 1000);
             tracef("sleeping %d msecs", r);
             Thread.sleep(r.msecs);
+            trace("wakeup now");
         } catch (InterruptedException e) {
             // ...
+            warning(e.toString());
         }
     }
 
@@ -64,6 +65,7 @@ class CompletableFutureTest {
         try {
             trace("sleeping 2 secondes");
             Thread.sleep(2.seconds);
+            trace("wakeup now");
         } catch (InterruptedException e) {
             // ...
         }
