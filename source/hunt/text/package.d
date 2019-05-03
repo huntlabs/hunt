@@ -11,6 +11,7 @@
 
 module hunt.text;
 
+public import hunt.text.Charset;
 public import hunt.text.Common;
 public import hunt.text.PathMatcher;
 public import hunt.text.Pattern;
