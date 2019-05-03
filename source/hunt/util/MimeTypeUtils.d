@@ -11,19 +11,18 @@
 
 module hunt.util.MimeTypeUtils;
 
-import hunt.util.AcceptMimeType;
-import hunt.util.MimeType;
 
 import hunt.collection;
-import hunt.logging;
-
-import hunt.text.Charset;
 import hunt.Exceptions;
+import hunt.logging.ConsoleLogger;
 import hunt.text;
+import hunt.util.AcceptMimeType;
+import hunt.util.MimeType;
 import hunt.util.Traits;
 
 import std.algorithm;
 import std.array;
+import std.concurrency : initOnce;
 import std.container.array;
 import std.conv;
 import std.file;
@@ -39,45 +38,52 @@ import std.uni;
 class MimeTypeUtils {
 
     // private __gshared static ByteBuffer[string] TYPES; // = new ArrayTrie<>(512);
-    private __gshared static Map!(string, string) __dftMimeMap; 
-    private __gshared static Map!(string, string) __inferredEncodings;
-    private __gshared static Map!(string, string) __assumedEncodings;
+    private static Map!(string, string) __dftMimeMap() {
+        __gshared Map!(string, string) m;
+        return initOnce!m({
+            Map!(string, string) _m = new HashMap!(string, string)();
+            string resourcePath = dirName(thisExePath()) ~ "/resources";
+            string resourceName = buildPath(resourcePath, "mime.properties");
+            loadMimeProperties(resourceName, _m);
+            return _m;
+        }());
+    }
 
+    private __gshared Map!(string, string) _inferredEncodings;
+    private __gshared Map!(string, string) _assumedEncodings;
+
+    private static void initializeEncodingsMap() {
+        __gshared bool _isEncodingsLoaded = false;
+        initOnce!(_isEncodingsLoaded)({
+            _inferredEncodings = new HashMap!(string, string)();
+            _assumedEncodings = new HashMap!(string, string)();
+
+            foreach (MimeType type ; MimeType.values) {
+                CACHE[type.toString()] = type;
+                // TYPES[type.toString()] = type.asBuffer();
+
+                auto charset = type.toString().indexOf(";charset=");
+                if (charset > 0) {
+                    string alt = type.toString().replace(";charset=", "; charset=");
+                    CACHE[alt] = type;
+                    // TYPES[alt] = type.asBuffer();
+                }
+
+                if (type.isCharsetAssumed())
+                    _assumedEncodings.put(type.asString(), type.getCharsetString());
+            }
+
+            string resourcePath = dirName(thisExePath()) ~ "/resources";
+            string resourceName = buildPath(resourcePath, "encoding.properties");
+            loadEncodingProperties(resourceName);
+            return true;
+        }());
+    }
 
     __gshared MimeType[string] CACHE; 
 
 
-    shared static this() {
-        __dftMimeMap = new HashMap!(string, string)();
-        __inferredEncodings = new HashMap!(string, string)();
-        __assumedEncodings = new HashMap!(string, string)();
-
-        foreach (MimeType type ; MimeType.values) {
-            CACHE[type.toString()] = type;
-            // TYPES[type.toString()] = type.asBuffer();
-
-            auto charset = type.toString().indexOf(";charset=");
-            if (charset > 0) {
-                string alt = type.toString().replace(";charset=", "; charset=");
-                CACHE[alt] = type;
-                // TYPES[alt] = type.asBuffer();
-            }
-
-            if (type.isCharsetAssumed())
-                __assumedEncodings.put(type.asString(), type.getCharsetString());
-        }
-
-        string resourcePath = dirName(thisExePath()) ~ "/resources";
-
-        string resourceName = buildPath(resourcePath, "mime.properties");
-        loadMimeProperties(resourceName);
-
-        resourceName = buildPath(resourcePath, "encoding.properties");
-        loadEncodingProperties(resourceName);
-        
-    }
-
-    private static void loadMimeProperties(string fileName) {
+    private static void loadMimeProperties(string fileName, Map!(string, string) m) {
         if(!exists(fileName)) {
             version(HUNT_DEBUG) warningf("File does not exist: %s", fileName);
             return;
@@ -98,12 +104,12 @@ class MimeTypeUtils {
                     string key = parts[0].strip().toLower();
                     string value = normalizeMimeType(parts[1].strip());
                     // trace(key, " = ", value);
-                    __dftMimeMap.put(key, value);
+                    m.put(key, value);
                 }
 
-                if (__dftMimeMap.size() == 0) {
+                if (m.size() == 0) {
                     warningf("Empty mime types at %s", fileName);
-                } else if (__dftMimeMap.size() < count) {
+                } else if (m.size() < count) {
                     warningf("Duplicate or null mime-type extension in resource: %s", fileName);
                 }            
             } catch(Exception ex) {
@@ -138,14 +144,14 @@ class MimeTypeUtils {
                 string charset = parts[1].strip();
                 version(HUNT_DEBUG) trace(t, " = ", charset);
                 if(charset.startsWith("-"))
-                    __assumedEncodings.put(t, charset[1..$]);
+                    _assumedEncodings.put(t, charset[1..$]);
                 else
-                    __inferredEncodings.put(t, charset);
+                    _inferredEncodings.put(t, charset);
             }
 
-            if (__inferredEncodings.size() == 0) {
+            if (_inferredEncodings.size() == 0) {
                 warningf("Empty encodings at %s", fileName);
-            } else if (__inferredEncodings.size() + __inferredEncodings.size() < count) {
+            } else if (_inferredEncodings.size() + _assumedEncodings.size() < count) {
                 warningf("Null or duplicate encodings in resource: %s", fileName);
             }            
         } catch(Exception ex) {
@@ -200,13 +206,13 @@ class MimeTypeUtils {
 
                 string ext = std.uni.toLower(filename[i + 1 .. $]);
                 if (type == null)
-                    type = __dftMimeMap.get(ext);
+                    type = __dftMimeMap().get(ext);
             }
         }
 
         if (type == null) {
             if (type == null)
-                type = __dftMimeMap.get("*");
+                type = __dftMimeMap().get("*");
         }
 
         return type;
@@ -232,17 +238,17 @@ class MimeTypeUtils {
                     break;
 
                 string ext = std.uni.toLower(filename[i + 1 .. $]);
-                if (_mimeMap !is null)
+                if (_mimeMap !is null && _mimeMap.containsKey(ext))
                     type = _mimeMap.get(ext);
-                if (type == null)
+                if (type == null && __dftMimeMap.containsKey(ext))
                     type = __dftMimeMap.get(ext);
             }
         }
 
         if (type == null) {
-            if (_mimeMap !is null)
+            if (_mimeMap !is null && _mimeMap.containsKey("*"))
                 type = _mimeMap.get("*");
-            if (type == null)
+            if (type == null && __dftMimeMap.containsKey("*"))
                 type = __dftMimeMap.get("*");
         }
 
@@ -375,7 +381,8 @@ class MimeTypeUtils {
      * @return Map of mime type to charset
      */
     static Map!(string, string) getInferredEncodings() {
-        return __inferredEncodings;
+        initializeEncodingsMap();
+        return _inferredEncodings;
     }
 
     /**
@@ -386,15 +393,16 @@ class MimeTypeUtils {
      * @return Map of mime type to charset
      */
     static Map!(string, string) getAssumedEncodings() {
-        return __inferredEncodings;
+        initializeEncodingsMap();
+        return _assumedEncodings;
     }
 
     static string getCharsetInferredFromContentType(string contentType) {
-        return __inferredEncodings.get(contentType);
+        return getInferredEncodings().get(contentType);
     }
 
     static string getCharsetAssumedFromContentType(string contentType) {
-        return __assumedEncodings.get(contentType);
+        return getAssumedEncodings().get(contentType);
     }
 
     static string getContentTypeWithoutCharset(string value) {
