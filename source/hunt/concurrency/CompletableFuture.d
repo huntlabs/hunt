@@ -1403,15 +1403,15 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     CompletableFuture!(U) thenApplyAsync(U)(Function!(T, U) fn) {
-        return uniApplyStage(defaultExecutor(), fn);
+        return uniApplyStage!(U)(defaultExecutor(), fn);
     }
 
     CompletableFuture!(U) thenApplyAsync(U)(Function!(T, U) fn, Executor executor) {
-        return uniApplyStage(screenExecutor(executor), fn);
+        return uniApplyStage!(U)(screenExecutor(executor), fn);
     }
 
     CompletableFuture!(Void) thenAccept(Consumer!(T) action) {
-        return uniAcceptStage(null, action);
+        return uniAcceptStage(cast(Executor)null, action);
     }
 
     CompletableFuture!(Void) thenAcceptAsync(Consumer!(T) action) {
