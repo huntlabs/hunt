@@ -1,6 +1,5 @@
 module hunt.concurrency.ThreadLocalRandom;
 
-import hunt.concurrency.thread.ThreadEx;
 import hunt.concurrency.atomic.AtomicHelper;
 import hunt.util.DateTime;
 import std.datetime;
@@ -34,15 +33,24 @@ import std.datetime;
  * seed unless the {@linkplain System#getProperty system property}
  * {@code java.util.secureRandomSeed} is set to {@code true}.
  *
- * @since 1.7
  * @author Doug Lea
  */
-public class ThreadLocalRandom {
+class ThreadLocalRandom {
+    // These fields are used to build the high-performance PRNGs in the
+    // concurrent code, and we can not risk accidental false sharing.    
+    /** The current seed for a ThreadLocalRandom */
+    static long threadLocalRandomSeed = 0;
 
-    static shared long seeder;
+    /** Probe hash value; nonzero if threadLocalRandomSeed initialized */
+    static int threadLocalRandomProbe = 0;
+
+    /** Secondary seed isolated from public ThreadLocalRandom sequence */
+    static int threadLocalRandomSecondarySeed = 0;
+
+    static shared long seeder = 0;
     
     /** Generates per-thread initialization/probe field */
-    private static shared int probeGenerator;
+    private static shared int probeGenerator = 0;
 
     /**
      * The seed increment.
@@ -98,9 +106,8 @@ public class ThreadLocalRandom {
         int p = AtomicHelper.increment(probeGenerator, PROBE_INCREMENT);
         int probe = (p == 0) ? 1 : p; // skip 0
         long seed = mix64(AtomicHelper.getAndAdd(seeder, SEEDER_INCREMENT));
-        ThreadEx t = ThreadEx.currentThread();
-        t.threadLocalRandomSeed = seed;
-        t.threadLocalRandomProbe = probe;
+        threadLocalRandomSeed = seed;
+        threadLocalRandomProbe = probe;
     }
 
     /**
@@ -109,8 +116,7 @@ public class ThreadLocalRandom {
      * can be used to force initialization on zero return.
      */
     static int getProbe() {
-        ThreadEx t = ThreadEx.currentThread();
-        return t.threadLocalRandomProbe;
+        return threadLocalRandomProbe;
     }
 
     /**
@@ -121,8 +127,7 @@ public class ThreadLocalRandom {
         probe ^= probe << 13;   // xorshift
         probe ^= probe >>> 17;
         probe ^= probe << 5;
-        ThreadEx t = ThreadEx.currentThread();
-        t.threadLocalRandomProbe = probe;
+        threadLocalRandomProbe = probe;
         return probe;
     }    
 
@@ -131,15 +136,14 @@ public class ThreadLocalRandom {
      */
     static int nextSecondarySeed() {
         int r;
-        ThreadEx t = ThreadEx.currentThread();
-        if ((r = t.threadLocalRandomSecondarySeed) != 0) {
+        if ((r = threadLocalRandomSecondarySeed) != 0) {
             r ^= r << 13;   // xorshift
             r ^= r >>> 17;
             r ^= r << 5; 
         }
         else if ((r = mix32(AtomicHelper.getAndAdd(seeder, SEEDER_INCREMENT))) == 0)
             r = 1; // avoid zero
-        t.threadLocalRandomSecondarySeed = r;
+        threadLocalRandomSecondarySeed = r;
         return r;
     }
 }

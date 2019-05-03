@@ -268,19 +268,6 @@ class ThreadEx : Thread, Runnable {
     Object parkBlocker;
     ThreadState state;
     
-    // The following three initially uninitialized fields are exclusively
-    // managed by class ThreadLocalRandom. These
-    // fields are used to build the high-performance PRNGs in the
-    // concurrent code, and we can not risk accidental false sharing.
-
-    /** The current seed for a ThreadLocalRandom */
-    long threadLocalRandomSeed;
-
-    /** Probe hash value; nonzero if threadLocalRandomSeed initialized */
-    int threadLocalRandomProbe;
-
-    /** Secondary seed isolated from public ThreadLocalRandom sequence */
-    int threadLocalRandomSecondarySeed;
 
     /* The object in which this thread is blocked in an interruptible I/O
      * operation, if any.  The blocker's interrupt method should be invoked

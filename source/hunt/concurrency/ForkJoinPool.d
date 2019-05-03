@@ -63,7 +63,6 @@ import std.algorithm;
 import std.array;
 import std.conv;
 import std.datetime;
-import std.random;
 
 alias ReentrantLock = Mutex;
 
@@ -1465,15 +1464,12 @@ class ForkJoinPool : AbstractExecutorService {
      * @param task the task. Caller must ensure non-null.
      */
     final void externalPush(IForkJoinTask task) {
-        auto rnd = Random();
-        int r = rnd.front();
-        // FIXME: Needing refactor or cleanup -@zxp at 5/3/2019, 4:50:21 PM
-        // 
         // initialize caller's probe
-        // if ((r = ThreadLocalRandom.getProbe()) == 0) {
-        //     ThreadLocalRandom.localInit();
-        //     r = ThreadLocalRandom.getProbe();
-        // }
+        int r = ThreadLocalRandom.getProbe();
+        if (r == 0) {
+            ThreadLocalRandom.localInit();
+            r = ThreadLocalRandom.getProbe();
+        }
 
         for (;;) {
             WorkQueue q;
@@ -1500,7 +1496,7 @@ class ForkJoinPool : AbstractExecutorService {
                 }
             }
             else if (!q.tryLockPhase()) // move if busy
-                r = rnd.front(); // ThreadLocalRandom.advanceProbe(r);
+                r = ThreadLocalRandom.advanceProbe(r);
             else {
                 if (q.lockedPush(task))
                     signalWork();
@@ -2017,7 +2013,6 @@ class ForkJoinPool : AbstractExecutorService {
      * @since 1.8
      */
     static ForkJoinPool commonPool() {
-        // assert common !is null : "static init error";
         return common;
     }
 

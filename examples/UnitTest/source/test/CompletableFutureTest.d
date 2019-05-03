@@ -54,7 +54,7 @@ class CompletableFutureTest {
             int r = uniform(0, 1000);
             tracef("sleeping %d msecs", r);
             Thread.sleep(r.msecs);
-            trace("wakeup now");
+            trace("waked up now");
         } catch (InterruptedException e) {
             // ...
             warning(e.toString());
@@ -65,7 +65,7 @@ class CompletableFutureTest {
         try {
             trace("sleeping 2 secondes");
             Thread.sleep(2.seconds);
-            trace("wakeup now");
+            trace("waked up now");
         } catch (InterruptedException e) {
             // ...
         }
