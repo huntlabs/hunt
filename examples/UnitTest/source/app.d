@@ -41,6 +41,7 @@ void main()
 	writeln("Memory page: ", pageSize);
 	writeln("TimeZone: ", getSystemTimeZoneId());
 	writeln("Locale: ", Locale.getUserDefault());
+	tracef("isDaemon: %s", Thread.getThis().isDaemon());
 
 	// // testClone();
 

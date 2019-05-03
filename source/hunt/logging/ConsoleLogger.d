@@ -221,7 +221,7 @@ class ConsoleLogger {
         string time_prior = Clock.currTime.toString();
         string tid = std.conv.to!string(getTid());
 
-        // writeln(func);
+        // writeln("fullname: ",func);
         string fun = func;
         ptrdiff_t index = lastIndexOf(func, '.');
         if (index != -1) {
