@@ -610,7 +610,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if (f is null) throw new NullPointerException();
         Object r;
         if ((r = result) !is null)
-            return uniApplyNow(r, e, f);
+            return uniApplyNow!(V)(r, e, f);
         CompletableFuture!(V) d = newIncompleteFuture!(V)();
         unipush(new UniApply!(T,V)(e, d, this, f));
         return d;
@@ -632,7 +632,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                 e.execute(new UniApply!(T,V)(null, d, this, f));
             } else {
                 T t = cast(T) r;
-                d.result = d.encodeValue(f.apply(t));
+                d.result = d.encodeValue(f(t));
             }
         } catch (Throwable ex) {
             d.result = encodeThrowable(ex);
@@ -1399,7 +1399,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     CompletableFuture!(U) thenApply(U)(Function!(T, U) fn) {
-        return uniApplyStage(null, fn);
+        return uniApplyStage!(U)(cast(Executor)null, fn);
     }
 
     CompletableFuture!(U) thenApplyAsync(U)(Function!(T, U) fn) {
@@ -2152,11 +2152,11 @@ static final class UniApply(T,V) : UniCompletion {
         super(executor, dep, src); this.fn = fn;
     }
 
-    final CompletableFuture!(V) tryFire(int mode) {
+    final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d; CompletableFuture!(T) a;
         Object r; Throwable x; Function!(T,V) f;
-        if ((d = dep) is null || (f = fn) is null
-            || (a = src) is null || (r = a.result) is null)
+        if ((d = cast(CompletableFuture!(V))dep) is null || (f = fn) is null
+            || (a = cast(CompletableFuture!(T))src) is null || (r = a.result) is null)
             return null;
 
         tryComplete: if (d.result is null) {
@@ -2164,7 +2164,7 @@ static final class UniApply(T,V) : UniCompletion {
             if (ar !is null) {
                 if ((x = ar.ex) !is null) {
                     d.completeThrowable(x, r);
-                    break tryComplete;
+                    goto tryComplete;
                 }
                 r = null;
             }

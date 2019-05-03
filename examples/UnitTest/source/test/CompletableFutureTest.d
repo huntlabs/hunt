@@ -31,23 +31,34 @@ https://github.com/manouti/completablefuture-examples
 */
 class CompletableFutureTest {
 
-    void testCompletedFuture01() {
-        CompletableFuture!String cf = completedFuture(new String("message"));
-        assertTrue(cf.isDone());
-        assertEquals(new String("message"), cf.getNow(null));
-    }
+    // void testCompletedFuture01() {
+    //     CompletableFuture!String cf = completedFuture(new String("message"));
+    //     assertTrue(cf.isDone());
+    //     assertEquals(new String("message"), cf.getNow(null));
+    // }
 
-    void testRunAsync() {
-        CompletableFuture!Void cf = runAsync(() {
-            info("running...");
-            assertTrue(ThreadEx.currentThread().isDaemon());
-            randomSleep();
+    // void testRunAsync() {
+    //     CompletableFuture!Void cf = runAsync(() {
+    //         info("running...");
+    //         assertTrue(ThreadEx.currentThread().isDaemon());
+    //         randomSleep();
+    //     });
+    //     assertFalse(cf.isDone());
+    //     sleepEnough();
+    //     assertTrue(cf.isDone());
+    // }
+
+    void testThenApply() {
+        CompletableFuture!String cf = completedFuture(new String("message"))
+            .thenApply!(String)( delegate String (String s) {
+                assertFalse(Thread.getThis().isDaemon());
+                trace(s.toString());
+                return s.toUpperCase();
         });
-        assertFalse(cf.isDone());
-        sleepEnough();
-        assertTrue(cf.isDone());
+        String value = cf.getNow(null);
+        trace(value.toString());
+        assertEquals(new String("MESSAGE"), value);
     }
-
 
     private static void randomSleep() {
         try {
