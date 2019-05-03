@@ -12,6 +12,7 @@
 module hunt.String;
 
 import hunt.Nullable;
+import std.string;
 
 /**
  * The {@code String} class represents character strings. All
@@ -191,7 +192,7 @@ final class String : Nullable!string {
      * an empty character sequence.  Note that use of this constructor is
      * unnecessary since Strings are immutable.
      */
-    public String() {
+    String() {
         this.value = "".value;
         this.coder = "".coder;
     }
@@ -207,7 +208,7 @@ final class String : Nullable!string {
      *         A {@code String}
      */
     @HotSpotIntrinsicCandidate
-    public String(String original) {
+    String(String original) {
         this.value = original.value;
         this.coder = original.coder;
         this.hash = original.hash;
@@ -222,7 +223,7 @@ final class String : Nullable!string {
      * @param  value
      *         The initial value of the string
      */
-    public String(char value[]) {
+    String(char value[]) {
         this(value, 0, value.length, null);
     }
 
@@ -247,7 +248,7 @@ final class String : Nullable!string {
      *          If {@code offset} is negative, {@code count} is negative, or
      *          {@code offset} is greater than {@code value.length - count}
      */
-    public String(char value[], int offset, int count) {
+    String(char value[], int offset, int count) {
         this(value, offset, count, rangeCheck(value, offset, count));
     }
 
@@ -284,7 +285,7 @@ final class String : Nullable!string {
      *
      * @since  1.5
      */
-    public String(int[] codePoints, int offset, int count) {
+    String(int[] codePoints, int offset, int count) {
         checkBoundsOffCount(offset, count, codePoints.length);
         if (count == 0) {
             this.value = "".value;
@@ -344,7 +345,7 @@ final class String : Nullable!string {
      * @see  #String(byte[])
      */
     @Deprecated(since="1.1")
-    public String(byte ascii[], int hibyte, int offset, int count) {
+    String(byte ascii[], int hibyte, int offset, int count) {
         checkBoundsOffCount(offset, count, ascii.length);
         if (count == 0) {
             this.value = "".value;
@@ -396,7 +397,7 @@ final class String : Nullable!string {
      * @see  #String(byte[])
      */
     @Deprecated(since="1.1")
-    public String(byte ascii[], int hibyte) {
+    String(byte ascii[], int hibyte) {
         this(ascii, hibyte, 0, ascii.length);
     }
 
@@ -433,7 +434,7 @@ final class String : Nullable!string {
      *
      * @since  1.1
      */
-    public String(byte bytes[], int offset, int length, String charsetName)
+    String(byte bytes[], int offset, int length, String charsetName)
             throws UnsupportedEncodingException {
         if (charsetName == null)
             throw new NullPointerException("charsetName");
@@ -474,7 +475,7 @@ final class String : Nullable!string {
      *
      * @since  1.6
      */
-    public String(byte bytes[], int offset, int length, Charset charset) {
+    String(byte bytes[], int offset, int length, Charset charset) {
         if (charset == null)
             throw new NullPointerException("charset");
         checkBoundsOffCount(offset, length, bytes.length);
@@ -507,7 +508,7 @@ final class String : Nullable!string {
      *
      * @since  1.1
      */
-    public String(byte bytes[], String charsetName)
+    String(byte bytes[], String charsetName)
             throws UnsupportedEncodingException {
         this(bytes, 0, bytes.length, charsetName);
     }
@@ -532,7 +533,7 @@ final class String : Nullable!string {
      *
      * @since  1.6
      */
-    public String(byte bytes[], Charset charset) {
+    String(byte bytes[], Charset charset) {
         this(bytes, 0, bytes.length, charset);
     }
 
@@ -562,7 +563,7 @@ final class String : Nullable!string {
      *
      * @since  1.1
      */
-    public String(byte bytes[], int offset, int length) {
+    String(byte bytes[], int offset, int length) {
         checkBoundsOffCount(offset, length, bytes.length);
         StringCoding.Result ret = StringCoding.decode(bytes, offset, length);
         this.value = ret.value;
@@ -585,7 +586,7 @@ final class String : Nullable!string {
      *
      * @since  1.1
      */
-    public String(byte[] bytes) {
+    String(byte[] bytes) {
         this(bytes, 0, bytes.length);
     }
 
@@ -598,7 +599,7 @@ final class String : Nullable!string {
      * @param  buffer
      *         A {@code StringBuffer}
      */
-    public String(StringBuffer buffer) {
+    String(StringBuffer buffer) {
         this(buffer.toString());
     }
 
@@ -617,7 +618,7 @@ final class String : Nullable!string {
      *
      * @since  1.5
      */
-    public String(StringBuilder builder) {
+    String(StringBuilder builder) {
         this(builder, null);
     }
 
@@ -629,7 +630,7 @@ final class String : Nullable!string {
      * @return  the length of the sequence of characters represented by this
      *          object.
      */
-    public int length() {
+    int length() {
         return value.length >> coder();
     }
 
@@ -641,7 +642,7 @@ final class String : Nullable!string {
      *
      * @since 1.6
      */
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return value.length == 0;
     }
 
@@ -663,7 +664,7 @@ final class String : Nullable!string {
      *             argument is negative or not less than the length of this
      *             string.
      */
-    public char charAt(int index) {
+    char charAt(int index) {
         if (isLatin1()) {
             return StringLatin1.charAt(value, index);
         } else {
@@ -693,7 +694,7 @@ final class String : Nullable!string {
      *             string.
      * @since      1.5
      */
-    public int codePointAt(int index) {
+    int codePointAt(int index) {
         if (isLatin1()) {
             checkIndex(index, value.length);
             return value[index] & 0xff;
@@ -725,7 +726,7 @@ final class String : Nullable!string {
      *            of this string.
      * @since     1.5
      */
-    public int codePointBefore(int index) {
+    int codePointBefore(int index) {
         int i = index - 1;
         if (i < 0 || i >= length()) {
             throw new StringIndexOutOfBoundsException(index);
@@ -757,7 +758,7 @@ final class String : Nullable!string {
      * {@code beginIndex} is larger than {@code endIndex}.
      * @since  1.5
      */
-    public int codePointCount(int beginIndex, int endIndex) {
+    int codePointCount(int beginIndex, int endIndex) {
         if (beginIndex < 0 || beginIndex > endIndex ||
             endIndex > length()) {
             throw new IndexOutOfBoundsException();
@@ -788,7 +789,7 @@ final class String : Nullable!string {
      *   of {@code codePointOffset} code points.
      * @since 1.5
      */
-    public int offsetByCodePoints(int index, int codePointOffset) {
+    int offsetByCodePoints(int index, int codePointOffset) {
         if (index < 0 || index > length()) {
             throw new IndexOutOfBoundsException();
         }
@@ -825,7 +826,7 @@ final class String : Nullable!string {
      *            <li>{@code dstBegin+(srcEnd-srcBegin)} is larger than
      *                {@code dst.length}</ul>
      */
-    public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
+    void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
         checkBoundsBeginEnd(srcBegin, srcEnd, length());
         checkBoundsOffCount(dstBegin, srcEnd - srcBegin, dst.length);
         if (isLatin1()) {
@@ -879,7 +880,7 @@ final class String : Nullable!string {
      *          </ul>
      */
     @Deprecated(since="1.1")
-    public void getBytes(int srcBegin, int srcEnd, byte dst[], int dstBegin) {
+    void getBytes(int srcBegin, int srcEnd, byte dst[], int dstBegin) {
         checkBoundsBeginEnd(srcBegin, srcEnd, length());
         Objects.requireNonNull(dst);
         checkBoundsOffCount(dstBegin, srcEnd - srcBegin, dst.length);
@@ -910,7 +911,7 @@ final class String : Nullable!string {
      *
      * @since  1.1
      */
-    public byte[] getBytes(String charsetName)
+    byte[] getBytes(String charsetName)
             throws UnsupportedEncodingException {
         if (charsetName == null) throw new NullPointerException();
         return StringCoding.encode(charsetName, coder(), value);
@@ -934,7 +935,7 @@ final class String : Nullable!string {
      *
      * @since  1.6
      */
-    public byte[] getBytes(Charset charset) {
+    byte[] getBytes(Charset charset) {
         if (charset == null) throw new NullPointerException();
         return StringCoding.encode(charset, coder(), value);
      }
@@ -952,7 +953,7 @@ final class String : Nullable!string {
      *
      * @since      1.1
      */
-    public byte[] getBytes() {
+    byte[] getBytes() {
         // return StringCoding.encode(coder(), value);
         return cast(byte[])_value.dup;
     }
@@ -976,7 +977,7 @@ final class String : Nullable!string {
      * @see  #compareTo(String)
      * @see  #equalsIgnoreCase(String)
      */
-    public boolean equals(Object anObject) {
+    boolean equals(Object anObject) {
         if (this == anObject) {
             return true;
         }
@@ -1008,7 +1009,7 @@ final class String : Nullable!string {
      *
      * @since  1.4
      */
-    public boolean contentEquals(StringBuffer sb) {
+    boolean contentEquals(StringBuffer sb) {
         return contentEquals((CharSequence)sb);
     }
 
@@ -1054,7 +1055,7 @@ final class String : Nullable!string {
      *
      * @since  1.5
      */
-    public boolean contentEquals(CharSequence cs) {
+    boolean contentEquals(CharSequence cs) {
         // Argument is a StringBuffer, StringBuilder
         if (cs instanceof AbstractStringBuilder) {
             if (cs instanceof StringBuffer) {
@@ -1117,7 +1118,7 @@ final class String : Nullable!string {
      *
      * @see  #equals(Object)
      */
-    public boolean equalsIgnoreCase(String anotherString) {
+    boolean equalsIgnoreCase(String anotherString) {
         return (this == anotherString) ? true
                 : (anotherString != null)
                 && (anotherString.length() == length())
@@ -1168,7 +1169,7 @@ final class String : Nullable!string {
      *          value greater than {@code 0} if this string is
      *          lexicographically greater than the string argument.
      */
-    public int compareTo(String anotherString) {
+    int compareTo(String anotherString) {
         byte v1[] = value;
         byte v2[] = anotherString.value;
         if (coder() == anotherString.coder()) {
@@ -1190,14 +1191,14 @@ final class String : Nullable!string {
      * @see     java.text.Collator
      * @since   1.2
      */
-    public static final Comparator<String> CASE_INSENSITIVE_ORDER
+    static final Comparator<String> CASE_INSENSITIVE_ORDER
                                          = new CaseInsensitiveComparator();
     private static class CaseInsensitiveComparator
             implements Comparator<String>, java.io.Serializable {
         // use serialVersionUID from JDK 1.2.2 for interoperability
         private static final long serialVersionUID = 8575799808933029326L;
 
-        public int compare(String s1, String s2) {
+        int compare(String s1, String s2) {
             byte v1[] = s1.value;
             byte v2[] = s2.value;
             if (s1.coder() == s2.coder()) {
@@ -1231,7 +1232,7 @@ final class String : Nullable!string {
      * @see     java.text.Collator
      * @since   1.2
      */
-    public int compareToIgnoreCase(String str) {
+    int compareToIgnoreCase(String str) {
         return CASE_INSENSITIVE_ORDER.compare(this, str);
     }
 
@@ -1270,7 +1271,7 @@ final class String : Nullable!string {
      *          exactly matches the specified subregion of the string argument;
      *          {@code false} otherwise.
      */
-    public boolean regionMatches(int toffset, String other, int ooffset, int len) {
+    boolean regionMatches(int toffset, String other, int ooffset, int len) {
         byte tv[] = value;
         byte ov[] = other.value;
         // Note: toffset, ooffset, or len might be near -1>>>1.
@@ -1360,7 +1361,7 @@ final class String : Nullable!string {
      *          or case insensitive depends on the {@code ignoreCase}
      *          argument.
      */
-    public boolean regionMatches(boolean ignoreCase, int toffset,
+    boolean regionMatches(boolean ignoreCase, int toffset,
             String other, int ooffset, int len) {
         if (!ignoreCase) {
             return regionMatches(toffset, other, ooffset, len);
@@ -1400,7 +1401,7 @@ final class String : Nullable!string {
      *          this.substring(toffset).startsWith(prefix)
      *          </pre>
      */
-    public boolean startsWith(String prefix, int toffset) {
+    boolean startsWith(String prefix, int toffset) {
         // Note: toffset might be near -1>>>1.
         if (toffset < 0 || toffset > length() - prefix.length()) {
             return false;
@@ -1443,7 +1444,7 @@ final class String : Nullable!string {
      *          {@link #equals(Object)} method.
      * @since   1.0
      */
-    public boolean startsWith(String prefix) {
+    boolean startsWith(String prefix) {
         return startsWith(prefix, 0);
     }
 
@@ -1458,7 +1459,7 @@ final class String : Nullable!string {
      *          empty string or is equal to this {@code String} object
      *          as determined by the {@link #equals(Object)} method.
      */
-    public boolean endsWith(String suffix) {
+    boolean endsWith(String suffix) {
         return startsWith(suffix, length() - suffix.length());
     }
 
@@ -1475,7 +1476,7 @@ final class String : Nullable!string {
      *
      * @return  a hash code value for this object.
      */
-    public int hashCode() {
+    int hashCode() {
         int h = hash;
         if (h == 0 && value.length > 0) {
             hash = h = isLatin1() ? StringLatin1.hashCode(value)
@@ -1508,7 +1509,7 @@ final class String : Nullable!string {
      *          character sequence represented by this object, or
      *          {@code -1} if the character does not occur.
      */
-    public int indexOf(int ch) {
+    int indexOf(int ch) {
         return indexOf(ch, 0);
     }
 
@@ -1551,7 +1552,7 @@ final class String : Nullable!string {
      *          than or equal to {@code fromIndex}, or {@code -1}
      *          if the character does not occur.
      */
-    public int indexOf(int ch, int fromIndex) {
+    int indexOf(int ch, int fromIndex) {
         return isLatin1() ? StringLatin1.indexOf(value, ch, fromIndex)
                           : StringUTF16.indexOf(value, ch, fromIndex);
     }
@@ -1579,7 +1580,7 @@ final class String : Nullable!string {
      *          character sequence represented by this object, or
      *          {@code -1} if the character does not occur.
      */
-    public int lastIndexOf(int ch) {
+    int lastIndexOf(int ch) {
         return lastIndexOf(ch, length() - 1);
     }
 
@@ -1617,7 +1618,7 @@ final class String : Nullable!string {
      *          than or equal to {@code fromIndex}, or {@code -1}
      *          if the character does not occur before that point.
      */
-    public int lastIndexOf(int ch, int fromIndex) {
+    int lastIndexOf(int ch, int fromIndex) {
         return isLatin1() ? StringLatin1.lastIndexOf(value, ch, fromIndex)
                           : StringUTF16.lastIndexOf(value, ch, fromIndex);
     }
@@ -1636,7 +1637,7 @@ final class String : Nullable!string {
      * @return  the index of the first occurrence of the specified substring,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int indexOf(String str) {
+    int indexOf(String str) {
         if (coder() == str.coder()) {
             return isLatin1() ? StringLatin1.indexOf(value, str.value)
                               : StringUTF16.indexOf(value, str.value);
@@ -1664,7 +1665,7 @@ final class String : Nullable!string {
      *          starting at the specified index,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int indexOf(String str, int fromIndex) {
+    int indexOf(String str, int fromIndex) {
         return indexOf(value, coder(), length(), str, fromIndex);
     }
 
@@ -1724,7 +1725,7 @@ final class String : Nullable!string {
      * @return  the index of the last occurrence of the specified substring,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int lastIndexOf(String str) {
+    int lastIndexOf(String str) {
         return lastIndexOf(str, length());
     }
 
@@ -1745,7 +1746,7 @@ final class String : Nullable!string {
      *          searching backward from the specified index,
      *          or {@code -1} if there is no such occurrence.
      */
-    public int lastIndexOf(String str, int fromIndex) {
+    int lastIndexOf(String str, int fromIndex) {
         return lastIndexOf(value, coder(), length(), str, fromIndex);
     }
 
@@ -1809,7 +1810,7 @@ final class String : Nullable!string {
      *             {@code beginIndex} is negative or larger than the
      *             length of this {@code String} object.
      */
-    public String substring(int beginIndex) {
+    String substring(int beginIndex) {
         if (beginIndex < 0) {
             throw new StringIndexOutOfBoundsException(beginIndex);
         }
@@ -1846,7 +1847,7 @@ final class String : Nullable!string {
      *             {@code beginIndex} is larger than
      *             {@code endIndex}.
      */
-    public String substring(int beginIndex, int endIndex) {
+    String substring(int beginIndex, int endIndex) {
         int length = length();
         checkBoundsBeginEnd(beginIndex, endIndex, length);
         int subLen = endIndex - beginIndex;
@@ -1886,7 +1887,7 @@ final class String : Nullable!string {
      * @since 1.4
      * @spec JSR-51
      */
-    public CharSequence subSequence(int beginIndex, int endIndex) {
+    CharSequence subSequence(int beginIndex, int endIndex) {
         return this.substring(beginIndex, endIndex);
     }
 
@@ -1910,7 +1911,7 @@ final class String : Nullable!string {
      * @return  a string that represents the concatenation of this object's
      *          characters followed by the string argument's characters.
      */
-    public String concat(String str) {
+    String concat(String str) {
         int olen = str.length();
         if (olen == 0) {
             return this;
@@ -1959,7 +1960,7 @@ final class String : Nullable!string {
      * @return  a string derived from this string by replacing every
      *          occurrence of {@code oldChar} with {@code newChar}.
      */
-    public String replace(char oldChar, char newChar) {
+    String replace(char oldChar, char newChar) {
         if (oldChar != newChar) {
             String ret = isLatin1() ? StringLatin1.replace(value, oldChar, newChar)
                                     : StringUTF16.replace(value, oldChar, newChar);
@@ -1997,7 +1998,7 @@ final class String : Nullable!string {
      * @since 1.4
      * @spec JSR-51
      */
-    public boolean matches(String regex) {
+    boolean matches(String regex) {
         return Pattern.matches(regex, this);
     }
 
@@ -2009,7 +2010,7 @@ final class String : Nullable!string {
      * @return true if this string contains {@code s}, false otherwise
      * @since 1.5
      */
-    public boolean contains(CharSequence s) {
+    boolean contains(CharSequence s) {
         return indexOf(s.toString()) >= 0;
     }
 
@@ -2054,7 +2055,7 @@ final class String : Nullable!string {
      * @since 1.4
      * @spec JSR-51
      */
-    public String replaceFirst(String regex, String replacement) {
+    String replaceFirst(String regex, String replacement) {
         return Pattern.compile(regex).matcher(this).replaceFirst(replacement);
     }
 
@@ -2099,7 +2100,7 @@ final class String : Nullable!string {
      * @since 1.4
      * @spec JSR-51
      */
-    public String replaceAll(String regex, String replacement) {
+    String replaceAll(String regex, String replacement) {
         return Pattern.compile(regex).matcher(this).replaceAll(replacement);
     }
 
@@ -2115,7 +2116,7 @@ final class String : Nullable!string {
      * @return  The resulting string
      * @since 1.5
      */
-    public String replace(CharSequence target, CharSequence replacement) {
+    String replace(CharSequence target, CharSequence replacement) {
         String tgtStr = target.toString();
         String replStr = replacement.toString();
         int j = indexOf(tgtStr);
@@ -2230,7 +2231,7 @@ final class String : Nullable!string {
      * @since 1.4
      * @spec JSR-51
      */
-    public String[] split(String regex, int limit) {
+    String[] split(String regex, int limit) {
         /* fastpath if the regex is a
          (1)one-char String and this character is not one of the
             RegEx's meta characters ".$|()[{^?*+\\", or
@@ -2328,7 +2329,7 @@ final class String : Nullable!string {
      * @since 1.4
      * @spec JSR-51
      */
-    public String[] split(String regex) {
+    String[] split(String regex) {
         return split(regex, 0);
     }
 
@@ -2357,7 +2358,7 @@ final class String : Nullable!string {
      * @see java.util.StringJoiner
      * @since 1.8
      */
-    public static String join(CharSequence delimiter, CharSequence... elements) {
+    static String join(CharSequence delimiter, CharSequence... elements) {
         Objects.requireNonNull(delimiter);
         Objects.requireNonNull(elements);
         // Number of elements not likely worth Arrays.stream overhead.
@@ -2402,7 +2403,7 @@ final class String : Nullable!string {
      * @see    java.util.StringJoiner
      * @since 1.8
      */
-    public static String join(CharSequence delimiter,
+    static String join(CharSequence delimiter,
             Iterable<? extends CharSequence> elements) {
         Objects.requireNonNull(delimiter);
         Objects.requireNonNull(elements);
@@ -2467,11 +2468,11 @@ final class String : Nullable!string {
      * @see     java.lang.String#toUpperCase(Locale)
      * @since   1.1
      */
-    public String toLowerCase(Locale locale) {
+    String toLowerCase(Locale locale) {
         return isLatin1() ? StringLatin1.toLowerCase(this, value, locale)
                           : StringUTF16.toLowerCase(this, value, locale);
     }
-
+++/
     /**
      * Converts all of the characters in this {@code String} to lower
      * case using the rules of the default locale. This is equivalent to calling
@@ -2491,10 +2492,11 @@ final class String : Nullable!string {
      * @return  the {@code String}, converted to lowercase.
      * @see     java.lang.String#toLowerCase(Locale)
      */
-    public String toLowerCase() {
-        return toLowerCase(Locale.getDefault());
+    String toLowerCase() {
+        return new String(this._value.toLower());
     }
 
+/++
     /**
      * Converts all of the characters in this {@code String} to upper
      * case using the rules of the given {@code Locale}. Case mapping is based
@@ -2548,11 +2550,11 @@ final class String : Nullable!string {
      * @see     java.lang.String#toLowerCase(Locale)
      * @since   1.1
      */
-    public String toUpperCase(Locale locale) {
+    String toUpperCase(Locale locale) {
         return isLatin1() ? StringLatin1.toUpperCase(this, value, locale)
                           : StringUTF16.toUpperCase(this, value, locale);
     }
-
+++/
     /**
      * Converts all of the characters in this {@code String} to upper
      * case using the rules of the default locale. This method is equivalent to
@@ -2572,10 +2574,11 @@ final class String : Nullable!string {
      * @return  the {@code String}, converted to uppercase.
      * @see     java.lang.String#toUpperCase(Locale)
      */
-    public String toUpperCase() {
-        return toUpperCase(Locale.getDefault());
+    String toUpperCase() {
+        return new String(this._value.toUpper());
     }
 
+/++
     /**
      * Returns a string whose value is this string, with any leading and trailing
      * whitespace removed.
@@ -2607,7 +2610,7 @@ final class String : Nullable!string {
      *          space removed, or this string if it has no leading or
      *          trailing white space.
      */
-    public String trim() {
+    String trim() {
         String ret = isLatin1() ? StringLatin1.trim(value)
                                 : StringUTF16.trim(value);
         return ret == null ? this : ret;
@@ -2618,7 +2621,7 @@ final class String : Nullable!string {
      *
      * @return  the string itself.
      */
-    public String toString() {
+    String toString() {
         return this;
     }
 
@@ -2632,7 +2635,7 @@ final class String : Nullable!string {
      * @since 9
      */
     @Override
-    public IntStream chars() {
+    IntStream chars() {
         return StreamSupport.intStream(
             isLatin1() ? new StringLatin1.CharsSpliterator(value, Spliterator.IMMUTABLE)
                        : new StringUTF16.CharsSpliterator(value, Spliterator.IMMUTABLE),
@@ -2652,7 +2655,7 @@ final class String : Nullable!string {
      * @since 9
      */
     @Override
-    public IntStream codePoints() {
+    IntStream codePoints() {
         return StreamSupport.intStream(
             isLatin1() ? new StringLatin1.CharsSpliterator(value, Spliterator.IMMUTABLE)
                        : new StringUTF16.CodePointsSpliterator(value, Spliterator.IMMUTABLE),
@@ -2666,7 +2669,7 @@ final class String : Nullable!string {
      *          of this string and whose contents are initialized to contain
      *          the character sequence represented by this string.
      */
-    public char[] toCharArray() {
+    char[] toCharArray() {
         return isLatin1() ? StringLatin1.toChars(value)
                           : StringUTF16.toChars(value);
     }
@@ -2708,7 +2711,7 @@ final class String : Nullable!string {
      * @see  java.util.Formatter
      * @since  1.5
      */
-    public static String format(String format, Object... args) {
+    static String format(String format, Object... args) {
         return new Formatter().format(format, args).toString();
     }
 
@@ -2749,7 +2752,7 @@ final class String : Nullable!string {
      * @see  java.util.Formatter
      * @since  1.5
      */
-    public static String format(Locale l, String format, Object... args) {
+    static String format(Locale l, String format, Object... args) {
         return new Formatter(l).format(format, args).toString();
     }
 ++/
@@ -2762,7 +2765,7 @@ final class String : Nullable!string {
      *          {@code obj.toString()} is returned.
      * @see     java.lang.Object#toString()
      */
-    public static String valueOf(Object obj) {
+    static String valueOf(Object obj) {
         string str = (obj is null) ? "null" : obj.toString();
         return new String(str);
     }
@@ -2778,7 +2781,7 @@ final class String : Nullable!string {
      * @return  a {@code String} that contains the characters of the
      *          character array.
      */
-    public static String valueOf(char data[]) {
+    static String valueOf(char data[]) {
         return new String(data);
     }
 
@@ -2802,7 +2805,7 @@ final class String : Nullable!string {
      *          {@code offset+count} is larger than
      *          {@code data.length}.
      */
-    public static String valueOf(char data[], int offset, int count) {
+    static String valueOf(char data[], int offset, int count) {
         return new String(data, offset, count);
     }
 
@@ -2819,7 +2822,7 @@ final class String : Nullable!string {
      *          {@code offset+count} is larger than
      *          {@code data.length}.
      */
-    public static String copyValueOf(char data[], int offset, int count) {
+    static String copyValueOf(char data[], int offset, int count) {
         return new String(data, offset, count);
     }
 
@@ -2830,7 +2833,7 @@ final class String : Nullable!string {
      * @return  a {@code String} that contains the characters of the
      *          character array.
      */
-    public static String copyValueOf(char data[]) {
+    static String copyValueOf(char data[]) {
         return new String(data);
     }
 
@@ -2842,7 +2845,7 @@ final class String : Nullable!string {
      *          {@code "true"} is returned; otherwise, a string equal to
      *          {@code "false"} is returned.
      */
-    public static String valueOf(boolean b) {
+    static String valueOf(boolean b) {
         return b ? "true" : "false";
     }
 
@@ -2854,7 +2857,7 @@ final class String : Nullable!string {
      * @return  a string of length {@code 1} containing
      *          as its single character the argument {@code c}.
      */
-    public static String valueOf(char c) {
+    static String valueOf(char c) {
         if (COMPACT_STRINGS && StringLatin1.canEncode(c)) {
             return new String(StringLatin1.toBytes(c), LATIN1);
         }
@@ -2871,7 +2874,7 @@ final class String : Nullable!string {
      * @return  a string representation of the {@code int} argument.
      * @see     java.lang.Integer#toString(int, int)
      */
-    public static String valueOf(int i) {
+    static String valueOf(int i) {
         return Integer.toString(i);
     }
 
@@ -2885,7 +2888,7 @@ final class String : Nullable!string {
      * @return  a string representation of the {@code long} argument.
      * @see     java.lang.Long#toString(long)
      */
-    public static String valueOf(long l) {
+    static String valueOf(long l) {
         return Long.toString(l);
     }
 
@@ -2899,7 +2902,7 @@ final class String : Nullable!string {
      * @return  a string representation of the {@code float} argument.
      * @see     java.lang.Float#toString(float)
      */
-    public static String valueOf(float f) {
+    static String valueOf(float f) {
         return Float.toString(f);
     }
 
@@ -2913,7 +2916,7 @@ final class String : Nullable!string {
      * @return  a  string representation of the {@code double} argument.
      * @see     java.lang.Double#toString(double)
      */
-    public static String valueOf(double d) {
+    static String valueOf(double d) {
         return Double.toString(d);
     }
 
@@ -2941,7 +2944,7 @@ final class String : Nullable!string {
      *          guaranteed to be from a pool of unique strings.
      * @jls 3.10.5 String Literals
      */
-    public native String intern();
+    native String intern();
 
     ////////////////////////////////////////////////////////////////
 
