@@ -13,5 +13,5 @@ module hunt.Version;
 
 // define hunt versions
 enum HUNT_MAJOR_VERSION = 1;
-enum HUNT_MINOR_VERSION = 0;
+enum HUNT_MINOR_VERSION = 2;
 enum HUNT_PATCH_VERSION = 0;
