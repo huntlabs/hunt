@@ -311,16 +311,22 @@ class ThreadEx : Thread, Runnable {
         initialize();
     }
 
-    // deprecated("Not supported anymore.")
-    this(void function() fn, size_t sz = 0) nothrow {
-        super(fn, sz);
-        initialize();
+    this(Action dg, string name) {
+        this(new class Runnable {
+            void run() { dg();}
+        }, name);
     }
 
-    // deprecated("Not supported anymore.")
-    this(void delegate() dg, size_t sz = 0) nothrow {
-        super(dg , sz);
-        initialize();
+    this(Action dg) {
+        this(new class Runnable {
+            void run() { dg();}
+        });
+    }
+
+    this(void function() fn) {
+        this(new class Runnable {
+            void run() { fn();}
+        });
     }
 
     ~this() {
