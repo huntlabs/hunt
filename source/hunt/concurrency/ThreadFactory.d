@@ -70,11 +70,11 @@ interface ThreadFactory {
      * @return constructed thread, or {@code null} if the request to
      *         create a thread is rejected
      */
-    final Thread newThread(Runnable r) {
-        return newThread({ r.run(); });
-    }
+    Thread newThread(Runnable r);
 
-    Thread newThread(Action dg );
+    // final Thread newThread(Action dg ) {
+
+    // }
 }
 
 
@@ -96,11 +96,10 @@ private class DefaultThreadFactory : ThreadFactory {
     }
 
     
-    ThreadEx newThread(Action dg ) {
+    ThreadEx newThread(Runnable runnable ) {
         int n = AtomicHelper.getAndIncrement(threadNumber);
 
-        ThreadEx t = new ThreadEx(dg);
-        t.name = namePrefix ~ n.to!string();
+        ThreadEx t = new ThreadEx(runnable, namePrefix ~ n.to!string());
         t.isDaemon = false;
         // version(Posix) {
         //     t.priority = Thread.PRIORITY_DEFAULT;
@@ -110,41 +109,3 @@ private class DefaultThreadFactory : ThreadFactory {
     }
 }
 
-
-/**
- * Thread factory capturing access control context and class loader.
- */
-// private class PrivilegedThreadFactory : DefaultThreadFactory {
-//     // AccessControlContext acc;
-//     // ClassLoader ccl;
-
-//     this() {
-//         super();
-//         SecurityManager sm = System.getSecurityManager();
-//         if (sm !is null) {
-//             // Calls to getContextClassLoader from this class
-//             // never trigger a security check, but we check
-//             // whether our callers have this permission anyways.
-//             sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-
-//             // Fail fast
-//             sm.checkPermission(new RuntimePermission("setContextClassLoader"));
-//         }
-//         this.acc = AccessController.getContext();
-//         this.ccl = Thread.getThis().getContextClassLoader();
-//     }
-
-//     Thread newThread(Runnable r) {
-//         return super.newThread(new Runnable() {
-//             void run() {
-//                 AccessController.doPrivileged(new PrivilegedAction<>() {
-//                     Void run() {
-//                         Thread.getThis().setContextClassLoader(ccl);
-//                         r.run();
-//                         return null;
-//                     }
-//                 }, acc);
-//             }
-//         });
-//     }
-// }

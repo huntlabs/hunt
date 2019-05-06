@@ -44,9 +44,9 @@ class CompletableFutureTest {
             executor = Executors.newFixedThreadPool(3, new class ThreadFactory {
             int count = 1;
 
-            ThreadEx newThread(Action dg) {
+            ThreadEx newThread(Runnable runnable) {
                 count++;
-                return new ThreadEx(dg, "custom-executor-" ~ count.to!string(), 0);
+                return new ThreadEx(runnable, "custom-executor-" ~ count.to!string());
             }
         });
     }
