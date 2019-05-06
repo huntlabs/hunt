@@ -2,9 +2,13 @@ module test.CompletableFutureTest;
 
 import hunt.Assert;
 import hunt.Exceptions;
+import hunt.concurrency.atomic;
 import hunt.concurrency.thread;
 import hunt.concurrency.CompletableFuture;
-import hunt.concurrency.atomic;
+import hunt.concurrency.Executors;
+import hunt.concurrency.ExecutorService;
+import hunt.concurrency.ThreadFactory;
+import hunt.Functions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 import hunt.util.DateTime;
@@ -12,7 +16,10 @@ import hunt.util.DateTime;
 import core.atomic;
 import core.thread;
 import core.time;
+
+import std.conv;
 import std.random;
+import std.string;
 
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;
@@ -30,6 +37,21 @@ https://mahmoudanouti.wordpress.com/2018/01/26/20-examples-of-using-javas-comple
 https://github.com/manouti/completablefuture-examples
 */
 class CompletableFutureTest {
+
+    __gshared ExecutorService executor;
+
+    shared static this() {
+            executor = Executors.newFixedThreadPool(3, new class ThreadFactory {
+            int count = 1;
+
+            ThreadEx newThread(Action dg) {
+                count++;
+                return new ThreadEx(dg, "custom-executor-" ~ count.to!string(), 0);
+            }
+        });
+    }
+
+
 
     // void testCompletedFuture01() {
     //     CompletableFuture!String cf = completedFuture(new String("message"));
@@ -60,14 +82,32 @@ class CompletableFutureTest {
     //     assertEquals(new String("MESSAGE"), value);
     // }
 
-    void testThenApplyAsync() {
+    // void testThenApplyAsync() {
+    //     void doTest() {
+    //         CompletableFuture!String cf = completedFuture(new String("message"))
+    //             .thenApplyAsync!(String)(delegate String (String s) {
+    //                 assertTrue(Thread.getThis().isDaemon());
+    //                 randomSleep();
+    //                 return s.toUpperCase();
+    //             });
+    //         assertNull(cf.getNow(null));
+    //         assertEquals(new String("MESSAGE"), cf.join());
+    //     }
+
+    //     ThreadEx thread = new ThreadEx(&doTest);
+    //     thread.start();
+    // }
+
+    void testThenApplyAsyncWithExecutor() {
         void doTest() {
             CompletableFuture!String cf = completedFuture(new String("message"))
                 .thenApplyAsync!(String)(delegate String (String s) {
-                    assertTrue(Thread.getThis().isDaemon());
+                    assertTrue(ThreadEx.currentThread().name().startsWith("custom-executor-"));
+                    trace("isDaemon: ", Thread.getThis().isDaemon());
+                    assertFalse(Thread.getThis().isDaemon());
                     randomSleep();
                     return s.toUpperCase();
-                });
+                }, executor);
             assertNull(cf.getNow(null));
             assertEquals(new String("MESSAGE"), cf.join());
         }
