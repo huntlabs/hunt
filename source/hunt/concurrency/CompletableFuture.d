@@ -793,7 +793,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if ((r = result) is null)
             unipush(new UniHandle!(T,V)(e, d, this, f));
         else if (e is null)
-            d.uniHandle(r, f, null);
+            d.uniHandle!(T)(r, f, null);
         else {
             try {
                 e.execute(new UniHandle!(T,V)(null, d, this, f));
@@ -1567,19 +1567,18 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return uniWhenCompleteStage(screenExecutor(executor), action);
     }
 
-    CompletableFuture!(U) handle(U)(
-        BiFunction!(T, Throwable, U) fn) {
-        return uniHandleStage(null, fn);
+    CompletableFuture!(U) handle(U)(BiFunction!(T, Throwable, U) fn) {
+        return uniHandleStage!(U)(null, fn);
     }
 
     CompletableFuture!(U) handleAsync(U)(
         BiFunction!(T, Throwable, U) fn) {
-        return uniHandleStage(defaultExecutor(), fn);
+        return uniHandleStage!(U)(defaultExecutor(), fn);
     }
 
     CompletableFuture!(U) handleAsync(U)(
         BiFunction!(T, Throwable, U) fn, Executor executor) {
-        return uniHandleStage(screenExecutor(executor), fn);
+        return uniHandleStage!(U)(screenExecutor(executor), fn);
     }
 
     /**
@@ -1977,84 +1976,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return this;
     }
 
-    /**
-     * Returns a new Executor that submits a task to the given base
-     * executor after the given delay (or no delay if non-positive).
-     * Each delay commences upon invocation of the returned executor's
-     * {@code execute} method.
-     *
-     * @param delay how long to delay, in units of {@code unit}
-     * @param unit a {@code TimeUnit} determining how to interpret the
-     *        {@code delay} parameter
-     * @param executor the base executor
-     * @return the new delayed executor
-     * @since 9
-     */
-    static Executor delayedExecutor(Duration delay, Executor executor) {
-        if (executor is null)
-            throw new NullPointerException();
-        return new DelayedExecutor(delay, executor);
-    }
-
-    /**
-     * Returns a new Executor that submits a task to the default
-     * executor after the given delay (or no delay if non-positive).
-     * Each delay commences upon invocation of the returned executor's
-     * {@code execute} method.
-     *
-     * @param delay how long to delay, in units of {@code unit}
-     * @param unit a {@code TimeUnit} determining how to interpret the
-     *        {@code delay} parameter
-     * @return the new delayed executor
-     * @since 9
-     */
-    static Executor delayedExecutor(Duration delay) {
-        return new DelayedExecutor(delay, ASYNC_POOL);
-    }
-
-    /**
-     * Returns a new CompletionStage that is already completed with
-     * the given value and supports only those methods in
-     * interface {@link CompletionStage}.
-     *
-     * @param value the value
-     * @param <U> the type of the value
-     * @return the completed CompletionStage
-     * @since 9
-     */
-    static CompletionStage!(U) completedStage(U)(U value) {
-        return new MinimalStage!(U)((value is null) ? NIL : value);
-    }
-
-    /**
-     * Returns a new CompletableFuture that is already completed
-     * exceptionally with the given exception.
-     *
-     * @param ex the exception
-     * @param <U> the type of the value
-     * @return the exceptionally completed CompletableFuture
-     * @since 9
-     */
-    static CompletableFuture!(U) failedFuture(U)(Throwable ex) {
-        if (ex is null) throw new NullPointerException();
-        return new CompletableFuture!(U)(new AltResult(ex));
-    }
-
-    /**
-     * Returns a new CompletionStage that is already completed
-     * exceptionally with the given exception and supports only those
-     * methods in interface {@link CompletionStage}.
-     *
-     * @param ex the exception
-     * @param <U> the type of the value
-     * @return the exceptionally completed CompletionStage
-     * @since 9
-     */
-    static CompletionStage!(U) failedStage(U)(Throwable ex) {
-        if (ex is null) throw new NullPointerException();
-        return new MinimalStage!(U)(new AltResult(ex));
-    }
-
 }
 
 
@@ -2284,19 +2205,22 @@ final class UniWhenComplete(T) : UniCompletion {
 
 
 
-final class UniHandle(T,V) : UniCompletion {
-    BiFunction!(T, Throwable) fn;
+final class UniHandle(T, V) : UniCompletion {
+    BiFunction!(T, Throwable, V) fn;
     this(Executor executor, CompletableFuture!(V) dep,
               CompletableFuture!(T) src,
-              BiFunction!(T, Throwable) fn) {
+              BiFunction!(T, Throwable, V) fn) {
         super(executor, dep, src); this.fn = fn;
     }
-    final CompletableFuture!(V) tryFire(int mode) {
-        CompletableFuture!(V) d; CompletableFuture!(T) a;
-        Object r; BiFunction!(T, Throwable) f;
-        if ((d = dep) is null || (f = fn) is null
-            || (a = src) is null || (r = a.result) is null
-            || !d.uniHandle(r, f, mode > 0 ? null : this))
+
+    final override CompletableFuture!(V) tryFire(int mode) {
+        CompletableFuture!(V) d = cast(CompletableFuture!(V))dep;
+        CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
+        Object r; BiFunction!(T, Throwable, V) f;
+
+        if (d is null || (f = fn) is null
+            || a is null || (r = a.result) is null
+            || !d.uniHandle!(T)(r, f, mode > 0 ? null : this))
             return null;
         dep = null; src = null; fn = null;
         return d.postFire(a, mode);
@@ -3049,4 +2973,83 @@ CompletableFuture!(Void) asyncRunStage(Executor e, Action f) {
     CompletableFuture!(Void) d = new CompletableFuture!(Void)();
     e.execute(new AsyncRun(d, f));
     return d;
+}
+
+
+/**
+ * Returns a new Executor that submits a task to the given base
+ * executor after the given delay (or no delay if non-positive).
+ * Each delay commences upon invocation of the returned executor's
+ * {@code execute} method.
+ *
+ * @param delay how long to delay, in units of {@code unit}
+ * @param unit a {@code TimeUnit} determining how to interpret the
+ *        {@code delay} parameter
+ * @param executor the base executor
+ * @return the new delayed executor
+ * @since 9
+ */
+Executor delayedExecutor(Duration delay, Executor executor) {
+    if (executor is null)
+        throw new NullPointerException();
+    return new DelayedExecutor(delay, executor);
+}
+
+/**
+ * Returns a new Executor that submits a task to the default
+ * executor after the given delay (or no delay if non-positive).
+ * Each delay commences upon invocation of the returned executor's
+ * {@code execute} method.
+ *
+ * @param delay how long to delay, in units of {@code unit}
+ * @param unit a {@code TimeUnit} determining how to interpret the
+ *        {@code delay} parameter
+ * @return the new delayed executor
+ * @since 9
+ */
+Executor delayedExecutor(Duration delay) {
+    return new DelayedExecutor(delay, ASYNC_POOL);
+}
+
+/**
+ * Returns a new CompletionStage that is already completed with
+ * the given value and supports only those methods in
+ * interface {@link CompletionStage}.
+ *
+ * @param value the value
+ * @param <U> the type of the value
+ * @return the completed CompletionStage
+ * @since 9
+ */
+CompletionStage!(U) completedStage(U)(U value) {
+    return new MinimalStage!(U)((value is null) ? NIL : value);
+}
+
+/**
+ * Returns a new CompletableFuture that is already completed
+ * exceptionally with the given exception.
+ *
+ * @param ex the exception
+ * @param <U> the type of the value
+ * @return the exceptionally completed CompletableFuture
+ * @since 9
+ */
+CompletableFuture!(U) failedFuture(U)(Throwable ex) {
+    if (ex is null) throw new NullPointerException();
+    return new CompletableFuture!(U)(new AltResult(ex));
+}
+
+/**
+ * Returns a new CompletionStage that is already completed
+ * exceptionally with the given exception and supports only those
+ * methods in interface {@link CompletionStage}.
+ *
+ * @param ex the exception
+ * @param <U> the type of the value
+ * @return the exceptionally completed CompletionStage
+ * @since 9
+ */
+CompletionStage!(U) failedStage(U)(Throwable ex) {
+    if (ex is null) throw new NullPointerException();
+    return new MinimalStage!(U)(new AltResult(ex));
 }

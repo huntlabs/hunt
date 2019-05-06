@@ -7,9 +7,11 @@ import hunt.concurrency.thread;
 import hunt.concurrency.CompletableFuture;
 import hunt.concurrency.Executors;
 import hunt.concurrency.ExecutorService;
+import hunt.concurrency.Exceptions;
 import hunt.concurrency.ThreadFactory;
 import hunt.Functions;
 import hunt.logging.ConsoleLogger;
+import hunt.text.StringBuilder;
 import hunt.util.Common;
 import hunt.util.DateTime;
 
@@ -27,6 +29,7 @@ alias assertThat = Assert.assertThat;
 alias assertEquals = Assert.assertEquals;
 alias assertNotNull = Assert.assertNotNull;
 alias assertNull = Assert.assertNull;
+alias fail = Assert.fail;
 
 import hunt.String;
 
@@ -98,22 +101,73 @@ class CompletableFutureTest {
     //     thread.start();
     // }
 
-    void testThenApplyAsyncWithExecutor() {
-        void doTest() {
-            CompletableFuture!String cf = completedFuture(new String("message"))
-                .thenApplyAsync!(String)(delegate String (String s) {
-                    assertTrue(ThreadEx.currentThread().name().startsWith("custom-executor-"));
-                    trace("isDaemon: ", Thread.getThis().isDaemon());
-                    assertFalse(Thread.getThis().isDaemon());
-                    randomSleep();
+    // void testThenApplyAsyncWithExecutor() {
+    //     void doTest() {
+    //         CompletableFuture!String cf = completedFuture(new String("message"))
+    //             .thenApplyAsync!(String)(delegate String (String s) {
+    //                 assertTrue(ThreadEx.currentThread().name().startsWith("custom-executor-"));
+    //                 trace("isDaemon: ", Thread.getThis().isDaemon());
+    //                 assertFalse(Thread.getThis().isDaemon());
+    //                 randomSleep();
+    //                 return s.toUpperCase();
+    //             }, executor);
+    //         assertNull(cf.getNow(null));
+    //         assertEquals(new String("MESSAGE"), cf.join());
+    //     }
+
+    //     ThreadEx thread = new ThreadEx(&doTest);
+    //     thread.start();
+    // }
+
+    // void testThenAccept() {
+    //     StringBuilder result = new StringBuilder();
+    //     completedFuture(new String("thenAccept message"))
+    //             .thenAccept( (s) { 
+    //                 trace(s.value);
+    //                 result.append(s.value); 
+    //             });
+    //     assertTrue("Result was empty", result.length() > 0);
+    // }
+
+
+    // void testThenAcceptAsync() {
+    //     void doTest() {
+    //         StringBuilder result = new StringBuilder();
+    //         CompletableFuture!Void cf = completedFuture(new String("thenAcceptAsync message"))
+    //                 .thenAcceptAsync( (s) { 
+    //                     trace(s.value);
+    //                     result.append(s.value); 
+    //                 });
+    //         cf.join();
+    //         assertTrue("Result was empty", result.length() > 0);
+    //     }
+
+    //     ThreadEx thread = new ThreadEx(&doTest);
+    //     thread.start();
+    // }
+
+    void testCompleteExceptionally() {
+        CompletableFuture!String cf = completedFuture(new String("message"))
+            .thenApplyAsync!(String)(delegate String (String s) { 
+                    trace(s.value);
                     return s.toUpperCase();
-                }, executor);
-            assertNull(cf.getNow(null));
-            assertEquals(new String("MESSAGE"), cf.join());
+                },
+                delayedExecutor(1.seconds));
+        CompletableFuture!String exceptionHandler = cf.handle!(String)(delegate String (String s, Throwable th) { 
+                return (th !is null) ? new String("message upon cancel") : new String(""); 
+            });
+
+        cf.completeExceptionally(new RuntimeException("completed exceptionally"));
+
+        assertTrue("Was not completed exceptionally", cf.isCompletedExceptionally());
+        try {
+            cf.join();
+            fail("Should have thrown an exception");
+        } catch (CompletionException ex) { // just for testing
+            assertEquals("completed exceptionally", ex.next().msg);
         }
 
-        ThreadEx thread = new ThreadEx(&doTest);
-        thread.start();
+        assertEquals("message upon cancel", exceptionHandler.join().value);
     }
 
     private static void randomSleep() {
