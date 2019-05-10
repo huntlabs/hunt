@@ -11,7 +11,6 @@
 
 module hunt.concurrency.ExecutorService;
 
-import hunt.concurrency.Executor;
 import hunt.collection.Collection;
 import hunt.collection.List;
 import hunt.Functions;

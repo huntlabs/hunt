@@ -16,8 +16,9 @@ import hunt.concurrency.thread.LockSupport;
 import hunt.Exceptions;
 import hunt.Functions;
 import hunt.logging.ConsoleLogger;
-import hunt.util.Common;
 import hunt.system.Memory;
+import hunt.util.Common;
+import hunt.util.DateTime;
 
 import core.atomic;
 import core.thread;
@@ -526,9 +527,7 @@ class ThreadEx : Thread, Runnable {
      * @revised 6.0
      */
     static bool interrupted() {
-        ThreadEx tex = cast(ThreadEx) Thread.getThis();
-        assert(tex !is null, "Must be a ThreadEx");
-        return tex.isInterrupted(true);
+        return currentThread().isInterrupted(true);
     }
 
     /**
@@ -553,7 +552,6 @@ class ThreadEx : Thread, Runnable {
         // structure because it hides the issue.
         if (_interrupted && canClear) {
             _interrupted = false;
-            // osthread->set_interrupted(false);
             // consider thread->_SleepEvent->reset() ... optional optimization
         }
 
@@ -795,6 +793,7 @@ class Parker {
     enum int ABS_INDEX = 1;
 
     private shared int _counter;
+    private int _nParked;
     private Parker freeNext;
     private Thread associatedWith; // Current association
 
@@ -818,26 +817,49 @@ class Parker {
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
     void park(Duration time) {
-        bool isAbsolute = false;
 
+        // Invariant: Only the thread associated with the Event/PlatformEvent
+        // may call park().
+        assert(_nParked == 0, "invariant");
+
+        if(!_mutex.tryLock())
+            return;
+        scope(exit) {
+            _mutex.unlock();
+            // Paranoia to ensure our locked and lock-free paths interact
+            // correctly with each other and Java-level accesses.
+            atomicFence();
+        }
+        _nParked++;
+
+        _cond[REL_INDEX].wait(time);
+        _nParked--;
+    }
+
+    // park decrements count if > 0, else does a condvar wait.  Unpark
+    // sets count to 1 and signals condvar.  Only one thread ever waits
+    // on the condvar. Contention seen when trying to park implies that someone
+    // is unparking you, so don't wait. And spurious returns are fine, so there
+    // is no need to track notifications.
+    void park(bool isAbsolute, Duration time) {
         // Optional fast-path check:
         // Return immediately if a permit is available.
-        // We depend on Atomic.xchg() having full barrier semantics
+        // We depend on Atomic::xchg() having full barrier semantics
         // since we are doing a lock-free update to _counter.
-        int old = _counter;
-        atomicStore(_counter, 0);
-        if (old > 0)
+        const int c = _counter;
+        if(c > 0) {
+            warning("counter=%s", c);
             return;
+        }
+        atomicStore(_counter, 0);
 
         ThreadEx thread = ThreadEx.currentThread();
-        if(thread is null) throw new Exception("Must be a ThreadEx");
 
         // // Optional optimization -- avoid state transitions if there's
         // // an interrupt pending.
-        // if (Thread.is_interrupted(thread, false)) {
+        // if (Threadex.is_interrupted(thread, false)) {
         //     return;
         // }
-
         // Next, demultiplex/decode time arguments
         if (time < Duration.zero || (isAbsolute && time == Duration.zero)) { // don't wait at all
             return;
@@ -847,25 +869,27 @@ class Parker {
         // Beware of deadlocks such as 6317397.
         // The per-thread Parker. mutex is a classic leaf-lock.
         // In particular a thread must never block on the Threads_lock while
-        // holding the Parker. mutex.  If safepoints are pending both the
-        // the ThreadBlockInVM() CTOR and DTOR may grab Threads_lock.
-        //   ThreadBlockInVM tbivm(jt);
+        // holding the Parker.mutex. 
 
         // Don't wait if cannot get lock since interference arises from
         // unparking. Also re-check interrupt before trying wait.
         // if (Thread.is_interrupted(thread, false) || pthread_mutex_trylock(_mutex) != 0) {
         //     return;
         // }
-        if(!_mutex.tryLock())
-            return;
 
         if (_counter > 0) { // no wait needed
+            return;
+        }
+
+        if(!_mutex.tryLock())
+            return;
+        
+        scope(exit) {
             _counter = 0;
             _mutex.unlock();
             // Paranoia to ensure our locked and lock-free paths interact
             // correctly with each other and Java-level accesses.
             atomicFence();
-            return;
         }
 
         // OSThreadWaitState osts(thread.osthread(), false  /* not Object.wait() */ );
@@ -878,21 +902,18 @@ class Parker {
             _cond[_cur_index].wait();
         }
         else {
-            _cur_index = isAbsolute ? ABS_INDEX : REL_INDEX;
-            _cond[_cur_index].wait(time);
+            if(isAbsolute) {
+                _cur_index = ABS_INDEX;
+                Duration t = time - msecs(DateTimeHelper.currentTimeMillis());
+                if(t > Duration.zero)
+                    _cond[ABS_INDEX].wait(t);
+            } else {
+                _cur_index = REL_INDEX;
+                _cond[REL_INDEX].wait(time);
+            }
+
         }
         _cur_index = -1;
-
-        _counter = 0;
-        _mutex.unlock();
-        // Paranoia to ensure our locked and lock-free paths interact
-        // correctly with each other and Java-level accesses.
-        atomicFence();
-
-        // // If externally suspended while waiting, re-suspend
-        // if (jt.handle_special_suspend_equivalent_condition()) {
-        //     jt.java_suspend_self();
-        // }
     }
 
     void unpark() {

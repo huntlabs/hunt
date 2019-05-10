@@ -13,6 +13,7 @@ module hunt.concurrency.Executors;
 
 import hunt.concurrency.AbstractExecutorService;
 import hunt.concurrency.atomic.AtomicHelper;
+import hunt.concurrency.Delayed;
 import hunt.concurrency.Exceptions;
 import hunt.concurrency.ExecutorService;
 // import hunt.concurrency.ForkJoinPool;
@@ -23,9 +24,10 @@ import hunt.concurrency.ScheduledThreadPoolExecutor;
 import hunt.concurrency.ThreadFactory;
 import hunt.concurrency.ThreadPoolExecutor;
 
-import hunt.util.DateTime;
+import hunt.collection.List;
 import hunt.Exceptions;
 import hunt.util.Common;
+import hunt.util.DateTime;
 
 import core.thread;
 import core.time;
@@ -230,45 +232,45 @@ class Executors {
     //                                   threadFactory);
     // }
 
-    // /**
-    //  * Creates a single-threaded executor that can schedule commands
-    //  * to run after a given delay, or to execute periodically.
-    //  * (Note however that if this single
-    //  * thread terminates due to a failure during execution prior to
-    //  * shutdown, a new one will take its place if needed to execute
-    //  * subsequent tasks.)  Tasks are guaranteed to execute
-    //  * sequentially, and no more than one task will be active at any
-    //  * given time. Unlike the otherwise equivalent
-    //  * {@code newScheduledThreadPool(1)} the returned executor is
-    //  * guaranteed not to be reconfigurable to use additional threads.
-    //  *
-    //  * @return the newly created scheduled executor
-    //  */
-    // static ScheduledExecutorService newSingleThreadScheduledExecutor() {
-    //     return new DelegatedScheduledExecutorService
-    //         (new ScheduledThreadPoolExecutor(1));
-    // }
+    /**
+     * Creates a single-threaded executor that can schedule commands
+     * to run after a given delay, or to execute periodically.
+     * (Note however that if this single
+     * thread terminates due to a failure during execution prior to
+     * shutdown, a new one will take its place if needed to execute
+     * subsequent tasks.)  Tasks are guaranteed to execute
+     * sequentially, and no more than one task will be active at any
+     * given time. Unlike the otherwise equivalent
+     * {@code newScheduledThreadPool(1)} the returned executor is
+     * guaranteed not to be reconfigurable to use additional threads.
+     *
+     * @return the newly created scheduled executor
+     */
+    static ScheduledExecutorService newSingleThreadScheduledExecutor() {
+        return new DelegatedScheduledExecutorService!ScheduledThreadPoolExecutor
+            (new ScheduledThreadPoolExecutor(1));
+    }
 
-    // /**
-    //  * Creates a single-threaded executor that can schedule commands
-    //  * to run after a given delay, or to execute periodically.  (Note
-    //  * however that if this single thread terminates due to a failure
-    //  * during execution prior to shutdown, a new one will take its
-    //  * place if needed to execute subsequent tasks.)  Tasks are
-    //  * guaranteed to execute sequentially, and no more than one task
-    //  * will be active at any given time. Unlike the otherwise
-    //  * equivalent {@code newScheduledThreadPool(1, threadFactory)}
-    //  * the returned executor is guaranteed not to be reconfigurable to
-    //  * use additional threads.
-    //  *
-    //  * @param threadFactory the factory to use when creating new threads
-    //  * @return the newly created scheduled executor
-    //  * @throws NullPointerException if threadFactory is null
-    //  */
-    // static ScheduledExecutorService newSingleThreadScheduledExecutor(ThreadFactory threadFactory) {
-    //     return new DelegatedScheduledExecutorService
-    //         (new ScheduledThreadPoolExecutor(1, threadFactory));
-    // }
+    /**
+     * Creates a single-threaded executor that can schedule commands
+     * to run after a given delay, or to execute periodically.  (Note
+     * however that if this single thread terminates due to a failure
+     * during execution prior to shutdown, a new one will take its
+     * place if needed to execute subsequent tasks.)  Tasks are
+     * guaranteed to execute sequentially, and no more than one task
+     * will be active at any given time. Unlike the otherwise
+     * equivalent {@code newScheduledThreadPool(1, threadFactory)}
+     * the returned executor is guaranteed not to be reconfigurable to
+     * use additional threads.
+     *
+     * @param threadFactory the factory to use when creating new threads
+     * @return the newly created scheduled executor
+     * @throws NullPointerException if threadFactory is null
+     */
+    static ScheduledExecutorService newSingleThreadScheduledExecutor(ThreadFactory threadFactory) {
+        return new DelegatedScheduledExecutorService!ScheduledThreadPoolExecutor
+            (new ScheduledThreadPoolExecutor(1, threadFactory));
+    }
 
     /**
      * Creates a thread pool that can schedule commands to run after a
@@ -863,119 +865,137 @@ private final class RunnableAdapter(T) : Callable!(T) if(!is(T == void)) {
 //     }
 // }
 
+void reachabilityFence(ExecutorService) {
+    // do nothing;
+    // TODO: Tasks pending completion -@zxp at 5/10/2019, 10:50:31 AM    
+    // remove this
+}
 
+/**
+ * A wrapper class that exposes only the ExecutorService methods
+ * of an ExecutorService implementation.
+ */
+private class DelegatedExecutorService(U) : ExecutorService 
+    if(is(U : ExecutorService)) {
+        
+    private U e;
 
-// /**
-//  * A wrapper class that exposes only the ExecutorService methods
-//  * of an ExecutorService implementation.
-//  */
-// private class DelegatedExecutorService
-//         implements ExecutorService {
-//     private ExecutorService e;
-//     DelegatedExecutorService(ExecutorService executor) { e = executor; }
-//     void execute(Runnable command) {
-//         try {
-//             e.execute(command);
-//         } finally { reachabilityFence(this); }
-//     }
-//     void shutdown() { e.shutdown(); }
-//     List!(Runnable) shutdownNow() {
-//         try {
-//             return e.shutdownNow();
-//         } finally { reachabilityFence(this); }
-//     }
-//     bool isShutdown() {
-//         try {
-//             return e.isShutdown();
-//         } finally { reachabilityFence(this); }
-//     }
-//     bool isTerminated() {
-//         try {
-//             return e.isTerminated();
-//         } finally { reachabilityFence(this); }
-//     }
-//     bool awaitTermination(Duration timeout)
-//         throws InterruptedException {
-//         try {
-//             return e.awaitTermination(timeout, unit);
-//         } finally { reachabilityFence(this); }
-//     }
-//     Future<?> submit(Runnable task) {
-//         try {
-//             return e.submit(task);
-//         } finally { reachabilityFence(this); }
-//     }
-//     !(T) Future!(T) submit(Callable!(T) task) {
-//         try {
-//             return e.submit(task);
-//         } finally { reachabilityFence(this); }
-//     }
-//     !(T) Future!(T) submit(Runnable task, T result) {
-//         try {
-//             return e.submit(task, result);
-//         } finally { reachabilityFence(this); }
-//     }
-//     !(T) List!(Future!(T)) invokeAll(Collection!(Callable!(T)) tasks)
-//         throws InterruptedException {
-//         try {
-//             return e.invokeAll(tasks);
-//         } finally { reachabilityFence(this); }
-//     }
-//     !(T) List!(Future!(T)) invokeAll(Collection!(Callable!(T)) tasks,
-//                                          Duration timeout)
-//         throws InterruptedException {
-//         try {
-//             return e.invokeAll(tasks, timeout, unit);
-//         } finally { reachabilityFence(this); }
-//     }
-//     !(T) T invokeAny(Collection!(Callable!(T)) tasks)
-//         throws InterruptedException, ExecutionException {
-//         try {
-//             return e.invokeAny(tasks);
-//         } finally { reachabilityFence(this); }
-//     }
-//     !(T) T invokeAny(Collection!(Callable!(T)) tasks,
-//                            Duration timeout)
-//         throws InterruptedException, ExecutionException, TimeoutException {
-//         try {
-//             return e.invokeAny(tasks, timeout, unit);
-//         } finally { reachabilityFence(this); }
-//     }
-// }
+    this(U executor) { e = executor; }
 
-// private class FinalizableDelegatedExecutorService
-//         extends DelegatedExecutorService {
-//     FinalizableDelegatedExecutorService(ExecutorService executor) {
-//         super(executor);
-//     }
+    void execute(Runnable command) {
+        try {
+            e.execute(command);
+        } finally { reachabilityFence(this); }
+    }
 
-//     protected void finalize() {
-//         super.shutdown();
-//     }
-// }
+    void shutdown() { e.shutdown(); }
 
-// /**
-//  * A wrapper class that exposes only the ScheduledExecutorService
-//  * methods of a ScheduledExecutorService implementation.
-//  */
-// private class DelegatedScheduledExecutorService
-//         extends DelegatedExecutorService
-//         implements ScheduledExecutorService {
-//     private ScheduledExecutorService e;
-//     DelegatedScheduledExecutorService(ScheduledExecutorService executor) {
-//         super(executor);
-//         e = executor;
-//     }
-//     ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-//         return e.schedule(command, delay, unit);
-//     }
-//     !(V) ScheduledFuture!(V) schedule(Callable!(V) callable, long delay, TimeUnit unit) {
-//         return e.schedule(callable, delay, unit);
-//     }
-//     ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-//         return e.scheduleAtFixedRate(command, initialDelay, period, unit);
-//     }
-//     ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-//         return e.scheduleWithFixedDelay(command, initialDelay, delay, unit);
-//     }
-// }
+    List!(Runnable) shutdownNow() {
+        try {
+            return e.shutdownNow();
+        } finally { reachabilityFence(this); }
+    }
+
+    bool isShutdown() {
+        try {
+            return e.isShutdown();
+        } finally { reachabilityFence(this); }
+    }
+
+    bool isTerminated() {
+        try {
+            return e.isTerminated();
+        } finally { reachabilityFence(this); }
+    }
+
+    bool awaitTermination(Duration timeout) {
+        try {
+            return e.awaitTermination(timeout);
+        } finally { reachabilityFence(this); }
+    }
+
+    Future!Void submit(Runnable task) {
+        try {
+            return e.submit(task);
+        } finally { reachabilityFence(this); }
+    }
+
+    Future!(T) submit(T)(Callable!(T) task) {
+        try {
+            return e.submit(task);
+        } finally { reachabilityFence(this); }
+    }
+
+    Future!(T) submit(T)(Runnable task, T result) {
+        try {
+            return e.submit(task, result);
+        } finally { reachabilityFence(this); }
+    }
+
+    List!(Future!(T)) invokeAll(T)(Collection!(Callable!(T)) tasks) {
+        try {
+            return e.invokeAll(tasks);
+        } finally { reachabilityFence(this); }
+    }
+
+    List!(Future!(T)) invokeAll(T)(Collection!(Callable!(T)) tasks,
+                                         Duration timeout) {
+        try {
+            return e.invokeAll(tasks, timeout, unit);
+        } finally { reachabilityFence(this); }
+    }
+
+    T invokeAny(T)(Collection!(Callable!(T)) tasks) {
+        try {
+            return e.invokeAny(tasks);
+        } finally { reachabilityFence(this); }
+    }
+    
+    T invokeAny(T)(Collection!(Callable!(T)) tasks,
+                           Duration timeout) {
+        try {
+            return e.invokeAny(tasks, timeout, unit);
+        } finally { reachabilityFence(this); }
+    }
+}
+
+private class FinalizableDelegatedExecutorService(T) : DelegatedExecutorService!T {
+    this(T executor) {
+        super(executor);
+    }
+
+    protected void finalize() {
+        super.shutdown();
+    }
+}
+
+/**
+ * A wrapper class that exposes only the ScheduledExecutorService
+ * methods of a ScheduledExecutorService implementation.
+ */
+private class DelegatedScheduledExecutorService(T) : DelegatedExecutorService!T,
+        ScheduledExecutorService if(is(T : ScheduledExecutorService)){
+
+    private T e;
+
+    this(T executor) {
+        super(executor);
+        e = executor;
+    }
+
+    ScheduledFuture!Void schedule(Runnable command, Duration delay) {
+        return e.schedule(command, delay);
+    }
+
+    ScheduledFuture!(V) schedule(V)(Callable!(V) callable, Duration delay) {
+        return e.schedule!V(callable, delay);
+    }
+
+    ScheduledFuture!Void scheduleAtFixedRate(Runnable command, Duration initialDelay, Duration period) {
+        return e.scheduleAtFixedRate(command, initialDelay, period);
+    }
+
+    ScheduledFuture!Void scheduleWithFixedDelay(Runnable command, Duration initialDelay, Duration delay) {
+        return e.scheduleWithFixedDelay(command, initialDelay, delay);
+    }
+}

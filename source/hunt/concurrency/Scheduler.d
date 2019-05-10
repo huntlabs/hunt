@@ -16,15 +16,15 @@ import hunt.util.Lifecycle;
 
 import core.time;
 
-public interface Scheduler : Lifecycle {
+interface Scheduler : Lifecycle {
 
     interface Future {
         bool cancel();
     }
 
-    Future schedule(Runnable task, long delay, ref Duration unit);
+    Future schedule(Runnable task, Duration delay);
 
-    Future scheduleWithFixedDelay(Runnable task, long initialDelay, long delay, ref Duration unit);
+    Future scheduleWithFixedDelay(Runnable task, Duration initialDelay, Duration delay);
 
-    Future scheduleAtFixedRate(Runnable task, long initialDelay, long period, ref Duration unit);
+    Future scheduleAtFixedRate(Runnable task, Duration initialDelay, Duration period);
 }

@@ -65,7 +65,8 @@ interface ScheduledFuture(V) : Delayed, Future!(V) {
  * @author Doug Lea
  * @param (V) The result type returned by this Future's {@code get} method
  */
-interface RunnableScheduledFuture(V) : RunnableFuture!(V), ScheduledFuture!(V), IRunnableScheduledFuture{
+interface RunnableScheduledFuture(V) : RunnableFuture!(V), 
+    ScheduledFuture!(V), IRunnableScheduledFuture {
 
     /**
      * Returns {@code true} if this task is periodic. A periodic task may
@@ -78,7 +79,10 @@ interface RunnableScheduledFuture(V) : RunnableFuture!(V), ScheduledFuture!(V), 
 }
 
 interface IRunnableScheduledFuture : Delayed, Runnable {
+    
     bool isPeriodic();
+
     bool cancel(bool mayInterruptIfRunning);
+
     bool isCancelled();
 }

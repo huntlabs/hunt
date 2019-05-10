@@ -37,7 +37,6 @@ module hunt.concurrency.CompletableFuture;
 
 import hunt.concurrency.CompletionStage;
 import hunt.concurrency.Delayed;
-import hunt.concurrency.Executor;
 import hunt.concurrency.Exceptions;
 import hunt.concurrency.ForkJoinPool;
 import hunt.concurrency.ForkJoinTask;
@@ -966,10 +965,12 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     private CompletableFuture!(V) biApplyStage(U,V)(
-        Executor e, CompletionStage!(U) o,
-        BiFunction!(T, U, V) f) {
-        CompletableFuture!(U) b; Object r, s;
-        if (f is null || (b = o.toCompletableFuture()) is null)
+        Executor e, CompletionStage!(U) o, BiFunction!(T, U, V) f) {
+
+        CompletableFuture!(U) b = cast(CompletableFuture!(U))o.toCompletableFuture(); 
+        Object r, s;
+
+        if (f is null || b is null)
             throw new NullPointerException();
         CompletableFuture!(V) d = newIncompleteFuture!(V)();
         if ((r = result) is null || (s = b.result) is null)
@@ -1142,8 +1143,9 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     private CompletableFuture!(V) orApplyStage(U, V)( // U : T,V
         Executor e, CompletionStage!(U) o, Function!(T, V) f) {
-        CompletableFuture!(U) b;
-        if (f is null || (b = o.toCompletableFuture()) is null)
+
+        CompletableFuture!(U) b = cast(CompletableFuture!(U))o.toCompletableFuture();
+        if (f is null || b is null)
             throw new NullPointerException();
 
         Object r; CompletableFuture!T z;
@@ -1490,18 +1492,18 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     CompletableFuture!(U) applyToEither(U)(
         CompletionStage!(T) other, Function!(T, U) fn) {
-        return orApplyStage(null, other, fn);
+        return orApplyStage!(T, U)(null, other, fn);
     }
 
     CompletableFuture!(U) applyToEitherAsync(U)(
         CompletionStage!(T) other, Function!(T, U) fn) {
-        return orApplyStage(defaultExecutor(), other, fn);
+        return orApplyStage!(T, U)(defaultExecutor(), other, fn);
     }
 
     CompletableFuture!(U) applyToEitherAsync(U)(
         CompletionStage!(T) other, Function!(T, U) fn,
         Executor executor) {
-        return orApplyStage(screenExecutor(executor), other, fn);
+        return orApplyStage!(T, U)(screenExecutor(executor), other, fn);
     }
 
     CompletableFuture!(Void) acceptEither(
@@ -2446,37 +2448,41 @@ final class BiRelay : BiCompletion { // for And
     }
 }
 
-
     
-static final class OrApply(T,U : T,V) : BiCompletion {
+final class OrApply(T,U : T,V) : BiCompletion {
     Function!(T,V) fn;
     this(Executor executor, CompletableFuture!(V) dep,
             CompletableFuture!(T) src, CompletableFuture!(U) snd,
             Function!(T,V) fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
-    final CompletableFuture!(V) tryFire(int mode) {
-        CompletableFuture!(V) d;
-        CompletableFuture!(T) a;
-        CompletableFuture!(U) b;
-        Object r; Throwable x; Function!(T,V) f;
-        if ((d = dep) is null || (f = fn) is null
-            || (a = src) is null || (b = snd) is null
+
+    final override CompletableFuture!(V) tryFire(int mode) {
+        CompletableFuture!(V) d = cast(CompletableFuture!(V))dep;
+        CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
+        CompletableFuture!(U) b = cast(CompletableFuture!(U))snd;
+        Object r; Throwable x; 
+        Function!(T,V) f = fn;
+        
+        if (d is null || f is null || a is null || b is null
             || ((r = a.result) is null && (r = b.result) is null))
             return null;
+
         tryComplete: if (d.result is null) {
             try {
                 if (mode <= 0 && !claim())
                     return null;
+                
+                AltResult ar = cast(AltResult)r;
                 if (ar !is null) {
                     if ((x = ar.ex) !is null) {
                         d.completeThrowable(x, r);
-                        break tryComplete;
+                        goto tryComplete;
                     }
                     r = null;
                 }
                 T t = cast(T) r;
-                d.completeValue(f.apply(t));
+                d.completeValue(f(t));
             } catch (Throwable ex) {
                 d.completeThrowable(ex);
             }
@@ -2496,15 +2502,16 @@ static final class OrAccept(T,U : T) : BiCompletion {
     }
 
     final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d;
-        CompletableFuture!(T) a;
-        CompletableFuture!(U) b;
-        Object r; Throwable x; Consumer!(T) f;
-        if ((d = cast(CompletableFuture!(Void))dep) is null || (f = fn) is null
-            || (a = cast(CompletableFuture!(T))src) is null 
-            || (b = cast(CompletableFuture!(U))snd) is null
+        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+        CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
+        CompletableFuture!(U) b = cast(CompletableFuture!(U))snd;
+        Object r; Throwable x; 
+        Consumer!(T) f = fn;
+
+        if (d is null || f is null || a is null || b is null
             || ((r = a.result) is null && (r = b.result) is null))
             return null;
+
         tryComplete: if (d.result is null) {
             try {
                 if (mode <= 0 && !claim())
