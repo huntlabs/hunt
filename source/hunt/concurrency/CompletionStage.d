@@ -808,6 +808,6 @@ interface CompletionStage(T) {
      *
      * @return the CompletableFuture
      */
-//     CompletionStage!(T) toCompletableFuture();
+    CompletionStage!(T) toCompletableFuture();
 
 }

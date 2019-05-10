@@ -15,10 +15,9 @@ import core.thread;
 import core.time;
 
 import hunt.concurrency.thread.ThreadEx;
-import hunt.util.DateTime;
 import hunt.Exceptions;
-
 import hunt.logging.ConsoleLogger;
+import hunt.util.DateTime;
 
 
 /**
@@ -311,8 +310,7 @@ class LockSupport {
     static void parkUntil(Object blocker, long deadline) {
         ThreadEx t = ThreadEx.currentThread();
         setBlocker(t, blocker);
-        // U.park(true, deadline);
-        implementationMissing(false);
+        t.parker.park(true, deadline.msecs);
         setBlocker(t, null);
     }
 
@@ -383,8 +381,8 @@ class LockSupport {
      *        to wait until
      */
     static void parkUntil(long deadline) {
-        // U.park(true, deadline);
-        implementationMissing(false);
+        ThreadEx t = ThreadEx.currentThread();
+        t.parker.park(true, deadline.msecs);
     }
 
     /**

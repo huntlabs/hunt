@@ -489,19 +489,19 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws NullPointerException       {@inheritDoc}
      * @throws IllegalArgumentException   {@inheritDoc}
      */
-    ScheduledFuture!void scheduleAtFixedRate(Runnable command,
+    ScheduledFuture!Void scheduleAtFixedRate(Runnable command,
                                                   Duration initialDelay,
                                                   Duration period) {
         if (command is null)
             throw new NullPointerException();
         if (period <= Duration.zero)
             throw new IllegalArgumentException();
-        ScheduledFutureTask!(void) sft =
-            new ScheduledFutureTask!(void)(command,
+        ScheduledFutureTask!(Void) sft =
+            new ScheduledFutureTask!(Void)(command, cast(Void)null,
                                           triggerTime(initialDelay),
                                           period.total!(TimeUnit.HectoNanosecond)(), 
                                           cast(long)AtomicHelper.getAndIncrement(sequencer), this);
-        RunnableScheduledFuture!(void) t = decorateTask(command, sft);
+        RunnableScheduledFuture!(Void) t = decorateTask(command, sft);
         sft.outerTask = t;
         delayedExecute(t);
         return t;
@@ -535,19 +535,19 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws NullPointerException       {@inheritDoc}
      * @throws IllegalArgumentException   {@inheritDoc}
      */
-    ScheduledFuture!(void) scheduleWithFixedDelay(Runnable command,
+    ScheduledFuture!(Void) scheduleWithFixedDelay(Runnable command,
                                                      Duration initialDelay,
                                                      Duration delay) {
         if (command is null)
             throw new NullPointerException();
         if (delay <= Duration.zero)
             throw new IllegalArgumentException();
-        ScheduledFutureTask!(void) sft =
-            new ScheduledFutureTask!(void)(command,
+        ScheduledFutureTask!(Void) sft =
+            new ScheduledFutureTask!(Void)(command, cast(Void)null,
                                           triggerTime(initialDelay),
                                           -delay.total!(TimeUnit.HectoNanosecond)(),
                                           cast(long)AtomicHelper.getAndIncrement(sequencer), this);
-        RunnableScheduledFuture!(void) t = decorateTask(command, sft);
+        RunnableScheduledFuture!(Void) t = decorateTask(command, sft);
         sft.outerTask = t;
         delayedExecute(t);
         return t;

@@ -54,7 +54,7 @@ void main()
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
-	testUnits!(CompletableFutureTest);
+	// testUnits!(CompletableFutureTest);
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
@@ -74,7 +74,7 @@ void main()
 	// // b.bench();
 	// // testTask();
 	// // testLockSupport01();
-	// // testUnits!(ScheduledThreadPoolTest);
+	testUnits!(ScheduledThreadPoolTest);
 	// // testUnits!(ThreadPoolExecutorTest);
 
 	// testUnits!(SerializationTest);

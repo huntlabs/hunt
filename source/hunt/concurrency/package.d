@@ -14,7 +14,6 @@ public import hunt.concurrency.CountedCompleter;
 public import hunt.concurrency.CountingCallback;
 public import hunt.concurrency.Delayed;
 public import hunt.concurrency.Exceptions;
-public import hunt.concurrency.Executor;
 public import hunt.concurrency.Executors;
 public import hunt.concurrency.ExecutorService;
 public import hunt.concurrency.ForkJoinPool;
