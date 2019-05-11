@@ -55,6 +55,7 @@ void main()
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// testUnits!(CompletableFutureTest);
+	// testUnits!(ForkJoinPoolTest);
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
@@ -65,7 +66,7 @@ void main()
 	// // 
 	// // testUnits!(PathMatcherTest); 
 	// testUnits!(StringTokenizerTest);
-	// testUnits!(ThreadTest);
+	testUnits!(ThreadTest);
 
 	// // These tests belown will block the test procession.
 
@@ -74,7 +75,7 @@ void main()
 	// // b.bench();
 	// // testTask();
 	// // testLockSupport01();
-	testUnits!(ScheduledThreadPoolTest);
+	// testUnits!(ScheduledThreadPoolTest);
 	// // testUnits!(ThreadPoolExecutorTest);
 
 	// testUnits!(SerializationTest);
