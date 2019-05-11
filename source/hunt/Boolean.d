@@ -11,8 +11,11 @@
 
 module hunt.Boolean;
 
+import hunt.Nullable;
 import hunt.text;
 import std.traits;
+
+import std.concurrency : initOnce;
 
 /**
  * The Boolean class wraps a value of the primitive type
@@ -29,23 +32,25 @@ import std.traits;
  * @author  Arthur van Hoff
  * @since   JDK1.0
  */
-class Boolean {
+class Boolean : Nullable!bool {
     /**
      * The {@code Boolean} object corresponding to the primitive
      * value {@code true}.
      */
-    __gshared Boolean TRUE ;
+    static Boolean TRUE() {
+        __gshared Boolean inst;
+        return initOnce!inst(new Boolean(true));
+    }
 
     /**
      * The {@code Boolean} object corresponding to the primitive
      * value {@code false}.
      */
-    __gshared Boolean FALSE;
-
-    shared static this() {
-        TRUE = new Boolean(true);
-        FALSE = new Boolean(false);
+    static Boolean FALSE() {
+        __gshared Boolean inst;
+        return initOnce!inst(new Boolean(false));
     }
+
 
     /**
      * The Class object representing the primitive type bool.
@@ -54,13 +59,6 @@ class Boolean {
     //  */
     // @SuppressWarnings("unchecked")
     // static  Class<Boolean> TYPE = (Class<Boolean>) Class.getPrimitiveClass("bool");
-
-    /**
-     * The value of the Boolean.
-     *
-     * @serial
-     */
-    private bool value;
 
     /**
      * Allocates a {@code Boolean} object representing the
@@ -73,7 +71,8 @@ class Boolean {
      *
      * @param   value   the value of the {@code Boolean}.
      */
-    private void assign(T)(T arg) @safe {
+    static private bool assign(T)(T arg) @safe {
+        bool value;
         static if (is(T : typeof(null))) {
             value = false;
         }
@@ -96,20 +95,42 @@ class Boolean {
         else {
             static assert(false, text(`unable to convert type "`, T.stringof, `" to Boolean`));
         }
+
+        return value;
     }
 
-    this(T)(T value) if (!isStaticArray!T) {
-        assign(value);
+    this() {
+        super();
+    }
+    
+    this(bool v) {
+        super(v);
+    }
+    
+    this(long v) {
+        super(v != 0 ? true : false);
+    }
+    
+    this(ulong v) {
+        super(v != 0 ? true : false);
     }
 
-    /// Ditto
-    this(T)(ref T arg) if (isStaticArray!T) {
-        value = arg.booleanValue();
+    this(Boolean v) {
+        super(v.value);
     }
-    /// Ditto
-    this(T : Boolean)(inout T arg) inout {
-        value = arg.booleanValue();
-    }
+
+    // this(T)(T value) if (!isStaticArray!T) {
+    //     super(assign(value));
+    // }
+
+    // /// Ditto
+    // this(T)(ref T arg) if (isStaticArray!T) {
+    //     super(arg.booleanValue());
+    // }
+    // /// Ditto
+    // this(T : Boolean)(inout T arg) inout {
+    //     super(arg.booleanValue());
+    // }
 
     /**
      * Allocates a {@code Boolean} object representing the value
@@ -244,15 +265,15 @@ class Boolean {
      * @return  {@code true} if the Boolean objects represent the
      *          same value; {@code false} otherwise.
      */
-    override bool opEquals(Object obj) {
-        if (cast(Boolean) obj !is null) {
-            return value == (cast(Boolean) obj).booleanValue();
-        }
-        return false;
-    }
+    // override bool opEquals(Object obj) {
+    //     if (cast(Boolean) obj !is null) {
+    //         return value == (cast(Boolean) obj).booleanValue();
+    //     }
+    //     return false;
+    // }
 
     void opAssign(T)(T arg) if (!isStaticArray!T && !is(T : Boolean)) {
-        assign(arg);
+        this._value = assign(arg);
     }
 
     void opAssign(T)(ref T arg) if (isStaticArray!T) {

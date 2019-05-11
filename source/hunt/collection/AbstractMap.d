@@ -194,16 +194,7 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * @throws NullPointerException          {@inheritDoc}
      */
     V remove(K key) {
-
         throw new UnsupportedOperationException();
-        // auto v = key in _dict;
-
-        // V oldValue = V.init;
-        // if (v !is null) {
-        //     oldValue = *v;
-        //     _dict.remove(key);
-        // }
-        // return oldValue;
     }
 
     bool remove(K key, V value) {
@@ -365,11 +356,12 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
         //     arr.insertBack(value);
         // }
         // return arr.array();
-        V[] arr;
-        foreach (V value; byValue()) {
-            arr ~= value;
-        }
-        return arr;
+        // V[] arr;
+        // foreach (V value; byValue()) {
+        //     arr ~= value;
+        // }
+        // return arr;
+        return byValue().array();
     }
 
     // Comparison and hashing
@@ -403,38 +395,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
     bool opEquals(IObject o) {
         return opEquals(cast(Object) o);
     }
-    // bool equals(Object o) {
-    //     if (o == this)
-    //         return true;
-
-    //     if (!(o instanceof Map))
-    //         return false;
-    //     Map<?,?> m = (Map<?,?>) o;
-    //     if (m.size() != size())
-    //         return false;
-
-    //     try {
-    //         Iterator<Entry!(K,V)> i = entrySet().iterator();
-    //         while (i.hasNext()) {
-    //             Entry!(K,V) e = i.next();
-    //             K key = e.getKey();
-    //             V value = e.getValue();
-    //             if (value is null) {
-    //                 if (!(m.get(key)==null && m.containsKey(key)))
-    //                     return false;
-    //             } else {
-    //                 if (!value.equals(m.get(key)))
-    //                     return false;
-    //             }
-    //         }
-    //     } catch (ClassCastException unused) {
-    //         return false;
-    //     } catch (NullPointerException unused) {
-    //         return false;
-    //     }
-
-    //     return true;
-    // }
 
     // Iterator!(MapEntry!(K,V)) iterator()
     // {
@@ -465,9 +425,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
             foreach (MapEntry!(K, V) i; this) {
                 h += i.toHash();
             }
-            // Iterator!(MapEntry!(K,V)) i = this.iterator();
-            // while (i.hasNext())
-            //     h += i.next().toHash();
         } catch (Exception ex) {
         }
         return h;
@@ -713,20 +670,19 @@ class SimpleImmutableEntry(K, V) : AbstractMapEntry!(K, V) {
         throw new UnsupportedOperationException();
     }
 
-
     /**
-        * Returns the hash code value for this map entry.  The hash code
-        * of a map entry {@code e} is defined to be: <pre>
-        *   (e.getKey()==null   ? 0 : e.getKey().toHash()) ^
-        *   (e.getValue()==null ? 0 : e.getValue().toHash())</pre>
-        * This ensures that {@code e1.equals(e2)} implies that
-        * {@code e1.toHash()==e2.toHash()} for any two Entries
-        * {@code e1} and {@code e2}, as required by the general
-        * contract of {@link Object#toHash}.
-        *
-        * @return the hash code value for this map entry
-        * @see    #equals
-        */
+     * Returns the hash code value for this map entry.  The hash code
+     * of a map entry {@code e} is defined to be: <pre>
+     *   (e.getKey()==null   ? 0 : e.getKey().toHash()) ^
+     *   (e.getValue()==null ? 0 : e.getValue().toHash())</pre>
+     * This ensures that {@code e1.equals(e2)} implies that
+     * {@code e1.toHash()==e2.toHash()} for any two Entries
+     * {@code e1} and {@code e2}, as required by the general
+     * contract of {@link Object#toHash}.
+     *
+     * @return the hash code value for this map entry
+     * @see    #equals
+     */
     override size_t toHash() @trusted nothrow {
         static if (is(K == class)) {
             size_t kHash = 0;
@@ -751,7 +707,6 @@ class SimpleImmutableEntry(K, V) : AbstractMapEntry!(K, V) {
 /**
 */
 class EmptyMap(K, V) : AbstractMap!(K, V) {
-    // private enum long serialVersionUID = 6428348081105594320L;
 
     override int size() {
         return 0;

@@ -69,8 +69,6 @@ abstract class AbstractCollection(E) : Collection!E {
      *
      * @return an iterator over the elements contained in this collection
      */
-    
-    deprecated("Just remove it")
     InputRange!E iterator() {
         throw new NotImplementedException();
     }

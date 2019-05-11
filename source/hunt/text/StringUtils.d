@@ -416,11 +416,11 @@ class StringUtils {
 	 * @return the {@code string} array
 	 */
 	static string[] toStringArray(InputRange!string range) {
-        Array!string buffer;
-        foreach(string s; range) {
-            buffer.insertBack(s);
-        }
-		return buffer.array;
+        // Array!string buffer;
+        // foreach(string s; range) {
+        //     buffer.insertBack(s);
+        // }
+		return range.array;
 	}
 
 
@@ -431,7 +431,7 @@ class StringUtils {
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code string}
 	 */
-	static string arrayToDelimitedString(string[] arr, string delim) {
+	static string toDelimitedString(string[] arr, string delim) {
 		if (arr.length == 0) {
 			return "";
 		}
@@ -449,6 +449,7 @@ class StringUtils {
 		return sb.data;
 	}
 
+
 	/**
 	 * Convert a {@code string} array into a comma delimited {@code string}
 	 * (i.e., CSV).
@@ -456,10 +457,31 @@ class StringUtils {
 	 * @param arr the array to display (potentially {@code null} or empty)
 	 * @return the delimited {@code string}
 	 */
-	static string arrayToCommaDelimitedString(string[] arr) {
-		return arrayToDelimitedString(arr, ",");
+	static string toCommaDelimitedString(string[] arr) {
+		return toDelimitedString(arr, ",");
 	}
 
+	static string toDelimitedString(Object[] arr, string delim) {
+		if (arr.length == 0) {
+			return "";
+		}
+		if (arr.length == 1) {
+			return arr[0].toString();
+		}
+
+        Appender!string sb;
+		for (size_t i = 0; i < arr.length; i++) {
+			if (i > 0) {
+				sb.put(delim);
+			}
+			sb.put(arr[i].toString());
+		}
+		return sb.data;
+    }
+
+	static string toCommaDelimitedString(Object[] arr) {
+		return toDelimitedString(arr, ",");
+	}
 
 	/**
 	 * Convert a comma delimited list (e.g., a row from a CSV file) into an

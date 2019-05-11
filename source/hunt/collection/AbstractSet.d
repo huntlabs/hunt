@@ -167,31 +167,19 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
         assert(c !is null);
 
         bool modified = false;
-
-        // throw new NotImplementedException("");
-
         if (size() > c.size()) {
             foreach(E k; c)        {
                 if(this.contains(k)) {
                     this.remove(k); modified = true;
                 }
             }
-            // for (Iterator<?> i = c.iterator(); i.hasNext(); )
-            //     modified |= remove(i.next());
         } else {
-            // for (Iterator<?> i = iterator(); i.hasNext(); ) {
-            //     if (c.contains(i.next())) {
-            //         i.remove();
-            //         modified = true;
-            //     }
-            // }
             foreach(E k; this) {
                 if(c.contains(k))  {
                     this.remove(k);
                     modified = true;
                 }
-            }
-            
+            }            
         }
         return modified;
     }
@@ -214,17 +202,6 @@ class EmptySet(E) : AbstractSet!(E) {
 
     override E[] toArray() { return []; }
 
-    // <T> T[] toArray(T[] a) {
-    //     if (a.length > 0)
-    //         a[0] = null;
-    //     return a;
-    // }
-
-    // Override default methods in Collection
-    // override
-    // void forEach(Consumer<? super E> action) {
-    //     Objects.requireNonNull(action);
-    // }
     override bool removeIf(Predicate!E filter) {
         assert(filter !is null);
         return false;

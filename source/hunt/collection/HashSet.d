@@ -167,9 +167,9 @@ class HashSet(E) : AbstractSet!E, Set!E {
      * @return an Iterator over the elements in this set
      * @see ConcurrentModificationException
      */
-    // override InputRange!E iterator() {
-    //     return map.byKey;
-    // }
+    override InputRange!E iterator() {
+        return map.byKey;
+    }
 
     /**
      * Returns the number of elements in this set (its cardinality).
