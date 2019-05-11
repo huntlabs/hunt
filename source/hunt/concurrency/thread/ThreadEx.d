@@ -809,61 +809,34 @@ class Parker {
         _cur_index = -1; // mark as unused
     }
 
-    // For simplicity of interface with Java, all forms of park (indefinite,
+    // For simplicity of interface, all forms of park (indefinite,
     // relative, and absolute) are multiplexed into one call.
-    // Parker.park decrements count if > 0, else does a condvar wait.  Unpark
-    // sets count to 1 and signals condvar.  Only one thread ever waits
-    // on the condvar. Contention seen when trying to park implies that someone
-    // is unparking you, so don't wait. And spurious returns are fine, so there
-    // is no need to track notifications.
-    void park(Duration time) {
-
-        // Invariant: Only the thread associated with the Event/PlatformEvent
-        // may call park().
-        assert(_nParked == 0, "invariant");
-
-        if(!_mutex.tryLock())
-            return;
-        scope(exit) {
-            _mutex.unlock();
-            // Paranoia to ensure our locked and lock-free paths interact
-            // correctly with each other and Java-level accesses.
-            atomicFence();
-        }
-        _nParked++;
-
-        _cond[REL_INDEX].wait(time);
-        _nParked--;
-    }
-
     // park decrements count if > 0, else does a condvar wait.  Unpark
     // sets count to 1 and signals condvar.  Only one thread ever waits
     // on the condvar. Contention seen when trying to park implies that someone
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
     void park(bool isAbsolute, Duration time) {
+        version(HUNT_DEBUG) {
+            tracef("try to park a thread: isAbsolute=%s, time=%s", isAbsolute, time);
+        }
         // Optional fast-path check:
         // Return immediately if a permit is available.
         // We depend on Atomic::xchg() having full barrier semantics
         // since we are doing a lock-free update to _counter.
         const int c = _counter;
+        atomicStore(_counter, 0);
         if(c > 0) {
-            warning("counter=%s", c);
+            warningf("counter=%s", c);
             return;
         }
-        atomicStore(_counter, 0);
 
-        ThreadEx thread = ThreadEx.currentThread();
-
-        // // Optional optimization -- avoid state transitions if there's
-        // // an interrupt pending.
-        // if (Threadex.is_interrupted(thread, false)) {
-        //     return;
-        // }
         // Next, demultiplex/decode time arguments
         if (time < Duration.zero || (isAbsolute && time == Duration.zero)) { // don't wait at all
             return;
         }
+
+        ThreadEx thread = ThreadEx.currentThread();
 
         // Enter safepoint region
         // Beware of deadlocks such as 6317397.
@@ -873,17 +846,13 @@ class Parker {
 
         // Don't wait if cannot get lock since interference arises from
         // unparking. Also re-check interrupt before trying wait.
-        // if (Thread.is_interrupted(thread, false) || pthread_mutex_trylock(_mutex) != 0) {
-        //     return;
-        // }
+        if(thread.isInterrupted() || !_mutex.tryLock())
+            return;
 
         if (_counter > 0) { // no wait needed
             return;
         }
 
-        if(!_mutex.tryLock())
-            return;
-        
         scope(exit) {
             _counter = 0;
             _mutex.unlock();

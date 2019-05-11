@@ -174,7 +174,7 @@ class LockSupport {
     static void park() {
         ThreadEx tx = cast(ThreadEx)Thread.getThis();
         if (tx !is null) {
-            tx.parker().park(Duration.zero);
+            tx.parker().park(false, Duration.zero);
         } else {
             warning("The current thread is not ThreadEx!");
             // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:08:21 AM
@@ -186,7 +186,7 @@ class LockSupport {
     static void park(Duration time) {        
         ThreadEx tx = cast(ThreadEx)Thread.getThis();
         if (!time.isNegative && tx !is null) {
-            tx.parker().park(time);
+            tx.parker().park(false, time);
         } else {
             warning("The current thread is not ThreadEx!");
             Thread.sleep(time);
@@ -229,7 +229,7 @@ class LockSupport {
         ThreadEx tx = cast(ThreadEx)Thread.getThis();
         if (time >= Duration.zero && tx !is null) {
             setBlocker(tx, blocker);
-            tx.parker().park(time);
+            tx.parker().park(false, time);
             setBlocker(tx, null);
         } else {
             warning("The current thread is not ThreadEx!");
@@ -346,7 +346,7 @@ class LockSupport {
     static void parkNanos(long nanos) {        
         ThreadEx tx = cast(ThreadEx)Thread.getThis();
         if (nanos > 0 && tx !is null) {
-            tx.parker().park(dur!(TimeUnit.Nanosecond)(nanos));
+            tx.parker().park(false, dur!(TimeUnit.Nanosecond)(nanos));
         }
     }
 
