@@ -886,7 +886,7 @@ class HashMap(K,V) : AbstractMap!(K,V) {
         }
     }
 
-    final class KeyInputRange :  InputRange!K {
+    final class KeyInputRange : InputRange!K {
         mixin HashIterator;
 
         final K front() @property { return next.key; }
