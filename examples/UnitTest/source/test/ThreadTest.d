@@ -39,7 +39,10 @@ class ThreadTest {
 
     }
 
-
+    /**
+     See_also:
+        https://blog.csdn.net/anLA_/article/details/78635300
+    */
     void testLockSupport01() {
         ThreadEx tx;
         tx = new ThreadEx(
