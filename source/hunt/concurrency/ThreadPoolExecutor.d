@@ -664,14 +664,14 @@ class ThreadPoolExecutor : AbstractExecutorService {
         bool isLocked() { return isHeldExclusively(); }
 
         void interruptIfStarted() {
-            implementationMissing(false);
-            // Thread t;
-            // if (getState() >= 0 && (t = thread) !is null && !t.isInterrupted()) {
-            //     try {
-            //         t.interrupt();
-            //     } catch (SecurityException ignore) {
-            //     }
-            // }
+            ThreadEx t;
+            if (getState() >= 0 && (t = cast(ThreadEx)thread) !is null && !t.isInterrupted()) {
+                try {
+                    t.interrupt();
+                } catch (Exception ignore) {
+                    version(HUNT_DEBUG) warning(ignore.msg);
+                }
+            }
         }
     }
 
@@ -796,16 +796,18 @@ class ThreadPoolExecutor : AbstractExecutorService {
         mainLock.lock();
         try {
             foreach(Worker w ; workers) {
-                Thread t = w.thread;
-                implementationMissing(false);
-                // if (!t.isInterrupted() && w.tryLock()) {
-                //     try {
-                //         t.interrupt();
-                //     } catch (SecurityException ignore) {
-                //     } finally {
-                //         w.unlock();
-                //     }
-                // }
+                ThreadEx t = cast(ThreadEx)w.thread;
+                if (t !is null && !t.isInterrupted() && w.tryLock()) {
+                    try {
+                        t.interrupt();
+                    } catch (Exception ignore) {
+                        version(HUNT_DEBUG) {
+                            warning(ignore.toString());
+                        }
+                    } finally {
+                        w.unlock();
+                    }
+                }
                 if (onlyOne)
                     break;
             }
