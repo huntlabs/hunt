@@ -924,6 +924,7 @@ class ForkJoinPool : AbstractExecutorService {
             long nc = ((RC_MASK & (c + RC_UNIT)) |
                        (TC_MASK & (c + TC_UNIT)));
             if (ctl == c && AtomicHelper.compareAndSet(this.ctl, c, nc)) {
+                version(HUNT_DEBUG_CONCURRENCY) tracef("nc=%d, ctl=%d, c=%d", nc, ctl, c);
                 createWorker();
                 break;
             }
@@ -1164,7 +1165,7 @@ class ForkJoinPool : AbstractExecutorService {
     final void runWorker(WorkQueue w) {
         int r = (w.id ^ ThreadLocalRandom.nextSecondarySeed()) | FIFO; // rng
         w.array = new IForkJoinTask[INITIAL_QUEUE_CAPACITY]; // initialize
-        for (;;) {
+        while(true) {
             int phase;
             if (scan(w, r)) {                     // scan until apparently empty
                 r ^= r << 13; r ^= r >>> 17; r ^= r << 5; // move (xorshift)
@@ -1176,19 +1177,28 @@ class ForkJoinPool : AbstractExecutorService {
                     w.stackPred = cast(int)(c = ctl);
                     nc = ((c - RC_UNIT) & UC_MASK) | np;
                 } while (!AtomicHelper.compareAndSet(this.ctl, c, nc));
+
+                version(HUNT_DEBUG_CONCURRENCY) {
+                    infof("ctl=%d, c=%d, nc=%d, stackPred=%d", ctl, c, nc, w.stackPred);
+                }
             }
             else {                                // already queued
+
                 int pred = w.stackPred;
                 ThreadEx.interrupted();             // clear before park
                 w.source = DORMANT;               // enable signal
                 long c = ctl;
                 int md = mode, rc = (md & SMASK) + cast(int)(c >> RC_SHIFT);
-                if (md < 0)                       // terminating
+
+                version(HUNT_DEBUG_CONCURRENCY) {
+                    tracef("md=%d, rc=%d, c=%d, pred=%d, phase=%d", md, rc, c, pred, phase);
+                }
+
+                if (md < 0) {                      // terminating
                     break;
-                else if (rc <= 0 && (md & SHUTDOWN) != 0 &&
-                         tryTerminate(false, false))
+                } else if (rc <= 0 && (md & SHUTDOWN) != 0 && tryTerminate(false, false)) {
                     break;                        // quiescent shutdown
-                else if (rc <= 0 && pred != 0 && phase == cast(int)c) {
+                } else if (rc <= 0 && pred != 0 && phase == cast(int)c) {
                     long nc = (UC_MASK & (c - TC_UNIT)) | (SP_MASK & pred);
                     long d = keepAlive + DateTimeHelper.currentTimeMillis();
                     LockSupport.parkUntil(this, d);
@@ -1198,9 +1208,10 @@ class ForkJoinPool : AbstractExecutorService {
                         w.phase = QUIET;
                         break;
                     }
-                }
-                else if (w.phase < 0)
+                } else if (w.phase < 0) {
                     LockSupport.park(this);       // OK if spuriously woken
+            break;
+                }
                 w.source = 0;                     // disable signal
             }
         }
@@ -1225,25 +1236,25 @@ class ForkJoinPool : AbstractExecutorService {
                         // import core.atomic;  
                         // auto ss =     core.atomic.atomicLoad((cast(shared)a[k]));   
                         // FIXME: Needing refactor or cleanup -@zxp at 2/6/2019, 5:12:19 PM               
-                        // 
-                        // t = AtomicHelper.load(a[k]);
+                        // IForkJoinTask tt = a[k];
+                        // t = AtomicHelper.load(tt);
                         t = a[k];
-                        if (q.base == b++ && t !is null &&
-                            AtomicHelper.compareAndSet(a[k], t, null)) {
+                        if (q.base == b++ && t !is null && AtomicHelper.compareAndSet(a[k], t, null)) {
                             q.base = b;
                             w.source = qid;
-                            if (q.top - b > 0)
-                                signalWork();
+                            if (q.top - b > 0) signalWork();
                             w.topLevelExec(t, q,  // random fairness bound
                                            r & ((n << TOP_BOUND_SHIFT) - 1));
                         }
                     }
                     return true;
                 }
-                else if (--n > 0)
+                else if (--n > 0) {
                     j = (j + 1) & m;
-                else
+                }
+                else {
                     break;
+                }
             }
         }
         return false;
@@ -2039,7 +2050,14 @@ class ForkJoinPool : AbstractExecutorService {
         if (task is null)
             throw new NullPointerException();
         externalSubmit!(T)(task);
-        return task.join();
+        version(HUNT_DEBUG_CONCURRENCY) {
+            infof("waiting the result...");
+            T c = task.join();
+            infof("final result: %s", c);
+            return c;
+        } else {
+            return task.join();
+        }
     }
 
     /**
@@ -2051,7 +2069,6 @@ class ForkJoinPool : AbstractExecutorService {
      *         scheduled for execution
      */
     void execute(IForkJoinTask task) {
-        // implementationMissing(false);
         externalSubmit(task);
     }
 
@@ -3024,21 +3041,35 @@ class ForkJoinWorkerThread : ThreadEx {
      * {@link ForkJoinTask}s.
      */
     override void run() {
-        if (workQueue.array is null) { // only run once
-            Throwable exception = null;
-            scope(exit) {
-                pool.deregisterWorker(this, exception);                
-            }
+        if (workQueue.array !is null)
+            return;
+        // only run once
+        Throwable exception = null;
 
-            try {
-                onStart();
-                pool.runWorker(workQueue);
-            } catch (Throwable ex) {
-                exception = ex;
-            } finally {
-                onTermination(exception);
+        try {
+            onStart();
+            pool.runWorker(workQueue);
+        } catch (Throwable ex) {
+            version(HUNT_DEBUG) {
+                warning(ex);
+            } else {
+                warning(ex.msg);
             }
+            exception = ex;
         }
+
+        try {
+            onTermination(exception);
+        } catch(Throwable ex) {
+            version(HUNT_DEBUG) {
+                warning(ex);
+            } else {
+                warning(ex.msg);
+            }
+            if (exception is null)
+                exception = ex;
+        }
+        pool.deregisterWorker(this, exception);  
     }
 
     /**

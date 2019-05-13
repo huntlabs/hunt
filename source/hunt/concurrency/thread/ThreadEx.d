@@ -374,7 +374,7 @@ class ThreadEx : Thread, Runnable {
      *  https://stackoverflow.com/questions/8579657/whats-the-difference-between-thread-start-and-runnable-run
      */
     void run() {
-        version(HUNT_DEBUG) {
+        version(HUNT_DEBUG_CONCURRENCY) {
             infof("Trying to run a target (%s null)...", target is null ? "is" : "is not");
         }
         if (target !is null) {
@@ -817,7 +817,7 @@ class Parker {
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
     void park(bool isAbsolute, Duration time) {
-        version(HUNT_DEBUG) {
+        version(HUNT_DEBUG_CONCURRENCY) {
             tracef("try to park a thread: isAbsolute=%s, time=%s", isAbsolute, time);
         }
         // Optional fast-path check:
@@ -825,9 +825,9 @@ class Parker {
         // We depend on Atomic::xchg() having full barrier semantics
         // since we are doing a lock-free update to _counter.
         const int c = _counter;
-        atomicStore(_counter, 0);
         if(c > 0) {
-            warningf("counter=%s", c);
+            atomicStore(_counter, 0);
+            version(HUNT_DEBUG_CONCURRENCY) infof("no need to park, counter=%s", c);
             return;
         }
 
@@ -886,6 +886,9 @@ class Parker {
     }
 
     void unpark() {
+        version(HUNT_DEBUG_CONCURRENCY) {
+            tracef("try to unpark a thread");
+        }
         _mutex.lock();
         const int s = _counter;
         _counter = 1;

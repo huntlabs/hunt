@@ -29,7 +29,7 @@
  * file:
  *
  * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
+ * Expert Group and released to the domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
@@ -43,12 +43,10 @@ import hunt.concurrency.ForkJoinPool;
 import hunt.concurrency.ForkJoinTaskHelper;
 
 import hunt.collection.Collection;
+import hunt.logging.ConsoleLogger;
 import hunt.Exceptions;
 import hunt.util.Common;
 import hunt.util.DateTime;
-// import java.util.List;
-// import java.util.RandomAccess;
-// import hunt.concurrency.locks.ReentrantLock;
 
 import core.time;
 import core.sync.condition;
@@ -244,7 +242,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      * bits) of status field. The lower bits are used for user-defined
      * tags.
      */
-    int status; // accessed directly by pool and workers
+    shared int status; // accessed directly by pool and workers
 
     Mutex thisMutex;
     Condition thisLocker;
@@ -270,10 +268,13 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      * @return status on exit
      */
     private int setDone() {
-        int s = cast(int)(this.status | DONE);
-        // if (((s = (int)STATUS.getAndBitwiseOr(this, DONE)) & SIGNAL) != 0)
+        int s = AtomicHelper.getAndBitwiseOr(this.status, DONE);
+        version(HUNT_DEBUG_CONCURRENCY) {
+            // tracef("status: last=%d, new=%d", s, status);
+        }
         if((s & SIGNAL) != 0) {
             synchronized (this) { 
+                version(HUNT_DEBUG_CONCURRENCY) info("notifying on done .....");
                 thisLocker.notifyAll();
             }
         }
@@ -330,8 +331,9 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
                 completed = false;
                 s = setExceptionalCompletion(rex);
             }
-            if (completed)
+            if (completed) {
                 s = setDone();
+            }
         }
         return s;
     }
@@ -365,8 +367,10 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
         if(s < 0)
             return s;
         
-        // s = cast(int)STATUS.getAndBitwiseOr(this, SIGNAL);
-        s = cast(int)(this.status | SIGNAL);
+        s = AtomicHelper.getAndBitwiseOr(this.status, SIGNAL);
+        version(HUNT_DEBUG_CONCURRENCY) {
+            infof("status: last=%d, new=%d", s, status);
+        }
         if(s < 0)
             return s;
 
@@ -405,8 +409,10 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
             return s;
         }
 
-        // s = cast(int)STATUS.getAndBitwiseOr(this, SIGNAL);
-        s = cast(int)(this.status | SIGNAL);
+        s = AtomicHelper.getAndBitwiseOr(this.status, SIGNAL);
+        version(HUNT_DEBUG_CONCURRENCY) {
+            infof("status: last=%d, new=%d", s, status);
+        }
         if (s >= 0) {
             synchronized (this) {
                 for (;;) {
@@ -461,12 +467,11 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
 
         ForkJoinWorkerThread wt = cast(ForkJoinWorkerThread)Thread.getThis(); 
         if(wt !is null) {
-            return wt.awaitJoin(this);
-            // WorkQueue w = wt.workQueue;
-            // if(w.workQueue.tryUnpush(this) && (s = doExec()) < 0 )
-            //     return s;
-            // else
-            //     return wt.pool.awaitJoin(w, this, 0L);
+            WorkQueue w = wt.workQueue;
+            if(w.tryUnpush(this) && (s = doExec()) < 0 )
+                return s;
+            else
+                return wt.pool.awaitJoin(w, this, MonoTime.zero);
         } else {
             return externalAwaitDone();
         }
@@ -607,7 +612,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
         // if (e.thrower != Thread.getThis().getId()) {
         //     try {
         //         Constructor<?> noArgCtor = null;
-        //         // public ctors only
+        //         // ctors only
         //         for (Constructor<?> c : ex.getClass().getConstructors()) {
         //             Class<?>[] ps = c.getParameterTypes();
         //             if (ps.length == 0)
@@ -635,7 +640,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
                 new CancellationException());
     }
 
-    // public methods
+    // methods
 
     /**
      * Arranges to asynchronously execute this task in the pool the
@@ -674,11 +679,13 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      */
     final V join() {
         int s;
-        if (((s = doJoin()) & ABNORMAL) != 0)
+        if (((s = doJoin()) & ABNORMAL) != 0) {
             reportException(s);
+        }
+        
         static if(!is(V == void)) {
             return getRawResult();
-        }            
+        }          
     }
 
     /**
@@ -1041,8 +1048,7 @@ static if(is(V == void))   {
                 while ((s = status) >= 0 &&
                        (ns = deadline - MonoTime.currTime) > Duration.zero) {
                     if ((ms = ns.total!(TimeUnit.Millisecond)()) > 0L) {
-                        // s = cast(int)STATUS.getAndBitwiseOr(this, SIGNAL);
-                        s = cast(int)(this.status | SIGNAL);
+                        s = AtomicHelper.getAndBitwiseOr(this.status, SIGNAL);
                         if( s >= 0) {
                             synchronized (this) {
                                 if (status >= 0) // OK to throw InterruptedException
@@ -2278,7 +2284,63 @@ abstract class CountedCompleter(T) : ForkJoinTask!(T), ICountedCompleter {
 }
 
 
+/**
+ * A recursive result-bearing {@link ForkJoinTask}.
+ *
+ * <p>For a classic example, here is a task computing Fibonacci numbers:
+ *
+ * <pre> {@code
+ * class Fibonacci extends RecursiveTask<Integer> {
+ *   final int n;
+ *   Fibonacci(int n) { this.n = n; }
+ *   protected Integer compute() {
+ *     if (n <= 1)
+ *       return n;
+ *     Fibonacci f1 = new Fibonacci(n - 1);
+ *     f1.fork();
+ *     Fibonacci f2 = new Fibonacci(n - 2);
+ *     return f2.compute() + f1.join();
+ *   }
+ * }}</pre>
+ *
+ * However, besides being a dumb way to compute Fibonacci functions
+ * (there is a simple fast linear algorithm that you'd use in
+ * practice), this is likely to perform poorly because the smallest
+ * subtasks are too small to be worthwhile splitting up. Instead, as
+ * is the case for nearly all fork/join applications, you'd pick some
+ * minimum granularity size (for example 10 here) for which you always
+ * sequentially solve rather than subdividing.
+ *
+ * @since 1.7
+ * @author Doug Lea
+ */
+abstract class RecursiveTask(V) : ForkJoinTask!V {
 
-/*************************************************/
-// ForkJoinPool
-/*************************************************/
+    /**
+     * The result of the computation.
+     */
+    V result;
+
+    /**
+     * The main computation performed by this task.
+     * @return the result of the computation
+     */
+    protected abstract V compute();
+
+    final override V getRawResult() {
+        return result;
+    }
+
+    protected final override void setRawResult(V value) {
+        result = value;
+    }
+
+    /**
+     * Implements execution conventions for RecursiveTask.
+     */
+    protected final override bool exec() {
+        result = compute();
+        return true;
+    }
+
+}

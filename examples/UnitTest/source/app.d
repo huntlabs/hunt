@@ -55,7 +55,7 @@ void main()
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// testUnits!(CompletableFutureTest);
-	// testUnits!(ForkJoinPoolTest);
+	testUnits!(ForkJoinPoolTest);
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
@@ -66,7 +66,7 @@ void main()
 	// // 
 	// // testUnits!(PathMatcherTest); 
 	// testUnits!(StringTokenizerTest);
-	testUnits!(ThreadTest);
+	// testUnits!(ThreadTest);
 
 	// // These tests belown will block the test procession.
 
