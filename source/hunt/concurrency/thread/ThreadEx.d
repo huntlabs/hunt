@@ -459,9 +459,6 @@ class ThreadEx : Thread, Runnable {
      * @spec JSR-51
      */
     void interrupt() {
-        // if (this !is Thread.getThis())
-        //     checkAccess();
-
         synchronized (blockerLock) {
             Interruptible b = blocker;
             if (b !is null) {
