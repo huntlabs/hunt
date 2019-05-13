@@ -27,6 +27,9 @@ string generateUnitTests(T)() {
 	enum fullTypeName = fullyQualifiedName!(T);
 	enum memberModuleName = moduleName!(T);
 
+	string[] methodsBefore;
+	string[] methodsAfter;
+
 	string str;
 	str ~= `import std.stdio;
 writeln("=================================");
@@ -37,6 +40,38 @@ writeln("=================================");
 	str ~= "import " ~ memberModuleName ~ ";\n";
 	str ~= "auto t = new " ~ T.stringof ~ "();\n";
 
+	// 
+	foreach (memberName; __traits(allMembers, T)) {
+		// pragma(msg, "member: " ~ memberName);
+		static if (is(T == class) && FixedObjectMembers.canFind(memberName)) {
+			// pragma(msg, "skipping fixed Object member: " ~ memberName);
+		} else {
+			enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
+			static if (memberProtection == "private"
+					|| memberProtection == "protected" 
+					|| memberProtection == "export") {
+				// version (HUNT_DEBUG) pragma(msg, "skip private member: " ~ memberName);
+			} else {
+				import std.meta : Alias;
+				alias currentMember = Alias!(__traits(getMember, T, memberName));
+				static if (hasUDA!(currentMember, Before)) {
+					alias memberType = typeof(currentMember);
+					static if (is(memberType == function)) {
+						methodsBefore ~= memberName;
+					}
+				}
+
+				static if (hasUDA!(currentMember, After)) {
+					alias memberType = typeof(currentMember);
+					static if (is(memberType == function)) {
+						methodsAfter ~= memberName;
+					}
+				}
+			}
+		}
+	}
+
+	// 
 	foreach (memberName; __traits(allMembers, T)) {
 		// pragma(msg, "member: " ~ memberName);
 		static if (is(T == class) && FixedObjectMembers.canFind(memberName)) {
@@ -56,7 +91,19 @@ writeln("=================================");
 					alias memberType = typeof(currentMember);
 					static if (is(memberType == function)) {
 						str ~= `writeln("\n========> testing: ` ~ memberName ~ "\");\n";
+
+						// running methods annotated with BEFORE
+						foreach(string s; methodsBefore) {
+							str ~= "t." ~ s ~ "();\n";
+						}
+						
+						// execute a test
 						str ~= "t." ~ memberName ~ "();\n";
+
+						// running methods annotated with BEFORE
+						foreach(string s; methodsAfter) {
+							str ~= "t." ~ s ~ "();\n";
+						}
 					}
 				}
 			}
@@ -69,4 +116,10 @@ writeln("=================================");
 */
 struct Test {
 	TypeInfo expected;
+}
+
+interface Before {
+}
+
+interface After {
 }
