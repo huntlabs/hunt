@@ -403,6 +403,10 @@ class SQLException : Exception {
     mixin BasicExceptionCtors;
 }
 
+class ConfigurationException : Exception {
+    mixin BasicExceptionCtors;
+}
+
 
 // =====================
 

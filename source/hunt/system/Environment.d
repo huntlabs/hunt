@@ -28,7 +28,7 @@ struct Environment {
                 string fileName = buildPath(rootPath, defaultConfigFile);
                 if (exists(fileName)) {
                     if(isDir(fileName)) {
-                            throw new Exception("You can't load config from a directory: " ~ fileName);
+                        throw new Exception("You can't load config from a directory: " ~ fileName);
                     } else {
                         props = new ConfigBuilder(fileName, defaultSettingSection);
                     }

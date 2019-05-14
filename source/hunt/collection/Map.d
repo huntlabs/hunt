@@ -20,6 +20,7 @@ import hunt.util.Common;
 
 import std.range.interfaces : InputRange;
 
+
 /**
 */
 interface Map(K,V) : Iterable!(K,V), IObject {

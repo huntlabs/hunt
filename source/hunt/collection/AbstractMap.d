@@ -225,7 +225,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * @throws IllegalArgumentException      {@inheritDoc}
      */
     void putAll(Map!(K, V) m) {
-        // for (MapEntry!(K, V) e : m.entrySet())
         foreach (K k, V v; m)
             put(k, v);
     }

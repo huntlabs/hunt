@@ -24,6 +24,7 @@ import std.string;
 import std.traits;
 
 import hunt.logging;
+import hunt.Exceptions;
 
 /**
 */
@@ -231,11 +232,11 @@ class ConfigBuilder {
 
 
     this(string filename, string section = "") {
-        if (!exists(filename) || isDir(filename))
-            throw new Exception("The config file does not exist: " ~ filename);
         _section = section;
         _value = new ConfigurationItem("");
-
+        
+        string rootPath = dirName(thisExePath());
+        filename = buildPath(rootPath, filename);
         loadConfig(filename);
     }
 
@@ -287,6 +288,10 @@ class ConfigBuilder {
     bool hasProperty(string key) {
         auto p = key in _itemMap;
         return p !is null;
+    }
+
+    bool isEmpty() {
+        return _itemMap.length == 0;
     }
 
     alias setProperty = setValue;
@@ -516,9 +521,8 @@ class ConfigBuilder {
     }
 
     private void loadConfig(string filename) {
-        if (!exists(filename)) {
-            warning("The config file does not exist: " ~ filename);
-            return;
+        if (!exists(filename) || isDir(filename)) {
+            throw new ConfigurationException("The config file doesn't exist: " ~ filename);
         }
 
         auto f = File(filename, "r");

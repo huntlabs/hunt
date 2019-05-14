@@ -1076,3 +1076,13 @@ class Assert {
         }
     }
 }
+
+
+
+alias assertTrue = Assert.assertTrue;
+alias assertFalse = Assert.assertFalse;
+alias assertThat = Assert.assertThat;
+alias assertEquals = Assert.assertEquals;
+alias assertNotNull = Assert.assertNotNull;
+alias assertNull = Assert.assertNull;
+alias fail = Assert.fail;
