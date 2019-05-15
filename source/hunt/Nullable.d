@@ -25,7 +25,7 @@ interface INullable : IObject {
 
 /**
 */
-class Nullable(T) : INullable {
+class Nullable(T) : INullable if(!is(T == class) && !is(T == interface)) {
     
     protected T _value;
     private TypeInfo _valueType;
@@ -194,6 +194,6 @@ class Nullable(T) : INullable {
     }
 
     override size_t toHash() @trusted nothrow {
-        return super.toHash();
+        return hashOf(_value);
     }
 }
