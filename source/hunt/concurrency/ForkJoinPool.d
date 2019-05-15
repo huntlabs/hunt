@@ -1224,7 +1224,6 @@ class ForkJoinPool : AbstractExecutorService {
      * possibly ran task(s).
      */
     private bool scan(WorkQueue w, int r) {
-        trace("11111111111111");
         WorkQueue[] ws; int n;
         if ((ws = workQueues) !is null && (n = cast(int)ws.length) > 0 && w !is null) {
             for (int m = n - 1, j = r & m;;) {
@@ -1243,13 +1242,13 @@ class ForkJoinPool : AbstractExecutorService {
                         // IForkJoinTask tt = a[k];
                         // t = AtomicHelper.load(tt);
                         t = a[k];
-                        tracef("k=%d, t is null: %s", k, t is null);
+                        // tracef("k=%d, t is null: %s", k, t is null);
                         if (q.base == b++ && t !is null && AtomicHelper.compareAndSet(a[k], t, null)) {
                             q.base = b;
                             w.source = qid;
                             if (q.top - b > 0) signalWork();
 
-        // infof("IForkJoinTask: %s", typeid(cast(Object)t));
+                            // infof("IForkJoinTask: %s", typeid(cast(Object)t));
                             w.topLevelExec(t, q,  // random fairness bound
                                            r & ((n << TOP_BOUND_SHIFT) - 1));
                         }
@@ -3446,7 +3445,6 @@ final class WorkQueue {
      * queue, up to bound n (to avoid infinite unfairness).
      */
     final void topLevelExec(IForkJoinTask t, WorkQueue q, int n) {
-        trace("5555555555");
         if (t !is null && q !is null) { // hoist checks
             int nstolen = 1;
             for (;;) {
