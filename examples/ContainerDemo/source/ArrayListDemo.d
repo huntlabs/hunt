@@ -7,6 +7,8 @@ import hunt.collection.ArrayList;
 import hunt.collection.Collections;
 import hunt.collection.List;
 
+import hunt.logging.ConsoleLogger;
+
 import std.stdio;
 import std.conv;
 import std.range;
@@ -97,6 +99,8 @@ class ArrayListDemo
                 .to!string());
     }
 
+    // TODO: Tasks pending completion -@zxp at 5/15/2019, 6:12:03 PM
+    // 
     // void testSubList()
     // {
     //     ArrayList!(string) arrl = new ArrayList!(string)();
@@ -167,5 +171,27 @@ class ArrayListDemo
     // 		writeln(str);
     // 	}
     // }
+
+    void testInsert() {
+        ArrayList!(string) arrl = new ArrayList!(string)();
+
+        //adding elements to the end
+        arrl.add(0, "Second");
+        assert(arrl[0] == "Second");
+
+        arrl.add("Third");
+        arrl.add("Random");
+
+        arrl.add(0, "First");
+        assert(arrl[0] == "First");
+
+        arrl.add(2, "Random1");
+        assert(arrl[2] == "Random1");
+        assert(arrl[3] == "Third");
+
+        foreach(string s; arrl) {
+            trace(s);
+        }
+    }
 
 }
