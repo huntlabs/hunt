@@ -27,8 +27,6 @@ import hunt.util.Comparator;
 */
 class ArrayList(E) : AbstractList!E {
 
-    // private enum long serialVersionUID = 8683452581122892189L;
-
     /**
      * Default initial capacity.
      */
@@ -287,9 +285,9 @@ class ArrayList(E) : AbstractList!E {
         if(_array.length == 0)
             _array.insertBack(element) ;
         else {
-            if(index <= 0) 
-                index = 1;
-            _array.insertAfter(_array[index-1 .. index], element);
+            if(index < 0) 
+                index = 0;
+            _array.insertBefore(_array[index .. $], element);
         }
     }
 
