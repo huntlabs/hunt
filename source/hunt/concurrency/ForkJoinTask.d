@@ -270,7 +270,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
     private int setDone() {
         int s = AtomicHelper.getAndBitwiseOr(this.status, DONE);
         version(HUNT_DEBUG_CONCURRENCY) {
-            // tracef("status: last=%d, new=%d", s, status);
+            tracef("status: last=%d, new=%d", s, status);
         }
         if((s & SIGNAL) != 0) {
             synchronized (this) { 
@@ -323,6 +323,9 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      * @return status on exit from this method
      */
     final int doExec() {
+
+        tracef("66666=>%d", status);
+
         int s; bool completed;
         if ((s = status) >= 0) {
             try {
@@ -331,6 +334,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
                 completed = false;
                 s = setExceptionalCompletion(rex);
             }
+            version(HUNT_DEBUG_CONCURRENCY) tracef("completed: %s", completed);
             if (completed) {
                 s = setDone();
             }

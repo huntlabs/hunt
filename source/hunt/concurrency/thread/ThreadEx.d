@@ -815,7 +815,12 @@ class Parker {
     // is no need to track notifications.
     void park(bool isAbsolute, Duration time) {
         version(HUNT_DEBUG_CONCURRENCY) {
-            tracef("try to park a thread: isAbsolute=%s, time=%s", isAbsolute, time);
+            if(isAbsolute) {
+                Duration du = time - DateTimeHelper.currentTimeMillis().msecs;
+                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, du);
+            } else {
+                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, time);
+            }
         }
         // Optional fast-path check:
         // Return immediately if a permit is available.

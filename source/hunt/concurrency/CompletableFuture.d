@@ -95,8 +95,6 @@ abstract class AbstractCompletableFuture {
     Object result;       // Either the result or boxed AltResult
     Completion stack;    // Top of Treiber stack of dependent actions
 
-
-
     abstract void bipush(AbstractCompletableFuture b, BiCompletion c);
     abstract void cleanStack();
     abstract bool completeExceptionally(Throwable ex);
@@ -333,8 +331,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      * publication.
      */
 
-    // Object result;       // Either the result or boxed AltResult
-    // Completion stack;    // Top of Treiber stack of dependent actions
 
     final bool internalComplete(Object r) { // CAS from null to r
         return AtomicHelper.compareAndSet(this.result, null, r);
@@ -342,12 +338,18 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     /** Returns true if successfully pushed c onto stack. */
     final bool tryPushStack(Completion c) {
+        info(typeid(c).name);
+
         Completion h = stack;
 
         AtomicHelper.store(c.next, h); // CAS piggyback
-        return AtomicHelper.compareAndSet(this.stack, h, c);
-        // NEXT.set(c, h);         // CAS piggyback
-        // return STACK.compareAndSet(this, h, c);
+        bool r = AtomicHelper.compareAndSet(this.stack, h, c);
+        Completion x = this.stack;
+        while(x !is null) {
+            tracef("%s, Completion: %s", cast(Object*)this, typeid(x).name);
+            x = x.next;
+        }
+        return r;
     }
 
     /** Unconditionally pushes c onto stack, retrying if necessary. */
@@ -359,7 +361,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     /** Completes with the null value, unless already completed. */
     final bool completeNull() {
-        // return RESULT.compareAndSet(this, null, NIL);
         return AtomicHelper.compareAndSet(this.result, null, NIL);
     }
 
@@ -370,7 +371,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     /** Completes with a non-exceptional result, unless already completed. */
     final bool completeValue(T t) {
-        // return RESULT.compareAndSet(this, null, (t is null) ? NIL : t);
         return AtomicHelper.compareAndSet(this.result, null, (t is null) ? NIL : t);
     }
 
@@ -514,20 +514,31 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
          * and run.  It is extended along only one path at a time,
          * pushing others to avoid unbounded recursion.
          */
-        CompletableFuture!T f = this; Completion h;
+
+        AbstractCompletableFuture f = this; Completion h;
         while ((h = f.stack) !is null ||
-               (f != this && (h = (f = this).stack) !is null)) {
-            CompletableFuture!T d; Completion t;
+               (f !is this && (h = (f = this).stack) !is null)) {
+            AbstractCompletableFuture d; Completion t;
             t = h.next;
+            infof("this: %s, h: %s", cast(Object*)this, typeid(h).name);
+
             if(AtomicHelper.compareAndSet(f.stack, h, t)) {
                 if (t !is null) {
-                    if (f != this) {
+                    if (f !is this) {
                         pushStack(h);
                         continue;
                     }
                     AtomicHelper.compareAndSet(h.next, t, null); // try to detach
                 }
-                d = cast(CompletableFuture!T)h.tryFire(NESTED);
+                infof("Completion: %s, this: %s", typeid(h).name, typeid(this).name);
+                auto s = h.tryFire(NESTED);
+
+                d = s; // h.tryFire(NESTED);
+                if(s is null)
+                    warningf("s: %s, d: %s", s is null, d is null);
+                else
+                    warningf("s: %s, d: %s", typeid(s).name, d is null);
+
                 f = (d is null) ? this : d;
             }
         }
@@ -589,6 +600,9 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      * or returns this to caller, depending on mode.
      */
     final CompletableFuture!(T) postFire(AbstractCompletableFuture a, int mode) {
+
+        // infof("this: %s, h: %s", cast(Object*)this, typeid(this.stack).name);
+
         if (a !is null && a.stack !is null) {
             Object r;
             if ((r = a.result) is null)
@@ -596,12 +610,19 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (mode >= 0 && (r !is null || a.result !is null))
                 a.postComplete();
         }
+
+        if(stack is null)
+            infof("this: %s, mode=%d, result: %s, stack: null", cast(Object*)this, mode, result is null);
+        else
+            infof("this: %s, mode=%d, result: %s, stack: %s", cast(Object*)this, mode, result is null, typeid(this.stack).name);
+
         if (result !is null && stack !is null) {
             if (mode < 0)
                 return this;
             else
                 postComplete();
         }
+        info("333333333333333");
         return null;
     }
 
@@ -1209,8 +1230,9 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                 if (th !is null)
                     ForkJoinPool.helpAsyncBlocker(defaultExecutor(), q);
             }
-            else if (!queued)
+            else if (!queued) {
                 queued = tryPushStack(q);
+            }
             else {
                 try {
                     ForkJoinPool.managedBlock(q);
@@ -1351,6 +1373,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      */
     T join() {
         Object r;
+        trace("1111111111111");
         if ((r = result) is null)
             r = waitingGet(false);
         return cast(T) reportJoin(r);
@@ -2067,7 +2090,7 @@ abstract class UniCompletion : Completion, IUniCompletion {
 }
 
 
-static final class UniApply(T,V) : UniCompletion {
+final class UniApply(T,V) : UniCompletion {
     Function!(T,V) fn;
     this(Executor executor, CompletableFuture!(V) dep,
              CompletableFuture!(T) src,
@@ -2078,6 +2101,7 @@ static final class UniApply(T,V) : UniCompletion {
     final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d; CompletableFuture!(T) a;
         Object r; Throwable x; Function!(T,V) f;
+        trace("44444444");
         if ((d = cast(CompletableFuture!(V))dep) is null || (f = fn) is null
             || (a = cast(CompletableFuture!(T))src) is null || (r = a.result) is null)
             return null;
@@ -2092,8 +2116,10 @@ static final class UniApply(T,V) : UniCompletion {
                 r = null;
             }
             try {
-                if (mode <= 0 && !claim())
+                if (mode <= 0 && !claim()) {
+        trace("222222222222222");
                     return null;
+                }
                 else {
                     T t = cast(T) r;
                     d.completeValue(f(t));
@@ -2103,6 +2129,8 @@ static final class UniApply(T,V) : UniCompletion {
             }
         }
         dep = null; src = null; fn = null;
+
+        trace("444444444444444");
         return d.postFire(a, mode);
     }
 }
@@ -2701,6 +2729,7 @@ final class Signaller : Completion, ManagedBlocker {
         this.nanos = nanos;
         this.deadline = deadline;
     }
+
     final override AbstractCompletableFuture tryFire(int ignore) {
         ThreadEx w; // no need to atomically claim
         if ((w = thread) !is null) {
