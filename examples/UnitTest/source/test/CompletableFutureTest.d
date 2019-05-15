@@ -213,18 +213,19 @@ class CompletableFutureTest {
                     .thenApplyAsync!(String)(s => delayedUpperCase(s))
                     .acceptEither(
                         completedFuture(original).thenApplyAsync!(String)( (s) { 
-                            warning("sss=>", s.value);
+                            info("incoming: ", s.value);
                             return delayedLowerCase(s);
                         }),
                         (s) { 
-                            warning(s.value);
+                            info("incoming: ", s.value);
                             result.append(s.value).append("acceptEither"); 
                         }
                     );
 
+            info("waiting for the result...");
             cf.join();
+            infof("done with: %s", result.toString());
             assertTrue("Result was empty", result.toString().endsWith("acceptEither"));
-            trace("done");
         }
         
         ThreadEx thread = new ThreadEx(&doTest);

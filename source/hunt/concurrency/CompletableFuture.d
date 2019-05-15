@@ -338,17 +338,17 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     /** Returns true if successfully pushed c onto stack. */
     final bool tryPushStack(Completion c) {
-        info(typeid(c).name);
+        // info(typeid(c).name);
 
         Completion h = stack;
 
         AtomicHelper.store(c.next, h); // CAS piggyback
         bool r = AtomicHelper.compareAndSet(this.stack, h, c);
-        Completion x = this.stack;
-        while(x !is null) {
-            tracef("%s, Completion: %s", cast(Object*)this, typeid(x).name);
-            x = x.next;
-        }
+        // Completion x = this.stack;
+        // while(x !is null) {
+        //     tracef("%s, Completion: %s", cast(Object*)this, typeid(x).name);
+        //     x = x.next;
+        // }
         return r;
     }
 
@@ -520,7 +520,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                (f !is this && (h = (f = this).stack) !is null)) {
             AbstractCompletableFuture d; Completion t;
             t = h.next;
-            infof("this: %s, h: %s", cast(Object*)this, typeid(h).name);
+            // infof("this: %s, h: %s", cast(Object*)this, typeid(h).name);
 
             if(AtomicHelper.compareAndSet(f.stack, h, t)) {
                 if (t !is null) {
@@ -530,15 +530,8 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                     }
                     AtomicHelper.compareAndSet(h.next, t, null); // try to detach
                 }
-                infof("Completion: %s, this: %s", typeid(h).name, typeid(this).name);
-                auto s = h.tryFire(NESTED);
-
-                d = s; // h.tryFire(NESTED);
-                if(s is null)
-                    warningf("s: %s, d: %s", s is null, d is null);
-                else
-                    warningf("s: %s, d: %s", typeid(s).name, d is null);
-
+                // infof("Completion: %s, this: %s", typeid(h).name, typeid(this).name);
+                d = h.tryFire(NESTED);
                 f = (d is null) ? this : d;
             }
         }
@@ -611,10 +604,10 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                 a.postComplete();
         }
 
-        if(stack is null)
-            infof("this: %s, mode=%d, result: %s, stack: null", cast(Object*)this, mode, result is null);
-        else
-            infof("this: %s, mode=%d, result: %s, stack: %s", cast(Object*)this, mode, result is null, typeid(this.stack).name);
+        // if(stack is null)
+        //     infof("this: %s, mode=%d, result: %s, stack: null", cast(Object*)this, mode, result is null);
+        // else
+        //     infof("this: %s, mode=%d, result: %s, stack: %s", cast(Object*)this, mode, result is null, typeid(this.stack).name);
 
         if (result !is null && stack !is null) {
             if (mode < 0)
@@ -622,7 +615,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             else
                 postComplete();
         }
-        info("333333333333333");
         return null;
     }
 
@@ -1373,7 +1365,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      */
     T join() {
         Object r;
-        trace("1111111111111");
         if ((r = result) is null)
             r = waitingGet(false);
         return cast(T) reportJoin(r);
@@ -2101,7 +2092,6 @@ final class UniApply(T,V) : UniCompletion {
     final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d; CompletableFuture!(T) a;
         Object r; Throwable x; Function!(T,V) f;
-        trace("44444444");
         if ((d = cast(CompletableFuture!(V))dep) is null || (f = fn) is null
             || (a = cast(CompletableFuture!(T))src) is null || (r = a.result) is null)
             return null;
@@ -2117,7 +2107,6 @@ final class UniApply(T,V) : UniCompletion {
             }
             try {
                 if (mode <= 0 && !claim()) {
-        trace("222222222222222");
                     return null;
                 }
                 else {
@@ -2130,7 +2119,6 @@ final class UniApply(T,V) : UniCompletion {
         }
         dep = null; src = null; fn = null;
 
-        trace("444444444444444");
         return d.postFire(a, mode);
     }
 }
