@@ -14,6 +14,7 @@ import hunt.logging.ConsoleLogger;
 import hunt.text.StringBuilder;
 import hunt.util.Common;
 import hunt.util.DateTime;
+import hunt.util.UnitTest;
 
 import core.atomic;
 import core.thread;
@@ -23,13 +24,13 @@ import std.conv;
 import std.random;
 import std.string;
 
-alias assertTrue = Assert.assertTrue;
-alias assertFalse = Assert.assertFalse;
-alias assertThat = Assert.assertThat;
-alias assertEquals = Assert.assertEquals;
-alias assertNotNull = Assert.assertNotNull;
-alias assertNull = Assert.assertNull;
-alias fail = Assert.fail;
+// alias assertTrue = Assert.assertTrue;
+// alias assertFalse = Assert.assertFalse;
+// alias assertThat = Assert.assertThat;
+// alias assertEquals = Assert.assertEquals;
+// alias assertNotNull = Assert.assertNotNull;
+// alias assertNull = Assert.assertNull;
+// alias fail = Assert.fail;
 
 import hunt.String;
 
@@ -146,28 +147,99 @@ class CompletableFutureTest {
     //     thread.start();
     // }
 
-    void testCompleteExceptionally() {
-        CompletableFuture!String cf = completedFuture(new String("message"))
-            .thenApplyAsync!(String)(delegate String (String s) { 
-                    trace(s.value);
-                    return s.toUpperCase();
-                },
-                delayedExecutor(1.seconds));
-        CompletableFuture!String exceptionHandler = cf.handle!(String)(delegate String (String s, Throwable th) { 
-                return (th !is null) ? new String("message upon cancel") : new String(""); 
-            });
+    // void testCompleteExceptionally() {
+    //     CompletableFuture!String cf = completedFuture(new String("message"))
+    //         .thenApplyAsync!(String)(delegate String (String s) { 
+    //                 trace(s.value);
+    //                 return s.toUpperCase();
+    //             },
+    //             delayedExecutor(1.seconds));
+    //     CompletableFuture!String exceptionHandler = cf.handle!(String)(delegate String (String s, Throwable th) { 
+    //             return (th !is null) ? new String("message upon cancel") : new String(""); 
+    //         });
 
-        cf.completeExceptionally(new RuntimeException("completed exceptionally"));
+    //     cf.completeExceptionally(new RuntimeException("completed exceptionally"));
 
-        assertTrue("Was not completed exceptionally", cf.isCompletedExceptionally());
-        try {
+    //     assertTrue("Was not completed exceptionally", cf.isCompletedExceptionally());
+    //     try {
+    //         cf.join();
+    //         fail("Should have thrown an exception");
+    //     } catch (CompletionException ex) { // just for testing
+    //         assertEquals("completed exceptionally", ex.next().msg);
+    //     }
+
+    //     assertEquals("message upon cancel", exceptionHandler.join().value);
+    // }
+
+    // @Test
+    // void cancelExample() {
+    //     CompletableFuture!String cf = completedFuture(new String("message"))
+    //         .thenApplyAsync!(String)(delegate String (String s) { 
+    //                 trace(s.value);
+    //                 return s.toUpperCase();
+    //             },
+    //             delayedExecutor(1.seconds));
+    //     CompletableFuture!String cf2 = cf.exceptionally(throwable => new String("canceled message"));
+    //     assertTrue("Was not canceled", cf.cancel(true));
+    //     assertTrue("Was not completed exceptionally", cf.isCompletedExceptionally());
+    //     assertEquals("canceled message", cf2.join().value);
+    // }
+
+    // @Test
+    // void applyToEitherExample() {
+    //     void doTest() {
+    //         String original = new String("Message");
+    //         CompletableFuture!String cf1 = completedFuture(original)
+    //                 .thenApplyAsync!(String)(s => delayedUpperCase(s));
+
+    //         CompletableFuture!String cf2 = cf1.applyToEither!(String)(
+    //                 completedFuture(original).thenApplyAsync!(String)(s => delayedLowerCase(s)),
+    //                 s => new String(s.value ~ " from applyToEither"));
+
+    //         assertTrue(cf2.join().value.endsWith(" from applyToEither"));
+    //     }
+
+    //     ThreadEx thread = new ThreadEx(&doTest);
+    //     thread.start();
+    // }
+
+
+    @Test
+    void acceptEitherExample() {
+        void doTest() {
+            String original = new String("Message");
+            StringBuilder result = new StringBuilder();
+            CompletableFuture!Void cf = completedFuture(original)
+                    .thenApplyAsync!(String)(s => delayedUpperCase(s))
+                    .acceptEither(
+                        completedFuture(original).thenApplyAsync!(String)( (s) { 
+                            warning("sss=>", s.value);
+                            return delayedLowerCase(s);
+                        }),
+                        (s) { 
+                            warning(s.value);
+                            result.append(s.value).append("acceptEither"); 
+                        }
+                    );
+
             cf.join();
-            fail("Should have thrown an exception");
-        } catch (CompletionException ex) { // just for testing
-            assertEquals("completed exceptionally", ex.next().msg);
+            assertTrue("Result was empty", result.toString().endsWith("acceptEither"));
+            trace("done");
         }
+        
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
+    }
 
-        assertEquals("message upon cancel", exceptionHandler.join().value);
+
+    private static String delayedUpperCase(String s) {
+        randomSleep();
+        return s.toUpperCase();
+    }
+
+    private static String delayedLowerCase(String s) {
+        randomSleep();
+        return s.toLowerCase();
     }
 
     private static void randomSleep() {

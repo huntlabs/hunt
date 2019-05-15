@@ -924,7 +924,7 @@ class ForkJoinPool : AbstractExecutorService {
             long nc = ((RC_MASK & (c + RC_UNIT)) |
                        (TC_MASK & (c + TC_UNIT)));
             if (ctl == c && AtomicHelper.compareAndSet(this.ctl, c, nc)) {
-                version(HUNT_DEBUG_CONCURRENCY) tracef("nc=%d, ctl=%d, c=%d", nc, ctl, c);
+                // version(HUNT_DEBUG_CONCURRENCY) tracef("nc=%d, ctl=%d, c=%d", nc, ctl, c);
                 createWorker();
                 break;
             }
@@ -1179,19 +1179,19 @@ class ForkJoinPool : AbstractExecutorService {
                 } while (!AtomicHelper.compareAndSet(this.ctl, c, nc));
 
                 version(HUNT_DEBUG_CONCURRENCY) {
-                    infof("ctl=%d, c=%d, nc=%d, stackPred=%d", ctl, c, nc, w.stackPred);
+                    // infof("ctl=%d, c=%d, nc=%d, stackPred=%d", ctl, c, nc, w.stackPred);
                 }
             }
             else {                                // already queued
 
                 int pred = w.stackPred;
-                ThreadEx.interrupted();             // clear before park
+                ThreadEx.interrupted();           // clear before park
                 w.source = DORMANT;               // enable signal
                 long c = ctl;
                 int md = mode, rc = (md & SMASK) + cast(int)(c >> RC_SHIFT);
 
                 version(HUNT_DEBUG_CONCURRENCY) {
-                    tracef("md=%d, rc=%d, c=%d, pred=%d, phase=%d", md, rc, c, pred, phase);
+                    // tracef("md=%d, rc=%d, c=%d, pred=%d, phase=%d", md, rc, c, pred, phase);
                 }
 
                 if (md < 0) {                      // terminating
@@ -1224,13 +1224,17 @@ class ForkJoinPool : AbstractExecutorService {
      * possibly ran task(s).
      */
     private bool scan(WorkQueue w, int r) {
+        trace("11111111111111");
         WorkQueue[] ws; int n;
         if ((ws = workQueues) !is null && (n = cast(int)ws.length) > 0 && w !is null) {
             for (int m = n - 1, j = r & m;;) {
                 WorkQueue q; int b;
                 if ((q = ws[j]) !is null && q.top != (b = q.base)) {
                     int qid = q.id;
-                    IForkJoinTask[] a; size_t cap, k; IForkJoinTask t;
+                    IForkJoinTask[] a; 
+                    size_t cap, k; 
+                    IForkJoinTask t;
+
                     if ((a = q.array) !is null && (cap = cast(int)a.length) > 0) {
                         k = (cap - 1) & b;
                         // import core.atomic;  
@@ -1239,10 +1243,13 @@ class ForkJoinPool : AbstractExecutorService {
                         // IForkJoinTask tt = a[k];
                         // t = AtomicHelper.load(tt);
                         t = a[k];
+                        tracef("k=%d, t is null: %s", k, t is null);
                         if (q.base == b++ && t !is null && AtomicHelper.compareAndSet(a[k], t, null)) {
                             q.base = b;
                             w.source = qid;
                             if (q.top - b > 0) signalWork();
+
+        // infof("IForkJoinTask: %s", typeid(cast(Object)t));
                             w.topLevelExec(t, q,  // random fairness bound
                                            r & ((n << TOP_BOUND_SHIFT) - 1));
                         }
@@ -3439,6 +3446,7 @@ final class WorkQueue {
      * queue, up to bound n (to avoid infinite unfairness).
      */
     final void topLevelExec(IForkJoinTask t, WorkQueue q, int n) {
+        trace("5555555555");
         if (t !is null && q !is null) { // hoist checks
             int nstolen = 1;
             for (;;) {
