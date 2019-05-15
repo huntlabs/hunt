@@ -266,11 +266,11 @@ class AntPathMatcher : PathMatcher {
 	 * @see #getStringMatcher(string)
 	 */
 	void setCachePatterns(bool cachePatterns) {
-		this.cachePatterns = cachePatterns;
+		this.cachePatterns = new Boolean(cachePatterns);
 	}
 
 	private void deactivatePatternCache() {
-		this.cachePatterns = false;
+		this.cachePatterns = Boolean.FALSE;
 		this.tokenizedPatternCache.clear();
 		this.stringMatcherCache.clear();
 	}

@@ -27,6 +27,89 @@ import std.math;
 import std.range;
 import std.traits;
 
+
+/**
+ * The maximum capacity, used if a higher value is implicitly specified
+ * by either of the constructors with arguments.
+ * MUST be a power of two <= 1<<30.
+ */
+private enum int MAXIMUM_CAPACITY = 1 << 30;
+
+
+
+/**
+ * Computes key.toHash() and spreads (XORs) higher bits of hash
+ * to lower.  Because the table uses power-of-two masking, sets of
+ * hashes that vary only in bits above the current mask will
+ * always collide. (Among known examples are sets of Float keys
+ * holding consecutive whole numbers in small tables.)  So we
+ * apply a transform that spreads the impact of higher bits
+ * downward. There is a tradeoff between speed, utility, and
+ * quality of bit-spreading. Because many common sets of hashes
+ * are already reasonably distributed (so don't benefit from
+ * spreading), and because we use trees to handle large sets of
+ * collisions in bins, we just XOR some shifted bits in the
+ * cheapest possible way to reduce systematic lossage, as well as
+ * to incorporate impact of the highest bits that would otherwise
+ * never be used in index calculations because of table bounds.
+ */
+package size_t hash(K)(K key) {
+    size_t h;
+    static if(is(K == class)) {
+        return (key is null) ? 0 : (h = key.toHash()) ^ (h >>> 16);
+    }
+    else {
+        h = hashOf(key);
+        return  h ^ (h >>> 16);
+    }
+}
+
+/**
+ * Returns x's Class if it is of the form "class C implements
+ * Comparable<C>", else null.
+ */
+// static Class<?> comparableClassFor(Object x) {
+//     if (x instanceof Comparable) {
+//         Class<?> c; Type[] ts, as; Type t; ParameterizedType p;
+//         if ((c = x.getClass()) == string.class) // bypass checks
+//             return c;
+//         if ((ts = c.getGenericInterfaces()) !is null) {
+//             for (int i = 0; i < ts.length; ++i) {
+//                 if (((t = ts[i]) instanceof ParameterizedType) &&
+//                     ((p = (ParameterizedType)t).getRawType() ==
+//                      Comparable.class) &&
+//                     (as = p.getActualTypeArguments()) !is null &&
+//                     as.length == 1 && as[0] == c) // type arg is c
+//                     return c;
+//             }
+//         }
+//     }
+//     return null;
+// }
+
+/**
+ * Returns k.compareTo(x) if x matches kc (k's screened comparable
+ * class), else 0.
+ */
+//  // for cast to Comparable
+// static int compareComparables(Class<?> kc, Object k, Object x) {
+//     return (x is null || x.getClass() != kc ? 0 :
+//             ((Comparable)k).compareTo(x));
+// }
+
+/**
+ * Returns a power of two size for the given target capacity.
+ */
+package int tableSizeFor(int cap) {
+    int n = cap - 1;
+    n |= n >>> 1;
+    n |= n >>> 2;
+    n |= n >>> 4;
+    n |= n >>> 8;
+    n |= n >>> 16;
+    return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+}
+
 /**
 */
 class HashMap(K,V) : AbstractMap!(K,V) {
@@ -128,12 +211,6 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      */
     enum int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
 
-    /**
-     * The maximum capacity, used if a higher value is implicitly specified
-     * by either of the constructors with arguments.
-     * MUST be a power of two <= 1<<30.
-     */
-    enum int MAXIMUM_CAPACITY = 1 << 30;
 
     /**
      * The load factor used when none specified in constructor.
@@ -160,78 +237,6 @@ class HashMap(K,V) : AbstractMap!(K,V) {
 
     /* ---------------- Static utilities -------------- */
 
-    /**
-     * Computes key.toHash() and spreads (XORs) higher bits of hash
-     * to lower.  Because the table uses power-of-two masking, sets of
-     * hashes that vary only in bits above the current mask will
-     * always collide. (Among known examples are sets of Float keys
-     * holding consecutive whole numbers in small tables.)  So we
-     * apply a transform that spreads the impact of higher bits
-     * downward. There is a tradeoff between speed, utility, and
-     * quality of bit-spreading. Because many common sets of hashes
-     * are already reasonably distributed (so don't benefit from
-     * spreading), and because we use trees to handle large sets of
-     * collisions in bins, we just XOR some shifted bits in the
-     * cheapest possible way to reduce systematic lossage, as well as
-     * to incorporate impact of the highest bits that would otherwise
-     * never be used in index calculations because of table bounds.
-     */
-    static size_t hash(K key) {
-        size_t h;
-        static if(is(K == class)) {
-            return (key is null) ? 0 : (h = key.toHash()) ^ (h >>> 16);
-        }
-        else {
-            h = hashOf(key);
-            return  h ^ (h >>> 16);
-        }
-    }
-
-    /**
-     * Returns x's Class if it is of the form "class C implements
-     * Comparable<C>", else null.
-     */
-    // static Class<?> comparableClassFor(Object x) {
-    //     if (x instanceof Comparable) {
-    //         Class<?> c; Type[] ts, as; Type t; ParameterizedType p;
-    //         if ((c = x.getClass()) == string.class) // bypass checks
-    //             return c;
-    //         if ((ts = c.getGenericInterfaces()) !is null) {
-    //             for (int i = 0; i < ts.length; ++i) {
-    //                 if (((t = ts[i]) instanceof ParameterizedType) &&
-    //                     ((p = (ParameterizedType)t).getRawType() ==
-    //                      Comparable.class) &&
-    //                     (as = p.getActualTypeArguments()) !is null &&
-    //                     as.length == 1 && as[0] == c) // type arg is c
-    //                     return c;
-    //             }
-    //         }
-    //     }
-    //     return null;
-    // }
-
-    /**
-     * Returns k.compareTo(x) if x matches kc (k's screened comparable
-     * class), else 0.
-     */
-    //  // for cast to Comparable
-    // static int compareComparables(Class<?> kc, Object k, Object x) {
-    //     return (x is null || x.getClass() != kc ? 0 :
-    //             ((Comparable)k).compareTo(x));
-    // }
-
-    /**
-     * Returns a power of two size for the given target capacity.
-     */
-    static final int tableSizeFor(int cap) {
-        int n = cap - 1;
-        n |= n >>> 1;
-        n |= n >>> 2;
-        n |= n >>> 4;
-        n |= n >>> 8;
-        n |= n >>> 16;
-        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
-    }
 
     /* ---------------- Fields -------------- */
 

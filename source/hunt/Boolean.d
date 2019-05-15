@@ -272,13 +272,13 @@ class Boolean : Nullable!bool {
     //     return false;
     // }
 
-    void opAssign(T)(T arg) if (!isStaticArray!T && !is(T : Boolean)) {
-        this._value = assign(arg);
-    }
+    // void opAssign(T)(T arg) if (!isStaticArray!T && !is(T : Boolean)) {
+    //     this._value = assign(arg);
+    // }
 
-    void opAssign(T)(ref T arg) if (isStaticArray!T) {
-        value = arg.booleanValue;
-    }
+    // void opAssign(T)(ref T arg) if (isStaticArray!T) {
+    //     value = arg.booleanValue;
+    // }
 
     /**
      * Returns {@code true} if and only if the system property
