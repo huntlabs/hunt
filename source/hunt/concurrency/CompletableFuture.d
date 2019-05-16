@@ -887,7 +887,11 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             }
             try {
                 T t = cast(T) r;
-                CompletableFuture!(V) g = f(t).toCompletableFuture();
+                auto gg = f(t).toCompletableFuture();
+                CompletableFuture!(V) g = cast(CompletableFuture!(V))gg;
+                if(g is null && gg !is null) {
+                    warningf("bad cast");
+                }
                 if ((s = g.result) !is null)
                     d.result = encodeRelay(s);
                 else {
@@ -1562,18 +1566,18 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     CompletableFuture!(U) thenCompose(U)(
         Function!(T, CompletionStage!(U)) fn) {
-        return uniComposeStage(null, fn);
+        return uniComposeStage!(U)(null, fn);
     }
 
     CompletableFuture!(U) thenComposeAsync(U)(
         Function!(T, CompletionStage!(U)) fn) {
-        return uniComposeStage(defaultExecutor(), fn);
+        return uniComposeStage!(U)(defaultExecutor(), fn);
     }
 
     CompletableFuture!(U) thenComposeAsync(U)(
         Function!(T, CompletionStage!(U)) fn,
         Executor executor) {
-        return uniComposeStage(screenExecutor(executor), fn);
+        return uniComposeStage!(U)(screenExecutor(executor), fn);
     }
 
     CompletableFuture!(T) whenComplete(
@@ -2305,13 +2309,16 @@ final class UniCompose(T,V) : UniCompletion {
     }
 
     final override CompletableFuture!(V) tryFire(int mode) {
-        CompletableFuture!(V) d; CompletableFuture!(T) a;
+        CompletableFuture!(V) d; 
+        AbstractCompletableFuture a;
         Function!(T, CompletionStage!(V)) f;
         Object r; Throwable x;
-        if ((d = dep) is null || (f = fn) is null
+
+        if ((d = cast(CompletableFuture!(V))dep) is null || (f = fn) is null
             || (a = src) is null || (r = a.result) is null)
             return null;
         tryComplete: if (d.result is null) {
+            AltResult ar = cast(AltResult)r;
             if (ar !is null) {
                 if ((x = ar.ex) !is null) {
                     d.completeThrowable(x, r);
@@ -2323,7 +2330,13 @@ final class UniCompose(T,V) : UniCompletion {
                 if (mode <= 0 && !claim())
                     return null;
                 T t = cast(T) r;
-                CompletableFuture!(V) g = f.apply(t).toCompletableFuture();
+
+                auto gg = f(t).toCompletableFuture();
+                CompletableFuture!(V) g = cast(CompletableFuture!(V))gg;
+                if(g is null && gg !is null) {
+                    warningf("bad cast");
+                }
+
                 if ((r = g.result) !is null)
                     d.completeRelay(r);
                 else {
