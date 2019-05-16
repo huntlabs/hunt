@@ -206,22 +206,22 @@ class CompletableFutureTest {
 
     // @Test
     // void acceptEitherExample() {
-    //     void doTest() {
-    //         String original = new String("Message");
-    //         StringBuilder result = new StringBuilder();
-    //         CompletableFuture!Void cf = completedFuture(original)
-    //                 .thenApplyAsync!(String)(s => delayedUpperCase(s))
-    //                 .acceptEither(
-    //                     completedFuture(original).thenApplyAsync!(String)( (s) { 
-    //                         info("incoming: ", s.value);
-    //                         return delayedLowerCase(s);
-    //                     }),
-    //                     (s) { 
-    //                         info("incoming: ", s.value);
-    //                         result.append(s.value).append("acceptEither"); 
-    //                     }
-    //                 );
+    //     String original = new String("Message");
+    //     StringBuilder result = new StringBuilder();
+    //     CompletableFuture!Void cf = completedFuture(original)
+    //             .thenApplyAsync!(String)(s => delayedUpperCase(s))
+    //             .acceptEither(
+    //                 completedFuture(original).thenApplyAsync!(String)( (s) { 
+    //                     info("incoming: ", s.value);
+    //                     return delayedLowerCase(s);
+    //                 }),
+    //                 (s) { 
+    //                     info("incoming: ", s.value);
+    //                     result.append(s.value).append("acceptEither"); 
+    //                 }
+    //             );
 
+    //     void doTest() {
     //         info("waiting for the result...");
     //         cf.join();
     //         infof("done with: %s", result.toString());
@@ -275,14 +275,34 @@ class CompletableFutureTest {
     //     assertEquals("MESSAGEmessage", result.toString());
     // }
 
+    // @Test
+    // void thenCombineExample() {
+    //     String original = new String("Message");
+    //     CompletableFuture!String cf = completedFuture(original)
+    //             .thenApply!(String)( (s) { 
+    //                 trace(s.toString());
+    //                 return delayedUpperCase(s); 
+    //             }).thenCombine!(String, String)(completedFuture(original).thenApply!(String)( (s) { 
+    //                     info("incoming: ", s.value);
+    //                     return delayedLowerCase(s);
+    //                 }),
+    //                 delegate String (String s1, String s2) { 
+    //                     trace("running...");
+    //                     return new String(s1.value ~ s2.value); 
+    //             });
+    //     trace("running done.");
+    //     assertEquals("MESSAGEmessage", cf.getNow(null).value);
+    // }
+
     @Test
-    void thenCombineExample() {
+    void thenCombineAsyncExample() {
         String original = new String("Message");
         CompletableFuture!String cf = completedFuture(original)
-                .thenApply!(String)( (s) { 
+                .thenApplyAsync!(String)( (s) { 
                     trace(s.toString());
                     return delayedUpperCase(s); 
-                }).thenCombine!(String, String)(completedFuture(original).thenApply!(String)( (s) { 
+                })
+                .thenCombine!(String, String)(completedFuture(original).thenApplyAsync!(String)( (s) { 
                         info("incoming: ", s.value);
                         return delayedLowerCase(s);
                     }),
@@ -290,8 +310,13 @@ class CompletableFutureTest {
                         trace("running...");
                         return new String(s1.value ~ s2.value); 
                 });
-        trace("running done.");
-        assertEquals("MESSAGEmessage", cf.getNow(null).value);
+        void doTest() {
+            trace("running done.");
+            assertEquals("MESSAGEmessage", cf.join().value);
+        }
+        
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
     }
 
 
