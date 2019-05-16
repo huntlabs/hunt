@@ -25,7 +25,7 @@ interface INullable : IObject {
 
 /**
 */
-class Nullable(T) : INullable if(!is(T == class) && !is(T == interface)) {
+class Nullable(T) { // : INullable if(!is(T == class) && !is(T == interface))
     
     protected T _value;
     private TypeInfo _valueType;

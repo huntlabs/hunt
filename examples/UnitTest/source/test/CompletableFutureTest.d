@@ -204,32 +204,54 @@ class CompletableFutureTest {
     // }
 
 
-    @Test
-    void acceptEitherExample() {
-        void doTest() {
-            String original = new String("Message");
-            StringBuilder result = new StringBuilder();
-            CompletableFuture!Void cf = completedFuture(original)
-                    .thenApplyAsync!(String)(s => delayedUpperCase(s))
-                    .acceptEither(
-                        completedFuture(original).thenApplyAsync!(String)( (s) { 
-                            info("incoming: ", s.value);
-                            return delayedLowerCase(s);
-                        }),
-                        (s) { 
-                            info("incoming: ", s.value);
-                            result.append(s.value).append("acceptEither"); 
-                        }
-                    );
+    // @Test
+    // void acceptEitherExample() {
+    //     void doTest() {
+    //         String original = new String("Message");
+    //         StringBuilder result = new StringBuilder();
+    //         CompletableFuture!Void cf = completedFuture(original)
+    //                 .thenApplyAsync!(String)(s => delayedUpperCase(s))
+    //                 .acceptEither(
+    //                     completedFuture(original).thenApplyAsync!(String)( (s) { 
+    //                         info("incoming: ", s.value);
+    //                         return delayedLowerCase(s);
+    //                     }),
+    //                     (s) { 
+    //                         info("incoming: ", s.value);
+    //                         result.append(s.value).append("acceptEither"); 
+    //                     }
+    //                 );
 
-            info("waiting for the result...");
-            cf.join();
-            infof("done with: %s", result.toString());
-            assertTrue("Result was empty", result.toString().endsWith("acceptEither"));
-        }
+    //         info("waiting for the result...");
+    //         cf.join();
+    //         infof("done with: %s", result.toString());
+    //         assertTrue("Result was empty", result.toString().endsWith("acceptEither"));
+    //     }
         
-        ThreadEx thread = new ThreadEx(&doTest);
-        thread.start();
+    //     ThreadEx thread = new ThreadEx(&doTest);
+    //     thread.start();
+    // }
+
+    @Test
+    void runAfterBothExample() {
+        String original = new String("Message");
+        StringBuilder result = new StringBuilder();
+        completedFuture(original).thenApply!(String)( (s) {
+                trace(s.toString());
+                return s.toUpperCase();
+            }).runAfterBoth!(String)(
+                completedFuture(original).thenApply!(String)((s) {
+                    trace(s.toString());
+                    return s.toLowerCase();
+                }),
+
+                () {
+                    result.append("done");
+                    trace("appending done.");
+                });
+        
+        trace("running done.");
+        assertTrue("Result was empty", result.length() > 0);
     }
 
 
