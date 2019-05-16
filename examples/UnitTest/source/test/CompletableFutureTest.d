@@ -254,26 +254,46 @@ class CompletableFutureTest {
     //     assertTrue("Result was empty", result.length() > 0);
     // }
 
-    @Test
-    void thenAcceptBothExample() {
-        String original = new String("Message");
-        StringBuilder result = new StringBuilder();
-        completedFuture(original).thenApply!(String)( (s) {
-                trace(s.toString());
-                return s.toUpperCase();
-            }).thenAcceptBoth!(String)(
-                completedFuture(original).thenApply!(String)((s) {
-                    trace(s.toString());
-                    return s.toLowerCase();
-                }),
+    // @Test
+    // void thenAcceptBothExample() {
+    //     String original = new String("Message");
+    //     StringBuilder result = new StringBuilder();
+    //     completedFuture(original).thenApply!(String)( (s) {
+    //             trace(s.toString());
+    //             return s.toUpperCase();
+    //         }).thenAcceptBoth!(String)(
+    //             completedFuture(original).thenApply!(String)((s) {
+    //                 trace(s.toString());
+    //                 return s.toLowerCase();
+    //             }),
 
-                (s1, s2) { 
-                    result.append(s1.value ~ s2.value); 
-                    trace("appending done.");
+    //             (s1, s2) { 
+    //                 result.append(s1.value ~ s2.value); 
+    //                 trace("appending done.");
+    //             });
+    //     trace("running done.");
+    //     assertEquals("MESSAGEmessage", result.toString());
+    // }
+
+    @Test
+    void thenCombineExample() {
+        String original = new String("Message");
+        CompletableFuture!String cf = completedFuture(original)
+                .thenApply!(String)( (s) { 
+                    trace(s.toString());
+                    return delayedUpperCase(s); 
+                }).thenCombine!(String, String)(completedFuture(original).thenApply!(String)( (s) { 
+                        info("incoming: ", s.value);
+                        return delayedLowerCase(s);
+                    }),
+                    delegate String (String s1, String s2) { 
+                        trace("running...");
+                        return new String(s1.value ~ s2.value); 
                 });
         trace("running done.");
-        assertEquals("MESSAGEmessage", result.toString());
+        assertEquals("MESSAGEmessage", cf.getNow(null).value);
     }
+
 
     private static String delayedUpperCase(String s) {
         randomSleep();
