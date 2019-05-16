@@ -193,7 +193,7 @@ abstract class AbstractCompletableFuture {
  *
  * <pre> {@code
  * class MyCompletableFuture(T) : CompletableFuture!(T) {
- *   static final Executor myExecutor = ...;
+ *   final Executor myExecutor = ...;
  *   MyCompletableFuture() { }
  *   <U> CompletableFuture!(U) newIncompleteFuture() {
  *     return new MyCompletableFuture!(U)(); }
@@ -1082,16 +1082,16 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     private CompletableFuture!(Void) biRunStage(U)(Executor e, CompletionStage!U o,
                                                Runnable f) {
         AbstractCompletableFuture b; Object r, s;
-        if (f is null || (b = o.toCompletableFuture()) is null)
+        if (f is null || (b = cast(AbstractCompletableFuture)o.toCompletableFuture()) is null)
             throw new NullPointerException();
         CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
         if ((r = result) is null || (s = b.result) is null)
-            bipush(b, new BiRun!(T, U)(e, d, this, b, f));
+            bipush(b, new BiRun(e, d, this, b, f));
         else if (e is null)
             d.biRun(r, s, f, null);
         else
             try {
-                e.execute(new BiRun!(T, U)(null, d, this, b, f));
+                e.execute(new BiRun(null, d, this, b, f));
             } catch (Throwable ex) {
                 d.result = encodeThrowable(ex);
             }
@@ -1486,6 +1486,15 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         CompletionStage!(U) other,
         BiConsumer!(T, U) action, Executor executor) {
         return biAcceptStage(screenExecutor(executor), other, action);
+    }
+
+    CompletableFuture!(Void) runAfterBoth(U)(CompletionStage!U other,
+                                                Action action) {
+        return biRunStage(null, other, new class Runnable {
+            void run() {
+                action();
+            }
+        } );
     }
 
     CompletableFuture!(Void) runAfterBoth(U)(CompletionStage!U other,
@@ -2164,14 +2173,15 @@ final class UniAccept(T) : UniCompletion {
     }
 }
 
-
     
 final class UniRun(T) : UniCompletion {
     Runnable fn;
+
     this(Executor executor, CompletableFuture!(Void) dep,
            CompletableFuture!(T) src, Runnable fn) {
         super(executor, dep, src); this.fn = fn;
     }
+
     final override CompletableFuture!(Void) tryFire(int mode) {
         CompletableFuture!(Void) d; CompletableFuture!(T) a;
         Object r; Throwable x; Runnable f;
@@ -2248,10 +2258,12 @@ final class UniHandle(T, V) : UniCompletion {
 
 final class UniExceptionally(T) : UniCompletion {
     Function!(Throwable,  T) fn;
+
     this(CompletableFuture!(T) dep, CompletableFuture!(T) src,
                      Function!(Throwable,  T) fn) {
         super(null, dep, src); this.fn = fn;
     }
+
     final override CompletableFuture!(T) tryFire(int mode) { // never ASYNC
         // assert mode != ASYNC;
         CompletableFuture!(T) d; CompletableFuture!(T) a;
@@ -2283,15 +2295,16 @@ final class UniRelay(U, T : U) : UniCompletion {
     }
 }
 
-
     
 final class UniCompose(T,V) : UniCompletion {
     Function!(T, CompletionStage!(V)) fn;
+
     this(Executor executor, CompletableFuture!(V) dep,
                CompletableFuture!(T) src,
                Function!(T, CompletionStage!(V)) fn) {
         super(executor, dep, src); this.fn = fn;
     }
+
     final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d; CompletableFuture!(T) a;
         Function!(T, CompletionStage!(V)) f;
@@ -2331,8 +2344,9 @@ final class UniCompose(T,V) : UniCompletion {
 
 /** A Completion for an action with two sources */
 
-abstract static class BiCompletion : UniCompletion {
+abstract class BiCompletion : UniCompletion {
     AbstractCompletableFuture snd; // second source for action
+
     this(Executor executor, AbstractCompletableFuture dep,
                  AbstractCompletableFuture src, AbstractCompletableFuture snd) {
         super(executor, dep, src); this.snd = snd;
@@ -2363,14 +2377,16 @@ final class CoCompletion : Completion {
 }
 
     
-final class BiApply(T,U,V) : BiCompletion {
+final class BiApply(T, U, V) : BiCompletion {
     BiFunction!(T, U, V) fn;
+
     this(Executor executor, CompletableFuture!(V) dep,
             CompletableFuture!(T) src, CompletableFuture!(U) snd,
             BiFunction!(T, U, V) fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
-    final CompletableFuture!(V) tryFire(int mode) {
+
+    final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d;
         CompletableFuture!(T) a;
         CompletableFuture!(U) b;
@@ -2385,16 +2401,17 @@ final class BiApply(T,U,V) : BiCompletion {
     }
 }
 
-
     
-static final class BiAccept(T,U) : BiCompletion {
+final class BiAccept(T, U) : BiCompletion {
     BiConsumer!(T, U) fn;
+
     this(Executor executor, CompletableFuture!(Void) dep,
              CompletableFuture!(T) src, CompletableFuture!(U) snd,
              BiConsumer!(T, U) fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
-    final CompletableFuture!(Void) tryFire(int mode) {
+
+    final override CompletableFuture!(Void) tryFire(int mode) {
         CompletableFuture!(Void) d;
         CompletableFuture!(T) a;
         CompletableFuture!(U) b;
@@ -2410,19 +2427,21 @@ static final class BiAccept(T,U) : BiCompletion {
 }
 
 
-static final class BiRun(T,U) : BiCompletion {
+final class BiRun : BiCompletion {
     Runnable fn;
+
     this(Executor executor, CompletableFuture!(Void) dep,
-          CompletableFuture!(T) src, CompletableFuture!(U) snd,
+          AbstractCompletableFuture src, AbstractCompletableFuture snd,
           Runnable fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
-    final CompletableFuture!(Void) tryFire(int mode) {
+
+    final override CompletableFuture!(Void) tryFire(int mode) {
         CompletableFuture!(Void) d;
-        CompletableFuture!(T) a;
-        CompletableFuture!(U) b;
+        AbstractCompletableFuture a;
+        AbstractCompletableFuture b;
         Object r, s; Runnable f;
-        if ((d = dep) is null || (f = fn) is null
+        if ((d = cast(CompletableFuture!(Void))dep) is null || (f = fn) is null
             || (a = src) is null || (r = a.result) is null
             || (b = snd) is null || (s = b.result) is null
             || !d.biRun(r, s, f, mode > 0 ? null : this))
@@ -2465,8 +2484,9 @@ final class BiRelay : BiCompletion { // for And
 }
 
     
-final class OrApply(T,U : T,V) : BiCompletion {
+final class OrApply(T, U : T, V) : BiCompletion {
     Function!(T,V) fn;
+
     this(Executor executor, CompletableFuture!(V) dep,
             CompletableFuture!(T) src, CompletableFuture!(U) snd,
             Function!(T,V) fn) {
@@ -2509,7 +2529,7 @@ final class OrApply(T,U : T,V) : BiCompletion {
 }
 
 
-static final class OrAccept(T,U : T) : BiCompletion {
+final class OrAccept(T, U : T) : BiCompletion {
     Consumer!(T) fn;
     this(Executor executor, CompletableFuture!(Void) dep,
              CompletableFuture!(T) src, CompletableFuture!(U) snd,
@@ -2552,15 +2572,16 @@ static final class OrAccept(T,U : T) : BiCompletion {
     }
 }
 
-
     
 final class OrRun : BiCompletion {
     Runnable fn;
+
     this(Executor executor, CompletableFuture!(Void) dep,
           AbstractCompletableFuture src, AbstractCompletableFuture snd,
           Runnable fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
+
     final override CompletableFuture!(Void) tryFire(int mode) {
         CompletableFuture!(Void) d;
         AbstractCompletableFuture a;
@@ -2596,8 +2617,10 @@ final class OrRun : BiCompletion {
 /** Completion for an anyOf input future. */
 
 static class AnyOf : Completion {
-    CompletableFuture!(Object) dep; AbstractCompletableFuture src;
+    CompletableFuture!(Object) dep; 
+    AbstractCompletableFuture src;
     AbstractCompletableFuture[] srcs;
+
     this(CompletableFuture!(Object) dep, AbstractCompletableFuture src,
           AbstractCompletableFuture[] srcs) {
         this.dep = dep; this.src = src; this.srcs = srcs;
