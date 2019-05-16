@@ -943,7 +943,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 
-    final bool biApply(R,S)(Object r, Object s,
+    final bool biApply(R, S)(Object r, Object s,
                                 BiFunction!(R, S, T) f,
                                 BiApply!(R,S,T) c) {
         Throwable x;
@@ -952,7 +952,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (ar !is null) {
                 if ((x = ar.ex) !is null) {
                     completeThrowable(x, r);
-                    break tryComplete;
+                    goto tryComplete;
                 }
                 r = null;
             }
@@ -960,7 +960,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (ars !is null) {
                 if ((x = ars.ex) !is null) {
                     completeThrowable(x, s);
-                    break tryComplete;
+                    goto tryComplete;
                 }
                 s = null;
             }
@@ -989,7 +989,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if ((r = result) is null || (s = b.result) is null)
             bipush(b, new BiApply!(T,U,V)(e, d, this, b, f));
         else if (e is null)
-            d.biApply(r, s, f, null);
+            d.biApply!(T, U)(r, s, f, null);
         else
             try {
                 e.execute(new BiApply!(T,U,V)(null, d, this, b, f));
@@ -1455,19 +1455,19 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     CompletableFuture!(V) thenCombine(U, V)(
         CompletionStage!(U) other,
         BiFunction!(T, U, V) fn) {
-        return biApplyStage(null, other, fn);
+        return biApplyStage!(U, V)(null, other, fn);
     }
 
     CompletableFuture!(V) thenCombineAsync(U, V)(
         CompletionStage!(U) other,
         BiFunction!(T, U, V) fn) {
-        return biApplyStage(defaultExecutor(), other, fn);
+        return biApplyStage!(U, V)(defaultExecutor(), other, fn);
     }
 
     CompletableFuture!(V) thenCombineAsync(U, V)(
         CompletionStage!(U) other,
         BiFunction!(T, U, V) fn, Executor executor) {
-        return biApplyStage(screenExecutor(executor), other, fn);
+        return biApplyStage!(U, V)(screenExecutor(executor), other, fn);
     }
 
     CompletableFuture!(Void) thenAcceptBoth(U)(CompletionStage!(U) other, 
@@ -2315,7 +2315,7 @@ final class UniCompose(T,V) : UniCompletion {
             if (ar !is null) {
                 if ((x = ar.ex) !is null) {
                     d.completeThrowable(x, r);
-                    break tryComplete;
+                    goto tryComplete;
                 }
                 r = null;
             }
@@ -2387,13 +2387,13 @@ final class BiApply(T, U, V) : BiCompletion {
 
     final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d;
-        CompletableFuture!(T) a;
-        CompletableFuture!(U) b;
+        AbstractCompletableFuture a;
+        AbstractCompletableFuture b;
         Object r, s; BiFunction!(T, U, V) f;
-        if ((d = dep) is null || (f = fn) is null
+        if ((d = cast(CompletableFuture!(V))dep) is null || (f = fn) is null
             || (a = src) is null || (r = a.result) is null
             || (b = snd) is null || (s = b.result) is null
-            || !d.biApply(r, s, f, mode > 0 ? null : this))
+            || !d.biApply!(T, U)(r, s, f, mode > 0 ? null : this))
             return null;
         dep = null; src = null; snd = null; fn = null;
         return d.postFire(a, b, mode);
