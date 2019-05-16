@@ -1009,7 +1009,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (ar !is null) {
                 if ((x = ar.ex) !is null) {
                     completeThrowable(x, r);
-                    break tryComplete;
+                    goto tryComplete;
                 }
                 r = null;
             }
@@ -1017,7 +1017,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (ars !is null) {
                 if ((x = ars.ex) !is null) {
                     completeThrowable(x, s);
-                    break tryComplete;
+                    goto tryComplete;
                 }
                 s = null;
             }
@@ -1026,7 +1026,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                     return false;
                 R rr = cast(R) r;
                 S ss = cast(S) s;
-                f.accept(rr, ss);
+                f(rr, ss);
                 completeNull();
             } catch (Throwable ex) {
                 completeThrowable(ex);
@@ -1036,16 +1036,16 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     private CompletableFuture!(Void) biAcceptStage(U)(
-        Executor e, CompletionStage!(U) o,
-        BiConsumer!(T, U) f) {
-        CompletableFuture!(U) b; Object r, s;
-        if (f is null || (b = o.toCompletableFuture()) is null)
+        Executor e, CompletionStage!(U) o, BiConsumer!(T, U) f) {
+            
+        AbstractCompletableFuture b; Object r, s;
+        if (f is null || (b = cast(AbstractCompletableFuture)o.toCompletableFuture()) is null)
             throw new NullPointerException();
         CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
         if ((r = result) is null || (s = b.result) is null)
             bipush(b, new BiAccept!(T,U)(e, d, this, b, f));
         else if (e is null)
-            d.biAccept(r, s, f, null);
+            d.biAccept!(T, U)(r, s, f, null);
         else
             try {
                 e.execute(new BiAccept!(T,U)(null, d, this, b, f));
@@ -1470,22 +1470,21 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return biApplyStage(screenExecutor(executor), other, fn);
     }
 
-    CompletableFuture!(Void) thenAcceptBoth(U)(
-        CompletionStage!(U) other,
+    CompletableFuture!(Void) thenAcceptBoth(U)(CompletionStage!(U) other, 
         BiConsumer!(T, U) action) {
-        return biAcceptStage(null, other, action);
+        return biAcceptStage!(U)(null, other, action);
     }
 
     CompletableFuture!(Void) thenAcceptBothAsync(U)(
         CompletionStage!(U) other,
         BiConsumer!(T, U) action) {
-        return biAcceptStage(defaultExecutor(), other, action);
+        return biAcceptStage!(U)(defaultExecutor(), other, action);
     }
 
     CompletableFuture!(Void) thenAcceptBothAsync(U)(
         CompletionStage!(U) other,
         BiConsumer!(T, U) action, Executor executor) {
-        return biAcceptStage(screenExecutor(executor), other, action);
+        return biAcceptStage!(U)(screenExecutor(executor), other, action);
     }
 
     CompletableFuture!(Void) runAfterBoth(U)(CompletionStage!U other,
@@ -2406,20 +2405,20 @@ final class BiAccept(T, U) : BiCompletion {
     BiConsumer!(T, U) fn;
 
     this(Executor executor, CompletableFuture!(Void) dep,
-             CompletableFuture!(T) src, CompletableFuture!(U) snd,
+             AbstractCompletableFuture src, AbstractCompletableFuture snd,
              BiConsumer!(T, U) fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
 
     final override CompletableFuture!(Void) tryFire(int mode) {
         CompletableFuture!(Void) d;
-        CompletableFuture!(T) a;
-        CompletableFuture!(U) b;
+        AbstractCompletableFuture a;
+        AbstractCompletableFuture b;
         Object r, s; BiConsumer!(T, U) f;
-        if ((d = dep) is null || (f = fn) is null
+        if ((d = cast(CompletableFuture!(Void))dep) is null || (f = fn) is null
             || (a = src) is null || (r = a.result) is null
             || (b = snd) is null || (s = b.result) is null
-            || !d.biAccept(r, s, f, mode > 0 ? null : this))
+            || !d.biAccept!(T, U)(r, s, f, mode > 0 ? null : this))
             return null;
         dep = null; src = null; snd = null; fn = null;
         return d.postFire(a, b, mode);

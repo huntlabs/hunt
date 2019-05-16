@@ -232,28 +232,48 @@ class CompletableFutureTest {
     //     thread.start();
     // }
 
+    // @Test
+    // void runAfterBothExample() {
+    //     String original = new String("Message");
+    //     StringBuilder result = new StringBuilder();
+    //     completedFuture(original).thenApply!(String)( (s) {
+    //             trace(s.toString());
+    //             return s.toUpperCase();
+    //         }).runAfterBoth!(String)(
+    //             completedFuture(original).thenApply!(String)((s) {
+    //                 trace(s.toString());
+    //                 return s.toLowerCase();
+    //             }),
+
+    //             () {
+    //                 result.append("done");
+    //                 trace("appending done.");
+    //             });
+        
+    //     trace("running done.");
+    //     assertTrue("Result was empty", result.length() > 0);
+    // }
+
     @Test
-    void runAfterBothExample() {
+    void thenAcceptBothExample() {
         String original = new String("Message");
         StringBuilder result = new StringBuilder();
         completedFuture(original).thenApply!(String)( (s) {
                 trace(s.toString());
                 return s.toUpperCase();
-            }).runAfterBoth!(String)(
+            }).thenAcceptBoth!(String)(
                 completedFuture(original).thenApply!(String)((s) {
                     trace(s.toString());
                     return s.toLowerCase();
                 }),
 
-                () {
-                    result.append("done");
+                (s1, s2) { 
+                    result.append(s1.value ~ s2.value); 
                     trace("appending done.");
                 });
-        
         trace("running done.");
-        assertTrue("Result was empty", result.length() > 0);
+        assertEquals("MESSAGEmessage", result.toString());
     }
-
 
     private static String delayedUpperCase(String s) {
         randomSleep();
