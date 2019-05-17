@@ -55,6 +55,7 @@ void main()
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	testUnits!(CompletableFutureTest);
+	testUnits!(RealLifeCompletableFutureExample);
 	// testUnits!(ForkJoinPoolTest);
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);

@@ -366,50 +366,20 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     /** Returns the encoding of the given non-exceptional value. */
     final Object encodeValue(T t) {
-        return (t is null) ? NIL : t;
+        return (t is null) ? NIL : cast(Object)t;
     }
 
     /** Completes with a non-exceptional result, unless already completed. */
     final bool completeValue(T t) {
-        return AtomicHelper.compareAndSet(this.result, null, (t is null) ? NIL : t);
+        return AtomicHelper.compareAndSet(this.result, null, (t is null) ? NIL : cast(Object)t);
     }
 
-    /**
-     * Returns the encoding of the given (non-null) exception as a
-     * wrapped CompletionException unless it is one already.
-     */
-    private static AltResult encodeThrowable(Throwable x) {
-        CompletionException ex = cast(CompletionException)x;
-        if(ex is null) {
-            return new AltResult(new CompletionException(x));
-        } else {
-            return new AltResult(x);
-        }
-    }
 
     /** Completes with an exceptional result, unless already completed. */
     final bool completeThrowable(Throwable x) {
         return AtomicHelper.compareAndSet(this.result, null, encodeThrowable(x));
     }
 
-    /**
-     * Returns the encoding of the given (non-null) exception as a
-     * wrapped CompletionException unless it is one already.  May
-     * return the given Object r (which must have been the result of a
-     * source future) if it is equivalent, i.e. if this is a simple
-     * relay of an existing CompletionException.
-     */
-    static Object encodeThrowable(Throwable x, Object r) {
-        CompletionException cex = cast(CompletionException)x;
-        if (cex is null)
-            x = new CompletionException(x);
-        else {
-            AltResult ar = cast(AltResult)r;
-            if (ar !is null && x is ar.ex)
-                return r;
-        }
-        return new AltResult(x);
-    }
 
     /**
      * Completes with the given (non-null) exceptional result as a
@@ -429,26 +399,9 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      * value, boxed as NIL if null.
      */
     Object encodeOutcome(T t, Throwable x) {
-        return (x is null) ? (t is null) ? NIL : t : encodeThrowable(x);
+        return (x is null) ? (t is null) ? NIL : cast(Object)t : encodeThrowable(x);
     }
 
-    /**
-     * Returns the encoding of a copied outcome; if exceptional,
-     * rewraps as a CompletionException, else returns argument.
-     */
-    static Object encodeRelay(Object r) {
-        Throwable x;
-
-        AltResult ar = cast(AltResult)r;
-
-        if (ar !is null && (x = ar.ex) !is null) {
-            CompletionException cex = cast(CompletionException)x;
-            if(x is null) {
-                r = new AltResult(new CompletionException(x));
-            }
-        }
-        return r;
-    }
 
     /**
      * Completes with r or a copy of r, unless already completed.
@@ -849,16 +802,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return d;
     }
 
-// T : U
-    private static CompletableFuture!(U) uniCopyStage(U, T)(CompletableFuture!(T) src) {
-        Object r;
-        CompletableFuture!(U) d = newIncompleteFuture!(U)();// src.newIncompleteFuture();
-        if ((r = src.result) !is null)
-            d.result = encodeRelay(r);
-        else
-            src.unipush(new UniRelay!(U,T)(d, src));
-        return d;
-    }
+
 
     private MinimalStage!(T) uniAsMinimalStage() {
         Object r;
@@ -1102,40 +1046,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return d;
     }
 
-
-    /** Recursively constructs a tree of completions. */
-    static CompletableFuture!(Void) andTree(AbstractCompletableFuture[] cfs,
-                                           int lo, int hi) {
-        CompletableFuture!(Void) d = new CompletableFuture!(Void)();
-        if (lo > hi) // empty
-            d.result = NIL;
-        else {
-            AbstractCompletableFuture a, b; 
-            Object r, s, z; 
-            Throwable x;
-
-            int mid = (lo + hi) >>> 1;
-            if ((a = (lo == mid ? cfs[lo] :
-                      andTree(cfs, lo, mid))) is null ||
-                (b = (lo == hi ? a : (hi == mid+1) ? cfs[hi] :
-                      andTree(cfs, mid+1, hi))) is null)
-                throw new NullPointerException();
-            if ((r = a.result) is null || (s = b.result) is null)
-                a.bipush(b, new BiRelay(d, a, b));
-            else {
-                AltResult ar = cast(AltResult)r;
-                AltResult ars = cast(AltResult)s;
-                if(ar !is null && (x = ar.ex) !is null){
-                    d.result = encodeThrowable(x, r);
-                } else if(ars !is null && (x = ars.ex) !is null){
-                    d.result = encodeThrowable(x, s);
-                }
-                else
-                    d.result = NIL;
-            }
-        }
-        return d;
-    }
 
     /* ------------- Projected (Ored) BiCompletions -------------- */
 
@@ -1580,13 +1490,11 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return uniComposeStage!(U)(screenExecutor(executor), fn);
     }
 
-    CompletableFuture!(T) whenComplete(
-        BiConsumer!(T, Throwable) action) {
+    CompletableFuture!(T) whenComplete(BiConsumer!(T, Throwable) action) {
         return uniWhenCompleteStage(null, action);
     }
 
-    CompletableFuture!(T) whenCompleteAsync(
-        BiConsumer!(T, Throwable) action) {
+    CompletableFuture!(T) whenCompleteAsync(BiConsumer!(T, Throwable) action) {
         return uniWhenCompleteStage(defaultExecutor(), action);
     }
 
@@ -1640,78 +1548,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return uniExceptionallyStage(fn);
     }
 
-
-    /* ------------- Arbitrary-arity constructions -------------- */
-
-    /**
-     * Returns a new CompletableFuture that is completed when all of
-     * the given CompletableFutures complete.  If any of the given
-     * CompletableFutures complete exceptionally, then the returned
-     * CompletableFuture also does so, with a CompletionException
-     * holding this exception as its cause.  Otherwise, the results,
-     * if any, of the given CompletableFutures are not reflected in
-     * the returned CompletableFuture, but may be obtained by
-     * inspecting them individually. If no CompletableFutures are
-     * provided, returns a CompletableFuture completed with the value
-     * {@code null}.
-     *
-     * <p>Among the applications of this method is to await completion
-     * of a set of independent CompletableFutures before continuing a
-     * program, as in: {@code CompletableFuture.allOf(c1, c2,
-     * c3).join();}.
-     *
-     * @param cfs the CompletableFutures
-     * @return a new CompletableFuture that is completed when all of the
-     * given CompletableFutures complete
-     * @throws NullPointerException if the array or any of its elements are
-     * {@code null}
-     */
-    static CompletableFuture!(Void) allOf(AbstractCompletableFuture[] cfs...) {
-        return andTree(cfs, 0, cast(int)cfs.length - 1);
-    }
-
-    /**
-     * Returns a new CompletableFuture that is completed when any of
-     * the given CompletableFutures complete, with the same result.
-     * Otherwise, if it completed exceptionally, the returned
-     * CompletableFuture also does so, with a CompletionException
-     * holding this exception as its cause.  If no CompletableFutures
-     * are provided, returns an incomplete CompletableFuture.
-     *
-     * @param cfs the CompletableFutures
-     * @return a new CompletableFuture that is completed with the
-     * result or exception of any of the given CompletableFutures when
-     * one completes
-     * @throws NullPointerException if the array or any of its elements are
-     * {@code null}
-     */
-    static CompletableFuture!(Object) anyOf(U)(CompletableFuture!(U)[] cfs...) {
-        int n; Object r;
-        if ((n = cast(int)cfs.length) <= 1)
-            return (n == 0)
-                ? new CompletableFuture!(Object)()
-                : uniCopyStage(U, T)(cfs[0]);
-
-        foreach(AbstractCompletableFuture cf; cfs) {
-            if ((r = cf.result) !is null)
-                return new CompletableFuture!(Object)(encodeRelay(r));
-        }
-
-        cfs = cfs.dup;
-        CompletableFuture!(Object) d = new CompletableFuture!Object();
-        foreach (AbstractCompletableFuture cf;  cfs)
-            cf.unipush(new AnyOf(d, cf, cfs));
-        // If d was completed while we were adding completions, we should
-        // clean the stack of any sources that may have had completions
-        // pushed on their stack after d was completed.
-        if (d.result !is null)
-            for (size_t i = 0, len = cfs.length; i < len; i++)
-                if (cfs[i].result !is null)
-                    for (i++; i < len; i++)
-                        if (cfs[i].result is null)
-                            cfs[i].cleanStack();
-        return d;
-    }
 
     /* ------------- Control and status methods -------------- */
 
@@ -1780,7 +1616,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      * @param value the completion value
      */
     void obtrudeValue(T value) {
-        result = (value is null) ? NIL : value;
+        result = (value is null) ? NIL : cast(Object)value;
         postComplete();
     }
 
@@ -1849,21 +1685,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     // jdk9 additions
-
-    /**
-     * Returns a new incomplete CompletableFuture of the type to be
-     * returned by a CompletionStage method. Subclasses should
-     * normally override this method to return an instance of the same
-     * class as this CompletableFuture. The default implementation
-     * returns an instance of class CompletableFuture.
-     *
-     * @param <U> the type of the value
-     * @return a new CompletableFuture
-     * @since 9
-     */
-    static CompletableFuture!(U) newIncompleteFuture(U)() {
-        return new CompletableFuture!(U)();
-    }
 
     /**
      * Returns the default Executor used for async methods that do not
@@ -2289,7 +2110,7 @@ final class UniRelay(U, T : U) : UniCompletion {
     final override CompletableFuture!(U) tryFire(int mode) {
         CompletableFuture!(U) d; CompletableFuture!(T) a; Object r;
         if ((d = cast(CompletableFuture!(U))dep) is null
-            || (a = cast(CompletableFuture!(U))src) is null || (r = a.result) is null)
+            || (a = cast(CompletableFuture!(T))src) is null || (r = a.result) is null)
             return null;
         if (d.result is null)
             d.completeRelay(r);
@@ -2628,20 +2449,20 @@ final class OrRun : BiCompletion {
 
 /** Completion for an anyOf input future. */
 
-static class AnyOf : Completion {
+static class AnyOf(T) : Completion {
     CompletableFuture!(Object) dep; 
     AbstractCompletableFuture src;
-    AbstractCompletableFuture[] srcs;
+    CompletableFuture!(T)[] srcs;
 
     this(CompletableFuture!(Object) dep, AbstractCompletableFuture src,
-          AbstractCompletableFuture[] srcs) {
+          CompletableFuture!(T)[] srcs) {
         this.dep = dep; this.src = src; this.srcs = srcs;
     }
 
     final override CompletableFuture!(Object) tryFire(int mode) {
         // assert mode != ASYNC;
         CompletableFuture!(Object) d; AbstractCompletableFuture a;
-        AbstractCompletableFuture[] as;
+        CompletableFuture!(T)[] as;
         Object r;
         if ((d = dep) is null
             || (a = src) is null || (r = a.result) is null
@@ -2948,7 +2769,7 @@ Executor screenExecutor(Executor e) {
  * @return the new CompletableFuture
  */
 CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier) {
-    return asyncSupplyStage(ASYNC_POOL, supplier);
+    return asyncSupplyStage!(U)(ASYNC_POOL, supplier);
 }
 
 /**
@@ -2963,7 +2784,7 @@ CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier) {
  * @return the new CompletableFuture
  */
 CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier, Executor executor) {
-    return asyncSupplyStage(screenExecutor(executor), supplier);
+    return asyncSupplyStage!(U)(screenExecutor(executor), supplier);
 }
 
 /**
@@ -3111,4 +2932,187 @@ CompletableFuture!(U) failedFuture(U)(Throwable ex) {
 CompletionStage!(U) failedStage(U)(Throwable ex) {
     if (ex is null) throw new NullPointerException();
     return new MinimalStage!(U)(new AltResult(ex));
+}
+
+
+/* ------------- Arbitrary-arity constructions -------------- */
+
+/**
+ * Returns a new CompletableFuture that is completed when all of
+ * the given CompletableFutures complete.  If any of the given
+ * CompletableFutures complete exceptionally, then the returned
+ * CompletableFuture also does so, with a CompletionException
+ * holding this exception as its cause.  Otherwise, the results,
+ * if any, of the given CompletableFutures are not reflected in
+ * the returned CompletableFuture, but may be obtained by
+ * inspecting them individually. If no CompletableFutures are
+ * provided, returns a CompletableFuture completed with the value
+ * {@code null}.
+ *
+ * <p>Among the applications of this method is to await completion
+ * of a set of independent CompletableFutures before continuing a
+ * program, as in: {@code CompletableFuture.allOf(c1, c2,
+ * c3).join();}.
+ *
+ * @param cfs the CompletableFutures
+ * @return a new CompletableFuture that is completed when all of the
+ * given CompletableFutures complete
+ * @throws NullPointerException if the array or any of its elements are
+ * {@code null}
+ */
+CompletableFuture!(Void) allOf(T)(CompletableFuture!T[] cfs...) {
+    return andTree!(T)(cfs, 0, cast(int)cfs.length - 1);
+}
+
+/**
+ * Returns a new CompletableFuture that is completed when any of
+ * the given CompletableFutures complete, with the same result.
+ * Otherwise, if it completed exceptionally, the returned
+ * CompletableFuture also does so, with a CompletionException
+ * holding this exception as its cause.  If no CompletableFutures
+ * are provided, returns an incomplete CompletableFuture.
+ *
+ * @param cfs the CompletableFutures
+ * @return a new CompletableFuture that is completed with the
+ * result or exception of any of the given CompletableFutures when
+ * one completes
+ * @throws NullPointerException if the array or any of its elements are
+ * {@code null}
+ */
+static CompletableFuture!(Object) anyOf(U)(CompletableFuture!(U)[] cfs...) {
+    int n; Object r;
+    if ((n = cast(int)cfs.length) <= 1)
+        return (n == 0)
+            ? new CompletableFuture!(Object)()
+            : uniCopyStage!(Object, U)(cfs[0]);
+
+    foreach(AbstractCompletableFuture cf; cfs) {
+        if ((r = cf.result) !is null)
+            return new CompletableFuture!(Object)(encodeRelay(r));
+    }
+
+    cfs = cfs.dup;
+    CompletableFuture!(Object) d = new CompletableFuture!Object();
+    foreach (AbstractCompletableFuture cf;  cfs)
+        cf.unipush(new AnyOf!(U)(d, cf, cfs));
+    // If d was completed while we were adding completions, we should
+    // clean the stack of any sources that may have had completions
+    // pushed on their stack after d was completed.
+    if (d.result !is null)
+        for (size_t i = 0, len = cfs.length; i < len; i++)
+            if (cfs[i].result !is null)
+                for (i++; i < len; i++)
+                    if (cfs[i].result is null)
+                        cfs[i].cleanStack();
+    return d;
+}
+
+
+/** Recursively constructs a tree of completions. */
+private CompletableFuture!(Void) andTree(T)(CompletableFuture!T[] cfs,
+                                       int lo, int hi) {
+    CompletableFuture!(Void) d = new CompletableFuture!(Void)();
+    if (lo > hi) // empty
+        d.result = NIL;
+    else {
+        AbstractCompletableFuture a, b; 
+        Object r, s, z; 
+        Throwable x;
+
+        int mid = (lo + hi) >>> 1;
+        if ((a = (lo == mid ? cfs[lo] :
+                  andTree!(T)(cfs, lo, mid))) is null ||
+            (b = (lo == hi ? a : (hi == mid+1) ? cfs[hi] :
+                  andTree!(T)(cfs, mid+1, hi))) is null)
+            throw new NullPointerException();
+        if ((r = a.result) is null || (s = b.result) is null)
+            a.bipush(b, new BiRelay(d, a, b));
+        else {
+            AltResult ar = cast(AltResult)r;
+            AltResult ars = cast(AltResult)s;
+            if(ar !is null && (x = ar.ex) !is null){
+                d.result = encodeThrowable(x, r);
+            } else if(ars !is null && (x = ars.ex) !is null){
+                d.result = encodeThrowable(x, s);
+            }
+            else
+                d.result = NIL;
+        }
+    }
+    return d;
+}
+
+/**
+ * Returns the encoding of the given (non-null) exception as a
+ * wrapped CompletionException unless it is one already.
+ */
+private AltResult encodeThrowable(Throwable x) {
+    CompletionException ex = cast(CompletionException)x;
+    if(ex is null) {
+        return new AltResult(new CompletionException(x));
+    } else {
+        return new AltResult(x);
+    }
+}
+
+/**
+ * Returns the encoding of the given (non-null) exception as a
+ * wrapped CompletionException unless it is one already.  May
+ * return the given Object r (which must have been the result of a
+ * source future) if it is equivalent, i.e. if this is a simple
+ * relay of an existing CompletionException.
+ */
+static Object encodeThrowable(Throwable x, Object r) {
+    CompletionException cex = cast(CompletionException)x;
+    if (cex is null)
+        x = new CompletionException(x);
+    else {
+        AltResult ar = cast(AltResult)r;
+        if (ar !is null && x is ar.ex)
+            return r;
+    }
+    return new AltResult(x);
+}
+
+private static CompletableFuture!(U) uniCopyStage(U, T : U)(CompletableFuture!(T) src) {
+    Object r;
+    CompletableFuture!(U) d = newIncompleteFuture!(U)();// src.newIncompleteFuture();
+    if ((r = src.result) !is null)
+        d.result = encodeRelay(r);
+    else
+        src.unipush(new UniRelay!(U, T)(d, src));
+    return d;
+}
+
+/**
+ * Returns the encoding of a copied outcome; if exceptional,
+ * rewraps as a CompletionException, else returns argument.
+ */
+private static Object encodeRelay(Object r) {
+    Throwable x;
+
+    AltResult ar = cast(AltResult)r;
+
+    if (ar !is null && (x = ar.ex) !is null) {
+        CompletionException cex = cast(CompletionException)x;
+        if(x is null) {
+            r = new AltResult(new CompletionException(x));
+        }
+    }
+    return r;
+}
+
+/**
+ * Returns a new incomplete CompletableFuture of the type to be
+ * returned by a CompletionStage method. Subclasses should
+ * normally override this method to return an instance of the same
+ * class as this CompletableFuture. The default implementation
+ * returns an instance of class CompletableFuture.
+ *
+ * @param <U> the type of the value
+ * @return a new CompletableFuture
+ * @since 9
+ */
+static CompletableFuture!(U) newIncompleteFuture(U)() {
+    return new CompletableFuture!(U)();
 }
