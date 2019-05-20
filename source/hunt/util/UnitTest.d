@@ -31,7 +31,7 @@ string generateUnitTests(T)() {
 	string[] methodsAfter;
 
 	string str;
-	str ~= `import std.stdio;
+	str ~= `import std.stdio; import hunt.logging.ConsoleLogger;
 writeln("=================================");
 writeln("Module: ` ~ fullTypeName ~ `     ");
 writeln("=================================");
@@ -85,9 +85,10 @@ writeln("=================================");
 			} else {
 				import std.meta : Alias;
 				alias currentMember = Alias!(__traits(getMember, T, memberName));
+				alias testUDAs = getUDAs!(currentMember, Test);// hasUDA!(currentMember, Test);
 				static if (memberName.startsWith("test") 
 						|| memberName.endsWith("Test")
-						|| hasUDA!(currentMember, Test)) {
+						|| testUDAs.length>0) {
 					alias memberType = typeof(currentMember);
 					static if (is(memberType == function)) {
 						str ~= `writeln("\n========> testing: ` ~ memberName ~ "\");\n";
@@ -97,8 +98,18 @@ writeln("=================================");
 							str ~= "t." ~ s ~ "();\n";
 						}
 						
-						// execute a test
-						str ~= "t." ~ memberName ~ "();\n";
+						// execute a test 
+						static if(testUDAs.length > 0) {
+							alias expectedType = typeof(testUDAs[0].expected);
+							static if(is(expectedType : Throwable)) {
+								str ~= "try { t." ~ memberName ~ "(); } catch(" ~ fullyQualifiedName!expectedType ~ 
+									" ex) { version(HUNT_DEBUG) { warning(ex.msg); } }\n";
+							} else {
+								str ~= "t." ~ memberName ~ "();\n"; 
+							}
+						} else {
+							str ~= "t." ~ memberName ~ "();\n"; 
+						}
 
 						// running methods annotated with BEFORE
 						foreach(string s; methodsAfter) {
@@ -114,12 +125,16 @@ writeln("=================================");
 
 /**
 */
-struct Test {
-	TypeInfo expected;
+struct Test(T = Object) {
+	T expected; 
 }
 
+/**
+*/
 interface Before {
 }
 
+/**
+*/
 interface After {
 }
