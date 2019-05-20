@@ -10,8 +10,9 @@ import test.AtomicTest;
 import test.BigIntegerTest;
 import test.ByteBufferTest;
 import test.CompletableFutureTest;
-import test.JsonHelperTest;
+import test.CompletableFutureTest2;
 import test.ForkJoinPoolTest;
+import test.JsonHelperTest;
 import test.LocaleTest;
 import test.LinkedBlockingQueueTest;
 import test.MagedQueueTest;
@@ -30,6 +31,7 @@ import test.ThreadTest;
 import common;
 import core.thread;
 import std.stdio;
+
 
 import benchmark.LinkedBlockingQueueBench;
 
@@ -55,7 +57,9 @@ void main()
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	testUnits!(CompletableFutureTest);
-	testUnits!(RealLifeCompletableFutureExample);
+	testUnits!(CompletableFutureTest2);
+	// testUnits!(RealLifeCompletableFutureExample);
+	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
@@ -81,6 +85,7 @@ void main()
 
 	// testUnits!(SerializationTest);
 	// testUnits!(ByteBufferTest);
+
 }
 
 
