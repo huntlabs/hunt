@@ -1079,6 +1079,7 @@ class Assert {
 
 
 
+alias assertArrayEquals = Assert.assertArrayEquals;
 alias assertTrue = Assert.assertTrue;
 alias assertFalse = Assert.assertFalse;
 alias assertThat = Assert.assertThat;

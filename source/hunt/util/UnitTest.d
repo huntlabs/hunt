@@ -38,7 +38,7 @@ writeln("=================================");
 
 `;
 	str ~= "import " ~ memberModuleName ~ ";\n";
-	str ~= "auto t = new " ~ T.stringof ~ "();\n";
+	str ~= T.stringof ~ " t;\n";
 
 	// 
 	foreach (memberName; __traits(allMembers, T)) {
@@ -92,6 +92,9 @@ writeln("=================================");
 					alias memberType = typeof(currentMember);
 					static if (is(memberType == function)) {
 						str ~= `writeln("\n========> testing: ` ~ memberName ~ "\");\n";
+
+						// Every @Test method will be test alone. 
+						str ~= "t = new " ~ T.stringof ~ "();\n";
 
 						// running methods annotated with BEFORE
 						foreach(string s; methodsBefore) {
