@@ -584,6 +584,7 @@ T unserialize(T)(const byte[] data, out long parse_index, RefClass stack)
 
 	parse_index = 1 + index1 + len;
 	long index = 1 + index1;
+	long parse = 0; 
 	mixin(unserializeMembers!T());
 
 	return t;
