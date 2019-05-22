@@ -3205,7 +3205,7 @@ private CompletableFuture!(Void) andTree(T)(CompletableFuture!T[] cfs,
                                        int lo, int hi) {
     CompletableFuture!(Void) d = new CompletableFuture!(Void)();
     if (lo > hi) // empty
-        d.result = NIL;
+        d.completeNull!false();
     else {
         AbstractCompletableFuture a, b; 
         Object r, s, z; 
