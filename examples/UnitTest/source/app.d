@@ -56,7 +56,7 @@ void main()
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
-	testUnits!(CompletableFutureTest);
+	// testUnits!(CompletableFutureTest);
 	testUnits!(CompletableFutureTest2);
 	// testUnits!(RealLifeCompletableFutureExample);
 	// testUnits!(RealLifeCompletableFutureExample2);
