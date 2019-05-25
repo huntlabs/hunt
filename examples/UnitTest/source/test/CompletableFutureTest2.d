@@ -86,23 +86,25 @@ class CompletableFutureTest2 {
     //     assertEquals("MESSAGE", value);
     // }
 
-    // @Test
-    // void thenApplyAsyncExample() {
-    //     CompletableFuture!string cf = completedFuture("message")
-    //         .thenApplyAsync!(string)((s) {
-    //             assertTrue(Thread.getThis().isDaemon());
-    //             randomSleep();
-    //             return s.toUpper();
-    //         });
-    //     assertNull(cf.getNow(null));
+    @Test
+    void thenApplyAsyncExample() {
+        CompletableFuture!string cf = completedFuture("message")
+            .thenApplyAsync!(string)((s) {
+                assertTrue(Thread.getThis().isDaemon());
+                randomSleep();
+                return s.toUpper();
+            });
+        assertNull(cf.getNow(null));
 
-    //     void doTest() {
-    //         assertEquals("MESSAGE", cf.join());
-    //     }
+        void doTest() {
+            string v = cf.join();
+            info("result is: ", v);
+            assertEquals("MESSAGE", v);
+        }
 
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
+    }
 
     // @Test
     // void thenApplyAsyncWithExecutorExample() {
