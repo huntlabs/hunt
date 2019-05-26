@@ -557,14 +557,14 @@ class RealLifeCompletableFutureExample2 {
         });
 
 
-        void doTest() {
+        // void doTest() {
             cf.join();
             MonoTime end = MonoTime.currTime();
             infof("Took %s", end - start);
-        }
+        // }
         
-        ThreadEx thread = new ThreadEx(&doTest);
-        thread.start(); 
+        // ThreadEx thread = new ThreadEx(&doTest);
+        // thread.start(); 
     }
 
     static CompletableFuture!float rating(int manufacturer) {
