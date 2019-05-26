@@ -266,7 +266,7 @@ class ThreadEx : Thread, Runnable {
     /* What will be run. */
     private Runnable target;
 
-    Object parkBlocker;
+    // Object parkBlocker;
     ThreadState state;
     
 
@@ -333,13 +333,13 @@ class ThreadEx : Thread, Runnable {
     ~this() {
         blocker = null;
         blockerLock = null;
-        parkBlocker = null;
+        // parkBlocker = null;
         target = null;
-        _parker = null;
+        // _parker = null;
     }
 
     private void initialize() nothrow {
-        _parker = Parker.allocate(this);
+        // _parker = Parker.allocate(this);
         blockerLock = new Object();
         state = ThreadState.NEW;
     }
@@ -375,7 +375,7 @@ class ThreadEx : Thread, Runnable {
      */
     void run() {
         version(HUNT_DEBUG_CONCURRENCY) {
-            infof("Trying to run a target (%s null)...", target is null ? "is" : "is not");
+            infof("trying to run a target (%s null)...", target is null ? "is" : "is not");
         }
         if (target !is null) {
             target.run();
@@ -482,7 +482,8 @@ class ThreadEx : Thread, Runnable {
         }
 
         // For JSR166. Unpark even if interrupt status already was set
-        _parker.unpark();
+        // _parker.unpark();
+        LockSupport.unpark();
 
         // ParkEvent * ev = thread->_ParkEvent ;
         // if (ev != NULL) ev->unpark() ;
@@ -524,7 +525,11 @@ class ThreadEx : Thread, Runnable {
      * @revised 6.0
      */
     static bool interrupted() {
-        return currentThread().isInterrupted(true);
+        ThreadEx tex = cast(ThreadEx) Thread.getThis();
+        if(tex is null)
+            return false;
+
+        return tex.isInterrupted(true);
     }
 
     /**
@@ -562,10 +567,10 @@ class ThreadEx : Thread, Runnable {
     }
 
 
-    Parker parker() {
-        return _parker;
-    }
-    private Parker _parker;
+    // Parker parker() {
+    //     return _parker;
+    // }
+    // private Parker _parker;
 
     // Short sleep, direct OS call.
     static void nakedSleep(Duration timeout) {
@@ -767,6 +772,7 @@ class ThreadEx : Thread, Runnable {
     }
 }
 
+
 /*
  * Per-thread blocking support for JSR166. See the Java-level
  * Documentation for rationale. Basically, park acts like wait, unpark
@@ -788,6 +794,8 @@ class Parker {
 
     enum int REL_INDEX = 0;
     enum int ABS_INDEX = 1;
+
+    Object parkBlocker;
 
     private shared int _counter;
     private int _nParked;
@@ -816,10 +824,12 @@ class Parker {
     void park(bool isAbsolute, Duration time) {
         version(HUNT_DEBUG_CONCURRENCY) {
             if(isAbsolute) {
-                Duration du = time - DateTimeHelper.currentTimeMillis().msecs;
-                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, du);
+                Duration d = time - DateTimeHelper.currentTimeMillis().msecs;
+                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, 
+                    d <= Duration.zero ? "forever" : "in " ~ d.toString());
             } else {
-                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, time);
+                tracef("try to park a thread: isAbsolute=%s, %s", isAbsolute, 
+                    time <= Duration.zero ? "forever" : "in " ~ time.toString());
             }
         }
         // Optional fast-path check:
@@ -838,7 +848,7 @@ class Parker {
             return;
         }
 
-        ThreadEx thread = ThreadEx.currentThread();
+        ThreadEx thread = cast(ThreadEx) Thread.getThis();
 
         // Enter safepoint region
         // Beware of deadlocks such as 6317397.
@@ -848,7 +858,7 @@ class Parker {
 
         // Don't wait if cannot get lock since interference arises from
         // unparking. Also re-check interrupt before trying wait.
-        if(thread.isInterrupted() || !_mutex.tryLock())
+        if((thread !is null && thread.isInterrupted()) || !_mutex.tryLock())
             return;
 
         if (_counter > 0) { // no wait needed

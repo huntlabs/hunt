@@ -21,9 +21,9 @@ class ThreadTest {
         {
             auto ex = Thread.getThis();
             if(ex is null)
-                ConsoleLogger.warning("ex is null");
+                warning("ex is null");
             else
-                ConsoleLogger.info(typeid(ex), " id=", Thread.getThis().id);
+                info(typeid(ex), " id=", Thread.getThis().id);
             assert(ex !is null);
             x++;
         }).start().join();
@@ -32,9 +32,9 @@ class ThreadTest {
 
         auto ex = Thread.getThis();
         if(ex is null)
-            ConsoleLogger.warning("ex is null");
+            warning("ex is null");
         else
-            ConsoleLogger.info(typeid(ex), " id=", Thread.getThis().id);
+            info(typeid(ex), " id=", Thread.getThis().id);
         assert(ex !is null);
 
     }
@@ -101,6 +101,8 @@ class ThreadTest {
      See_also:
         https://www.cnblogs.com/dennyzhangdd/p/7010972.html
     */
+    // void futureTask01() {
+    @Test    
     void futureTask01() {
         
         int count = 0;
@@ -115,12 +117,12 @@ class ThreadTest {
         count += 10; 
         trace("checking done.");
 
-        if (count >= 1) {
+        if (count >= 100) {
             trace("The target reached, so cancel the futureTask");
             futureTask.cancel(true); 
         }
         else {
-            trace("The target doesn't reach, so querying more...");
+            trace("The target is not reached, so querying more...");
             int i = futureTask.get(); // execute CallableTask
             trace("result: " ~ i.to!string());
             assert(i == 10);
