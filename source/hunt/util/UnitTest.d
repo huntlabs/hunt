@@ -73,7 +73,7 @@ writeln("=================================");
 
 	// 
 	foreach (memberName; __traits(allMembers, T)) {
-		// pragma(msg, "member: " ~ memberName);
+	// 	pragma(msg, "member: " ~ memberName);
 		static if (is(T == class) && FixedObjectMembers.canFind(memberName)) {
 			// pragma(msg, "skipping fixed Object member: " ~ memberName);
 		} else {
@@ -85,12 +85,10 @@ writeln("=================================");
 			} else {
 				import std.meta : Alias;
 				alias currentMember = Alias!(__traits(getMember, T, memberName));
-				alias testUDAs = getUDAs!(currentMember, Test);// hasUDA!(currentMember, Test);
-				static if (memberName.startsWith("test") 
-						|| memberName.endsWith("Test")
-						|| testUDAs.length>0) {
-					alias memberType = typeof(currentMember);
-					static if (is(memberType == function)) {
+
+				static if (isFunction!(currentMember)) {
+					alias testWithUDAs = getUDAs!(currentMember, TestWith);// hasUDA!(currentMember, Test);
+					static if(testWithUDAs.length >0) {
 						str ~= `writeln("\n========> testing: ` ~ memberName ~ "\");\n";
 
 						// Every @Test method will be test alone. 
@@ -102,14 +100,10 @@ writeln("=================================");
 						}
 						
 						// execute a test 
-						static if(testUDAs.length > 0) {
-							alias expectedType = typeof(testUDAs[0].expected);
-							static if(is(expectedType : Throwable)) {
-								str ~= "try { t." ~ memberName ~ "(); } catch(" ~ fullyQualifiedName!expectedType ~ 
-									" ex) { version(HUNT_DEBUG) { warning(ex.msg); } }\n";
-							} else {
-								str ~= "t." ~ memberName ~ "();\n"; 
-							}
+						alias expectedType = typeof(testUDAs[0].expected);
+						static if(is(expectedType : Throwable)) {
+							str ~= "try { t." ~ memberName ~ "(); } catch(" ~ fullyQualifiedName!expectedType ~ 
+								" ex) { version(HUNT_DEBUG) { warning(ex.msg); } }\n";
 						} else {
 							str ~= "t." ~ memberName ~ "();\n"; 
 						}
@@ -117,6 +111,27 @@ writeln("=================================");
 						// running methods annotated with BEFORE
 						foreach(string s; methodsAfter) {
 							str ~= "t." ~ s ~ "();\n";
+						}
+					} else {
+						static if (memberName.startsWith("test") || memberName.endsWith("Test")
+							|| hasUDA!(currentMember, Test)) {
+							str ~= `writeln("\n========> testing: ` ~ memberName ~ "\");\n";
+
+							// Every @Test method will be test alone. 
+							str ~= "t = new " ~ T.stringof ~ "();\n";
+
+							// running methods annotated with BEFORE
+							foreach(string s; methodsBefore) {
+								str ~= "t." ~ s ~ "();\n";
+							}
+							
+							// execute a test 
+							str ~= "t." ~ memberName ~ "();\n"; 
+
+							// running methods annotated with BEFORE
+							foreach(string s; methodsAfter) {
+								str ~= "t." ~ s ~ "();\n";
+							}
 						}
 					}
 				}
@@ -128,8 +143,11 @@ writeln("=================================");
 
 /**
 */
-struct Test(T = Object) {
+struct TestWith(T = Object) {
 	T expected; 
+}
+
+struct Test {
 }
 
 /**
