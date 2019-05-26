@@ -11,6 +11,7 @@
 
 module hunt.concurrency.thread.LockSupport;
 
+import core.atomic;
 import core.thread;
 import core.time;
 
@@ -120,12 +121,55 @@ import hunt.util.DateTime;
  * @since 1.5
  */
 class LockSupport {
+    private static Parker _parker;    
+    private __gshared Parker[Thread] parkers;
+    private shared static bool m_lock;
+
     private this() {} // Cannot be instantiated.
 
-    private static void setBlocker(ThreadEx t, Object arg) {
-        // Even though volatile, hotspot doesn't need a write barrier here.
-        t.parkBlocker = arg;
-        // implementationMissing(false);
+    static Parker getParker() {
+        if(_parker is null) {
+            Thread t = Thread.getThis();
+            _parker = createParker(t);
+        }
+        return _parker;
+    }
+
+    static Parker getParker(Thread t) {
+        if(t is Thread.getThis())
+            return getParker();
+        
+        Parker* itemPtr = t in parkers;
+        if(itemPtr is null) {
+            _parker = createParker(t);
+        }
+
+        return *itemPtr;
+    }
+
+    private static Parker createParker(Thread t) {
+        version(HUNT_DEBUG) info("creating a new parker");
+        Parker p = Parker.allocate(t);
+
+        while(!cas(&m_lock, false, true)) {
+        }
+
+        parkers[t] = p;
+        m_lock = false;
+
+        return p;
+    }
+
+    static void removeParker() {
+        removeParker(Thread.getThis);
+        _parker = null;
+    }
+
+    static void removeParker(Thread t) {
+        while(!cas(&m_lock, false, true)) {
+        }
+        parkers.remove(t);
+        m_lock = false;
     }
 
     /**
@@ -140,9 +184,14 @@ class LockSupport {
      *        this operation has no effect
      */
     static void unpark(Thread thread) {
-        ThreadEx tx = cast(ThreadEx)thread;
-        if (tx !is null) 
-            tx.parker().unpark();
+        getParker(thread).unpark();
+        // ThreadEx tx = cast(ThreadEx)thread;
+        // if (tx !is null) 
+        //     tx.parker().unpark();
+    }
+
+    static void unpark() {
+        getParker().unpark();
     }
 
 
@@ -172,25 +221,27 @@ class LockSupport {
      * for example, the interrupt status of the thread upon return.
      */
     static void park() {
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (tx !is null) {
-            tx.parker().park(false, Duration.zero);
-        } else {
-            warning("The current thread is not ThreadEx!");
-            // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:08:21 AM
-            // upgrade Thread to ThreadEx
-            Thread.sleep(Duration.zero);
-        }
+        // ThreadEx tx = cast(ThreadEx)Thread.getThis();
+        // if (tx !is null) {
+        //     tx.parker().park(false, Duration.zero);
+        // } else {
+        //     warning("The current thread is not ThreadEx!");
+        //     // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:08:21 AM
+        //     // upgrade Thread to ThreadEx
+        //     Thread.sleep(Duration.zero);
+        // }
+        getParker().park(false, Duration.zero);
     }
 
     static void park(Duration time) {        
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (!time.isNegative && tx !is null) {
-            tx.parker().park(false, time);
-        } else {
-            warning("The current thread is not ThreadEx!");
-            Thread.sleep(time);
-        }
+        // ThreadEx tx = cast(ThreadEx)Thread.getThis();
+        // if (!time.isNegative && tx !is null) {
+        //     tx.parker().park(false, time);
+        // } else {
+        //     warning("The current thread is not ThreadEx!");
+        //     Thread.sleep(time);
+        // }
+        getParker().park(false, time);
     }
 
     /**
@@ -226,10 +277,10 @@ class LockSupport {
     }
 
     static void park(Object blocker, Duration time) {
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (time >= Duration.zero && tx !is null) {
+        Thread tx = Thread.getThis();
+        if (time >= Duration.zero) {
             setBlocker(tx, blocker);
-            tx.parker().park(false, time);
+            getParker().park(false, time);
             setBlocker(tx, null);
         } else {
             warning("The current thread is not ThreadEx!");
@@ -309,9 +360,9 @@ class LockSupport {
      */
     static void parkUntil(Object blocker, long deadline) {
         
-        ThreadEx t = ThreadEx.currentThread();
+        Thread t = Thread.getThis();
         setBlocker(t, blocker);
-        t.parker.park(true, deadline.msecs);
+        getParker().park(true, deadline.msecs);
         setBlocker(t, null);
     }
 
@@ -345,9 +396,8 @@ class LockSupport {
      * @param nanos the maximum number of nanoseconds to wait
      */
     static void parkNanos(long nanos) {        
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (nanos > 0 && tx !is null) {
-            tx.parker().park(false, dur!(TimeUnit.Nanosecond)(nanos));
+        if (nanos > 0) {
+            getParker().park(false, dur!(TimeUnit.Nanosecond)(nanos));
         }
     }
 
@@ -382,8 +432,8 @@ class LockSupport {
      *        to wait until
      */
     static void parkUntil(long deadline) {
-        ThreadEx t = ThreadEx.currentThread();
-        t.parker.park(true, deadline.msecs);
+        // ThreadEx t = ThreadEx.currentThread();
+        getParker().park(true, deadline.msecs);
     }
 
     /**
@@ -399,12 +449,18 @@ class LockSupport {
      * @since 1.6
      */
     static Object getBlocker(Thread t) {
-         ThreadEx tx = cast(ThreadEx)t;
-        if (tx is null) 
-            throw new NullPointerException();
-        return tx.parkBlocker;
-        
+        //  ThreadEx tx = cast(ThreadEx)t;
+        // if (tx is null) 
+        //     throw new NullPointerException();
+        return getParker(t).parkBlocker;
     }
+
+    private static void setBlocker(Thread t, Object arg) {
+        // Even though volatile, hotspot doesn't need a write barrier here.
+        // t.parkBlocker = arg;
+        getParker(t).parkBlocker = arg;
+    }
+
 
     /**
      * Returns the pseudo-randomly initialized or updated secondary seed.

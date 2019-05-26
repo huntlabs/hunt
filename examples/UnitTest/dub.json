@@ -1,8 +1,5 @@
 {
 	"name": "unittest",
-    "authors": [
-        "Hunt Labs"
-    ],
 	"description": "All the unittests for hunt.",
 	"copyright": "Copyright (C) 2015-2019, HuntLabs.net",
 	"homepage": "https://www.huntlabs.net",
@@ -11,6 +8,6 @@
 		"hunt" :{"path": "../../"}
 	},
 	"versions": [
-		"HUNT_DEBUG"
+		"HUNT_DEBUG", "HUNT_DEBUG_CONCURRENCY"
 	]
 }

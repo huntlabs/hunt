@@ -54,6 +54,7 @@ import hunt.util.ObjectUtils;
 
 import hunt.logging.ConsoleLogger;
 
+import core.thread;
 import core.time;
 import std.conv;
 import std.concurrency : initOnce;
@@ -1287,7 +1288,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         while (!isDone()) {
             if (q is null) {
                 q = new Signaller(interruptible, 0L, 0L);
-                ForkJoinWorkerThread th = cast(ForkJoinWorkerThread)ThreadEx.currentThread();
+                ForkJoinWorkerThread th = cast(ForkJoinWorkerThread)Thread.getThis();
                 if (th !is null)
                     ForkJoinPool.helpAsyncBlocker(defaultExecutor(), q);
             }
@@ -2741,18 +2742,18 @@ final class Signaller : Completion, ManagedBlocker {
     long deadline;           // non-zero if timed
     bool interruptible;
     bool interrupted;
-    ThreadEx thread;
+    Thread thread;
 
     this(bool interruptible, long nanos, long deadline) {
-        this.thread = ThreadEx.currentThread();
+        this.thread = Thread.getThis();
         this.interruptible = interruptible;
         this.nanos = nanos;
         this.deadline = deadline;
     }
 
     final override AbstractCompletableFuture tryFire(int ignore) {
-        ThreadEx w; // no need to atomically claim
-        if ((w = thread) !is null) {
+        Thread w = thread; // no need to atomically claim
+        if (w !is null) {
             thread = null;
             LockSupport.unpark(w);
         }

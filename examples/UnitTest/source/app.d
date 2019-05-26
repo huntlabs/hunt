@@ -57,7 +57,7 @@ void main()
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
 	// testUnits!(CompletableFutureTest);
-	testUnits!(CompletableFutureTest2);
+	// testUnits!(CompletableFutureTest2);
 	// testUnits!(RealLifeCompletableFutureExample);
 	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
@@ -71,7 +71,7 @@ void main()
 	// // 
 	// // testUnits!(PathMatcherTest); 
 	// testUnits!(StringTokenizerTest);
-	// testUnits!(ThreadTest);
+	testUnits!(ThreadTest);
 
 	// // These tests belown will block the test procession.
 
