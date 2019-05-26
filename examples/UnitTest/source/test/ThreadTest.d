@@ -101,7 +101,6 @@ class ThreadTest {
      See_also:
         https://www.cnblogs.com/dennyzhangdd/p/7010972.html
     */
-    // void futureTask01() {
     @Test    
     void futureTask01() {
         
@@ -118,6 +117,7 @@ class ThreadTest {
         trace("checking done.");
 
         if (count >= 100) {
+        // if (count >= 1) {
             trace("The target reached, so cancel the futureTask");
             futureTask.cancel(true); 
         }
