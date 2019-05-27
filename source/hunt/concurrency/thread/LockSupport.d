@@ -11,6 +11,7 @@
 
 module hunt.concurrency.thread.LockSupport;
 
+import core.atomic;
 import core.thread;
 import core.time;
 
@@ -120,12 +121,66 @@ import hunt.util.DateTime;
  * @since 1.5
  */
 class LockSupport {
+    private static Parker _parker;    
+    private __gshared Parker[Thread] parkers;
+    private shared static bool m_lock;
+
     private this() {} // Cannot be instantiated.
 
-    private static void setBlocker(ThreadEx t, Object arg) {
-        // Even though volatile, hotspot doesn't need a write barrier here.
-        t.parkBlocker = arg;
-        // implementationMissing(false);
+    static Parker getParker() {
+        if(_parker is null) {
+            Thread t = Thread.getThis();
+            ThreadEx tx = cast(ThreadEx)t;
+            if(tx !is null) {
+                return tx.parker();
+            } else {
+                _parker = createParker(t);
+            }
+        }
+        return _parker;
+    }
+
+    static Parker getParker(Thread t) {
+        if(t is Thread.getThis())
+            return getParker();
+        
+        ThreadEx tx = cast(ThreadEx)t;
+        if(tx !is null) {
+            return tx.parker();
+        } else {
+            Parker* itemPtr = t in parkers;
+            if(itemPtr is null) {
+                _parker = createParker(t);
+            }
+
+            return *itemPtr;
+        }
+    }
+
+    private static Parker createParker(Thread t) {
+        version(HUNT_DEBUG) info("creating a new parker for " ~ typeid(t).name);
+        Parker p = Parker.allocate(t);
+
+        while(!cas(&m_lock, false, true)) {
+            // waitting...
+        }
+
+        parkers[t] = p;
+        m_lock = false;
+
+        return p;
+    }
+
+    static void removeParker() {
+        removeParker(Thread.getThis);
+        _parker = null;
+    }
+
+    static void removeParker(Thread t) {
+        while(!cas(&m_lock, false, true)) {
+        }
+        parkers.remove(t);
+        m_lock = false;
     }
 
     /**
@@ -140,9 +195,11 @@ class LockSupport {
      *        this operation has no effect
      */
     static void unpark(Thread thread) {
-        ThreadEx tx = cast(ThreadEx)thread;
-        if (tx !is null) 
-            tx.parker().unpark();
+        getParker(thread).unpark();
+    }
+
+    static void unpark() {
+        getParker().unpark();
     }
 
 
@@ -172,25 +229,11 @@ class LockSupport {
      * for example, the interrupt status of the thread upon return.
      */
     static void park() {
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (tx !is null) {
-            tx.parker().park(false, Duration.zero);
-        } else {
-            warning("The current thread is not ThreadEx!");
-            // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:08:21 AM
-            // upgrade Thread to ThreadEx
-            Thread.sleep(Duration.zero);
-        }
+        getParker().park(Duration.zero);
     }
 
-    static void park(Duration time) {        
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (!time.isNegative && tx !is null) {
-            tx.parker().park(false, time);
-        } else {
-            warning("The current thread is not ThreadEx!");
-            Thread.sleep(time);
-        }
+    static void park(Duration time) {
+        getParker().park(time);
     }
 
     /**
@@ -226,13 +269,13 @@ class LockSupport {
     }
 
     static void park(Object blocker, Duration time) {
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (time >= Duration.zero && tx !is null) {
-            setBlocker(tx, blocker);
-            tx.parker().park(false, time);
-            setBlocker(tx, null);
+        if (time >= Duration.zero) {
+            Parker p = getParker();
+            p.setBlocker(blocker);
+            p.park(time);
+            p.setBlocker(null);
         } else {
-            warning("The current thread is not ThreadEx!");
+            warning("The time must be greater than 0.");
         }
     }
 
@@ -268,12 +311,50 @@ class LockSupport {
      * @param nanos the maximum number of nanoseconds to wait
      * @since 1.6
      */
+    
+    deprecated("Using park(Object, Duration) instead.")
     static void parkNanos(Object blocker, long nanos) {
         if(nanos > 0) {
             park(blocker, dur!(TimeUnit.Nanosecond)(nanos));
         }
     }
 
+    /**
+     * Disables the current thread for thread scheduling purposes, for up to
+     * the specified waiting time, unless the permit is available.
+     *
+     * <p>If the permit is available then it is consumed and the call
+     * returns immediately; otherwise the current thread becomes disabled
+     * for thread scheduling purposes and lies dormant until one of four
+     * things happens:
+     *
+     * <ul>
+     * <li>Some other thread invokes {@link #unpark unpark} with the
+     * current thread as the target; or
+     *
+     * <li>Some other thread {@linkplain Thread#interrupt interrupts}
+     * the current thread; or
+     *
+     * <li>The specified waiting time elapses; or
+     *
+     * <li>The call spuriously (that is, for no reason) returns.
+     * </ul>
+     *
+     * <p>This method does <em>not</em> report which of these caused the
+     * method to return. Callers should re-check the conditions which caused
+     * the thread to park in the first place. Callers may also determine,
+     * for example, the interrupt status of the thread, or the elapsed time
+     * upon return.
+     *
+     * @param nanos the maximum number of nanoseconds to wait
+     */
+    deprecated("Using park(Duration) instead.")
+    static void parkNanos(long nanos) {        
+        if (nanos > 0) {
+            getParker().park(nanos.nsecs);
+        }
+    }
+    
     /**
      * Disables the current thread for thread scheduling purposes, until
      * the specified deadline, unless the permit is available.
@@ -307,49 +388,17 @@ class LockSupport {
      *        to wait until
      * @since 1.6
      */
-    static void parkUntil(Object blocker, long deadline) {
-        
-        ThreadEx t = ThreadEx.currentThread();
-        setBlocker(t, blocker);
-        t.parker.park(true, deadline.msecs);
-        setBlocker(t, null);
+    static void parkUntil(Object blocker, MonoTime deadline) {
+        Parker p = getParker();
+        p.setBlocker(blocker);
+        p.park(deadline);
+        p.setBlocker(null);
     }
-
-    /**
-     * Disables the current thread for thread scheduling purposes, for up to
-     * the specified waiting time, unless the permit is available.
-     *
-     * <p>If the permit is available then it is consumed and the call
-     * returns immediately; otherwise the current thread becomes disabled
-     * for thread scheduling purposes and lies dormant until one of four
-     * things happens:
-     *
-     * <ul>
-     * <li>Some other thread invokes {@link #unpark unpark} with the
-     * current thread as the target; or
-     *
-     * <li>Some other thread {@linkplain Thread#interrupt interrupts}
-     * the current thread; or
-     *
-     * <li>The specified waiting time elapses; or
-     *
-     * <li>The call spuriously (that is, for no reason) returns.
-     * </ul>
-     *
-     * <p>This method does <em>not</em> report which of these caused the
-     * method to return. Callers should re-check the conditions which caused
-     * the thread to park in the first place. Callers may also determine,
-     * for example, the interrupt status of the thread, or the elapsed time
-     * upon return.
-     *
-     * @param nanos the maximum number of nanoseconds to wait
-     */
-    static void parkNanos(long nanos) {        
-        ThreadEx tx = cast(ThreadEx)Thread.getThis();
-        if (nanos > 0 && tx !is null) {
-            tx.parker().park(false, dur!(TimeUnit.Nanosecond)(nanos));
-        }
-    }
+    
+    // deprecated("Using parkUntil(Object, Duration) instead.")
+    // static void parkUntil(Object blocker, long deadline) {
+    //     parkUntil(blocker, deadline.msecs);
+    // }
 
     /**
      * Disables the current thread for thread scheduling purposes, until
@@ -381,10 +430,15 @@ class LockSupport {
      * @param deadline the absolute time, in milliseconds from the Epoch,
      *        to wait until
      */
-    static void parkUntil(long deadline) {
-        ThreadEx t = ThreadEx.currentThread();
-        t.parker.park(true, deadline.msecs);
+    static void parkUntil(MonoTime deadline) {
+        getParker().park(deadline);
     }
+
+    deprecated("Using parkUntil(Duration) instead.")
+    static void parkUntil(long deadline) {
+        parkUntil(MonoTime(deadline));
+    }
+
 
     /**
      * Returns the blocker object supplied to the most recent
@@ -399,11 +453,7 @@ class LockSupport {
      * @since 1.6
      */
     static Object getBlocker(Thread t) {
-         ThreadEx tx = cast(ThreadEx)t;
-        if (tx is null) 
-            throw new NullPointerException();
-        return tx.parkBlocker;
-        
+        return getParker(t).getBlocker();
     }
 
     /**

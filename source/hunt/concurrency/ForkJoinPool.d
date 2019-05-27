@@ -59,6 +59,7 @@ import core.atomic;
 import core.sync.mutex;
 import core.thread;
 import core.time;
+
 import std.algorithm;
 import std.array;
 import std.conv;
@@ -872,7 +873,7 @@ class ForkJoinPool : AbstractExecutorService {
     // Instance fields
 
     long stealCount;            // collects worker nsteals
-    long keepAlive;                // milliseconds before dropping if idle
+    Duration keepAlive;                // milliseconds before dropping if idle
     int indexSeed;                       // next worker index
     int bounds;                    // min, max threads packed as shorts
     int mode;                   // parallelism, runstate, queue mode
@@ -1200,10 +1201,10 @@ class ForkJoinPool : AbstractExecutorService {
                     break;                        // quiescent shutdown
                 } else if (rc <= 0 && pred != 0 && phase == cast(int)c) {
                     long nc = (UC_MASK & (c - TC_UNIT)) | (SP_MASK & pred);
-                    long d = keepAlive + DateTimeHelper.currentTimeMillis();
+                    MonoTime d = MonoTime.currTime + keepAlive; // DateTimeHelper.currentTimeMillis();
                     LockSupport.parkUntil(this, d);
                     if (ctl == c &&               // drop on timeout if all idle
-                        d - DateTimeHelper.currentTimeMillis() <= TIMEOUT_SLOP &&
+                        d - MonoTime.currTime <= TIMEOUT_SLOP.msecs &&
                         AtomicHelper.compareAndSet(this.ctl, c, nc)) {
                         w.phase = QUIET;
                         break;
@@ -1947,7 +1948,7 @@ class ForkJoinPool : AbstractExecutorService {
         this.factory = factory;
         this.ueh = handler;
         this.saturate = saturate;
-        this.keepAlive = ms;
+        this.keepAlive = ms.msecs;
         this.bounds = b;
         this.mode = m;
         this.ctl = c;
@@ -2010,7 +2011,7 @@ class ForkJoinPool : AbstractExecutorService {
         this.factory = fac;
         this.ueh = handler;
         this.saturate = null;
-        this.keepAlive = DEFAULT_KEEPALIVE;
+        this.keepAlive = DEFAULT_KEEPALIVE.msecs;
         this.bounds = b;
         this.mode = parallelism;
         this.ctl = c;
