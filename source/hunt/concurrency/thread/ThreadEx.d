@@ -266,7 +266,7 @@ class ThreadEx : Thread, Runnable {
     /* What will be run. */
     private Runnable target;
 
-    Object parkBlocker;
+    // Object parkBlocker;
     ThreadState state;
     
 
@@ -333,7 +333,7 @@ class ThreadEx : Thread, Runnable {
     ~this() {
         blocker = null;
         blockerLock = null;
-        parkBlocker = null;
+        // parkBlocker = null;
         target = null;
         _parker = null;
     }
@@ -375,7 +375,7 @@ class ThreadEx : Thread, Runnable {
      */
     void run() {
         version(HUNT_DEBUG_CONCURRENCY) {
-            infof("Trying to run a target (%s null)...", target is null ? "is" : "is not");
+            infof("trying to run a target (%s null)...", target is null ? "is" : "is not");
         }
         if (target !is null) {
             target.run();
@@ -483,6 +483,7 @@ class ThreadEx : Thread, Runnable {
 
         // For JSR166. Unpark even if interrupt status already was set
         _parker.unpark();
+        // LockSupport.unpark();
 
         // ParkEvent * ev = thread->_ParkEvent ;
         // if (ev != NULL) ev->unpark() ;
@@ -524,7 +525,11 @@ class ThreadEx : Thread, Runnable {
      * @revised 6.0
      */
     static bool interrupted() {
-        return currentThread().isInterrupted(true);
+        ThreadEx tex = cast(ThreadEx) Thread.getThis();
+        if(tex is null)
+            return false;
+
+        return tex.isInterrupted(true);
     }
 
     /**
@@ -767,6 +772,7 @@ class ThreadEx : Thread, Runnable {
     }
 }
 
+
 /*
  * Per-thread blocking support for JSR166. See the Java-level
  * Documentation for rationale. Basically, park acts like wait, unpark
@@ -788,6 +794,8 @@ class Parker {
 
     enum int REL_INDEX = 0;
     enum int ABS_INDEX = 1;
+
+    private Object parkBlocker;
 
     private shared int _counter;
     private int _nParked;
@@ -813,14 +821,10 @@ class Parker {
     // on the condvar. Contention seen when trying to park implies that someone
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
-    void park(bool isAbsolute, Duration time) {
+    void park(Duration time) {
         version(HUNT_DEBUG_CONCURRENCY) {
-            if(isAbsolute) {
-                Duration du = time - DateTimeHelper.currentTimeMillis().msecs;
-                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, du);
-            } else {
-                tracef("try to park a thread: isAbsolute=%s, in %s", isAbsolute, time);
-            }
+            tracef("try to park a thread: %s",
+                time <= Duration.zero ? "forever" : "in " ~ time.toString());
         }
         // Optional fast-path check:
         // Return immediately if a permit is available.
@@ -834,11 +838,11 @@ class Parker {
         }
 
         // Next, demultiplex/decode time arguments
-        if (time < Duration.zero || (isAbsolute && time == Duration.zero)) { // don't wait at all
+        if (time < Duration.zero) { // don't wait at all
             return;
         }
 
-        ThreadEx thread = ThreadEx.currentThread();
+        ThreadEx thread = cast(ThreadEx) Thread.getThis();
 
         // Enter safepoint region
         // Beware of deadlocks such as 6317397.
@@ -848,7 +852,7 @@ class Parker {
 
         // Don't wait if cannot get lock since interference arises from
         // unparking. Also re-check interrupt before trying wait.
-        if(thread.isInterrupted() || !_mutex.tryLock())
+        if((thread !is null && thread.isInterrupted()) || !_mutex.tryLock())
             return;
 
         if (_counter > 0) { // no wait needed
@@ -873,16 +877,73 @@ class Parker {
             _cond[_cur_index].wait();
         }
         else {
-            if(isAbsolute) {
-                _cur_index = ABS_INDEX;
-                Duration t = time - msecs(DateTimeHelper.currentTimeMillis());
-                if(t > Duration.zero)
-                    _cond[ABS_INDEX].wait(t);
-            } else {
-                _cur_index = REL_INDEX;
-                _cond[REL_INDEX].wait(time);
-            }
+            _cur_index = REL_INDEX;
+            _cond[REL_INDEX].wait(time);
+        }
+        _cur_index = -1;
+    }
 
+    void park(MonoTime time) {
+        version(HUNT_DEBUG_CONCURRENCY) {
+            Duration d = time - MonoTime.currTime;
+            tracef("try to park a thread: in %s",  
+                d <= Duration.zero ? "forever" : "in " ~ d.toString());
+        }
+        // Optional fast-path check:
+        // Return immediately if a permit is available.
+        // We depend on Atomic::xchg() having full barrier semantics
+        // since we are doing a lock-free update to _counter.
+        const int c = _counter;
+        if(c > 0) {
+            atomicStore(_counter, 0);
+            version(HUNT_DEBUG_CONCURRENCY) infof("no need to park, counter=%s", c);
+            return;
+        }
+
+        // Next, demultiplex/decode time arguments
+        if (time <= MonoTime.zero) { // don't wait at all
+            return;
+        }
+
+        ThreadEx thread = cast(ThreadEx) Thread.getThis();
+
+        // Enter safepoint region
+        // Beware of deadlocks such as 6317397.
+        // The per-thread Parker. mutex is a classic leaf-lock.
+        // In particular a thread must never block on the Threads_lock while
+        // holding the Parker.mutex. 
+
+        // Don't wait if cannot get lock since interference arises from
+        // unparking. Also re-check interrupt before trying wait.
+        if((thread !is null && thread.isInterrupted()) || !_mutex.tryLock())
+            return;
+
+        if (_counter > 0) { // no wait needed
+            return;
+        }
+
+        scope(exit) {
+            _counter = 0;
+            _mutex.unlock();
+            // Paranoia to ensure our locked and lock-free paths interact
+            // correctly with each other and Java-level accesses.
+            atomicFence();
+        }
+
+        // OSThreadWaitState osts(thread.osthread(), false  /* not Object.wait() */ );
+        // jt.set_suspend_equivalent();
+        // // cleared by handle_special_suspend_equivalent_condition() or java_suspend_self()
+
+        assert(_cur_index == -1, "invariant");
+        if (time == MonoTime.zero) {
+            _cur_index = REL_INDEX; // arbitrary choice when not timed
+            _cond[_cur_index].wait();
+        }
+        else {
+            _cur_index = ABS_INDEX;
+            Duration t = time - MonoTime.currTime;
+            if(t > Duration.zero)
+                _cond[ABS_INDEX].wait(t);
         }
         _cur_index = -1;
     }
@@ -910,6 +971,14 @@ class Parker {
             // thread is definitely parked
             _cond[index].notify();
         }
+    }
+
+    Object getBlocker() {
+        return parkBlocker;
+    }
+
+    void setBlocker(Object arg) {
+        parkBlocker = arg;
     }
 
     // Lifecycle operators

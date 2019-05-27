@@ -54,6 +54,7 @@ import hunt.util.ObjectUtils;
 
 import hunt.logging.ConsoleLogger;
 
+import core.thread;
 import core.time;
 import std.conv;
 import std.concurrency : initOnce;
@@ -1286,8 +1287,8 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         bool queued = false;
         while (!isDone()) {
             if (q is null) {
-                q = new Signaller(interruptible, 0L, 0L);
-                ForkJoinWorkerThread th = cast(ForkJoinWorkerThread)ThreadEx.currentThread();
+                q = new Signaller(interruptible, Duration.zero, MonoTime.zero);
+                ForkJoinWorkerThread th = cast(ForkJoinWorkerThread)Thread.getThis();
                 if (th !is null)
                     ForkJoinPool.helpAsyncBlocker(defaultExecutor(), q);
             }
@@ -1326,22 +1327,20 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if (timeout <= Duration.zero) 
             throw new TimeoutException();
 
-        long nanos = timeout.total!(TimeUnit.Millisecond)();
-
-        long d = DateTimeHelper.currentTimeMillis + nanos;
-        long deadline = (d == 0L) ? 1L : d; // avoid 0
+        MonoTime d = MonoTime.currTime + timeout;
+        MonoTime deadline = (d == MonoTime.zero) ? MonoTime(1) : d; // avoid 0
         Signaller q = null;
         bool queued = false;
         while (!isDone()) { // similar to untimed
             if (q is null) {
-                q = new Signaller(true, nanos, deadline);
+                q = new Signaller(true, timeout, deadline);
                 ForkJoinWorkerThread th = cast(ForkJoinWorkerThread)ThreadEx.currentThread();
                 if (th !is null)
                     ForkJoinPool.helpAsyncBlocker(defaultExecutor(), q);
             }
             else if (!queued)
                 queued = tryPushStack(q);
-            else if (q.nanos <= 0L)
+            else if (q.remaining <= Duration.zero)
                 break;
             else {
                 try {
@@ -2737,22 +2736,22 @@ final class AsyncRun : ForkJoinTask!(Void), Runnable, AsynchronousCompletionTask
  */
 
 final class Signaller : Completion, ManagedBlocker {
-    long nanos;                    // remaining wait time if timed
-    long deadline;           // non-zero if timed
+    Duration remaining;              // remaining wait time if timed
+    MonoTime deadline;           // non-zero if timed
     bool interruptible;
     bool interrupted;
-    ThreadEx thread;
+    Thread thread;
 
-    this(bool interruptible, long nanos, long deadline) {
-        this.thread = ThreadEx.currentThread();
+    this(bool interruptible, Duration remaining, MonoTime deadline) {
+        this.thread = Thread.getThis();
         this.interruptible = interruptible;
-        this.nanos = nanos;
+        this.remaining = remaining;
         this.deadline = deadline;
     }
 
     final override AbstractCompletableFuture tryFire(int ignore) {
-        ThreadEx w; // no need to atomically claim
-        if ((w = thread) !is null) {
+        Thread w = thread; // no need to atomically claim
+        if (w !is null) {
             thread = null;
             LockSupport.unpark(w);
         }
@@ -2763,17 +2762,18 @@ final class Signaller : Completion, ManagedBlocker {
         if (ThreadEx.interrupted())
             interrupted = true;
         return ((interrupted && interruptible) ||
-                (deadline != 0L &&
-                 (nanos <= 0L ||
-                  (nanos = deadline - DateTimeHelper.currentTimeMillis()) <= 0L)) ||
+                (deadline != MonoTime.zero &&
+                 (remaining <= Duration.zero ||
+                  (remaining = deadline - MonoTime.currTime) <= Duration.zero)) ||
                 thread is null);
     }
+
     bool block() {
         while (!isReleasable()) {
-            if (deadline == 0L)
+            if (deadline == MonoTime.zero)
                 LockSupport.park(this);
             else
-                LockSupport.parkNanos(this, nanos);
+                LockSupport.park(this, remaining);
         }
         return true;
     }
