@@ -507,7 +507,6 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
             ReentrantLock lock = ForkJoinTaskHelper.exceptionTableLock;
             lock.lock();
             try {
-                ForkJoinTaskHelper.expungeStaleExceptions();
                 ExceptionNode[] t = ForkJoinTaskHelper.exceptionTable;
                 size_t i = h & (t.length - 1);
                 for (ExceptionNode e = t[i]; ; e = e.next) {
@@ -569,7 +568,6 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
                 pred = e;
                 e = next;
             }
-            ForkJoinTaskHelper.expungeStaleExceptions();
             status = 0;
         } finally {
             lock.unlock();
@@ -591,16 +589,14 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      * @return the exception, or null if none
      */
     private Throwable getThrowableException() {
-        // int h = System.identityHashCode(this);
         size_t h = this.toHash();
         ExceptionNode e;
         ReentrantLock lock = ForkJoinTaskHelper.exceptionTableLock;
         lock.lock();
         try {
-            ForkJoinTaskHelper.expungeStaleExceptions();
             ExceptionNode[] t = ForkJoinTaskHelper.exceptionTable;
             e = t[h & ($ - 1)];
-            while (e !is null && e.get() != this)
+            while (e !is null && e.get() !is this)
                 e = e.next;
         } finally {
             lock.unlock();
@@ -608,27 +604,6 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
         Throwable ex;
         if (e is null || (ex = e.ex) is null)
             return null;
-            // TODO: Tasks pending completion -@zxp at 12/21/2018, 10:28:06 PM
-            // 
-        // if (e.thrower != Thread.getThis().getId()) {
-        //     try {
-        //         Constructor<?> noArgCtor = null;
-        //         // ctors only
-        //         for (Constructor<?> c : ex.getClass().getConstructors()) {
-        //             Class<?>[] ps = c.getParameterTypes();
-        //             if (ps.length == 0)
-        //                 noArgCtor = c;
-        //             else if (ps.length == 1 && ps[0] == Throwable.class)
-        //                 return (Throwable)c.newInstance(ex);
-        //         }
-        //         if (noArgCtor !is null) {
-        //             Throwable wx = (Throwable)noArgCtor.newInstance();
-        //             wx.initCause(ex);
-        //             return wx;
-        //         }
-        //     } catch (Exception ignore) {
-        //     }
-        // }
         return ex;
     }
 

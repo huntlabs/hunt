@@ -266,21 +266,37 @@ abstract class AbstractCompletableFuture {
  */
 class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionStage!(T) {
 
-    private T result;       // Either the result or boxed AltResult
+static if(is(T == void)) {
 
+    alias ConsumerT = Action;  
+    alias BiConsumerT = Action1!(Throwable);
 
-    /**
-     * Creates a new incomplete CompletableFuture.
-     */
-    this() {
+    alias FunctionT(V) = Func!(V);
+    
+    this(bool completed = false) {
+        if(completed) completeValue!false();
     }
+
+} else {
+
+    alias ConsumerT = Consumer!(T);  
+    alias BiConsumerT = Action2!(T, Throwable);
+    alias FunctionT(V) = Func1!(T, V);
+
+    private T result;       // Either the result or boxed AltResult
 
     /**
      * Creates a new complete CompletableFuture with given encoded result.
      */
     this(T r) {
         completeValue!false(r);
-    }
+    }    
+}
+    /**
+     * Creates a new incomplete CompletableFuture.
+     */
+    this() {
+    }    
 
     this(AltResult r) {
         completeValue!false(r);
@@ -466,6 +482,26 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     // }
 
     /** Completes with a non-exceptional result, unless already completed. */
+
+static if(is(T == void)) {
+    final bool completeValue(bool useCas = true)() {
+        // return AtomicHelper.compareAndSet(this.result, null, (t is null) ? NIL : cast(Object)t);
+        static if(useCas) {
+            if(AtomicHelper.compareAndSet(_isDone, false, true)) {
+                _isNull = false;
+                return true;
+            }
+        }
+        else {
+            if(!_isDone) {
+                _isDone = true;
+                _isNull = false;
+                return true;
+            }
+        }
+        return false;
+    }
+} else {
     final bool completeValue(bool useCas = true)(T t) {
         // return AtomicHelper.compareAndSet(this.result, null, (t is null) ? NIL : cast(Object)t);
         static if(useCas) {
@@ -485,6 +521,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         }
         return false;
     }
+}    
 
     final bool completeValue(bool useCas = true)(AltResult r) {
         static if(useCas) {
@@ -691,7 +728,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return null;
     }
 
-    private CompletableFuture!(V) uniApplyStage(V)(Executor e, Function!(T,V) f) {
+    private CompletableFuture!(V) uniApplyStage(V)(Executor e, FunctionT!(V) f) {
         if (f is null) throw new NullPointerException();
         if (_isDone) {
             return uniApplyNow!(V)(e, f);
@@ -702,7 +739,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 
-    private CompletableFuture!(V) uniApplyNow(V)(Executor e, Function!(T, V) f) {
+    private CompletableFuture!(V) uniApplyNow(V)(Executor e, FunctionT!(V) f) {
 
         CompletableFuture!(V) d = newIncompleteFuture!(V)();
 
@@ -719,7 +756,11 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (e !is null) {
                 e.execute(new UniApply!(T, V)(null, d, this, f));
             } else {
+static if(is(T == void)) {
+                d.completeValue!false(f());
+} else {
                 d.completeValue!false(f(this.result));
+}
             }
         } catch (Throwable ex) {
             d.completeThrowable!false(ex);
@@ -728,19 +769,19 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 
-    private CompletableFuture!(Void) uniAcceptStage(Executor e,
-                                                   Consumer!(T) f) {
+    private CompletableFuture!(void) uniAcceptStage(Executor e,
+                                                   ConsumerT f) {
         if (f is null) throw new NullPointerException();
         if (isDone)
             return uniAcceptNow(e, f);
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         unipush(new UniAccept!(T)(e, d, this, f));
         return d;
     }
 
-    private CompletableFuture!(Void) uniAcceptNow(Executor e, Consumer!(T) f) {
+    private CompletableFuture!(void) uniAcceptNow(Executor e, ConsumerT f) {
         Throwable x;
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         AltResult ar = altResult;
         if (ar !is null) {
             if ((x = ar.ex) !is null) {
@@ -754,8 +795,13 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             if (e !is null) {
                 e.execute(new UniAccept!(T)(null, d, this, f));
             } else {
+
+static if(is(T == void)) {
+                f();
+} else {
                 T t = this.result;
                 f(t);
+} 
                 d.completeValue!false(NIL);
             }
         } catch (Throwable ex) {
@@ -765,18 +811,18 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 
-    private CompletableFuture!(Void) uniRunStage(Executor e, Runnable f) {
+    private CompletableFuture!(void) uniRunStage(Executor e, Runnable f) {
         if (f is null) throw new NullPointerException();
         if (!isDone())
             return uniRunNow(altResult, e, f);
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         unipush(new UniRun!(T)(e, d, this, f));
         return d;
     }
 
-    private CompletableFuture!(Void) uniRunNow(AltResult ar, Executor e, Runnable f) {
+    private CompletableFuture!(void) uniRunNow(AltResult ar, Executor e, Runnable f) {
         Throwable x;
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         if (ar !is null && (x = ar.ex) !is null)
             d.completeValue!false(encodeThrowable(x, ar));
         else
@@ -795,7 +841,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
 
     final bool uniWhenComplete(CompletableFuture!(T) r,
-                                  BiConsumer!(T, Throwable) f,
+                                  BiConsumerT f,
                                   UniWhenComplete!(T) c) {
         Throwable x = null;
         if (!_isDone) {
@@ -805,15 +851,24 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                 AltResult ar = r.altResult;
                 if (ar !is null) {
                     x = ar.ex;
-                    warning("Need check");
+                    warning("Need to check");
+static if(is(T == void)) {
+                    f(x);
+} else {
                     f(T.init, x);
+}                    
                     if (x is null) {
                         completeValue(ar);
                     }
                 } else {
+static if(is(T == void)) {
+                    f(x);
+                    completeValue();
+} else {
                     T t = r.result;
                     f(t, x);
                     completeValue(t);
+}                    
                 }
 
                 if (x is null) {
@@ -832,7 +887,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     private CompletableFuture!(T) uniWhenCompleteStage(
-        Executor e, BiConsumer!(T, Throwable) f) {
+        Executor e, BiConsumerT f) {
         if (f is null) throw new NullPointerException();
         CompletableFuture!(T) d = newIncompleteFuture!(T)();
         Object r;
@@ -901,7 +956,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
  
     final bool uniExceptionally(CompletableFuture!(T) r,
-                                   Function!(Throwable,  T) f,
+                                   Function!(Throwable, T) f,
                                    UniExceptionally!(T) c) {
         Throwable x;
         if (!isDone()) {
@@ -910,10 +965,20 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
                 if (ar !is null && (x = ar.ex) !is null) {
                     if (c !is null && !c.claim())
                         return false;
+static if(is(T == void)) {
+                    f(x);
+                    completeValue();
+
+} else {
                     completeValue(f(x));
+}                        
                 } else {
                     // internalComplete(r);
+static if(is(T == void)) {
+                    completeValue();
+} else {
                     completeValue(r.result);
+}                    
                 }
             } catch (Throwable ex) {
                 completeThrowable(ex);
@@ -932,14 +997,17 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return d;
     }
 
-
-
     private MinimalStage!(T) uniAsMinimalStage() {
         if (isDone()) {
             if(isFaulted())
                 return new MinimalStage!(T)(this.altResult);
-            else 
+            else {
+static if(is(T == void)) {
+                return new MinimalStage!(T)(true);
+} else {
                 return new MinimalStage!(T)(this.result);
+}                
+            }
         }
         MinimalStage!(T) d = new MinimalStage!(T)();
         unipush(new UniRelay!(T,T)(d, this));
@@ -947,7 +1015,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     private CompletableFuture!(V) uniComposeStage(V)(Executor e, 
-                Function!(T, CompletionStage!(V)) f) {
+                FunctionT!(CompletionStage!(V)) f) {
 
         if (f is null) throw new NullPointerException();
         CompletableFuture!(V) d = newIncompleteFuture!(V)();
@@ -1131,7 +1199,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return true;
     }
 
-    private CompletableFuture!(Void) biAcceptStage(U)(Executor e, 
+    private CompletableFuture!(void) biAcceptStage(U)(Executor e, 
                 CompletionStage!(U) o, BiConsumer!(T, U) f) {
             
         if (f is null)
@@ -1141,7 +1209,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if (b is null)
             throw new NullPointerException();
 
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         if (!isDone() || !b.isDone())
             bipush(b, new BiAccept!(T,U)(e, d, this, b, f));
         else if (e is null)
@@ -1180,12 +1248,12 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return true;
     }
 
-    private CompletableFuture!(Void) biRunStage(U)(Executor e, CompletionStage!U o,
+    private CompletableFuture!(void) biRunStage(U)(Executor e, CompletionStage!U o,
                                                Runnable f) {
         CompletableFuture!U b = cast(CompletableFuture!U)o.toCompletableFuture(); 
         if (f is null || b is null)
             throw new NullPointerException();
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         // if ((r = result) is null || (s = b.result) is null)
         if (!isDone() || !b.isDone())
             bipush(b, new BiRun!(T, U)(e, d, this, b, f));
@@ -1223,7 +1291,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
     private CompletableFuture!(V) orApplyStage(U, V)( // U : T,V
-        Executor e, CompletionStage!(U) o, Function!(T, V) f) {
+        Executor e, CompletionStage!(U) o, FunctionT!(V) f) {
 
         CompletableFuture!(U) b = cast(CompletableFuture!(U))o.toCompletableFuture();
         if (f is null || b is null)
@@ -1245,8 +1313,8 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 
-    private CompletableFuture!(Void) orAcceptStage(U)( // U : T
-        Executor e, CompletionStage!(U) o, Consumer!(T) f) {
+    private CompletableFuture!(void) orAcceptStage(U)( // U : T
+        Executor e, CompletionStage!(U) o, ConsumerT f) {
         CompletableFuture!(U) b;
         if (f is null || (b = cast(CompletableFuture!(U))o) is null)
             throw new NullPointerException();
@@ -1255,12 +1323,12 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if ((z = this).isDone() || (z = b).isDone())
             return z.uniAcceptNow(e, f);
 
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         orpush(b, new OrAccept!(T,U)(e, d, this, b, f));
         return d;
     }
 
-    private CompletableFuture!(Void) orRunStage(U)(Executor e, CompletionStage!U o,
+    private CompletableFuture!(void) orRunStage(U)(Executor e, CompletionStage!U o,
                                                Runnable f) {
         AbstractCompletableFuture b;
         if (f is null || (b = o.toCompletableFuture()) is null)
@@ -1270,7 +1338,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if ((z = this).isDone() || (z = b).isDone())
             return z.uniRunNow(e, f);
 
-        CompletableFuture!(Void) d = newIncompleteFuture!(Void)();
+        CompletableFuture!(void) d = newIncompleteFuture!(void)();
         orpush(b, new OrRun(e, d, this, b, f));
         return d;
     }
@@ -1369,6 +1437,36 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
 
     /* ------------- methods -------------- */
 
+static if(is(T == void)) {
+    void get() {
+        if (!isDone()) waitingGet(true); {
+            reportGet(this.altResult);
+        }
+    }
+   
+    void getNow() {
+        if(isDone()) {
+            reportJoin(this.altResult);
+        }
+    }
+
+    bool complete() {
+        bool triggered = completeValue();
+        postComplete();
+        return triggered;
+    }
+    
+    void get(Duration timeout) {
+        if (!isDone()) timedGet(timeout);
+            reportGet(this.altResult);
+    }
+
+    void join() {
+        if (!isDone()) waitingGet(false);
+            reportJoin(this.altResult);
+    }
+
+} else {
 
     /**
      * Waits if necessary for this future to complete, and then
@@ -1402,6 +1500,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         if (!isDone()) timedGet(timeout);
         return reportGet!T(this.result, this.altResult);
     }
+
 
     /**
      * Returns the result value when complete, or throws an
@@ -1437,7 +1536,6 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
             ? valueIfAbsent 
             : reportJoin!T(this.result, this.altResult);
     }
-
     /**
      * If not already completed, sets the value returned by {@link
      * #get()} and related methods to the given value.
@@ -1452,6 +1550,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return triggered;
     }
 
+}
     /**
      * If not already completed, causes invocations of {@link #get()}
      * and related methods to throw the given exception.
@@ -1467,40 +1566,41 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return triggered;
     }
 
-    CompletableFuture!(U) thenApply(U)(Function!(T, U) fn) {
+
+    CompletableFuture!(U) thenApply(U)(FunctionT!(U) fn) {
         return uniApplyStage!(U)(cast(Executor)null, fn);
     }
 
-    CompletableFuture!(U) thenApplyAsync(U)(Function!(T, U) fn) {
+    CompletableFuture!(U) thenApplyAsync(U)(FunctionT!(U) fn) {
         return uniApplyStage!(U)(defaultExecutor(), fn);
     }
 
-    CompletableFuture!(U) thenApplyAsync(U)(Function!(T, U) fn, Executor executor) {
+    CompletableFuture!(U) thenApplyAsync(U)(FunctionT!(U) fn, Executor executor) {
         return uniApplyStage!(U)(screenExecutor(executor), fn);
     }
 
-    CompletableFuture!(Void) thenAccept(Consumer!(T) action) {
+    CompletableFuture!(void) thenAccept(ConsumerT action) {
         return uniAcceptStage(cast(Executor)null, action);
     }
 
-    CompletableFuture!(Void) thenAcceptAsync(Consumer!(T) action) {
+    CompletableFuture!(void) thenAcceptAsync(ConsumerT action) {
         return uniAcceptStage(defaultExecutor(), action);
     }
 
-    CompletableFuture!(Void) thenAcceptAsync(Consumer!(T) action,
+    CompletableFuture!(void) thenAcceptAsync(ConsumerT action,
                                                    Executor executor) {
         return uniAcceptStage(screenExecutor(executor), action);
     }
 
-    CompletableFuture!(Void) thenRun(Runnable action) {
+    CompletableFuture!(void) thenRun(Runnable action) {
         return uniRunStage(null, action);
     }
 
-    CompletableFuture!(Void) thenRunAsync(Runnable action) {
+    CompletableFuture!(void) thenRunAsync(Runnable action) {
         return uniRunStage(defaultExecutor(), action);
     }
 
-    CompletableFuture!(Void) thenRunAsync(Runnable action,
+    CompletableFuture!(void) thenRunAsync(Runnable action,
                                                 Executor executor) {
         return uniRunStage(screenExecutor(executor), action);
     }
@@ -1523,24 +1623,24 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return biApplyStage!(U, V)(screenExecutor(executor), other, fn);
     }
 
-    CompletableFuture!(Void) thenAcceptBoth(U)(CompletionStage!(U) other, 
+    CompletableFuture!(void) thenAcceptBoth(U)(CompletionStage!(U) other, 
         BiConsumer!(T, U) action) {
         return biAcceptStage!(U)(null, other, action);
     }
 
-    CompletableFuture!(Void) thenAcceptBothAsync(U)(
+    CompletableFuture!(void) thenAcceptBothAsync(U)(
         CompletionStage!(U) other,
         BiConsumer!(T, U) action) {
         return biAcceptStage!(U)(defaultExecutor(), other, action);
     }
 
-    CompletableFuture!(Void) thenAcceptBothAsync(U)(
+    CompletableFuture!(void) thenAcceptBothAsync(U)(
         CompletionStage!(U) other,
         BiConsumer!(T, U) action, Executor executor) {
         return biAcceptStage!(U)(screenExecutor(executor), other, action);
     }
 
-    CompletableFuture!(Void) runAfterBoth(U)(CompletionStage!U other,
+    CompletableFuture!(void) runAfterBoth(U)(CompletionStage!U other,
                                                 Action action) {
         return biRunStage(null, other, new class Runnable {
             void run() {
@@ -1549,96 +1649,96 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         } );
     }
 
-    CompletableFuture!(Void) runAfterBoth(U)(CompletionStage!U other,
+    CompletableFuture!(void) runAfterBoth(U)(CompletionStage!U other,
                                                 Runnable action) {
         return biRunStage(null, other, action);
     }
 
-    CompletableFuture!(Void) runAfterBothAsync(U)(CompletionStage!U other,
+    CompletableFuture!(void) runAfterBothAsync(U)(CompletionStage!U other,
                                                      Runnable action) {
         return biRunStage(defaultExecutor(), other, action);
     }
 
-    CompletableFuture!(Void) runAfterBothAsync(U)(CompletionStage!U other,
+    CompletableFuture!(void) runAfterBothAsync(U)(CompletionStage!U other,
                                                      Runnable action,
                                                      Executor executor) {
         return biRunStage(screenExecutor(executor), other, action);
     }
 
     CompletableFuture!(U) applyToEither(U)(
-        CompletionStage!(T) other, Function!(T, U) fn) {
+        CompletionStage!(T) other, FunctionT!(U) fn) {
         return orApplyStage!(T, U)(null, other, fn);
     }
 
     CompletableFuture!(U) applyToEitherAsync(U)(
-        CompletionStage!(T) other, Function!(T, U) fn) {
+        CompletionStage!(T) other, FunctionT!(U) fn) {
         return orApplyStage!(T, U)(defaultExecutor(), other, fn);
     }
 
     CompletableFuture!(U) applyToEitherAsync(U)(
-        CompletionStage!(T) other, Function!(T, U) fn,
+        CompletionStage!(T) other, FunctionT!(U) fn,
         Executor executor) {
         return orApplyStage!(T, U)(screenExecutor(executor), other, fn);
     }
 
-    CompletableFuture!(Void) acceptEither(
-        CompletionStage!(T) other, Consumer!(T) action) {
+    CompletableFuture!(void) acceptEither(
+        CompletionStage!(T) other, ConsumerT action) {
         return orAcceptStage(null, other, action);
     }
 
-    CompletableFuture!(Void) acceptEitherAsync(
-        CompletionStage!(T) other, Consumer!(T) action) {
+    CompletableFuture!(void) acceptEitherAsync(
+        CompletionStage!(T) other, ConsumerT action) {
         return orAcceptStage(defaultExecutor(), other, action);
     }
 
-    CompletableFuture!(Void) acceptEitherAsync(
-        CompletionStage!(T) other, Consumer!(T) action,
+    CompletableFuture!(void) acceptEitherAsync(
+        CompletionStage!(T) other, ConsumerT action,
         Executor executor) {
         return orAcceptStage(screenExecutor(executor), other, action);
     }
 
-    CompletableFuture!(Void) runAfterEither(U)(CompletionStag!U other,
+    CompletableFuture!(void) runAfterEither(U)(CompletionStag!U other,
                                                   Runnable action) {
         return orRunStage(null, other, action);
     }
 
-    CompletableFuture!(Void) runAfterEitherAsync(U)(CompletionStage!U other,
+    CompletableFuture!(void) runAfterEitherAsync(U)(CompletionStage!U other,
                                                        Runnable action) {
         return orRunStage(defaultExecutor(), other, action);
     }
 
-    CompletableFuture!(Void) runAfterEitherAsync(U)(CompletionStage!U other,
+    CompletableFuture!(void) runAfterEitherAsync(U)(CompletionStage!U other,
                                                        Runnable action,
                                                        Executor executor) {
         return orRunStage(screenExecutor(executor), other, action);
     }
 
     CompletableFuture!(U) thenCompose(U)(
-        Function!(T, CompletionStage!(U)) fn) {
+        FunctionT!(CompletionStage!(U)) fn) {
         return uniComposeStage!(U)(null, fn);
     }
 
     CompletableFuture!(U) thenComposeAsync(U)(
-        Function!(T, CompletionStage!(U)) fn) {
+        FunctionT!(CompletionStage!(U)) fn) {
         return uniComposeStage!(U)(defaultExecutor(), fn);
     }
 
     CompletableFuture!(U) thenComposeAsync(U)(
-        Function!(T, CompletionStage!(U)) fn,
+        FunctionT!(CompletionStage!(U)) fn,
         Executor executor) {
         return uniComposeStage!(U)(screenExecutor(executor), fn);
     }
 
-    CompletableFuture!(T) whenComplete(BiConsumer!(T, Throwable) action) {
+    CompletableFuture!(T) whenComplete(BiConsumerT action) {
         return uniWhenCompleteStage(null, action);
     }
 
-    CompletableFuture!(T) whenCompleteAsync(BiConsumer!(T, Throwable) action) {
+    CompletableFuture!(T) whenCompleteAsync(BiConsumerT action) {
         return uniWhenCompleteStage(defaultExecutor(), action);
     }
 
     CompletableFuture!(T) whenCompleteAsync(
-        BiConsumer!(T, Throwable) action, Executor executor) {
+        BiConsumerT action, Executor executor) {
         return uniWhenCompleteStage(screenExecutor(executor), action);
     }
 
@@ -1709,7 +1809,14 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         return cancelled || isCancelled();
     }
 
+static if(is(T == void)) {
+    void obtrudeValue() {
+        _isNull = false;
+        _isDone = true;
+        postComplete();
+    }
 
+} else {
     /**
      * Forcibly sets or resets the value subsequently returned by
      * method {@link #get()} and related methods, whether or not
@@ -1741,6 +1848,8 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
         postComplete();
     }
 
+
+}
     /**
      * Forcibly causes subsequent invocations of method {@link #get()}
      * and related methods to throw the given exception, whether or
@@ -1912,15 +2021,39 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      */
     CompletableFuture!(T) orTimeout(Duration timeout) {
         if (!_isDone) {
-            ScheduledFuture!(Void) f = Delayer.delay(new Timeout(this), timeout);
+            ScheduledFuture!(void) f = Delayer.delay(new Timeout(this), timeout);
+static if(is(T == void)) {
+            whenComplete((Throwable ex) {
+                if (ex is null && f !is null && !f.isDone())
+                    f.cancel(false);
+            });
+
+} else {
             whenComplete((T ignore, Throwable ex) {
                 if (ex is null && f !is null && !f.isDone())
                     f.cancel(false);
             });
+
+}            
         }
         return this;
     }
 
+static if(is(T == void)) {
+    CompletableFuture!(T) completeOnTimeout(Duration timeout) {
+        if (!_isDone) {
+          ScheduledFuture!(void) f = 
+            Delayer.delay(new DelayedCompleter!(T)(this), timeout);
+
+            whenComplete((Throwable ex) {
+                if (ex is null && f !is null && !f.isDone())
+                    f.cancel(false);
+            });            
+        }
+        return this;
+    }
+
+} else {
 
     /**
      * Completes this CompletableFuture with the given value if not
@@ -1936,7 +2069,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
      */
     CompletableFuture!(T) completeOnTimeout(T value, Duration timeout) {
         if (!_isDone) {
-          ScheduledFuture!(Void) f = 
+          ScheduledFuture!(void) f = 
             Delayer.delay(new DelayedCompleter!(T)(this, value), timeout);
 
             whenComplete((T ignore, Throwable ex) {
@@ -1948,6 +2081,7 @@ class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionSt
     }
 
 }
+}
 
 
 
@@ -1958,7 +2092,7 @@ private final class AltResult { // See above
 
 
 
-abstract class Completion : ForkJoinTask!(Void),
+abstract class Completion : ForkJoinTask!(void),
     Runnable, AsynchronousCompletionTask {
     Completion next;      // Treiber stack link
 
@@ -1975,8 +2109,8 @@ abstract class Completion : ForkJoinTask!(Void),
 
     final void run()                { tryFire(ASYNC); }
     final override bool exec()            { tryFire(ASYNC); return false; }
-    final override Void getRawResult()       { return null; }
-    final override void setRawResult(Void v) {}
+    // final override void getRawResult()       { return null; }
+    // final override void setRawResult(void v) {}
 }
 
 
@@ -2037,17 +2171,24 @@ abstract class UniCompletion : Completion, IUniCompletion {
 
 
 final class UniApply(T, V) : UniCompletion {
-    Function!(T,V) fn;
+
+static if(is(T == void)) {
+    alias FunctionT(V) = Func!(V);
+} else {
+    alias FunctionT(V) = Func1!(T, V);
+}
+
+    FunctionT!(V) fn;
     this(Executor executor, CompletableFuture!(V) dep,
              CompletableFuture!(T) src,
-             Function!(T,V) fn) {
+             FunctionT!(V) fn) {
         super(executor, dep, src); this.fn = fn;
     }
 
     final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d = cast(CompletableFuture!(V))dep; 
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
-        Throwable x; Function!(T,V) f = fn;
+        Throwable x; FunctionT!(V) f = fn;
         if (d is null || f is null || a is null || !a.isDone())
             return null;
 
@@ -2064,8 +2205,12 @@ final class UniApply(T, V) : UniCompletion {
                     return null;
                 }
                 else {
+static if(is(T == void)) {
+                    d.completeValue(f());
+} else {
                     T t = a.result;
                     d.completeValue(f(t));
+}
                 }
             } catch (Throwable ex) {
                 d.completeThrowable(ex);
@@ -2079,18 +2224,24 @@ final class UniApply(T, V) : UniCompletion {
 
 
 final class UniAccept(T) : UniCompletion {
-    Consumer!(T) fn;
 
-    this(Executor executor, CompletableFuture!(Void) dep,
-              CompletableFuture!(T) src, Consumer!(T) fn) {
+static if(is(T == void)) {
+    alias ConsumerT = Action;  
+} else {
+    alias ConsumerT = Consumer!(T);
+}    
+    ConsumerT fn;
+
+    this(Executor executor, CompletableFuture!(void) dep,
+              CompletableFuture!(T) src, ConsumerT fn) {
         super(executor, dep, src); this.fn = fn;
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep; 
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep; 
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
         Throwable x; 
-        Consumer!(T) f = fn;
+        ConsumerT f = fn;
         if (d is null || f is null
             || a is null || !a.isDone())
             return null;
@@ -2108,8 +2259,12 @@ final class UniAccept(T) : UniCompletion {
                 if (mode <= 0 && !claim())
                     return null;
                 else {
+static if(is(T == void)) {
+                    f();
+} else {
                     T t = a.result;
                     f(t);
+}                    
                     d.completeNull();
                 }
             } catch (Throwable ex) {
@@ -2125,13 +2280,13 @@ final class UniAccept(T) : UniCompletion {
 final class UniRun(T) : UniCompletion {
     Runnable fn;
 
-    this(Executor executor, CompletableFuture!(Void) dep,
+    this(Executor executor, CompletableFuture!(void) dep,
            CompletableFuture!(T) src, Runnable fn) {
         super(executor, dep, src); this.fn = fn;
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep;
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
         Throwable x; 
         Runnable f = fn;
@@ -2162,17 +2317,28 @@ final class UniRun(T) : UniCompletion {
 
     
 final class UniWhenComplete(T) : UniCompletion {
-    BiConsumer!(T, Throwable) fn;
+static if(is(T == void)) {
+
+    alias ConsumerT = Action;  
+    alias BiConsumerT = Action1!(Throwable);
+
+} else {
+
+    alias ConsumerT = Consumer!(T);  
+    alias BiConsumerT = BiConsumer!(T, Throwable);
+}
+
+    BiConsumerT fn;
     this(Executor executor, CompletableFuture!(T) dep,
                     CompletableFuture!(T) src,
-                    BiConsumer!(T, Throwable) fn) {
+                    BiConsumerT fn) {
         super(executor, dep, src); this.fn = fn;
     }
     
     final override CompletableFuture!(T) tryFire(int mode) {
         CompletableFuture!(T) d = cast(CompletableFuture!(T))dep; 
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
-        BiConsumer!(T, Throwable) f = fn;
+        BiConsumerT f = fn;
 
         if (d is null || f is null
             || a is null || !a.isDone()
@@ -2208,10 +2374,10 @@ final class UniHandle(T, V) : UniCompletion {
 
 
 final class UniExceptionally(T) : UniCompletion {
-    Function!(Throwable,  T) fn;
+    Function!(Throwable, T) fn;
 
     this(CompletableFuture!(T) dep, CompletableFuture!(T) src,
-                     Function!(Throwable,  T) fn) {
+                     Function!(Throwable, T) fn) {
         super(null, dep, src); this.fn = fn;
     }
 
@@ -2245,8 +2411,13 @@ final class UniRelay(U, T : U) : UniCompletion {
         if (!d.isDone()) {
             if(a.isFaulted())
                 d.completeValue(a.altResult);
-            else
+            else {
+static if(is(T == void)) {
+                d.completeValue();
+} else {
                 d.completeValue(a.result);
+}                
+            }
             // d.completeRelay(r);
         }
         src = null; dep = null;
@@ -2256,18 +2427,25 @@ final class UniRelay(U, T : U) : UniCompletion {
 
     
 final class UniCompose(T, V) : UniCompletion {
-    Function!(T, CompletionStage!(V)) fn;
+
+static if(is(T == void)) {
+    alias FunctionT(V) = Func!(V);
+} else {
+    alias FunctionT(V) = Func1!(T, V);
+}
+
+    FunctionT!(CompletionStage!(V)) fn;
 
     this(Executor executor, CompletableFuture!(V) dep,
                CompletableFuture!(T) src,
-               Function!(T, CompletionStage!(V)) fn) {
+               FunctionT!(CompletionStage!(V)) fn) {
         super(executor, dep, src); this.fn = fn;
     }
 
     final override CompletableFuture!(V) tryFire(int mode) {
         CompletableFuture!(V) d = cast(CompletableFuture!(V))dep; 
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
-        Function!(T, CompletionStage!(V)) f = fn;
+        FunctionT!(CompletionStage!(V)) f = fn;
         Throwable x;
 
         if (d is null || f is null
@@ -2378,14 +2556,14 @@ final class BiApply(T, U, V) : BiCompletion {
 final class BiAccept(T, U) : BiCompletion {
     BiConsumer!(T, U) fn;
 
-    this(Executor executor, CompletableFuture!(Void) dep,
+    this(Executor executor, CompletableFuture!(void) dep,
              CompletableFuture!T src, CompletableFuture!U snd,
              BiConsumer!(T, U) fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep;
         CompletableFuture!T a = cast(CompletableFuture!(T))src;
         CompletableFuture!U b = cast(CompletableFuture!(U))snd;
         BiConsumer!(T, U) f = fn;
@@ -2403,14 +2581,14 @@ final class BiAccept(T, U) : BiCompletion {
 final class BiRun(T, U) : BiCompletion {
     Runnable fn;
 
-    this(Executor executor, CompletableFuture!(Void) dep,
+    this(Executor executor, CompletableFuture!(void) dep,
           CompletableFuture!(T) src, CompletableFuture!(U) snd,
           Runnable fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep;
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
         CompletableFuture!(U) b = cast(CompletableFuture!(U))snd;
         Runnable f = fn;
@@ -2427,13 +2605,13 @@ final class BiRun(T, U) : BiCompletion {
 
     
 final class BiRelay : BiCompletion { // for And
-    this(CompletableFuture!(Void) dep,
+    this(CompletableFuture!(void) dep,
             AbstractCompletableFuture src, AbstractCompletableFuture snd) {
         super(null, dep, src, snd);
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep;
         AbstractCompletableFuture a;
         AbstractCompletableFuture b;
         Throwable x;
@@ -2460,11 +2638,18 @@ final class BiRelay : BiCompletion { // for And
 
     
 final class OrApply(T, U : T, V) : BiCompletion {
-    Function!(T,V) fn;
+
+static if(is(T == void)) {
+    alias FunctionT(V) = Func!(V);
+} else {
+    alias FunctionT(V) = Func1!(T, V);
+}
+
+    FunctionT!(V) fn;
 
     this(Executor executor, CompletableFuture!(V) dep,
             CompletableFuture!(T) src, CompletableFuture!(U) snd,
-            Function!(T,V) fn) {
+            FunctionT!(V) fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
 
@@ -2473,7 +2658,7 @@ final class OrApply(T, U : T, V) : BiCompletion {
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
         CompletableFuture!(U) b = cast(CompletableFuture!(U))snd;
         Throwable x; 
-        Function!(T,V) f = fn;
+        FunctionT!(V) f = fn;
         
         if (d is null || f is null || a is null || b is null
             || (!a.isDone() && !b.isDone()))
@@ -2514,24 +2699,43 @@ final class OrApply(T, U : T, V) : BiCompletion {
 
 
 final class OrAccept(T, U : T) : BiCompletion {
-    Consumer!(T) fn;
-    this(Executor executor, CompletableFuture!(Void) dep,
+static if(is(T == void)) {
+
+    alias ConsumerT = Action;  
+
+} else {
+
+    alias ConsumerT = Consumer!(T);
+}
+
+    ConsumerT fn;
+    this(Executor executor, CompletableFuture!(void) dep,
              CompletableFuture!(T) src, CompletableFuture!(U) snd,
-             Consumer!(T) fn) {
+             ConsumerT fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep;
         CompletableFuture!(T) a = cast(CompletableFuture!(T))src;
         CompletableFuture!(U) b = cast(CompletableFuture!(U))snd;
         Object r; Throwable x; 
-        Consumer!(T) f = fn;
+        ConsumerT f = fn;
 
         if (d is null || f is null || a is null || b is null
             || (!a.isDone() && !b.isDone()))
             return null;
 
+static if(is(T == void)) {
+        AltResult ar;
+        if(a.isDone()) {
+            ar = a.altResult;
+        } else if(b.isDone()) {
+            ar = b.altResult;
+        } else {
+            warning("unhandled status");
+        }
+} else {
         T t;
         AltResult ar;
         if(a.isDone()) {
@@ -2543,6 +2747,8 @@ final class OrAccept(T, U : T) : BiCompletion {
         } else {
             warning("unhandled status");
         }
+}
+
 
         tryComplete: if (!d.isDone()) {
             try {
@@ -2556,8 +2762,11 @@ final class OrAccept(T, U : T) : BiCompletion {
                     }
                     r = null;
                 }
-
+static if(is(T == void)) {
+                f();
+} else {
                 f(t);
+}
                 d.completeNull();
             } catch (Throwable ex) {
                 d.completeThrowable(ex);
@@ -2572,14 +2781,14 @@ final class OrAccept(T, U : T) : BiCompletion {
 final class OrRun : BiCompletion {
     Runnable fn;
 
-    this(Executor executor, CompletableFuture!(Void) dep,
+    this(Executor executor, CompletableFuture!(void) dep,
           AbstractCompletableFuture src, AbstractCompletableFuture snd,
           Runnable fn) {
         super(executor, dep, src, snd); this.fn = fn;
     }
 
-    final override CompletableFuture!(Void) tryFire(int mode) {
-        CompletableFuture!(Void) d = cast(CompletableFuture!(Void))dep;
+    final override CompletableFuture!(void) tryFire(int mode) {
+        CompletableFuture!(void) d = cast(CompletableFuture!(void))dep;
         AbstractCompletableFuture a;
         AbstractCompletableFuture b;
         Throwable x; Runnable f = fn;
@@ -2665,7 +2874,7 @@ static class AnyOf(T) : Completion {
 /* ------------- Zero-input Async forms -------------- */
 
 
-final class AsyncSupply(T) : ForkJoinTask!(Void), Runnable, 
+final class AsyncSupply(T) : ForkJoinTask!(void), Runnable, 
             AsynchronousCompletionTask {
         
     CompletableFuture!(T) dep; 
@@ -2675,8 +2884,8 @@ final class AsyncSupply(T) : ForkJoinTask!(Void), Runnable,
         this.dep = dep; this.fn = fn;
     }
 
-    final override Void getRawResult() { return null; }
-    final override void setRawResult(Void v) {}
+    // final override void getRawResult() { return null; }
+    // final override void setRawResult(void v) {}
     final override bool exec() { run(); return false; }
 
     void run() {
@@ -2685,7 +2894,12 @@ final class AsyncSupply(T) : ForkJoinTask!(Void), Runnable,
             dep = null; fn = null;
             if (!d._isDone) {
                 try {
+static if(is(T == void)) {
+                    f();
+                    d.completeValue();
+} else {
                     d.completeValue(f());
+}                    
                 } catch (Throwable ex) {
                     d.completeThrowable(ex);
                 }
@@ -2697,22 +2911,22 @@ final class AsyncSupply(T) : ForkJoinTask!(Void), Runnable,
 
 
    
-final class AsyncRun : ForkJoinTask!(Void), Runnable, AsynchronousCompletionTask {
-    CompletableFuture!(Void) dep; Action fn;
+final class AsyncRun : ForkJoinTask!(void), Runnable, AsynchronousCompletionTask {
+    CompletableFuture!(void) dep; Action fn;
     
-    this(CompletableFuture!(Void) dep, Action fn) {
+    this(CompletableFuture!(void) dep, Action fn) {
         this.dep = dep; this.fn = fn;
     }
 
-    final override Void getRawResult() { return null; }
-    final override void setRawResult(Void v) {}
+    // final override void getRawResult() { return null; }
+    // final override void setRawResult(void v) {}
     final override bool exec() { run(); return false; }
 
     void run() {
-        CompletableFuture!(Void) d; Action f;
+        CompletableFuture!(void) d; Action f;
         if ((d = dep) !is null && (f = fn) !is null) {
             dep = null; fn = null;
-            if (!d._isDone) {
+            if (!d.isDone) {
                 try {
                     f();
                     d.completeNull();
@@ -2788,7 +3002,7 @@ final class Signaller : Completion, ManagedBlocker {
 
 
 final class Delayer {
-    static ScheduledFuture!(Void) delay(Runnable command, Duration delay) {
+    static ScheduledFuture!(void) delay(Runnable command, Duration delay) {
         return delayer.schedule(command, delay);
     }
 
@@ -2847,7 +3061,7 @@ final class Timeout : Runnable {
 }
 
 /** Action to complete on timeout */
-final class DelayedCompleter(U) : Runnable {
+final class DelayedCompleter(U) : Runnable if(!is(U == void)) {
     CompletableFuture!(U) f;
     U u;
 
@@ -2860,6 +3074,17 @@ final class DelayedCompleter(U) : Runnable {
     }
 }
 
+final class DelayedCompleter(U) : Runnable if(is(U == void)) {
+    CompletableFuture!(U) f;
+
+    this(CompletableFuture!(U) f) { this.f = f; }
+
+    void run() {
+        if (f !is null) {
+            f.complete();
+        }
+    }
+}
 
 
 /**
@@ -2867,7 +3092,6 @@ final class DelayedCompleter(U) : Runnable {
  */
 final class MinimalStage(T) : CompletableFuture!(T) {
     this() { }
-    this(T r) { super(r); }
     this(AltResult r) { super(r); }
 
     override CompletableFuture!(U) newIncompleteFuture(U)() {
@@ -2876,17 +3100,11 @@ final class MinimalStage(T) : CompletableFuture!(T) {
         throw new UnsupportedOperationException(); }
     override T get(Duration timeout) {
         throw new UnsupportedOperationException(); }
-    override T getNow(T valueIfAbsent) {
-        throw new UnsupportedOperationException(); }
     override T join() {
-        throw new UnsupportedOperationException(); }
-    override bool complete(T value) {
         throw new UnsupportedOperationException(); }
     override bool completeExceptionally(Throwable ex) {
         throw new UnsupportedOperationException(); }
     override bool cancel(bool mayInterruptIfRunning) {
-        throw new UnsupportedOperationException(); }
-    override void obtrudeValue(T value) {
         throw new UnsupportedOperationException(); }
     override void obtrudeException(Throwable ex) {
         throw new UnsupportedOperationException(); }
@@ -2907,22 +3125,56 @@ final class MinimalStage(T) : CompletableFuture!(T) {
     override CompletableFuture!(T) orTimeout
         (Duration timeout) {
         throw new UnsupportedOperationException(); }
-    override CompletableFuture!(T) completeOnTimeout
-        (T value, Duration timeout) {
-        throw new UnsupportedOperationException(); }
 
     override CompletableFuture!(T) toCompletableFuture() {
         if (isDone()) {
             if(isFaulted())
                 return new CompletableFuture!(T)(this.altResult);
-            else
+            else {
+static if(is(T == void)) {
+                return new CompletableFuture!(T)(true);
+} else {
                 return new CompletableFuture!(T)(this.result);
+}
+            }
         } else {
             CompletableFuture!(T) d = new CompletableFuture!T();
             unipush(new UniRelay!(T,T)(d, this));
             return d;
         }
     }
+
+static if(is(T == void)) {
+
+    this(bool r) { super(r); }
+
+    override T getNow() {
+        throw new UnsupportedOperationException(); }
+    override bool complete() {
+        throw new UnsupportedOperationException(); }
+
+    override void obtrudeValue() {
+        throw new UnsupportedOperationException(); }
+
+    override CompletableFuture!(T) completeOnTimeout(Duration timeout) {
+        throw new UnsupportedOperationException(); }
+
+} else {
+
+    this(T r) { super(r); }
+
+    override T getNow(T valueIfAbsent) {
+        throw new UnsupportedOperationException(); }
+    override bool complete(T value) {
+        throw new UnsupportedOperationException(); }
+
+    override void obtrudeValue(T value) {
+        throw new UnsupportedOperationException(); }
+
+    override CompletableFuture!(T) completeOnTimeout(T value, Duration timeout) {
+        throw new UnsupportedOperationException(); }
+}
+
 }
 
 
@@ -2977,14 +3229,14 @@ CompletableFuture!(U) supplyAsync(U)(Supplier!(U) supplier, Executor executor) {
  * returned CompletableFuture
  * @return the new CompletableFuture
  */
-CompletableFuture!(Void) runAsync(Runnable runnable) {
+CompletableFuture!(void) runAsync(Runnable runnable) {
     if(runnable is null) 
         throw new NullPointerException();
     return asyncRunStage(ASYNC_POOL, { runnable.run(); });
 }
 
 
-CompletableFuture!(Void) runAsync(Action act) {
+CompletableFuture!(void) runAsync(Action act) {
     if(act is null) 
         throw new NullPointerException();
     return asyncRunStage(ASYNC_POOL, act);
@@ -3000,7 +3252,7 @@ CompletableFuture!(Void) runAsync(Action act) {
  * @param executor the executor to use for asynchronous execution
  * @return the new CompletableFuture
  */
-CompletableFuture!(Void) runAsync(Runnable runnable, Executor executor) {
+CompletableFuture!(void) runAsync(Runnable runnable, Executor executor) {
     if(runnable is null) 
         throw new NullPointerException();
     return asyncRunStage(screenExecutor(executor), { runnable.run(); });
@@ -3036,9 +3288,9 @@ CompletableFuture!(U) asyncSupplyStage(U)(Executor e,
 }
 
 
-CompletableFuture!(Void) asyncRunStage(Executor e, Action f) {
+CompletableFuture!(void) asyncRunStage(Executor e, Action f) {
     if (f is null) throw new NullPointerException();
-    CompletableFuture!(Void) d = new CompletableFuture!(Void)();
+    CompletableFuture!(void) d = new CompletableFuture!(void)();
     e.execute(new AsyncRun(d, f));
     return d;
 }
@@ -3148,7 +3400,7 @@ CompletionStage!(U) failedStage(U)(Throwable ex) {
  * @throws NullPointerException if the array or any of its elements are
  * {@code null}
  */
-CompletableFuture!(Void) allOf(T)(CompletableFuture!T[] cfs...) {
+CompletableFuture!(void) allOf(T)(CompletableFuture!T[] cfs...) {
     return andTree!(T)(cfs, 0, cast(int)cfs.length - 1);
 }
 
@@ -3201,9 +3453,9 @@ static CompletableFuture!(U) anyOf(U)(CompletableFuture!(U)[] cfs...) {
 
 
 /** Recursively constructs a tree of completions. */
-private CompletableFuture!(Void) andTree(T)(CompletableFuture!T[] cfs,
+private CompletableFuture!(void) andTree(T)(CompletableFuture!T[] cfs,
                                        int lo, int hi) {
-    CompletableFuture!(Void) d = new CompletableFuture!(Void)();
+    CompletableFuture!(void) d = new CompletableFuture!(void)();
     if (lo > hi) // empty
         d.completeNull!false();
     else {
@@ -3271,8 +3523,13 @@ private CompletableFuture!(U) uniCopyStage(U, T : U)(CompletableFuture!(T) src) 
     if (src._isDone) {
         if(src.isFaulted())
             d.completeValue!false(src.altResult);
-        else
+        else {
+static if(is(T == void)) {
+            d.completeValue!false();
+} else {
             d.completeValue!false(src.result);
+}            
+        }
     }
     else
         src.unipush(new UniRelay!(U, T)(d, src));
@@ -3295,11 +3552,10 @@ private AltResult encodeRelay(AltResult ar) {
     return ar;
 }
 
-
 /**
  * Reports result using Future.get conventions.
  */
-private V reportGet(V)(V r, AltResult ar) {
+private V reportGet(V)(V r, AltResult ar) if(!is(V == void)) {
     if (ar is null) // by convention below, null means interrupted
         throw new InterruptedException();
 
@@ -3320,6 +3576,28 @@ private V reportGet(V)(V r, AltResult ar) {
     }
     return r;
 }
+
+private void reportGet(AltResult ar) {
+    if (ar is null) // by convention below, null means interrupted
+        throw new InterruptedException();
+
+    if (ar !is null) {
+        Throwable x, cause;
+        if ((x = ar.ex) is null){
+            warning("to check");
+            return;
+        }
+        CancellationException cex = cast(CancellationException)x;
+        if (cex !is null)
+            throw cex;
+        CompletionException cex2 = cast(CompletionException)x;
+        if (cex2 !is null &&
+            (cause = x.next) !is null)
+            x = cause;
+        throw new ExecutionException(x);
+    }
+}
+
 
 /**
  * Decodes outcome to return result or throw unchecked exception.
@@ -3347,7 +3625,8 @@ private void reportJoin(AltResult ar) {
     if (ar !is null) {
         Throwable x;
         if ((x = ar.ex) is null) {
-            warning("to check");
+            warning("need to check");
+            return;
         }
         CancellationException cex = cast(CancellationException)x;
         if (cex !is null)

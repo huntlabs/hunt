@@ -43,3 +43,5 @@ class AbstractObject : IObject {
         return super.toHash();
     }
 }
+
+alias Void = Object;

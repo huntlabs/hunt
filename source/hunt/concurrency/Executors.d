@@ -514,7 +514,7 @@ class Executors {
      *         scheduled for execution
      * @throws NullPointerException if the task is null
      */
-    static Future!(Void) submit(ExecutorService es, Runnable task) {
+    static Future!(void) submit(ExecutorService es, Runnable task) {
 
         AbstractExecutorService aes = cast(AbstractExecutorService)es;
         if(aes is null) 
@@ -914,7 +914,7 @@ private class DelegatedExecutorService(U) : ExecutorService
         } finally { reachabilityFence(this); }
     }
 
-    Future!Void submit(Runnable task) {
+    Future!void submit(Runnable task) {
         try {
             return e.submit(task);
         } finally { reachabilityFence(this); }
@@ -983,7 +983,7 @@ private class DelegatedScheduledExecutorService(T) : DelegatedExecutorService!T,
         e = executor;
     }
 
-    ScheduledFuture!Void schedule(Runnable command, Duration delay) {
+    ScheduledFuture!void schedule(Runnable command, Duration delay) {
         return e.schedule(command, delay);
     }
 
@@ -991,11 +991,11 @@ private class DelegatedScheduledExecutorService(T) : DelegatedExecutorService!T,
         return e.schedule!V(callable, delay);
     }
 
-    ScheduledFuture!Void scheduleAtFixedRate(Runnable command, Duration initialDelay, Duration period) {
+    ScheduledFuture!void scheduleAtFixedRate(Runnable command, Duration initialDelay, Duration period) {
         return e.scheduleAtFixedRate(command, initialDelay, period);
     }
 
-    ScheduledFuture!Void scheduleWithFixedDelay(Runnable command, Duration initialDelay, Duration delay) {
+    ScheduledFuture!void scheduleWithFixedDelay(Runnable command, Duration initialDelay, Duration delay) {
         return e.scheduleWithFixedDelay(command, initialDelay, delay);
     }
 }
