@@ -86,7 +86,7 @@ interface ScheduledExecutorService : ExecutorService {
      *         scheduled for execution
      * @throws NullPointerException if command or unit is null
      */
-    ScheduledFuture!Void schedule(Runnable command, Duration delay);
+    ScheduledFuture!void schedule(Runnable command, Duration delay);
 
     // /**
     //  * Submits a value-returning one-shot task that becomes enabled
@@ -142,7 +142,7 @@ interface ScheduledExecutorService : ExecutorService {
      * @throws NullPointerException if command or unit is null
      * @throws IllegalArgumentException if period less than or equal to zero
      */
-    ScheduledFuture!Void scheduleAtFixedRate(Runnable command,
+    ScheduledFuture!void scheduleAtFixedRate(Runnable command,
                                                   Duration initialDelay,
                                                   Duration period);
 
@@ -181,7 +181,7 @@ interface ScheduledExecutorService : ExecutorService {
      * @throws NullPointerException if command or unit is null
      * @throws IllegalArgumentException if delay less than or equal to zero
      */
-    ScheduledFuture!Void scheduleWithFixedDelay(Runnable command,
+    ScheduledFuture!void scheduleWithFixedDelay(Runnable command,
                                                      Duration initialDelay,
                                                      Duration delay);
 

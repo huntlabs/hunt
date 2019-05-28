@@ -27,7 +27,6 @@ import hunt.util.DateTime;
 
 import std.datetime;
 
-alias Void = Object;
 
 /**
  * Provides default implementations of {@link ExecutorService}
@@ -76,8 +75,12 @@ abstract class AbstractExecutorService : ExecutorService {
      * the underlying task
      * @since 1.6
      */
-    static RunnableFuture!(T) newTaskFor(T)(Runnable runnable, T value) {
+    static RunnableFuture!(T) newTaskFor(T)(Runnable runnable, T value) if(!is(T == void)) {
         return new FutureTask!(T)(runnable, value);
+    }
+
+    static RunnableFuture!(T) newTaskFor(T)(Runnable runnable) if(is(T == void)) {
+        return new FutureTask!(T)(runnable);
     }
 
     /**
@@ -99,10 +102,10 @@ abstract class AbstractExecutorService : ExecutorService {
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    Future!(Void) submit(Runnable task) {
+    Future!(void) submit(Runnable task) {
         if (task is null) throw new NullPointerException();
-        // RunnableFuture!(Void) ftask = new FutureTask!(Void)(task);
-        RunnableFuture!(Void) ftask = newTaskFor!(Void)(task, cast(Void)null);
+        // RunnableFuture!(void) ftask = new FutureTask!(void)(task);
+        RunnableFuture!(void) ftask = newTaskFor!(void)(task);
         execute(ftask);
         return ftask;
     }

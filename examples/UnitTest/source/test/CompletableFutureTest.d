@@ -63,7 +63,7 @@ class CompletableFutureTest {
 
     // @Test
     // void runAsyncExample() {
-    //     CompletableFuture!Void cf = runAsync(() {
+    //     CompletableFuture!void cf = runAsync(() {
     //         info("running...");
     //         assertTrue(Thread.getThis().isDaemon());
     //         randomSleep();
@@ -139,7 +139,7 @@ class CompletableFutureTest {
     // void thenAcceptAsyncExample() {
     //     void doTest() {
     //         StringBuilder result = new StringBuilder();
-    //         CompletableFuture!Void cf = completedFuture(new String("thenAcceptAsync message"))
+    //         CompletableFuture!void cf = completedFuture(new String("thenAcceptAsync message"))
     //                 .thenAcceptAsync( (s) { 
     //                     trace(s.value);
     //                     result.append(s.value); 
@@ -214,7 +214,7 @@ class CompletableFutureTest {
     // void acceptEitherExample() {
     //     String original = new String("Message");
     //     StringBuilder result = new StringBuilder();
-    //     CompletableFuture!Void cf = completedFuture(original)
+    //     CompletableFuture!void cf = completedFuture(original)
     //             .thenApplyAsync!(String)(s => delayedUpperCase(s))
     //             .acceptEither(
     //                 completedFuture(original).thenApplyAsync!(String)( (s) { 
@@ -410,7 +410,7 @@ class CompletableFutureTest {
     //                 });
     //             }).array;
 
-    //     CompletableFuture!Void allOf = allOf!(String)(futures).whenComplete((res, th) {
+    //     CompletableFuture!void allOf = allOf!(String)(futures).whenComplete((res, th) {
     //         if(th is null) {
     //             foreach(CompletableFuture!(String) cf; futures) {
     //                 String v = cf.getNow(null);
@@ -521,9 +521,9 @@ class RealLifeCompletableFutureExample {
                     });
                 }).array;
 
-            CompletableFuture!Void done = allOf!(Car)(updatedCars);
+            CompletableFuture!void done = allOf!(Car)(updatedCars);
 
-            return done.thenApply!(List!Car)((v) {
+            return done.thenApply!(List!Car)(() {
 
                     List!Car carList = new ArrayList!Car();
                     Car[] cs = updatedCars.map!((f) { 
