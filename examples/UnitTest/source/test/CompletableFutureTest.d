@@ -54,59 +54,59 @@ class CompletableFutureTest {
 
 
 
-    // @Test
-    // void completedFutureExample() {
-    //     CompletableFuture!String cf = completedFuture(new String("message"));
-    //     assertTrue(cf.isDone());
-    //     assertEquals(new String("message"), cf.getNow(null));
-    // }
+    @Test
+    void completedFutureExample() {
+        CompletableFuture!String cf = completedFuture(new String("message"));
+        assertTrue(cf.isDone());
+        assertEquals(new String("message"), cf.getNow(null));
+    }
 
-    // @Test
-    // void runAsyncExample() {
-    //     CompletableFuture!void cf = runAsync(() {
-    //         info("running...");
-    //         assertTrue(Thread.getThis().isDaemon());
-    //         randomSleep();
-    //     });
-    //     assertFalse(cf.isDone());
-    //     sleepEnough();
-    //     assertTrue(cf.isDone());
-    // }
+    @Test
+    void runAsyncExample() {
+        CompletableFuture!void cf = runAsync(() {
+            info("running...");
+            assertTrue(Thread.getThis().isDaemon());
+            randomSleep();
+        });
+        assertFalse(cf.isDone());
+        sleepEnough();
+        assertTrue(cf.isDone());
+    }
 
-    // @Test
-    // void thenApplyExample() {
-    //     CompletableFuture!String cf = completedFuture(new String("message"))
-    //         .thenApply!(String)( delegate String (String s) {
-    //             // assertFalse(Thread.getThis().isDaemon());
-    //             trace(s.toString());
-    //             return s.toUpperCase();
-    //         });
-    //     String value = cf.getNow(null);
-    //     trace(value.toString());
-    //     assertEquals(new String("MESSAGE"), value);
-    // }
+    @Test
+    void thenApplyExample() {
+        CompletableFuture!String cf = completedFuture(new String("message"))
+            .thenApply!(String)( delegate String (String s) {
+                // assertFalse(Thread.getThis().isDaemon());
+                trace(s.toString());
+                return s.toUpperCase();
+            });
+        String value = cf.getNow(null);
+        trace(value.toString());
+        assertEquals(new String("MESSAGE"), value);
+    }
 
-    // @Test
-    // void thenApplyAsyncExample() {
-    //     void doTest() {
-    //         CompletableFuture!String cf = completedFuture(new String("message"))
-    //             .thenApplyAsync!(String)(delegate String (String s) {
-    //                 assertTrue(Thread.getThis().isDaemon());
-    //                 randomSleep();
-    //                 return s.toUpperCase();
-    //             });
-    //         assertNull(cf.getNow(null));
-    //         assertEquals(new String("MESSAGE"), cf.join());
-    //     }
+    @Test
+    void thenApplyAsyncExample() {
+        // void doTest() {
+            CompletableFuture!String cf = completedFuture(new String("message"))
+                .thenApplyAsync!(String)(delegate String (String s) {
+                    assertTrue(Thread.getThis().isDaemon());
+                    randomSleep();
+                    return s.toUpperCase();
+                });
+            assertNull(cf.getNow(null));
+            assertEquals(new String("MESSAGE"), cf.join());
+        // }
 
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        // ThreadEx thread = new ThreadEx(&doTest);
+        // thread.start();
+    }
 
     // @Test
     // void thenApplyAsyncWithExecutorExample() {
-        // initilizeExecutor();
-    //     void doTest() {
+    //     initilizeExecutor();
+    //     // void doTest() {
     //         CompletableFuture!String cf = completedFuture(new String("message"))
     //             .thenApplyAsync!(String)(delegate String (String s) {
     //                 assertTrue(ThreadEx.currentThread().name().startsWith("custom-executor-"));
@@ -117,65 +117,65 @@ class CompletableFutureTest {
     //             }, executor);
     //         assertNull(cf.getNow(null));
     //         assertEquals(new String("MESSAGE"), cf.join());
-    //     }
+    //     // }
 
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
+    //     // ThreadEx thread = new ThreadEx(&doTest);
+    //     // thread.start();
     // }
 
-    // @Test
-    // void thenAcceptExample() {
-    //     StringBuilder result = new StringBuilder();
-    //     completedFuture(new String("thenAccept message"))
-    //             .thenAccept( (s) { 
-    //                 trace(s.value);
-    //                 result.append(s.value); 
-    //             });
-    //     assertTrue("Result was empty", result.length() > 0);
-    // }
+    @Test
+    void thenAcceptExample() {
+        StringBuilder result = new StringBuilder();
+        completedFuture(new String("thenAccept message"))
+                .thenAccept( (s) { 
+                    trace(s.value);
+                    result.append(s.value); 
+                });
+        assertTrue("Result was empty", result.length() > 0);
+    }
 
 
-    // @Test
-    // void thenAcceptAsyncExample() {
-    //     void doTest() {
-    //         StringBuilder result = new StringBuilder();
-    //         CompletableFuture!void cf = completedFuture(new String("thenAcceptAsync message"))
-    //                 .thenAcceptAsync( (s) { 
-    //                     trace(s.value);
-    //                     result.append(s.value); 
-    //                 });
-    //         cf.join();
-    //         assertTrue("Result was empty", result.length() > 0);
-    //     }
+    @Test
+    void thenAcceptAsyncExample() {
+        void doTest() {
+            StringBuilder result = new StringBuilder();
+            CompletableFuture!void cf = completedFuture(new String("thenAcceptAsync message"))
+                    .thenAcceptAsync( (s) { 
+                        trace(s.value);
+                        result.append(s.value); 
+                    });
+            cf.join();
+            assertTrue("Result was empty", result.length() > 0);
+        }
 
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
+    }
 
-    // @Test
-    // void completeExceptionallyExample() {
-    //     CompletableFuture!String cf = completedFuture(new String("message"))
-    //         .thenApplyAsync!(String)(delegate String (String s) { 
-    //                 trace(s.value);
-    //                 return s.toUpperCase();
-    //             },
-    //             delayedExecutor(1.seconds));
-    //     CompletableFuture!String exceptionHandler = cf.handle!(String)(delegate String (String s, Throwable th) { 
-    //             return (th !is null) ? new String("message upon cancel") : new String(""); 
-    //         });
+    @Test
+    void completeExceptionallyExample() {
+        CompletableFuture!String cf = completedFuture(new String("message"))
+            .thenApplyAsync!(String)(delegate String (String s) { 
+                    trace(s.value);
+                    return s.toUpperCase();
+                },
+                delayedExecutor(1.seconds));
+        CompletableFuture!String exceptionHandler = cf.handle!(String)(delegate String (String s, Throwable th) { 
+                return (th !is null) ? new String("message upon cancel") : new String(""); 
+            });
 
-    //     cf.completeExceptionally(new RuntimeException("completed exceptionally"));
+        cf.completeExceptionally(new RuntimeException("completed exceptionally"));
 
-    //     assertTrue("Was not completed exceptionally", cf.isCompletedExceptionally());
-    //     try {
-    //         cf.join();
-    //         fail("Should have thrown an exception");
-    //     } catch (CompletionException ex) { // just for testing
-    //         assertEquals("completed exceptionally", ex.next().msg);
-    //     }
+        assertTrue("Was not completed exceptionally", cf.isCompletedExceptionally());
+        try {
+            cf.join();
+            fail("Should have thrown an exception");
+        } catch (CompletionException ex) { // just for testing
+            assertEquals("completed exceptionally", ex.next().msg);
+        }
 
-    //     assertEquals("message upon cancel", exceptionHandler.join().value);
-    // }
+        assertEquals("message upon cancel", exceptionHandler.join().value);
+    }
 
     @Test
     void cancelExample() {
@@ -191,245 +191,245 @@ class CompletableFutureTest {
         assertEquals("canceled message", cf2.join().value);
     }
 
-    // @Test
-    // void applyToEitherExample() {
-    //     void doTest() {
-    //         String original = new String("Message");
-    //         CompletableFuture!String cf1 = completedFuture(original)
-    //                 .thenApplyAsync!(String)(s => delayedUpperCase(s));
+    @Test
+    void applyToEitherExample() {
+        void doTest() {
+            String original = new String("Message");
+            CompletableFuture!String cf1 = completedFuture(original)
+                    .thenApplyAsync!(String)(s => delayedUpperCase(s));
 
-    //         CompletableFuture!String cf2 = cf1.applyToEither!(String)(
-    //                 completedFuture(original).thenApplyAsync!(String)(s => delayedLowerCase(s)),
-    //                 s => new String(s.value ~ " from applyToEither"));
+            CompletableFuture!String cf2 = cf1.applyToEither!(String)(
+                    completedFuture(original).thenApplyAsync!(String)(s => delayedLowerCase(s)),
+                    s => new String(s.value ~ " from applyToEither"));
 
-    //         assertTrue(cf2.join().value.endsWith(" from applyToEither"));
-    //     }
+            assertTrue(cf2.join().value.endsWith(" from applyToEither"));
+        }
 
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
+    }
 
 
-    // @Test
-    // void acceptEitherExample() {
-    //     String original = new String("Message");
-    //     StringBuilder result = new StringBuilder();
-    //     CompletableFuture!void cf = completedFuture(original)
-    //             .thenApplyAsync!(String)(s => delayedUpperCase(s))
-    //             .acceptEither(
-    //                 completedFuture(original).thenApplyAsync!(String)( (s) { 
-    //                     info("incoming: ", s.value);
-    //                     return delayedLowerCase(s);
-    //                 }),
-    //                 (s) { 
-    //                     info("incoming: ", s.value);
-    //                     result.append(s.value).append("acceptEither"); 
-    //                 }
-    //             );
+    @Test
+    void acceptEitherExample() {
+        String original = new String("Message");
+        StringBuilder result = new StringBuilder();
+        CompletableFuture!void cf = completedFuture(original)
+                .thenApplyAsync!(String)(s => delayedUpperCase(s))
+                .acceptEither(
+                    completedFuture(original).thenApplyAsync!(String)( (s) { 
+                        info("incoming: ", s.value);
+                        return delayedLowerCase(s);
+                    }),
+                    (s) { 
+                        info("incoming: ", s.value);
+                        result.append(s.value).append("acceptEither"); 
+                    }
+                );
 
-    //     void doTest() {
-    //         info("waiting for the result...");
-    //         cf.join();
-    //         infof("done with: %s", result.toString());
-    //         assertTrue("Result was empty", result.toString().endsWith("acceptEither"));
-    //     }
+        void doTest() {
+            info("waiting for the result...");
+            cf.join();
+            infof("done with: %s", result.toString());
+            assertTrue("Result was empty", result.toString().endsWith("acceptEither"));
+        }
         
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
+    }
 
-    // @Test
-    // void runAfterBothExample() {
-    //     String original = new String("Message");
-    //     StringBuilder result = new StringBuilder();
-    //     completedFuture(original).thenApply!(String)( (s) {
-    //             trace(s.toString());
-    //             return s.toUpperCase();
-    //         }).runAfterBoth!(String)(
-    //             completedFuture(original).thenApply!(String)((s) {
-    //                 trace(s.toString());
-    //                 return s.toLowerCase();
-    //             }),
+    @Test
+    void runAfterBothExample() {
+        String original = new String("Message");
+        StringBuilder result = new StringBuilder();
+        completedFuture(original).thenApply!(String)( (s) {
+                trace(s.toString());
+                return s.toUpperCase();
+            }).runAfterBoth!(String)(
+                completedFuture(original).thenApply!(String)((s) {
+                    trace(s.toString());
+                    return s.toLowerCase();
+                }),
 
-    //             () {
-    //                 result.append("done");
-    //                 trace("appending done.");
-    //             });
+                () {
+                    result.append("done");
+                    trace("appending done.");
+                });
         
-    //     trace("running done.");
-    //     assertTrue("Result was empty", result.length() > 0);
-    // }
+        trace("running done.");
+        assertTrue("Result was empty", result.length() > 0);
+    }
 
-    // @Test
-    // void thenAcceptBothExample() {
-    //     String original = new String("Message");
-    //     StringBuilder result = new StringBuilder();
-    //     completedFuture(original).thenApply!(String)( (s) {
-    //             trace(s.toString());
-    //             return s.toUpperCase();
-    //         }).thenAcceptBoth!(String)(
-    //             completedFuture(original).thenApply!(String)((s) {
-    //                 trace(s.toString());
-    //                 return s.toLowerCase();
-    //             }),
+    @Test
+    void thenAcceptBothExample() {
+        String original = new String("Message");
+        StringBuilder result = new StringBuilder();
+        completedFuture(original).thenApply!(String)( (s) {
+                trace(s.toString());
+                return s.toUpperCase();
+            }).thenAcceptBoth!(String)(
+                completedFuture(original).thenApply!(String)((s) {
+                    trace(s.toString());
+                    return s.toLowerCase();
+                }),
 
-    //             (s1, s2) { 
-    //                 result.append(s1.value ~ s2.value); 
-    //                 trace("appending done.");
-    //             });
-    //     trace("running done.");
-    //     assertEquals("MESSAGEmessage", result.toString());
-    // }
+                (s1, s2) { 
+                    result.append(s1.value ~ s2.value); 
+                    trace("appending done.");
+                });
+        trace("running done.");
+        assertEquals("MESSAGEmessage", result.toString());
+    }
 
-    // @Test
-    // void thenCombineExample() {
-    //     String original = new String("Message");
-    //     CompletableFuture!String cf = completedFuture(original)
-    //             .thenApply!(String)( (s) { 
-    //                 trace(s.toString());
-    //                 return delayedUpperCase(s); 
-    //             }).thenCombine!(String, String)(completedFuture(original).thenApply!(String)( (s) { 
-    //                     info("incoming: ", s.value);
-    //                     return delayedLowerCase(s);
-    //                 }),
-    //                 delegate String (String s1, String s2) { 
-    //                     trace("running...");
-    //                     return new String(s1.value ~ s2.value); 
-    //             });
-    //     trace("running done.");
-    //     assertEquals("MESSAGEmessage", cf.getNow(null).value);
-    // }
+    @Test
+    void thenCombineExample() {
+        String original = new String("Message");
+        CompletableFuture!String cf = completedFuture(original)
+                .thenApply!(String)( (s) { 
+                    trace(s.toString());
+                    return delayedUpperCase(s); 
+                }).thenCombine!(String, String)(completedFuture(original).thenApply!(String)( (s) { 
+                        info("incoming: ", s.value);
+                        return delayedLowerCase(s);
+                    }),
+                    delegate String (String s1, String s2) { 
+                        trace("running...");
+                        return new String(s1.value ~ s2.value); 
+                });
+        trace("running done.");
+        assertEquals("MESSAGEmessage", cf.getNow(null).value);
+    }
 
-    // @Test
-    // void thenCombineAsyncExample() {
-    //     String original = new String("Message");
-    //     CompletableFuture!String cf = completedFuture(original)
-    //             .thenApplyAsync!(String)( (s) { 
-    //                 trace(s.toString());
-    //                 return delayedUpperCase(s); 
-    //             })
-    //             .thenCombine!(String, String)(completedFuture(original).thenApplyAsync!(String)( (s) { 
-    //                     info("incoming: ", s.value);
-    //                     return delayedLowerCase(s);
-    //                 }),
-    //                 delegate String (String s1, String s2) { 
-    //                     trace("running...");
-    //                     return new String(s1.value ~ s2.value); 
-    //             });
-    //     void doTest() {
-    //         trace("running done.");
-    //         assertEquals("MESSAGEmessage", cf.join().value);
-    //     }
+    @Test
+    void thenCombineAsyncExample() {
+        String original = new String("Message");
+        CompletableFuture!String cf = completedFuture(original)
+                .thenApplyAsync!(String)( (s) { 
+                    trace(s.toString());
+                    return delayedUpperCase(s); 
+                })
+                .thenCombine!(String, String)(completedFuture(original).thenApplyAsync!(String)( (s) { 
+                        info("incoming: ", s.value);
+                        return delayedLowerCase(s);
+                    }),
+                    delegate String (String s1, String s2) { 
+                        trace("running...");
+                        return new String(s1.value ~ s2.value); 
+                });
+        void doTest() {
+            trace("running done.");
+            assertEquals("MESSAGEmessage", cf.join().value);
+        }
         
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        ThreadEx thread = new ThreadEx(&doTest);
+        thread.start();
+    }
 
-    // @Test
-    // void thenComposeExample() {
-    //     String original = new String("Message");
-    //     CompletableFuture!String cf = completedFuture(original).thenApply!(String)( (s) { 
-    //             trace(s.toString());
-    //             return delayedUpperCase(s); 
-    //         })
-    //         .thenCompose!(String)((upper) { 
-    //             CompletableFuture!String cf2 = completedFuture(original).thenApply!(String)( (s) { 
-    //                 info("incoming: ", s.value);
-    //                 return delayedLowerCase(s);
-    //             }).thenApply!(String)( (s) { 
-    //                 info("incoming: ", s.value);
-    //                 return new String(upper.value ~ s.value); 
-    //             });
-    //             info("running: ");
-    //             return cf2;
-    //         });
-    //     trace("running done.");    
-    //     assertEquals("MESSAGEmessage", cf.join().value);
-    // }
+    @Test
+    void thenComposeExample() {
+        String original = new String("Message");
+        CompletableFuture!String cf = completedFuture(original).thenApply!(String)( (s) { 
+                trace(s.toString());
+                return delayedUpperCase(s); 
+            })
+            .thenCompose!(String)((upper) { 
+                CompletableFuture!String cf2 = completedFuture(original).thenApply!(String)( (s) { 
+                    info("incoming: ", s.value);
+                    return delayedLowerCase(s);
+                }).thenApply!(String)( (s) { 
+                    info("incoming: ", s.value);
+                    return new String(upper.value ~ s.value); 
+                });
+                info("running: ");
+                return cf2;
+            });
+        trace("running done.");    
+        assertEquals("MESSAGEmessage", cf.join().value);
+    }
 
-    // @Test
-    // void anyOfExample() {
-    //     StringBuilder result = new StringBuilder();
-    //     string[] messages = ["a", "b", "c"];
-    //     CompletableFuture!(String)[] futures = messages
-    //             .map!((msg) {
-    //                 trace(msg);
-    //                 return completedFuture(new String(msg)).thenApply!String((s) { 
-    //                     return delayedUpperCase(s); 
-    //                 });
-    //             }).array;
+    @Test
+    void anyOfExample() {
+        StringBuilder result = new StringBuilder();
+        string[] messages = ["a", "b", "c"];
+        CompletableFuture!(String)[] futures = messages
+                .map!((msg) {
+                    trace(msg);
+                    return completedFuture(new String(msg)).thenApply!String((s) { 
+                        return delayedUpperCase(s); 
+                    });
+                }).array;
 
-    //     anyOf!(String)(futures).whenComplete((res, th) {
-    //         if(th is null) {
-    //             trace(res);
-    //             assertTrue(isUpperCase(cast(String) res));
-    //             result.append((cast(String)res).value);
-    //         }
-    //     });
+        anyOf!(String)(futures).whenComplete((res, th) {
+            if(th is null) {
+                trace(res);
+                assertTrue(isUpperCase(cast(String) res));
+                result.append((cast(String)res).value);
+            }
+        });
 
-    //     trace("running done.");  
-    //     assertTrue("Result was empty", result.length() > 0);
-    // }    
+        trace("running done.");  
+        assertTrue("Result was empty", result.length() > 0);
+    }    
 
-    // @Test
-    // void allOfExample() {
-    //     StringBuilder result = new StringBuilder();
-    //     string[] messages = ["a", "b", "c"];
-    //     CompletableFuture!(String)[] futures = messages
-    //             .map!((msg) {
-    //                 trace(msg);
-    //                 return completedFuture(new String(msg)).thenApply!String((s) { 
-    //                     return delayedUpperCase(s); 
-    //                 });
-    //             }).array;
+    @Test
+    void allOfExample() {
+        StringBuilder result = new StringBuilder();
+        string[] messages = ["a", "b", "c"];
+        CompletableFuture!(String)[] futures = messages
+                .map!((msg) {
+                    trace(msg);
+                    return completedFuture(new String(msg)).thenApply!String((s) { 
+                        return delayedUpperCase(s); 
+                    });
+                }).array;
 
-    //     allOf!(String)(futures).whenComplete((res, th) {
-    //         if(th is null) {
-    //             foreach(CompletableFuture!(String) cf; futures) {
-    //                 String v = cf.getNow(null);
-    //                 trace(v);
-    //                 assertTrue(isUpperCase(v));
-    //             }
-    //             result.append("done");
-    //         }
-    //     });
+        allOf!(String)(futures).whenComplete((th) {
+            if(th is null) {
+                foreach(CompletableFuture!(String) cf; futures) {
+                    String v = cf.getNow(null);
+                    trace(v);
+                    assertTrue(isUpperCase(v));
+                }
+                result.append("done");
+            }
+        });
 
-    //     trace("running done.");  
-    //     assertTrue("Result was empty", result.length() > 0);
-    // }
+        trace("running done.");  
+        assertTrue("Result was empty", result.length() > 0);
+    }
 
-    // @Test
-    // void allOfAsyncExample() {
-    //     StringBuilder result = new StringBuilder();
-    //     string[] messages = ["a", "b", "c"];
-    //     CompletableFuture!(String)[] futures = messages
-    //             .map!((msg) {
-    //                 trace(msg);
-    //                 return completedFuture(new String(msg)).thenApplyAsync!String((s) { 
-    //                     return delayedUpperCase(s); 
-    //                 });
-    //             }).array;
+    @Test
+    void allOfAsyncExample() {
+        StringBuilder result = new StringBuilder();
+        string[] messages = ["a", "b", "c"];
+        CompletableFuture!(String)[] futures = messages
+                .map!((msg) {
+                    trace(msg);
+                    return completedFuture(new String(msg)).thenApplyAsync!String((s) { 
+                        return delayedUpperCase(s); 
+                    });
+                }).array;
 
-    //     CompletableFuture!void allOf = allOf!(String)(futures).whenComplete((res, th) {
-    //         if(th is null) {
-    //             foreach(CompletableFuture!(String) cf; futures) {
-    //                 String v = cf.getNow(null);
-    //                 trace(v);
-    //                 assertTrue(isUpperCase(v));
-    //             }
-    //             result.append("done");
-    //         }
-    //     });
+        CompletableFuture!void allOf = allOf!(String)(futures).whenComplete((th) {
+            if(th is null) {
+                foreach(CompletableFuture!(String) cf; futures) {
+                    String v = cf.getNow(null);
+                    trace(v);
+                    assertTrue(isUpperCase(v));
+                }
+                result.append("done");
+            }
+        });
 
-    //     void doTest() {
-    //         allOf.join();
-    //         trace("running done.");  
-    //         assertTrue("Result was empty", result.length() > 0);
-    //     }
+        // void doTest() {
+            allOf.join();
+            trace("running done.");  
+            assertTrue("Result was empty", result.length() > 0);
+        // }
         
-    //     ThreadEx thread = new ThreadEx(&doTest);
-    //     thread.start();
-    // }
+        // ThreadEx thread = new ThreadEx(&doTest);
+        // thread.start();
+    }
 
     private static String delayedUpperCase(String s) {
         randomSleep();
