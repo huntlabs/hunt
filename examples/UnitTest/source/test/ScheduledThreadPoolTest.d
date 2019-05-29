@@ -47,7 +47,7 @@ class ScheduledThreadPoolTest {
         StringTask task1 = new StringTask("StringTask");
 
         ScheduledFuture!(string) f1 = executor.schedule!(string)(task1, seconds(3));
-        ScheduledFuture!(Void) f2 = executor.schedule(task2, seconds(5));
+        ScheduledFuture!(void) f2 = executor.schedule(task2, seconds(5));
         ScheduledFuture!(int) f3 = executor.schedule(task3, seconds(5));
 
         tracef("wainting for the result... ");

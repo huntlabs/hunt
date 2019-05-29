@@ -46,7 +46,6 @@ import std.datetime;
 // import hunt.concurrency.locks.ReentrantLock;
 
 alias ReentrantLock = Mutex;
-alias Void = Object;
 
 interface IScheduledFutureTask {
     void heapIndex(int index);
@@ -430,14 +429,16 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    ScheduledFuture!(Void) schedule(Runnable command, Duration delay) {
+    ScheduledFuture!(void) schedule(Runnable command, Duration delay) {
         if (command is null)
             throw new NullPointerException();
         long n = atomicOp!"+="(sequencer, 1);
         n--;
-        RunnableScheduledFuture!(Void) t = decorateTask(command,
-            new ScheduledFutureTask!(Void)(command, cast(Void)null, triggerTime(delay), n, this));
-        delayedExecute!(Void)(t);
+        // RunnableScheduledFuture!(void) t = decorateTask(command,
+        //     new ScheduledFutureTask!(void)(command, cast(void)null, triggerTime(delay), n, this));
+        RunnableScheduledFuture!(void) t = decorateTask(command,
+            new ScheduledFutureTask!(void)(command, triggerTime(delay), n, this));        
+        delayedExecute!(void)(t);
         return t;
     }
 
@@ -489,19 +490,20 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws NullPointerException       {@inheritDoc}
      * @throws IllegalArgumentException   {@inheritDoc}
      */
-    ScheduledFuture!Void scheduleAtFixedRate(Runnable command,
+    ScheduledFuture!void scheduleAtFixedRate(Runnable command,
                                                   Duration initialDelay,
                                                   Duration period) {
         if (command is null)
             throw new NullPointerException();
         if (period <= Duration.zero)
             throw new IllegalArgumentException();
-        ScheduledFutureTask!(Void) sft =
-            new ScheduledFutureTask!(Void)(command, cast(Void)null,
+
+        ScheduledFutureTask!(void) sft =
+            new ScheduledFutureTask!(void)(command, // cast(void)null,
                                           triggerTime(initialDelay),
                                           period.total!(TimeUnit.HectoNanosecond)(), 
-                                          cast(long)AtomicHelper.getAndIncrement(sequencer), this);
-        RunnableScheduledFuture!(Void) t = decorateTask(command, sft);
+                                          cast(long)AtomicHelper.getAndIncrement(sequencer), this);        
+        RunnableScheduledFuture!(void) t = decorateTask(command, sft);
         sft.outerTask = t;
         delayedExecute(t);
         return t;
@@ -535,19 +537,19 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws NullPointerException       {@inheritDoc}
      * @throws IllegalArgumentException   {@inheritDoc}
      */
-    ScheduledFuture!(Void) scheduleWithFixedDelay(Runnable command,
+    ScheduledFuture!(void) scheduleWithFixedDelay(Runnable command,
                                                      Duration initialDelay,
                                                      Duration delay) {
         if (command is null)
             throw new NullPointerException();
         if (delay <= Duration.zero)
             throw new IllegalArgumentException();
-        ScheduledFutureTask!(Void) sft =
-            new ScheduledFutureTask!(Void)(command, cast(Void)null,
+        ScheduledFutureTask!(void) sft =
+            new ScheduledFutureTask!(void)(command, // cast(void)null,
                                           triggerTime(initialDelay),
                                           -delay.total!(TimeUnit.HectoNanosecond)(),
                                           cast(long)AtomicHelper.getAndIncrement(sequencer), this);
-        RunnableScheduledFuture!(Void) t = decorateTask(command, sft);
+        RunnableScheduledFuture!(void) t = decorateTask(command, sft);
         sft.outerTask = t;
         delayedExecute(t);
         return t;
@@ -583,7 +585,7 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @throws RejectedExecutionException {@inheritDoc}
      * @throws NullPointerException       {@inheritDoc}
      */
-    override Future!Void submit(Runnable task) {
+    override Future!void submit(Runnable task) {
         return schedule(task, Duration.zero);
     }
 

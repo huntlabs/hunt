@@ -823,7 +823,7 @@ class Parker {
     // is no need to track notifications.
     void park(Duration time) {
         version(HUNT_DEBUG_CONCURRENCY) {
-            tracef("try to park a thread: %s",
+            tracef("try to park a thread %s",
                 time <= Duration.zero ? "forever" : "in " ~ time.toString());
         }
         // Optional fast-path check:
@@ -886,7 +886,7 @@ class Parker {
     void park(MonoTime time) {
         version(HUNT_DEBUG_CONCURRENCY) {
             Duration d = time - MonoTime.currTime;
-            tracef("try to park a thread: in %s",  
+            tracef("try to park a thread %s",  
                 d <= Duration.zero ? "forever" : "in " ~ d.toString());
         }
         // Optional fast-path check:

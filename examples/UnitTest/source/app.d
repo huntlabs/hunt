@@ -56,11 +56,13 @@ void main()
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
+
 	// testUnits!(CompletableFutureTest);
-	// testUnits!(CompletableFutureTest2);
+	testUnits!(CompletableFutureTest2);
 	// testUnits!(RealLifeCompletableFutureExample);
-	testUnits!(RealLifeCompletableFutureExample2);
+	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
+
 	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
@@ -75,13 +77,13 @@ void main()
 
 	// // These tests belown will block the test procession.
 
-	// testUnits!(TaskPoolTest);
 	// // LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
 	// // b.bench();
-	// // testTask();
-	// // testLockSupport01();
+	// testLockSupport01();
+
+	// testUnits!(TaskPoolTest);
 	// testUnits!(ScheduledThreadPoolTest);
-	// // testUnits!(ThreadPoolExecutorTest);
+	// testUnits!(ThreadPoolExecutorTest);
 
 	// testUnits!(SerializationTest);
 	// testUnits!(ByteBufferTest);
@@ -90,14 +92,14 @@ void main()
 
 
 
-    // void testLockSupport01() {
-    //     Thread thread = Thread.getThis();  
-      
-    //     LockSupport.unpark(thread);  
-      
-    //     writeln("a");  
-    //     LockSupport.park();  
-    //     writeln("b");  
-    //     LockSupport.park();  
-    //     writeln("c");  
-    // }
+void testLockSupport01() {
+	Thread thread = Thread.getThis();  
+	
+	LockSupport.unpark(thread);  
+	
+	writeln("a");  
+	LockSupport.park();  
+	writeln("b");  
+	LockSupport.park();  
+	writeln("c");  
+}
