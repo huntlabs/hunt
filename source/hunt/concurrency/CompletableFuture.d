@@ -270,7 +270,6 @@ static if(is(T == void)) {
 
     alias ConsumerT = Action;  
     alias BiConsumerT = Action1!(Throwable);
-
     alias FunctionT(V) = Func!(V);
     
     this(bool completed = false) {
@@ -292,6 +291,7 @@ static if(is(T == void)) {
         completeValue!false(r);
     }    
 }
+
     /**
      * Creates a new incomplete CompletableFuture.
      */
@@ -756,6 +756,7 @@ static if(is(T == void)) {
             if (e !is null) {
                 e.execute(new UniApply!(T, V)(null, d, this, f));
             } else {
+
 static if(is(T == void)) {
                 d.completeValue!false(f());
 } else {
@@ -801,7 +802,7 @@ static if(is(T == void)) {
 } else {
                 T t = this.result;
                 f(t);
-} 
+}
                 d.completeValue!false(NIL);
             }
         } catch (Throwable ex) {
@@ -852,6 +853,7 @@ static if(is(T == void)) {
                 if (ar !is null) {
                     x = ar.ex;
                     warning("Need to check");
+
 static if(is(T == void)) {
                     f(x);
 } else {
@@ -861,6 +863,7 @@ static if(is(T == void)) {
                         completeValue(ar);
                     }
                 } else {
+
 static if(is(T == void)) {
                     f(x);
                     completeValue();
@@ -906,7 +909,7 @@ static if(is(T == void)) {
     }
 
     final bool uniHandle(S)(CompletableFuture!(S) r, BiFunction!(S, Throwable, T) f,
-                            UniHandle!(S,T) c) {
+                            UniHandle!(S, T) c) {
         Throwable x;
         if (!isDone()) {
             try {
@@ -965,15 +968,15 @@ static if(is(T == void)) {
                 if (ar !is null && (x = ar.ex) !is null) {
                     if (c !is null && !c.claim())
                         return false;
+
 static if(is(T == void)) {
                     f(x);
                     completeValue();
-
 } else {
                     completeValue(f(x));
 }                        
                 } else {
-                    // internalComplete(r);
+
 static if(is(T == void)) {
                     completeValue();
 } else {
@@ -1002,6 +1005,7 @@ static if(is(T == void)) {
             if(isFaulted())
                 return new MinimalStage!(T)(this.altResult);
             else {
+
 static if(is(T == void)) {
                 return new MinimalStage!(T)(true);
 } else {
@@ -1549,8 +1553,8 @@ static if(is(T == void)) {
         postComplete();
         return triggered;
     }
-
 }
+
     /**
      * If not already completed, causes invocations of {@link #get()}
      * and related methods to throw the given exception.
@@ -1809,47 +1813,6 @@ static if(is(T == void)) {
         return cancelled || isCancelled();
     }
 
-static if(is(T == void)) {
-    void obtrudeValue() {
-        _isNull = false;
-        _isDone = true;
-        postComplete();
-    }
-
-} else {
-    /**
-     * Forcibly sets or resets the value subsequently returned by
-     * method {@link #get()} and related methods, whether or not
-     * already completed. This method is designed for use only in
-     * error recovery actions, and even in such situations may result
-     * in ongoing dependent completions using established versus
-     * overwritten outcomes.
-     *
-     * @param value the completion value
-     */
-    void obtrudeValue(T value) {
-        // result = (value is null) ? NIL : value;
-
-        static if(is(T == class) || is(T == interface)) {
-            if(value is null) {
-                this.altResult = NIL;
-                this.result = null;
-                _isNull = true;
-            } else {
-                this.result = value;
-                _isNull = false;
-            }
-        } else {
-            this.result = value;
-            _isNull = false;
-        }
-        _isDone = true;
-
-        postComplete();
-    }
-
-
-}
     /**
      * Forcibly causes subsequent invocations of method {@link #get()}
      * and related methods to throw the given exception, whether or
@@ -2007,6 +1970,72 @@ static if(is(T == void)) {
         return completeAsync(supplier, defaultExecutor());
     }
 
+
+
+static if(is(T == void)) {
+
+    void obtrudeValue() {
+        _isNull = false;
+        _isDone = true;
+        postComplete();
+    }
+
+   CompletableFuture!(T) orTimeout(Duration timeout) {
+        if (!_isDone) {
+            ScheduledFuture!(void) f = Delayer.delay(new Timeout(this), timeout);
+            whenComplete((Throwable ex) {
+                if (ex is null && f !is null && !f.isDone())
+                    f.cancel(false);
+            });
+        }
+        return this;
+    }
+
+    CompletableFuture!(T) completeOnTimeout(Duration timeout) {
+        if (!_isDone) {
+          ScheduledFuture!(void) f = 
+            Delayer.delay(new DelayedCompleter!(T)(this), timeout);
+
+            whenComplete((Throwable ex) {
+                if (ex is null && f !is null && !f.isDone())
+                    f.cancel(false);
+            });            
+        }
+        return this;
+    }
+
+} else {
+    /**
+     * Forcibly sets or resets the value subsequently returned by
+     * method {@link #get()} and related methods, whether or not
+     * already completed. This method is designed for use only in
+     * error recovery actions, and even in such situations may result
+     * in ongoing dependent completions using established versus
+     * overwritten outcomes.
+     *
+     * @param value the completion value
+     */
+    void obtrudeValue(T value) {
+        // result = (value is null) ? NIL : value;
+
+        static if(is(T == class) || is(T == interface)) {
+            if(value is null) {
+                this.altResult = NIL;
+                this.result = null;
+                _isNull = true;
+            } else {
+                this.result = value;
+                _isNull = false;
+            }
+        } else {
+            this.result = value;
+            _isNull = false;
+        }
+        _isDone = true;
+
+        postComplete();
+    }
+
     /**
      * Exceptionally completes this CompletableFuture with
      * a {@link TimeoutException} if not otherwise completed
@@ -2022,38 +2051,13 @@ static if(is(T == void)) {
     CompletableFuture!(T) orTimeout(Duration timeout) {
         if (!_isDone) {
             ScheduledFuture!(void) f = Delayer.delay(new Timeout(this), timeout);
-static if(is(T == void)) {
-            whenComplete((Throwable ex) {
-                if (ex is null && f !is null && !f.isDone())
-                    f.cancel(false);
-            });
-
-} else {
             whenComplete((T ignore, Throwable ex) {
                 if (ex is null && f !is null && !f.isDone())
                     f.cancel(false);
             });
-
-}            
         }
         return this;
     }
-
-static if(is(T == void)) {
-    CompletableFuture!(T) completeOnTimeout(Duration timeout) {
-        if (!_isDone) {
-          ScheduledFuture!(void) f = 
-            Delayer.delay(new DelayedCompleter!(T)(this), timeout);
-
-            whenComplete((Throwable ex) {
-                if (ex is null && f !is null && !f.isDone())
-                    f.cancel(false);
-            });            
-        }
-        return this;
-    }
-
-} else {
 
     /**
      * Completes this CompletableFuture with the given value if not
@@ -2203,8 +2207,7 @@ static if(is(T == void)) {
             try {
                 if (mode <= 0 && !claim()) {
                     return null;
-                }
-                else {
+                } else {
 static if(is(T == void)) {
                     d.completeValue(f());
 } else {
@@ -2256,9 +2259,9 @@ static if(is(T == void)) {
             }
 
             try {
-                if (mode <= 0 && !claim())
+                if (mode <= 0 && !claim()) {
                     return null;
-                else {
+                } else {
 static if(is(T == void)) {
                     f();
 } else {
@@ -2317,14 +2320,10 @@ final class UniRun(T) : UniCompletion {
 
     
 final class UniWhenComplete(T) : UniCompletion {
+
 static if(is(T == void)) {
-
-    alias ConsumerT = Action;  
     alias BiConsumerT = Action1!(Throwable);
-
 } else {
-
-    alias ConsumerT = Consumer!(T);  
     alias BiConsumerT = BiConsumer!(T, Throwable);
 }
 
@@ -2409,9 +2408,9 @@ final class UniRelay(U, T : U) : UniCompletion {
             return null;
 
         if (!d.isDone()) {
-            if(a.isFaulted())
+            if(a.isFaulted()) {
                 d.completeValue(a.altResult);
-            else {
+            } else {
 static if(is(T == void)) {
                 d.completeValue();
 } else {
@@ -2700,11 +2699,8 @@ static if(is(T == void)) {
 
 final class OrAccept(T, U : T) : BiCompletion {
 static if(is(T == void)) {
-
     alias ConsumerT = Action;  
-
 } else {
-
     alias ConsumerT = Consumer!(T);
 }
 
@@ -2748,8 +2744,6 @@ static if(is(T == void)) {
             warning("unhandled status");
         }
 }
-
-
         tryComplete: if (!d.isDone()) {
             try {
                 if (mode <= 0 && !claim())
@@ -2894,6 +2888,7 @@ final class AsyncSupply(T) : ForkJoinTask!(void), Runnable,
             dep = null; fn = null;
             if (!d._isDone) {
                 try {
+
 static if(is(T == void)) {
                     f();
                     d.completeValue();
@@ -3128,9 +3123,9 @@ final class MinimalStage(T) : CompletableFuture!(T) {
 
     override CompletableFuture!(T) toCompletableFuture() {
         if (isDone()) {
-            if(isFaulted())
+            if(isFaulted()) {
                 return new CompletableFuture!(T)(this.altResult);
-            else {
+            } else {
 static if(is(T == void)) {
                 return new CompletableFuture!(T)(true);
 } else {
