@@ -547,7 +547,6 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      * Removes exception node and clears status.
      */
     private void clearExceptionalCompletion() {
-        // int h = System.identityHashCode(this);
         size_t h = this.toHash();
         ReentrantLock lock = ForkJoinTaskHelper.exceptionTableLock;
         lock.lock();
