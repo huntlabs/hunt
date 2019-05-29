@@ -11,10 +11,10 @@
 
 module hunt.concurrency.CompletionStage;
 
+import hunt.Object;
 import hunt.Functions;
 import hunt.util.Common;
 
-alias Void = Object;
 
 /**
  * A stage of a possibly asynchronous computation, that performs an
@@ -175,9 +175,16 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) thenApplyAsync(U)(Function!(T, U) fn,
-         Executor executor);
+//     CompletionStage!(U) thenApplyAsync(U)(Function!(T, U) fn,
+//          Executor executor);
 
+static if(is(T == void)) {
+
+    CompletionStage!(void) thenAccept(Action action);
+    CompletionStage!(void) thenAcceptAsync(Action action);
+    CompletionStage!(void) thenAcceptAsync(Action action,
+                                                 Executor executor);
+} else {
     /**
      * Returns a new CompletionStage that, when this stage completes
      * normally, is executed with this stage's result as the argument
@@ -190,7 +197,7 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenAccept(Consumer!(T) action);
+    CompletionStage!(void) thenAccept(Consumer!(T) action);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -205,7 +212,7 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenAcceptAsync(Consumer!(T) action);
+    CompletionStage!(void) thenAcceptAsync(Consumer!(T) action);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -220,8 +227,11 @@ interface CompletionStage(T) {
      * @param executor the executor to use for asynchronous execution
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenAcceptAsync(Consumer!(T) action,
+    CompletionStage!(void) thenAcceptAsync(Consumer!(T) action,
                                                  Executor executor);
+
+     
+}                                                 
     /**
      * Returns a new CompletionStage that, when this stage completes
      * normally, executes the given action.
@@ -233,7 +243,7 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenRun(Runnable action);
+    CompletionStage!(void) thenRun(Runnable action);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -247,7 +257,7 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenRunAsync(Runnable action);
+    CompletionStage!(void) thenRunAsync(Runnable action);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -261,7 +271,7 @@ interface CompletionStage(T) {
      * @param executor the executor to use for asynchronous execution
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenRunAsync(Runnable action,
+    CompletionStage!(void) thenRunAsync(Runnable action,
                                               Executor executor);
 
     /**
@@ -279,8 +289,8 @@ interface CompletionStage(T) {
      * @param (V) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(V) thenCombine(U,V)(CompletionStage!(U) other,
-         BiFunction!(T, U, V) fn);
+//     CompletionStage!(V) thenCombine(U,V)(CompletionStage!(U) other,
+//          BiFunction!(T, U, V) fn);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -298,8 +308,8 @@ interface CompletionStage(T) {
      * @param (V) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(V) thenCombineAsync(U,V)(CompletionStage!(U) other,
-         BiFunction!(T, U, V) fn);
+//     CompletionStage!(V) thenCombineAsync(U,V)(CompletionStage!(U) other,
+//          BiFunction!(T, U, V) fn);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -318,8 +328,8 @@ interface CompletionStage(T) {
      * @param (V) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(V) thenCombineAsync(U,V)(CompletionStage!(U) other,
-         BiFunction!(T, U, V) fn, Executor executor);
+//     CompletionStage!(V) thenCombineAsync(U,V)(CompletionStage!(U) other,
+//          BiFunction!(T, U, V) fn, Executor executor);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -335,8 +345,8 @@ interface CompletionStage(T) {
      * @param (U) the type of the other CompletionStage's result
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenAcceptBoth(U)(CompletionStage!(U) other,
-         BiConsumer!(T, U) action);
+//     CompletionStage!(void) thenAcceptBoth(U)(CompletionStage!(U) other,
+//          BiConsumer!(T, U) action);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -353,8 +363,8 @@ interface CompletionStage(T) {
      * @param (U) the type of the other CompletionStage's result
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenAcceptBothAsync(U)(CompletionStage!(U) other,
-         BiConsumer!(T, U) action);
+//     CompletionStage!(void) thenAcceptBothAsync(U)(CompletionStage!(U) other,
+//          BiConsumer!(T, U) action);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -372,8 +382,8 @@ interface CompletionStage(T) {
      * @param (U) the type of the other CompletionStage's result
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) thenAcceptBothAsync(U)(CompletionStage!(U) other,
-         BiConsumer!(T, U) action, Executor executor);
+//     CompletionStage!(void) thenAcceptBothAsync(U)(CompletionStage!(U) other,
+//          BiConsumer!(T, U) action, Executor executor);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -387,8 +397,8 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) runAfterBoth(U)(CompletionStage!(U) other,
-                                              Runnable action);
+//     CompletionStage!(void) runAfterBoth(U)(CompletionStage!(U) other,
+//                                               Runnable action);
     /**
      * Returns a new CompletionStage that, when this and the other
      * given stage both complete normally, executes the given action
@@ -402,8 +412,8 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) runAfterBothAsync(U)(CompletionStage!(U) other,
-                                                   Runnable action);
+//     CompletionStage!(void) runAfterBothAsync(U)(CompletionStage!(U) other,
+//                                                    Runnable action);
 
     /**
      * Returns a new CompletionStage that, when this and the other
@@ -419,9 +429,9 @@ interface CompletionStage(T) {
      * @param executor the executor to use for asynchronous execution
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) runAfterBothAsync(U)(CompletionStage!(U) other,
-                                                   Runnable action,
-                                                   Executor executor);
+//     CompletionStage!(void) runAfterBothAsync(U)(CompletionStage!(U) other,
+//                                                    Runnable action,
+//                                                    Executor executor);
     /**
      * Returns a new CompletionStage that, when either this or the
      * other given stage complete normally, is executed with the
@@ -436,8 +446,8 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) applyToEither(U)(CompletionStage!(T) other,
-         Function!(T, U) fn);
+//     CompletionStage!(U) applyToEither(U)(CompletionStage!(T) other,
+//          Function!(T, U) fn);
 
     /**
      * Returns a new CompletionStage that, when either this or the
@@ -454,8 +464,8 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) applyToEitherAsync(U)(CompletionStage!(T) other,
-         Function!(T, U) fn);
+//     CompletionStage!(U) applyToEitherAsync(U)(CompletionStage!(T) other,
+//          Function!(T, U) fn);
 
     /**
      * Returns a new CompletionStage that, when either this or the
@@ -473,9 +483,17 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) applyToEitherAsync(U)(CompletionStage!(T) other,
-         Function!(T, U) fn, Executor executor);
+//     CompletionStage!(U) applyToEitherAsync(U)(CompletionStage!(T) other,
+//          Function!(T, U) fn, Executor executor);
 
+static if(is(T == void)) {
+    CompletionStage!(void) acceptEither(CompletionStage!(T) other,
+         Action action);
+    CompletionStage!(void) acceptEitherAsync(CompletionStage!(T) other,
+         Action action);
+    CompletionStage!(void) acceptEitherAsync(CompletionStage!(T) other,
+         Action action, Executor executor);
+} else {
     /**
      * Returns a new CompletionStage that, when either this or the
      * other given stage complete normally, is executed with the
@@ -489,7 +507,7 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) acceptEither(CompletionStage!(T) other,
+    CompletionStage!(void) acceptEither(CompletionStage!(T) other,
          Consumer!(T) action);
 
     /**
@@ -506,7 +524,7 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) acceptEitherAsync(CompletionStage!(T) other,
+    CompletionStage!(void) acceptEitherAsync(CompletionStage!(T) other,
          Consumer!(T) action);
 
     /**
@@ -524,9 +542,10 @@ interface CompletionStage(T) {
      * @param executor the executor to use for asynchronous execution
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) acceptEitherAsync(CompletionStage!(T) other,
+    CompletionStage!(void) acceptEitherAsync(CompletionStage!(T) other,
          Consumer!(T) action, Executor executor);
-
+     
+}
     /**
      * Returns a new CompletionStage that, when either this or the
      * other given stage complete normally, executes the given action.
@@ -539,8 +558,8 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) runAfterEither(U)(CompletionStage!(U) other,
-                                                Runnable action);
+//     CompletionStage!(void) runAfterEither(U)(CompletionStage!(U) other,
+//                                                 Runnable action);
 
     /**
      * Returns a new CompletionStage that, when either this or the
@@ -555,8 +574,8 @@ interface CompletionStage(T) {
      * returned CompletionStage
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) runAfterEitherAsync(U)(CompletionStage!(U) other,
-         Runnable action);
+//     CompletionStage!(void) runAfterEitherAsync(U)(CompletionStage!(U) other,
+//          Runnable action);
 
     /**
      * Returns a new CompletionStage that, when either this or the
@@ -572,8 +591,8 @@ interface CompletionStage(T) {
      * @param executor the executor to use for asynchronous execution
      * @return the new CompletionStage
      */
-    CompletionStage!(Void) runAfterEitherAsync(U)(CompletionStage!(U) other,
-         Runnable action, Executor executor);
+//     CompletionStage!(void) runAfterEitherAsync(U)(CompletionStage!(U) other,
+//          Runnable action, Executor executor);
 
     /**
      * Returns a new CompletionStage that is completed with the same
@@ -599,7 +618,7 @@ interface CompletionStage(T) {
      * @param (U) the type of the returned CompletionStage's result
      * @return the new CompletionStage
      */
-    CompletionStage!(U) thenCompose(U)(Function!(T, CompletionStage!(U)) fn);
+//     CompletionStage!(U) thenCompose(U)(Function!(T, CompletionStage!(U)) fn);
 
     /**
      * Returns a new CompletionStage that is completed with the same
@@ -623,8 +642,7 @@ interface CompletionStage(T) {
      * @param (U) the type of the returned CompletionStage's result
      * @return the new CompletionStage
      */
-    CompletionStage!(U) thenComposeAsync(U)
-        (Function!(T, CompletionStage!(U)) fn);
+//     CompletionStage!(U) thenComposeAsync(U)(Function!(T, CompletionStage!(U)) fn);
 
     /**
      * Returns a new CompletionStage that is completed with the same
@@ -648,8 +666,8 @@ interface CompletionStage(T) {
      * @param (U) the type of the returned CompletionStage's result
      * @return the new CompletionStage
      */
-    CompletionStage!(U) thenComposeAsync(U)
-        (Function!(T, CompletionStage!(U)) fn, Executor executor);
+//     CompletionStage!(U) thenComposeAsync(U)
+//         (Function!(T, CompletionStage!(U)) fn, Executor executor);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -666,7 +684,7 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) handle(U)(BiFunction!(T, Throwable, U) fn);
+//     CompletionStage!(U) handle(U)(BiFunction!(T, Throwable, U) fn);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -684,7 +702,7 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) handleAsync(U)(BiFunction!(T, Throwable, U) fn);
+//     CompletionStage!(U) handleAsync(U)(BiFunction!(T, Throwable, U) fn);
 
     /**
      * Returns a new CompletionStage that, when this stage completes
@@ -703,8 +721,14 @@ interface CompletionStage(T) {
      * @param (U) the function's return type
      * @return the new CompletionStage
      */
-    CompletionStage!(U) handleAsync(U)(BiFunction!(T, Throwable, U) fn,
-         Executor executor);
+//     CompletionStage!(U) handleAsync(U)(BiFunction!(T, Throwable, U) fn,
+//          Executor executor);
+
+static if(is(T == void)) {
+    CompletionStage!(T) whenCompleteAsync(Action1!(Throwable) action);
+    CompletionStage!(T) whenComplete(Action1!(Throwable) action);
+    CompletionStage!(T) whenCompleteAsync(Action1!(Throwable) action, Executor executor);
+} else {
 
     /**
      * Returns a new CompletionStage with the same result or exception as
@@ -728,8 +752,7 @@ interface CompletionStage(T) {
      * @param action the action to perform
      * @return the new CompletionStage
      */
-    CompletionStage!(T) whenComplete
-        (BiConsumer!(T, Throwable) action);
+    CompletionStage!(T) whenComplete(BiConsumer!(T, Throwable) action);
 
     /**
      * Returns a new CompletionStage with the same result or exception as
@@ -754,8 +777,7 @@ interface CompletionStage(T) {
      * @param action the action to perform
      * @return the new CompletionStage
      */
-    CompletionStage!(T) whenCompleteAsync
-        (BiConsumer!(T, Throwable) action);
+    CompletionStage!(T) whenCompleteAsync(BiConsumer!(T, Throwable) action);
 
     /**
      * Returns a new CompletionStage with the same result or exception as
@@ -781,9 +803,9 @@ interface CompletionStage(T) {
      * @param executor the executor to use for asynchronous execution
      * @return the new CompletionStage
      */
-    CompletionStage!(T) whenCompleteAsync
-        (BiConsumer!(T, Throwable) action, Executor executor);
-
+    CompletionStage!(T) whenCompleteAsync(BiConsumer!(T, Throwable) action, Executor executor);
+     
+}
     /**
      * Returns a new CompletionStage that, when this stage completes
      * exceptionally, is executed with this stage's exception as the
@@ -809,5 +831,6 @@ interface CompletionStage(T) {
      * @return the CompletableFuture
      */
     CompletionStage!(T) toCompletableFuture();
+    
 
 }

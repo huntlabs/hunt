@@ -77,6 +77,7 @@ mixin template BasicExceptionCtors() {
     }
 
     this(Throwable next, string file = __FILE__, size_t line = __LINE__) @nogc @safe pure nothrow {
+        assert(next !is null);
         super(next.msg, file, line, next);
     }
 

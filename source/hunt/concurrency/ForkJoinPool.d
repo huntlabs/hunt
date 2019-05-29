@@ -1031,12 +1031,10 @@ class ForkJoinPool : AbstractExecutorService {
             w.cancelAll();                            // cancel remaining tasks
 
         if (!tryTerminate(false, false) &&            // possibly replace worker
-            w !is null && w.array !is null)             // avoid repeated failures
+            w !is null && w.array !is null)           // avoid repeated failures
             signalWork();
 
-        if (ex is null)                               // help clean on way out
-            ForkJoinTaskHelper.helpExpungeStaleExceptions();
-        else                                          // rethrow
+        if (ex !is null)                              // rethrow
             ForkJoinTaskHelper.rethrow(ex);
     }
 

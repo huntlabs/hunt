@@ -101,58 +101,9 @@ struct ForkJoinTaskHelper {
     /** Lock protecting access to exceptionTable. */
     package __gshared ReentrantLock exceptionTableLock;
 
-    /** Reference queue of stale exceptionally completed tasks. */
-    // private __gshared ReferenceQueue!(IForkJoinTask) exceptionTableRefQueue;
-
     shared static this() {
         exceptionTable = new ExceptionNode[32];
         exceptionTableLock = new ReentrantLock();
-        // exceptionTableRefQueue = new ReferenceQueue!(IForkJoinTask)();
-    }
-
-    /**
-     * Polls stale refs and removes them. Call only while holding lock.
-     */
-    package static void expungeStaleExceptions() {
-        // TODO: Tasks pending completion -@zxp at 12/22/2018, 5:04:07 PM
-        // 
-        implementationMissing(false);
-        // for (Object x; (x = exceptionTableRefQueue.poll()) !is null;) {
-        //     ExceptionNode en = cast(ExceptionNode)x;
-        //     if (en !is null) {
-        //         ExceptionNode[] t = exceptionTable;
-        //         int i = en.hashCode & (t.length - 1);
-        //         ExceptionNode e = t[i];
-        //         ExceptionNode pred = null;
-        //         while (e !is null) {
-        //             ExceptionNode next = e.next;
-        //             if (e == x) {
-        //                 if (pred is null)
-        //                     t[i] = next;
-        //                 else
-        //                     pred.next = next;
-        //                 break;
-        //             }
-        //             pred = e;
-        //             e = next;
-        //         }
-        //     }
-        // }
-    }
-
-    /**
-     * If lock is available, polls stale refs and removes them.
-     * Called from ForkJoinPool when pools become quiescent.
-     */
-    static void helpExpungeStaleExceptions() {
-        ReentrantLock lock = exceptionTableLock;
-        if (lock.tryLock()) {
-            try {
-                expungeStaleExceptions();
-            } finally {
-                lock.unlock();
-            }
-        }
     }
 
     /**
