@@ -21,7 +21,7 @@ import core.atomic;
 import std.socket;
 
 
-alias DataReceivedHandler = void delegate(ByteBuffer buffer);
+alias DataReceivedHandler = int delegate(ubyte[] buffer);
 alias AcceptHandler = void delegate(Socket socket);
 alias ErrorEventHandler = Action1!(string);
 
