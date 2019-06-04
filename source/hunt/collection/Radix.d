@@ -1326,7 +1326,7 @@ private:
 	{
 		//find it
 
-		if ( s is null)
+		if (s.length == 0)
 		{	
 			return 0;
 		}
