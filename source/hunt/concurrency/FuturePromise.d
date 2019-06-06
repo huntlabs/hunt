@@ -137,7 +137,7 @@ class FuturePromise(T) : Future!T, Promise!T {
 				throw new TimeoutException();
 		}
 
-		if (_cause == COMPLETED)
+		if (_cause is COMPLETED)
 			return _result;
 
 		TimeoutException t = cast(TimeoutException) _cause;
@@ -152,6 +152,6 @@ class FuturePromise(T) : Future!T, Promise!T {
 	}
 
 	override string toString() {
-		return format("FutureCallback@%x{%b,%b,%s}", toHash(), _done, _cause == COMPLETED, _result);
+		return format("FutureCallback@%x{%b,%b,%s}", toHash(), _done, _cause is COMPLETED, _result);
 	}
 }

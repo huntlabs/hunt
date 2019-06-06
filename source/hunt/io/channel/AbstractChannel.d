@@ -46,7 +46,7 @@ abstract class AbstractChannel : Channel {
         }
         clear();
 
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("channel closed [fd=%d]...", this.handle);
     }
 
@@ -79,10 +79,10 @@ abstract class AbstractChannel : Channel {
 
     void close() {
         if (cas(&_isClosed, false, true)) {
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
                 tracef("channel[fd=%d] closing...", this.handle);
             onClose();
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
                 tracef("channel[fd=%d] closed...", this.handle);
         } else {
             debug warningf("The channel[fd=%d] has already been closed", this.handle);

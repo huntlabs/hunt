@@ -135,7 +135,7 @@ class AbstractSelector : Selector {
     override bool deregister(AbstractChannel channel) {
         size_t fd = cast(size_t) channel.handle;
         size_t index = cast(size_t)(fd / divider);
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("deregister channel: fd=%d, index=%d", fd, index);
         channels[index] = null;
 
@@ -191,7 +191,7 @@ class AbstractSelector : Selector {
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint event) {
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
         infof("handling event: events=%d, fd=%d", event, channel.handle);
 
         try {
@@ -213,15 +213,15 @@ class AbstractSelector : Selector {
                 // events=8221, fd=13
                 channel.close();
             } else if (event == EPOLLIN) {
-                version (HUNT_DEBUG)
+                version (HUNT_DEBUG_MORE)
                     tracef("channel read event: fd=%d", channel.handle);
                 channel.onRead();
             } else if (event == EPOLLOUT) {
-                version (HUNT_DEBUG)
+                version (HUNT_DEBUG_MORE)
                     tracef("channel write event: fd=%d", channel.handle);
                 channel.onWrite();
             } else if (event == (EPOLLIN | EPOLLOUT)) {
-                version (HUNT_DEBUG)
+                version (HUNT_DEBUG_MORE)
                     tracef("channel read and write: fd=%d", channel.handle);
                 channel.onWrite();
                 channel.onRead();

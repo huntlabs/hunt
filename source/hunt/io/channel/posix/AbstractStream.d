@@ -63,7 +63,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
         version (HUNT_DEBUG)
-            tracef("reading[fd=%d]: %d nbytes", this.handle, len);
+            tracef("reading[fd=%d]: %d bytes", this.handle, len);
 
         if (len > 0) {
             if (dataReceivedHandler !is null) {
