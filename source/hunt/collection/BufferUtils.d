@@ -1010,16 +1010,17 @@ class BufferUtils {
                 }
             }
             buf.append(">>>");
-            int limit = buffer.limit();
-            buffer.limit(buffer.capacity());
-            for (int i = limit; i < buffer.capacity(); i++) {
-                appendContentChar(buf, buffer.get(i));
-                if (i == limit + 16 && buffer.capacity() > limit + 32) {
-                    buf.append("...");
-                    i = buffer.capacity() - 16;
-                }
-            }
-            buffer.limit(limit);
+
+            // int limit = buffer.limit();
+            // buffer.limit(buffer.capacity());
+            // for (int i = limit; i < buffer.capacity(); i++) {
+            //     appendContentChar(buf, buffer.get(i));
+            //     if (i == limit + 16 && buffer.capacity() > limit + 32) {
+            //         buf.append("...");
+            //         i = buffer.capacity() - 16;
+            //     }
+            // }
+            // buffer.limit(limit);
         } catch (Exception x) {
             buf.append("!!concurrent mod!!");
         }
@@ -1235,5 +1236,12 @@ class BufferUtils {
         } else {
             return buf;
         }
+    }
+
+    static ByteBuffer clone(ByteBuffer buf) {
+        byte[] bytes = buf.getRemaining();
+        ByteBuffer heapBuffer = new HeapByteBuffer(bytes.dup, 0, cast(int)bytes.length);
+        return heapBuffer;
+
     }
 }

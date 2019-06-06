@@ -47,7 +47,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
             return;
         }
         _isClosing = true;
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("socket channel closing [fd=%d]...", this.handle);
 
         if (isBusy()) {

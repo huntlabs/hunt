@@ -85,6 +85,7 @@ template isPublic(alias T) {
 */
 mixin template CloneMemberTemplate(T, alias cloneHandler = null) 	{
 	import std.traits;
+	version(HUNT_DEBUG_MORE) import hunt.logging.ConsoleLogger;
 	alias baseClasses = BaseClassesTuple!T;
 
 	static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {

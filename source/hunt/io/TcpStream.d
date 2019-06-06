@@ -298,22 +298,22 @@ class TcpStream : AbstractStream {
             const(ubyte)[] d = data;
 
             while (!_isClosing && !isWriteCancelling && d.length > 0) {
-                version (HUNT_DEBUG)
+                version (HUNT_DEBUG_MORE)
                     tracef("write data directly, fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
 
                 if (nBytes == d.length) {
-                    version (HUNT_DEBUG)
+                    version (HUNT_DEBUG_MORE)
                         tracef("write out once: %d / %d bytes, fd=%d", nBytes,
                                 d.length, this.handle);
                     checkAllWriteDone();
                     break;
                 } else if (nBytes > 0) {
-                    version (HUNT_DEBUG)
+                    version (HUNT_DEBUG_MORE)
                         tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     d = d[nBytes .. $];
                 } else {
-                    version (HUNT_DEBUG)
+                    version (HUNT_DEBUG_MORE)
                         warningf("buffering remaining data: %d bytes, fd=%d", d.length, this.handle);
                     initializeWriteQueue();
                     _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
@@ -380,7 +380,7 @@ protected:
         // }
         super.onClose();
 
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             infof("notify TCP stream down: fd=%d", this.handle);
         if (closeHandler)
             closeHandler();
