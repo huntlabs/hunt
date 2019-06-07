@@ -58,7 +58,7 @@ void main()
 	// testUnits!(BigIntegerTest);
 
 	// testUnits!(CompletableFutureTest);
-	testUnits!(CompletableFutureTest2);
+	// testUnits!(CompletableFutureTest2);
 	// testUnits!(RealLifeCompletableFutureExample);
 	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
@@ -86,7 +86,7 @@ void main()
 	// testUnits!(ThreadPoolExecutorTest);
 
 	// testUnits!(SerializationTest);
-	// testUnits!(ByteBufferTest);
+	testUnits!(ByteBufferTest);
 
 }
 

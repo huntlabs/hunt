@@ -154,18 +154,21 @@ class HeapByteBuffer : ByteBuffer {
         // short* ptr = &r;
         // ptr[0]=hb[index+1]; // bigEndian
         // ptr[1]=hb[index]; 
-        if (bigEndian)
-            return makeShort(hb[index], hb[index + 1]);
-        else
-            return makeShort(hb[index + 1], hb[index]);
+        // if (bigEndian)
+        //     return makeShort(hb[index], hb[index + 1]);
+        // else
+        //     return makeShort(hb[index + 1], hb[index]);
+
+        return convEndian(bigEndian, makeShort(hb[index], hb[index + 1]));
     }
 
     override short getShort(int i) {
         int index = ix(checkIndex(i, 2));
-        if (bigEndian)
-            return makeShort(hb[index], hb[index + 1]);
-        else
-            return makeShort(hb[index + 1], hb[index]);
+        return convEndian(bigEndian, makeShort(hb[index], hb[index + 1]));
+        // if (bigEndian)
+        //     return makeShort(hb[index], hb[index + 1]);
+        // else
+        //     return makeShort(hb[index + 1], hb[index]);
     }
 
     override ByteBuffer putShort(short x) {
@@ -519,13 +522,13 @@ class HeapByteBuffer : ByteBuffer {
               | (toUnsignedInt(i3) << pickPos(24, 24)));
     }
 
-    private static short makeShort(byte i0, byte i1) {
+    static short makeShort(byte i0, byte i1) {
         return cast(short)((toUnsignedInt(i0) << pickPos(8, 0))
                      | (toUnsignedInt(i1) << pickPos(8, 8)));
     }
 
     version (LittleEndian) {
-            // Maybe byte-reverse an integer
+        // Maybe byte-reverse an integer
         // private static char convEndian(bool big, char n)   { return big == BE ? n : Char.reverseBytes(n); }
         private static short convEndian(bool big, short n) { return big ? Short.reverseBytes(n) : n   ; }
         private static int convEndian(bool big, int n)     { return big ? Integer.reverseBytes(n) : n ; }
@@ -537,7 +540,7 @@ class HeapByteBuffer : ByteBuffer {
 
         private static int pickPos(int top, int pos) { return pos; }
     } else {
-            // Maybe byte-reverse an integer
+        // Maybe byte-reverse an integer
         // private static char convEndian(bool big, char n)   { return big == BE ? n : Character.reverseBytes(n); }
         private static short convEndian(bool big, short n) { return big ? n : Short.reverseBytes(n)    ; }
         private static int convEndian(bool big, int n)     { return big ? n : Integer.reverseBytes(n)  ; }

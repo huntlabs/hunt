@@ -2,6 +2,8 @@ module test.ByteBufferTest;
 
 import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;
+import hunt.collection.HeapByteBuffer;
+
 import hunt.Byte;
 
 import hunt.logging.ConsoleLogger;
@@ -83,4 +85,16 @@ class ByteBufferTest {
             assertValues(i, fromFilled, fromMethodView, bb);
         }
     }
+
+    void testShort() {
+        byte[] data = [0x03, 0x03, 0x00, 0x00];
+        ByteBuffer b = BufferUtils.wrap(data);
+        assert(b.order == ByteOrder.BigEndian);
+        b.putShort(2, 61);
+        trace(data);
+
+        assert(b.getShort(2) == 61);
+        assert(HeapByteBuffer.makeShort(0x00, 0x3D) == cast(short)15616);
+    }
+
 }
