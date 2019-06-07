@@ -142,6 +142,68 @@ class BufferUtils {
         return buf;
     }
 
+
+    /**
+     * Wraps a byte array into a buffer.
+     *
+     * <p> The new buffer will be backed by the given byte array;
+     * that is, modifications to the buffer will cause the array to be modified
+     * and vice versa.  The new buffer's capacity will be
+     * <tt>array.length</tt>, its position will be <tt>offset</tt>, its limit
+     * will be <tt>offset + length</tt>, and its mark will be undefined.  Its
+     * {@link #array backing array} will be the given array, and
+     * its {@link #arrayOffset array offset} will be zero.  </p>
+     *
+     * @param  array
+     *         The array that will back the new buffer
+     *
+     * @param  offset
+     *         The offset of the subarray to be used; must be non-negative and
+     *         no larger than <tt>array.length</tt>.  The new buffer's position
+     *         will be set to this value.
+     *
+     * @param  length
+     *         The length of the subarray to be used;
+     *         must be non-negative and no larger than
+     *         <tt>array.length - offset</tt>.
+     *         The new buffer's limit will be set to <tt>offset + length</tt>.
+     *
+     * @return  The new byte buffer
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If the preconditions on the <tt>offset</tt> and <tt>length</tt>
+     *          parameters do not hold
+     */
+    static ByteBuffer wrap(byte[] array, int offset, int length)
+    {
+        try {
+            return new HeapByteBuffer(array, offset, length);
+        } catch (IllegalArgumentException x) {
+            throw new IndexOutOfBoundsException("");
+        }
+    }
+
+    /**
+     * Wraps a byte array into a buffer.
+     *
+     * <p> The new buffer will be backed by the given byte array;
+     * that is, modifications to the buffer will cause the array to be modified
+     * and vice versa.  The new buffer's capacity and limit will be
+     * <tt>array.length</tt>, its position will be zero, and its mark will be
+     * undefined.  Its {@link #array backing array} will be the
+     * given array, and its {@link #arrayOffset array offset>} will
+     * be zero.  </p>
+     *
+     * @param  array
+     *         The array that will back this buffer
+     *
+     * @return  The new byte buffer
+     */
+    static ByteBuffer wrap(byte[] array) {
+        return wrap(array, 0, cast(int)array.length);
+    }
+
+
     /* ------------------------------------------------------------ */
 
     /**
