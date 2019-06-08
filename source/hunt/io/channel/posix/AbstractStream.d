@@ -219,7 +219,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     override void onWrite() {
-        version (HUNT_DEBUG) {
+        version (HUNT_DEBUG_MORE) {
             tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
             if(writeBuffer !is null) {
                 infof("writeBuffer: %s", writeBuffer.toString());
