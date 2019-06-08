@@ -31,7 +31,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
             s.blocking = false;
         }
         _socket = s;
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             infof("new socket: fd=%d", this.handle);
     }
 

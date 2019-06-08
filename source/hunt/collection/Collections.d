@@ -26,6 +26,7 @@ import hunt.collection.TreeSet;
 
 import hunt.Functions;
 import hunt.Exceptions;
+import hunt.Object;
 
 import std.conv;
 import std.range;
@@ -330,6 +331,12 @@ private class UnmodifiableCollection(E) : Collection!(E) {
         throw new UnsupportedOperationException();
     }
     
+    bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+
+    alias opEquals = Object.opEquals;
+
     // override
     // Spliterator!(E) spliterator() {
     //     return (Spliterator!(E))c.spliterator();
@@ -353,7 +360,16 @@ private class UnmodifiableSet(E) : UnmodifiableCollection!(E), Set!(E) {
     // private static final long serialVersionUID = -9215047833775013803L;
 
     this(Set!(E) s)     {super(s);}
-    override bool opEquals(Object o) {return o is this || c == o;}
+    override bool opEquals(Object o) {return o is this || c == o;} 
+    
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+
+    override string toString() {
+        return super.toString();
+    }
+
     override size_t toHash() @trusted nothrow           { return c.toHash();}
 }
 
@@ -396,6 +412,22 @@ private class UnmodifiableSortedSet(E) : UnmodifiableSet!(E), SortedSet!(E) {
 
     E first()                   {return ss.first();}
     E last()                    {return ss.last();}
+
+
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+    
+    alias opEquals = Object.opEquals;
+
+    override string toString() {
+        return super.toString();
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+
 }
 
 
@@ -454,5 +486,22 @@ private class UnmodifiableNavigableSet(E) :
     // alias subSet = UnmodifiableSortedSet!(E).subSet;
     // alias headSet = UnmodifiableSortedSet!(E).headSet;
     // alias tailSet = UnmodifiableSortedSet!(E).tailSet;
+
+    override bool opEquals(IObject o) {
+        return opEquals(cast(Object) o);
+    }
+
+    alias opEquals = Object.opEquals;
+
+    override string toString() {
+        return super.toString();
+    }
+
+    override size_t toHash() @trusted nothrow {
+        return super.toHash();
+    }
+
+    // alias toString = Object.toString;
+    // alias toHash = Object.toHash;
 
 }
