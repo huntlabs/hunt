@@ -140,10 +140,10 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected ptrdiff_t tryWrite(const ubyte[] data) {
         clearError();
         // const nBytes = this.socket.send(data);
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("try to writ: %d bytes, fd=%d", data.length, this.handle);
         const nBytes = write(this.handle, data.ptr, data.length);
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
         if (nBytes > 0) {
@@ -167,7 +167,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 this.close();
             }
         } else {
-            version (HUNT_DEBUG) {
+            version (HUNT_DEBUG_MORE) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
             }
@@ -189,18 +189,18 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     private bool tryNextWrite(ByteBuffer buffer) {
         const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
         if(data.length == 0)
             return true;
 
         size_t nBytes = tryWrite(data);
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
         if (nBytes > 0) {
             buffer.nextGetIndex(cast(int)nBytes);
             if(!buffer.hasRemaining()) {
-                version (HUNT_DEBUG)
+                version (HUNT_DEBUG_MORE)
                     tracef("A buffer is written out. fd=%d", this.handle);
                 // buffer.clear();
                 return true;
@@ -229,7 +229,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         if(!_isWritting)
             return;
         if(_isClosing && isWriteCancelling) {
-            version (HUNT_DEBUG) infof("Write cancelled, fd=%d", this.handle);
+            version (HUNT_DEBUG_MORE) infof("Write cancelled, fd=%d", this.handle);
             resetWriteStatus();
             return;
         }
@@ -238,11 +238,11 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;
             } else {
-                version (HUNT_DEBUG) 
+                version (HUNT_DEBUG_MORE) 
                 tracef("waiting to try again... fd=%d, %s", this.handle, writeBuffer.toString());
                 return;
             }
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
             tracef("running here, fd=%d", this.handle);
         }
 
@@ -250,7 +250,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("start to write [fd=%d], writeBuffer: %s", this.handle, writeBuffer is null);
 
         if(_writeQueue.tryDequeue(writeBuffer)) {
@@ -258,10 +258,10 @@ abstract class AbstractStream : AbstractSocketChannel {
                 writeBuffer = null;  
                 checkAllWriteDone();            
             } else {
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
                 tracef("waiting to try again: fd=%d", this.handle);
             }
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
                 tracef("running here, fd=%d", this.handle);
         }
     }
@@ -269,7 +269,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool checkAllWriteDone() {
         if(_writeQueue is null || _writeQueue.isEmpty()) {
             resetWriteStatus();        
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
                 tracef("All data are written out. fd=%d", this.handle);
             if(dataWriteDoneHandler !is null)
                 dataWriteDoneHandler(this);
