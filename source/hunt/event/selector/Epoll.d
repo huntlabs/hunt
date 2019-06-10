@@ -97,7 +97,7 @@ class AbstractSelector : Selector {
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
         int infd = cast(int) channel.handle;
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("register channel: fd=%d", infd);
 
         size_t index = cast(size_t)(infd / divider);
@@ -198,7 +198,7 @@ class AbstractSelector : Selector {
             if (isClosed(event)) {
                 /* An error has occured on this fd, or the socket is not
                     ready for reading (why were we notified then?) */
-                version (HUNT_DEBUG) {
+                version (HUNT_DEBUG_MORE) {
                     if (isError(event)) {
                         warningf("channel error: fd=%s, event=%d, errno=%d, message=%s",
                                 channel.handle, event, errno, getErrorMessage(errno));

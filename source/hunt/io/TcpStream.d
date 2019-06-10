@@ -24,7 +24,6 @@ import hunt.Functions;
 import std.format;
 import std.socket;
 import std.exception;
-import std.socket;
 
 import core.atomic;
 import core.thread;
@@ -124,8 +123,12 @@ class TcpStream : AbstractStream {
         return _isWritting;
     }
 
-    void connect(string ip, ushort port) {
-        connect(parseAddress(ip, port));
+    void connect(string hostname, ushort port) {
+        Address[] addresses = getAddress(hostname, port);
+        if(addresses is null) {
+            throw new SocketException("Can't resolve hostname: " ~ hostname);
+        }
+        connect(addresses[0]); // always select the first one.
     }
 
     void connect(Address addr) {
