@@ -6,7 +6,6 @@ version(Posix):
 
 import hunt.collection.BufferUtils;
 import hunt.collection.ByteBuffer;
-import hunt.collection.RingBuffer;
 import hunt.event.selector.Selector;
 import hunt.Functions;
 import hunt.io.channel.AbstractSocketChannel;
@@ -23,6 +22,8 @@ import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
+version(MMAP)  import hunt.collection.RingBuffer;
+
 enum string ResponseData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 
 /**
@@ -30,8 +31,15 @@ TCP Peer
 */
 abstract class AbstractStream : AbstractSocketChannel {
     // enum BufferSize = 4096;
+
+version(MMAP) {
     private ubyte[] _readBuffer;
     private size_t startPos;
+    private RingBuffer!(ubyte, 8192) ringBuffer;
+}   else {
+    private const(ubyte)[] _readBuffer;
+}
+
     private ByteBuffer writeBuffer;
 
     protected SimpleEventHandler disconnectionHandler;
@@ -40,20 +48,22 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool _isConnected; // It's always true for server.
     protected AddressFamily _family;
     protected ByteBuffer _bufferForRead;
-    private RingBuffer!(ubyte, 8192) ringBuffer;
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
 
         this._family = family;
+version(MMAP)  {
         ringBuffer.extend(bufferSize);
         _readBuffer = ringBuffer.window();
         startPos = 0;
-        // _bufferForRead = BufferUtils.allocate(bufferSize);
-        // _bufferForRead.limit(cast(int)bufferSize);
-        // _readBuffer = cast(ubyte[])_bufferForRead.array();
+}         else {
+        _bufferForRead = BufferUtils.allocate(bufferSize);
+        _bufferForRead.limit(cast(int)bufferSize);
+        _readBuffer = cast(ubyte[])_bufferForRead.array();
         // _writeQueue = new WritingBufferQueue();
+}
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
         setFlag(ChannelFlag.Write, true);
@@ -68,17 +78,19 @@ abstract class AbstractStream : AbstractSocketChannel {
         // ubyte[] _readBuffer = ringBuffer.window();
         // ubyte[BufferSize] _readBuffer;
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
+version(MMAP)  {            
         ptrdiff_t len = read(this.handle, cast(void*) (_readBuffer.ptr + startPos), _readBuffer.length - startPos);
+} else {
+    ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
+}        
         version (HUNT_DEBUG)
             tracef("reading[fd=%d]: %d nbytes", this.handle, len);
 
         if (len > 0) {
             if (dataReceivedHandler !is null) {
-                // _bufferForRead.limit(cast(int)len);
-                // _bufferForRead.position(0);
+version(MMAP)  {   
                 int le = dataReceivedHandler(_readBuffer[0..len]);
                 debug infof("le=%d, remaining=%d", le, len - le);
-
                 if(len == le) {
                     startPos = 0;
                 } else if(le == 0) {
@@ -91,6 +103,11 @@ abstract class AbstractStream : AbstractSocketChannel {
                     _readBuffer = ringBuffer.window();
                     startPos = 0;
                 }
+} else {
+                _bufferForRead.limit(cast(int)len);
+                _bufferForRead.position(0);
+                dataReceivedHandler(_bufferForRead);
+}
             }
 
             // size_t nBytes = tryWrite(cast(ubyte[])ResponseData);

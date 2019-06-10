@@ -20,8 +20,12 @@ import hunt.system.Memory;
 import core.atomic;
 import std.socket;
 
-
-alias DataReceivedHandler = int delegate(ubyte[] buffer);
+version(MMAP) {
+    alias DataReceivedHandler = int delegate(ubyte[] buffer);
+}
+else {
+    alias DataReceivedHandler = void delegate(ByteBuffer buffer);
+}
 alias AcceptHandler = void delegate(Socket socket);
 alias ErrorEventHandler = Action1!(string);
 
