@@ -47,15 +47,15 @@ mixin template GetConstantValues(T) if (is(T == struct) || is(T == class)) {
 	}
 }
 
-alias Helper(alias T) = T;
+// alias Helper(alias T) = T;
 
-template Pointer(T) {
-	static if (is(T == class) || is(T == interface)) {
-		alias Pointer = T;
-	} else {
-		alias Pointer = T*;
-	}
-}
+// template Pointer(T) {
+// 	static if (is(T == class) || is(T == interface)) {
+// 		alias Pointer = T;
+// 	} else {
+// 		alias Pointer = T*;
+// 	}
+// }
 
 template isInheritClass(T, Base) {
 	enum FFilter(U) = is(U == Base);
@@ -83,9 +83,9 @@ template isPublic(alias T) {
 
 /**
 */
-mixin template CloneMemberTemplate(T, alias cloneHandler = null) 	{
+mixin template CloneMemberTemplate(T, alias onCloned = null) 	{
 	import std.traits;
-	version(HUNT_DEBUG_MORE) import hunt.logging.ConsoleLogger;
+	version(HUNT_DEBUG) import hunt.logging.ConsoleLogger;
 	alias baseClasses = BaseClassesTuple!T;
 
 	static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {
@@ -103,19 +103,54 @@ mixin template CloneMemberTemplate(T, alias cloneHandler = null) 	{
 	}
 
 	private void __copyFieldsTo(T copy) {
-		assert(copy !is null);	
-
-		static foreach (string fieldName; FieldNameTuple!T) {
-			__traits(getMember, copy, fieldName) = __traits(getMember, this, fieldName);
-			version(HUNT_DEBUG_MORE) {
-				tracef("cloning field: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
-			}
+		if(copy is null) {
+			version(HUNT_DEBUG) warningf("Can't create an instance for %s", T.stringof);
+			throw new Exception("Can't create an instance for " ~ T.stringof);
 		}
 
-		static if(cloneHandler !is null) {
-			cloneHandler(this, copy);
+		// pragma(msg, "========\nclone type: " ~ T.stringof);
+		static foreach (string fieldName; FieldNameTuple!T) {
+			// pragma(msg, "nclone field=" ~ fieldName);
+			version(HUNT_DEBUG_MORE) {
+				tracef("cloning: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
+			}
+			__traits(getMember, copy, fieldName) = __traits(getMember, this, fieldName);
+		}
+
+		static if(onCloned !is null) {
+			onCloned(this, copy);
 		}
 	}
+}
+
+
+/**
+*/
+string getAllFieldValues(T, string separator1 = "=", string separator2 = ", ")(T obj) 
+	if (is(T == class) || is(T == struct)) {
+
+	Appender!string sb;
+	bool isFirst = true;
+	alias baseClasses = BaseClassesTuple!T;
+
+	static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {
+	} else {
+		string s = getAllFieldValues!(baseClasses[0], separator1, separator2)(obj);
+		sb.put(s);
+		isFirst = false; 
+	}
+
+	static foreach (string fieldName; FieldNameTuple!T) {
+		if(isFirst) 
+			isFirst = false; 
+		else 
+			sb.put(separator2);
+		sb.put(fieldName);
+		sb.put(separator1);
+		sb.put(to!string(__traits(getMember, obj, fieldName)));
+	}
+
+	return sb.data;
 }
 
 

@@ -1,5 +1,6 @@
 module common;
 
+import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 import hunt.util.Traits;
 
@@ -15,7 +16,7 @@ class FruitBase : Cloneable {
     }
 
     mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
-        writeln("Checking description. Its value is: " ~ from.description);
+        writeln("Checking description. The value is: " ~ from.description);
     });
 }
 
@@ -93,4 +94,13 @@ void testClone() {
 	f1.setName("Peach");
 
 	assert(f1.getName() != f2.getName());
+}
+
+void testGetFieldValues() {
+
+    import hunt.util.Traits;
+	Fruit f1 = new Fruit("Apple", 9.5f);
+	f1.description = "normal apple";
+
+	trace(f1.getAllFieldValues());
 }
