@@ -128,6 +128,9 @@ class TcpStream : AbstractStream {
         if(addresses is null) {
             throw new SocketException("Can't resolve hostname: " ~ hostname);
         }
+        version(HUNT_DEBUG_MORE) {
+            infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, addresses[0], port);
+        }
         connect(addresses[0]); // always select the first one.
     }
 

@@ -45,7 +45,8 @@ void main()
 	writeln("Locale: ", Locale.getUserDefault());
 	tracef("isDaemon: %s", Thread.getThis().isDaemon());
 
-	// // testClone();
+	testClone();
+	testGetFieldValues();
 
 	// trace(Locale.getUserUI());
 	// trace(Locale.getSystemDefault());
@@ -86,9 +87,11 @@ void main()
 	// testUnits!(ThreadPoolExecutorTest);
 
 	// testUnits!(SerializationTest);
-	testUnits!(ByteBufferTest);
+	// testUnits!(ByteBufferTest);
+
 
 }
+
 
 
 
