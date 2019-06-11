@@ -31,10 +31,10 @@ TCP Peer
 */
 abstract class AbstractStream : AbstractSocketChannel {
     // enum BufferSize = 4096;
+    private size_t startPos;
 
 version(MMAP) {
     private ubyte[] _readBuffer;
-    private size_t startPos;
     private RingBuffer!(ubyte, 8192) ringBuffer;
 }   else {
     private const(ubyte)[] _readBuffer;
@@ -61,6 +61,7 @@ version(MMAP)  {
 }         else {
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.limit(cast(int)bufferSize);
+        _bufferForRead.position(0);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
         // _writeQueue = new WritingBufferQueue();
 }
@@ -80,6 +81,8 @@ version(MMAP)  {
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
 version(MMAP)  {            
         ptrdiff_t len = read(this.handle, cast(void*) (_readBuffer.ptr + startPos), _readBuffer.length - startPos);
+}  else version(MINIHTTP) { 
+        ptrdiff_t len = read(this.handle, cast(void*) (_readBuffer.ptr + startPos), _readBuffer.length - startPos);
 } else {
     ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
 }        
@@ -95,13 +98,35 @@ version(MMAP)  {
                     startPos = 0;
                 } else if(le == 0) {
                     startPos += len;
-                    debug infof("remaining=%d", startPos);
+                    debug infof("startPos=%d", startPos);
                 } else if(le < len) {
                     debug infof("release=%d", le);
                     ringBuffer.releaseFront(le);
                     ringBuffer.extend(le);
                     _readBuffer = ringBuffer.window();
                     startPos = 0;
+                }
+} else version(MINIHTTP) {
+                _bufferForRead.limit(cast(int)(len + startPos));
+                debug infof( "available: %d bytes", _bufferForRead.remaining());
+                dataReceivedHandler(_bufferForRead);
+                int remaining = _bufferForRead.remaining();
+                debug infof( "remaining: %d bytes", remaining);
+                if(remaining == 0) {
+                    startPos = 0;
+                    _bufferForRead.position(0);
+                } else if(len == remaining) {
+                    startPos += len;
+                    debug infof("startPos=%d", startPos);
+					// buffer.position(buffer.position() - len);
+                } else if(remaining > 0) {
+                    byte[] remainingBytes = _bufferForRead.getRemaining();
+                    // debug tracef("_bufferForRead: %s", _bufferForRead.toString());
+                    debug tracef("move remaining data: %d bytes", remainingBytes);
+                    _bufferForRead.clear();
+                    _bufferForRead.put(remainingBytes); // move remaining data
+                    _bufferForRead.position(0);
+                    startPos = remaining;
                 }
 } else {
                 _bufferForRead.limit(cast(int)len);
