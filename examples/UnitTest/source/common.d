@@ -102,5 +102,7 @@ void testGetFieldValues() {
 	Fruit f1 = new Fruit("Apple", 9.5f);
 	f1.description = "normal apple";
 
+static if (CompilerHelper.isGreaterThan(2086)) {
 	trace(f1.getAllFieldValues());
+}
 }
