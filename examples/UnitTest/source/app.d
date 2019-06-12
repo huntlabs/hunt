@@ -45,15 +45,15 @@ void main()
 	writeln("Locale: ", Locale.getUserDefault());
 	tracef("isDaemon: %s", Thread.getThis().isDaemon());
 
-	testClone();
-	testGetFieldValues();
+	// testClone();
+	// testGetFieldValues();
 
 	// trace(Locale.getUserUI());
 	// trace(Locale.getSystemDefault());
 
 	// testPropertySetter();
 
-	// testUnits!(MagedQueueTest);
+	testUnits!(MagedQueueTest);
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);

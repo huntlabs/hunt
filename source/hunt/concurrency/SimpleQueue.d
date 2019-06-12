@@ -31,9 +31,15 @@ interface Queue(T) {
     bool tryDequeue(out T e);
 }
 
-private static class QueueNode(T) {
+private class QueueNode(T) {
     QueueNode!T nxt;
     T value;
+
+    this() {} 
+
+    this(T value) {
+        this.value = value;
+    }
 }
 
 /** blocking multi-producer multi-consumer queue  */
@@ -197,14 +203,11 @@ class SimpleQueue(T) : Queue!T {
     }
 
     void enqueue(T t) {
-        auto end = new QueueNode!T();
-        end.value = t;
+        auto end = new QueueNode!T(t);
         
         auto tl = this.tail;
         this.tail = end;
-        tl.value = t;
         tl.nxt = end; // acces
-        
     }
 
     T dequeue() {

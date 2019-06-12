@@ -20,6 +20,7 @@ import std.string;
 import std.traits;
 
 import hunt.logging.ConsoleLogger;
+import hunt.util.Common;
 
 enum string[] FixedObjectMembers = ["toString", "opCmp", "opEquals", "Monitor", "factory"];
 
@@ -123,6 +124,7 @@ mixin template CloneMemberTemplate(T, alias onCloned = null) 	{
 	}
 }
 
+static if (CompilerHelper.isGreaterThan(2086)) {
 
 /**
 */
@@ -153,6 +155,7 @@ string getAllFieldValues(T, string separator1 = "=", string separator2 = ", ")(T
 	return sb.data;
 }
 
+}
 
 /**
 * Params

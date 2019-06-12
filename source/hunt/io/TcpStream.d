@@ -306,7 +306,7 @@ class TcpStream : AbstractStream {
 
             while (!_isClosing && !isWriteCancelling && d.length > 0) {
                 version (HUNT_DEBUG_MORE)
-                    tracef("write data directly, fd=%d, %d bytes", this.handle, d.length);
+                    tracef("write directly: fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
 
                 if (nBytes == d.length) {
@@ -320,7 +320,7 @@ class TcpStream : AbstractStream {
                         tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     d = d[nBytes .. $];
                 } else {
-                    version (HUNT_DEBUG_MORE)
+                    version (HUNT_DEBUG)
                         warningf("buffering remaining data: %d bytes, fd=%d", d.length, this.handle);
                     initializeWriteQueue();
                     _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
