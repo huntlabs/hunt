@@ -202,7 +202,6 @@ class SimpleQueue(T) : Queue!T {
         
         auto tl = this.tail;
         this.tail = end;
-        tl.value = t;
         tl.nxt = end; // acces
         
     }
