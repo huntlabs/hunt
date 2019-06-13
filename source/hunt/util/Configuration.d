@@ -97,7 +97,7 @@ class ConfigurationItem {
     ConfigurationItem parent;
 
     this(string name, string parentPath = "") {
-        // version(HUNT_DEBUG_CONFIG) tracef("new item: %s, parent: %s", name, parentPath);
+        // version(HUNT_CONFIG_DEBUG) tracef("new item: %s, parent: %s", name, parentPath);
         _name = name;
     }
 
@@ -298,7 +298,7 @@ class ConfigBuilder {
 
     void setValue(string key, string value) {
 
-        version (HUNT_DEBUG_CONFIG)
+        version (HUNT_CONFIG_DEBUG)
             tracef("setting item: key=%s, value=%s", key, value);
         _itemMap[key] = value;
 
@@ -310,7 +310,7 @@ class ConfigBuilder {
                 continue;
 
             if (canFind(reservedWords, str)) {
-                warningf("Found a reserved word: %s. It may cause some errors.", str);
+                version (HUNT_DEBUG) warningf("Found a reserved word: %s. It may cause some errors.", str);
             }
 
             if (currentPath.empty)
@@ -318,14 +318,14 @@ class ConfigBuilder {
             else
                 currentPath = currentPath ~ "." ~ str;
 
-            // version (HUNT_DEBUG_CONFIG)
+            // version (HUNT_CONFIG_DEBUG)
             //     tracef("checking node: path=%s", currentPath);
             ConfigurationItem tvalue = cvalue._map.get(str, null);
             if (tvalue is null) {
                 tvalue = new ConfigurationItem(str);
                 tvalue._fullPath = currentPath;
                 cvalue.apppendChildNode(str, tvalue);
-                version (HUNT_DEBUG_CONFIG)
+                version (HUNT_CONFIG_DEBUG)
                     tracef("new node: key=%s, parent=%s, node=%s", key, cvalue.fullPath, str);
             }
             cvalue = tvalue;
@@ -337,7 +337,7 @@ class ConfigBuilder {
 
     T build(T, string nodeName = "")() {
         static if (!nodeName.empty) {
-            // version(HUNT_DEBUG_CONFIG) pragma(msg, "node name: " ~ nodeName);
+            // version(HUNT_CONFIG_DEBUG) pragma(msg, "node name: " ~ nodeName);
             return buildItem!(T)(this.subItem(nodeName));
         } else static if (hasUDA!(T, Configuration)) {
             enum name = getUDAs!(T, Configuration)[0].name;
@@ -379,11 +379,11 @@ class ConfigBuilder {
             enum memberProtection = __traits(getProtection, __traits(getMember, T, memberName));
             static if (memberProtection == "private"
                     || memberProtection == "protected" || memberProtection == "export") {
-                // version (HUNT_DEBUG_CONFIG) pragma(msg, "skip private member: " ~ memberName);
+                // version (HUNT_CONFIG_DEBUG) pragma(msg, "skip private member: " ~ memberName);
             } else static if (isType!(__traits(getMember, T, memberName))) {
-                // version (HUNT_DEBUG_CONFIG) pragma(msg, "skip inner type member: " ~ memberName);
+                // version (HUNT_CONFIG_DEBUG) pragma(msg, "skip inner type member: " ~ memberName);
             } else static if (__traits(isStaticFunction, __traits(getMember, T, memberName))) {
-                // version (HUNT_DEBUG_CONFIG) pragma(msg, "skip static member: " ~ memberName);
+                // version (HUNT_CONFIG_DEBUG) pragma(msg, "skip static member: " ~ memberName);
             } else {
                 alias memberType = typeof(__traits(getMember, T, memberName));
                 enum memberTypeString = memberType.stringof;
@@ -424,28 +424,28 @@ class ConfigBuilder {
                             ConfigurationItem[] items = %5$s.subItems("%1$s");
                             %3$s tempValues;
                             foreach(ConfigurationItem it; items) {
-                                // version (HUNT_DEBUG_CONFIG) tracef("name:%%s, value:%%s", it.name, item.value);
+                                // version (HUNT_CONFIG_DEBUG) tracef("name:%%s, value:%%s", it.name, item.value);
                                 tempValues ~= buildItem!(%6$s)(it); // it.as!(%6$s)();
                             }
                             %4$s.%2$s = tempValues;
                         } else {
-                            version (HUNT_DEBUG_CONFIG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
+                            version (HUNT_CONFIG_DEBUG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                         }                        
-                        version (HUNT_DEBUG_CONFIG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                        version (HUNT_CONFIG_DEBUG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
 
                     }.format(settingItemName, memberName,
                             memberTypeString, returnParameter, incomingParameter, T.stringof);
                 } else {
-                    // version (HUNT_DEBUG_CONFIG) pragma(msg,
+                    // version (HUNT_CONFIG_DEBUG) pragma(msg,
                     //         "setting " ~ memberName ~ " with item " ~ settingItemName);
 
                     str ~= q{
                         if(%5$s.exists("%1$s")) {
                             %4$s.%2$s = %5$s.subItem("%1$s").as!(%3$s)();
                         } else {
-                            version (HUNT_DEBUG_CONFIG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
+                            version (HUNT_CONFIG_DEBUG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                         }                        
-                        version (HUNT_DEBUG_CONFIG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                        version (HUNT_CONFIG_DEBUG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
 
                     }.format(settingItemName, memberName,
                             memberTypeString, returnParameter, incomingParameter);
@@ -464,23 +464,23 @@ class ConfigBuilder {
 
             static if (is(parameterType == struct) || is(parameterType == class)
                     || is(parameterType == interface)) {
-                // version (HUNT_DEBUG_CONFIG) pragma(msg, "skip method with class: " ~ memberName);
+                // version (HUNT_CONFIG_DEBUG) pragma(msg, "skip method with class: " ~ memberName);
             } else {
-                // version (HUNT_DEBUG_CONFIG) pragma(msg, "method: " ~ memberName);
+                // version (HUNT_CONFIG_DEBUG) pragma(msg, "method: " ~ memberName);
 
                 r = q{
                     if(%5$s.exists("%1$s")) {
                         %4$s.%2$s(%5$s.subItem("%1$s").as!(%3$s)());
                     } else {
-                        version (HUNT_DEBUG_CONFIG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
+                        version (HUNT_CONFIG_DEBUG) warningf("Undefined item: %%s.%1$s" , %5$s.fullPath);
                     }
                     
-                    version (HUNT_DEBUG_CONFIG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
+                    version (HUNT_CONFIG_DEBUG) tracef("%4$s.%2$s=%%s", %4$s.%2$s);
                     }.format(settingItemName, memberName,
                         parameterType.stringof, returnParameter, incomingParameter);
             }
         } else {
-            // version (HUNT_DEBUG_CONFIG) pragma(msg, "skip method: " ~ memberName);
+            // version (HUNT_CONFIG_DEBUG) pragma(msg, "skip method: " ~ memberName);
         }
 
         return r;
@@ -498,7 +498,7 @@ class ConfigBuilder {
             enum newSettingItemName = settingItemName;
         }
 
-        // version (HUNT_DEBUG_CONFIG)
+        // version (HUNT_CONFIG_DEBUG)
         // {
         //     pragma(msg, "module name: " ~ memberModuleName);
         //     pragma(msg, "full type name: " ~ fullTypeName);
@@ -513,7 +513,7 @@ class ConfigBuilder {
                 %5$s.%3$s = buildItem!(%4$s)(%6$s.subItem("%2$s"));
             }
             else {
-                version (HUNT_DEBUG_CONFIG) warningf("Undefined item: %%s.%2$s" , %6$s.fullPath);
+                version (HUNT_CONFIG_DEBUG) warningf("Undefined item: %%s.%2$s" , %6$s.fullPath);
             }
         }.format(memberModuleName, newSettingItemName,
                 memberName, fullTypeName, returnParameter, incomingParameter);
