@@ -85,11 +85,8 @@ class BufferedOutputStream : OutputStream {
 
     override
     void flush()  {
-        version(HUNT_DEBUG) {
-            // if(count == 0)
-            //     warning("buffered data(bytes): 0");
-            // else
-            tracef("buffered data: %d bytes", count);
+        version(HUNT_DEBUG_MORE) {
+            tracef("remaining: %d bytes", count);
         }
         if (count > 0) {
             output.write(buf, 0, count);
