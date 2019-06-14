@@ -311,6 +311,117 @@ class DateTimeHelper {
             static assert(0, "Unsupported OS");
     }
 
+    static long currentTimeNsecs() @trusted @property {
+        version (Windows) {
+            import core.sys.windows.winbase;
+            import core.sys.windows.winnt;
+
+            /**
+                http://www.frenk.com/2009/12/convert-filetime-to-unix-timestamp/
+                https://stackoverflow.com/questions/10849717/what-is-the-significance-of-january-1-1601
+                https://stackoverflow.com/questions/1090869/why-is-1-1-1970-the-epoch-time
+                https://www.unixtimestamp.com/
+            */
+            FILETIME fileTime;
+            GetSystemTimeAsFileTime(&fileTime);
+            ULARGE_INTEGER date, adjust;
+            date.HighPart = fileTime.dwHighDateTime;
+            date.LowPart = fileTime.dwLowDateTime;
+
+            // 100-nanoseconds = milliseconds * 10000
+            adjust.QuadPart = 11644473600000 * 10000;
+
+            // removes the diff between 1970 and 1601
+            date.QuadPart -= adjust.QuadPart;
+
+            // converts back from 100-nanoseconds to nanoseconds
+            return date.QuadPart * 100;
+
+        } else version (Posix) {
+                import core.sys.posix.signal : timespec;
+            version (OSX) {
+                import core.sys.posix.sys.time : gettimeofday, timeval;
+
+                timeval tv = void;
+                // Posix gettimeofday called with a valid timeval address
+                // and a null second parameter doesn't fail.
+                gettimeofday(&tv, null);
+                return convert!(TimeUnit.Second, TimeUnit.Nanosecond)(tv.tv_sec) + 
+                    convert!(TimeUnit.Microsecond, TimeUnit.Nanosecond)(tv.tv_usec);
+
+            } else version (linux) {
+                    import core.sys.linux.time : CLOCK_REALTIME_COARSE;
+                    import core.sys.posix.time : clock_gettime, CLOCK_REALTIME;
+
+                    timespec ts = void;
+                    immutable error = clock_gettime(CLOCK_REALTIME, &ts);
+                    // Posix clock_gettime called with a valid address and valid clock_id is only
+                    // permitted to fail if the number of seconds does not fit in time_t. If tv_sec
+                    // is long or larger overflow won't happen before 292 billion years A.D.
+                    static if (ts.tv_sec.max < long.max) {
+                        if (error)
+                            throw new TimeException("Call to clock_gettime() failed");
+                    }
+                    return convert!(TimeUnit.Second, TimeUnit.Nanosecond)(ts.tv_sec) + (ts.tv_nsec);
+
+            } else version (FreeBSD) {
+                import core.sys.freebsd.time : clock_gettime, CLOCK_REALTIME;
+
+                timespec ts = void;
+                immutable error = clock_gettime(CLOCK_REALTIME, &ts);
+                // Posix clock_gettime called with a valid address and valid clock_id is only
+                // permitted to fail if the number of seconds does not fit in time_t. If tv_sec
+                // is long or larger overflow won't happen before 292 billion years A.D.
+                static if (ts.tv_sec.max < long.max) {
+                    if (error)
+                        throw new TimeException("Call to clock_gettime() failed");
+                }
+                return convert!(TimeUnit.Second, TimeUnit.Nanosecond)(ts.tv_sec) + (ts.tv_nsec);
+            } else version (NetBSD) {
+                import core.sys.netbsd.time : clock_gettime, CLOCK_REALTIME;
+
+                timespec ts = void;
+                immutable error = clock_gettime(CLOCK_REALTIME, &ts);
+                // Posix clock_gettime called with a valid address and valid clock_id is only
+                // permitted to fail if the number of seconds does not fit in time_t. If tv_sec
+                // is long or larger overflow won't happen before 292 billion years A.D.
+                static if (ts.tv_sec.max < long.max) {
+                    if (error)
+                        throw new TimeException("Call to clock_gettime() failed");
+                }
+                return convert!(TimeUnit.Second, TimeUnit.Nanosecond)(ts.tv_sec) + (ts.tv_nsec);
+            } else version (DragonFlyBSD) {
+                import core.sys.dragonflybsd.time : clock_gettime, CLOCK_REALTIME;
+
+                timespec ts = void;
+                immutable error = clock_gettime(CLOCK_REALTIME, &ts);
+                // Posix clock_gettime called with a valid address and valid clock_id is only
+                // permitted to fail if the number of seconds does not fit in time_t. If tv_sec
+                // is long or larger overflow won't happen before 292 billion years A.D.
+                static if (ts.tv_sec.max < long.max) {
+                    if (error)
+                        throw new TimeException("Call to clock_gettime() failed");
+                }
+                return convert!(TimeUnit.Second, TimeUnit.Nanosecond)(ts.tv_sec) + (ts.tv_nsec);
+            } else version (Solaris) {
+                import core.sys.solaris.time : clock_gettime, CLOCK_REALTIME;
+
+                timespec ts = void;
+                immutable error = clock_gettime(CLOCK_REALTIME, &ts);
+                // Posix clock_gettime called with a valid address and valid clock_id is only
+                // permitted to fail if the number of seconds does not fit in time_t. If tv_sec
+                // is long or larger overflow won't happen before 292 billion years A.D.
+                static if (ts.tv_sec.max < long.max) {
+                    if (error)
+                        throw new TimeException("Call to clock_gettime() failed");
+                }
+                return convert!(TimeUnit.Second, TimeUnit.Nanosecond)(ts.tv_sec) + (ts.tv_nsec);
+            } else
+                static assert(0, "Unsupported OS");
+        } else
+            static assert(0, "Unsupported OS");
+    }
+
     static string getTimeAsGMT() {
         return cast(string)*timingValue;
     }
