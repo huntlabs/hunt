@@ -279,7 +279,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
         if(_writeQueue is null || _writeQueue.isEmpty()) {
             resetWriteStatus();        
-            version (HUNT_DEBUG)
+            version (HUNT_DEBUG_MORE)
                 infof("All data are written out. fd=%d", this.handle);
             if(dataWriteDoneHandler !is null)
                 dataWriteDoneHandler(this);
