@@ -47,18 +47,31 @@ class JsonHelperTest {
 
     @Test void testGetAsClass01() {
         Greeting gt = new Greeting();
+        gt.privateMember = "private member";
+        gt.id = 123;
         gt.content = "Hello, world!";
         gt.creationTime = Clock.currTime;
         gt.currentTime = Clock.currStdTime;
+        gt.setColor("Red");
+        gt.setContent("Hello");
         JSONValue jv = JsonHelper.toJson(gt);
-        // trace("====>", jv, "====");
+        trace("====>", jv.toPrettyString(), "====");
 
         Greeting gt1 = JsonHelper.getAs!(Greeting)(jv);
         // trace("gt====>", gt, "====");
         // trace("gt1====>", gt1, "====");
+        trace(gt1.getContent());
+
+        assert(gt.privateMember == gt1.privateMember);
+        assert(gt.id == gt1.id);
         assert(gt.content == gt1.content);
         assert(gt.creationTime == gt1.creationTime);
-        assert(gt.currentTime == gt1.currentTime);
+        assert(gt.currentTime != gt1.currentTime);
+        assert(0 == gt1.currentTime);
+        assert(gt.getColor() == gt1.getColor());
+        assert(gt1.getColor() == "Red");
+        assert(gt.getContent() == gt1.getContent());
+        assert(gt1.getContent() == "Hello");
 
         JSONValue parametersInJson;
         parametersInJson["name"] = "Hunt";
@@ -224,16 +237,90 @@ class JsonHelperTest {
     }
 }
 
-class Greeting {
-    private int id;
 
-    // alias TestHandler = void delegate(string); // bug
 
-    string content;
+interface ISettings : JsonSerializable {
+    string color();
+    void color(string c);
+}
+
+class GreetingSettings : ISettings {
+    string _color;
+
+    this() {
+        _color = "black";
+    }
+
+    string color() {
+        return _color;
+    }
+
+    void color(string c) {
+        this._color = c;
+    }
+
+
+    JSONValue jsonSerialize() {
+        // return JsonHelper.toJson(this);
+        JSONValue v;
+        v["_color"] = _color;
+        return v;
+    }
+    
+    void jsonDeserialize(JSONValue value) {
+        info(value.toString());
+        _color = value["_color"].str;
+    }
+
+}
+
+class GreetingBase {
+    int id;
+    private string content;
+
+    void setContent(string content) {
+        this.content = content;
+    }
+
+    string getContent() {
+        return this.content;
+    }
+}
+
+class Greeting : GreetingBase {
+    private string privateMember;
+    private ISettings settings;
+    Object.Monitor skippedMember;
+
+    alias TestHandler = void delegate(string); 
+
+    // FIXME: Needing refactor or cleanup -@zxp at 6/16/2019, 12:33:02 PM
+    // 
+    string content; // test for the same fieldname
+
     SysTime creationTime;
+    
+    @Exclude
     long currentTime;
+    
     byte[] bytes;
     string[] members;
+
+    this() {
+        settings = new GreetingSettings();
+    }
+
+    void setColor(string color) {
+        settings.color = color;
+    }
+
+    string getColor() {
+        return settings.color();
+    }
+
+    void voidReturnMethod() {
+
+    }
 
     override string toString() {
         string s = format("content=%s, creationTime=%s, currentTime=%s",

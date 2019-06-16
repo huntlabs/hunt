@@ -53,7 +53,7 @@ void main()
 
 	// testPropertySetter();
 
-	testUnits!(MagedQueueTest);
+	// testUnits!(MagedQueueTest);
 
 	// testUnits!(AtomicTest);
 	// testUnits!(BigIntegerTest);
@@ -64,7 +64,7 @@ void main()
 	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
 
-	// testUnits!(JsonHelperTest);
+	testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
