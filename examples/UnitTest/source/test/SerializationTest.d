@@ -1,13 +1,41 @@
 module test.SerializationTest;
 
+import test.quartz.JobDataMap;
+
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 import hunt.util.Serialize;
+import hunt.util.Traits;
+
+import hunt.text.JsonHelper;
 
 import std.conv;
 import std.format;
+import std.json;
 
 class SerializationTest {
+
+    void testJson01() {
+
+        JobDataMap m = new JobDataMap();
+        m.put("name", "Bob");
+        m.put("age", 23);
+        trace(m.toString());
+
+        // ubyte[] d = cast(ubyte[])m.serialize();
+        // tracef("%(%02X %)", d);
+
+        JSONValue jv = JsonHelper.toJson(m);
+        // trace(jv.toPrettyString());
+
+        JobDataMap m2 = JsonHelper.getAs!(JobDataMap)(jv);
+        trace(m.toString());
+        string name = m2.getFromString!(string)("name");
+        int age = m2.getFromString!(int)("age");
+        assert(name == "Bob");
+        assert(age == 23);
+
+    }
 
     // void testAssociativeArray() {
 
@@ -23,34 +51,34 @@ class SerializationTest {
     // }
 
 
-    void testSerializable() {
-        B b = new B();
-        b.id = 2;
-        b.name = "Bob";
-        b.age = 20;
-        b.height = 1.8f;
+    // void testSerializable() {
+    //     B b = new B();
+    //     b.id = 2;
+    //     b.name = "Bob";
+    //     b.age = 20;
+    //     b.height = 1.8f;
 
-        ubyte[] bytes = b.serialize();
-        // version(HUNT_DEBUG) tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
+    //     ubyte[] bytes = b.serialize();
+    //     version(HUNT_DEBUG) tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
 
-        B b1 = unserialize!B(cast(byte[])bytes);
-        version(HUNT_DEBUG) trace(b1.toString());
-        assert(b1 !is b);
-        assert(b1 == b);
+    //     B b1 = unserialize!B(cast(byte[])bytes);
+    //     version(HUNT_DEBUG) trace(b1.toString());
+    //     assert(b1 !is b);
+    //     assert(b1 == b);
 
-        A a = unserialize!A(cast(byte[])bytes);
-        version(HUNT_DEBUG) trace(a.toString());
+    //     A a = unserialize!A(cast(byte[])bytes);
+    //     version(HUNT_DEBUG) trace(a.toString());
 
-        assert(a.name == b.name && a.id == b.id);
+    //     assert(a.name == b.name && a.id == b.id);
 
-        // a = new A();
-        // a.name = "Bob";
+    //     a = new A();
+    //     a.name = "Bob";
         
-        // bytes = a.serialize();
-        // tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
+    //     bytes = a.serialize();
+    //     tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
 
-        // trace(b.toString());
-    }
+    //     trace(b.toString());
+    // }
 
     // void testClassInherit() {
     //     B b = new B();
@@ -101,7 +129,7 @@ void test1(T)(T t) {
 
 
 class A : Serializable {
-    int id;
+    private int id;
     string name;
 
     override string toString() {
@@ -115,6 +143,8 @@ class A : Serializable {
 
 
 class B1 : A {
+
+    // It's not necessary
     // mixin SerializationMember!(typeof(this));
 }
 
