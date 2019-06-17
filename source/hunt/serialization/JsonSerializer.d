@@ -20,6 +20,8 @@ import std.stdio;
 import std.traits;
 
 import hunt.logging.ConsoleLogger;
+import hunt.util.Common;
+
 
 /**
 */
@@ -55,6 +57,9 @@ enum EncodeOnly;
  */
 enum DecodeOnly;
 
+static if(CompilerHelper.isLessThan(2086)) {
+    pragma(msg, "Warning: The minimum required version of D compiler is 2.086.");
+} else {
 
 /**
 */
@@ -83,9 +88,7 @@ final class JsonSerializer {
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == class)) {
 
-        JSONType jt = json.type();
-
-        if (jt != JSON_TYPE.OBJECT) {
+        if (json.type() != JSON_TYPE.OBJECT) {
             return handleException!(T, canThrow)(json, "wrong object type", defaultValue);
         }
 
@@ -499,4 +502,5 @@ final class JsonSerializer {
         return result;
     }
 
+}
 }

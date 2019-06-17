@@ -17,6 +17,10 @@
 
 module test.quartz.DirtyFlagMap;
 
+import hunt.util.Common;
+
+static if(CompilerHelper.isGreaterThan (2086)) {
+
 import hunt.collection.AbstractMap;
 import hunt.collection.ArrayList;
 import hunt.collection.AbstractCollection;
@@ -266,25 +270,29 @@ class DirtyFlagMap(K, V) : Map!(K, V), Cloneable, JsonSerializable {
     // mixin SerializationMember!(typeof(this));
 
     JSONValue jsonSerialize() {
-        JSONValue value = JsonSerializer.serializeObject!(typeof(this), false)(this);
-        string[] keys = map.byKey.array;
+        JSONValue r = JsonSerializer.serializeObject!(typeof(this), false)(this);
+        // string[] keys = map.byKey.array;
         
-        static if(is(V == class)) {
-            string[] values = map.byValue.map!(a => a.toString()).array;
-        } else {
-            V[] values = map.byValue.array;
-        }
+        // static if(is(V == class)) {
+        //     string[] values = map.byValue.map!(a => a.toString()).array;
+        // } else {
+        //     V[] values = map.byValue.array;
+        // }
 
         JSONValue mapJson;
-        // mapJson["type"] = typeid(cast(Object)map).name;
-        // mapJson["keyType"] = K.stringof;
-        // mapJson["valueType"] = V.stringof;
-        mapJson["keys"] = JSONValue(keys);
-        mapJson["values"] = JSONValue(values);
+        // // mapJson["type"] = typeid(cast(Object)map).name;
+        // // mapJson["keyType"] = K.stringof;
+        // // mapJson["valueType"] = V.stringof;
+        // mapJson["keys"] = JSONValue(keys);
+        // mapJson["values"] = JSONValue(values);
 
-        value["map"] = mapJson;
-        trace(value.toPrettyString());
-        return value;
+        foreach(K key, V value; map) {
+            mapJson[key] = value.toString();
+        }
+
+        r["map"] = mapJson;
+        trace(r.toPrettyString());
+        return r;
     }
 
     void jsonDeserialize(const(JSONValue) value) {
@@ -294,10 +302,15 @@ class DirtyFlagMap(K, V) : Map!(K, V), Cloneable, JsonSerializable {
         JsonSerializer.deserializeObject!(typeof(this), false)(this, value);
         JSONValue mapJson = value["map"];
 
-        const(JSONValue)[] keys = mapJson["keys"].array;
-        const(JSONValue)[] values = mapJson["values"].array;
-        for(size_t i=0; i< keys.length; i++) {
-            map.put(keys[i].str, new String(values[i].str));
+        // const(JSONValue)[] keys = mapJson["keys"].array;
+        // const(JSONValue)[] values = mapJson["values"].array;
+        // for(size_t i=0; i< keys.length; i++) {
+        //     map.put(keys[i].str, new String(values[i].str));
+        // }
+        foreach(string key, ref JSONValue value; mapJson) {
+            map.put(key, new String(value.str));
         }
     }   
+}
+
 }

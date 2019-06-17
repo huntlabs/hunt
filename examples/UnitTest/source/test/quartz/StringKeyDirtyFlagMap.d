@@ -15,6 +15,10 @@
  */
 module test.quartz.StringKeyDirtyFlagMap;
 
+import hunt.util.Common;
+
+static if(CompilerHelper.isGreaterThan (2086)) {
+
 import test.quartz.DirtyFlagMap;
 
 import hunt.Exceptions;
@@ -395,4 +399,6 @@ class StringKeyDirtyFlagMap : DirtyFlagMap!(string, Object) {
     }
 
     mixin CloneMemberTemplate!(typeof(this));  
+}
+
 }

@@ -18,6 +18,10 @@
 
 module test.quartz.JobDataMap;
 
+import hunt.util.Common;
+
+static if(CompilerHelper.isGreaterThan (2086)) {
+
 import hunt.collection.Map;
 
 import test.quartz.StringKeyDirtyFlagMap;
@@ -526,4 +530,6 @@ class JobDataMap : StringKeyDirtyFlagMap {
 
     //     return new Long((string) obj);
     // }
+}
+
 }
