@@ -21,12 +21,14 @@ import std.traits;
 // import std.typecons;
 
 import hunt.logging;
-// import hunt.util.serialize;
 
+/**
+*/
 interface JsonSerializable {
+
     JSONValue jsonSerialize();
 
-    void jsonDeserialize(JSONValue value);
+    void jsonDeserialize(const(JSONValue) value);
 }
 
 
@@ -86,10 +88,15 @@ final class JsonHelper {
         }
 
         auto result = new T();
-        try {
-            deserializeObject!(T, traverseBase)(result, json);
-        } catch (JSONException e) {
-            return handleException!(T, canThrow)(json, e.msg, defaultValue);
+
+        static if(is(T : JsonSerializable)) {
+            result.jsonDeserialize(json);
+        } else {
+            try {
+                deserializeObject!(T, traverseBase)(result, json);
+            } catch (JSONException e) {
+                return handleException!(T, canThrow)(json, e.msg, defaultValue);
+            }
         }
 
         return result;
@@ -110,7 +117,7 @@ final class JsonHelper {
 
         try {
             static foreach (string member; FieldNameTuple!T) {
-                    deserializeObjectMembers!(member, false)(result, json);
+                    deserializeMembers!(member, false)(result, json);
             }
         } catch (JSONException e) {
             return handleException!(T, canThrow)(json, e.msg, defaultValue);
@@ -119,12 +126,14 @@ final class JsonHelper {
         return result;
     }
 
-    private static void deserializeObject(T, bool traverseBase = true)
-            (T result, auto ref const(JSONValue) json) if(is(T == class)) {
+    /**
+    */
+    static void deserializeObject(T, bool traverseBase = true)
+            (T target, auto ref const(JSONValue) json) if(is(T == class)) {
 
         static foreach (string member; FieldNameTuple!T) {
             // current fields
-            deserializeObjectMembers!(member)(result, json);
+            deserializeMembers!(member)(target, json);
         }
 
         // super fields
@@ -132,13 +141,13 @@ final class JsonHelper {
         static if(traverseBase && baseClasses.length >= 1) {
             auto jsonItemPtr = "super" in json;
             if(jsonItemPtr !is null) {
-                deserializeObject!(baseClasses[0], traverseBase)(result, *jsonItemPtr);
+                deserializeObject!(baseClasses[0], traverseBase)(target, *jsonItemPtr);
             }
         }
     }
 
-    private static void deserializeObjectMembers(string member, bool traverseBase = true, T)
-        (ref T result, auto ref const(JSONValue) json) {
+    private static void deserializeMembers(string member, bool traverseBase = true, T)
+        (ref T target, auto ref const(JSONValue) json) {
 
             static if(!hasUDA!(__traits(getMember, T, member), Exclude)) {
 
@@ -148,7 +157,7 @@ final class JsonHelper {
                     version(HUNT_DEBUG) warning("skipped a member: " ~ member);
                 } else {
                     version(HUNT_DEBUG) tracef("setting: %s = %s", member, json[member].toString());
-                    __traits(getMember, result, member) = getAs!(memberType, false)(json[member]);
+                    __traits(getMember, target, member) = getAs!(memberType, false)(json[member]);
                 }                    
             }
     }
@@ -352,9 +361,19 @@ final class JsonHelper {
     //     return toJson(t, level, ignore);
     // }
 
+
     static JSONValue toJson(T, bool traverseBase = true, 
-            bool includeMetaType = true)(T value, uint level = uint.max)
-            if (is(T == class)) {
+            bool includeMetaType = true)(T value) if (is(T == class)) {
+
+        static if(is(T : JsonSerializable)) {
+            return value.jsonSerialize();
+        } else {
+            return serializeObject!(T, traverseBase, includeMetaType)(value);
+        }
+    }
+
+    static JSONValue serializeObject(T, bool traverseBase = true, 
+            bool includeMetaType = true)(T value) if (is(T == class)) {
         import std.traits : isSomeFunction, isType;
         // import std.typecons : nullable;
 
@@ -411,7 +430,7 @@ final class JsonHelper {
             alias memberType = typeof(__traits(getMember, T, member));
 
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
-                version(HUNT_DEBUG) warning("skipped member: " ~ member);
+                version(HUNT_DEBUG) warning("skipped member(not JsonSerializable): " ~ member);
             } else {
                 JSONValue json = toJson!(memberType)(__traits(getMember, obj, member));
                 version(HUNT_DEBUG) {

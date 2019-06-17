@@ -45,6 +45,7 @@ class JsonHelperTest {
         assert(testClass.testStruct.json["key"].str == "value");
     }
 
+
     @Test void testGetAsClass01() {
         Greeting gt = new Greeting();
         gt.privateMember = "private member";
@@ -261,13 +262,13 @@ class GreetingSettings : ISettings {
 
 
     JSONValue jsonSerialize() {
-        // return JsonHelper.toJson(this);
-        JSONValue v;
-        v["_color"] = _color;
-        return v;
+        return JsonHelper.serializeObject(this);
+        // JSONValue v;
+        // v["_color"] = _color;
+        // return v;
     }
     
-    void jsonDeserialize(JSONValue value) {
+    void jsonDeserialize(const(JSONValue) value) {
         info(value.toString());
         _color = value["_color"].str;
     }

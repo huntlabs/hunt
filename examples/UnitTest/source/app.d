@@ -64,7 +64,7 @@ void main()
 	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
 
-	testUnits!(JsonHelperTest);
+	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
@@ -86,7 +86,7 @@ void main()
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
 
-	// testUnits!(SerializationTest);
+	testUnits!(SerializationTest);
 	// testUnits!(ByteBufferTest);
 
 
