@@ -7,7 +7,7 @@ import hunt.util.Common;
 import hunt.util.Serialize;
 import hunt.util.Traits;
 
-import hunt.text.JsonHelper;
+import hunt.serialization.JsonSerializer;
 
 import std.conv;
 import std.format;
@@ -25,10 +25,10 @@ class SerializationTest {
         // ubyte[] d = cast(ubyte[])m.serialize();
         // tracef("%(%02X %)", d);
 
-        JSONValue jv = JsonHelper.toJson(m);
+        JSONValue jv = JsonSerializer.toJson(m);
         // trace(jv.toPrettyString());
 
-        JobDataMap m2 = JsonHelper.getAs!(JobDataMap)(jv);
+        JobDataMap m2 = JsonSerializer.fromJson!(JobDataMap)(jv);
         trace(m.toString());
         string name = m2.getFromString!(string)("name");
         int age = m2.getFromString!(int)("age");

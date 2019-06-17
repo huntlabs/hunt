@@ -12,7 +12,7 @@ import test.ByteBufferTest;
 import test.CompletableFutureTest;
 import test.CompletableFutureTest2;
 import test.ForkJoinPoolTest;
-import test.JsonHelperTest;
+import test.JsonSerializerTest;
 import test.LocaleTest;
 import test.LinkedBlockingQueueTest;
 import test.MagedQueueTest;
@@ -64,7 +64,6 @@ void main()
 	// testUnits!(RealLifeCompletableFutureExample2);
 	// testUnits!(ForkJoinPoolTest);
 
-	// testUnits!(JsonHelperTest);
 	// testUnits!(LocaleTest);
 	// testUnits!(LinkedBlockingQueueTest);
 	// testUnits!(MimeTypeTest);
@@ -86,7 +85,8 @@ void main()
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
 
-	testUnits!(SerializationTest);
+	testUnits!(JsonSerializerTest);
+	// testUnits!(SerializationTest);
 	// testUnits!(ByteBufferTest);
 
 
