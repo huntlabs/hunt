@@ -1,13 +1,10 @@
 module test.SerializationTest;
 
-import test.quartz.JobDataMap;
 
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 import hunt.util.Serialize;
 import hunt.util.Traits;
-
-import hunt.serialization.JsonSerializer;
 
 import std.conv;
 import std.format;
@@ -15,27 +12,7 @@ import std.json;
 
 class SerializationTest {
 
-    void testJson01() {
 
-        JobDataMap m = new JobDataMap();
-        m.put("name", "Bob");
-        m.put("age", 23);
-        trace(m.toString());
-
-        // ubyte[] d = cast(ubyte[])m.serialize();
-        // tracef("%(%02X %)", d);
-
-        JSONValue jv = JsonSerializer.toJson(m);
-        // trace(jv.toPrettyString());
-
-        JobDataMap m2 = JsonSerializer.fromJson!(JobDataMap)(jv);
-        trace(m.toString());
-        string name = m2.getFromString!(string)("name");
-        int age = m2.getFromString!(int)("age");
-        assert(name == "Bob");
-        assert(age == 23);
-
-    }
 
     // void testAssociativeArray() {
 

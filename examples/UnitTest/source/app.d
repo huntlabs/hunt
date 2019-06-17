@@ -85,14 +85,12 @@ void main()
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
 
-	testUnits!(JsonSerializerTest);
+	// testUnits!(JsonSerializerTest);
 	// testUnits!(SerializationTest);
 	// testUnits!(ByteBufferTest);
 
 
 }
-
-
 
 
 void testLockSupport01() {
