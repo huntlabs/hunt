@@ -109,9 +109,9 @@ mixin template CloneMemberTemplate(T, alias onCloned = null) 	{
 			throw new Exception("Can't create an instance for " ~ T.stringof);
 		}
 
-		// pragma(msg, "========\nclone type: " ~ T.stringof);
+		version(HUNT_DEBUG_MORE) pragma(msg, "========\n clone type: " ~ T.stringof);
 		static foreach (string fieldName; FieldNameTuple!T) {
-			// pragma(msg, "nclone field=" ~ fieldName);
+			version(HUNT_DEBUG_MORE) pragma(msg, "clone field=" ~ fieldName);
 			version(HUNT_DEBUG_MORE) {
 				tracef("cloning: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
 			}
