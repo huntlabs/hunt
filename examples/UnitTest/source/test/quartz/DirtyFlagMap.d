@@ -33,7 +33,7 @@ import hunt.util.Common;
 import hunt.util.Serialize;
 import hunt.util.Traits;
 
-import hunt.text.JsonHelper;
+import hunt.serialization.JsonSerializer;
 
 import std.algorithm;
 import std.array;
@@ -266,7 +266,7 @@ class DirtyFlagMap(K, V) : Map!(K, V), Cloneable, JsonSerializable {
     // mixin SerializationMember!(typeof(this));
 
     JSONValue jsonSerialize() {
-        JSONValue value = JsonHelper.serializeObject!(typeof(this), false)(this);
+        JSONValue value = JsonSerializer.serializeObject!(typeof(this), false)(this);
         string[] keys = map.byKey.array;
         
         static if(is(V == class)) {
@@ -291,7 +291,7 @@ class DirtyFlagMap(K, V) : Map!(K, V), Cloneable, JsonSerializable {
         import hunt.String;
 
         trace(value.toPrettyString());
-        JsonHelper.deserializeObject!(typeof(this), false)(this, value);
+        JsonSerializer.deserializeObject!(typeof(this), false)(this, value);
         JSONValue mapJson = value["map"];
 
         const(JSONValue)[] keys = mapJson["keys"].array;
