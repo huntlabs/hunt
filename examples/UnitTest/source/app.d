@@ -3,6 +3,7 @@ import hunt.logging.ConsoleLogger;
 import hunt.system.Locale;
 import hunt.system.Memory;
 import hunt.system.TimeZone;
+import hunt.util.Common;
 import hunt.util.DateTime;
 import hunt.util.UnitTest;
 
@@ -85,10 +86,12 @@ void main()
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
 
-	// testUnits!(JsonSerializerTest);
+static if(CompilerHelper.isGreaterThan (2086)) {
+	testUnits!(JsonSerializerTest);
 	// testUnits!(SerializationTest);
-	// testUnits!(ByteBufferTest);
+}
 
+	// testUnits!(ByteBufferTest);
 
 }
 

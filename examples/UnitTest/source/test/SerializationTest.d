@@ -12,8 +12,6 @@ import std.json;
 
 class SerializationTest {
 
-
-
     // void testAssociativeArray() {
 
     //     int[string] data;
