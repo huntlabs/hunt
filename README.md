@@ -25,6 +25,9 @@ A refined core library for D programming language.
 ## Frameworks
  * [hunt-framework](https://github.com/huntlabs/hunt-framework) – Hunt is a high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 
+## Requirements
+D Compiler 2.086+.
+
 ## Avaliable versions
 | Identifier | Description | 
 |--------|--------|
@@ -43,9 +46,7 @@ For details, see [here](docs/benchmark.md).
  * @Kripth
 
 ## TODO
-- [ ] Improve performance
-- [ ] Stablize APIs
-- [ ] More friendly APIs
+- [ ] Better performance
+- [ ] Better APIs
 - [ ] More examples
-- [ ] More utils
-- [ ] Add concurrent modules
+- [ ] Improve serialization (JSON and Binary)
