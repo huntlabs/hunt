@@ -9,12 +9,6 @@ import hunt.collection.List;
 import hunt.Assert;
 import hunt.Exceptions;
 
-alias assertTrue = Assert.assertTrue;
-alias assertFalse = Assert.assertFalse;
-alias assertThat = Assert.assertThat;
-alias assertEquals = Assert.assertEquals;
-alias assertNotNull = Assert.assertNotNull;
-alias assertNull = Assert.assertNull;
 
 class MimeTypeTest {
     
