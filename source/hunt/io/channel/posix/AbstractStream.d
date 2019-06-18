@@ -226,7 +226,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         if(!_isWritting) {
-            version (HUNT_DEBUG) warning("not ready for write...");
+            version (HUNT_DEBUG_MORE) warning("not ready for write...");
             return;
         }
 
