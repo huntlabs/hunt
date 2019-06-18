@@ -28,6 +28,7 @@ import test.StringTokenizerTest;
 import test.TaskPoolTest;
 import test.ThreadPoolExecutorTest;
 import test.ThreadTest;
+import test.ConverterUtilsTest;
 
 import common;
 import core.thread;
@@ -85,9 +86,10 @@ void main()
 	// testUnits!(TaskPoolTest);
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
+	testUnits!(ConverterUtilsTest);
 
 static if(CompilerHelper.isGreaterThan (2086)) {
-	testUnits!(JsonSerializerTest);
+	// testUnits!(JsonSerializerTest);
 	// testUnits!(SerializationTest);
 }
 

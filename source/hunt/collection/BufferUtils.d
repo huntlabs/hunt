@@ -22,7 +22,7 @@ import hunt.collection.HeapByteBuffer;
 import hunt.collection.List;
 
 import hunt.Exceptions;
-import hunt.util.TypeUtils;
+import hunt.util.ConverterUtils;
 
 import std.conv;
 import std.range;
@@ -970,10 +970,10 @@ class BufferUtils {
         if (buffer.hasArray() && buffer.arrayOffset() == 4) {
             ot.append('T');
             byte[] array = buffer.array();
-            TypeUtils.toHex(array[0], ot);
-            TypeUtils.toHex(array[1], ot);
-            TypeUtils.toHex(array[2], ot);
-            TypeUtils.toHex(array[3], ot);
+            ConverterUtils.toHex(array[0], ot);
+            ConverterUtils.toHex(array[1], ot);
+            ConverterUtils.toHex(array[2], ot);
+            ConverterUtils.toHex(array[3], ot);
         } else {
             size_t hashCode = hashOf(buffer);
             ot.append(to!string(hashCode, 16));
@@ -1100,7 +1100,7 @@ class BufferUtils {
         else if (b == '\t')
             buf.append("\\t");
         else
-            buf.append("\\x").append(TypeUtils.toHexString(b));
+            buf.append("\\x").append(ConverterUtils.toHexString(b));
     }
 
     /* ------------------------------------------------------------ */
@@ -1118,7 +1118,7 @@ class BufferUtils {
 
         buf.append("b[").append(buffer.remaining()).append("]=");
         for (int i = buffer.position(); i < buffer.limit(); i++) {
-            TypeUtils.toHex(buffer.get(i), buf);
+            ConverterUtils.toHex(buffer.get(i), buf);
             if (i == buffer.position() + 24 && buffer.limit() > buffer.position() + 32) {
                 buf.append("...");
                 i = buffer.limit() - 8;
@@ -1138,7 +1138,7 @@ class BufferUtils {
     static string toHexString(ByteBuffer buffer) {
         if (buffer is null)
             return "null";
-        return TypeUtils.toHexString(toArray(buffer));
+        return ConverterUtils.toHexString(toArray(buffer));
     }
 
     private enum int[] decDivisors = [

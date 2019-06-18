@@ -80,6 +80,16 @@ final class JsonSerializer {
         }
     }
 
+    static T fromJson(T, bool traverseBase = true, bool canThrow = false)
+            (string json, T defaultValue = T.init) if (is(T == class)) {
+        return fromJson!(T, traverseBase, canThrow)(parseJSON(json));
+    }
+
+    static T fromJson(T, bool canThrow = false)
+            (string json, T defaultValue = T.init) if (!is(T == class)) {
+        return fromJson!(T, traverseBase, canThrow)(parseJSON(json));
+    }
+
     /**
     Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
     */

@@ -63,8 +63,8 @@ template isInheritClass(T, Base) {
 	enum isInheritClass = (Filter!(FFilter, BaseTypeTuple!T).length > 0);
 }
 
-template isOnlyCharByte(T) {
-	enum bool isOnlyCharByte = is(T == byte) || is(T == ubyte) || is(T == char);
+template isByteType(T) {
+	enum bool isByteType = is(T == byte) || is(T == ubyte) || is(T == char);
 }
 
 template isCharByte(T) {
@@ -77,8 +77,7 @@ template isRefType(T) {
 }
 
 template isPublic(alias T) {
-	enum protection = __traits(getProtection, T);
-	enum isPublic = (protection == "public");
+	enum isPublic = (__traits(getProtection, T) == "public");
 }
 
 

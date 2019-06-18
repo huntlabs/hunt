@@ -21,7 +21,7 @@ import hunt.text.Common;
 import hunt.text.StringBuilder;
 import hunt.Exceptions;
 import hunt.util.Common;
-import hunt.util.TypeUtils;
+import hunt.util.ConverterUtils;
 
 
 /**
@@ -432,10 +432,10 @@ class QuotedStringTokenizer : StringTokenizer {
 					b.append('"');
 					break;
 				case 'u':
-					b.append(cast(char) ((TypeUtils.convertHexDigit(cast(byte) s.charAt(i++)) << 24)
-							+ (TypeUtils.convertHexDigit(cast(byte) s.charAt(i++)) << 16)
-							+ (TypeUtils.convertHexDigit(cast(byte) s.charAt(i++)) << 8)
-							+ (TypeUtils.convertHexDigit(cast(byte) s.charAt(i++)))));
+					b.append(cast(char) ((ConverterUtils.convertHexDigit(cast(byte) s.charAt(i++)) << 24)
+							+ (ConverterUtils.convertHexDigit(cast(byte) s.charAt(i++)) << 16)
+							+ (ConverterUtils.convertHexDigit(cast(byte) s.charAt(i++)) << 8)
+							+ (ConverterUtils.convertHexDigit(cast(byte) s.charAt(i++)))));
 					break;
 				default:
 					if (lenient && !isValidEscaping(c)) {
