@@ -170,7 +170,7 @@ final class JsonSerializer {
                 static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
                     version(HUNT_DEBUG) warning("skipped a member: " ~ member);
                 } else {
-                    version(HUNT_DEBUG) tracef("setting: %s = %s", member, json[member].toString());
+                    version(HUNT_DEBUG_MORE) tracef("setting: %s = %s", member, json[member].toString());
                     __traits(getMember, target, member) = fromJson!(memberType, false)(json[member]);
                 }                    
             }
