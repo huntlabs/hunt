@@ -61,7 +61,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         // ubyte[BufferSize] _readBuffer;
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
-        version (HUNT_DEBUG)
+        version (HUNT_DEBUG_MORE)
             tracef("reading[fd=%d]: %d bytes", this.handle, len);
 
         if (len > 0) {
@@ -111,7 +111,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     protected override void onClose() {
-        version (HUNT_DEBUG) {
+        version (HUNT_DEBUG_MORE) {
             infof("_isWritting=%s, writeBuffer: %s, _writeQueue: %s", _isWritting, writeBuffer is null, 
                 _writeQueue is null || _writeQueue.isEmpty());
         }

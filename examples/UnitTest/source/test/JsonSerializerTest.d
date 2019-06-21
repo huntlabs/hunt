@@ -1,5 +1,6 @@
 module test.JsonSerializerTest;
 
+import common;
 import hunt.util.Common;
 
 static if(CompilerHelper.isGreaterThan (2086)) {
@@ -8,6 +9,7 @@ import test.quartz.JobDataMap;
 import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.UnitTest;
+import hunt.serialization.Common;
 import hunt.serialization.JsonSerializer;
 
 // import hunt.util.serialize;
@@ -52,7 +54,7 @@ class JsonSerializerTest {
 
     @Test void testGetAsClass01() {
         Greeting gt = new Greeting();
-        gt.privateMember = "private member";
+        gt.setPrivateMember("private member");
         gt.id = 123;
         gt.content = "Hello, world!";
         gt.creationTime = Clock.currTime;
@@ -65,9 +67,10 @@ class JsonSerializerTest {
         Greeting gt1 = JsonSerializer.fromJson!(Greeting)(jv);
         // trace("gt====>", gt, "====");
         // trace("gt1====>", gt1, "====");
+        assert(gt1 !is null);
         trace(gt1.getContent());
 
-        assert(gt.privateMember == gt1.privateMember);
+        assert(gt.getPrivateMember == gt1.getPrivateMember);
         assert(gt.id == gt1.id);
         assert(gt.content == gt1.content);
         assert(gt.creationTime == gt1.creationTime);
@@ -233,6 +236,36 @@ class JsonSerializerTest {
     void testArrayToJson() {
         assert(JsonSerializer.toJson([0, 1, 2]) == JSONValue([0, 1, 2]));
         assert(JsonSerializer.toJson(["hello", "world"]) == JSONValue(["hello", "world"]));
+
+        GreetingBase[] greetings;
+        greetings ~= new GreetingBase(1, "Hello");
+        greetings ~= new GreetingBase(2, "World");
+
+        JSONValue json = JsonSerializer.toJson(greetings);
+        trace(json);
+        
+        json = JsonSerializer.toJson!(TraverseBase.no, OnlyPublic.yes)(greetings);
+        trace(json);
+    }
+
+
+    void testArrayToJson02() {
+
+        Greeting[] greetings;
+        greetings ~= new Greeting(1, "Hello");
+        greetings ~= new Greeting(2, "World");
+
+        greetings[0].setPrivateMember("private member");
+
+        JSONValue json = JsonSerializer.toJson(greetings);
+        info(json.toPrettyString());
+        
+        json = JsonSerializer.toJson!(TraverseBase.no, OnlyPublic.yes)(greetings);
+        info(json.toPrettyString());
+
+        json = JsonSerializer.toJson!(TraverseBase.yes, OnlyPublic.yes)(greetings);
+        info(json.toPrettyString());
+
     }
 
     void testAssociativeArrayToJson() {
@@ -265,96 +298,6 @@ class JsonSerializerTest {
 }
 
 
-
-interface ISettings : JsonSerializable {
-    string color();
-    void color(string c);
-}
-
-class GreetingSettings : ISettings {
-    string _color;
-
-    this() {
-        _color = "black";
-    }
-
-    string color() {
-        return _color;
-    }
-
-    void color(string c) {
-        this._color = c;
-    }
-
-
-    JSONValue jsonSerialize() {
-        return JsonSerializer.serializeObject(this);
-        // JSONValue v;
-        // v["_color"] = _color;
-        // return v;
-    }
-    
-    void jsonDeserialize(const(JSONValue) value) {
-        info(value.toString());
-        _color = value["_color"].str;
-    }
-
-}
-
-class GreetingBase {
-    int id;
-    private string content;
-
-    void setContent(string content) {
-        this.content = content;
-    }
-
-    string getContent() {
-        return this.content;
-    }
-}
-
-class Greeting : GreetingBase {
-    private string privateMember;
-    private ISettings settings;
-    Object.Monitor skippedMember;
-
-    alias TestHandler = void delegate(string); 
-
-    // FIXME: Needing refactor or cleanup -@zxp at 6/16/2019, 12:33:02 PM
-    // 
-    string content; // test for the same fieldname
-
-    SysTime creationTime;
-    
-    @Exclude
-    long currentTime;
-    
-    byte[] bytes;
-    string[] members;
-
-    this() {
-        settings = new GreetingSettings();
-    }
-
-    void setColor(string color) {
-        settings.color = color;
-    }
-
-    string getColor() {
-        return settings.color();
-    }
-
-    void voidReturnMethod() {
-
-    }
-
-    override string toString() {
-        string s = format("content=%s, creationTime=%s, currentTime=%s",
-                content, creationTime, currentTime);
-        return s;
-    }
-}
 
 
 struct TestStruct

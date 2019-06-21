@@ -12,6 +12,7 @@ import test.BigIntegerTest;
 import test.ByteBufferTest;
 import test.CompletableFutureTest;
 import test.CompletableFutureTest2;
+import test.DeductionTest;
 import test.ForkJoinPoolTest;
 import test.JsonSerializerTest;
 import test.LocaleTest;
@@ -86,10 +87,11 @@ void main()
 	// testUnits!(TaskPoolTest);
 	// testUnits!(ScheduledThreadPoolTest);
 	// testUnits!(ThreadPoolExecutorTest);
-	testUnits!(ConverterUtilsTest);
+	// testUnits!(ConverterUtilsTest);
+	// testUnits!(DeductionTest);
 
 static if(CompilerHelper.isGreaterThan (2086)) {
-	// testUnits!(JsonSerializerTest);
+	testUnits!(JsonSerializerTest);
 	// testUnits!(SerializationTest);
 }
 
