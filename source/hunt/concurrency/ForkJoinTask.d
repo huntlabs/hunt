@@ -269,12 +269,12 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
      */
     private int setDone() {
         int s = AtomicHelper.getAndBitwiseOr(this.status, DONE);
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             tracef("status: last=%d, new=%d", s, status);
         }
         if((s & SIGNAL) != 0) {
             synchronized (this) { 
-                version(HUNT_DEBUG_CONCURRENCY) info("notifying on done .....");
+                version(HUNT_CONCURRENCY_DEBUG) info("notifying on done .....");
                 thisLocker.notifyAll();
             }
         }
@@ -331,7 +331,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
                 completed = false;
                 s = setExceptionalCompletion(rex);
             }
-            version(HUNT_DEBUG_CONCURRENCY) tracef("completed: %s", completed);
+            version(HUNT_CONCURRENCY_DEBUG) tracef("completed: %s", completed);
             if (completed) {
                 s = setDone();
             }
@@ -369,7 +369,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
             return s;
         
         s = AtomicHelper.getAndBitwiseOr(this.status, SIGNAL);
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             infof("status: last=%d, new=%d", s, status);
         }
         if(s < 0)
@@ -411,7 +411,7 @@ abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
         }
 
         s = AtomicHelper.getAndBitwiseOr(this.status, SIGNAL);
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             infof("status: last=%d, new=%d", s, status);
         }
         if (s >= 0) {

@@ -374,7 +374,7 @@ class ThreadEx : Thread, Runnable {
      *  https://stackoverflow.com/questions/8579657/whats-the-difference-between-thread-start-and-runnable-run
      */
     void run() {
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             infof("trying to run a target (%s null)...", target is null ? "is" : "is not");
         }
         if (target !is null) {
@@ -822,7 +822,7 @@ class Parker {
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
     void park(Duration time) {
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             tracef("try to park a thread %s",
                 time <= Duration.zero ? "forever" : "in " ~ time.toString());
         }
@@ -833,7 +833,7 @@ class Parker {
         const int c = _counter;
         if(c > 0) {
             atomicStore(_counter, 0);
-            version(HUNT_DEBUG_CONCURRENCY) infof("no need to park, counter=%s", c);
+            version(HUNT_CONCURRENCY_DEBUG) infof("no need to park, counter=%s", c);
             return;
         }
 
@@ -884,7 +884,7 @@ class Parker {
     }
 
     void park(MonoTime time) {
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             Duration d = time - MonoTime.currTime;
             tracef("try to park a thread %s",  
                 d <= Duration.zero ? "forever" : "in " ~ d.toString());
@@ -896,7 +896,7 @@ class Parker {
         const int c = _counter;
         if(c > 0) {
             atomicStore(_counter, 0);
-            version(HUNT_DEBUG_CONCURRENCY) infof("no need to park, counter=%s", c);
+            version(HUNT_CONCURRENCY_DEBUG) infof("no need to park, counter=%s", c);
             return;
         }
 
@@ -949,7 +949,7 @@ class Parker {
     }
 
     void unpark() {
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             tracef("try to unpark a thread");
         }
         _mutex.lock();
