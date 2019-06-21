@@ -64,7 +64,7 @@ final class JsonSerializer {
 
     static T fromJson(T, bool canThrow = false)
             (string json, T defaultValue = T.init) if (!is(T == class)) {
-        return fromJson!(T, traverseBase, canThrow)(parseJSON(json));
+        return fromJson!(T, canThrow)(parseJSON(json));
     }
 
     /**
@@ -116,6 +116,16 @@ final class JsonSerializer {
         }
 
         return result;
+    }
+
+
+    static void deserializeObject(T)(ref T target, auto ref const(JSONValue) json)
+         if(is(T == struct)) {
+
+        static foreach (string member; FieldNameTuple!T) {
+            // current fields
+            deserializeMembers!(member)(target, json);
+        }
     }
 
     /**
