@@ -925,7 +925,7 @@ class ForkJoinPool : AbstractExecutorService {
             long nc = ((RC_MASK & (c + RC_UNIT)) |
                        (TC_MASK & (c + TC_UNIT)));
             if (ctl == c && AtomicHelper.compareAndSet(this.ctl, c, nc)) {
-                // version(HUNT_DEBUG_CONCURRENCY) tracef("nc=%d, ctl=%d, c=%d", nc, ctl, c);
+                // version(HUNT_CONCURRENCY_DEBUG) tracef("nc=%d, ctl=%d, c=%d", nc, ctl, c);
                 createWorker();
                 break;
             }
@@ -1177,7 +1177,7 @@ class ForkJoinPool : AbstractExecutorService {
                     nc = ((c - RC_UNIT) & UC_MASK) | np;
                 } while (!AtomicHelper.compareAndSet(this.ctl, c, nc));
 
-                version(HUNT_DEBUG_CONCURRENCY) {
+                version(HUNT_CONCURRENCY_DEBUG) {
                     // infof("ctl=%d, c=%d, nc=%d, stackPred=%d", ctl, c, nc, w.stackPred);
                 }
             }
@@ -1189,7 +1189,7 @@ class ForkJoinPool : AbstractExecutorService {
                 long c = ctl;
                 int md = mode, rc = (md & SMASK) + cast(int)(c >> RC_SHIFT);
 
-                version(HUNT_DEBUG_CONCURRENCY) {
+                version(HUNT_CONCURRENCY_DEBUG) {
                     // tracef("md=%d, rc=%d, c=%d, pred=%d, phase=%d", md, rc, c, pred, phase);
                 }
 
@@ -2055,7 +2055,7 @@ class ForkJoinPool : AbstractExecutorService {
         if (task is null)
             throw new NullPointerException();
         externalSubmit!(T)(task);
-        version(HUNT_DEBUG_CONCURRENCY) {
+        version(HUNT_CONCURRENCY_DEBUG) {
             infof("waiting the result...");
             T c = task.join();
             infof("final result: %s", c);
