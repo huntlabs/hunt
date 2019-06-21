@@ -71,6 +71,22 @@ class JsonSerializerTest {
         trace(greeting.toString());
         assert(greeting.getContent() == "Hello World");
 
+        // 
+        GreetingModel greetingModel = JsonSerializer.fromJson!GreetingModel(jsonStr);
+        assert(greetingModel.id == 0);
+        assert(greetingModel.content == "Hello World");
+        trace(greetingModel);
+
+        //
+        greetingModel.id = 10;
+        greetingModel.content = "new world";
+
+        JsonSerializer.deserializeObject(greetingModel, parseJSON(jsonStr));
+        trace(greetingModel);
+        assert(greetingModel.id == 10);
+        assert(greetingModel.content == "Hello World");
+
+
     }
 
     @Test void testGetAsClass01() {
@@ -319,6 +335,12 @@ class JsonSerializerTest {
 }
 
 
+
+struct GreetingModel
+{
+    int id;
+    string content;
+}
 
 
 struct TestStruct
