@@ -11,6 +11,10 @@
 
 module hunt.serialization.JsonSerializer;
 
+import hunt.serialization.Common;
+import hunt.logging.ConsoleLogger;
+import hunt.util.Common;
+
 import std.algorithm : map;
 import std.array;
 import std.conv;
@@ -18,9 +22,6 @@ import std.datetime;
 import std.json;
 import std.stdio;
 import std.traits;
-
-import hunt.logging.ConsoleLogger;
-import hunt.util.Common;
 
 
 /**
@@ -32,30 +33,6 @@ interface JsonSerializable {
     void jsonDeserialize(const(JSONValue) value);
 }
 
-/// attributes for json
-
-/**
- * Excludes the field from both encoding and decoding.
- */
-enum Exclude;
-
-/**
- * Includes this even if it would otherwise be excluded.
- * If Exclude (or other UDA(@)) and Include are present value will be included.
- * Can also be used on @property methods to include them. (Be sure both the setter and getter exist!)
- * If used on a value of a base class value will be included.
- */
-enum Include;
-
-/**
- * Excludes the field from decoding, encode only.
- */
-enum EncodeOnly;
-
-/**
- * Excludes the field from encoding, decode only.
- */
-enum DecodeOnly;
 
 static if(CompilerHelper.isLessThan(2085)) {
     pragma(msg, "Warning: The minimum required version of D compiler is 2.086.");
@@ -80,7 +57,7 @@ final class JsonSerializer {
         }
     }
 
-    static T fromJson(T, bool traverseBase = true, bool canThrow = false)
+    static T fromJson(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
             (string json, T defaultValue = T.init) if (is(T == class)) {
         return fromJson!(T, traverseBase, canThrow)(parseJSON(json));
     }
@@ -93,9 +70,9 @@ final class JsonSerializer {
     /**
     Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
     */
-    static T fromJson(T, bool traverseBase = true, bool canThrow = false)
+    static T fromJson(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
-            if (is(T == class)) {
+            if (is(T == class) && is(typeof(new T()))) {
 
         if (json.type() != JSON_TYPE.OBJECT) {
             return handleException!(T, canThrow)(json, "wrong object type", defaultValue);
@@ -118,7 +95,8 @@ final class JsonSerializer {
 
     /**
     */
-    static T fromJson(T, bool canThrow = false)(auto ref const(JSONValue) json, T defaultValue = T.init) 
+    static T fromJson(T, bool canThrow = false)(
+            auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == struct) && !is(T == SysTime)) {
 
         JSONType jt = json.type();
@@ -131,7 +109,7 @@ final class JsonSerializer {
 
         try {
             static foreach (string member; FieldNameTuple!T) {
-                    deserializeMembers!(member, false)(result, json);
+                    deserializeMembers!(member)(result, json);
             }
         } catch (JSONException e) {
             return handleException!(T, canThrow)(json, e.msg, defaultValue);
@@ -142,7 +120,7 @@ final class JsonSerializer {
 
     /**
     */
-    static void deserializeObject(T, bool traverseBase = true)
+    static void deserializeObject(T, TraverseBase traverseBase = TraverseBase.yes)
             (T target, auto ref const(JSONValue) json) if(is(T == class)) {
 
         static foreach (string member; FieldNameTuple!T) {
@@ -160,29 +138,31 @@ final class JsonSerializer {
         }
     }
 
-    private static void deserializeMembers(string member, bool traverseBase = true, T)
-        (ref T target, auto ref const(JSONValue) json) {
+    private static void deserializeMembers(string member, T)
+            (ref T target, auto ref const(JSONValue) json) {
 
-            static if(!hasUDA!(__traits(getMember, T, member), Exclude)) {
+        static if(!hasUDA!(__traits(getMember, T, member), Exclude)) {
 
-                alias memberType = typeof(__traits(getMember, T, member));
+            alias memberType = typeof(__traits(getMember, T, member));
 
-                static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
-                    version(HUNT_DEBUG) warning("skipped a member: " ~ member);
-                } else {
-                    version(HUNT_DEBUG_MORE) tracef("setting: %s = %s", member, json[member].toString());
-                    __traits(getMember, target, member) = fromJson!(memberType, false)(json[member]);
-                }                    
-            }
+            static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
+                version(HUNT_DEBUG) warning("skipped a member: " ~ member);
+            } else {
+                version(HUNT_DEBUG_MORE) tracef("setting: %s = %s", member, json[member].toString());
+                __traits(getMember, target, member) = fromJson!(memberType, false)(json[member]);
+            }                    
+        }
     }
 
 
-    static T fromJson(T, bool canThrow = false)(auto ref const(JSONValue) json, 
-        T defaultValue = T.init) if(is(T == interface) && is(T : JsonSerializable)) {
+    static T fromJson(T, bool canThrow = false)(
+            auto ref const(JSONValue) json, 
+            T defaultValue = T.init) 
+            if(is(T == interface) && is(T : JsonSerializable)) {
 
         auto jsonItemPtr = "type" in json;
         if(jsonItemPtr is null) {
-            warningf("can't find 'type' item for interface %s", T.stringof);
+            warningf("Can't find 'type' item for interface %s", T.stringof);
             return T.init;
         }
         string typeId = jsonItemPtr.str;
@@ -195,8 +175,10 @@ final class JsonSerializer {
     
     }
 
-    static T fromJson(T, bool canThrow = false)(auto ref const(JSONValue) json, 
-        T defaultValue = T.init) if(is(T == SysTime)) {
+    static T fromJson(T, bool canThrow = false)(
+            auto ref const(JSONValue) json, 
+            T defaultValue = T.init) 
+            if(is(T == SysTime)) {
   
         JSONType jt = json.type();
         if(jt == JSON_TYPE.string) {
@@ -218,8 +200,9 @@ final class JsonSerializer {
         return json.nullable;
     }
 
-    static T fromJson(T, bool canThrow = false)(auto ref const(JSONValue) json, T defaultValue = T.init) 
-        if (isNumeric!T || isSomeChar!T) {
+    static T fromJson(T, bool canThrow = false)
+            (auto ref const(JSONValue) json, T defaultValue = T.init) 
+            if (isNumeric!T || isSomeChar!T) {
 
         switch (json.type) {
         case JSON_TYPE.NULL, JSON_TYPE.FALSE:
@@ -261,8 +244,8 @@ final class JsonSerializer {
         }
     }
 
-    static T fromJson(T, bool canThrow = false)(auto ref const(JSONValue) json) if (isBoolean!T) {
-        import std.json : JSON_TYPE;
+    static T fromJson(T, bool canThrow = false)
+            (auto ref const(JSONValue) json) if (isBoolean!T) {
 
         switch (json.type) {
         case JSON_TYPE.NULL, JSON_TYPE.FALSE:
@@ -303,7 +286,8 @@ final class JsonSerializer {
         }
     }
 
-    static T fromJson(T : U[], bool canThrow = false, U)(auto ref const(JSONValue) json, 
+    static T fromJson(T : U[], bool canThrow = false, U)
+            (auto ref const(JSONValue) json, 
             T defaultValue = T.init)
             if (isArray!T && !isSomeString!T && !is(T : string) && !is(T
                 : wstring) && !is(T : dstring)) {
@@ -325,7 +309,6 @@ final class JsonSerializer {
                 .to!T;
 
         case JSON_TYPE.OBJECT:
-            // throw new JSONException(json.toString() ~ " is not a string type");
             return handleException!(T, canThrow)(json, "", defaultValue);
 
         default:
@@ -358,7 +341,6 @@ final class JsonSerializer {
             break;
 
         default:
-            // throw new JSONException(json.toString() ~ " is not an object type");
             return handleException!(T, canThrow)(json, "", defaultValue);
         }
 
@@ -370,26 +352,34 @@ final class JsonSerializer {
     /// toJson
     ///////////////////////////////////
 
-    // Nullable!JSONValue toJson(T)(T value) {
-        // return JSONValue.init;
-    //     return toJson(t, level, ignore);
-    // }
+    static JSONValue toJson(T, 
+            TraverseBase traverseBase = TraverseBase.yes, 
+            OnlyPublic onlyPublic = OnlyPublic.no, 
+            IncludeMeta includeMeta = IncludeMeta.yes)
+            (T value) if (is(T == class)) {
 
-
-    static JSONValue toJson(T, bool traverseBase = true, 
-            bool includeMetaType = true)(T value) if (is(T == class)) {
+        version(HUNT_DEBUG_MORE) 
+        tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s",
+             traverseBase, onlyPublic, includeMeta);
 
         static if(is(T : JsonSerializable)) {
             return value.jsonSerialize();
         } else {
-            return serializeObject!(T, traverseBase, includeMetaType)(value);
+            return serializeObject!(T, traverseBase, onlyPublic, includeMeta)(value);
         }
     }
 
-    static JSONValue serializeObject(T, bool traverseBase = true, 
-            bool includeMetaType = true)(T value) if (is(T == class)) {
+    static JSONValue serializeObject(T, 
+            TraverseBase traverseBase = TraverseBase.yes, 
+            OnlyPublic onlyPublic = OnlyPublic.no, 
+            IncludeMeta includeMeta = IncludeMeta.yes) 
+            (T value) if (is(T == class)) {
         import std.traits : isSomeFunction, isType;
         // import std.typecons : nullable;
+
+        version(HUNT_DEBUG_MORE) 
+        tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s",
+             traverseBase, onlyPublic, includeMeta);
 
         if (value is null) {
             version(HUNT_DEBUG) warning("value is null");
@@ -403,7 +393,7 @@ final class JsonSerializer {
         static if(traverseBase) {
             alias baseClasses = BaseClassesTuple!T;
             static if(baseClasses.length >= 1) {
-                JSONValue superResult = toJson!(baseClasses[0], traverseBase, includeMetaType)(value);
+                JSONValue superResult = toJson!(baseClasses[0], traverseBase, onlyPublic, includeMeta)(value);
                 if(!superResult.isNull)
                     result["super"] = superResult;
 
@@ -412,13 +402,13 @@ final class JsonSerializer {
         
         // current fields
 		static foreach (string member; FieldNameTuple!T) {
-            serializeMember!(member)(value, result);
+            serializeMember!(member, T, onlyPublic)(value, result);
         }
 
         return result;
     }
 
-    static JSONValue toJson(T)(T value, uint level = uint.max)
+    static JSONValue toJson(T)(T value, OnlyPublic onlyPublic = OnlyPublic.no)
             if (is(T == struct) && !is(T == SysTime)) {
         import std.traits : isSomeFunction, isType;
         // import std.typecons : nullable;
@@ -430,24 +420,43 @@ final class JsonSerializer {
             version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: struct " ~ T.stringof);
                 
             static foreach (string member; FieldNameTuple!T) {
-                serializeMember!(member)(value, result);
+                serializeMember!(member, T, onlyPublic)(value, result);
             }
 
             return result;
         }
     }
 
-    private static void serializeMember(string member, T)(T obj, ref JSONValue result) {
+    private static void serializeMember(string member, 
+            T, OnlyPublic onlyPublic = OnlyPublic.no)
+            (T obj, ref JSONValue result) {
+
         version(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
+
+        alias currentMember = __traits(getMember, T, member);
+
+        static if(onlyPublic) {
+            static if (__traits(getProtection, currentMember) == "public") {
+                enum canSerialize = true;
+            } else {
+                enum canSerialize = false;
+            }
+        } else static if(hasUDA!(currentMember, Exclude)) {
+            enum canSerialize = false;
+        } else {
+            enum canSerialize = true;
+        }
         
-        static if(!hasUDA!(__traits(getMember, T, member), Exclude)) {
-            alias memberType = typeof(__traits(getMember, T, member));
+        version(HUNT_DEBUG_MORE) tracef("name: %s, onlyPublic: %s", member, onlyPublic);
+
+        static if(canSerialize) {
+            alias memberType = typeof(currentMember);
 
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
                 version(HUNT_DEBUG) warning("skipped member(not JsonSerializable): " ~ member);
             } else {
                 JSONValue json = toJson!(memberType)(__traits(getMember, obj, member));
-                version(HUNT_DEBUG) {
+                version(HUNT_DEBUG_MORE) {
                     tracef("name: %s, value: %s", member, json.toString());
                 }
                 if (!json.isNull) {
@@ -462,6 +471,8 @@ final class JsonSerializer {
                 }
 
             }
+        } else {
+            version(HUNT_DEBUG_MORE) tracef("skipped member, name: %s", member);
         }
     }
 
@@ -486,16 +497,26 @@ final class JsonSerializer {
         return v;
     }
 
-    static JSONValue toJson(T)(T value)
-    // if ((!is(T == class) && !is(T == struct) && !is(T == interface))) 
-            if (isBuiltinType!T) {
+    static JSONValue toJson(T)(T value) if (isBasicType!T) {
         return JSONValue(value);
     }
 
-    static JSONValue toJson(T : U[], U)(T value)
-            if (isArray!T && !isSomeString!T && !is(T : string) && !is(T : wstring) && !is(T : dstring)) {
-        import std.algorithm : map;
+    static JSONValue toJson(T)(T value)
+            if (is(T : U[], U) && (isBasicType!U || isSomeString!U)) {
+        return JSONValue(value);
+    }
 
+    static JSONValue toJson(TraverseBase traverseBase = TraverseBase.yes, 
+            OnlyPublic onlyPublic = OnlyPublic.no, 
+            T : U[], U)
+            (T value) 
+            if(is(T : U[], U) && is(U == class)) {
+
+        return JSONValue(value.map!(item => toJson!(U, traverseBase, onlyPublic)(item))()
+                .map!(json => json.isNull ? JSONValue(null) : json).array);
+    }
+    
+    static JSONValue toJson(T : U[], U)(T value) if(is(U == struct)) {
         return JSONValue(value.map!(item => toJson(item))()
                 .map!(json => json.isNull ? JSONValue(null) : json).array);
     }

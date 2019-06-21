@@ -310,7 +310,7 @@ class ConfigBuilder {
                 continue;
 
             if (canFind(reservedWords, str)) {
-                version (HUNT_DEBUG) warningf("Found a reserved word: %s. It may cause some errors.", str);
+                version (HUNT_CONFIG_DEBUG) warningf("Found a reserved word: %s. It may cause some errors.", str);
             }
 
             if (currentPath.empty)

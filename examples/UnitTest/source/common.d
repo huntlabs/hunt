@@ -1,12 +1,18 @@
 module common;
 
+
+import hunt.serialization.Common;
+import hunt.serialization.JsonSerializer;
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 import hunt.util.Traits;
 
 import std.conv;
+import std.format;
+import std.json;
 import std.traits;
 import std.stdio;
+import std.datetime;
 
 class FruitBase : Cloneable {
     string description;
@@ -105,4 +111,120 @@ void testGetFieldValues() {
 static if (CompilerHelper.isGreaterThan(2086)) {
 	trace(f1.getAllFieldValues());
 }
+}
+
+
+
+interface ISettings : JsonSerializable {
+    string color();
+    void color(string c);
+}
+
+class GreetingSettings : ISettings {
+    string _color;
+
+    this() {
+        _color = "black";
+    }
+
+    string color() {
+        return _color;
+    }
+
+    void color(string c) {
+        this._color = c;
+    }
+
+
+    JSONValue jsonSerialize() {
+        return JsonSerializer.serializeObject(this);
+        // JSONValue v;
+        // v["_color"] = _color;
+        // return v;
+    }
+    
+    void jsonDeserialize(const(JSONValue) value) {
+        info(value.toString());
+        _color = value["_color"].str;
+    }
+
+}
+
+class GreetingBase {
+    int id;
+    private string content;
+
+    this() {
+
+    }
+
+    this(int id, string content) {
+        this.id = id;
+        this.content = content;
+    }
+
+    void setContent(string content) {
+        this.content = content;
+    }
+
+    string getContent() {
+        return this.content;
+    }
+}
+
+class Greeting : GreetingBase {
+    private string privateMember;
+    private ISettings settings;
+    Object.Monitor skippedMember;
+
+    alias TestHandler = void delegate(string); 
+
+    // FIXME: Needing refactor or cleanup -@zxp at 6/16/2019, 12:33:02 PM
+    // 
+    string content; // test for the same fieldname
+
+    SysTime creationTime;
+    
+    @Exclude
+    long currentTime;
+    
+    byte[] bytes;
+    string[] members;
+
+    this() {
+        super();
+        settings = new GreetingSettings();
+    }
+
+    this(int id, string content) {
+        super(id, content);
+        this.content = ">>> " ~ content ~ " <<<";
+        settings = new GreetingSettings();
+    }
+
+    void setColor(string color) {
+        settings.color = color;
+    }
+
+    string getColor() {
+        return settings.color();
+    }
+
+    void voidReturnMethod() {
+
+    }
+
+    void setPrivateMember(string value) {
+        this.privateMember = value;
+    }
+
+    string getPrivateMember() {
+        return this.privateMember;
+    }
+
+    override string toString() {
+        string s = format("content=%s, creationTime=%s, currentTime=%s",
+                content, creationTime, currentTime);
+        return s;
+    }
 }
