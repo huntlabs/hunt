@@ -170,6 +170,10 @@ class GreetingBase {
     string getContent() {
         return this.content;
     }
+
+    override string toString() {
+        return "id=" ~ to!string(id) ~ ", content=" ~ content;
+    }
 }
 
 class Greeting : GreetingBase {

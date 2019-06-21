@@ -148,12 +148,16 @@ final class JsonSerializer {
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
                 version(HUNT_DEBUG) warning("skipped a member: " ~ member);
             } else {
-                version(HUNT_DEBUG_MORE) tracef("setting: %s = %s", member, json[member].toString());
-                __traits(getMember, target, member) = fromJson!(memberType, false)(json[member]);
+                auto jsonItemPtr = member in json;
+                if(jsonItemPtr is null) {
+                    version(HUNT_DEBUG) warningf("No data available for member: %s", member);
+                } else {
+                    version(HUNT_DEBUG_MORE) tracef("available data: %s = %s", member, jsonItemPtr.toString());
+                    __traits(getMember, target, member) = fromJson!(memberType, false)(*jsonItemPtr);
+                }
             }                    
         }
     }
-
 
     static T fromJson(T, bool canThrow = false)(
             auto ref const(JSONValue) json, 
@@ -453,7 +457,7 @@ final class JsonSerializer {
             alias memberType = typeof(currentMember);
 
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
-                version(HUNT_DEBUG) warning("skipped member(not JsonSerializable): " ~ member);
+                version(HUNT_DEBUG) warning("skipped a member(not JsonSerializable): " ~ member);
             } else {
                 JSONValue json = toJson!(memberType)(__traits(getMember, obj, member));
                 version(HUNT_DEBUG_MORE) {
