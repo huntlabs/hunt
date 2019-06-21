@@ -52,6 +52,27 @@ class JsonSerializerTest {
         assert(testClass.testStruct.json["key"].str == "value");
     }
 
+    void testMemberMissing() {
+        GreetingBase greeting = new GreetingBase(1, "Hello");
+        JSONValue json = JsonSerializer.toJson(greeting);
+        assert(json.toString() == `{"content":"Hello","id":1}`);
+
+        // 
+        enum string jsonStr = `{"content":"Hello World"}`;
+
+        GreetingBase greeting1 = JsonSerializer.fromJson!GreetingBase(jsonStr);
+        trace(greeting1.toString());
+
+        assert(greeting1.id == 0);
+        assert(greeting1.getContent() == "Hello World");
+
+        // 
+        JsonSerializer.deserializeObject(greeting, parseJSON(jsonStr));
+        trace(greeting.toString());
+        assert(greeting.getContent() == "Hello World");
+
+    }
+
     @Test void testGetAsClass01() {
         Greeting gt = new Greeting();
         gt.setPrivateMember("private member");
