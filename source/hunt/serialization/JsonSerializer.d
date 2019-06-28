@@ -422,7 +422,7 @@ final class JsonSerializer {
         return result;
     }
 
-    static JSONValue toJson(T)(T value, OnlyPublic onlyPublic = OnlyPublic.no)
+    static JSONValue toJson(T, OnlyPublic onlyPublic = OnlyPublic.no)(T value)
             if (is(T == struct) && !is(T == SysTime)) {
         import std.traits : isSomeFunction, isType;
         // import std.typecons : nullable;
