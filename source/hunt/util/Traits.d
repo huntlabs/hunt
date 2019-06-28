@@ -154,6 +154,46 @@ string getAllFieldValues(T, string separator1 = "=", string separator2 = ", ")(T
 	return sb.data;
 }
 
+/**
+*/
+static U mappingObject(T, U)(T t) if(is(U == struct)) {
+	import std.traits;
+	import hunt.util.Traits;
+
+	U u;
+	
+	foreach (targetMemberName; __traits(allMembers, U)) {
+		
+		foreach (sourceMemberName; __traits(allMembers, T)) {
+			static if(targetMemberName == sourceMemberName) {
+				__traits(getMember, u, targetMemberName) = __traits(getMember, t, sourceMemberName);
+			}
+		}
+	}
+
+	return u;
+}
+
+static U mappingObject(T, U)(T t) if(is(U == class)) {
+	import std.traits;
+	import hunt.util.Traits;
+
+// TODO: Tasks pending completion -@zhangxueping at 2019-6-27 16:53:17
+// support base
+	U u = new U();
+	
+	foreach (targetMemberName; __traits(allMembers, U)) {
+		
+		foreach (sourceMemberName; __traits(allMembers, T)) {
+			static if(targetMemberName == sourceMemberName) {
+				__traits(getMember, u, targetMemberName) = __traits(getMember, t, sourceMemberName);
+			}
+		}
+	}
+
+	return u;
+}
+
 }
 
 /**

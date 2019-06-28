@@ -203,6 +203,12 @@ class DateTimeHelper {
         return currentTime!(TimeUnit.Nanosecond)();
     }
 
+    static long currentUnixTime() @trusted @property {
+        return currentTime!(TimeUnit.Second)();
+    }
+
+    alias currentTimeSecond = currentUnixTime;
+
     /**
     */
     static long currentTime(TimeUnit targetUnit)() @trusted @property {
