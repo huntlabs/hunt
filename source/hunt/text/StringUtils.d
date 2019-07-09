@@ -104,6 +104,10 @@ class StringUtils {
         return cast(byte[])s.dup;
     }
 
+    static byte[] getBytes(string s, string charset) {
+        return cast(byte[])s.dup;
+    }
+
     static string randomId(size_t n = 10, string str = letters) {
         import std.random : randomSample;
         import std.utf : byCodeUnit;

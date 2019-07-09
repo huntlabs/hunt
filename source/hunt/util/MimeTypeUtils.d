@@ -18,7 +18,7 @@ import hunt.logging.ConsoleLogger;
 import hunt.text;
 import hunt.util.AcceptMimeType;
 import hunt.util.MimeType;
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 import std.algorithm;
 import std.array;

@@ -30,8 +30,8 @@ import hunt.Integer;
 import hunt.Long;
 import hunt.Number;
 import hunt.String;
+import hunt.util.ObjectUtils;
 import hunt.util.Serialize;
-import hunt.util.Traits;
 
 /**
  * <p>

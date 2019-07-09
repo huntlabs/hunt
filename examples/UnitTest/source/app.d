@@ -21,6 +21,7 @@ import test.MagedQueueTest;
 import test.MimeTypeTest;
 import test.NullableTest;
 import test.NumberTest;
+import test.ObjectMappingTest;
 import test.PathMatcherTest;
 import test.PropertySetterTest;
 import test.ScheduledThreadPoolTest;
@@ -36,78 +37,80 @@ import core.thread;
 import std.stdio;
 
 
+
 import benchmark.LinkedBlockingQueueBench;
 
 
 void main()
 {
-	writeln("Thread id: ", Thread.getThis().id);
-	writeln("CPU: ", totalCPUs);
-	writeln("Memory page: ", pageSize);
-	writeln("TimeZone: ", getSystemTimeZoneId());
-	writeln("Locale: ", Locale.getUserDefault());
-	tracef("isDaemon: %s", Thread.getThis().isDaemon());
+    writeln("Thread id: ", Thread.getThis().id);
+    writeln("CPU: ", totalCPUs);
+    writeln("Memory page: ", pageSize);
+    writeln("TimeZone: ", getSystemTimeZoneId());
+    writeln("Locale: ", Locale.getUserDefault());
+    tracef("isDaemon: %s", Thread.getThis().isDaemon());
 
-	// testClone();
-	// testGetFieldValues();
+    // testClone();
+    // testGetFieldValues();
 
-	// trace(Locale.getUserUI());
-	// trace(Locale.getSystemDefault());
+    // trace(Locale.getUserUI());
+    // trace(Locale.getSystemDefault());
 
-	// testPropertySetter();
+    // testPropertySetter();
 
-	// testUnits!(MagedQueueTest);
+    // testUnits!(MagedQueueTest);
 
-	// testUnits!(AtomicTest);
-	// testUnits!(BigIntegerTest);
+    // testUnits!(AtomicTest);
+    // testUnits!(BigIntegerTest);
 
-	// testUnits!(CompletableFutureTest);
-	// testUnits!(CompletableFutureTest2);
-	// testUnits!(RealLifeCompletableFutureExample);
-	// testUnits!(RealLifeCompletableFutureExample2);
-	// testUnits!(ForkJoinPoolTest);
+    // testUnits!(CompletableFutureTest);
+    // testUnits!(CompletableFutureTest2);
+    // testUnits!(RealLifeCompletableFutureExample);
+    // testUnits!(RealLifeCompletableFutureExample2);
+    // testUnits!(ForkJoinPoolTest);
 
-	// testUnits!(LocaleTest);
-	// testUnits!(LinkedBlockingQueueTest);
-	// testUnits!(MimeTypeTest);
-	// testUnits!(NullableTest);
-	// testUnits!(NumberTest);
-	// // TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
-	// // 
-	// // testUnits!(PathMatcherTest); 
-	// testUnits!(StringTokenizerTest);
-	// testUnits!(ThreadTest);
+    // testUnits!(LocaleTest);
+    // testUnits!(LinkedBlockingQueueTest);
+    // testUnits!(MimeTypeTest);
+    // testUnits!(NullableTest);
+    // testUnits!(NumberTest);
+    // // TODO: Tasks pending completion -@zxp at 2/28/2019, 5:45:41 PM
+    // // 
+    // // testUnits!(PathMatcherTest); 
+    // testUnits!(StringTokenizerTest);
+    // testUnits!(ThreadTest);
 
-	// // These tests belown will block the test procession.
+    // // These tests belown will block the test procession.
 
-	// // LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
-	// // b.bench();
-	// testLockSupport01();
+    // // LinkedBlockingQueueBench b = new LinkedBlockingQueueBench();
+    // // b.bench();
+    // testLockSupport01();
 
-	// testUnits!(TaskPoolTest);
-	// testUnits!(ScheduledThreadPoolTest);
-	// testUnits!(ThreadPoolExecutorTest);
-	// testUnits!(ConverterUtilsTest);
-	// testUnits!(DeductionTest);
+    // testUnits!(TaskPoolTest);
+    // testUnits!(ScheduledThreadPoolTest);
+    // testUnits!(ThreadPoolExecutorTest);
+    // testUnits!(ConverterUtilsTest);
+    // testUnits!(DeductionTest);
 
 static if(CompilerHelper.isGreaterThan (2086)) {
-	testUnits!(JsonSerializerTest);
-	// testUnits!(SerializationTest);
+    // testUnits!(JsonSerializerTest);
+    // testUnits!(SerializationTest);
+    testUnits!(ObjectMappingTest);
 }
 
-	// testUnits!(ByteBufferTest);
+    // testUnits!(ByteBufferTest);
 
 }
 
 
 void testLockSupport01() {
-	Thread thread = Thread.getThis();  
-	
-	LockSupport.unpark(thread);  
-	
-	writeln("a");  
-	LockSupport.park();  
-	writeln("b");  
-	LockSupport.park();  
-	writeln("c");  
+    Thread thread = Thread.getThis();  
+    
+    LockSupport.unpark(thread);  
+    
+    writeln("a");  
+    LockSupport.park();  
+    writeln("b");  
+    LockSupport.park();  
+    writeln("c");  
 }

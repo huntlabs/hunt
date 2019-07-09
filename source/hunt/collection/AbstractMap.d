@@ -18,7 +18,7 @@ import hunt.collection.Set;
 
 import hunt.Exceptions;
 import hunt.Object;
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 import std.array;
 // import std.container.array;

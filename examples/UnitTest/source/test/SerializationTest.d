@@ -4,7 +4,7 @@ module test.SerializationTest;
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 import hunt.util.Serialize;
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 import std.conv;
 import std.format;

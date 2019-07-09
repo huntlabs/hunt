@@ -1,6 +1,7 @@
 module test.PropertySetterTest;
 
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
+import hunt.util.ObjectUtils;
 import hunt.logging.ConsoleLogger;
 
 struct Foo {

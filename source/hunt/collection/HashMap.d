@@ -18,7 +18,7 @@ import hunt.collection.Iterator;
 import hunt.Exceptions;
 import hunt.Object;
 import hunt.text.StringBuilder;
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 import std.algorithm;
 import std.conv;

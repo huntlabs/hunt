@@ -211,6 +211,10 @@ class URISyntaxException : IOException {
     mixin BasicExceptionCtors;
 }
 
+class UnsupportedEncodingException : IOException {
+    mixin BasicExceptionCtors;
+}
+
 class AsynchronousCloseException : ClosedChannelException {
     mixin BasicExceptionCtors;
 }
@@ -244,10 +248,6 @@ class UnsupportedOperationException : RuntimeException {
 }
 
 class NoSuchElementException : RuntimeException {
-    // this()
-    // {
-    //     super("");
-    // }
     mixin BasicExceptionCtors;
 }
 
@@ -288,15 +288,6 @@ class WritePendingException : IllegalStateException {
 }
 
 class CancellationException : IllegalStateException {
-    mixin BasicExceptionCtors;
-}
-
-class OutOfMemoryError : Error {
-    // this(string msg, Throwable nextInChain = null)
-    // {
-    //     super(msg, nextInChain);
-    // }
-
     mixin BasicExceptionCtors;
 }
 
@@ -409,8 +400,24 @@ class ConfigurationException : Exception {
 }
 
 
-// =====================
-
-class IncompatibleClassChangeError : Error {
+// ===================== Error
+class LinkageError : Error {
     mixin BasicExceptionCtors;
 }
+
+class OutOfMemoryError : Error {
+    mixin BasicExceptionCtors;
+}
+
+class ThreadDeath : Error {
+    mixin BasicExceptionCtors;
+}
+
+class IncompatibleClassChangeError : LinkageError {
+    mixin BasicExceptionCtors;
+}
+
+class InstantiationError : IncompatibleClassChangeError {
+    mixin BasicExceptionCtors;
+}
+
