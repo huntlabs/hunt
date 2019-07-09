@@ -34,8 +34,8 @@ import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 import hunt.Object;
 import hunt.util.Common;
+import hunt.util.ObjectUtils;
 import hunt.util.Serialize;
-import hunt.util.Traits;
 
 import hunt.serialization.Common;
 import hunt.serialization.JsonSerializer;

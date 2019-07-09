@@ -33,8 +33,8 @@ class ScheduledThreadPoolTest {
     }
 
     void doBasicOperatoins01() {
-        ScheduledThreadPoolExecutor executor = cast(ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(
-                1);
+        ScheduledThreadPoolExecutor executor = 
+            cast(ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
         tracef("Main thread starting...");
         // for (int i = 0; i < 5; i++) {
         //     StringTask task = new StringTask("StringTask " ~ i);

@@ -1236,7 +1236,7 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @since      1.0
      */
     final void setDaemon(bool daemon) {
-        checkAccess();
+        // checkAccess();
         this.daemon = daemon;
     }
 

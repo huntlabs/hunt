@@ -11,7 +11,7 @@
 
 module hunt.util.UnitTest;
 
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 void testUnits(T)() {
 	enum v = generateUnitTests!T;

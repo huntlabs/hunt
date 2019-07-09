@@ -20,7 +20,7 @@ import hunt.text.Charset;
 import hunt.text.Common;
 import hunt.Exceptions;
 // import hunt.text;
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 import std.algorithm;
 import std.array;

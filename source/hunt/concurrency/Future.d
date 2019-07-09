@@ -96,6 +96,8 @@ interface Future(V) : IFuture {
     V get(Duration timeout);
 }
 
+/**
+*/
 interface IFuture {
 
     /**

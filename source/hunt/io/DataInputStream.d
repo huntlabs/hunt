@@ -20,7 +20,6 @@ import hunt.io.Common;
 import hunt.Exceptions;
 import hunt.io.PushbackInputStream;
 
-public
 class DataInputStream : FilterInputStream , DataInput {
 
     /**
@@ -29,7 +28,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *
      * @param  inputStream   the specified input stream
      */
-    public this(InputStream inputStream) {
+    this(InputStream inputStream) {
         super(inputStream);
     }
 
@@ -78,7 +77,7 @@ class DataInputStream : FilterInputStream , DataInput {
      * @see        java.io.InputStream#read(byte[], int, int)
      */
      override
-    public final int read(byte[] b)  {
+    final int read(byte[] b)  {
         return inputStream.read(b, 0, cast(int)(b.length));
     }
 
@@ -128,7 +127,7 @@ class DataInputStream : FilterInputStream , DataInput {
      * @see        java.io.InputStream#read(byte[], int, int)
      */
     override
-    public final int read(byte[] b, int off, int len)  {
+    final int read(byte[] b, int off, int len)  {
         return inputStream.read(b, off, len);
     }
 
@@ -149,7 +148,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *          another I/O error occurs.
      * @see     java.io.FilterInputStream#inputStream
      */
-    public final void readFully(byte[] b)  {
+    final void readFully(byte[] b)  {
         readFully(b, 0, cast(int)(b.length));
     }
 
@@ -175,7 +174,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final void readFully(byte[] b, int off, int len)  {
+    final void readFully(byte[] b, int off, int len)  {
         if (len < 0)
             throw new IndexOutOfBoundsException();
         int n = 0;
@@ -201,7 +200,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             the contained input stream does not support
      *             reading after close, or another I/O error occurs.
      */
-    public final int skipBytes(int n)  {
+    final int skipBytes(int n)  {
         int total = 0;
         int cur = 0;
 
@@ -226,7 +225,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final bool readBoolean()  {
+    final bool readBoolean()  {
         int ch = inputStream.read();
         if (ch < 0)
             throw new EOFException();
@@ -249,7 +248,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final byte readByte()  {
+    final byte readByte()  {
         int ch = inputStream.read();
         if (ch < 0)
             throw new EOFException();
@@ -272,7 +271,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see         java.io.FilterInputStream#inputStream
      */
-    public final int readUnsignedByte()  {
+    final int readUnsignedByte()  {
         int ch = inputStream.read();
         if (ch < 0)
             throw new EOFException();
@@ -296,7 +295,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final short readShort()  {
+    final short readShort()  {
         int ch1 = inputStream.read();
         int ch2 = inputStream.read();
         if ((ch1 | ch2) < 0)
@@ -321,7 +320,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final int readUnsignedShort()  {
+    final int readUnsignedShort()  {
         int ch1 = inputStream.read();
         int ch2 = inputStream.read();
         if ((ch1 | ch2) < 0)
@@ -346,7 +345,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final char readChar()  {
+    final char readChar()  {
         return readByte();
         // int ch1 = inputStream.read();
         // return cast(char)ch1;
@@ -373,7 +372,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final int readInt()  {
+    final int readInt()  {
         int ch1 = inputStream.read();
         int ch2 = inputStream.read();
         int ch3 = inputStream.read();
@@ -402,7 +401,7 @@ class DataInputStream : FilterInputStream , DataInput {
      *             another I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      */
-    public final long readLong()  {
+    final long readLong()  {
         readFully(readBuffer, 0, 8);
         return ((cast(long)readBuffer[0] << 56) +
                 (cast(long)(readBuffer[1] & 255) << 48) +
@@ -432,7 +431,7 @@ class DataInputStream : FilterInputStream , DataInput {
      * @see        java.io.DataInputStream#readInt()
      * @see        java.lang.Float#intBitsToFloat(int)
      */
-    public final float readFloat()  {
+    final float readFloat()  {
         return Float.intBitsToFloat(readInt());
     }
 
@@ -454,7 +453,7 @@ class DataInputStream : FilterInputStream , DataInput {
      * @see        java.io.DataInputStream#readLong()
      * @see        java.lang.Double#longBitsToDouble(long)
      */
-    public final double readDouble()  {
+    final double readDouble()  {
         return Double.longBitsToDouble(readLong());
     }
 
@@ -488,7 +487,7 @@ class DataInputStream : FilterInputStream , DataInput {
      * @see        java.io.FilterInputStream#inputStream
      */
     // @Deprecated
-    public final string readLine()  {
+    final string readLine()  {
         char[] buf = lineBuffer;
 
         if (buf is null) {
@@ -551,7 +550,7 @@ loop:   while (true) {
      *             modified UTF-8 encoding of a string.
      * @see        java.io.DataInputStream#readUTF(java.io.DataInput)
      */
-    public final string readUTF()  {
+    final string readUTF()  {
         return readUTF(this);
     }
 
@@ -576,7 +575,7 @@ loop:   while (true) {
      *               valid modified UTF-8 encoding of a Unicode string.
      * @see        java.io.DataInputStream#readUnsignedShort()
      */
-    public static final string readUTF(DataInput inputStream)  {
+    static final string readUTF(DataInput inputStream)  {
         int utflen = inputStream.readUnsignedShort();
         byte[] bytearr = null;
         import hunt.logging;

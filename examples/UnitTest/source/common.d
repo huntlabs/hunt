@@ -5,7 +5,7 @@ import hunt.serialization.Common;
 import hunt.serialization.JsonSerializer;
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
-import hunt.util.Traits;
+import hunt.util.ObjectUtils;
 
 import std.conv;
 import std.format;
@@ -14,7 +14,16 @@ import std.traits;
 import std.stdio;
 import std.datetime;
 
+struct Plant {
+    int number;
+    string name;
+}
+
+/**
+*/
 class FruitBase : Cloneable {
+    int number;
+
     string description;
 
     this() {
@@ -24,8 +33,14 @@ class FruitBase : Cloneable {
     mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
         writeln("Checking description. The value is: " ~ from.description);
     });
+
+    override string toString() {
+        return "number: " ~ number.to!string() ~ "; description: " ~ description;
+    }
 }
 
+/**
+*/
 class Fruit : FruitBase {
 
     private string name;
@@ -79,7 +94,7 @@ class Fruit : FruitBase {
     }
 
     override string toString() {
-        return "name: " ~ name ~ "  price: " ~ price.to!string();
+        return "name: " ~ name ~ "; price: " ~ price.to!string() ~ "; " ~ super.toString;
     }
 }
 
@@ -104,7 +119,7 @@ void testClone() {
 
 void testGetFieldValues() {
 
-    import hunt.util.Traits;
+    import hunt.util.ObjectUtils;
 	Fruit f1 = new Fruit("Apple", 9.5f);
 	f1.description = "normal apple";
 
