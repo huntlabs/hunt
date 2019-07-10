@@ -62,7 +62,6 @@ interface Collection(E) : Iterable!E, IObject {
      *
      * @return an <tt>Iterator</tt> over the elements in this collection
      */
-    
     InputRange!E iterator();
 
     /**

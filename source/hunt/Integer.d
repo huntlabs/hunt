@@ -32,13 +32,13 @@ class Integer : AbstractNumber!int
      *     representation of the specified {@code int} value.
      * @since 1.5
      */
-    enum int MIN_VALUE = 0x80000000;
+    enum int MIN_VALUE = int.min; // 0x80000000;
 
     /**
      * A constant holding the maximum value an {@code int} can
      * have, 2!(sup)31</sup>-1.
      */
-    enum int MAX_VALUE = 0x7fffffff;
+    enum int MAX_VALUE = int.max; // 0x7fffffff;
 
     static int bitCount(int i)
     {
