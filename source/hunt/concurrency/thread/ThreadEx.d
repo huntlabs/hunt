@@ -394,7 +394,32 @@ class ThreadEx : Thread, Runnable {
     final bool isAlive() {
         // TODO: Tasks pending completion -@zxp at 11/7/2018, 10:30:43 AM
         // 
-        return isRunning;
+        return isRunning();
+    }
+
+
+    /**
+     * Marks this thread as either a {@linkplain #isDaemon daemon} thread
+     * or a user thread. The Java Virtual Machine exits when the only
+     * threads running are all daemon threads.
+     *
+     * <p> This method must be invoked before the thread is started.
+     *
+     * @param  on
+     *         if {@code true}, marks this thread as a daemon thread
+     *
+     * @throws  IllegalThreadStateException
+     *          if this thread is {@linkplain #isAlive alive}
+     *
+     * @throws  SecurityException
+     *          if {@link #checkAccess} determines that the current
+     *          thread cannot modify this thread
+     */
+    final void setDaemon(bool on) {
+        if (isAlive()) {
+            throw new IllegalThreadStateException();
+        }
+        isDaemon(on);
     }
 
     /**

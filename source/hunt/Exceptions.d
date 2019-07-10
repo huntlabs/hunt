@@ -400,7 +400,16 @@ class ConfigurationException : Exception {
 }
 
 
-// ===================== Error
+// ===================== Error =====================
+
+class IncompatibleClassChangeError : LinkageError {
+    mixin BasicExceptionCtors;
+}
+
+class AssertionError : Error {
+    mixin BasicExceptionCtors;
+}
+
 class LinkageError : Error {
     mixin BasicExceptionCtors;
 }
@@ -413,11 +422,6 @@ class ThreadDeath : Error {
     mixin BasicExceptionCtors;
 }
 
-class IncompatibleClassChangeError : LinkageError {
-    mixin BasicExceptionCtors;
-}
-
 class InstantiationError : IncompatibleClassChangeError {
     mixin BasicExceptionCtors;
 }
-

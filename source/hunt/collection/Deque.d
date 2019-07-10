@@ -11,8 +11,8 @@
 
 module hunt.collection.Deque;
 
-
 import hunt.collection.Queue;
+import std.range;
 
 /**
  * A linear collection that supports element insertion and removal at
@@ -559,5 +559,7 @@ interface Deque(E) : Queue!E {
      * sequence
      */
     // Iterator!E descendingIterator();
+
+    InputRange!E descendingIterator();
 
 }
