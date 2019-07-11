@@ -67,4 +67,5 @@ alias store = AtomicHelper.store;
 alias load = AtomicHelper.load;
 alias compareAndSet = AtomicHelper.compareAndSet;
 alias increment = AtomicHelper.increment;
+alias decrement = AtomicHelper.decrement;
 

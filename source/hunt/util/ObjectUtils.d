@@ -190,14 +190,20 @@ mixin template GetConstantValues(T) if (is(T == struct) || is(T == class)) {
 
 enum string[] FixedObjectMembers = ["toString", "opCmp", "opEquals", "Monitor", "factory"];
 
+
+alias TopLevel = Flag!"TopLevel";
+
+static if (CompilerHelper.isGreaterThan(2086)) {
+	
 /**
 */
-mixin template CloneMemberTemplate(T, alias onCloned = null) 	{
+mixin template CloneMemberTemplate(T, TopLevel topLevel = TopLevel.no, alias onCloned = null) 	{
 	import std.traits;
 	version(HUNT_DEBUG) import hunt.logging.ConsoleLogger;
 	alias baseClasses = BaseClassesTuple!T;
 
-	static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {
+	static if(baseClasses.length == 1 && is(baseClasses[0] == Object) 
+			|| topLevel == TopLevel.yes) {
 		T clone() {
 			T copy = cast(T)typeid(this).create();
 			__copyFieldsTo(copy);
@@ -232,7 +238,6 @@ mixin template CloneMemberTemplate(T, alias onCloned = null) 	{
 	}
 }
 
-static if (CompilerHelper.isGreaterThan(2086)) {
 
 /**
 */
