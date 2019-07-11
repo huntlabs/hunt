@@ -558,8 +558,6 @@ interface Deque(E) : Queue!E {
      * @return an iterator over the elements in this deque in reverse
      * sequence
      */
-    // Iterator!E descendingIterator();
-
     InputRange!E descendingIterator();
 
 }
