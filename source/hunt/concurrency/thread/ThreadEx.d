@@ -375,7 +375,7 @@ class ThreadEx : Thread, Runnable {
      */
     void run() {
         version(HUNT_CONCURRENCY_DEBUG) {
-            infof("trying to run a target (%s null)...", target is null ? "is" : "is not");
+            infof("trying to run a target %s...", target is null ? "(null)" : "");
         }
         if (target !is null) {
             target.run();
