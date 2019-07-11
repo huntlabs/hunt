@@ -11,10 +11,11 @@
 
 module hunt.collection;
 
+public import hunt.collection.AbstractDeque;
 public import hunt.collection.AbstractList;
-public import hunt.collection.AbstractSet;
 public import hunt.collection.AbstractMap;
 public import hunt.collection.AbstractQueue;
+public import hunt.collection.AbstractSet;
 public import hunt.collection.ArrayDeque;
 public import hunt.collection.ArrayList;
 public import hunt.collection.ArrayTernaryTrie;

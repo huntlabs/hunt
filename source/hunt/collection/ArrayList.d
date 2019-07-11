@@ -14,6 +14,7 @@ module hunt.collection.ArrayList;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.range;
 import std.traits;
 
 import hunt.Exceptions;
@@ -22,6 +23,7 @@ import hunt.collection.AbstractList;
 import hunt.collection.Collection;
 import hunt.collection.List;
 import hunt.util.Comparator;
+import hunt.util.Functional;
 
 /**
 */
@@ -84,13 +86,13 @@ class ArrayList(E) : AbstractList!E {
      * @param c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-     this(ref Array!E arr) {
-         _array = arr;
-     }
+    this(ref Array!E arr) {
+        _array = arr;
+    }
 
-     this(E[] arr) {
-         _array.insertBack(arr);
-     }
+    this(E[] arr) {
+        _array.insertBack(arr);
+    }
 
     this(Collection!E c) {
         foreach(E e; c) {
@@ -687,6 +689,111 @@ class ArrayList(E) : AbstractList!E {
         modCount++;
     }
 
+
+    /**
+     * Returns an iterator over the elements in this list in proper sequence.
+     *
+     * <p>The returned iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
+     *
+     * @return an iterator over the elements in this list in proper sequence
+     */
+    override InputRange!E iterator() {
+        return new Itr();
+    }
+
+    /**
+     * An optimized version of AbstractList.Itr
+     */
+    private class Itr : InputRange!E {
+        int cursor;       // index of next element to return
+        int lastRet = -1; // index of last element returned; -1 if no such
+        int expectedModCount;
+
+        // prevent creating a synthetic constructor
+        this() {
+            expectedModCount = this.outer.modCount;
+        }
+
+        bool empty() {
+            return cursor == size();
+        }
+
+        E front() {
+            checkForComodification();
+            int i = cursor;
+            if (i >= size())
+                throw new NoSuchElementException();
+            cursor = i + 1;
+            return this.outer._array[lastRet = i];
+        }
+
+        void popFront() {
+            int i = cursor;
+            if (i >= size())
+                throw new NoSuchElementException();
+            cursor = i + 1; 
+        }
+
+        E moveFront() {
+            // this.outer._array.moveFront();
+            throw new NotImplementedException();
+        }
+
+        // void remove() {
+        //     if (lastRet < 0)
+        //         throw new IllegalStateException();
+        //     checkForComodification();
+
+        //     try {
+        //         ArrayList.this.remove(lastRet);
+        //         cursor = lastRet;
+        //         lastRet = -1;
+        //         expectedModCount = modCount;
+        //     } catch (IndexOutOfBoundsException ex) {
+        //         throw new ConcurrentModificationException();
+        //     }
+        // }
+
+        // void forEachRemaining(Consumer!E action) {
+        //     Objects.requireNonNull(action);
+        //     int size = ArrayList.this.size;
+        //     int i = cursor;
+        //     if (i < size) {
+        //         Object[] es = elementData;
+        //         if (i >= es.length)
+        //             throw new ConcurrentModificationException();
+        //         for (; i < size && modCount == expectedModCount; i++)
+        //             action.accept(elementAt(es, i));
+        //         // update once at end to reduce heap write traffic
+        //         cursor = i;
+        //         lastRet = i - 1;
+        //         checkForComodification();
+        //     }
+        // }
+
+        int opApply(scope int delegate(E) dg) {
+            int result = 0;
+            foreach(ref E e; this.outer._array) {
+                result = dg(e);
+            }
+            return result;
+        }
+
+        /// Ditto
+        int opApply(scope int delegate(size_t, E) dg) {
+            int result = 0;
+            size_t index = 0;
+            foreach(ref E e; this.outer._array) {
+                result = dg(index++, e);
+            }
+            return result;   
+        }
+
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+        }
+    }
 }
 
 /**

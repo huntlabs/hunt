@@ -779,7 +779,7 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      *
      * @return a shallow copy of this map
      */
-    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
+    mixin CloneMemberTemplate!(typeof(this), TopLevel.no, (typeof(this) from, typeof(this) to) {
         to.reinitialize();
         to.putMapEntries(from, false);
     });

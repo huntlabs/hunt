@@ -42,7 +42,7 @@ import hunt.Object;
  *
  * @since 1.5
  * @author Doug Lea
- * @param !(E) the type of elements held in this queue
+ * @param (E) the type of elements held in this queue
  */
 abstract class AbstractQueue(E) : AbstractCollection!(E), Queue!(E) {
 
