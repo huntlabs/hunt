@@ -52,6 +52,22 @@ interface Cloneable {
 
 
 /**
+ * A {@code Flushable} is a destination of data that can be flushed.  The
+ * flush method is invoked to write any buffered output to the underlying
+ * stream.
+ */
+interface Flushable {
+
+    /**
+     * Flushes this stream by writing any buffered output to the underlying
+     * stream.
+     *
+     * @throws IOException If an I/O error occurs
+     */
+    void flush();
+}
+
+/**
 */
 interface Serializable {
 
@@ -318,7 +334,6 @@ interface Closeable : AutoCloseable {
 }
 
 
-
 /**
  * An object to which {@code char} sequences and values can be appended.  The
  * {@code Appendable} interface must be implemented by any class whose
@@ -359,7 +374,7 @@ interface Appendable {
      * @throws  IOException
      *          If an I/O error occurs
      */
-    Appendable append(string csq);
+    Appendable append(const(char)[] csq);
 
     /**
      * Appends a subsequence of the specified character sequence to this
@@ -395,7 +410,7 @@ interface Appendable {
      * @throws  IOException
      *          If an I/O error occurs
      */
-    // Appendable append(CharSequence csq, int start, int end);
+    Appendable append(const(char)[], int start, int end);
 
     /**
      * Appends the specified character to this {@code Appendable}.
