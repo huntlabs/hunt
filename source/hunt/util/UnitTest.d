@@ -12,6 +12,7 @@
 module hunt.util.UnitTest;
 
 import hunt.util.ObjectUtils;
+import core.time;
 
 void testUnits(T)() {
 	enum v = generateUnitTests!T;
@@ -148,6 +149,7 @@ struct TestWith(T = Object) {
 }
 
 struct Test {
+	Duration timeout;
 }
 
 /**
