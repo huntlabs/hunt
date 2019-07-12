@@ -24,15 +24,6 @@ import std.traits;
 import hunt.logging;
 import hunt.Exceptions;
 
-class AssertionError : Error {
-    // this(string file = __FILE__, size_t line = __LINE__,
-    //      Throwable next = null) @nogc @safe pure nothrow
-    // {
-    //     super("", file, line, next);
-    // }
-
-    mixin basicExceptionCtors;
-}
 
 class Matchers {
     static T[] contains(T)(T[] items...) {

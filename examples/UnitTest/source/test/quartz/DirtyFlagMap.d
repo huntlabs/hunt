@@ -261,7 +261,7 @@ class DirtyFlagMap(K, V) : Map!(K, V), Cloneable, JsonSerializable {
         return map.toString();
     }
 
-    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
+    mixin CloneMemberTemplate!(typeof(this), TopLevel.no, (typeof(this) from, typeof(this) to) {
         HashMap!(K,V) hashMap = cast(HashMap!(K,V))from.map;
         if (hashMap !is null) {
             to.map = cast(Map!(K,V))(hashMap.clone());

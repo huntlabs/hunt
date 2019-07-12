@@ -30,7 +30,7 @@ class FruitBase : Cloneable {
         description = "It's the base";
     }
 
-    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
+    mixin CloneMemberTemplate!(typeof(this), TopLevel.yes, (typeof(this) from, typeof(this) to) {
         writeln("Checking description. The value is: " ~ from.description);
     });
 
@@ -74,9 +74,9 @@ class Fruit : FruitBase {
 
     // mixin CloneMemberTemplate!(typeof(this));
 
-    mixin CloneMemberTemplate!(typeof(this), (typeof(this) from, typeof(this) to) {
-        writefln("Checking description. The last value is: %s", to.description);
-        to.description = "description: " ~ from.description;
+    mixin CloneMemberTemplate!(typeof(this), TopLevel.no, (typeof(this) from, typeof(this) to) {
+        writefln("Checking name. The last value is: %s", to.name);
+        to.name = "name: " ~ from.name;
     });
 
     override size_t toHash() @trusted nothrow {
