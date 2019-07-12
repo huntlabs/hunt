@@ -93,9 +93,9 @@ void main()
     // testUnits!(DeductionTest);
 
 static if(CompilerHelper.isGreaterThan (2086)) {
-    // testUnits!(JsonSerializerTest);
+    testUnits!(JsonSerializerTest);
     // testUnits!(SerializationTest);
-    testUnits!(ObjectMappingTest);
+    // testUnits!(ObjectMappingTest);
 }
 
     // testUnits!(ByteBufferTest);
