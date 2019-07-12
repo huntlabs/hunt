@@ -32,6 +32,11 @@ template isCharByte(T) {
 	enum bool isCharByte = is(Unqual!T == byte) || is(Unqual!T == ubyte) || is(Unqual!T == char);
 }
 
+template isByteArray(T) {
+	enum bool isByteArray = is(T : U[], U) && isByteType!U;
+}
+
+
 template isRefType(T) {
 	enum isRefType = /*isPointer!T ||*/ isDelegate!T || isDynamicArray!T
 			|| isAssociativeArray!T || is(T == class) || is(T == interface);

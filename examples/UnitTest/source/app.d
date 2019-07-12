@@ -90,10 +90,10 @@ void main()
     // testUnits!(ScheduledThreadPoolTest);
     // testUnits!(ThreadPoolExecutorTest);
     // testUnits!(ConverterUtilsTest);
-    // testUnits!(DeductionTest);
+    testUnits!(DeductionTest);
 
 static if(CompilerHelper.isGreaterThan (2086)) {
-    testUnits!(JsonSerializerTest);
+    // testUnits!(JsonSerializerTest);
     // testUnits!(SerializationTest);
     // testUnits!(ObjectMappingTest);
 }

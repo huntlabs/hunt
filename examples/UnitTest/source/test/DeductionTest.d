@@ -4,6 +4,8 @@ import common;
 import hunt.logging.ConsoleLogger;
 
 import std.traits;
+import hunt.util.Traits;
+
 
 class DeductionTest {
 
@@ -21,6 +23,13 @@ class DeductionTest {
 
         Exception ex;
         deduce(ex);
+    }
+
+ 
+
+    void test2() {
+        assert(isByteArray!(ubyte[]));
+        assert(!isByteArray!(int[]));
     }
 }
 
