@@ -19,6 +19,7 @@ import hunt.Exceptions;
 import hunt.Object;
 import hunt.text.StringBuilder;
 import hunt.util.ObjectUtils;
+import hunt.util.Traits;
 
 import std.algorithm;
 import std.conv;
@@ -1194,7 +1195,7 @@ final class TreeNode(K, V) : LinkedHashMapEntry!(K, V) {
      * equivalence across rebalancings. Tie-breaking further than
      * necessary simplifies testing a bit.
      */
-    static int tieBreakOrder(T)(T a, T b) if(isBasicType!(T) || isSomeString!T) {
+    static int tieBreakOrder(T)(T a, T b) if(isBasicType!(T) || isSomeString!T || isByteArray!T) {
         return (hashOf(a) <= hashOf(b) ? -1 : 1);
     }
 
