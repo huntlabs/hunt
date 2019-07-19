@@ -61,8 +61,13 @@ abstract class AbstractStream : AbstractSocketChannel {
         // ubyte[BufferSize] _readBuffer;
         // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
-        version (HUNT_DEBUG_MORE)
+        version (HUNT_IO_MORE) {
             tracef("reading[fd=%d]: %d bytes", this.handle, len);
+            if (len <= 32)
+                infof("fd: %d, %d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. len]);
+            else
+                infof("fd: %d, 32/%d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. 32]);
+        }
 
         if (len > 0) {
             if (dataReceivedHandler !is null) {
@@ -111,7 +116,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     protected override void onClose() {
-        version (HUNT_DEBUG_MORE) {
+        version (HUNT_IO_MORE) {
             infof("_isWritting=%s, writeBuffer: %s, _writeQueue: %s", _isWritting, writeBuffer is null, 
                 _writeQueue is null || _writeQueue.isEmpty());
         }
@@ -139,10 +144,10 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected ptrdiff_t tryWrite(const ubyte[] data) {
         clearError();
         // const nBytes = this.socket.send(data);
-        version (HUNT_DEBUG_MORE)
+        version (HUNT_IO_MORE)
             tracef("try to write: %d bytes, fd=%d", data.length, this.handle);
         const nBytes = write(this.handle, data.ptr, data.length);
-        version (HUNT_DEBUG_MORE)
+        version (HUNT_IO_MORE)
             tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
         if (nBytes > 0) {
@@ -166,7 +171,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 this.close();
             }
         } else {
-            version (HUNT_DEBUG_MORE) {
+            version (HUNT_IO_MORE) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
             }
@@ -188,18 +193,18 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     private bool tryNextWrite(ByteBuffer buffer) {
         const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
-        version (HUNT_DEBUG_MORE)
+        version (HUNT_IO_MORE)
             tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
         if(data.length == 0)
             return true;
 
         size_t nBytes = tryWrite(data);
-        version (HUNT_DEBUG_MORE)
+        version (HUNT_IO_MORE)
             tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
         if (nBytes > 0) {
             buffer.nextGetIndex(cast(int)nBytes);
             if(!buffer.hasRemaining()) {
-                version (HUNT_DEBUG_MORE)
+                version (HUNT_IO_MORE)
                     tracef("A buffer is written out. fd=%d", this.handle);
                 // buffer.clear();
                 return true;
@@ -218,20 +223,18 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     override void onWrite() {
-        version (HUNT_DEBUG_MORE) {
-            tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
-            if(writeBuffer !is null) {
-                infof("writeBuffer: %s", writeBuffer.toString());
-            }
+        version (HUNT_IO_MORE) {
+            tracef("checking status, isWritting: %s, writeBuffer: %s", 
+                _isWritting, writeBuffer is null ? "null" : writeBuffer.toString());
         }
 
         if(!_isWritting) {
-            version (HUNT_DEBUG_MORE) warning("not ready for write...");
+            version (HUNT_IO_MORE) infof("No data to be written. fd=%d", this.handle);
             return;
         }
 
         if(_isClosing && isWriteCancelling) {
-            version (HUNT_DEBUG_MORE) infof("Write cancelled, fd=%d", this.handle);
+            version (HUNT_IO_MORE) infof("Write cancelled or closed, fd=%d", this.handle);
             resetWriteStatus();
             return;
         }
@@ -240,13 +243,13 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;
             } else {
-                version (HUNT_DEBUG_MORE) {
+                version (HUNT_IO_MORE) {
                     tracef("waiting to try again... fd=%d, writeBuffer: %s", 
                         this.handle, writeBuffer.toString());
                 }
                 return;
             }
-            version (HUNT_DEBUG_MORE)
+            version (HUNT_IO_MORE)
                 tracef("running here, fd=%d", this.handle);
         }
 
@@ -254,7 +257,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        version (HUNT_DEBUG_MORE) {
+        version (HUNT_IO_MORE) {
             tracef("start to write [fd=%d], writeBuffer %s empty", this.handle, writeBuffer is null ? "is" : "is not");
         }
 
@@ -263,24 +266,24 @@ abstract class AbstractStream : AbstractSocketChannel {
                 writeBuffer = null;  
                 checkAllWriteDone();            
             } else {
-            version (HUNT_DEBUG_MORE)
+            version (HUNT_IO_MORE)
                 tracef("waiting to try again: fd=%d, writeBuffer: %s", this.handle, writeBuffer.toString());
             }
-            version (HUNT_DEBUG_MORE)
+            version (HUNT_IO_MORE)
                 tracef("running here, fd=%d", this.handle);
         }
     }
 
     protected bool checkAllWriteDone() {
-        version (HUNT_DEBUG_MORE) {
+        version (HUNT_IO_MORE) {
             infof("checking remaining: fd=%d, empty: %s", this.handle, 
                 _writeQueue is null ? true : _writeQueue.isEmpty());
         }
 
         if(_writeQueue is null || _writeQueue.isEmpty()) {
             resetWriteStatus();        
-            version (HUNT_DEBUG_MORE)
-                infof("All data are written out. fd=%d", this.handle);
+            version (HUNT_IO_MORE)
+                infof("The all data content are written out: fd=%d", this.handle);
             if(dataWriteDoneHandler !is null)
                 dataWriteDoneHandler(this);
             return true;
@@ -299,7 +302,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
 
     protected void initializeWriteQueue() {
-        version(HUNT_DEBUG_MORE) info("_writeQueue: ", _writeQueue is null);
+        version(HUNT_IO_MORE) info("_writeQueue: ", _writeQueue is null);
         if (_writeQueue is null) {
             _writeQueue = new WritingBufferQueue();
         }

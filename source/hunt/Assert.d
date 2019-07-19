@@ -146,7 +146,7 @@ class Assert {
      */
     static void assertEquals(T, size_t line = __LINE__, string file = __FILE__)(
             string message, T expected, T actual) {
-        version (HUNT_DEBUG) {
+        version (HUNT_DEBUG_MORE) {
             trace("expected: ", expected);
             trace("actual: ", actual);
         }

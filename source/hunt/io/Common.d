@@ -28,14 +28,6 @@ import std.algorithm;
  * must always provide a method that returns the next byte of input.
  *
  * @author  Arthur van Hoff
- * @see     java.io.BufferedInputStream
- * @see     java.io.ByteArrayInputStream
- * @see     java.io.DataInputStream
- * @see     java.io.FilterInputStream
- * @see     java.io.InputStream#read()
- * @see     java.io.OutputStream
- * @see     java.io.PushbackInputStream
- * @since   JDK1.0
  */
 abstract class InputStream : Closeable {
 
@@ -371,15 +363,8 @@ abstract class InputStream : Closeable {
  * that writes one byte of output.
  *
  * @author  Arthur van Hoff
- * @see     java.io.BufferedOutputStream
- * @see     java.io.ByteArrayOutputStream
- * @see     java.io.DataOutputStream
- * @see     java.io.FilterOutputStream
- * @see     java.io.InputStream
- * @see     java.io.OutputStream#write(int)
- * @since   JDK1.0
  */
-abstract class OutputStream : Closeable  { // implements  Flushable
+abstract class OutputStream : Closeable, Flushable {
     /**
      * Writes the specified byte to this output stream. The general
      * contract for <code>write</code> is that one byte is written
