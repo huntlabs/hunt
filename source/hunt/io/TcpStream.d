@@ -128,7 +128,7 @@ class TcpStream : AbstractStream {
         if(addresses is null) {
             throw new SocketException("Can't resolve hostname: " ~ hostname);
         }
-        version(HUNT_DEBUG_MORE) {
+        version(HUNT_IO_MORE) {
             infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, addresses[0], port);
         }
         connect(addresses[0]); // always select the first one.
@@ -300,23 +300,30 @@ class TcpStream : AbstractStream {
             throw new Exception("The connection is down!");
         }
 
+        version (HUNT_IO_MORE) {
+            if (data.length <= 32)
+                infof("fd: %d, %d bytes: %(%02X %)", this.handle, data.length, data[0 .. $]);
+            else
+                infof("fd: %d, %d bytes: %(%02X %)", this.handle, data.length, data[0 .. 32]);
+        }
+
         if ((_writeQueue is null || _writeQueue.isEmpty()) && !_isWritting) {
             _isWritting = true;
             const(ubyte)[] d = data;
 
             while (!_isClosing && !isWriteCancelling && d.length > 0) {
-                version (HUNT_DEBUG_MORE)
+                version (HUNT_IO_MORE)
                     tracef("write directly: fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
 
                 if (nBytes == d.length) {
-                    version (HUNT_DEBUG_MORE)
+                    version (HUNT_IO_MORE)
                         tracef("write out once: %d / %d bytes, fd=%d", nBytes,
                                 d.length, this.handle);
                     checkAllWriteDone();
                     break;
                 } else if (nBytes > 0) {
-                    version (HUNT_DEBUG_MORE)
+                    version (HUNT_IO_MORE)
                         tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     d = d[nBytes .. $];
                 } else {
@@ -387,7 +394,7 @@ protected:
         // }
         super.onClose();
 
-        version (HUNT_DEBUG_MORE)
+        version (HUNT_IO_MORE)
             infof("notify TCP stream down: fd=%d", this.handle);
         if (closeHandler)
             closeHandler();

@@ -25,4 +25,6 @@ public import hunt.io.IOUtils;
 
 public import hunt.io.TcpListener;
 public import hunt.io.TcpStream;
+public import hunt.io.TcpInputStream;
+public import hunt.io.TcpOutputStream;
 
