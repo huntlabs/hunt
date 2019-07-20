@@ -723,7 +723,6 @@ class ArrayList(E) : AbstractList!E {
             int i = cursor;
             if (i >= size())
                 throw new NoSuchElementException();
-            cursor = i + 1;
             return this.outer._array[lastRet = i];
         }
 

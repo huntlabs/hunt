@@ -388,7 +388,24 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * @return <tt>true</tt> if the specified object is equal to this map
      */
     override bool opEquals(Object o) {
-        throw new UnsupportedOperationException();
+        if(o is null) return false;
+        if (o is this) return true;
+
+        auto m = cast(Map!(K, V)) o;
+        if(m is null) return false;
+        if (m.size() != size())
+            return false;
+
+        try {
+            foreach(K key, V value; this) {
+                if(value != m.get(key))
+                    return false;
+            }
+        } catch (Exception) {
+            return false;
+        }
+
+        return true;
     }
 
     bool opEquals(IObject o) {
