@@ -30,6 +30,8 @@ class TcpInputStream : InputStream {
 
     override int read(byte[] b, int off, int len) {
         version(HUNT_DEBUG) info("waitting....");
+        // TODO: Tasks pending completion -@zxp at 7/20/2019, 11:32:52 AM
+        // Support timeout
         ByteBuffer buffer = bufferQueue.dequeue();
         int r = buffer.remaining();
         version(HUNT_DEBUG) info("read....", buffer.toString());
