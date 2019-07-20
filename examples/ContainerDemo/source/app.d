@@ -17,15 +17,15 @@ import TrieTest;
 import hunt.util.DateTime;
 
 void main() {
-    testUnits!(ArrayListDemo)();
-    testUnits!(BufferUtilsDemo)();
+    // testUnits!(ArrayListDemo)();
+    // testUnits!(BufferUtilsDemo)();
     testUnits!HashMapDemo();
-    testUnits!HashSetDemo();
-    testUnits!(LinkedListDemo)();
-    testUnits!LinkedHashSetDemo();
-    testUnits!LinkedHashMapDemo();
-    testUnits!(MultiMapDemo)();
-    testUnits!TreeMapDemo();
-    testUnits!(TrieTest)();
-    testUnits!SetDemo();
+    // testUnits!HashSetDemo();
+    // testUnits!(LinkedListDemo)();
+    // testUnits!LinkedHashSetDemo();
+    // testUnits!LinkedHashMapDemo();
+    // testUnits!(MultiMapDemo)();
+    // testUnits!TreeMapDemo();
+    // testUnits!(TrieTest)();
+    // testUnits!SetDemo();
 }

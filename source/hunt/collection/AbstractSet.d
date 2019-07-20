@@ -75,8 +75,8 @@ abstract class AbstractSet(E) : AbstractCollection!E, Set!E {
      * @return <tt>true</tt> if the specified object is equal to this set
      */
     override bool opEquals(Object o) {
-        if (o is this)
-            return true;
+        if(o is null) return false;
+        if (o is this) return true;
 
         Collection!E c = cast(Collection!E) o;
         if(c is null) return false;

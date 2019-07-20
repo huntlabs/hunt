@@ -187,4 +187,32 @@ class HashMapDemo
         assert(hmap.size() == 4);
 
     }
+
+    void testEquals1() {
+
+        HashMap!(int, string) hmap1 = new HashMap!(int, string)();
+        hmap1.put(1, "Sherry");
+        hmap1.put(22, "Abey");
+
+        HashMap!(int, string) hmap2 = new HashMap!(int, string)();
+        hmap2.put(22, "Abey");
+        hmap2.put(1, "Sherry");
+
+        assert(hmap1 == hmap2);
+    }
+
+
+    void testEquals2() {
+
+        HashMap!(Price, string) hm1 = new HashMap!(Price, string)();
+        hm1.put(new Price("Banana", 20), "Yellow Banana");
+        hm1.put(new Price("Apple", 40), "Red Apple");
+
+        HashMap!(Price, string) hm2 = new HashMap!(Price, string)();
+        hm2.put(new Price("Apple", 40), "Red Apple");
+        hm2.put(new Price("Banana", 20), "Yellow Banana");
+
+        assert(hm1 == hm2);
+    }
+
 }
