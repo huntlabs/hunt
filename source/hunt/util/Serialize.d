@@ -868,7 +868,7 @@ JSONValue toJson(T)(T t, RefClass stack, uint level)
 // uinteger
 T toObject(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 {
-	if(v.type() == JSON_TYPE.UINTEGER)
+	if(v.type() == JSONType.uinteger)
 		return cast(T) v.uinteger;
 	else
 		return T.init;
@@ -877,7 +877,7 @@ T toObject(T)(JSONValue v, RefClass stack) if (isUnsignedType!T)
 // integer
 T toObject(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 {
-	if(v.type() == JSON_TYPE.INTEGER)
+	if(v.type() == JSONType.integer)
 		return cast(T) v.integer;
 	else
 		return T.init;
@@ -886,7 +886,7 @@ T toObject(T)(JSONValue v, RefClass stack) if (isSignedType!T)
 // string
 T toObject(T)(JSONValue v, RefClass stack) if (is(T == string))
 {
-	if(v.type() == JSON_TYPE.STRING)
+	if(v.type() == JSONType.string)
 		return v.str;
 	else
 		return T.init;
@@ -895,8 +895,8 @@ T toObject(T)(JSONValue v, RefClass stack) if (is(T == string))
 // bool
 T toObject(T)(JSONValue v, RefClass stack) if (is(T == bool))
 {
-	if(v.type() == JSON_TYPE.TRUE || v.type() == JSON_TYPE.FALSE)
-		return v.type() == JSON_TYPE.TRUE;
+	if(v.type() == JSONType.true_ || v.type() == JSONType.false_)
+		return v.type() == JSONType.true_;
 	else
 		return T.init;
 }
@@ -904,7 +904,7 @@ T toObject(T)(JSONValue v, RefClass stack) if (is(T == bool))
 // floating
 T toObject(T)(JSONValue v, RefClass stack) if (isFloatType!T)
 {
-	if(v.type() == JSON_TYPE.FLOAT)
+	if(v.type() == JSONType.float_)
 		return cast(T) v.floating;
 	else
 		return  T.init;
@@ -927,7 +927,7 @@ JSONValue toJson(T)(T t, RefClass stack, uint level)
 T toObject(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 {
 	T t;
-	if(v.type() == JSON_TYPE.ARRAY)
+	if(v.type() == JSONType.array)
 	{
 		for (size_t i = 0; i < t.length; i++)
 		{
@@ -941,7 +941,7 @@ T toObject(T)(JSONValue v, RefClass stack) if (isStaticArray!T)
 T toObject(T)(JSONValue v, RefClass stack) if (isDynamicArray!T && !is(T == string)&& !is(T == enum))
 {
 	T t;
-	if(v.type() == JSON_TYPE.ARRAY)
+	if(v.type() == JSONType.array)
 	{
 		t.length = v.array.length;
 		for (size_t i = 0; i < t.length; i++)
@@ -1033,7 +1033,7 @@ T toObject(T)(JSONValue j, RefClass stack) if (is(T == struct))
 	else
 	{
 		T t;
-		if(j.type() == JSON_TYPE.OBJECT)
+		if(j.type() == JSONType.object)
 		{
 			mixin(toObjectMembers!T);
 		}
@@ -1071,9 +1071,9 @@ JSONValue toJson(T)(T t, RefClass stack, uint level) if (is(T == class))
 
 T toObject(T)(JSONValue j, RefClass stack) if (is(T == class))
 {
-	if ( j.type() != JSON_TYPE.OBJECT)
+	if ( j.type() != JSONType.object)
 		return T.init;
-	assert(j.type() == JSON_TYPE.OBJECT);
+	assert(j.type() == JSONType.object);
 
 	if (MAGIC_KEY in j)
 	{
@@ -1102,7 +1102,7 @@ JSONValue toJson(T)(T t, RefClass stack, uint level) if (isAssociativeArray!T)
 T toObject(T)(JSONValue j, RefClass stack) if (isAssociativeArray!T)
 {
 	import std.conv;
-	if ( j.type() != JSON_TYPE.OBJECT)
+	if ( j.type() != JSONType.object)
 		return T.init;
 	T t;
 	foreach (k, v; j.object)
@@ -1128,16 +1128,16 @@ T toObject(T)(JSONValue j, RefClass stack) if (is(T == enum))
 	OriginalType!T val;
 	static if (is(OriginalType!T == string ))
 	{
-		if(j.type() == JSON_TYPE.STRING)
+		if(j.type() == JSONType.string)
 			val = cast(OriginalType!T)j.str;
 		else
 			return T.init;
 	}
 	else static if (is(OriginalType!T == int))
 	{
-		if(j.type() == JSON_TYPE.integer)
+		if(j.type() == JSONType.integer)
 			val = cast(OriginalType!T)j.integer;
-		else if(j.type() == JSON_TYPE.uinteger)
+		else if(j.type() == JSONType.uinteger)
 			val = cast(OriginalType!T)j.uinteger;
 		else
 			return T.init;
@@ -1286,7 +1286,7 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
 
         final switch (value.type)
         {
-            case JSON_TYPE.OBJECT:
+            case JSONType.object:
                 auto obj = value.objectNoRef;
                 if (!obj.length)
                 {
@@ -1333,7 +1333,7 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
                 }
                 break;
 
-            case JSON_TYPE.ARRAY:
+            case JSONType.array:
                 auto arr = value.arrayNoRef;
                 if (arr.empty)
                 {
@@ -1355,19 +1355,19 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
                 }
                 break;
 
-            case JSON_TYPE.STRING:
+            case JSONType.string:
                 toString(value.str);
                 break;
 
-            case JSON_TYPE.INTEGER:
+            case JSONType.integer:
                 json.put(to!string(value.integer));
                 break;
 
-            case JSON_TYPE.UINTEGER:
+            case JSONType.uinteger:
                 json.put(to!string(value.uinteger));
                 break;
 
-            case JSON_TYPE.FLOAT:
+            case JSONType.float_:
                 import std.math : isNaN, isInfinity;
 
                 auto val = value.floating;
@@ -1407,15 +1407,15 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
                 }
                 break;
 
-            case JSON_TYPE.TRUE:
+            case JSONType.true_:
                 json.put("true");
                 break;
 
-            case JSON_TYPE.FALSE:
+            case JSONType.false_:
                 json.put("false");
                 break;
 
-            case JSON_TYPE.NULL:
+            case JSONType.null_:
                 json.put("null");
                 break;
         }

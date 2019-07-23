@@ -33,7 +33,7 @@ template isCharByte(T) {
 }
 
 template isByteArray(T) {
-	static if(is(T : U[], U) && isByteType!U) {
+	static if(is(T : U[], U) && isByteType!(Unqual!U)) {
 		enum bool isByteArray = true;
 	} else {
 		enum bool isByteArray = false;
