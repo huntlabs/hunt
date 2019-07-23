@@ -125,7 +125,7 @@ class  FormatterWrapper
         foreach(k , v; matchs) {
             if(v in data)
             {
-                if(data[v].type == JSON_TYPE.STRING)
+                if(data[v].type == JSONType.string)
                     input = input.replace(k , data[v].str);
                 else
                     input = input.replace(k , data[v].to!string);
