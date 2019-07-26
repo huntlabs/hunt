@@ -7,3 +7,7 @@ version(Posix):
 public import hunt.io.channel.posix.AbstractDatagramSocket;
 public import hunt.io.channel.posix.AbstractListener;
 public import hunt.io.channel.posix.AbstractStream;
+
+version (HAVE_EPOLL) {
+    public import hunt.io.channel.posix.EpollEventChannel;
+}

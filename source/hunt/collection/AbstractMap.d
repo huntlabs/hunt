@@ -483,13 +483,7 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      *
      * @return a shallow copy of this map
      */
-     mixin CloneMemberTemplate!(typeof(this));
-    // protected Object clone() {
-    //     AbstractMap!(K, V) result = cast(AbstractMap!(K, V))(typeid(this).create());
-    //     // result.keySet = null;
-    //     // result.values = null;
-    //     return result;
-    // }
+    mixin CloneMemberTemplate!(typeof(this));
 
     /**
      * Utility method for SimpleEntry and SimpleImmutableEntry.

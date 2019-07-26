@@ -309,7 +309,7 @@ abstract class TimerChannelBase : AbstractChannel, ITimer {
     void stop() {
         if (_isActive) {
             _isActive = false;
-            onClose();
+            close();
         }
     }
 

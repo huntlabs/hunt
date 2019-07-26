@@ -49,12 +49,15 @@ shared static this() {
     fdLimit = fileLimit.rlim_max;
 }
 
+
 /**
 */
 class AbstractSelector : Selector {
     enum int NUM_KEVENTS = 1024;
     private int _epollFD;
     epoll_event[NUM_KEVENTS] events;
+
+    private EventChannel _eventChannel;
 
     this(size_t number, size_t divider, size_t maxChannels = 1500) {
         super(number, divider, maxChannels);
@@ -68,6 +71,9 @@ class AbstractSelector : Selector {
         // _epollFD = epoll_create(256);
         if (_epollFD < 0)
             throw new IOException("epoll_create failed");
+        
+        _eventChannel = new EpollEventChannel(this);
+        register(_eventChannel);
     }
 
     ~this() {
@@ -78,26 +84,33 @@ class AbstractSelector : Selector {
         if (isDisposed)
             return;
 
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("disposing selector[fd=%d]...", _epollFD);
         isDisposed = true;
-        core.sys.posix.unistd.close(_epollFD);
+        _eventChannel.close();
+        int r = core.sys.posix.unistd.close(_epollFD);
+        if(r != 0) {
+            warningf("error: %d", r);
+        }
     }
 
     private bool isDisposed = false;
 
-    // override void stop() {
-    //     if (_running) {
-    //         super.stop();
-    //         version (HUNT_DEBUG)
-    //             tracef("selector[fd=%d] stopped", _epollFD);
-    //     }
-    // }
+    override void onStop() {
+        version (HUNT_DEBUG)
+            infof("Selector stopping. fd=%d", _epollFD);  
+               
+        if(!_eventChannel.isClosed()) {
+            _eventChannel.trigger();
+            // _eventChannel.onWrite();
+        }
+
+    }
 
     override bool register(AbstractChannel channel) {
         assert(channel !is null);
         int infd = cast(int) channel.handle;
-        version (HUNT_IO_MORE)
+        version (HUNT_IO_DEBUG)
             tracef("register channel: fd=%d", infd);
 
         size_t index = cast(size_t)(infd / divider);
@@ -135,7 +148,7 @@ class AbstractSelector : Selector {
     override bool deregister(AbstractChannel channel) {
         size_t fd = cast(size_t) channel.handle;
         size_t index = cast(size_t)(fd / divider);
-        version (HUNT_IO_MORE)
+        version (HUNT_IO_DEBUG)
             tracef("deregister channel: fd=%d, index=%d", fd, index);
         channels[index] = null;
 
@@ -191,19 +204,19 @@ class AbstractSelector : Selector {
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint event) {
-        version (HUNT_IO_MORE)
-        infof("handling event: events=%d, fd=%d", event, channel.handle);
+        version (HUNT_IO_DEBUG)
+        infof("handling event: selector=%d, events=%d, channel=%d", this._epollFD, event, channel.handle);
 
         try {
             if (isClosed(event)) {
                 /* An error has occured on this fd, or the socket is not
                     ready for reading (why were we notified then?) */
-                version (HUNT_IO_MORE) {
+                version (HUNT_IO_DEBUG) {
                     if (isError(event)) {
                         warningf("channel error: fd=%s, event=%d, errno=%d, message=%s",
                                 channel.handle, event, errno, getErrorMessage(errno));
                     } else {
-                        infof("channel closed: fd=%d, errno=%d, message=%s",
+                        tracef("channel closed: fd=%d, errno=%d, message=%s",
                                     channel.handle, errno, getErrorMessage(errno));
                     }
                 }
@@ -211,17 +224,18 @@ class AbstractSelector : Selector {
                 // May be triggered twice for a channel, for example:
                 // events=8197, fd=13
                 // events=8221, fd=13
-                channel.close();
+                // The remote connection broken abnormally, so we should close the peer socket forcely.
+                channel.close(); 
             } else if (event == EPOLLIN) {
-                version (HUNT_IO_MORE)
+                version (HUNT_IO_DEBUG)
                     tracef("channel read event: fd=%d", channel.handle);
                 channel.onRead();
             } else if (event == EPOLLOUT) {
-                version (HUNT_IO_MORE)
+                version (HUNT_IO_DEBUG)
                     tracef("channel write event: fd=%d", channel.handle);
                 channel.onWrite();
             } else if (event == (EPOLLIN | EPOLLOUT)) {
-                version (HUNT_IO_MORE)
+                version (HUNT_IO_DEBUG)
                     tracef("channel read and write: fd=%d", channel.handle);
                 channel.onWrite();
                 channel.onRead();
@@ -235,39 +249,6 @@ class AbstractSelector : Selector {
             }
         }
     }
-
-    // private void handeChannel(AbstractChannel channel, uint currentEvents) {
-    //     // version (HUNT_DEBUG)
-    //         infof("handling event: events=%d, fd=%d", currentEvents, channel.handle);
-
-    //     if (isClosed(currentEvents)) {
-    //         version (HUNT_DEBUG)
-    //             infof("channel closed: fd=%d, errno=%d, message=%s",
-    //                     channel.handle, errno, getErrorMessage(errno));
-    //         channel.close();
-    //     } else if (isError(currentEvents)) {
-    //         // version (HUNT_DEBUG)
-    //         debug warningf("channel error: fd=%s, errno=%d, message=%s",
-    //                 channel.handle, errno, getErrorMessage(errno));
-    //         channel.close();
-    //     } else if (isReadable(currentEvents)) {
-    //         version (HUNT_DEBUG)
-    //             tracef("channel reading: fd=%d", channel.handle);
-
-    //         version (HUNT_IO_WORKERPOOL) {
-    //             workerPool.put(cast(int)channel.handle, makeTask(&channel.onRead));
-    //         } else {
-    //             channel.onRead();
-    //         }
-    //     } else if (isWritable(currentEvents)) {
-    //         AbstractSocketChannel wt = cast(AbstractSocketChannel) channel;
-    //         assert(wt !is null);
-    //         wt.onWriteDone();
-    //     } else {
-    //         warningf("Undefined behavior: fd=%d, registered=%s",
-    //                 channel.handle, channel.isRegistered);
-    //     }
-    // }
 
     private int iepoll(int epfd, epoll_event* events, int numfds, int timeout) {
         long start, now;

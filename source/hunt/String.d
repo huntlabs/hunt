@@ -14,6 +14,17 @@ module hunt.String;
 import hunt.Nullable;
 import std.string;
 
+        import std.stdio;
+void testxxx() {
+    version ( unittest ) {
+        
+            writeln("test - unittestd");
+    } else {
+
+            writeln("test-non-unittest");
+    }
+}
+
 /**
  * The {@code String} class represents character strings. All
  * string literals in Java programs, such as {@code "abc"}, are
