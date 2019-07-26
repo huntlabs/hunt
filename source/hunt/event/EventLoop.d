@@ -78,7 +78,6 @@ final class EventLoop : AbstractSelector {
         } else {
             _thread = null;
             super.stop();
-            // dispose();
         }
     }
 

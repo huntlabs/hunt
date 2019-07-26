@@ -14,9 +14,14 @@ module hunt.event.EventLoopGroup;
 import hunt.system.Memory;
 import hunt.event.EventLoop;
 import hunt.logging;
-import std.stdio;
+import hunt.util.Lifecycle;
+// import std.stdio;
 
-class EventLoopGroup {
+import core.atomic;
+
+/**
+*/
+class EventLoopGroup : Lifecycle {
 
     this(size_t size = (totalCPUs - 1)) {
         size_t _size = size > 0 ? size : 1;
@@ -27,30 +32,37 @@ class EventLoopGroup {
         }
     }
 
+    void start() {
+        start(-1);
+    }
+
     /**
         timeout: in millisecond
     */
-    void start(long timeout = -1) {
-        if (_started)
-            return;
-        _started = true;
-        foreach (EventLoop pool; eventLoopPool) {
-            pool.runAsync(timeout);
+    void start(long timeout) {
+        if (cas(&_isRunning, false, true)) {
+            foreach (EventLoop pool; eventLoopPool) {
+                pool.runAsync(timeout);
+            }
         }
     }
 
     void stop() {
+        if (!cas(&_isRunning, true, false))
+            return;
+
         version (HUNT_DEBUG)
             trace("stopping EventLoopGroup...");
-        if (!_started)
-            return;
         foreach (pool; eventLoopPool) {
             pool.stop();
         }
-        _started = false;
 
         version (HUNT_DEBUG)
             trace("EventLoopGroup stopped.");
+    }
+
+	bool isRunning() {
+        return _isRunning;
     }
 
     @property size_t size() {
@@ -62,7 +74,6 @@ class EventLoopGroup {
     }
 
     EventLoop nextLoop() {
-        import core.atomic;
         size_t index = atomicOp!"+="(_loopIndex, 1);
         if(index > 10000) {
             index = 0;
@@ -71,7 +82,6 @@ class EventLoopGroup {
         index %= eventLoopPool.length;
         return eventLoopPool[index];
     }
-    private shared int _loopIndex;
 
     EventLoop opIndex(size_t index) {
         auto i = index % eventLoopPool.length;
@@ -89,6 +99,7 @@ class EventLoopGroup {
     }
 
 private:
-    bool _started;
+    shared int _loopIndex;
+    shared bool _isRunning;
     EventLoop[] eventLoopPool;
 }

@@ -128,7 +128,7 @@ class TcpStream : AbstractStream {
         if(addresses is null) {
             throw new SocketException("Can't resolve hostname: " ~ hostname);
         }
-        version(HUNT_IO_MORE) {
+        version(HUNT_IO_DEBUG) {
             infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, addresses[0], port);
         }
         connect(addresses[0]); // always select the first one.
@@ -172,10 +172,10 @@ class TcpStream : AbstractStream {
             this.socket.blocking = true;
             super.doConnect(addr);
             this.socket.blocking = false;
-            _isConnected = true;
             setKeepalive();
             _localAddress = this.socket.localAddress();
             start();
+            _isConnected = true;
         } catch (Exception ex) {
             warningf("Exception: %s, Message: %s", typeid(ex), ex.message);
         }
@@ -300,7 +300,7 @@ class TcpStream : AbstractStream {
             throw new Exception("The connection is down!");
         }
 
-        version (HUNT_IO_MORE) {
+        version (HUNT_IO_DEBUG) {
             if (data.length <= 32)
                 infof("fd: %d, %d bytes: %(%02X %)", this.handle, data.length, data[0 .. $]);
             else
@@ -312,18 +312,18 @@ class TcpStream : AbstractStream {
             const(ubyte)[] d = data;
 
             while (!_isClosing && !isWriteCancelling && d.length > 0) {
-                version (HUNT_IO_MORE)
+                version (HUNT_IO_DEBUG)
                     tracef("write directly: fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
 
                 if (nBytes == d.length) {
-                    version (HUNT_IO_MORE)
+                    version (HUNT_IO_DEBUG)
                         tracef("write out once: %d / %d bytes, fd=%d", nBytes,
                                 d.length, this.handle);
                     checkAllWriteDone();
                     break;
                 } else if (nBytes > 0) {
-                    version (HUNT_IO_MORE)
+                    version (HUNT_IO_DEBUG)
                         tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     d = d[nBytes .. $];
                 } else {
@@ -380,22 +380,15 @@ protected:
                 warningf("Some data has not been sent yet: fd=%d", this.handle);
             }
 
-            infof("close connection with: %s", this.remoteAddress);
+            infof("closing a connection with: %s", this.remoteAddress);
         }
 
         resetWriteStatus();
         _isConnected = false;
-        // if(this.socket is null) {
-        //     import core.sys.posix.unistd;
-        //     core.sys.posix.unistd.close(this.handle);
-        // } else {
-        //     this.socket.shutdown(SocketShutdown.BOTH);
-        //     this.socket.close();
-        // }
         super.onClose();
 
-        version (HUNT_IO_MORE)
-            infof("notify TCP stream down: fd=%d", this.handle);
+        version (HUNT_IO_DEBUG)
+            infof("notifying TCP stream down: fd=%d", this.handle);
         if (closeHandler)
             closeHandler();
     }

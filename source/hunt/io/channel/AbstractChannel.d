@@ -37,7 +37,22 @@ abstract class AbstractChannel : Channel {
         return _isClosing || _isClosed;
     }
 
+    void close() {
+        if (cas(&_isClosed, false, true)) {
+            version (HUNT_IO_DEBUG_MORE)
+                tracef("channel[fd=%d] closing...", this.handle);
+            onClose();
+            version (HUNT_IO_DEBUG)
+                tracef("channel[fd=%d] closed", this.handle);
+        } else {
+            debug warningf("The channel[fd=%d] has already been closed", this.handle);
+        }
+    }
+
     protected void onClose() {
+        version (HUNT_IO_DEBUG)
+            tracef("onClose [fd=%d]...", this.handle);
+
         _isRegistered = false;
         _isClosing = false;
         version (HAVE_IOCP) {
@@ -46,8 +61,8 @@ abstract class AbstractChannel : Channel {
         }
         clear();
 
-        version (HUNT_DEBUG_MORE)
-            tracef("channel closed [fd=%d]...", this.handle);
+        version (HUNT_IO_DEBUG_MORE)
+            tracef("onClose done [fd=%d]...", this.handle);
     }
 
     protected void errorOccurred(string msg) {
@@ -75,18 +90,6 @@ abstract class AbstractChannel : Channel {
 
     @property Selector eventLoop() {
         return _inLoop;
-    }
-
-    void close() {
-        if (cas(&_isClosed, false, true)) {
-            version (HUNT_DEBUG_MORE)
-                tracef("channel[fd=%d] closing...", this.handle);
-            onClose();
-            version (HUNT_DEBUG_MORE)
-                tracef("channel[fd=%d] closed...", this.handle);
-        } else {
-            debug warningf("The channel[fd=%d] has already been closed", this.handle);
-        }
     }
 
     void setNext(AbstractChannel next) {
@@ -125,6 +128,39 @@ private:
     AbstractChannel _next;
 }
 
+
+
+/**
+    https://stackoverflow.com/questions/40361869/how-to-wake-up-epoll-wait-before-any-event-happened
+*/
+class EventChannel : AbstractChannel {
+    this(Selector loop) {
+        super(loop, ChannelType.Event);
+    }
+
+    abstract void trigger();
+    // override void close() {
+    //     if(_isClosing)
+    //         return;
+    //     _isClosing = true;
+    //     version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
+
+    //     if(isBusy) {
+    //         import std.parallelism;
+    //         version (HUNT_DEBUG) warning("Close operation delayed");
+    //         auto theTask = task(() {
+    //             while(isBusy) {
+    //                 version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
+    //                 // Thread.sleep(20.msecs);
+    //             }
+    //             super.close();
+    //         });
+    //         taskPool.put(theTask);
+    //     } else {
+    //         super.close();
+    //     }
+    // }
+}
 
 mixin template OverrideErro() {
     bool isError() {

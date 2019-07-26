@@ -10,7 +10,7 @@
 		"hunt" :{"path": "../../"}
 	},
 	"versions": [
-		"HUNT_DEBUG"
+		"HUNT_DEBUG","HUNT_IO_DEBUG", "HUNT_IO_DEBUG_MORE"
 	],
 	"configurations": [
 		{

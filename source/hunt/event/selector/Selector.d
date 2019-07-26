@@ -16,6 +16,8 @@ abstract class Selector {
     protected size_t number;
     protected size_t divider;
     protected AbstractChannel[] channels;
+    protected long idleTime = -1; // in millisecond
+    protected int fd;
 
     this(size_t number, size_t divider, size_t maxChannels = 1500) {
         this.number = number;
@@ -29,9 +31,15 @@ abstract class Selector {
 
     void stop() {
         if(cas(&_running, true, false)) {
-            version (HUNT_DEBUG)
-                trace("Selector stopped.");
+            version (HUNT_IO_DEBUG)
+                tracef("Selector stopping. idleTime=%d", idleTime);            
+            // dispose();
+            onStop();
         }
+    }
+
+    protected void onStop() {
+
     }
 
     abstract void dispose();
@@ -52,13 +60,14 @@ abstract class Selector {
     */
     protected void onLoop(long timeout = -1) {
         _running = true;
+        idleTime = timeout;
         do {
-            // version (HUNT_DEBUG) trace("Selector rolled once.");
             // wakeup();
             doSelect(timeout);
+            // infof("Selector rolled once. isRuning: %s", isRuning);
         }
         while (_running);
-        version (HUNT_DEBUG) trace("Selector loop existed.");
+        version(HUNT_DEBUG) info("Selector loop existed.");
         dispose();
     }
 
