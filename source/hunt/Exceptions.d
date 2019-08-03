@@ -187,6 +187,10 @@ class IOException : Exception {
     mixin BasicExceptionCtors;
 }
 
+class CharacterCodingException : IOException {
+    mixin BasicExceptionCtors;
+}
+
 class ClosedChannelException : IOException {
     mixin BasicExceptionCtors;
 }

@@ -35,7 +35,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected SimpleEventHandler disconnectionHandler;
     protected SimpleActionHandler dataWriteDoneHandler;
 
-    protected bool _isConnected; // It's always true for server.
     protected AddressFamily _family;
     protected ByteBuffer _bufferForRead;
     protected WritingBufferQueue _writeQueue;
@@ -52,6 +51,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         setFlag(ChannelFlag.Write, true);
         setFlag(ChannelFlag.ETMode, true);
     }
+
+    abstract bool isConnected() nothrow;
+    abstract protected void onDisconnected();
 
     /**
     */
@@ -102,14 +104,14 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(errno == ECONNRESET) {
                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                 onDisconnected();
-                this.close();
+                // this.close();
             }
         }
         else {
             version (HUNT_DEBUG)
                 infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
             onDisconnected();
-            this.close();
+            // this.close();
         }
 
         return isDone;
@@ -122,7 +124,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 _isWritting, writeBuffer is null, 
                 _writeQueue is null || _writeQueue.isEmpty());
         }
-        resetWriteStatus();
+        // resetWriteStatus();
 
         if(this.socket is null) {
             import core.sys.posix.unistd;
@@ -133,15 +135,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         version (HUNT_IO_DEBUG) {
-            infof("peer closed: fd=%d", this.handle);
+            infof("peer socket closed: fd=%d", this.handle);
         }
     }
 
-    protected void onDisconnected() {
-        _isConnected = false;
-        if (disconnectionHandler !is null)
-            disconnectionHandler();
-    }
 
     /**
     Try to write a block of data.
@@ -173,7 +170,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(errno == ECONNRESET) {
                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                 onDisconnected();
-                this.close();
+                // this.close();
             }
         } else {
             version (HUNT_IO_DEBUG) {
@@ -238,7 +235,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        if(_isClosing && isWriteCancelling) {
+        if(isClosing() && isWriteCancelling) {
             version (HUNT_IO_DEBUG) infof("Write cancelled or closed, fd=%d", this.handle);
             resetWriteStatus();
             return;

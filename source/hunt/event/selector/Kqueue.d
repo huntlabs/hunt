@@ -59,6 +59,7 @@ class AbstractSelector : Selector {
             return;
         isDisposed = true;
         core.sys.posix.unistd.close(_kqueueFD);
+        super.dispose();
     }
 
     override bool register(AbstractChannel channel) {
