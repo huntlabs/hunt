@@ -92,6 +92,8 @@ class AbstractSelector : Selector {
         if(r != 0) {
             warningf("error: %d", r);
         }
+
+        super.dispose();
     }
 
     private bool isDisposed = false;

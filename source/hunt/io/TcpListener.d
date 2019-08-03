@@ -11,7 +11,12 @@
 
 module hunt.io.TcpListener;
 
+import hunt.io.TcpStream;
+import hunt.io.TcpStreamOptions;
+
 import hunt.event;
+import hunt.Functions;
+import hunt.util.Common;
 
 import std.socket;
 import std.exception;
@@ -19,9 +24,6 @@ import hunt.logging;
 import core.thread;
 import core.time;
 
-import hunt.Functions;
-import hunt.io.TcpStream;
-import hunt.util.Common;
 
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
 alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, size_t bufferSize);
@@ -30,7 +32,7 @@ alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, 
 */
 class TcpListener : AbstractListener {
     private bool isSslEnabled = false;
-    private TcpStreamOption _tcpStreamoption;
+    private TcpStreamOptions _tcpStreamoption;
     protected EventHandler _shutdownHandler;
 
     /// event handlers
@@ -39,7 +41,7 @@ class TcpListener : AbstractListener {
     PeerCreateHandler peerCreateHandler;
 
     this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
-        _tcpStreamoption = TcpStreamOption.createOption();
+        _tcpStreamoption = TcpStreamOptions.create();
         _tcpStreamoption.bufferSize = bufferSize;
         version (HAVE_IOCP)
             super(loop, family, bufferSize);

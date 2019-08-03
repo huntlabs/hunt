@@ -15,7 +15,7 @@ abstract class AbstractChannel : Channel {
     ErrorEventHandler errorHandler;
 
     protected bool _isRegistered = false;
-    protected bool _isClosing = false;
+    private shared bool _isClosing = false;
     protected shared bool _isClosed = false;
 
     this(Selector loop, ChannelType type) {
@@ -33,19 +33,30 @@ abstract class AbstractChannel : Channel {
 
     /**
     */
-    bool isClosed() {
-        return _isClosing || _isClosed;
+    bool isClosing() {
+        return _isClosing;
     }
 
+    /**
+    */
+    bool isClosed() {
+        return _isClosed;
+    }
+
+    /**
+    */
     void close() {
-        if (cas(&_isClosed, false, true)) {
+        if (!_isClosed && cas(&_isClosing, false, true) ) {
             version (HUNT_IO_DEBUG_MORE)
                 tracef("channel[fd=%d] closing...", this.handle);
             onClose();
             version (HUNT_IO_DEBUG)
                 tracef("channel[fd=%d] closed", this.handle);
+            
+            _isClosing = false;
+            _isClosed = true;
         } else {
-            debug warningf("The channel[fd=%d] has already been closed", this.handle);
+            debug warningf("The channel[fd=%d] has already been closed or closing", this.handle);
         }
     }
 
@@ -54,7 +65,6 @@ abstract class AbstractChannel : Channel {
             tracef("onClose [fd=%d]...", this.handle);
 
         _isRegistered = false;
-        _isClosing = false;
         version (HAVE_IOCP) {
         } else {
             _inLoop.deregister(this);

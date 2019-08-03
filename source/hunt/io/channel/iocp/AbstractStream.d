@@ -326,12 +326,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         isWriteCancelling = true;
     }
 
-    protected void onDisconnected() {
-        _isConnected = false;
-        _isClosed = true;
-        if (disconnectionHandler !is null)
-            disconnectionHandler();
-    }
+    abstract protected void onDisconnected();
 
     protected void initializeWriteQueue() {
         if (_writeQueue is null) {

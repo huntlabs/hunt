@@ -22,7 +22,6 @@ import std.parallelism;
 
 */
 final class EventLoop : AbstractSelector {
-    private long timeout = -1; // in millisecond
 
     this() {
         super(0, 1);
@@ -32,60 +31,21 @@ final class EventLoop : AbstractSelector {
         super(number, divider);
     }
 
-    /**
-        timeout: in millisecond
-    */
-    void run(long timeout = -1) {
-        this.timeout = timeout;
-        doRun();
-    }
-
-    /**
-        timeout: in millisecond
-    */
-    void runAsync(long timeout = -1) {
-        this.timeout = timeout;
-        version (HUNT_DEBUG_MORE) trace("runAsync ...");
-        // BUG: Reported defects -@zxp at 12/3/2018, 8:17:58 PM
-        // The task may not be executed.
-        // auto runTask = task(&run, timeout);
-        // taskPool.put(runTask); // 
-        Thread th = new Thread(&doRun);
-        th.start();
-    }
-
-    private void doRun() {
-        if (_running) {
-            version (HUNT_DEBUG) warning("The current eventloop is running!");
-        } else {
-            version (HUNT_DEBUG_MORE) trace("running eventloop...");
-            _thread = Thread.getThis();
-            onLoop(timeout);
-        }
-    }
 
     override void stop() {
-        if(!_running) {
-            version (HUNT_DEBUG) trace("event loop has been stopped.");
+        if(!isRuning) {
+            version (HUNT_DEBUG) trace("The event loop is not running.");
             return;
         }
         
         version (HUNT_DEBUG) trace("Stopping event loop...");
-        if(isLoopThread()) {
-            version (HUNT_DEBUG) trace("Try to stopping event loop in another thread");
+        if(isSelfThread()) {
+            version (HUNT_DEBUG) info("Try to stop the event loop in another thread");
             auto stopTask = task(&stop);
             taskPool.put(stopTask);
         } else {
-            _thread = null;
             super.stop();
         }
     }
 
-    bool isLoopThread() {
-        return _thread is Thread.getThis();
-    }
-
-
-private:
-    Thread _thread;
 }

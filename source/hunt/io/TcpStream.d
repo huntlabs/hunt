@@ -11,11 +11,12 @@
 
 module hunt.io.TcpStream;
 
+import hunt.io.channel.Common;
+import hunt.io.TcpStreamOptions;
 
 import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;
 import hunt.event.selector.Selector;
-import hunt.io.channel.Common;
 import hunt.concurrency.SimpleQueue;
 import hunt.event;
 import hunt.logging.ConsoleLogger;
@@ -33,57 +34,20 @@ version (HAVE_EPOLL) {
     import core.sys.linux.netinet.tcp : TCP_KEEPCNT;
 }
 
-/**
-*/
-class TcpStreamOption {
-    string ip = "127.0.0.1";
-    ushort port = 8080;
-
-    // http://www.tldp.org/HOWTO/TCP-Keepalive-HOWTO/usingkeepalive.html
-    /// the interval between the last data packet sent (simple ACKs are not considered data) and the first keepalive probe; 
-    /// after the connection is marked to need keepalive, this counter is not used any further 
-    int keepaliveTime = 7200; // in seconds
-
-    /// the interval between subsequential keepalive probes, regardless of what the connection has exchanged in the meantime 
-    int keepaliveInterval = 75; // in seconds
-
-    /// the number of unacknowledged probes to send before considering the connection dead and notifying the application layer 
-    int keepaliveProbes = 9; // times
-
-    bool isKeepalive = false;
-
-    size_t bufferSize = 1024 * 8;
-
-    int retryTimes = 5;
-    Duration retryInterval = 2.seconds;
-
-    static TcpStreamOption createOption() {
-        TcpStreamOption option = new TcpStreamOption();
-        option.isKeepalive = true;
-        option.keepaliveTime = 15;
-        option.keepaliveInterval = 3;
-        option.keepaliveProbes = 5;
-        option.bufferSize = 1024 * 8;
-        return option;
-    }
-
-    this() {
-
-    }
-}
 
 /**
 */
 class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
+    protected shared bool _isConnected; // It's always true for server.
 
-    private TcpStreamOption _tcpOption;
+    private TcpStreamOptions _tcpOption;
     private int retryCount = 0;
 
     // for client
-    this(Selector loop, AddressFamily family = AddressFamily.INET, TcpStreamOption option = null) {
+    this(Selector loop, TcpStreamOptions option = null, AddressFamily family = AddressFamily.INET) {
         if (option is null)
-            _tcpOption = TcpStreamOption.createOption();
+            _tcpOption = TcpStreamOptions.create();
         else
             _tcpOption = option;
         super(loop, family, _tcpOption.bufferSize);
@@ -95,9 +59,9 @@ class TcpStream : AbstractStream {
     }
 
     // for server
-    this(Selector loop, Socket socket, TcpStreamOption option = null) {
+    this(Selector loop, Socket socket, TcpStreamOptions option = null) {
         if (option is null)
-            _tcpOption = TcpStreamOption.createOption();
+            _tcpOption = TcpStreamOptions.create();
         else
             _tcpOption = option;
         super(loop, socket.addressFamily, _tcpOption.bufferSize);
@@ -110,12 +74,12 @@ class TcpStream : AbstractStream {
         setKeepalive();
     }
 
-    void options(TcpStreamOption option) @property {
+    void options(TcpStreamOptions option) @property {
         assert(option !is null);
         this._tcpOption = option;
     }
 
-    TcpStreamOption options() @property {
+    TcpStreamOptions options() @property {
         return this._tcpOption;
     }
 
@@ -129,7 +93,7 @@ class TcpStream : AbstractStream {
             throw new SocketException("Can't resolve hostname: " ~ hostname);
         }
         version(HUNT_IO_DEBUG) {
-            infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, addresses[0], port);
+            infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, addresses[0].toAddrString(), port);
         }
         connect(addresses[0]); // always select the first one.
     }
@@ -256,7 +220,7 @@ class TcpStream : AbstractStream {
         return this;
     }
 
-    bool isConnected() nothrow {
+    override bool isConnected() nothrow {
         return _isConnected;
     }
 
@@ -311,7 +275,7 @@ class TcpStream : AbstractStream {
             _isWritting = true;
             const(ubyte)[] d = data;
 
-            while (!_isClosing && !isWriteCancelling && d.length > 0) {
+            while (!isClosing() && !isWriteCancelling && d.length > 0) {
                 version (HUNT_IO_DEBUG)
                     tracef("write directly: fd=%d, %d bytes", this.handle, d.length);
                 size_t nBytes = tryWrite(d);
@@ -347,6 +311,18 @@ class TcpStream : AbstractStream {
         this.socket.shutdown(SocketShutdown.SEND);
     }
 
+    override protected void onDisconnected() {
+        version(HUNT_DEBUG) {
+            infof("peer disconnected: fd=%d", this.handle);
+        }
+        // _isConnected = false;
+        // _isClosed = true;
+        if (disconnectionHandler !is null)
+            disconnectionHandler();
+            
+        this.close();
+    }
+
 protected:
     bool _isClient;
     ConnectionHandler _connectionHandler;
@@ -369,28 +345,31 @@ protected:
                     this.handle, this.erroString);
             // version (HUNT_DEBUG)
             debug errorf(msg);
-            if (!isClosed)
+            if (!isClosed())
                 errorOccurred(msg);
         }
     }
 
     override void onClose() {
-        version (HUNT_DEBUG) {
-            if (_writeQueue !is null && !_writeQueue.isEmpty) {
-                warningf("Some data has not been sent yet: fd=%d", this.handle);
+        bool lastConnectStatus = _isConnected;
+        super.onClose();
+        if(lastConnectStatus) {
+            version (HUNT_DEBUG) {
+                if (_writeQueue !is null && !_writeQueue.isEmpty) {
+                    warningf("Some data has not been sent yet: fd=%d", this.handle);
+                }
+
+                infof("closing a connection with: %s", this.remoteAddress);
             }
 
-            infof("closing a connection with: %s", this.remoteAddress);
+            resetWriteStatus();
+            _isConnected = false;
+            version (HUNT_IO_DEBUG)
+                infof("notifying TCP stream down: fd=%d", this.handle);
+            if (closeHandler !is null)
+                closeHandler();
         }
 
-        resetWriteStatus();
-        _isConnected = false;
-        super.onClose();
-
-        version (HUNT_IO_DEBUG)
-            infof("notifying TCP stream down: fd=%d", this.handle);
-        if (closeHandler)
-            closeHandler();
     }
 
 }

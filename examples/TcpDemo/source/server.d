@@ -54,7 +54,7 @@ void main()
 			// 	debug writeln("sent: size=", size, "  content: ", cast(string) wdata);
 			// }));
 		}).onWritten((Object obj) {
-			writefln("Data write done");
+			writefln("Data written done");
 		}).onDisconnected(() {
 			debug writefln("client disconnected: %s", client.remoteAddress.toString());
 		}).onClosed(() {

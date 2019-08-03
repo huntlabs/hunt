@@ -42,12 +42,12 @@ abstract class AbstractSocketChannel : AbstractChannel {
     protected Socket _socket;
 
     override void close() {
-        if (_isClosing) {
-            // debug warningf("already closed [fd=%d]", this.handle);
-            return;
-        }
-        _isClosing = true;
-        version (HUNT_DEBUG_MORE)
+        // if (_isClosing) {
+        //     // debug warningf("already closed [fd=%d]", this.handle);
+        //     return;
+        // }
+        // _isClosing = true;
+        version (HUNT_IO_MORE)
             tracef("socket channel closing [fd=%d]...", this.handle);
 
         if (isBusy()) {

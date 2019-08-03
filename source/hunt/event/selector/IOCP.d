@@ -170,9 +170,9 @@ class AbstractSelector : Selector {
 
     }
 
-    override void dispose() {
+    // override void dispose() {
 
-    }
+    // }
 
     private void onSocketRead(AbstractChannel channel, size_t len) {
         debug if (channel is null) {

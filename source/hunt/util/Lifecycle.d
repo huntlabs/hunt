@@ -167,8 +167,9 @@ interface SmartLifecycle : Lifecycle, Phased {
 /**
 */
 abstract class AbstractLifecycle : Lifecycle {
+	import core.atomic;
 
-    protected bool _isRunning;
+    protected shared bool _isRunning;
 
     this() {
        
@@ -183,26 +184,14 @@ abstract class AbstractLifecycle : Lifecycle {
     }
 
     void start() {
-        if (_isRunning)
-            return;
-
-        synchronized (this) {
-            if (!_isRunning){
-                initialize();
-                _isRunning = true;
-            }
+        if (cas(&_isRunning, false, true)) {
+			initialize();
         }
     }
 
     void stop() {
-        if (!_isRunning)
-            return;
-
-        synchronized (this) {
-            if (_isRunning){
-                destroy();
-                _isRunning = false;
-            }
+        if (cas(&_isRunning, true, false)) {
+			destroy();
         }
     }
 
