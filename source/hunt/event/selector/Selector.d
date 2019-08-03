@@ -40,11 +40,6 @@ abstract class Selector {
 
     protected abstract int doSelect(long timeout);
 
-
-    void onStarted(SimpleEventHandler handler) {
-        this._startedHandler = handler;
-    }
-
     /**
         timeout: in millisecond
     */
@@ -56,20 +51,24 @@ abstract class Selector {
     /**
         timeout: in millisecond
     */
-    void runAsync(long timeout = -1) {
+    void runAsync(long timeout = -1, SimpleEventHandler handler = null) {
+        if(_running) {
+            version (HUNT_IO_DEBUG) trace("The selector is running already...");
+            return;
+        }
         this.timeout = timeout;
         version (HUNT_IO_DEBUG) trace("runAsync ...");
-        Thread th = new Thread(&doRun);
+        Thread th = new Thread((){ doRun(handler); });
         // th.isDaemon = true; // unstable
         th.start();
     }
     
-    private void doRun() {
+    private void doRun(SimpleEventHandler handler=null) {
         if(cas(&_running, false, true)) {
             version (HUNT_IO_DEBUG) trace("running selector...");
             _thread = Thread.getThis();
-            if(_startedHandler !is null) {
-                _startedHandler();
+            if(handler !is null) {
+                handler();
             }
             onLoop(timeout);
         } else {
@@ -81,9 +80,6 @@ abstract class Selector {
         version (HUNT_IO_DEBUG)
             tracef("Selector stopping. _running=%s", _running); 
         if(cas(&_running, true, false)) {
-            // version (HUNT_IO_DEBUG)
-            //     tracef("Selector stopping. idleTime=%d", idleTime);            
-            // dispose();
             onStop();
         }
     }
@@ -91,7 +87,6 @@ abstract class Selector {
     protected void onStop() {
         version (HUNT_IO_DEBUG) 
             tracef("stopping.");
-        // _thread = null;
     }
 
     /**
