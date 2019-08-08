@@ -240,7 +240,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         if(!_isWritting) {
-            version (HUNT_IO_DEBUG) infof("No data to write out. fd=%d", this.handle);
+            version (HUNT_IO_DEBUG) infof("No data needs to be written out. fd=%d", this.handle);
             return;
         }
 

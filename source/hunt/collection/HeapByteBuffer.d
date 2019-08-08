@@ -7,6 +7,8 @@ import hunt.Integer;
 import hunt.Long;
 import hunt.Short;
 
+import std.format;
+
 /**
 */
 class HeapByteBuffer : ByteBuffer {
@@ -116,8 +118,9 @@ class HeapByteBuffer : ByteBuffer {
                 throw new IllegalArgumentException();
             HeapByteBuffer sb = cast(HeapByteBuffer) src;
             int n = sb.remaining();
-            if (n > remaining())
-                throw new BufferOverflowException("");
+            int r = this.remaining();
+            if (n > r)
+                throw new BufferOverflowException(format("soure remaining: %d, this remaining: %d", n, r));
 
             int sourcePos = sb.ix(sb.position());
             int targetPos = ix(position());
