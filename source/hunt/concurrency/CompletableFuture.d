@@ -41,6 +41,7 @@ import hunt.concurrency.Exceptions;
 import hunt.concurrency.ForkJoinPool;
 import hunt.concurrency.ForkJoinTask;
 import hunt.concurrency.Future;
+import hunt.concurrency.Promise;
 import hunt.concurrency.ScheduledThreadPoolExecutor;
 import hunt.concurrency.thread;
 import hunt.concurrency.ThreadFactory;
@@ -262,9 +263,12 @@ abstract class AbstractCompletableFuture {
  * @author Doug Lea
  * @param <T> The result type returned by this future's {@code join}
  * and {@code get} methods
- * @since 1.8
  */
-class CompletableFuture(T) : AbstractCompletableFuture, Future!(T), CompletionStage!(T) {
+class CompletableFuture(T) : 
+    AbstractCompletableFuture, Future!(T), Promise!(T), CompletionStage!(T) {
+
+// A CompletableFuture is also a Promise.
+// https://www.eclipse.org/jetty/javadoc/9.4.8.v20171121/org/eclipse/jetty/util/Promise.Completable.html
 
 static if(is(T == void)) {
 
@@ -1460,6 +1464,13 @@ static if(is(T == void)) {
         return triggered;
     }
     
+    /**
+     * Callback invoked when the operation completes.
+     */
+    void succeeded() {
+        complete();
+    }
+    
     void get(Duration timeout) {
         if (!isDone()) timedGet(timeout);
             reportGet(this.altResult);
@@ -1553,6 +1564,13 @@ static if(is(T == void)) {
         postComplete();
         return triggered;
     }
+    
+    /**
+     * Callback invoked when the operation completes.
+     */
+    void succeeded(T result) {
+        complete(result);
+    }
 }
 
     /**
@@ -1570,7 +1588,16 @@ static if(is(T == void)) {
         return triggered;
     }
 
+    /**
+     * Callback invoked when the operation fails.
+     */
+    void failed(Exception x) {
+        completeExceptionally(x);
+    }
 
+
+    /**
+    */
     CompletableFuture!(U) thenApply(U)(FunctionT!(U) fn) {
         return uniApplyStage!(U)(cast(Executor)null, fn);
     }
