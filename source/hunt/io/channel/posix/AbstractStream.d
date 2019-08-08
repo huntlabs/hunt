@@ -141,8 +141,8 @@ abstract class AbstractStream : AbstractSocketChannel {
 
 
     /**
-    Try to write a block of data.
-    */
+     *Try to write a block of data.
+     */
     protected ptrdiff_t tryWrite(const ubyte[] data) {
         clearError();
         // const nBytes = this.socket.send(data);
@@ -195,14 +195,20 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     private bool tryNextWrite(ByteBuffer buffer) {
         const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
-        version (HUNT_IO_DEBUG)
-            tracef("writting data from a buffer [fd=%d], %d bytes", this.handle, data.length);
+        version (HUNT_IO_DEBUG) {
+            tracef("writting data from a buffer [fd=%d], %d bytes, buffer: %s", 
+                this.handle, data.length, buffer.toString());
+        }
+
         if(data.length == 0)
             return true;
 
         size_t nBytes = tryWrite(data);
-        version (HUNT_IO_DEBUG)
-            tracef("write out once: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+        version (HUNT_IO_DEBUG) {
+            tracef("write out once: fd=%d, %d / %d bytes, buffer: %s", 
+                this.handle, nBytes, data.length, buffer.toString());
+        }
+
         if (nBytes > 0) {
             buffer.nextGetIndex(cast(int)nBytes);
             if(!buffer.hasRemaining()) {
@@ -224,6 +230,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         writeBuffer = null;
     }
 
+    /**
+     * Should be thread-safe.
+     */
     override void onWrite() {
         version (HUNT_IO_DEBUG) {
             tracef("checking status, isWritting: %s, writeBuffer: %s", 
@@ -239,6 +248,16 @@ abstract class AbstractStream : AbstractSocketChannel {
             version (HUNT_IO_DEBUG) infof("Write cancelled or closed, fd=%d", this.handle);
             resetWriteStatus();
             return;
+        }
+
+        // keep thread-safe here
+        if(!cas(&_isBusyWritting, false, true)) {
+            version (HUNT_IO_DEBUG) warningf("busy writing. fd=%d", this.handle);
+            return;
+        }
+
+        scope(exit) {
+            _isBusyWritting = false;
         }
 
         if(writeBuffer !is null) {
@@ -275,11 +294,13 @@ abstract class AbstractStream : AbstractSocketChannel {
                 tracef("running here, fd=%d", this.handle);
         }
     }
+    private shared bool _isBusyWritting = false;
 
     protected bool checkAllWriteDone() {
         version (HUNT_IO_DEBUG) {
-            tracef("checking remaining: fd=%d, empty: %s", this.handle, 
-                _writeQueue is null ? true : _writeQueue.isEmpty());
+            import std.conv;
+            tracef("checking remaining: fd=%d, writeQueue: %s", this.handle, 
+                _writeQueue is null ? "null" : _writeQueue.isEmpty().to!string());
         }
 
         if(_writeQueue is null || _writeQueue.isEmpty()) {

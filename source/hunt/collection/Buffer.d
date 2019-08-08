@@ -331,13 +331,13 @@ abstract class Buffer
      */
     final int nextGetIndex() {                          // package-private
         if (_position >= _limit)
-            throw new BufferUnderflowException("");
+            throw new BufferUnderflowException(format("limit=%d, position=%d", _limit, _position));
         return _position++;
     }
 
     final int nextGetIndex(int nb) {                    // package-private
         if (_limit - _position < nb)
-            throw new BufferUnderflowException("");
+            throw new BufferUnderflowException(format("limit=%d, position=%d, nb=%d", _limit, _position, nb));
         int p = _position;
         _position += nb;
         return p;
