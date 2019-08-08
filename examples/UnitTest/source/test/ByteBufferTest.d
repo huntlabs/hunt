@@ -14,7 +14,6 @@ import std.format;
 
 alias IntUnaryOperator = int delegate(int);
 
-alias fail = Assert.fail;
 
 class ByteBufferTest {
 
@@ -22,6 +21,11 @@ class ByteBufferTest {
 
     static ByteBuffer allocate() {
         return allocate(i => i);
+    }
+
+    static ByteBuffer allocate(int size) {
+        ByteBuffer buf = BufferUtils.allocate(size);
+        return buf;
     }
 
     static ByteBuffer allocate(IntUnaryOperator o) {
@@ -41,6 +45,21 @@ class ByteBufferTest {
             fail(format("Values %s and %s differ at index %d for %s",
                                bValue, bbValue, i, bb));
         }
+    }
+
+    void testCopy() {
+        ByteBuffer src = allocate(4);
+        ByteBuffer dst = allocate(5);
+        src.put('a');
+        dst.put('b');
+        tracef("dst: %s", dst.toString());
+        dst.clear();
+        tracef("dst: %s", dst.toString());
+        dst.put(src).flip();
+        tracef("dst: %s", dst.toString());
+        dst.flip();
+        tracef("dst: %s", dst.toString());
+        trace("============");
     }
 
     void testInt() {

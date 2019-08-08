@@ -245,6 +245,9 @@ class AbstractSelector : Selector {
                 debug warningf("this thread only for read/write/close events, event: %d", event);
             }
         } catch (Exception e) {
+            version(HUNT_DEBUG) {
+                warning(e);
+            }
             debug {
                 errorf("error while handing channel: fd=%s, exception=%s, message=%s",
                         channel.handle, typeid(e), e.msg);

@@ -44,7 +44,7 @@ final class JsonSerializer {
 
     static T getItemAs(T, bool canThrow = false)(ref const(JSONValue) json, string name, 
         T defaultValue = T.init) if (!is(T == void)) {
-        if (json.type() != JSON_TYPE.OBJECT) {            
+        if (json.type() != JSONType.object) {            
             return handleException!(T, canThrow)(json, "wrong member type", defaultValue);
         }
 
@@ -74,7 +74,7 @@ final class JsonSerializer {
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == class) && is(typeof(new T()))) {
 
-        if (json.type() != JSON_TYPE.OBJECT) {
+        if (json.type() != JSONType.object) {
             return handleException!(T, canThrow)(json, "wrong object type", defaultValue);
         }
 
@@ -101,7 +101,7 @@ final class JsonSerializer {
 
         JSONType jt = json.type();
 
-        if (jt != JSON_TYPE.OBJECT) {
+        if (jt != JSONType.object) {
             return handleException!(T, canThrow)(json, "wrong object type", defaultValue);
         }
 
@@ -195,9 +195,9 @@ final class JsonSerializer {
             if(is(T == SysTime)) {
   
         JSONType jt = json.type();
-        if(jt == JSON_TYPE.string) {
+        if(jt == JSONType.string) {
             return SysTime.fromSimpleString(json.str);
-        } else if(jt == JSON_TYPE.INTEGER) {
+        } else if(jt == JSONType.integer) {
             return SysTime(json.integer);  // STD time
         } else {
             return handleException!(T, canThrow)(json, "wrong SysTime type", defaultValue);
@@ -206,7 +206,7 @@ final class JsonSerializer {
 
     // static N fromJson(N : Nullable!T, T, bool canThrow = false)(auto ref const(JSONValue) json) {
 
-    //     return (json.type == JSON_TYPE.NULL) ? N() : fromJson!T(json).nullable;
+    //     return (json.type == JSONType.null_) ? N() : fromJson!T(json).nullable;
     // }
 
     static T fromJson(T : JSONValue, bool canThrow = false)(auto ref const(JSONValue) json) {
@@ -219,22 +219,22 @@ final class JsonSerializer {
             if (isNumeric!T || isSomeChar!T) {
 
         switch (json.type) {
-        case JSON_TYPE.NULL, JSON_TYPE.FALSE:
+        case JSONType.null_, JSONType.false_:
             return 0.to!T;
 
-        case JSON_TYPE.TRUE:
+        case JSONType.true_:
             return 1.to!T;
 
-        case JSON_TYPE.FLOAT:
+        case JSONType.float_:
             return json.floating.to!T;
 
-        case JSON_TYPE.INTEGER:
+        case JSONType.integer:
             return json.integer.to!T;
 
-        case JSON_TYPE.UINTEGER:
+        case JSONType.uinteger:
             return json.uinteger.to!T;
 
-        case JSON_TYPE.STRING:
+        case JSONType.string:
             try {
                 return json.str.to!T;
             } catch(Exception ex) {
@@ -262,19 +262,19 @@ final class JsonSerializer {
             (auto ref const(JSONValue) json) if (isBoolean!T) {
 
         switch (json.type) {
-        case JSON_TYPE.NULL, JSON_TYPE.FALSE:
+        case JSONType.null_, JSONType.false_:
             return false;
 
-        case JSON_TYPE.FLOAT:
+        case JSONType.float_:
             return json.floating != 0;
 
-        case JSON_TYPE.INTEGER:
+        case JSONType.integer:
             return json.integer != 0;
 
-        case JSON_TYPE.UINTEGER:
+        case JSONType.uinteger:
             return json.uinteger != 0;
 
-        case JSON_TYPE.STRING:
+        case JSONType.string:
             return json.str.length > 0;
 
         default:
@@ -296,7 +296,7 @@ final class JsonSerializer {
             return handleException!(T, canThrow)(json, 
                 " is not a member of " ~ typeid(T).toString(), defaultValue);
         } else {
-            return (json.type == JSON_TYPE.STRING ? json.str : json.toString()).to!T;
+            return (json.type == JSONType.string ? json.str : json.toString()).to!T;
         }
     }
 
@@ -307,22 +307,22 @@ final class JsonSerializer {
                 : wstring) && !is(T : dstring)) {
 
         switch (json.type) {
-        case JSON_TYPE.NULL:
+        case JSONType.null_:
             return [];
 
-        case JSON_TYPE.FALSE:
+        case JSONType.false_:
             return [fromJson!U(JSONValue(false))];
 
-        case JSON_TYPE.TRUE:
+        case JSONType.true_:
             return [fromJson!U(JSONValue(true))];
 
-        case JSON_TYPE.ARRAY:
+        case JSONType.array:
             return json.array
                 .map!(value => fromJson!U(value))
                 .array
                 .to!T;
 
-        case JSON_TYPE.OBJECT:
+        case JSONType.object:
             return handleException!(T, canThrow)(json, "", defaultValue);
 
         default:
@@ -337,17 +337,17 @@ final class JsonSerializer {
         U[K] result;
 
         switch (json.type) {
-        case JSON_TYPE.NULL:
+        case JSONType.null_:
             return result;
 
-        case JSON_TYPE.OBJECT:
+        case JSONType.object:
             foreach (key, value; json.object) {
                 result[key.to!K] = fromJson!U(value);
             }
 
             break;
 
-        case JSON_TYPE.ARRAY:
+        case JSONType.array:
             foreach (key, value; json.array) {
                 result[key.to!K] = fromJson!U(value);
             }
