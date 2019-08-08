@@ -61,20 +61,37 @@ abstract class AbstractStream : AbstractSocketChannel {
         super.onRead();
     }
 
+    /**
+     * Should be thread-safe.
+     */
     override void onWrite() {        
         version (HUNT_DEBUG)
             tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
 
-        if(!_isWritting)
+        if(!_isWritting){
+            version (HUNT_IO_DEBUG) infof("No data to write out. fd=%d", this.handle);
             return;
+        }
+
         if(_isClosing && isWriteCancelling) {
             version (HUNT_DEBUG) infof("Write cancelled, fd=%d", this.handle);
             resetWriteStatus();
             return;
         }
 
+        // keep thread-safe here
+        if(!cas(&_isBusyWritting, false, true)) {
+            version (HUNT_IO_DEBUG) warningf("busy writing. fd=%d", this.handle);
+            return;
+        }
+
+        scope(exit) {
+            _isBusyWritting = false;
+        }
+
         tryNextWrite();
     }
+    private shared bool _isBusyWritting = false;
     
     protected override void onClose() {
         _isWritting = false;
