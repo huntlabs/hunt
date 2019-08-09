@@ -50,7 +50,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.limit(cast(int)bufferSize);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
-        // _writeQueue = new WritingBufferQueue();
+        _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
         setFlag(ChannelFlag.Write, true);
@@ -126,8 +126,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         super.onClose();
         version (HUNT_IO_DEBUG_MORE) {
             tracef("_isWritting=%s, writeBuffer is empty: %s, _writeQueue is empty: %s", 
-                _isWritting, writeBuffer is null, 
-                _writeQueue is null || _writeQueue.isEmpty());
+                _isWritting, writeBuffer is null, _writeQueue.isEmpty());
         }
         // resetWriteStatus();
 
@@ -228,11 +227,9 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     void resetWriteStatus() {
-        if(_writeQueue !is null)
-            _writeQueue.clear();
+        _writeQueue.clear();
         atomicStore(_isWritting, false);
         isWriteCancelling = false;
-        writeBuffer = null;
     }
 
     /**
@@ -305,10 +302,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_IO_DEBUG) {
             import std.conv;
             tracef("checking remaining: fd=%d, writeQueue: %s", this.handle, 
-                _writeQueue is null ? "null" : _writeQueue.isEmpty().to!string());
+                _writeQueue.isEmpty().to!string());
         }
 
-        if(_writeQueue is null || _writeQueue.isEmpty()) {
+        if(_writeQueue.isEmpty()) {
             resetWriteStatus();        
             version (HUNT_IO_DEBUG)
                 infof("All data are written out: fd=%d", this.handle);
@@ -326,13 +323,5 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     void cancelWrite() {
         isWriteCancelling = true;
-    }
-
-
-    protected void initializeWriteQueue() {
-        version(HUNT_IO_DEBUG) info("_writeQueue: ", _writeQueue is null);
-        if (_writeQueue is null) {
-            _writeQueue = new WritingBufferQueue();
-        }
     }
 }
