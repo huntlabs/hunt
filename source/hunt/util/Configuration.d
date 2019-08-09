@@ -389,8 +389,8 @@ class ConfigBuilder {
                 enum memberTypeString = memberType.stringof;
 
                 static if (hasUDA!(__traits(getMember, T, memberName), Value)) {
-                    enum item = getUDAs!((__traits(getMember, T, memberName)), Value)[0];
-                    enum settingItemName = item.name.empty ? memberName : item.name;
+                    enum itemName = getUDAs!((__traits(getMember, T, memberName)), Value)[0].name;
+                    enum settingItemName = itemName.empty ? memberName : itemName;
                 } else {
                     enum settingItemName = memberName;
                 }
