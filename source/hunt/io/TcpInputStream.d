@@ -20,7 +20,7 @@ class TcpInputStream : InputStream {
         assert(tcp !is null);
         bufferQueue = new SimpleQueue!ByteBuffer();
         this.tcp = tcp;
-        this.tcp.dataReceivedHandler = &dataReceived;
+        this.tcp.onReceived(&dataReceived);
     }
 
     private void dataReceived(ByteBuffer buffer) {

@@ -29,6 +29,11 @@ TCP Peer
 abstract class AbstractStream : AbstractSocketChannel {
 
     // data event handlers
+    
+    /**
+    * Warning: The received data is stored a inner buffer. For a data safe, 
+    * you would make a copy of it. 
+    */
     protected DataReceivedHandler dataReceivedHandler;
     protected SimpleActionHandler dataWriteDoneHandler;
 
@@ -40,7 +45,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         // setFlag(ChannelFlag.Read, true);
         // setFlag(ChannelFlag.Write, true);
 
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             trace("Buffer size for read: ", bufferSize);
         // _readBuffer = new ubyte[bufferSize];
         
@@ -56,7 +61,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     mixin CheckIocpError;
 
     override void onRead() {
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             trace("ready to read");
         super.onRead();
     }
@@ -65,7 +70,7 @@ abstract class AbstractStream : AbstractSocketChannel {
      * Should be thread-safe.
      */
     override void onWrite() {        
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("checking write status, isWritting: %s, writeBuffer: %s", _isWritting, writeBuffer is null);
 
         if(!_isWritting){
@@ -73,8 +78,8 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        if(_isClosing && isWriteCancelling) {
-            version (HUNT_DEBUG) infof("Write cancelled, fd=%d", this.handle);
+        if(isClosing() && isWriteCancelling) {
+            version (HUNT_IO_DEBUG) infof("Write cancelled, fd=%d", this.handle);
             resetWriteStatus();
             return;
         }
@@ -95,12 +100,16 @@ abstract class AbstractStream : AbstractSocketChannel {
     
     protected override void onClose() {
         _isWritting = false;
-        if(this.socket is null) {
+
+        if(this._socket is null) {
             import core.sys.windows.winsock2;
             .closesocket(this.handle);
         } else {
-            this.socket.shutdown(SocketShutdown.BOTH);
-            this.socket.close();
+            // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/9 1:20:27 pm
+            // 
+            infof("socket closed: fd=%d ", this.handle);
+            // this._socket.shutdown(SocketShutdown.BOTH);
+            // this._socket.close();
         }
         super.onClose();
     }
@@ -113,7 +122,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         DWORD dwReceived = 0;
         DWORD dwFlags = 0;
 
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("start receiving [fd=%d] ", this.socket.handle);
 
         // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
@@ -139,7 +148,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         DWORD dwSent = 0;
         _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.write;
-        version (HUNT_DEBUG) {
+            size_t bufferLength = sendDataBuffer.length;
+            tracef("To write %d nbytes: fd=%d", bufferLength, this.socket.handle());
+        version (HUNT_IO_DEBUG) {
             size_t bufferLength = sendDataBuffer.length;
             tracef("To write %d nbytes: fd=%d", bufferLength, this.socket.handle());
             if (bufferLength > 32)
@@ -151,10 +162,12 @@ abstract class AbstractStream : AbstractSocketChannel {
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
                 dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
-        version (HUNT_DEBUG) {
+        version (HUNT_IO_DEBUG) {
             if (dwSent != _dataWriteBuffer.len)
                 warningf("dwSent=%d, BufferLength=%d", dwSent, _dataWriteBuffer.len);
         }
+        
+        tracef("sent: %d / %d bytes, fd=%d", dwSent, _dataWriteBuffer.len, this.handle);
 
         checkErro(nRet, SOCKET_ERROR);
 
@@ -163,18 +176,20 @@ abstract class AbstractStream : AbstractSocketChannel {
             this.close();
         }
 
+        // dup data
+
         return dwSent;
     }
 
     protected void doRead() {
         this.clearError();
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("start reading: %d nbytes", this.readLen);
 
         if (readLen > 0) {
             // import std.stdio;
             // writefln("length=%d, data: %(%02X %)", readLen, _readBuffer[0 .. readLen]);
-            version (HUNT_DEBUG)
+            version (HUNT_IO_DEBUG)
                 tracef("reading done: %d nbytes", readLen);
 
             if (dataReceivedHandler !is null) {
@@ -186,7 +201,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             // continue reading
             this.beginRead();
         } else if (readLen == 0) {
-            version (HUNT_DEBUG) {
+            version (HUNT_IO_DEBUG) {
                 if (_remoteAddress !is null)
                     warningf("connection broken: %s", _remoteAddress.toString());
             }
@@ -194,7 +209,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             // if (_isClosed)
             //     this.close();
         } else {
-            version (HUNT_DEBUG) {
+            version (HUNT_IO_DEBUG) {
                 warningf("undefined behavior on thread %d", getTid());
             } else {
                 this._error = true;
@@ -206,11 +221,14 @@ abstract class AbstractStream : AbstractSocketChannel {
     // try to write a block of data directly
     protected size_t tryWrite(const ubyte[] data) {
         // if (_isWritting) {
-        //     version (HUNT_DEBUG) warning("Busy in writting on thread: ");
+        //     version (HUNT_IO_DEBUG) warning("Busy in writting on thread: ");
         //     return 0;
         // }
-        version (HUNT_DEBUG)
-            trace("start to write");
+        
+        // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/9 12:18:20 pm
+        // Keep this to prevent the buffer corrupted. Why?
+        version (HUNT_IO_DEBUG)
+            tracef("start to write, total=%d bytes, fd=%d", data.length, this.handle);
         // _isWritting = true;
 
         clearError();
@@ -229,7 +247,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
         bool haveBuffer = _writeQueue.tryDequeue(writeBuffer);
         if(!haveBuffer) {
-            version (HUNT_DEBUG)
+            version (HUNT_IO_DEBUG)
                 warning("No buffer in queue");
             return;
         }
@@ -237,12 +255,12 @@ abstract class AbstractStream : AbstractSocketChannel {
         setWriteBuffer(data);
         size_t nBytes = doWrite();
 
-        version (HUNT_DEBUG)
-            tracef("written data: %d bytes", nBytes);
+        // version (HUNT_IO_DEBUG)
+            tracef("written data: %d bytes, fd=%d", nBytes, this.handle);
 
         if (nBytes < data.length) { // to fix the corrupted data 
-            version (HUNT_DEBUG)
-                warningf("remaining data: %d / %d ", data.length - nBytes, data.length);
+            // version (HUNT_IO_DEBUG)
+                warningf("remaining data: %d / %d, fd=%d", data.length - nBytes, data.length, this.handle);
             sendDataBuffer = data.dup;
         }        
     }
@@ -250,7 +268,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool checkAllWriteDone() {
         if(_writeQueue is null || _writeQueue.isEmpty()) {
             resetWriteStatus();        
-            version (HUNT_DEBUG)
+            version (HUNT_IO_DEBUG)
                 tracef("All data are written out. fd=%d", this.handle);
             if(dataWriteDoneHandler !is null)
                 dataWriteDoneHandler(this);
@@ -268,12 +286,14 @@ abstract class AbstractStream : AbstractSocketChannel {
         sendDataBuffer = null;
     }
 
-    private void setWriteBuffer(in ubyte[] data) {
-        version (HUNT_DEBUG)
+    private void setWriteBuffer(const(ubyte)[] data) {
+        // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/9 12:18:20 pm
+        // Keep this to prevent the buffer corrupted. Why?
+        // version (HUNT_IO_DEBUG)
             tracef("buffering data temporarily: %d bytes, fd=%d", data.length, this.handle);
         // trace(cast(string) data);
         // tracef("%(%02X %)", data);
-
+        sendDataBackupBuffer = data;
         sendDataBuffer = data; //data[writeLen .. $]; // TODO: need more tests
         _dataWriteBuffer.buf = cast(char*) sendDataBuffer.ptr;
         _dataWriteBuffer.len = cast(uint) sendDataBuffer.length;
@@ -284,7 +304,7 @@ abstract class AbstractStream : AbstractSocketChannel {
      * Note: It's only for IOCP selector: 
     */
     void onWriteDone(size_t nBytes) {
-        version (HUNT_DEBUG) {
+        version (HUNT_IO_DEBUG) {
             tracef("write out once: %d bytes, isWritting: %s, writeBuffer: %s, isWriteCancelling:%s",
                  nBytes, _isWritting, writeBuffer is null, isWriteCancelling);
         }
@@ -297,37 +317,61 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
+        size_t total = sendDataBackupBuffer.length;
+
         if(writeBuffer is null) {
-            if(sendDataBuffer.length == nBytes) {
-                version (HUNT_DEBUG)
+            if(total == nBytes) {
+                version (HUNT_IO_DEBUG)
                     tracef("try next write");
                 tryNextWrite();
-            } else if(sendDataBuffer.length > 0) {
-                version (HUNT_DEBUG)
-                    tracef("continue to write remaining data: %d bytes", sendDataBuffer.length - nBytes);
-                
-                setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
+            } else if(total > 0) {
+
+                // const(ubyte)[] tempdata = sendDataBuffer.dup;
+                // version (HUNT_IO_DEBUG)
+
+                 {
+                    infof("continue to write remaining data: %d / %d bytes",  total - nBytes, total);
+                }
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                setWriteBuffer(sendDataBackupBuffer[nBytes .. $]); // send remaining
                 doWrite();
             }
         } else {
             writeBuffer.nextGetIndex(cast(int)nBytes);
             if (!writeBuffer.hasRemaining()) {
                 // writeBuffer.clear();
-                version (HUNT_DEBUG)
+                version (HUNT_IO_DEBUG)
                     tracef("try next write");
 
                 tryNextWrite();
             } else // if (sendDataBuffer.length > nBytes) 
             {
-                // version (HUNT_DEBUG)
-                version (HUNT_DEBUG)
-                    tracef("continue to write remaining data: %d bytes", sendDataBuffer.length - nBytes);
+                // version (HUNT_IO_DEBUG)
+                version (HUNT_IO_DEBUG)
+                    infof("continue to write remaining data: %d / %d bytes",  total - nBytes, total);
                 // FIXME: Needing refactor or cleanup -@Administrator at 2018-6-12 13:56:17
                 // sendDataBuffer corrupted
                 // const(ubyte)[] data = writeBuffer.remaining();
                 // tracef("%(%02X %)", data);
                 // tracef("%(%02X %)", sendDataBuffer);
-                setWriteBuffer(sendDataBuffer[nBytes .. $]); // send remaining
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                warningf("sent: %d, total: %d, backup: %d", nBytes, sendDataBuffer.length, sendDataBackupBuffer.length);
+                setWriteBuffer(sendDataBackupBuffer[nBytes .. $]); // send remaining
                 nBytes = doWrite();
             }
         }
@@ -343,6 +387,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         isWriteCancelling = true;
     }
 
+    abstract bool isConnected() nothrow;
     abstract protected void onDisconnected();
 
     protected void initializeWriteQueue() {
@@ -351,13 +396,13 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
     }
 
-    bool _isConnected; //if server side always true.
     SimpleEventHandler disconnectionHandler;
-
+    
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
     private const(ubyte)[] _readBuffer;
     private const(ubyte)[] sendDataBuffer;
+    private const(ubyte)[] sendDataBackupBuffer;
     private ByteBuffer writeBuffer;
 
     private IocpContext _iocpread;

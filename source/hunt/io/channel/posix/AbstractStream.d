@@ -32,6 +32,11 @@ abstract class AbstractStream : AbstractSocketChannel {
     private const(ubyte)[] _readBuffer;
     private ByteBuffer writeBuffer;
 
+    /**
+    * Warning: The received data is stored a inner buffer. For a data safe, 
+    * you would make a copy of it. 
+    */
+    protected DataReceivedHandler dataReceivedHandler;
     protected SimpleEventHandler disconnectionHandler;
     protected SimpleActionHandler dataWriteDoneHandler;
 
@@ -330,11 +335,4 @@ abstract class AbstractStream : AbstractSocketChannel {
             _writeQueue = new WritingBufferQueue();
         }
     }
-
-    /**
-    * Warning: The received data is stored a inner buffer. For a data safe, 
-    * you would make a copy of it. 
-    */
-    DataReceivedHandler dataReceivedHandler;
-
 }
