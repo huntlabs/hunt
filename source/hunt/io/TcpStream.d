@@ -240,18 +240,12 @@ class TcpStream : AbstractStream {
             throw new Exception("The connection is down!");
         }
 
-        version (HUNT_DEBUG)
-            infof("data buffered (%d bytes): fd=%d", buffer.capacity, this.handle);
+        // version (HUNT_DEBUG)
+            infof("data buffered (%d bytes): fd=%d", buffer.limit(), this.handle);
         _isWritting = true;
-        initializeWriteQueue();
+        // initializeWriteQueue();
         _writeQueue.enqueue(buffer);
         onWrite();
-
-        // version (HAVE_IOCP) {
-        //     if (!_isWritting)  tryWrite();
-        // } else {
-        //     onWrite();
-        // }
     }
 
     /**
@@ -271,29 +265,27 @@ class TcpStream : AbstractStream {
                 infof("fd: %d, %d bytes: %(%02X %)", this.handle, data.length, data[0 .. 32]);
         }
 
-        if ((_writeQueue is null || _writeQueue.isEmpty()) && !_isWritting) {
+        if ((_writeQueue.isEmpty()) && !_isWritting) {
             _isWritting = true;
             const(ubyte)[] d = data;
 
             while (!isClosing() && !isWriteCancelling && d.length > 0) {
                 version (HUNT_IO_DEBUG)
-                    tracef("write directly: fd=%d, %d bytes", this.handle, d.length);
+                    infof("to write directly %d bytes, fd=%d", d.length, this.handle);
                 size_t nBytes = tryWrite(d);
 
                 if (nBytes == d.length) {
                     version (HUNT_IO_DEBUG)
-                        tracef("write out once: %d / %d bytes, fd=%d", nBytes,
-                                d.length, this.handle);
+                        tracef("write all out at once: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     checkAllWriteDone();
                     break;
                 } else if (nBytes > 0) {
                     version (HUNT_IO_DEBUG)
-                        tracef("written: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                        tracef("write out partly: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
                     d = d[nBytes .. $];
                 } else {
-                    version (HUNT_DEBUG)
-                        warningf("buffering remaining data: %d bytes, fd=%d", d.length, this.handle);
-                    initializeWriteQueue();
+                    version (HUNT_IO_DEBUG)
+                        warningf("buffering data: %d bytes, fd=%d", d.length, this.handle);
                     _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
                     break;
                 }
@@ -315,8 +307,6 @@ class TcpStream : AbstractStream {
         version(HUNT_DEBUG) {
             infof("peer disconnected: fd=%d", this.handle);
         }
-        // _isConnected = false;
-        // _isClosed = true;
         if (disconnectionHandler !is null)
             disconnectionHandler();
             
@@ -328,12 +318,12 @@ protected:
     ConnectionHandler _connectionHandler;
 
     override void onRead() {
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             trace("start to read");
 
         version (Posix) {
             while (!_isClosed && !tryRead()) {
-                version (HUNT_DEBUG)
+                version (HUNT_IO_DEBUG)
                     trace("continue reading...");
             }
         } else {
@@ -355,7 +345,7 @@ protected:
         super.onClose();
         if(lastConnectStatus) {
             version (HUNT_DEBUG) {
-                if (_writeQueue !is null && !_writeQueue.isEmpty) {
+                if (!_writeQueue.isEmpty) {
                     warningf("Some data has not been sent yet: fd=%d", this.handle);
                 }
 

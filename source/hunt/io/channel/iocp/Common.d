@@ -8,12 +8,10 @@ pragma(lib, "Ws2_32");
 // dfmt on
 
 import hunt.collection.ByteBuffer;
-// import hunt.collection.BufferUtils;
 import hunt.io.channel.AbstractChannel;
 import hunt.io.channel.Common;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
-// import hunt.concurrency.thread.Helper;
 
 import core.atomic;
 import core.sys.windows.windows;
@@ -34,7 +32,7 @@ import std.stdio;
 mixin template CheckIocpError() {
     void checkErro(int ret, int erro = 0) {
         DWORD dwLastError = GetLastError();
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             infof("erro=%d, dwLastError=%d", erro, dwLastError);
         if (ret != erro || dwLastError == 0)
             return;
