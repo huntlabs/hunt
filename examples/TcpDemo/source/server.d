@@ -41,6 +41,7 @@ void main()
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
 
 	listener
+	// .reusePort(false)
 	.bind(8080)
 	.listen(1024)
 	.onConnectionAccepted((TcpListener sender, TcpStream client) {
