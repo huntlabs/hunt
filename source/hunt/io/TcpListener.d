@@ -102,25 +102,21 @@ class TcpListener : AbstractListener {
      * https://www.cnblogs.com/xybaby/p/7341579.html
      * https://rextester.com/BUAFK86204
      */
-    TcpListener reusePort(bool use) {
+    TcpListener reusePort(bool flag) {
         if(_isBinded) {
             throw new IOException("Must be set before binding.");
         }
 
-        this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
-
         version (Posix) {
             import core.sys.posix.sys.socket;
 
-            this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, use);
+            this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, flag);
+            this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, flag);
         } else version (Windows) {
             // https://docs.microsoft.com/en-us/windows/win32/winsock/using-so-reuseaddr-and-so-exclusiveaddruse
             // https://docs.microsoft.com/zh-cn/windows/win32/winsock/so-exclusiveaddruse
             import core.sys.windows.winsock2;
-            // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/10 10:33:59 am
-            // failed to set
-            // this.socket.setOption(SocketOptionLevel.SOCKET,
-            //         cast(SocketOption) SO_EXCLUSIVEADDRUSE, use);
+            this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_EXCLUSIVEADDRUSE, !flag);
         }
 
         return this;
