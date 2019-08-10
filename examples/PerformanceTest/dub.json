@@ -1,13 +1,10 @@
 {
 	"name": "performance",
 	"targetType": "executable",
-	"authors": [
-		"Putao"
-	],
 	"description": "A performance tester for Hunt.",
-	"copyright": "Copyright © 2017-2018, HuntLabs.net",
+	"copyright": "Copyright © 2017-2019, HuntLabs.net",
 	"license": "Apache-2.0",
-	"versions": ["HUNT_DEBUG1"],
+	"versions": ["HUNT_DEBUG1", "HUNT_IO_DEBUG1"],
 	"dependencies": {
 		"hunt" : {
 			"path" : "../../"
