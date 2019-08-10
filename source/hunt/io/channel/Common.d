@@ -26,10 +26,7 @@ alias AcceptHandler = void delegate(Socket socket);
 alias ErrorEventHandler = Action1!(string);
 
 alias ConnectionHandler = void delegate(bool isSucceeded);
-
-// dfmt off
-alias UDPReadCallBack = void delegate(in ubyte[] data, Address addr);
-// dfmt on
+alias UdpDataHandler = void delegate(const(ubyte)[] data, Address addr);
 
 @property TaskPool workerPool() @trusted {
     import std.concurrency : initOnce;

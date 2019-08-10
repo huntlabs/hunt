@@ -21,12 +21,19 @@ import std.exception;
 */
 class UdpSocket : AbstractDatagramSocket {
 
+    private UdpDataHandler _receivedHandler;
+
     this(EventLoop loop, AddressFamily amily = AddressFamily.INET) {
         super(loop, amily);
     }
+    
+    UdpSocket enableBroadcast(bool flag) {
+        this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.BROADCAST, flag);
+        return this;
+    }
 
-    UdpSocket setReadData(UDPReadCallBack cback) {
-        _readBack = cback;
+    UdpSocket onReceived(UdpDataHandler handler) {
+        _receivedHandler = handler;
         return this;
     }
 
@@ -47,6 +54,11 @@ class UdpSocket : AbstractDatagramSocket {
         return this;
     }
 
+    UdpSocket bind(Address address) {
+        super.bind(address);
+        return this;
+    }
+
     UdpSocket connect(Address addr) {
         this.socket.connect(addr);
         return this;
@@ -64,18 +76,17 @@ class UdpSocket : AbstractDatagramSocket {
             doRead();
     }
 
-protected:
-    override void onRead() nothrow {
+    protected override void onRead() nothrow {
         catchAndLogException(() {
             bool canRead = true;
             while (canRead && _isRegistered) {
-                version (HUNT_DEBUG)
+                version (HUNT_IO_DEBUG)
                     trace("reading data...");
                 canRead = tryRead((Object obj) nothrow{
                     collectException(() {
                         UdpDataObject data = cast(UdpDataObject) obj;
                         if (data !is null) {
-                            _readBack(data.data, data.addr);
+                            _receivedHandler(data.data, data.addr);
                         }
                     }());
                 });
@@ -89,6 +100,4 @@ protected:
         }());
     }
 
-private:
-    UDPReadCallBack _readBack;
 }

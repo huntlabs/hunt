@@ -82,7 +82,7 @@ abstract class AbstractDatagramSocket : AbstractSocketChannel {
     mixin CheckIocpError;
 
     void doRead() {
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             trace("Receiving......");
 
         _dataReadBuffer.len = cast(uint) _readBuffer.data.length;
