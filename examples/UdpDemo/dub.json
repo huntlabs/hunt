@@ -1,12 +1,30 @@
 {
 	"name": "udp-demo",
 	"description": "A demo for UDP server and client.",
-    "copyright": "Copyright (C) 2018-2019, HuntLabs",
-    "homepage": "https://www.huntlabs.net/",
+	"copyright": "Copyright (C) 2018-2019, HuntLabs.net",
 	"license": "Apache-2.0",
 	"dependencies": {
-		"hunt" : {
-			"path" : "../../"
+		"hunt" :{"path": "../../"}
+	},
+	"versions": [
+		"HUNT_DEBUG","HUNT_IO_DEBUG", "HUNT_IO_DEBUG_MORE"
+	],
+	"configurations": [
+		{
+			"name": "client",
+			"targetName": "udp-client",
+			"targetType": "executable",
+			"excludedSourceFiles": [
+				"source/server.d"
+			]
+		},
+		{
+			"name": "server",
+			"targetName": "udp-server",
+			"targetType": "executable",
+			"excludedSourceFiles": [
+				"source/client.d"
+			]
 		}
-	}
+	]
 }
