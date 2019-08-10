@@ -15,12 +15,13 @@ import hunt.io.TcpStream;
 import hunt.io.TcpStreamOptions;
 
 import hunt.event;
+import hunt.Exceptions;
 import hunt.Functions;
+import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
 
 import std.socket;
 import std.exception;
-import hunt.logging;
 import core.thread;
 import core.time;
 
@@ -31,7 +32,9 @@ alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, 
 /**
 */
 class TcpListener : AbstractListener {
-    private bool isSslEnabled = false;
+    private bool _isSslEnabled = false;
+    private bool _isBlocking = false;
+    private bool _isBinded = false;
     private TcpStreamOptions _tcpStreamoption;
     protected EventHandler _shutdownHandler;
 
@@ -65,19 +68,18 @@ class TcpListener : AbstractListener {
     }
 
     TcpListener bind(string ip, ushort port) {
-        bind(parseAddress(ip, port));
-        return this;
+        return bind(parseAddress(ip, port));
     }
 
     TcpListener bind(ushort port) {
-        bind(createAddress(this.socket.addressFamily, port));
-        return this;
+        return bind(createAddress(this.socket.addressFamily, port));
     }
 
     TcpListener bind(Address addr) {
         this.socket.bind(addr);
-        this.socket.blocking = false;
+        this.socket.blocking = _isBlocking;
         _localAddress = _socket.localAddress();
+        _isBinded = true;
         return this;
     }
 
@@ -85,19 +87,40 @@ class TcpListener : AbstractListener {
         return _localAddress;
     }
 
+    void blocking(bool flag) {
+        _isBlocking = flag;
+        // if(_isBinded)
+        this.socket.blocking = flag;
+    }
+
+    bool blocking() {
+        return _isBlocking;
+    }
+
+    /**
+     * https://stackoverflow.com/questions/14388706/socket-options-so-reuseaddr-and-so-reuseport-how-do-they-differ-do-they-mean-t
+     * https://www.cnblogs.com/xybaby/p/7341579.html
+     * https://rextester.com/BUAFK86204
+     */
     TcpListener reusePort(bool use) {
+        if(_isBinded) {
+            throw new IOException("Must be set before binding.");
+        }
+
         this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, use);
 
         version (Posix) {
             import core.sys.posix.sys.socket;
 
             this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_REUSEPORT, use);
-        } else version (windows) {
+        } else version (Windows) {
+            // https://docs.microsoft.com/en-us/windows/win32/winsock/using-so-reuseaddr-and-so-exclusiveaddruse
+            // https://docs.microsoft.com/zh-cn/windows/win32/winsock/so-exclusiveaddruse
             import core.sys.windows.winsock2;
-
-            if (!use)
-                this.socket.setOption(SocketOptionLevel.SOCKET,
-                        cast(SocketOption) SO_EXCLUSIVEADDRUSE, true);
+            // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/10 10:33:59 am
+            // failed to set
+            // this.socket.setOption(SocketOptionLevel.SOCKET,
+            //         cast(SocketOption) SO_EXCLUSIVEADDRUSE, use);
         }
 
         return this;
