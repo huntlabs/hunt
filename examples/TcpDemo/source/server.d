@@ -40,7 +40,10 @@ void main()
 	// TcpListener listener = new TcpListener(loop, AddressFamily.INET6, 512);
 	TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
 
-	listener.bind(8080).listen(1024).onConnectionAccepted((TcpListener sender, TcpStream client) {
+	listener
+	.bind(8080)
+	.listen(1024)
+	.onConnectionAccepted((TcpListener sender, TcpStream client) {
 		debug writefln("new connection from: %s", client.remoteAddress.toString());
 		client.onReceived((ByteBuffer buffer) {
 			ubyte[] data = cast(ubyte[])buffer.getRemaining();
@@ -63,7 +66,8 @@ void main()
 		}).onError((string msg){
 			writefln("error occurred: %s", msg);
 		});
-	}).start();
+	})
+	.start();
 
 	writeln("Listening on: ", listener.bindingAddress.toString());
 
