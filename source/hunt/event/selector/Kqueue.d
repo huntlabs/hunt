@@ -14,10 +14,8 @@ module hunt.event.selector.Kqueue;
 // dfmt off
 version(HAVE_KQUEUE):
 // dfmt on
-
 import hunt.event.selector.Selector;
-import hunt.io.channel.AbstractChannel;
-import hunt.io.channel.Common;
+import hunt.io.channel;
 import hunt.event.timer.Kqueue;
 import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
@@ -44,10 +42,13 @@ class AbstractSelector : Selector {
     private bool isDisposed = false;
     private Kevent[NUM_KEVENTS] events;
     private int _kqueueFD;
+    private EventChannel _eventChannel;
 
     this(size_t number, size_t divider, size_t maxChannels = 1500) {
         super(number, divider, maxChannels);
         _kqueueFD = kqueue();
+        _eventChannel = new KqueueEventChannel(this);
+        register(_eventChannel);
     }
 
     ~this() {
@@ -57,9 +58,27 @@ class AbstractSelector : Selector {
     override void dispose() {
         if (isDisposed)
             return;
+
+        version (HUNT_IO_DEBUG)
+            tracef("disposing selector[fd=%d]...", _kqueueFD);
         isDisposed = true;
-        core.sys.posix.unistd.close(_kqueueFD);
+        _eventChannel.close();
+        int r = core.sys.posix.unistd.close(_kqueueFD);
+        if(r != 0) {
+            warningf("error: %d", r);
+        }
+
         super.dispose();
+    }
+
+    override void onStop() {
+        version (HUNT_DEBUG)
+            infof("Selector stopping. fd=%d", _kqueueFD);  
+               
+        if(!_eventChannel.isClosed()) {
+            _eventChannel.trigger();
+            // _eventChannel.onWrite();
+        }
     }
 
     override bool register(AbstractChannel channel) {
@@ -208,73 +227,6 @@ class AbstractSelector : Selector {
     }
 }
 
-
-/**
-*/
-class KqueueEventChannel : EventChannel {
-    this(Selector loop) {
-        super(loop);
-        setFlag(ChannelFlag.Read, true);
-        _pair = socketPair();
-        _pair[0].blocking = false;
-        _pair[1].blocking = false;
-        this.handle = _pair[1].handle;
-    }
-
-    ~this() {
-        close();
-    }
-
-    override void call() {
-        _pair[0].send("call");
-    }
-
-    override void onRead() {
-        ubyte[128] data;
-        while (true) {
-            if (_pair[1].receive(data) <= 0)
-                break;
-        }
-
-        super.onRead();
-    }
-
-    Socket[2] _pair;
-}
-
-/**
-*/
-class EventChannel : AbstractChannel {
-    this(Selector loop) {
-        super(loop, ChannelType.Event);
-    }
-
-    void call() {
-        assert(false);
-    }
-
-    // override void close() {
-    //     if(_isClosing)
-    //         return;
-    //     _isClosing = true;
-    //     version (HUNT_DEBUG) tracef("closing [fd=%d]...", this.handle);
-
-    //     if(isBusy) {
-    //         import std.parallelism;
-    //         version (HUNT_DEBUG) warning("Close operation delayed");
-    //         auto theTask = task(() {
-    //             while(isBusy) {
-    //                 version (HUNT_DEBUG) infof("waitting for idle [fd=%d]...", this.handle);
-    //                 // Thread.sleep(20.msecs);
-    //             }
-    //             super.close();
-    //         });
-    //         taskPool.put(theTask);
-    //     } else {
-    //         super.close();
-    //     }
-    // }
-}
 
 enum : short {
     EVFILT_READ = -1,
