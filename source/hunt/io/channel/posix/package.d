@@ -11,3 +11,7 @@ public import hunt.io.channel.posix.AbstractStream;
 version (HAVE_EPOLL) {
     public import hunt.io.channel.posix.EpollEventChannel;
 }
+
+version(HAVE_KQUEUE) {
+    public import hunt.io.channel.posix.KqueueEventChannel;
+}

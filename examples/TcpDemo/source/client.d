@@ -15,8 +15,8 @@ void main() {
 	trace("Start test...");
 	EventLoop loop = new EventLoop();
 
-	// TcpStream client = new TcpStream(loop, AddressFamily.INET6);
-	TcpStream client = new TcpStream(loop, AddressFamily.INET);
+	// TcpStream client = new TcpStream(loop, null, AddressFamily.INET6);
+	TcpStream client = new TcpStream(loop);
 	int count = 10;
 	client.onConnected((bool isSucceeded) {
 		if (isSucceeded) {

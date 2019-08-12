@@ -55,8 +55,8 @@ shared static this() {
 class AbstractSelector : Selector {
     enum int NUM_KEVENTS = 1024;
     private int _epollFD;
-    epoll_event[NUM_KEVENTS] events;
-
+    private bool isDisposed = false;
+    private epoll_event[NUM_KEVENTS] events;
     private EventChannel _eventChannel;
 
     this(size_t number, size_t divider, size_t maxChannels = 1500) {
@@ -96,8 +96,6 @@ class AbstractSelector : Selector {
         super.dispose();
     }
 
-    private bool isDisposed = false;
-
     override void onStop() {
         version (HUNT_DEBUG)
             infof("Selector stopping. fd=%d", _epollFD);  
@@ -106,7 +104,6 @@ class AbstractSelector : Selector {
             _eventChannel.trigger();
             // _eventChannel.onWrite();
         }
-
     }
 
     override bool register(AbstractChannel channel) {
