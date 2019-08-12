@@ -37,7 +37,6 @@ import std.conv;
  * The {@link Executors#defaultThreadFactory} method provides a more
  * useful simple implementation, that sets the created thread context
  * to known values before returning it.
- * @since 1.5
  * @author Doug Lea
  */
 interface ThreadFactory {

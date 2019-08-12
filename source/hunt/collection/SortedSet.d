@@ -235,7 +235,6 @@ interface SortedSet(E) : Set!(E) {
      * {@link Spliterator#SUBSIZED}.
      *
      * @return a {@code Spliterator} over the elements in this sorted set
-     * @since 1.8
      */
     // override
     // default Spliterator!(E) spliterator() {

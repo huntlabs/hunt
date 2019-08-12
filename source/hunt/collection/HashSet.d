@@ -269,7 +269,6 @@ class HashSet(E) : AbstractSet!E, Set!E {
      * the reporting of additional characteristic values.
      *
      * @return a {@code Spliterator} over the elements in this set
-     * @since 1.8
      */
     // Spliterator<E> spliterator() {
     //     return new HashMap.KeySpliterator!(E, Object)(map, 0, -1, 0, 0);

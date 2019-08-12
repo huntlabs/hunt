@@ -24,7 +24,6 @@ import core.time;
  * {@code compareTo} method that provides an ordering consistent with
  * its {@code getDelay} method.
  *
- * @since 1.5
  * @author Doug Lea
  */
 interface Delayed : Comparable!(Delayed) {
@@ -47,7 +46,6 @@ interface Delayed : Comparable!(Delayed) {
  * Usually a scheduled future is the result of scheduling
  * a task with a {@link ScheduledExecutorService}.
  *
- * @since 1.5
  * @author Doug Lea
  * @param (V) The result type returned by this Future
  */
@@ -61,7 +59,6 @@ interface ScheduledFuture(V) : Delayed, Future!(V) {
  * {@code Future} and allows access to its results.
  * @see FutureTask
  * @see Executor
- * @since 1.6
  * @author Doug Lea
  * @param (V) The result type returned by this Future's {@code get} method
  */

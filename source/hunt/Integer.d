@@ -30,7 +30,6 @@ class Integer : AbstractNumber!int
      * @param i the value whose bits are to be counted
      * @return the number of one-bits in the two's complement binary
      *     representation of the specified {@code int} value.
-     * @since 1.5
      */
     enum int MIN_VALUE = int.min; // 0x80000000;
 
@@ -76,7 +75,6 @@ class Integer : AbstractNumber!int
      *     ("leftmost") one-bit in the two's complement binary representation
      *     of the specified {@code int} value, or 32 if the value
      *     is equal to zero.
-     * @since 1.5
      */
     static int numberOfLeadingZeros(int i)
     {
@@ -120,7 +118,6 @@ class Integer : AbstractNumber!int
      *     one-bit in the two's complement binary representation of the
      *     specified {@code int} value, or 32 if the value is equal
      *     to zero.
-     * @since 1.5
      */
     static int numberOfTrailingZeros(int i)
     {
@@ -177,7 +174,6 @@ class Integer : AbstractNumber!int
      *
      * @param value the value to hash
      * @return a hash code value for a {@code double} value.
-     * @since 1.8
      */
     override size_t toHash() @safe nothrow
     {
@@ -457,7 +453,6 @@ class Integer : AbstractNumber!int
      * The number of bits used to represent an {@code int} value in two's
      * complement binary form.
      *
-     * @since 1.5
      */
     enum int SIZE = BYTES * Byte.SIZE; // 32;
 
@@ -465,7 +460,6 @@ class Integer : AbstractNumber!int
      * The number of bytes used to represent an {@code int} value in two's
      * complement binary form.
      *
-     * @since 1.8
      */
     enum int BYTES = int.sizeof; 
 
@@ -487,7 +481,6 @@ class Integer : AbstractNumber!int
      * @return the value obtained by rotating the two's complement binary
      *     representation of the specified {@code int} value left by the
      *     specified number of bits.
-     * @since 1.5
      */
     static int rotateLeft(int i, int distance)
     {
@@ -512,7 +505,6 @@ class Integer : AbstractNumber!int
      * @return the value obtained by rotating the two's complement binary
      *     representation of the specified {@code int} value right by the
      *     specified number of bits.
-     * @since 1.5
      */
     static int rotateRight(int i, int distance)
     {
@@ -526,7 +518,6 @@ class Integer : AbstractNumber!int
      * @param i the value whose bytes are to be reversed
      * @return the value obtained by reversing the bytes in the specified
      *     {@code int} value.
-     * @since 1.5
      */
     static int reverseBytes(int i) {
         return (i << 24)            |

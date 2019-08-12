@@ -179,7 +179,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *        of a sequence of bits to be used as the initial bits of the
      *        new bit set
      * @return a {@code BitSet} containing all the bits in the long array
-     * @since 1.7
      */
     // static BitSet valueOf(long[] longs) {
     //     int n;
@@ -204,7 +203,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *        used as the initial bits of the new bit set
      * @return a {@code BitSet} containing all the bits in the buffer in the
      *         specified range
-     * @since 1.7
      */
     // static BitSet valueOf(LongBuffer lb) {
     //     lb = lb.slice();
@@ -230,7 +228,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *        representation of a sequence of bits to be used as the
      *        initial bits of the new bit set
      * @return a {@code BitSet} containing all the bits in the byte array
-     * @since 1.7
      */
     // static BitSet valueOf(byte[] bytes) {
     //     return BitSet.valueOf(ByteBuffer.wrap(bytes));
@@ -252,7 +249,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *        used as the initial bits of the new bit set
      * @return a {@code BitSet} containing all the bits in the buffer in the
      *         specified range
-     * @since 1.7
      */
     // static BitSet valueOf(ByteBuffer bb) {
     //     bb = bb.slice().order(ByteOrder.LITTLE_ENDIAN);
@@ -280,7 +276,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *
      * @return a byte array containing a little-endian representation
      *         of all the bits in this bit set
-     * @since 1.7
     */
     // byte[] toByteArray() {
     //     int n = wordsInUse;
@@ -309,7 +304,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *
      * @return a long array containing a little-endian representation
      *         of all the bits in this bit set
-     * @since 1.7
     */
     long[] toLongArray() {
         return words[0..wordsInUse].dup; // Arrays.copyOf(words, wordsInUse);
@@ -593,7 +587,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
     /**
      * Sets all of the bits in this BitSet to {@code false}.
      *
-     * @since 1.4
      */
     void clear() {
         while (wordsInUse > 0)

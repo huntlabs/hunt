@@ -122,7 +122,6 @@ import hunt.util.Common;
  * interface by providing a common conversion type.
  *
  * @author Doug Lea
- * @since 1.8
  */
 interface CompletionStage(T) {
 

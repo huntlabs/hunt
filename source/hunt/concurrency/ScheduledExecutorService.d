@@ -68,7 +68,6 @@ import core.time;
  *   }
  * }}</pre>
  *
- * @since 1.5
  * @author Doug Lea
  */
 interface ScheduledExecutorService : ExecutorService {

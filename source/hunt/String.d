@@ -651,7 +651,6 @@ final class String : Nullable!string {
      * @return {@code true} if {@link #length()} is {@code 0}, otherwise
      * {@code false}
      *
-     * @since 1.6
      */
     boolean isEmpty() {
         return value.length == 0;
@@ -798,7 +797,6 @@ final class String : Nullable!string {
      *   or if {@code codePointOffset} is negative and the substring
      *   before {@code index} has fewer than the absolute value
      *   of {@code codePointOffset} code points.
-     * @since 1.5
      */
     int offsetByCodePoints(int index, int codePointOffset) {
         if (index < 0 || index > length()) {
@@ -1895,7 +1893,6 @@ final class String : Nullable!string {
      *          if {@code endIndex} is greater than {@code length()},
      *          or if {@code beginIndex} is greater than {@code endIndex}
      *
-     * @since 1.4
      * @spec JSR-51
      */
     CharSequence subSequence(int beginIndex, int endIndex) {
@@ -2006,7 +2003,6 @@ final class String : Nullable!string {
      *
      * @see java.util.regex.Pattern
      *
-     * @since 1.4
      * @spec JSR-51
      */
     boolean matches(String regex) {
@@ -2019,7 +2015,6 @@ final class String : Nullable!string {
      *
      * @param s the sequence to search for
      * @return true if this string contains {@code s}, false otherwise
-     * @since 1.5
      */
     boolean contains(CharSequence s) {
         return indexOf(s.toString()) >= 0;
@@ -2063,7 +2058,6 @@ final class String : Nullable!string {
      *
      * @see java.util.regex.Pattern
      *
-     * @since 1.4
      * @spec JSR-51
      */
     String replaceFirst(String regex, String replacement) {
@@ -2108,7 +2102,6 @@ final class String : Nullable!string {
      *
      * @see java.util.regex.Pattern
      *
-     * @since 1.4
      * @spec JSR-51
      */
     String replaceAll(String regex, String replacement) {
@@ -2125,7 +2118,6 @@ final class String : Nullable!string {
      * @param  target The sequence of char values to be replaced
      * @param  replacement The replacement sequence of char values
      * @return  The resulting string
-     * @since 1.5
      */
     String replace(CharSequence target, CharSequence replacement) {
         String tgtStr = target.toString();
@@ -2239,7 +2231,6 @@ final class String : Nullable!string {
      *
      * @see java.util.regex.Pattern
      *
-     * @since 1.4
      * @spec JSR-51
      */
     String[] split(String regex, int limit) {
@@ -2337,7 +2328,6 @@ final class String : Nullable!string {
      *
      * @see java.util.regex.Pattern
      *
-     * @since 1.4
      * @spec JSR-51
      */
     String[] split(String regex) {
@@ -2367,7 +2357,6 @@ final class String : Nullable!string {
      *         is {@code null}
      *
      * @see java.util.StringJoiner
-     * @since 1.8
      */
     static String join(CharSequence delimiter, CharSequence... elements) {
         Objects.requireNonNull(delimiter);
@@ -2412,7 +2401,6 @@ final class String : Nullable!string {
      *
      * @see    #join(CharSequence,CharSequence...)
      * @see    java.util.StringJoiner
-     * @since 1.8
      */
     static String join(CharSequence delimiter,
             Iterable<? extends CharSequence> elements) {
@@ -2643,7 +2631,6 @@ final class String : Nullable!string {
      * point</a> is passed through uninterpreted.
      *
      * @return an IntStream of char values from this sequence
-     * @since 9
      */
     @Override
     IntStream chars() {
@@ -2663,7 +2650,6 @@ final class String : Nullable!string {
      * {@code int} values which are then passed to the stream.
      *
      * @return an IntStream of Unicode code points from this sequence
-     * @since 9
      */
     @Override
     IntStream codePoints() {

@@ -112,7 +112,6 @@ import std.datetime;
  * any actions taken by that task, which in turn <i>happen-before</i> the
  * result is retrieved via {@code Future.get()}.
  *
- * @since 1.5
  * @author Doug Lea
  */
 interface ExecutorService : Executor {

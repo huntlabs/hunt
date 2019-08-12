@@ -416,7 +416,6 @@ class FileInputStream : InputStream {
      *
      * @return  the file channel associated with this file input stream
      *
-     * @since 1.4
      * @spec JSR-51
      */
     // FileChannel getChannel() {

@@ -214,7 +214,6 @@ class StringUtils {
      * @param separatorChar the character used as the delimiter
      * @return an array of parsed Strings, <code>null</code> if null string
      * input
-     * @since 2.0
      */
     static string[] split(string str, char separatorChar) {
         return splitWorker(str, separatorChar, false);

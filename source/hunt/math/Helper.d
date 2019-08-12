@@ -245,7 +245,6 @@ final class MathHelper {
      *
      * @param   a   a value
      * @return  the base 10 logarithm of  {@code a}.
-     * @since 1.5
      */
     // @HotSpotIntrinsicCandidate
     // static double log10(double a) {
@@ -303,7 +302,6 @@ final class MathHelper {
      *
      * @param   a   a value.
      * @return  the cube root of {@code a}.
-     * @since 1.5
      */
     // static double cbrt(double a) {
     //     return StrictMath.cbrt(a);
@@ -731,7 +729,6 @@ final class MathHelper {
      * @param y the second value
      * @return the result
      * @throws ArithmeticException if the result overflows an int
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static int addExact(int x, int y) {
@@ -751,7 +748,6 @@ final class MathHelper {
      * @param y the second value
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static long addExact(long x, long y) {
@@ -771,7 +767,6 @@ final class MathHelper {
      * @param y the second value to subtract from the first
      * @return the result
      * @throws ArithmeticException if the result overflows an int
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static int subtractExact(int x, int y) {
@@ -792,7 +787,6 @@ final class MathHelper {
      * @param y the second value to subtract from the first
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static long subtractExact(long x, long y) {
@@ -813,7 +807,6 @@ final class MathHelper {
      * @param y the second value
      * @return the result
      * @throws ArithmeticException if the result overflows an int
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static int multiplyExact(int x, int y) {
@@ -832,7 +825,6 @@ final class MathHelper {
      * @param y the second value
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 9
      */
     static long multiplyExact(long x, int y) {
         return multiplyExact(x, cast(long)y);
@@ -846,7 +838,6 @@ final class MathHelper {
      * @param y the second value
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static long multiplyExact(long x, long y) {
@@ -872,7 +863,6 @@ final class MathHelper {
      * @param a the value to increment
      * @return the result
      * @throws ArithmeticException if the result overflows an int
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static int incrementExact(int a) {
@@ -890,7 +880,6 @@ final class MathHelper {
      * @param a the value to increment
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static long incrementExact(long a) {
@@ -908,7 +897,6 @@ final class MathHelper {
      * @param a the value to decrement
      * @return the result
      * @throws ArithmeticException if the result overflows an int
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static int decrementExact(int a) {
@@ -926,7 +914,6 @@ final class MathHelper {
      * @param a the value to decrement
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static long decrementExact(long a) {
@@ -944,7 +931,6 @@ final class MathHelper {
      * @param a the value to negate
      * @return the result
      * @throws ArithmeticException if the result overflows an int
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static int negateExact(int a) {
@@ -962,7 +948,6 @@ final class MathHelper {
      * @param a the value to negate
      * @return the result
      * @throws ArithmeticException if the result overflows a long
-     * @since 1.8
      */
     // @HotSpotIntrinsicCandidate
     static long negateExact(long a) {
@@ -980,7 +965,6 @@ final class MathHelper {
      * @param value the long value
      * @return the argument as an int
      * @throws ArithmeticException if the {@code argument} overflows an int
-     * @since 1.8
      */
     static int toIntExact(long value) {
         if (cast(int)value != value) {
@@ -995,7 +979,6 @@ final class MathHelper {
      * @param x the first value
      * @param y the second value
      * @return the result
-     * @since 9
      */
     static long multiplyFull(int x, int y) {
         return cast(long)x * cast(long)y;
@@ -1008,7 +991,6 @@ final class MathHelper {
      * @param x the first value
      * @param y the second value
      * @return the result
-     * @since 9
      */
     // @HotSpotIntrinsicCandidate
     static long multiplyHigh(long x, long y) {
@@ -1071,7 +1053,6 @@ final class MathHelper {
      * @throws ArithmeticException if the divisor {@code y} is zero
      * @see #floorMod(int, int)
      * @see #floor(double)
-     * @since 1.8
      */
     static int floorDiv(int x, int y) {
         int r = x / y;
@@ -1105,7 +1086,6 @@ final class MathHelper {
      * @throws ArithmeticException if the divisor {@code y} is zero
      * @see #floorMod(long, int)
      * @see #floor(double)
-     * @since 9
      */
     static long floorDiv(long x, int y) {
         return floorDiv(x, cast(long)y);
@@ -1134,7 +1114,6 @@ final class MathHelper {
      * @throws ArithmeticException if the divisor {@code y} is zero
      * @see #floorMod(long, long)
      * @see #floor(double)
-     * @since 1.8
      */
     static long floorDiv(long x, long y) {
         long r = x / y;
@@ -1187,7 +1166,6 @@ final class MathHelper {
      * @return the floor modulus {@code x - (floorDiv(x, y) * y)}
      * @throws ArithmeticException if the divisor {@code y} is zero
      * @see #floorDiv(int, int)
-     * @since 1.8
      */
     static int floorMod(int x, int y) {
         return x - floorDiv(x, y) * y;
@@ -1213,7 +1191,6 @@ final class MathHelper {
      * @return the floor modulus {@code x - (floorDiv(x, y) * y)}
      * @throws ArithmeticException if the divisor {@code y} is zero
      * @see #floorDiv(long, int)
-     * @since 9
      */
     static int floorMod(long x, int y) {
         // Result cannot overflow the range of int.
@@ -1240,7 +1217,6 @@ final class MathHelper {
      * @return the floor modulus {@code x - (floorDiv(x, y) * y)}
      * @throws ArithmeticException if the divisor {@code y} is zero
      * @see #floorDiv(long, long)
-     * @since 1.8
      */
     static long floorMod(long x, long y) {
         return x - floorDiv(x, y) * y;

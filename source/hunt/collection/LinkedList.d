@@ -76,7 +76,6 @@ import std.range;
  * @author  Josh Bloch
  * @see     List
  * @see     ArrayList
- * @since 1.2
  * @param E the type of elements held in this collection
  */
 
@@ -619,7 +618,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      * Retrieves, but does not remove, the head (first element) of this list.
      *
      * @return the head of this list, or {@code null} if this list is empty
-     * @since 1.5
      */
     E peek() {        
         return getFirst();
@@ -630,7 +628,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the head of this list
      * @throws NoSuchElementException if this list is empty
-     * @since 1.5
      */
     E element() {
         return getFirst();
@@ -640,7 +637,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      * Retrieves and removes the head (first element) of this list.
      *
      * @return the head of this list, or {@code null} if this list is empty
-     * @since 1.5
      */
     E poll() {
         return removeFirst();
@@ -651,7 +647,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the head of this list
      * @throws NoSuchElementException if this list is empty
-     * @since 1.5
      */
     E remove() {
         return removeFirst();
@@ -662,7 +657,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @param e the element to add
      * @return {@code true} (as specified by {@link Queue#offer})
-     * @since 1.5
      */
     bool offer(E e) {
         return add(e);
@@ -674,7 +668,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @param e the element to insert
      * @return {@code true} (as specified by {@link Deque#offerFirst})
-     * @since 1.6
      */
     bool offerFirst(E e) {
         addFirst(e);
@@ -686,7 +679,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @param e the element to insert
      * @return {@code true} (as specified by {@link Deque#offerLast})
-     * @since 1.6
      */
     bool offerLast(E e) {
         addLast(e);
@@ -699,7 +691,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the first element of this list, or {@code null}
      *         if this list is empty
-     * @since 1.6
      */
     E peekFirst() {
         return getFirst();
@@ -711,7 +702,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the last element of this list, or {@code null}
      *         if this list is empty
-     * @since 1.6
      */
     E peekLast() {
         return getLast();
@@ -723,7 +713,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the first element of this list, or {@code null} if
      *     this list is empty
-     * @since 1.6
      */
     E pollFirst() {
         return removeFirst();
@@ -735,7 +724,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @return the last element of this list, or {@code null} if
      *     this list is empty
-     * @since 1.6
      */
     E pollLast() {
         return removeLast();
@@ -748,7 +736,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      * <p>This method is equivalent to {@link #addFirst}.
      *
      * @param e the element to push
-     * @since 1.6
      */
     void push(E e) {
         addFirst(e);
@@ -763,7 +750,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      * @return the element at the front of this list (which is the top
      *         of the stack represented by this list)
      * @throws NoSuchElementException if this list is empty
-     * @since 1.6
      */
     E pop() {
         return removeFirst();
@@ -776,7 +762,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @param o element to be removed from this list, if present
      * @return {@code true} if the list contained the specified element
-     * @since 1.6
      */
     bool removeFirstOccurrence(E o) {
         return remove(o);
@@ -789,7 +774,6 @@ class LinkedList(E) : AbstractSequentialList!E,  Deque!E {  //, Cloneable
      *
      * @param o element to be removed from this list, if present
      * @return {@code true} if the list contained the specified element
-     * @since 1.6
      */
     // bool removeLastOccurrence(E o) {
 

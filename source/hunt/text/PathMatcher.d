@@ -35,7 +35,6 @@ import std.container.array;
  * Ant-style pattern syntax.
  *
  * @author Juergen Hoeller
- * @since 1.2
  * @see AntPathMatcher
  */
 interface PathMatcher {
@@ -175,7 +174,6 @@ private enum Regex!char VARIABLE_PATTERN = regex("\\{[^/]+?\\}");
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
- * @since 16.07.2003
  */
 class AntPathMatcher : PathMatcher {
 
@@ -798,7 +796,6 @@ protected static class AntPathStringMatcher {
      *
      * @param  s The string to be literalized
      * @return  A literal string replacement
-     * @since 1.5
      */
     static string quote(string s) {
         int slashEIndex = cast(int)s.indexOf("\\E");

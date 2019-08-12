@@ -138,7 +138,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * @throws NullPointerException if the specified key is null and this map
      * does not permit null keys
      * (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     V getOrDefault(K k, V value) {
         throw new UnsupportedOperationException();
@@ -510,7 +509,6 @@ abstract class AbstractMap(K, V) : Map!(K, V) {
      * arrays of <tt>SimpleEntry</tt> instances in method
      * <tt>Map.entrySet().toArray</tt>.
      *
-     * @since 1.6
      */
     // static class SimpleEntry!(K,V)
     //     implements Entry!(K,V), java.io.Serializable

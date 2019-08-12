@@ -100,7 +100,6 @@ import hunt.Exceptions;
  * @see Comparable
  * @see Collection
  * @see ClassCastException
- * @since 1.2
  */
 
 interface SortedMap(K,V) : Map!(K,V) {

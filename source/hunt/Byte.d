@@ -342,7 +342,6 @@ class Byte : AbstractNumber!(byte) {
      *
      * @param value the value to hash
      * @return a hash code value for a {@code byte} value.
-     * @since 1.8
      */
     override size_t toHash() @trusted nothrow {
         return cast(size_t)value;
@@ -362,7 +361,6 @@ class Byte : AbstractNumber!(byte) {
      * @param  x the value to convert to an unsigned {@code int}
      * @return the argument converted to {@code int} by an unsigned
      *         conversion
-     * @since 1.8
      */
     static int toUnsignedInt(byte x) {
         return (cast(int) x) & 0xff;
@@ -382,7 +380,6 @@ class Byte : AbstractNumber!(byte) {
      * @param  x the value to convert to an unsigned {@code long}
      * @return the argument converted to {@code long} by an unsigned
      *         conversion
-     * @since 1.8
      */
     static long toUnsignedLong(byte x) {
         return (cast(long) x) & 0xffL;
@@ -393,7 +390,6 @@ class Byte : AbstractNumber!(byte) {
      * The number of bits used to represent a {@code byte} value in two's
      * complement binary form.
      *
-     * @since 1.5
      */
     enum int SIZE = 8;
 
@@ -401,7 +397,6 @@ class Byte : AbstractNumber!(byte) {
      * The number of bytes used to represent a {@code byte} value in two's
      * complement binary form.
      *
-     * @since 1.8
      */
     enum int BYTES = byte.sizeof;
 

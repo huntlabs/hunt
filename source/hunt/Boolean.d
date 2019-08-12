@@ -160,7 +160,6 @@ class Boolean : Nullable!bool {
      * @param      s   the {@code string} containing the bool
      *                 representation to be parsed
      * @return     the bool represented by the string argument
-     * @since 1.5
      */
     static bool parseBoolean(string s) {
         return ((s.length != 0) && equalsIgnoreCase(s, "true"));
@@ -215,7 +214,6 @@ class Boolean : Nullable!bool {
      *
      * @param b the bool to be converted
      * @return the string representation of the specified {@code bool}
-     * @since 1.4
      */
     static string toString(bool b) {
         return b ? "true" : "false";
@@ -250,7 +248,6 @@ class Boolean : Nullable!bool {
      *
      * @param value the value to hash
      * @return a hash code value for a {@code bool} value.
-     * @since 1.8
      */
     // static size_t hashCode(bool value) {
     //     return value ? 1231 : 1237;
@@ -336,7 +333,6 @@ class Boolean : Nullable!bool {
      * @return the value {@code 0} if {@code x == y};
      *         a value less than {@code 0} if {@code !x && y}; and
      *         a value greater than {@code 0} if {@code x && !y}
-     * @since 1.7
      */
     static int compare(bool x, bool y) {
         return (x == y) ? 0 : (x ? 1 : -1);
@@ -350,7 +346,6 @@ class Boolean : Nullable!bool {
      * @param b the second operand
      * @return the logical AND of {@code a} and {@code b}
      * @see hunt.util.functional.BinaryOperator
-     * @since 1.8
      */
     static bool logicalAnd(bool a, bool b) {
         return a && b;
@@ -364,7 +359,6 @@ class Boolean : Nullable!bool {
      * @param b the second operand
      * @return the logical OR of {@code a} and {@code b}
      * @see hunt.util.functional.BinaryOperator
-     * @since 1.8
      */
     static bool logicalOr(bool a, bool b) {
         return a || b;
@@ -378,7 +372,6 @@ class Boolean : Nullable!bool {
      * @param b the second operand
      * @return  the logical XOR of {@code a} and {@code b}
      * @see hunt.util.functional.BinaryOperator
-     * @since 1.8
      */
     static bool logicalXor(bool a, bool b) {
         return a ^ b;

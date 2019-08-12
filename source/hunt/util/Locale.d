@@ -459,7 +459,6 @@ import std.string;
  * @see java.text.NumberFormat
  * @see java.text.Collator
  * @author Mark Davis
- * @since 1.1
  */
 final class Locale // : Cloneable
 {
@@ -612,7 +611,6 @@ final class Locale // : Cloneable
      * as the base locale of all locales, and is used as the language/country
      * neutral locale for the locale sensitive operations.
      *
-     * @since 1.6
      */
     static Locale ROOT() {
         __gshared Locale m;
@@ -624,7 +622,6 @@ final class Locale // : Cloneable
      *
      * @see #getExtension(char)
      * @see Builder#setExtension(char, string)
-     * @since 1.7
      */
     enum char PRIVATE_USE_EXTENSION = 'x';
 
@@ -633,7 +630,6 @@ final class Locale // : Cloneable
      *
      * @see #getExtension(char)
      * @see Builder#setExtension(char, string)
-     * @since 1.7
      */
     enum char UNICODE_LOCALE_EXTENSION = 'u';
 
@@ -644,7 +640,6 @@ final class Locale // : Cloneable
      * alpha-3, four-letter ISO3166-3 country codes.
      *
      * @see #getISOCountries(Locale.IsoCountryCode)
-     * @since 9
      */
     static class IsoCountryCode
     {
@@ -832,7 +827,6 @@ final class Locale // : Cloneable
      * up to 8 characters in length.  See the <code>Locale</code> class description about
      * valid language values.
      * @exception NullPointerException thrown if argument is null.
-     * @since 1.4
      */
     this(string language)
     {
@@ -936,7 +930,6 @@ final class Locale // : Cloneable
      * @return the default locale for the specified Category for this instance
      *     of the Java Virtual Machine
      * @see #setDefault(LocaleCategory, Locale)
-     * @since 1.7
      */
     static Locale getDefault(LocaleCategory category) {
         // do not synchronize this method - see 4071298
@@ -1048,7 +1041,6 @@ final class Locale // : Cloneable
      * @see SecurityManager#checkPermission(java.security.Permission)
      * @see PropertyPermission
      * @see #getDefault(LocaleCategory)
-     * @since 1.7
      */
     static void setDefault(LocaleCategory category, Locale newLocale) {
         implementationMissing(false);
@@ -1191,7 +1183,6 @@ final class Locale // : Cloneable
      *
      * @return The script code, or the empty string if none is defined.
      * @see #getDisplayScript
-     * @since 1.7
      */
     string getScript() {
         return script;
@@ -1224,7 +1215,6 @@ final class Locale // : Cloneable
      * extensions</a>.
      *
      * @return {@code true} if this {@code Locale} has any extensions
-     * @since 1.8
      */
     bool hasExtensions() {
         return false;
@@ -3431,7 +3421,6 @@ final class Locale // : Cloneable
  *
  * @see #getDefault(LocaleCategory)
  * @see #setDefault(LocaleCategory, Locale)
- * @since 1.7
  */
 struct LocaleCategory {
 

@@ -60,7 +60,6 @@ struct TypeUtils {
      *     ("leftmost") one-bit in the two's complement binary representation
      *     of the specified {@code int} value, or 32 if the value
      *     is equal to zero.
-     * @since 1.5
      */
     static int numberOfLeadingZeros(int i) {
         // HD, Figure 5-6

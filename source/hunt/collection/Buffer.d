@@ -254,7 +254,6 @@ abstract class Buffer
      * @return  <tt>true</tt> if, and only if, this buffer
      *          is backed by an array and is not read-only
      *
-     * @since 1.6
      */
     abstract bool hasArray();
 
@@ -281,7 +280,6 @@ abstract class Buffer
      * @throws  UnsupportedOperationException
      *          If this buffer is not backed by an accessible array
      *
-     * @since 1.6
      */
     // abstract Object array();
 
@@ -305,7 +303,6 @@ abstract class Buffer
      * @throws  UnsupportedOperationException
      *          If this buffer is not backed by an accessible array
      *
-     * @since 1.6
      */
     abstract int arrayOffset();
 
@@ -315,7 +312,6 @@ abstract class Buffer
      *
      * @return  <tt>true</tt> if, and only if, this buffer is direct
      *
-     * @since 1.6
      */
     abstract bool isDirect();
 

@@ -118,7 +118,6 @@ import hunt.util.DateTime;
  *   }
  * }}</pre>
  *
- * @since 1.5
  */
 class LockSupport {
     private static Parker _parker;    
@@ -262,7 +261,6 @@ class LockSupport {
      *
      * @param blocker the synchronization object responsible for this
      *        thread parking
-     * @since 1.6
      */
     static void park(Object blocker) {
         park(blocker, Duration.zero);
@@ -309,7 +307,6 @@ class LockSupport {
      * @param blocker the synchronization object responsible for this
      *        thread parking
      * @param nanos the maximum number of nanoseconds to wait
-     * @since 1.6
      */
     
     deprecated("Using park(Object, Duration) instead.")
@@ -386,7 +383,6 @@ class LockSupport {
      *        thread parking
      * @param deadline the absolute time, in milliseconds from the Epoch,
      *        to wait until
-     * @since 1.6
      */
     static void parkUntil(Object blocker, MonoTime deadline) {
         Parker p = getParker();
@@ -450,7 +446,6 @@ class LockSupport {
      * @param t the thread
      * @return the blocker
      * @throws NullPointerException if argument is null
-     * @since 1.6
      */
     static Object getBlocker(Thread t) {
         return getParker(t).getBlocker();

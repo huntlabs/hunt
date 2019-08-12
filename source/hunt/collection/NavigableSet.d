@@ -61,7 +61,6 @@ import hunt.collection.Iterator;
  * @author Doug Lea
  * @author Josh Bloch
  * @param (E) the type of elements maintained by this set
- * @since 1.6
  */
 interface NavigableSet(E) : SortedSet!(E) {
     /**

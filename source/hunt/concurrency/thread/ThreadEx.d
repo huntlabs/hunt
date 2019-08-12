@@ -57,7 +57,6 @@ interface Interruptible {
  * @see #setDefaultUncaughtExceptionHandler
  * @see #setUncaughtExceptionHandler
  * @see ThreadGroupEx#uncaughtException
- * @since 1.5
  */
 interface UncaughtExceptionHandler {
     /**
@@ -428,7 +427,6 @@ class ThreadEx : Thread, Runnable {
      * not for synchronization control.
      *
      * @return this thread's state.
-     * @since 1.5
      */
     ThreadState getState() {
         // get current thread state
@@ -733,7 +731,6 @@ class ThreadEx : Thread, Runnable {
      * @see #setUncaughtExceptionHandler
      * @see #getUncaughtExceptionHandler
      * @see ThreadGroup#uncaughtException
-     * @since 1.5
      */
     static void setDefaultUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
         // SecurityManager sm = System.getSecurityManager();
@@ -750,7 +747,6 @@ class ThreadEx : Thread, Runnable {
      * Returns the default handler invoked when a thread abruptly terminates
      * due to an uncaught exception. If the returned value is {@code null},
      * there is no default.
-     * @since 1.5
      * @see #setDefaultUncaughtExceptionHandler
      * @return the default uncaught exception handler for all threads
      */
@@ -764,7 +760,6 @@ class ThreadEx : Thread, Runnable {
      * uncaught exception handler explicitly set then this thread's
      * {@code ThreadGroup} object is returned, unless this thread
      * has terminated, in which case {@code null} is returned.
-     * @since 1.5
      * @return the uncaught exception handler for this thread
      */
     UncaughtExceptionHandler getUncaughtExceptionHandler() {
@@ -785,7 +780,6 @@ class ThreadEx : Thread, Runnable {
      *          modify this thread.
      * @see #setDefaultUncaughtExceptionHandler
      * @see ThreadGroup#uncaughtException
-     * @since 1.5
      */
     void setUncaughtExceptionHandler(UncaughtExceptionHandler eh) {
         checkAccess();

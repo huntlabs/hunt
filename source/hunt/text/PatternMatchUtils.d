@@ -21,7 +21,6 @@ import std.string;
  * Spring's typical "xxx*", "*xxx" and "*xxx*" pattern styles.
  *
  * @author Juergen Hoeller
- * @since 2.0
  */
 abstract class PatternMatchUtils {
 

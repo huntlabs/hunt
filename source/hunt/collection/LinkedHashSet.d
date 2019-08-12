@@ -188,7 +188,6 @@ class LinkedHashSet(E) : HashSet!(E) {
      * {@link Spliterator#SUBSIZED}.
      *
      * @return a {@code Spliterator} over the elements in this set
-     * @since 1.8
      */
     // override
     // Spliterator!(E) spliterator() {

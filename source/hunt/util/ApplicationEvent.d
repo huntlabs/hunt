@@ -54,7 +54,6 @@ abstract class ApplicationEvent : EventObject {
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @since 1.1.1
  * @see ApplicationContext
  * @see ApplicationEventPublisherAware
  * @see hunt.framework.context.ApplicationEvent

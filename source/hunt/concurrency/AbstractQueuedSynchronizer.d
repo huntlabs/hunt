@@ -282,7 +282,6 @@ import std.datetime;
  *   }
  * }}</pre>
  *
- * @since 1.5
  * @author Doug Lea
  */
 abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
@@ -1278,7 +1277,6 @@ abstract class AbstractQueuedSynchronizer : AbstractOwnableSynchronizer {
      * @return {@code true} if there is a queued thread preceding the
      *         current thread, and {@code false} if the current thread
      *         is at the head of the queue or the queue is empty
-     * @since 1.7
      */
     final bool hasQueuedPredecessors() {
         Node h, s;

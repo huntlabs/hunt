@@ -353,121 +353,101 @@ class Char : Nullable!char {
     /**
      * Undefined bidirectional character type. Undefined {@code char}
      * values have undefined directionality in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_UNDEFINED = -1;
 
     /**
      * Strong bidirectional character type "L" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_LEFT_TO_RIGHT = 0;
 
     /**
      * Strong bidirectional character type "R" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_RIGHT_TO_LEFT = 1;
 
     /**
     * Strong bidirectional character type "AL" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC = 2;
 
     /**
      * Weak bidirectional character type "EN" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_EUROPEAN_NUMBER = 3;
 
     /**
      * Weak bidirectional character type "ES" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR = 4;
 
     /**
      * Weak bidirectional character type "ET" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR = 5;
 
     /**
      * Weak bidirectional character type "AN" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_ARABIC_NUMBER = 6;
 
     /**
      * Weak bidirectional character type "CS" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_COMMON_NUMBER_SEPARATOR = 7;
 
     /**
      * Weak bidirectional character type "NSM" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_NONSPACING_MARK = 8;
 
     /**
      * Weak bidirectional character type "BN" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_BOUNDARY_NEUTRAL = 9;
 
     /**
      * Neutral bidirectional character type "B" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_PARAGRAPH_SEPARATOR = 10;
 
     /**
      * Neutral bidirectional character type "S" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_SEGMENT_SEPARATOR = 11;
 
     /**
      * Neutral bidirectional character type "WS" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_WHITESPACE = 12;
 
     /**
      * Neutral bidirectional character type "ON" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_OTHER_NEUTRALS = 13;
 
     /**
      * Strong bidirectional character type "LRE" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING = 14;
 
     /**
      * Strong bidirectional character type "LRO" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE = 15;
 
     /**
      * Strong bidirectional character type "RLE" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING = 16;
 
     /**
      * Strong bidirectional character type "RLO" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE = 17;
 
     /**
      * Weak bidirectional character type "PDF" in the Unicode specification.
-     * @since 1.4
      */
     enum byte DIRECTIONALITY_POP_DIRECTIONAL_FORMAT = 18;
 
@@ -478,7 +458,6 @@ class Char : Nullable!char {
      * in the UTF-16 encoding, constant {@code '\u005CuD800'}.
      * A high-surrogate is also known as a <i>leading-surrogate</i>.
      *
-     * @since 1.5
      */
     enum wchar MIN_HIGH_SURROGATE = 0xD800;
 
@@ -489,7 +468,6 @@ class Char : Nullable!char {
      * in the UTF-16 encoding, constant {@code '\u005CuDBFF'}.
      * A high-surrogate is also known as a <i>leading-surrogate</i>.
      *
-     * @since 1.5
      */
     enum wchar MAX_HIGH_SURROGATE = 0xDBFF;
 
@@ -500,7 +478,6 @@ class Char : Nullable!char {
      * in the UTF-16 encoding, constant {@code '\u005CuDC00'}.
      * A low-surrogate is also known as a <i>trailing-surrogate</i>.
      *
-     * @since 1.5
      */
     enum wchar MIN_LOW_SURROGATE  = 0xDC00;
 
@@ -511,7 +488,6 @@ class Char : Nullable!char {
      * in the UTF-16 encoding, constant {@code '\u005CuDFFF'}.
      * A low-surrogate is also known as a <i>trailing-surrogate</i>.
      *
-     * @since 1.5
      */
     enum wchar MAX_LOW_SURROGATE  = 0xDFFF;
 
@@ -519,7 +495,6 @@ class Char : Nullable!char {
      * The minimum value of a Unicode surrogate code unit in the
      * UTF-16 encoding, constant {@code '\u005CuD800'}.
      *
-     * @since 1.5
      */
     enum wchar MIN_SURROGATE = MIN_HIGH_SURROGATE;
 
@@ -527,7 +502,6 @@ class Char : Nullable!char {
      * The maximum value of a Unicode surrogate code unit in the
      * UTF-16 encoding, constant {@code '\u005CuDFFF'}.
      *
-     * @since 1.5
      */
     enum wchar MAX_SURROGATE = MAX_LOW_SURROGATE;
 
@@ -535,7 +509,6 @@ class Char : Nullable!char {
      * The maximum value of a Unicode surrogate code unit in the
      * UTF-16 encoding, constant {@code '\u005CuDFFF'}.
      *
-     * @since 1.5
      */
     // enum wchar MAX_SURROGATE = MAX_LOW_SURROGATE;
 
@@ -544,7 +517,6 @@ class Char : Nullable!char {
      * <a href="http://www.unicode.org/glossary/#supplementary_code_point">
      * Unicode supplementary code point</a>, constant {@code U+10000}.
      *
-     * @since 1.5
      */
     enum int MIN_SUPPLEMENTARY_CODE_POINT = 0x010000;
 
@@ -553,7 +525,6 @@ class Char : Nullable!char {
      * <a href="http://www.unicode.org/glossary/#code_point">
      * Unicode code point</a>, constant {@code U+0000}.
      *
-     * @since 1.5
      */
     enum int MIN_CODE_POINT = 0x000000;
 
@@ -562,7 +533,6 @@ class Char : Nullable!char {
      * <a href="http://www.unicode.org/glossary/#code_point">
      * Unicode code point</a>, constant {@code U+10FFFF}.
      *
-     * @since 1.5
      */
     enum int MAX_CODE_POINT = 0X10FFFF;
 

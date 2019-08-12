@@ -44,7 +44,6 @@ class Long : AbstractNumber!long {
      * The number of bits used to represent a {@code long} value in two's
      * complement binary form.
      *
-     * @since 1.5
      */
     enum int SIZE = BYTES * Byte.SIZE; // 64;
 
@@ -52,7 +51,6 @@ class Long : AbstractNumber!long {
      * The number of bytes used to represent a {@code long} value in two's
      * complement binary form.
      *
-     * @since 1.8
      */
     enum BYTES = long.sizeof; //  SIZE / 8;
 
@@ -63,7 +61,6 @@ class Long : AbstractNumber!long {
      *
      * @param i the value whose signum is to be computed
      * @return the signum function of the specified {@code long} value.
-     * @since 1.5
      */
     static int signum(long i) {
         // HD, Section 2-7
@@ -90,7 +87,6 @@ class Long : AbstractNumber!long {
      *     ("leftmost") one-bit in the two's complement binary representation
      *     of the specified {@code long} value, or 64 if the value
      *     is equal to zero.
-     * @since 1.5
      */
     static int numberOfLeadingZeros(long i) {
         // HD, Figure 5-6
@@ -327,7 +323,6 @@ class Long : AbstractNumber!long {
      * @param   radix   the radix to use in the string representation.
      * @return  an unsigned string representation of the argument in the specified radix.
      * @see     #toString(long, int)
-     * @since 1.8
      */
     static string toUnsignedString(long i, int radix) {
         if (i >= 0)
@@ -552,7 +547,6 @@ class Long : AbstractNumber!long {
      *     one-bit in the two's complement binary representation of the
      *     specified {@code long} value, or 64 if the value is equal
      *     to zero.
-     * @since 1.5
      */
     static int numberOfTrailingZeros(long i) {
         // HD, Figure 5-14
@@ -575,7 +569,6 @@ class Long : AbstractNumber!long {
      * @param i the value whose bits are to be counted
      * @return the number of one-bits in the two's complement binary
      *     representation of the specified {@code long} value.
-     * @since 1.5
      */
     static int bitCount(long i) {
         // HD, Figure 5-14
@@ -595,7 +588,6 @@ class Long : AbstractNumber!long {
      * @param i the value whose bytes are to be reversed
      * @return the value obtained by reversing the bytes in the specified
      *     {@code long} value.
-     * @since 1.5
      */
     static long reverseBytes(long i) {
         i = (i & 0x00ff00ff00ff00ffL) << 8 | (i >>> 8) & 0x00ff00ff00ff00ffL;
@@ -620,7 +612,6 @@ class Long : AbstractNumber!long {
      *
      * @param value the value to hash
      * @return a hash code value for a {@code long} value.
-     * @since 1.8
      */
     override size_t toHash() @safe nothrow {
         return cast(int)(value ^ (value >>> 32));

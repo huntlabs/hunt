@@ -60,7 +60,6 @@ import core.time;
  *
  * @see FutureTask
  * @see Executor
- * @since 1.5
  * @author Doug Lea
  * @param (V) The result type returned by this Future's {@code get} method
  */
@@ -150,7 +149,6 @@ interface IFuture {
  * and allows access to its results.
  * @see FutureTask
  * @see Executor
- * @since 1.6
  * @author Doug Lea
  * @param (V) The result type returned by this Future's {@code get} method
  */

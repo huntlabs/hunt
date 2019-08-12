@@ -55,7 +55,6 @@ class Double : AbstractNumber!double {
      * hexadecimal floating-point literal {@code 0x1.0p-1022} and also
      * equal to {@code Double.longBitsToDouble(0x0010000000000000L)}.
      *
-     * @since 1.6
      */
     enum double MIN_NORMAL = double.min_normal; // 0x1.0p-1022; // 2.2250738585072014E-308
 
@@ -73,7 +72,6 @@ class Double : AbstractNumber!double {
      * It is equal to the value returned by
      * {@code Math.getExponent(Double.MAX_VALUE)}.
      *
-     * @since 1.6
      */
     enum int MAX_EXPONENT = 1023;
 
@@ -82,21 +80,18 @@ class Double : AbstractNumber!double {
      * have.  It is equal to the value returned by
      * {@code Math.getExponent(Double.MIN_NORMAL)}.
      *
-     * @since 1.6
      */
     enum int MIN_EXPONENT = -1022;
 
     /**
      * The number of bits used to represent a {@code double} value.
      *
-     * @since 1.5
      */
     enum int SIZE = 64;
 
     /**
      * The number of bytes used to represent a {@code double} value.
      *
-     * @since 1.8
      */
     enum int BYTES = SIZE / 8;
 
@@ -253,7 +248,6 @@ class Double : AbstractNumber!double {
      *
      * @param value the value to hash
      * @return a hash code value for a {@code double} value.
-     * @since 1.8
      */
     override size_t toHash() @safe nothrow {
         return hashOf(value);

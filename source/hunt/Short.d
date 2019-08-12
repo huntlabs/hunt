@@ -331,7 +331,6 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
     /**
      * The number of bits used to represent a {@code short} value in two's
      * complement binary form.
-     * @since 1.5
      */
     enum int SIZE = 16;
 
@@ -339,7 +338,6 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      * The number of bytes used to represent a {@code short} value in two's
      * complement binary form.
      *
-     * @since 1.8
      */
     enum int BYTES = SIZE / Byte.SIZE;
 
@@ -350,7 +348,6 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      * @param i the value whose bytes are to be reversed
      * @return the value obtained by reversing (or, equivalently, swapping)
      *     the bytes in the specified {@code short} value.
-     * @since 1.5
      */
     static short reverseBytes(short i) {
         return cast(short) (((i & 0xFF00) >> 8) | (i << 8));
@@ -371,7 +368,6 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      * @param  x the value to convert to an unsigned {@code int}
      * @return the argument converted to {@code int} by an unsigned
      *         conversion
-     * @since 1.8
      */
     static int toUnsignedInt(short x) {
         return (cast(int) x) & 0xffff;
@@ -391,7 +387,6 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      * @param  x the value to convert to an unsigned {@code long}
      * @return the argument converted to {@code long} by an unsigned
      *         conversion
-     * @since 1.8
      */
     static long toUnsignedLong(short x) {
         return (cast(long) x) & 0xffffL;
