@@ -11,6 +11,7 @@
 module hunt.collection.Radix;
 
 import std.stdio;
+
 import core.memory;
 import core.stdc.string;
 import core.stdc.stdlib;
@@ -25,12 +26,12 @@ void debug_log(A...)(A args)
 alias log_info = debug_log;
 alias log_error = debug_log;
 
-struct raxNode
+struct RadixNode
 {
     size_t args;
     //	1 	iskey	
-    //	1	isnull	don't store it 
-    //	1	iscompr 
+    //	1	isNull	don't store it 
+    //	1	isCompr 
     //	29	size
 
     //void *data;
@@ -63,12 +64,12 @@ pragma(inline, true):
         return value;
     }
 
-    @property bool isnull()
+    @property bool isNull()
     {
         return cast(bool)(args & 0x4000_0000UL);
     }
 
-    @property bool isnull(bool value)
+    @property bool isNull(bool value)
     {
         if (value)
             args = args | 0x4000_0000UL;
@@ -78,12 +79,12 @@ pragma(inline, true):
         return value;
     }
 
-    @property bool iscompr()
+    @property bool isCompr()
     {
         return cast(bool)(args & 0x2000_0000UL);
     }
 
-    @property bool iscompr(bool value)
+    @property bool isCompr(bool value)
     {
         if (value)
             args = args | 0x2000_0000UL;
@@ -107,29 +108,29 @@ pragma(inline, true):
         return value;
     }
 
-    @property raxNode** orgin()
+    @property RadixNode** orgin()
     {
-        return cast(raxNode**)(str + size);
+        return cast(RadixNode**)(str + size);
     }
 
-    @property raxNode* next()
+    @property RadixNode* next()
     {
         return *orgin;
     }
 
-    @property raxNode* next(raxNode* n)
+    @property RadixNode* next(RadixNode* n)
     {
         *orgin = n;
         return n;
     }
 
-    @property raxNode* nextChild(size_t index)
+    @property RadixNode* nextChild(size_t index)
     {
         assert(index < size);
         return orgin[index];
     }
 
-    @property raxNode* nextChild(size_t index, raxNode* n)
+    @property RadixNode* nextChild(size_t index, RadixNode* n)
     {
         orgin[index] = n;
         return n;
@@ -137,7 +138,7 @@ pragma(inline, true):
 
     @property void* value()
     {
-        if (iscompr)
+        if (isCompr)
             return orgin[1];
         else
             return orgin[size];
@@ -145,121 +146,121 @@ pragma(inline, true):
 
     @property void* value(void* v)
     {
-        if (iscompr)
-            orgin[1] = cast(raxNode*) v;
+        if (isCompr)
+            orgin[1] = cast(RadixNode*) v;
         else
-            orgin[size] = cast(raxNode*) v;
+            orgin[size] = cast(RadixNode*) v;
         return v;
     }
 
 pragma(inline, false):
 
     //alloc non-compr node
-    static raxNode* New(size_t children, bool hasdata)
+    static RadixNode* create(size_t children, bool hasdata)
     {
-        size_t nodesize = raxNode.sizeof + children + (raxNode*).sizeof * children;
+        size_t nodesize = RadixNode.sizeof + children + (RadixNode*).sizeof * children;
         if (hasdata)
             nodesize += (void*).sizeof;
 
-        raxNode* n = cast(raxNode*) malloc(nodesize);
+        RadixNode* n = cast(RadixNode*) malloc(nodesize);
         if (n is null)
             return null;
         memset(n, 0, nodesize);
 
         n.iskey = false;
-        n.isnull = false;
-        n.iscompr = false;
+        n.isNull = false;
+        n.isCompr = false;
         n.size = children;
 
         return n;
     }
 
-    static raxNode* NewComp(size_t length, bool hasdata)
+    static RadixNode* createComp(size_t length, bool hasdata)
     {
-        size_t nodesize = raxNode.sizeof + length + (raxNode*).sizeof;
+        size_t nodesize = RadixNode.sizeof + length + (RadixNode*).sizeof;
         if (hasdata)
             nodesize += (void*).sizeof;
 
-        raxNode* n = cast(raxNode*) malloc(nodesize);
+        RadixNode* n = cast(RadixNode*) malloc(nodesize);
         if (n is null)
             return null;
         memset(n, 0, nodesize);
 
         n.iskey = false;
-        n.isnull = false;
-        n.iscompr = true;
+        n.isNull = false;
+        n.isCompr = true;
         n.size = length;
 
         return n;
     }
 
-    static raxNode* Renew(raxNode* n, size_t children, bool hasdata)
+    static RadixNode* recreate(RadixNode* n, size_t children, bool hasdata)
     {
-        size_t nodesize = raxNode.sizeof + children + (raxNode*).sizeof * children;
+        size_t nodesize = RadixNode.sizeof + children + (RadixNode*).sizeof * children;
         if (hasdata)
             nodesize += (void*).sizeof;
 
-        auto node = cast(raxNode*) realloc(n, nodesize);
+        auto node = cast(RadixNode*) realloc(n, nodesize);
         if (node is null)
             return null;
         memset(node, 0, nodesize);
 
-        node.iscompr = false;
+        node.isCompr = false;
         return node;
     }
 
-    static raxNode* RenewComp(raxNode* n, size_t length, bool hasdata)
+    static RadixNode* recreateComp(RadixNode* n, size_t length, bool hasdata)
     {
-        size_t nodesize = raxNode.sizeof + length + (raxNode*).sizeof * length;
+        size_t nodesize = RadixNode.sizeof + length + (RadixNode*).sizeof * length;
         if (hasdata)
             nodesize += (void*).sizeof;
 
-        auto node = cast(raxNode*) realloc(n, nodesize);
+        auto node = cast(RadixNode*) realloc(n, nodesize);
         if (node is null)
             return null;
         memset(node, 0, nodesize);
 
-        node.iscompr = true;
+        node.isCompr = true;
         return node;
     }
 
-    static void Free(raxNode* n)
+    static void free(RadixNode* n)
     {
-        free(n);
+        .free(n);
     }
 }
 
-struct raxItem
+struct RadixItem
 {
-    raxNode* n;
+    RadixNode* n;
     size_t index;
 }
 
 public:
 
-struct rax
+struct Radix
 {
-    protected raxNode* head;
+    protected RadixNode* head;
     protected size_t numnodes;
     size_t numele;
 
     //
-    //	api New
+    //	api create
     //
-    static rax* New()
+    static Radix* create()
     {
-        rax* r = cast(rax*) malloc(rax.sizeof);
+        Radix* r = cast(Radix*) malloc(Radix.sizeof);
         if (r is null)
             return null;
-        memset(r, 0, rax.sizeof);
+        memset(r, 0, Radix.sizeof);
 
         r.numele = 0;
         r.numnodes = 1;
-        r.head = raxNode.NewComp(0, false);
+        r.head = RadixNode.createComp(0, false);
 
         if (r.head is null)
         {
-            Free(r);
+            free(r);
             return null;
         }
         else
@@ -272,32 +273,32 @@ struct rax
     //
     //	api Free
     //
-    static void Free(rax* r)
+    static void free(Radix* r)
     {
-        r.RecursiveFree(r.head);
-        free(r);
+        r.recursiveFree(r.head);
+        .free(r);
     }
 
     //
-    //	api Clear
+    //	api clear
     //
-    void Clear()
+    void clear()
     {
-        RecursiveFree(head);
+        recursiveFree(head);
 
         numele = 0;
         numnodes = 1;
-        head = raxNode.NewComp(0, false);
+        head = RadixNode.createComp(0, false);
     }
 
     //
-    //	api Remove
+    //	api remove
     //
-    bool Remove(const ubyte[] s)
+    bool remove(const ubyte[] s)
     {
-        raxNode* h = head;
-        raxNode* p = head;
-        raxItem[] ts;
+        RadixNode* h = head;
+        RadixNode* p = head;
+        RadixItem[] ts;
         size_t index = 0;
         size_t splitpos = 0;
         size_t last = find(s, h, p, index, splitpos, ts);
@@ -315,7 +316,7 @@ struct rax
                 h.iskey = false;
                 if (h.size == 0)
                 {
-                    if (p.iscompr)
+                    if (p.isCompr)
                     {
                         //#1	最后一个节点为空	父节点压缩节点 且是key 则去除父节点			
                         //		   (x)
@@ -334,11 +335,11 @@ struct rax
                             }
                             else
                             {
-                                raxItem item = ts[$ - 2];
+                                RadixItem item = ts[$ - 2];
                                 item.n.nextChild(item.index, h);
                             }
                             numnodes -= 1;
-                            raxNode.Free(p);
+                            RadixNode.free(p);
                             log_info("#####r1");
                         }
                         //#2	最后一个节点为空	父节点是压缩节点 不是key 父父节点必须是非压缩节点  
@@ -416,21 +417,22 @@ struct rax
                             }
                             else
                             {
-                                raxItem t1 = ts[$ - 2];
-                                raxNode* r1 = ts[$ - 2].n;
+                                RadixItem t1 = ts[$ - 2];
+                                RadixNode* r1 = ts[$ - 2].n;
                                 if (r1.size == 2)
                                 {
-                                    raxNode* pp = null;
+                                    RadixNode* pp = null;
                                     if (ts.length >= 3)
                                         pp = ts[$ - 3].n;
-                                    bool ppCombine = pp && pp.iscompr && !r1.iskey;
-                                    raxNode* nh = r1.nextChild(r1.size - 1 - t1.index);
-                                    bool nhCombie = nh.iscompr && !nh.iskey;
+
+                                    bool ppCombine = pp && pp.isCompr && !r1.iskey;
+                                    RadixNode* nh = r1.nextChild(r1.size - 1 - t1.index);
+                                    bool nhCombie = nh.isCompr && !nh.iskey;
 
                                     if (ppCombine && nhCombie)
                                     {
-                                        bool hasdata = pp.iskey && !pp.isnull;
-                                        raxNode* u = raxNode.NewComp(pp.size + nh.size + 1, hasdata);
+                                        bool hasdata = pp.iskey && !pp.isNull;
+                                        RadixNode* u = RadixNode.createComp(pp.size + nh.size + 1, hasdata);
                                         memcpy(u.str, pp.str, pp.size);
                                         memcpy(u.str + pp.size, r1.str + r1.size - 1 - t1.index, 1);
                                         memcpy(u.str + pp.size + 1, nh.str, nh.size);
@@ -447,21 +449,21 @@ struct rax
                                         }
                                         else
                                         {
-                                            raxItem item = ts[$ - 4];
+                                            RadixItem item = ts[$ - 4];
                                             item.n.nextChild(item.index, u);
                                         }
-                                        raxNode.Free(nh);
-                                        raxNode.Free(pp);
-                                        raxNode.Free(p);
-                                        raxNode.Free(h);
-                                        raxNode.Free(r1);
+                                        RadixNode.free(nh);
+                                        RadixNode.free(pp);
+                                        RadixNode.free(p);
+                                        RadixNode.free(h);
+                                        RadixNode.free(r1);
                                         numnodes -= 4;
                                         log_info("#####r211");
                                     }
                                     else if (ppCombine)
                                     {
-                                        bool hasdata = pp.iskey && !pp.isnull;
-                                        raxNode* u = raxNode.NewComp(pp.size + 1, hasdata);
+                                        bool hasdata = pp.iskey && !pp.isNull;
+                                        RadixNode* u = RadixNode.createComp(pp.size + 1, hasdata);
                                         memcpy(u.str, pp.str, pp.size);
                                         memcpy(u.str + pp.size, r1.str + r1.size - 1 - t1.index, 1);
                                         u.next(nh);
@@ -477,21 +479,21 @@ struct rax
                                         }
                                         else
                                         {
-                                            raxItem item = ts[$ - 4];
+                                            RadixItem item = ts[$ - 4];
                                             item.n.nextChild(item.index, u);
                                         }
-                                        raxNode.Free(pp);
-                                        raxNode.Free(p);
-                                        raxNode.Free(h);
-                                        raxNode.Free(r1);
+                                        RadixNode.free(pp);
+                                        RadixNode.free(p);
+                                        RadixNode.free(h);
+                                        RadixNode.free(r1);
                                         numnodes -= 3;
 
                                         log_info("#####r212");
                                     }
                                     else if (nhCombie)
                                     {
-                                        bool hasdata = r1.iskey && !r1.isnull;
-                                        raxNode* u = raxNode.NewComp(1 + nh.size, hasdata);
+                                        bool hasdata = r1.iskey && !r1.isNull;
+                                        RadixNode* u = RadixNode.createComp(1 + nh.size, hasdata);
                                         memcpy(u.str, r1.str + r1.size - 1 - t1.index, 1);
                                         memcpy(u.str + 1, nh.str, nh.size);
                                         u.iskey = r1.iskey;
@@ -509,21 +511,21 @@ struct rax
                                         }
                                         else
                                         {
-                                            raxItem item = ts[$ - 3];
-                                            log_info(getStr(item.n));
+                                            RadixItem item = ts[$ - 3];
+                                            log_info(getString(item.n));
                                             item.n.nextChild(item.index, u);
                                         }
-                                        raxNode.Free(nh);
-                                        raxNode.Free(p);
-                                        raxNode.Free(h);
-                                        raxNode.Free(r1);
+                                        RadixNode.free(nh);
+                                        RadixNode.free(p);
+                                        RadixNode.free(h);
+                                        RadixNode.free(r1);
                                         numnodes -= 3;
                                         log_info("#####r213");
                                     }
                                     else
                                     {
-                                        bool hasdata = r1.iskey && !r1.isnull;
-                                        raxNode* n = raxNode.NewComp(1, hasdata);
+                                        bool hasdata = r1.iskey && !r1.isNull;
+                                        RadixNode* n = RadixNode.createComp(1, hasdata);
                                         n.iskey = r1.iskey;
                                         if (hasdata)
                                             n.value = r1.value;
@@ -536,13 +538,13 @@ struct rax
                                         }
                                         else
                                         {
-                                            raxItem item = ts[$ - 3];
+                                            RadixItem item = ts[$ - 3];
                                             item.n.nextChild(item.index, n);
                                         }
 
-                                        raxNode.Free(h);
-                                        raxNode.Free(p);
-                                        raxNode.Free(r1);
+                                        RadixNode.free(h);
+                                        RadixNode.free(p);
+                                        RadixNode.free(r1);
                                         numnodes -= 2;
                                         log_info("#####r214");
                                     }
@@ -561,8 +563,8 @@ struct rax
                                 //													
                                 else if (r1.size > 2)
                                 {
-                                    bool hasdata = r1.iskey && !r1.isnull;
-                                    raxNode* u = raxNode.New(r1.size - 1, hasdata);
+                                    bool hasdata = r1.iskey && !r1.isNull;
+                                    RadixNode* u = RadixNode.create(r1.size - 1, hasdata);
                                     u.iskey = r1.iskey;
                                     if (hasdata)
                                     {
@@ -587,7 +589,7 @@ struct rax
                                                 r1.size - t1.index - 1);
                                     }
 
-                                    log_info(getStr(u));
+                                    log_info(getString(u));
 
                                     for (size_t i, j = 0; i < r1.size;)
                                     {
@@ -597,7 +599,7 @@ struct rax
                                             i++;
                                     }
 
-                                    //raxNode *test = null;
+                                    //RadixNode *test = null;
 
                                     if (r1 == head)
                                     {
@@ -605,15 +607,15 @@ struct rax
                                     }
                                     else
                                     {
-                                        raxItem i = ts[$ - 3];
+                                        RadixItem i = ts[$ - 3];
 
                                         i.n.nextChild(i.index, u);
 
                                     }
 
-                                    raxNode.Free(r1);
-                                    raxNode.Free(h);
-                                    raxNode.Free(p);
+                                    RadixNode.free(r1);
+                                    RadixNode.free(h);
+                                    RadixNode.free(p);
 
                                     numnodes -= 2;
                                     log_info("####r22");
@@ -685,28 +687,28 @@ struct rax
                     //			 |										(C)
                     //			(D)										|	
                     //													(D)
-                    else if (!p.iscompr)
+                    else if (!p.isCompr)
                     {
                         // noncompr to compr
-                        log_info("p ", getStr(p));
+                        log_info("p ", getString(p));
                         if (p.size == 2)
                         {
-                            raxNode* pp = null;
+                            RadixNode* pp = null;
                             if (ts.length >= 2)
                                 pp = ts[$ - 2].n;
-                            bool ppCombine = pp && pp.iscompr && !p.iskey;
-                            raxNode* nh = p.nextChild(p.size - 1 - index);
+                            bool ppCombine = pp && pp.isCompr && !p.iskey;
+                            RadixNode* nh = p.nextChild(p.size - 1 - index);
 
-                            log_info("nh ", getStr(nh));
-                            bool nhCombie = nh.iscompr && !nh.iskey;
+                            log_info("nh ", getString(nh));
+                            bool nhCombie = nh.isCompr && !nh.iskey;
 
                             log_info(ppCombine, " ", nhCombie);
 
                             // #1 合并3个
                             if (ppCombine && nhCombie)
                             {
-                                bool hasdata = pp.iskey && !pp.isnull;
-                                raxNode* u = raxNode.NewComp(pp.size + nh.size + 1, hasdata);
+                                bool hasdata = pp.iskey && !pp.isNull;
+                                RadixNode* u = RadixNode.createComp(pp.size + nh.size + 1, hasdata);
                                 memcpy(u.str, pp.str, pp.size);
                                 memcpy(u.str + pp.size, p.str + p.size - 1 - index, 1);
                                 memcpy(u.str + pp.size + 1, nh.str, nh.size);
@@ -722,13 +724,13 @@ struct rax
                                 }
                                 else
                                 {
-                                    raxItem item = ts[$ - 3];
+                                    RadixItem item = ts[$ - 3];
                                     item.n.nextChild(item.index, u);
                                 }
-                                raxNode.Free(nh);
-                                raxNode.Free(pp);
-                                raxNode.Free(p);
-                                raxNode.Free(h);
+                                RadixNode.free(nh);
+                                RadixNode.free(pp);
+                                RadixNode.free(p);
+                                RadixNode.free(h);
 
                                 numnodes -= 3;
 
@@ -737,8 +739,8 @@ struct rax
                             // #2 
                             else if (ppCombine)
                             {
-                                bool hasdata = pp.iskey && !pp.isnull;
-                                raxNode* u = raxNode.NewComp(pp.size + 1, hasdata);
+                                bool hasdata = pp.iskey && !pp.isNull;
+                                RadixNode* u = RadixNode.createComp(pp.size + 1, hasdata);
                                 memcpy(u.str, pp.str, pp.size);
                                 memcpy(u.str + pp.size, p.str + p.size - 1 - index, 1);
                                 u.next(nh);
@@ -752,20 +754,20 @@ struct rax
                                 }
                                 else
                                 {
-                                    raxItem item = ts[$ - 3];
+                                    RadixItem item = ts[$ - 3];
                                     item.n.nextChild(item.index, u);
                                 }
-                                raxNode.Free(pp);
-                                raxNode.Free(p);
-                                raxNode.Free(h);
+                                RadixNode.free(pp);
+                                RadixNode.free(p);
+                                RadixNode.free(h);
                                 numnodes -= 2;
 
                                 log_info("#####r312");
                             }
                             else if (nhCombie)
                             {
-                                bool hasdata = p.iskey && !p.isnull;
-                                raxNode* u = raxNode.NewComp(1 + nh.size, hasdata);
+                                bool hasdata = p.iskey && !p.isNull;
+                                RadixNode* u = RadixNode.createComp(1 + nh.size, hasdata);
                                 memcpy(u.str, p.str + p.size - 1 - index, 1);
                                 memcpy(u.str + 1, nh.str, nh.size);
                                 u.iskey = p.iskey;
@@ -778,20 +780,20 @@ struct rax
                                 }
                                 else
                                 {
-                                    raxItem item = ts[$ - 2];
+                                    RadixItem item = ts[$ - 2];
                                     item.n.nextChild(item.index, u);
                                 }
-                                raxNode.Free(nh);
-                                raxNode.Free(p);
-                                raxNode.Free(h);
+                                RadixNode.free(nh);
+                                RadixNode.free(p);
+                                RadixNode.free(h);
                                 numnodes -= 2;
                                 log_info("#####r313");
                             }
                             // p.iskey or no combine.
                             else
                             {
-                                bool hasdata = p.iskey && !p.isnull;
-                                raxNode* n = raxNode.NewComp(1, hasdata);
+                                bool hasdata = p.iskey && !p.isNull;
+                                RadixNode* n = RadixNode.createComp(1, hasdata);
                                 n.iskey = p.iskey;
                                 if (hasdata)
                                     n.value = p.value;
@@ -804,12 +806,12 @@ struct rax
                                 }
                                 else
                                 {
-                                    raxItem item = ts[$ - 2];
+                                    RadixItem item = ts[$ - 2];
                                     item.n.nextChild(item.index, n);
                                 }
 
-                                raxNode.Free(h);
-                                raxNode.Free(p);
+                                RadixNode.free(h);
+                                RadixNode.free(p);
                                 numnodes -= 1;
                                 log_info("#####r314");
                             }
@@ -825,8 +827,8 @@ struct rax
                         //
                         else if (p.size > 2)
                         {
-                            bool hasdata = p.iskey && !p.isnull;
-                            raxNode* u = raxNode.New(p.size - 1, hasdata);
+                            bool hasdata = p.iskey && !p.isNull;
+                            RadixNode* u = RadixNode.create(p.size - 1, hasdata);
                             u.iskey = p.iskey;
                             if (hasdata)
                             {
@@ -863,12 +865,12 @@ struct rax
                             }
                             else
                             {
-                                raxItem item = ts[$ - 2];
+                                RadixItem item = ts[$ - 2];
                                 item.n.nextChild(item.index, u);
                             }
 
-                            raxNode.Free(h);
-                            raxNode.Free(p);
+                            RadixNode.free(h);
+                            RadixNode.free(p);
                             numnodes--;
                             log_info("#####r32");
                         }
@@ -887,10 +889,10 @@ struct rax
                     //
                     //	#5 只是去掉一个值。
 
-                    if (h.iscompr && p.iscompr)
+                    if (h.isCompr && p.isCompr)
                     {
-                        bool hasdata = p.iskey && !p.isnull;
-                        raxNode* u = raxNode.NewComp(p.size + h.size, hasdata);
+                        bool hasdata = p.iskey && !p.isNull;
+                        RadixNode* u = RadixNode.createComp(p.size + h.size, hasdata);
                         u.iskey = p.iskey;
                         if (hasdata)
                         {
@@ -906,12 +908,12 @@ struct rax
                         }
                         else
                         {
-                            raxItem item = ts[$ - 2];
+                            RadixItem item = ts[$ - 2];
                             item.n.nextChild(item.index, u);
                         }
                         numnodes--;
-                        raxNode.Free(p);
-                        raxNode.Free(h);
+                        RadixNode.free(p);
+                        RadixNode.free(h);
                         log_info("#####r4");
                     }
                     else
@@ -923,20 +925,20 @@ struct rax
             }
             else
             {
-                log_error(cast(string) s, " is not key ", getStr(h));
+                log_error(cast(string) s, " is not key ", getString(h));
                 return false;
             }
         }
     }
 
     //
-    //	api Insert
+    //	api insert
     //
-    bool Insert(const ubyte[] s, void* data)
+    bool insert(const ubyte[] s, void* data)
     {
-        raxNode* h = head;
-        raxNode* p = head;
-        raxItem[] ts;
+        RadixNode* h = head;
+        RadixNode* p = head;
+        RadixItem[] ts;
         size_t index = 0;
         size_t splitpos = 0;
         numele++;
@@ -957,10 +959,10 @@ struct rax
             //							
             if (p.size == 0)
             {
-                raxNode* n = raxNode.NewComp(s.length, false);
+                RadixNode* n = RadixNode.createComp(s.length, false);
                 memcpy(n.str, s.ptr, s.length);
 
-                p = raxNode.RenewComp(p, 0, true);
+                p = RadixNode.recreateComp(p, 0, true);
                 p.args = 0;
                 p.iskey = true;
                 p.value = data;
@@ -985,7 +987,7 @@ struct rax
                 if (h.size == 0)
                 {
                     //1 new comp node
-                    raxNode* n = raxNode.NewComp(last, true);
+                    RadixNode* n = RadixNode.createComp(last, true);
                     memcpy(n.str, s[$ - last .. $].ptr, last);
                     n.iskey = true;
                     n.value = h.value;
@@ -1012,19 +1014,19 @@ struct rax
                 //						   /		\
                 //					  u5 ()			(x)
                 //
-                else if (h.iscompr)
+                else if (h.isCompr)
                 {
-                    raxNode* u1;
+                    RadixNode* u1;
 
-                    bool hasvalue = h.iskey && !h.isnull;
-                    auto u2 = raxNode.New(2, hasvalue && splitpos <= 0);
+                    bool hasvalue = h.iskey && !h.isNull;
+                    auto u2 = RadixNode.create(2, hasvalue && splitpos <= 0);
                     u2.str[0] = s[$ - last];
                     u2.str[1] = h.str[splitpos];
                     numnodes++;
 
                     if (splitpos > 0)
                     {
-                        u1 = raxNode.NewComp(splitpos, hasvalue);
+                        u1 = RadixNode.createComp(splitpos, hasvalue);
                         memcpy(u1.str, h.str, splitpos);
                         u1.iskey = h.iskey;
                         if (hasvalue)
@@ -1040,14 +1042,14 @@ struct rax
                     }
 
                     size_t u3_len = h.size - splitpos - 1;
-                    raxNode* u3;
+                    RadixNode* u3;
                     bool bcombine = false;
                     if (u3_len > 0)
                     {
                         //combin
-                        if (h.next.size > 0 && h.next.iscompr && !h.next.iskey)
+                        if (h.next.size > 0 && h.next.isCompr && !h.next.iskey)
                         {
-                            u3 = raxNode.NewComp(u3_len + h.next.size, h.next.iskey && !h.next.isnull);
+                            u3 = RadixNode.createComp(u3_len + h.next.size, h.next.iskey && !h.next.isNull);
                             memcpy(u3.str, h.str + splitpos + 1, h.size - splitpos - 1);
                             memcpy(u3.str + h.size - splitpos - 1, h.next.str, h.next.size);
                             numnodes++;
@@ -1055,7 +1057,7 @@ struct rax
                         }
                         else
                         {
-                            u3 = raxNode.NewComp(h.size - splitpos - 1, false);
+                            u3 = RadixNode.createComp(h.size - splitpos - 1, false);
                             memcpy(u3.str, h.str + splitpos + 1, h.size - splitpos - 1);
                             numnodes++;
                         }
@@ -1067,17 +1069,17 @@ struct rax
 
                     //4
                     size_t u4_len = last - 1;
-                    raxNode* u4;
+                    RadixNode* u4;
 
                     //5
-                    auto u5 = raxNode.NewComp(0, true);
+                    auto u5 = RadixNode.createComp(0, true);
                     u5.iskey = true;
                     u5.value = data;
                     numnodes++;
 
                     if (u4_len > 0)
                     {
-                        u4 = raxNode.NewComp(last - 1, false);
+                        u4 = RadixNode.createComp(last - 1, false);
                         memcpy(u4.str, s.ptr + s.length - last + 1, last - 1);
                         numnodes++;
                     }
@@ -1093,7 +1095,7 @@ struct rax
                     if (bcombine)
                     {
                         u3.next = h.next.next;
-                        raxNode.Free(h.next);
+                        RadixNode.free(h.next);
                         numnodes--;
                     }
                     else if (u3_len > 0)
@@ -1112,7 +1114,7 @@ struct rax
                     if (h == head)
                         head = u1;
 
-                    raxNode.Free(h);
+                    RadixNode.free(h);
                     numnodes--;
 
                     log_info("####3");
@@ -1128,8 +1130,8 @@ struct rax
                 //											()
                 else
                 {
-                    bool hasdata = !h.isnull && h.iskey;
-                    auto i = raxNode.New(h.size + 1, hasdata);
+                    bool hasdata = !h.isNull && h.iskey;
+                    auto i = RadixNode.create(h.size + 1, hasdata);
                     i.iskey = h.iskey;
                     if (hasdata)
                     {
@@ -1139,18 +1141,18 @@ struct rax
                     numnodes++;
                     memcpy(i.str, h.str, h.size);
                     i.str[h.size] = s[$ - last];
-                    memcpy(i.str + i.size, h.str + h.size, h.size * (raxNode*).sizeof);
+                    memcpy(i.str + i.size, h.str + h.size, h.size * (RadixNode*).sizeof);
 
                     auto u1_len = last - 1;
-                    raxNode* u1;
+                    RadixNode* u1;
 
-                    auto u2 = raxNode.NewComp(0, true);
+                    auto u2 = RadixNode.createComp(0, true);
                     u2.value = data;
                     u2.iskey = true;
                     numnodes++;
                     if (u1_len > 0)
                     {
-                        u1 = raxNode.NewComp(u1_len, false);
+                        u1 = RadixNode.createComp(u1_len, false);
                         memcpy(u1.str, s.ptr + s.length - last + 1, u1_len);
                         numnodes++;
                         u1.next = u2;
@@ -1165,7 +1167,7 @@ struct rax
 
                     if (h == head)
                         head = i;
-                    raxNode.Free(h);
+                    RadixNode.free(h);
                     numnodes--;
                     log_info("####4");
                     return true;
@@ -1185,7 +1187,7 @@ struct rax
             //			()		 ()
             if (splitpos == 0)
             {
-                bool hasdata = (h.iskey && !h.isnull);
+                bool hasdata = (h.iskey && !h.isNull);
                 if (hasdata)
                 {
                     h.value = data;
@@ -1199,15 +1201,15 @@ struct rax
                 }
                 else
                 {
-                    raxNode* u;
-                    if (h.iscompr)
+                    RadixNode* u;
+                    if (h.isCompr)
                     {
-                        u = raxNode.RenewComp(h, h.size, true);
+                        u = RadixNode.recreateComp(h, h.size, true);
                         u.args = 0;
                     }
                     else
                     {
-                        u = raxNode.Renew(h, h.size, true);
+                        u = RadixNode.recreate(h, h.size, true);
                     }
 
                     u.value = data;
@@ -1226,17 +1228,17 @@ struct rax
             //								  |
             //								 (x)
             //
-            else if (h.iscompr)
+            else if (h.isCompr)
             {
-                bool hasdata = (h.iskey && !h.isnull);
-                auto u1 = raxNode.NewComp(splitpos, hasdata);
+                bool hasdata = (h.iskey && !h.isNull);
+                auto u1 = RadixNode.createComp(splitpos, hasdata);
                 memcpy(u1.str, h.str, splitpos);
                 u1.iskey = h.iskey;
                 if (hasdata)
                     u1.value = h.value;
                 numnodes++;
 
-                auto u2 = raxNode.NewComp(h.size - splitpos, true);
+                auto u2 = RadixNode.createComp(h.size - splitpos, true);
                 memcpy(u2.str, h.str + splitpos, h.size - splitpos);
                 u2.iskey = true;
                 u2.value = data;
@@ -1245,7 +1247,7 @@ struct rax
 
                 u1.next = u2;
 
-                raxNode.Free(h);
+                RadixNode.free(h);
                 numnodes--;
                 if (h == head)
                 {
@@ -1273,9 +1275,9 @@ struct rax
     //
     bool find(const ubyte[] s, out void* data)
     {
-        raxNode* h = head;
-        raxNode* p = head;
-        raxItem[] ts;
+        RadixNode* h = head;
+        RadixNode* p = head;
+        RadixItem[] ts;
         size_t index = 0;
         size_t splitpos = 0;
         size_t last = find(s, h, p, index, splitpos, ts);
@@ -1290,10 +1292,10 @@ struct rax
 
 private:
 
-    void RecursiveFree(raxNode* n)
+    void recursiveFree(RadixNode* n)
     {
         size_t numchildren = 0;
-        if (n.iscompr)
+        if (n.isCompr)
         {
             numchildren = n.size > 0 ? 1 : 0;
         }
@@ -1303,15 +1305,15 @@ private:
         }
         while (numchildren--)
         {
-            RecursiveFree(n.nextChild(numchildren));
+            recursiveFree(n.nextChild(numchildren));
         }
-        raxNode.Free(n);
+        RadixNode.free(n);
         numnodes--;
     }
 
     //find
-    size_t find(const ubyte[] s, ref raxNode* r, ref raxNode* pr, ref size_t index,
-            ref size_t splitpos, ref raxItem[] ts)
+    size_t find(const ubyte[] s, ref RadixNode* r, ref RadixNode* pr, ref size_t index,
+            ref size_t splitpos, ref RadixItem[] ts)
     {
         //find it
 
@@ -1325,7 +1327,7 @@ private:
             return s.length;
         }
 
-        if (r.iscompr) //is compr
+        if (r.isCompr) //is compr
         {
             char* p = r.str;
             size_t i = 0;
@@ -1340,7 +1342,7 @@ private:
                 pr = r;
                 r = r.next;
                 index = 0;
-                raxItem item;
+                RadixItem item;
                 item.n = pr;
                 item.index = index;
                 ts ~= item;
@@ -1374,7 +1376,7 @@ private:
                 pr = r;
                 index = i;
                 r = r.nextChild(index);
-                raxItem item;
+                RadixItem item;
                 item.n = pr;
                 item.index = index;
                 ts ~= item;
@@ -1383,7 +1385,7 @@ private:
         }
     }
 
-    string getStr(raxNode* h)
+    string getString(RadixNode* h)
     {
         string str;
         for (size_t i = 0; i < h.size; i++)
@@ -1391,45 +1393,45 @@ private:
         return str;
     }
 
-    void Recursiveshow(raxNode* n, size_t level)
+    void recursiveShow(RadixNode* n, size_t level)
     {
         show(n, level);
 
         if (n.size == 0)
             return;
 
-        if (n.iscompr)
+        if (n.isCompr)
         {
-            Recursiveshow(n.next, ++level);
+            recursiveShow(n.next, ++level);
         }
         else
         {
             ++level;
             for (size_t i = 0; i < n.size; i++)
             {
-                Recursiveshow(n.nextChild(i), level);
+                recursiveShow(n.nextChild(i), level);
             }
         }
     }
 
-    void show(raxNode* n, size_t level)
+    void show(RadixNode* n, size_t level)
     {
         for (size_t i = 0; i < level; i++)
             write("\t");
-        write(" key:", n.iskey, n.iscompr ? " (" : " [");
+        write(" key:", n.iskey, n.isCompr ? " (" : " [");
 
         for (size_t i = 0; i < n.size; i++)
             write(n.str[i]);
 
-        write(n.iscompr ? ") " : "] ", (n.iskey && !n.isnull) ? n.value : null, "\n");
+        write(n.isCompr ? ") " : "] ", (n.iskey && !n.isNull) ? n.value : null, "\n");
     }
 
     void show()
     {
-        raxNode* p = head;
+        RadixNode* p = head;
         writef("numele:%d numnodes:%d\n", numele, numnodes);
 
-        Recursiveshow(p, 0);
+        recursiveShow(p, 0);
 
         writef("\n");
     }
@@ -1443,15 +1445,15 @@ unittest
             "alligator", "alien", "baloon", "chromodynamic", "romane", "romanus",
             "romulus", "rubens", "ruber", "rubicon", "rubicundus", "all", "rub", "ba"
         ];
-        rax* r = rax.New();
+        Radix* r = Radix.create();
         foreach (i, s; toadd)
         {
-            r.Insert(cast(ubyte[]) s, cast(void*) i);
+            r.insert(cast(ubyte[]) s, cast(void*) i);
         }
 
         foreach (s; toadd)
         {
-            r.Remove(cast(ubyte[]) s);
+            r.remove(cast(ubyte[]) s);
         }
         r.show();
     }
@@ -1476,15 +1478,15 @@ unittest
             keys ~= key;
         }
 
-        rax* r = rax.New();
+        Radix* r = Radix.create();
         foreach (i, k; keys)
         {
-            r.Insert(cast(ubyte[]) k, cast(void*) i);
+            r.insert(cast(ubyte[]) k, cast(void*) i);
         }
 
         foreach (k; keys)
         {
-            r.Remove(cast(ubyte[]) k);
+            r.remove(cast(ubyte[]) k);
         }
 
         r.show();
