@@ -47,7 +47,6 @@ import hunt.io.FileDescriptor;
  *
  * @author Mark Reinhold
  * @author JSR-51 Expert Group
- * @since 1.4
  */
 
 abstract class MappedByteBuffer : ByteBuffer

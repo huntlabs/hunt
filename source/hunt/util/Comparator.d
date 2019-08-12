@@ -85,7 +85,6 @@ debug import hunt.logging.ConsoleLogger;
  * @author  Neal Gafter
  * @see Comparable
  * @see java.io.Serializable
- * @since 1.2
  */
 interface Comparator(T) {
     /**

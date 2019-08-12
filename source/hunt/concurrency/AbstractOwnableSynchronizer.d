@@ -22,7 +22,6 @@ import core.thread;
  * appropriately maintained values to help control and monitor access
  * and provide diagnostics.
  *
- * @since 1.6
  * @author Doug Lea
  */
 abstract class AbstractOwnableSynchronizer {

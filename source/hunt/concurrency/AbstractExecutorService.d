@@ -57,7 +57,6 @@ import std.datetime;
  *   // ... add constructors, etc.
  * }}</pre>
  *
- * @since 1.5
  * @author Doug Lea
  */
 abstract class AbstractExecutorService : ExecutorService {
@@ -73,7 +72,6 @@ abstract class AbstractExecutorService : ExecutorService {
      * underlying runnable and which, as a {@code Future}, will yield
      * the given value as its result and provide for cancellation of
      * the underlying task
-     * @since 1.6
      */
     static RunnableFuture!(T) newTaskFor(T)(Runnable runnable, T value) if(!is(T == void)) {
         return new FutureTask!(T)(runnable, value);
@@ -92,7 +90,6 @@ abstract class AbstractExecutorService : ExecutorService {
      * underlying callable and which, as a {@code Future}, will yield
      * the callable's result as its result and provide for
      * cancellation of the underlying task
-     * @since 1.6
      */
     static RunnableFuture!(T) newTaskFor(T)(Callable!(T) callable) {
         return new FutureTask!(T)(callable);

@@ -131,7 +131,6 @@ interface IScheduledFutureTask {
  *   // ... add constructors, etc.
  * }}</pre>
  *
- * @since 1.5
  * @author Doug Lea
  */
 class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService {
@@ -285,7 +284,6 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @param task the task created to execute the runnable
      * @param (V) the type of the task's result
      * @return a task that can execute the runnable
-     * @since 1.6
      */
     protected RunnableScheduledFuture!(V) decorateTask(V) (
         Runnable runnable, RunnableScheduledFuture!(V) task) {
@@ -302,7 +300,6 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @param task the task created to execute the callable
      * @param (V) the type of the task's result
      * @return a task that can execute the callable
-     * @since 1.6
      */
     protected RunnableScheduledFuture!(V) decorateTask(V)(
         Callable!(V) callable, RunnableScheduledFuture!(V) task) {
@@ -674,7 +671,6 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      *
      * @param value if {@code true}, remove on cancellation, else don't
      * @see #getRemoveOnCancelPolicy
-     * @since 1.7
      */
     void setRemoveOnCancelPolicy(bool value) {
         removeOnCancel = value;
@@ -688,7 +684,6 @@ class ScheduledThreadPoolExecutor : ThreadPoolExecutor, ScheduledExecutorService
      * @return {@code true} if cancelled tasks are immediately removed
      *         from the queue
      * @see #setRemoveOnCancelPolicy
-     * @since 1.7
      */
     bool getRemoveOnCancelPolicy() {
         return removeOnCancel;

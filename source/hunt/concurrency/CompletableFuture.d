@@ -1916,7 +1916,6 @@ static if(is(T == void)) {
      * an Executor that provides at least one independent thread.
      *
      * @return the executor
-     * @since 9
      */
     Executor defaultExecutor() {
         return ASYNC_POOL;
@@ -1934,7 +1933,6 @@ static if(is(T == void)) {
      * arrange dependent actions.
      *
      * @return the new CompletableFuture
-     * @since 9
      */
     CompletableFuture!(T) copy() {
         return uniCopyStage!(T, T)(this);
@@ -1958,7 +1956,6 @@ static if(is(T == void)) {
      * <pre> {@code minimalStage.toCompletableFuture().join(); }</pre>
      *
      * @return the new CompletionStage
-     * @since 9
      */
     CompletionStage!(T) minimalCompletionStage() {
         return uniAsMinimalStage();
@@ -1973,7 +1970,6 @@ static if(is(T == void)) {
      * to complete this CompletableFuture
      * @param executor the executor to use for asynchronous execution
      * @return this CompletableFuture
-     * @since 9
      */
     CompletableFuture!(T) completeAsync(Supplier!(T) supplier,
                                               Executor executor) {
@@ -1991,7 +1987,6 @@ static if(is(T == void)) {
      * @param supplier a function returning the value to be used
      * to complete this CompletableFuture
      * @return this CompletableFuture
-     * @since 9
      */
     CompletableFuture!(T) completeAsync(Supplier!(T) supplier) {
         return completeAsync(supplier, defaultExecutor());
@@ -2073,7 +2068,6 @@ static if(is(T == void)) {
      * @param unit a {@code TimeUnit} determining how to interpret the
      *        {@code timeout} parameter
      * @return this CompletableFuture
-     * @since 9
      */
     CompletableFuture!(T) orTimeout(Duration timeout) {
         if (!_isDone) {
@@ -2096,7 +2090,6 @@ static if(is(T == void)) {
      * @param unit a {@code TimeUnit} determining how to interpret the
      *        {@code timeout} parameter
      * @return this CompletableFuture
-     * @since 9
      */
     CompletableFuture!(T) completeOnTimeout(T value, Duration timeout) {
         if (!_isDone) {
@@ -2150,7 +2143,6 @@ abstract class Completion : ForkJoinTask!(void),
  * {@code async} methods. This may be useful for monitoring,
  * debugging, and tracking asynchronous activities.
  *
- * @since 1.8
  */
 private interface AsynchronousCompletionTask {
 }
@@ -3329,7 +3321,6 @@ CompletableFuture!(void) asyncRunStage(Executor e, Action f) {
  *        {@code delay} parameter
  * @param executor the base executor
  * @return the new delayed executor
- * @since 9
  */
 Executor delayedExecutor(Duration delay, Executor executor) {
     if (executor is null)
@@ -3347,7 +3338,6 @@ Executor delayedExecutor(Duration delay, Executor executor) {
  * @param unit a {@code TimeUnit} determining how to interpret the
  *        {@code delay} parameter
  * @return the new delayed executor
- * @since 9
  */
 Executor delayedExecutor(Duration delay) {
     return new DelayedExecutor(delay, ASYNC_POOL);
@@ -3361,7 +3351,6 @@ Executor delayedExecutor(Duration delay) {
  * @param value the value
  * @param <U> the type of the value
  * @return the completed CompletionStage
- * @since 9
  */
 CompletionStage!(U) completedStage(U)(U value) {
     return new MinimalStage!(U)((value is null) ? NIL : value);
@@ -3374,7 +3363,6 @@ CompletionStage!(U) completedStage(U)(U value) {
  * @param ex the exception
  * @param <U> the type of the value
  * @return the exceptionally completed CompletableFuture
- * @since 9
  */
 CompletableFuture!(U) failedFuture(U)(Throwable ex) {
     if (ex is null) throw new NullPointerException();
@@ -3389,7 +3377,6 @@ CompletableFuture!(U) failedFuture(U)(Throwable ex) {
  * @param ex the exception
  * @param <U> the type of the value
  * @return the exceptionally completed CompletionStage
- * @since 9
  */
 CompletionStage!(U) failedStage(U)(Throwable ex) {
     if (ex is null) throw new NullPointerException();
@@ -3669,7 +3656,6 @@ private void reportJoin(AltResult ar) {
  *
  * @param <U> the type of the value
  * @return a new CompletableFuture
- * @since 9
  */
 static CompletableFuture!(U) newIncompleteFuture(U)() {
     return new CompletableFuture!(U)();

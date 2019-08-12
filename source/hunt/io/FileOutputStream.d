@@ -209,7 +209,6 @@ class FileOutputStream : OutputStream
      * @see        java.io.File#getPath()
      * @see        java.lang.SecurityException
      * @see        java.lang.SecurityManager#checkWrite(java.lang.string)
-     * @since 1.4
      */
     // this(File file, bool append) {
     //     string name = (file != null ? file.getPath() : null);
@@ -424,7 +423,6 @@ class FileOutputStream : OutputStream
      *
      * @return  the file channel associated with this file output stream
      *
-     * @since 1.4
      * @spec JSR-51
      */
     // FileChannel getChannel() {

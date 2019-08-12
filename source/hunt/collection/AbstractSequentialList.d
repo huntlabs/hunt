@@ -56,7 +56,6 @@ import hunt.Exceptions;
  * @see List
  * @see AbstractList
  * @see AbstractCollection
- * @since 1.2
  */
 
 abstract class AbstractSequentialList(E) : AbstractList!E {

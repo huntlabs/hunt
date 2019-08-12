@@ -315,7 +315,6 @@ import hunt.logging.ConsoleLogger;
  *   }
  * }}</pre>
  *
- * @since 1.5
  * @author Doug Lea
  */
 class ThreadPoolExecutor : AbstractExecutorService {
@@ -1615,7 +1614,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @return {@code true} if core threads are allowed to time out,
      *         else {@code false}
      *
-     * @since 1.6
      */
     bool allowsCoreThreadTimeOut() {
         return _allowCoreThreadTimeOut;
@@ -1636,7 +1634,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
      * @throws IllegalArgumentException if value is {@code true}
      *         and the current keep-alive time is not greater than zero
      *
-     * @since 1.6
      */
     void allowCoreThreadTimeOut(bool value) {
         if (value && keepAliveTime <= 0)
@@ -2017,7 +2014,6 @@ class ThreadPoolExecutor : AbstractExecutorService {
 /**
  * A handler for tasks that cannot be executed by a {@link ThreadPoolExecutor}.
  *
- * @since 1.5
  * @author Doug Lea
  */
 interface RejectedExecutionHandler {

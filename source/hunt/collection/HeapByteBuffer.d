@@ -343,7 +343,6 @@ class HeapByteBuffer : ByteBuffer {
      * @return the value fetched from the indicated object
      * @throws RuntimeException No defined exceptions are thrown, not even
      *         {@link NullPointerException}
-     * @since 9
      */
     private static long getLongUnaligned(byte[] buf, size_t offset) {
         if ((offset & 7) == 0) {
@@ -377,7 +376,6 @@ class HeapByteBuffer : ByteBuffer {
      * @param offset The offset in bytes from the start of the object
      * @param bigEndian The endianness of the value
      * @return the value fetched from the indicated object
-     * @since 9
      */
     private static long getLongUnaligned(byte[] hb,  size_t offset, bool bigEndian) {
         return convEndian(bigEndian, getLongUnaligned(hb, offset));
@@ -392,7 +390,6 @@ class HeapByteBuffer : ByteBuffer {
      * @param bigEndian The endianness of the value
      * @throws RuntimeException No defined exceptions are thrown, not even
      *         {@link NullPointerException}
-     * @since 9
      */
     private static void putLongUnaligned(byte[] buf, size_t offset, long x, bool bigEndian) {
         putLongUnaligned(buf, offset, convEndian(bigEndian, x));

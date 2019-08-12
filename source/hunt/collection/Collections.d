@@ -76,7 +76,6 @@ class Collections {
      * @param (V) the class of the map values
      * @return an empty map
      * @see #EMPTY_MAP
-     * @since 1.5
      */
     static Map!(K,V) emptyMap(K,V)() {
         return new EmptyMap!(K,V)();
@@ -96,7 +95,6 @@ class Collections {
      *
      * @param !E type of elements, if there were any, in the set
      * @return the empty navigable set
-     * @since 1.8
      */
     static NavigableSet!(E) emptyNavigableSet(E)() {
         return new EmptyNavigableSet!(E)();
@@ -125,7 +123,6 @@ class Collections {
      * @param  !(T) the class of the objects in the list
      * @param o the sole object to be stored in the returned list.
      * @return an immutable list containing only the specified object.
-     * @since 1.3
      */
     static List!T singletonList(T)(T o) {
         return new SingletonList!T(o);

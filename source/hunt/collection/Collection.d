@@ -281,7 +281,6 @@ interface Collection(E) : Iterable!E, IObject {
      *         from this collection.  Implementations may throw this exception if a
      *         matching element cannot be removed or if, in general, removal is not
      *         supported.
-     * @since 1.8
      */
     bool removeIf(Predicate!E filter);
 
@@ -423,7 +422,6 @@ interface Collection(E) : Iterable!E, IObject {
      * covers no elements.
      *
      * @return a {@code Spliterator} over the elements in this collection
-     * @since 1.8
      */
     // override
     // final Spliterator!E spliterator() {
@@ -443,7 +441,6 @@ interface Collection(E) : Iterable!E, IObject {
      * collection's {@code Spliterator}.
      *
      * @return a sequential {@code Stream} over the elements in this collection
-     * @since 1.8
      */
     // final Stream!E stream() {
     //     return StreamSupport.stream(spliterator(), false);
@@ -464,7 +461,6 @@ interface Collection(E) : Iterable!E, IObject {
      *
      * @return a possibly parallel {@code Stream} over the elements in this
      * collection
-     * @since 1.8
      */
     // final Stream!E parallelStream() {
     //     return StreamSupport.stream(spliterator(), true);

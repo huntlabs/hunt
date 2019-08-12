@@ -53,7 +53,6 @@ class Float : AbstractNumber!float {
      * hexadecimal floating-point literal {@code 0x1.0p-126f} and also
      * equal to {@code Float.intBitsToFloat(0x00800000)}.
      *
-     * @since 1.6
      */
     enum float MIN_NORMAL = float.min_normal; // 0x1.0p-126f; // 1.17549435E-38f
 
@@ -70,7 +69,6 @@ class Float : AbstractNumber!float {
      * is equal to the value returned by {@code
      * Math.getExponent(Float.MAX_VALUE)}.
      *
-     * @since 1.6
      */
     enum int MAX_EXPONENT = 127;
 
@@ -79,21 +77,18 @@ class Float : AbstractNumber!float {
      * It is equal to the value returned by {@code
      * Math.getExponent(Float.MIN_NORMAL)}.
      *
-     * @since 1.6
      */
     enum int MIN_EXPONENT = -126;
 
     /**
      * The number of bits used to represent a {@code float} value.
      *
-     * @since 1.5
      */
     enum int SIZE = 32;
 
     /**
      * The number of bytes used to represent a {@code float} value.
      *
-     * @since 1.8
      */
     enum int BYTES = SIZE / 8;
 
@@ -258,7 +253,6 @@ class Float : AbstractNumber!float {
      *
      * @param value the value to hash
      * @return a hash code value for a {@code double} value.
-     * @since 1.8
      */
     override size_t toHash() @safe nothrow {
         return hashOf(value);

@@ -65,7 +65,6 @@ import std.conv;
  *       in execution methods requiring {@code Callable}.
  * </ul>
  *
- * @since 1.5
  * @author Doug Lea
  */
 class Executors {

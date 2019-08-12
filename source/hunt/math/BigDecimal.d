@@ -210,7 +210,6 @@ import hunt.Number;
  * @author  Mike Cowlishaw
  * @author  Joseph D. Darcy
  * @author  Sergey V. Kuksenko
- * @since 1.1
  */
 class BigDecimal : Number
 {
@@ -3279,39 +3278,38 @@ class BigDecimal : Number
     //         return layoutChars(false);
     //     }
 
-    //     /**
-    //      * Returns a string representation of this {@code BigDecimal}
-    //      * without an exponent field.  For values with a positive scale,
-    //      * the number of digits to the right of the decimal point is used
-    //      * to indicate scale.  For values with a zero or negative scale,
-    //      * the resulting string is generated as if the value were
-    //      * converted to a numerically equal value with zero scale and as
-    //      * if all the trailing zeros of the zero scale value were present
-    //      * in the result.
-    //      *
-    //      * The entire string is prefixed by a minus sign character '-'
-    //      * (<code>'&#92;u002D'</code>) if the unscaled value is less than
-    //      * zero. No sign character is prefixed if the unscaled value is
-    //      * zero or positive.
-    //      *
-    //      * Note that if the result of this method is passed to the
-    //      * {@linkplain #BigDecimal(string) string constructor}, only the
-    //      * numerical value of this {@code BigDecimal} will necessarily be
-    //      * recovered; the representation of the new {@code BigDecimal}
-    //      * may have a different scale.  In particular, if this
-    //      * {@code BigDecimal} has a negative scale, the string resulting
-    //      * from this method will have a scale of zero when processed by
-    //      * the string constructor.
-    //      *
-    //      * (This method behaves analogously to the {@code toString}
-    //      * method in 1.4 and earlier releases.)
-    //      *
-    //      * @return a string representation of this {@code BigDecimal}
-    //      * without an exponent field.
-    //      * @since 1.5
-    //      * @see #toString()
-    //      * @see #toEngineeringString()
-    //      */
+    /**
+     * Returns a string representation of this {@code BigDecimal}
+     * without an exponent field.  For values with a positive scale,
+     * the number of digits to the right of the decimal point is used
+     * to indicate scale.  For values with a zero or negative scale,
+     * the resulting string is generated as if the value were
+     * converted to a numerically equal value with zero scale and as
+     * if all the trailing zeros of the zero scale value were present
+     * in the result.
+     *
+     * The entire string is prefixed by a minus sign character '-'
+     * (<code>'&#92;u002D'</code>) if the unscaled value is less than
+     * zero. No sign character is prefixed if the unscaled value is
+     * zero or positive.
+     *
+     * Note that if the result of this method is passed to the
+     * {@linkplain #BigDecimal(string) string constructor}, only the
+     * numerical value of this {@code BigDecimal} will necessarily be
+     * recovered; the representation of the new {@code BigDecimal}
+     * may have a different scale.  In particular, if this
+     * {@code BigDecimal} has a negative scale, the string resulting
+     * from this method will have a scale of zero when processed by
+     * the string constructor.
+     *
+     * (This method behaves analogously to the {@code toString}
+     * method in 1.4 and earlier releases.)
+     *
+     * @return a string representation of this {@code BigDecimal}
+     * without an exponent field.
+     * @see #toString()
+     * @see #toEngineeringString()
+     */
     string toPlainString()
     {
         if (scale == 0)
@@ -3416,16 +3414,16 @@ class BigDecimal : Number
         return this.setScale(0, ROUND_DOWN).inflated();
     }
 
-    //     /**
-    //      * Converts this {@code BigDecimal} to a {@code BigInteger},
-    //      * checking for lost information.  An exception is thrown if this
-    //      * {@code BigDecimal} has a nonzero fractional part.
-    //      *
-    //      * @return this {@code BigDecimal} converted to a {@code BigInteger}.
-    //      * @throws ArithmeticException if {@code this} has a nonzero
-    //      *         fractional part.
-    //      * @since  1.5
-    //      */
+    /**
+     * Converts this {@code BigDecimal} to a {@code BigInteger},
+     * checking for lost information.  An exception is thrown if this
+     * {@code BigDecimal} has a nonzero fractional part.
+     *
+     * @return this {@code BigDecimal} converted to a {@code BigInteger}.
+     * @throws ArithmeticException if {@code this} has a nonzero
+     *         fractional part.
+     * @since  1.5
+     */    
     BigInteger toBigIntegerExact()
     {
         // round to an integer, with Exception if decimal part non-0
@@ -4216,17 +4214,17 @@ class BigDecimal : Number
     //         return b.compareMagnitude(bigTenToThe(r)) < 0? r : r+1;
     //     }
 
-    //     /**
-    //      * Check a scale for Underflow or Overflow.  If this BigDecimal is
-    //      * nonzero, throw an exception if the scale is outof range. If this
-    //      * is zero, saturate the scale to the extreme value of the right
-    //      * sign if the scale is out of range.
-    //      *
-    //      * @param val The new scale.
-    //      * @throws ArithmeticException (overflow or underflow) if the new
-    //      *         scale is out of range.
-    //      * @return validated scale as an int.
-    //      */
+        /**
+         * Check a scale for Underflow or Overflow.  If this BigDecimal is
+         * nonzero, throw an exception if the scale is outof range. If this
+         * is zero, saturate the scale to the extreme value of the right
+         * sign if the scale is out of range.
+         *
+         * @param val The new scale.
+         * @throws ArithmeticException (overflow or underflow) if the new
+         *         scale is out of range.
+         * @return validated scale as an int.
+         */
     private int checkScale(long val)
     {
         int asInt = cast(int) val;
@@ -4333,7 +4331,7 @@ class BigDecimal : Number
     //         return this;
     //     }
 
-    //     /* the same as checkScale where value!=0 */
+    /* the same as checkScale where value!=0 */
     private static int checkScaleNonZero(long val)
     {
         int asInt = cast(int) val;

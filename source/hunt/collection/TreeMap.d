@@ -121,7 +121,6 @@ private enum bool BLACK = true;
  * @see Comparable
  * @see Comparator
  * @see Collection
- * @since 1.2
  */
 
 class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V) 
@@ -258,7 +257,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @param value value whose presence in this map is to be tested
      * @return {@code true} if a mapping to {@code value} exists;
      *         {@code false} otherwise
-     * @since 1.2
      */
     override bool containsValue(V value) {
         for (TreeMapEntry!(K,V) e = getFirstEntry(); e !is null; e = successor(e))
@@ -679,21 +677,18 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
     // NavigableMap API methods
 
     /**
-     * @since 1.6
      */
     MapEntry!(K,V) firstEntry() {
         return exportEntry!(K,V)(getFirstEntry());
     }
 
     /**
-     * @since 1.6
      */
     MapEntry!(K,V) lastEntry() {
         return exportEntry!(K,V)(getLastEntry());
     }
 
     /**
-     * @since 1.6
      */
     MapEntry!(K,V) pollFirstEntry() {
         TreeMapEntry!(K,V) p = getFirstEntry();
@@ -704,7 +699,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
     }
 
     /**
-     * @since 1.6
      */
     MapEntry!(K,V) pollLastEntry() {
         TreeMapEntry!(K,V) p = getLastEntry();
@@ -719,7 +713,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     MapEntry!(K,V) lowerEntry(K key) {
         return exportEntry!(K,V)(getLowerEntry(key));
@@ -730,7 +723,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     K lowerKey(K key) {
         return keyOrNull(getLowerEntry(key));
@@ -741,7 +733,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     MapEntry!(K,V) floorEntry(K key) {
         return exportEntry!(K,V)(getFloorEntry(key));
@@ -752,7 +743,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     K floorKey(K key) {
         return keyOrNull(getFloorEntry(key));
@@ -763,7 +753,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     MapEntry!(K,V) ceilingEntry(K key) {
         return exportEntry!(K,V)(getCeilingEntry(key));
@@ -774,7 +763,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     K ceilingKey(K key) {
         return keyOrNull(getCeilingEntry(key));
@@ -785,7 +773,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     MapEntry!(K,V) higherEntry(K key) {
         return exportEntry!(K,V)(getHigherEntry(key));
@@ -796,7 +783,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * @throws NullPointerException if the specified key is null
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
-     * @since 1.6
      */
     K higherKey(K key) {
         return keyOrNull(getHigherEntry(key));
@@ -843,7 +829,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
     // }
 
     /**
-     * @since 1.6
      */
     // NavigableSet!K navigableKeySet() {
     //     KeySet!(K, V) nks = _navigableKeySet;
@@ -851,7 +836,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
     // }
 
     /**
-     * @since 1.6
      */
     // NavigableSet!K descendingKeySet() {
     //     return descendingMap().navigableKeySet();
@@ -915,7 +899,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
     // }
 
     /**
-     * @since 1.6
      */
     // NavigableMap!(K, V) descendingMap() {
     //     NavigableMap!(K, V) km = _descendingMap;
@@ -931,7 +914,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      *         null and this map uses natural ordering, or its comparator
      *         does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
      */
     NavigableMap!(K,V) subMap(K fromKey, bool fromInclusive,
                                     K toKey,   bool toInclusive) {
@@ -946,7 +928,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
      */
     NavigableMap!(K,V) headMap(K toKey, bool inclusive) {
         return new AscendingSubMap!(K, V)(this,
@@ -960,7 +941,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      *         and this map uses natural ordering, or its comparator
      *         does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
      */
     NavigableMap!(K,V) tailMap(K fromKey, bool inclusive) {
         return new AscendingSubMap!(K, V)(this,

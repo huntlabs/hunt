@@ -53,7 +53,6 @@ class Matchers {
  * </pre>
  *
  * @see AssertionError
- * @since 4.0
  */
 class Assert {
     /**

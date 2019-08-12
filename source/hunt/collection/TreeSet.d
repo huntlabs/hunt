@@ -208,14 +208,12 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      * Returns an iterator over the elements in this set in descending order.
      *
      * @return an iterator over the elements in this set in descending order
-     * @since 1.6
      */
     // Iterator!(E) descendingIterator() {
     //     return m.descendingKeySet().iterator();
     // }
 
     /**
-     * @since 1.6
      */
     // NavigableSet!(E) descendingSet() {
     //     return new TreeSet!(E, Object)(m.descendingMap());
@@ -341,7 +339,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *         is null and this set uses natural ordering, or its comparator
      *         does not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
      */
     NavigableSet!(E) subSet(E fromElement, bool fromInclusive,
                                   E toElement,   bool toInclusive) {
@@ -355,7 +352,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *         this set uses natural ordering, or its comparator does
      *         not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
      */
     NavigableSet!(E) headSet(E toElement, bool inclusive) {
         return new TreeSet!(E)(m.headMap(toElement, inclusive));
@@ -367,7 +363,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      *         this set uses natural ordering, or its comparator does
      *         not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
-     * @since 1.6
      */
     NavigableSet!(E) tailSet(E fromElement, bool inclusive) {
         return new TreeSet!(E)(m.tailMap(fromElement, inclusive));
@@ -431,7 +426,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      * @throws NullPointerException if the specified element is null
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
-     * @since 1.6
      */
     E lower(E e) {
         return m.lowerKey(e);
@@ -442,7 +436,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      * @throws NullPointerException if the specified element is null
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
-     * @since 1.6
      */
     E floor(E e) {
         return m.floorKey(e);
@@ -453,7 +446,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      * @throws NullPointerException if the specified element is null
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
-     * @since 1.6
      */
     E ceiling(E e) {
         return m.ceilingKey(e);
@@ -464,14 +456,12 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      * @throws NullPointerException if the specified element is null
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
-     * @since 1.6
      */
     E higher(E e) {
         return m.higherKey(e);
     }
 
     /**
-     * @since 1.6
      */
     E pollFirst() {
         MapEntry!(E, Object) e = m.pollFirstEntry();
@@ -482,7 +472,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
     }
 
     /**
-     * @since 1.6
      */
     E pollLast() {
         MapEntry!(E, Object) e = m.pollLastEntry();
@@ -527,7 +516,6 @@ class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable
      * same total ordering as the tree set's comparator.
      *
      * @return a {@code Spliterator} over the elements in this set
-     * @since 1.8
      */
     // Spliterator!(E) spliterator() {
     //     return TreeMap.keySpliteratorFor(m);

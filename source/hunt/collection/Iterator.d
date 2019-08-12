@@ -34,7 +34,6 @@ module hunt.collection.Iterator;
  * @see Collection
  * @see ListIterator
  * @see Iterable
- * @since 1.2
  */
 interface Iterator(E) {
     /**
@@ -93,7 +92,6 @@ interface Iterator(E) {
      *
      * @param action The action to be performed for each element
      * @throws NullPointerException if the specified action is null
-     * @since 1.8
      */
     // default void forEachRemaining(Consumer<E> action) {
     //     Objects.requireNonNull(action);

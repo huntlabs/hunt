@@ -115,7 +115,6 @@ import hunt.collection.Collection;
  * @see hunt.concurrency.ArrayBlockingQueue
  * @see hunt.concurrency.LinkedBlockingQueue
  * @see hunt.concurrency.PriorityBlockingQueue
- * @since 1.5
  * @author Doug Lea
  * @param !E the type of elements held in this collection
  */

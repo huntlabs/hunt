@@ -107,7 +107,6 @@ import std.string;
  * @author  Michael McCloskey
  * @author  Alan Eliasen
  * @author  Timothy Buktu
- * @since 1.1
  */
 
 class BigInteger : Number {
@@ -284,7 +283,6 @@ class BigInteger : Number {
      * @throws IndexOutOfBoundsException if the provided array offset and
      *         length would cause an index into the byte array to be
      *         negative or greater than or equal to the array length.
-     * @since 9
      */
     this(byte[] val, int off, int len) {
         if (val.length == 0) {
@@ -372,7 +370,6 @@ class BigInteger : Number {
      * @throws IndexOutOfBoundsException if the provided array offset and
      *         length would cause an index into the byte array to be
      *         negative or greater than or equal to the array length.
-     * @since 9
      */
     this(int signum, byte[] magnitude, int off, int len) {
         if (signum < -1 || signum > 1) {
@@ -745,7 +742,6 @@ class BigInteger : Number {
      * @return a BigInteger of {@code bitLength} bits that is probably prime
      * @throws ArithmeticException {@code bitLength < 2} or {@code bitLength} is too large.
      * @see    #bitLength()
-     * @since 1.4
      */
     // static BigInteger probablePrime(int bitLength, Random* rnd) {
     //     if (bitLength < 2)
@@ -841,7 +837,6 @@ class BigInteger : Number {
     * @return the first integer greater than this {@code BigInteger} that
     *         is probably prime.
     * @throws ArithmeticException {@code this < 0} or {@code this} is too large.
-    * @since 1.5
     */
     BigInteger nextProbablePrime() {
         if (this._signum < 0)
@@ -6630,7 +6625,6 @@ class MutableBigInteger {
      * @throws ArithmeticException if the value returned by {@code bitLength()}
      * overflows the range of {@code int}.
      * @return the integer square root of {@code this}
-     * @since 9
      */
     MutableBigInteger sqrt() {
         // Special cases.

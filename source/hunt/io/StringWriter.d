@@ -122,7 +122,6 @@ class StringWriter : Writer {
      *
      * @return  This writer
      *
-     * @since 1.5
      */
     override StringWriter append(char c) {
         write(c);

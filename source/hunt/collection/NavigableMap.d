@@ -70,7 +70,6 @@ import hunt.collection.NavigableSet;
  * @author Josh Bloch
  * @param !K the type of keys maintained by this map
  * @param !V the type of mapped values
- * @since 1.6
  */
 interface NavigableMap(K,V) : SortedMap!(K,V) {
     /**

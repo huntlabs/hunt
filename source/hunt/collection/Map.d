@@ -279,7 +279,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws NullPointerException if the specified key is null and this map
      * does not permit null keys
      * (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     // final V getOrDefault(K key, V defaultValue) {
     //     V v;
@@ -318,7 +317,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws NullPointerException if the specified action is null
      * @throws ConcurrentModificationException if an entry is found to be
      * removed during iteration
-     * @since 1.8
      */
     int opApply(scope int delegate(ref K, ref V) dg);
 
@@ -366,7 +364,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      * @throws ConcurrentModificationException if an entry is found to be
      * removed during iteration
-     * @since 1.8
      */
     // final void replaceAll(BiFunction<K, V, V> function) {
     //     Objects.requireNonNull(function);
@@ -434,7 +431,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws IllegalArgumentException if some property of the specified key
      *         or value prevents it from being stored in this map
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     V putIfAbsent(K key, V value);
 
@@ -470,7 +466,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws NullPointerException if the specified key or value is null,
      *         and this map does not permit null keys or values
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     bool remove(K key, V value);
 
@@ -515,7 +510,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
      * @throws IllegalArgumentException if some property of a specified key
      *         or value prevents it from being stored in this map
-     * @since 1.8
      */
     bool replace(K key, V oldValue, V newValue);
 
@@ -555,7 +549,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      *         and this map does not permit null keys or values
      * @throws IllegalArgumentException if some property of the specified key
      *         or value prevents it from being stored in this map
-     * @since 1.8
      */
     V replace(K key, V value);
 
@@ -616,7 +609,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws ClassCastException if the class of the specified key or value
      *         prevents it from being stored in this map
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
 
     final V computeIfAbsent(K key, Function!(K, V) mappingFunction) {
@@ -689,7 +681,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws ClassCastException if the class of the specified key or value
      *         prevents it from being stored in this map
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     // final V computeIfPresent(K key,
     //         BiFunction<K, V, V> remappingFunction) {
@@ -765,7 +756,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws ClassCastException if the class of the specified key or value
      *         prevents it from being stored in this map
      *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     // final V compute(K key,
     //         BiFunction<K, V, V> remappingFunction) {
@@ -846,7 +836,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
      * @throws NullPointerException if the specified key is null and this map
      *         does not support null keys or the value or remappingFunction is
      *         null
-     * @since 1.8
      */
     // final V merge(K key, V value,
     //         BiFunction<V, V, V> remappingFunction) {
@@ -875,7 +864,6 @@ interface Map(K,V) : Iterable!(K,V), IObject {
  * the <tt>setValue</tt> operation on the map entry.
  *
  * @see Map#entrySet()
- * @since 1.2
  */
 interface MapEntry(K,V) : IObject, Comparable!(MapEntry!(K,V)) {
     /**
@@ -970,7 +958,6 @@ interface MapEntry(K,V) : IObject, Comparable!(MapEntry!(K,V)) {
      * @param  !V the type of the map values
      * @return a comparator that compares {@link MapEntry} in natural order on key.
      * @see Comparable
-     * @since 1.8
      */
     // public static <K extends Comparable<K>, V> Comparator<MapEntry!(K,V)> comparingByKey() {
     //     return (Comparator<MapEntry<K, V>> & Serializable)
@@ -987,7 +974,6 @@ interface MapEntry(K,V) : IObject, Comparable!(MapEntry!(K,V)) {
      * @param !V the {@link Comparable} type of the map values
      * @return a comparator that compares {@link MapEntry} in natural order on value.
      * @see Comparable
-     * @since 1.8
      */
     // public static <K, V extends Comparable<V>> Comparator<MapEntry!(K,V)> comparingByValue() {
     //     return (Comparator<MapEntry<K, V>> & Serializable)
@@ -1005,7 +991,6 @@ interface MapEntry(K,V) : IObject, Comparable!(MapEntry!(K,V)) {
      * @param  !V the type of the map values
      * @param  cmp the key {@link Comparator}
      * @return a comparator that compares {@link MapEntry} by the key.
-     * @since 1.8
      */
     // public static <K, V> Comparator<MapEntry<K, V>> comparingByKey(Comparator<K> cmp) {
     //     Objects.requireNonNull(cmp);
@@ -1024,7 +1009,6 @@ interface MapEntry(K,V) : IObject, Comparable!(MapEntry!(K,V)) {
      * @param  !V the type of the map values
      * @param  cmp the value {@link Comparator}
      * @return a comparator that compares {@link MapEntry} by the value.
-     * @since 1.8
      */
     // public static <K, V> Comparator<MapEntry<K, V>> comparingByValue(Comparator<V> cmp) {
     //     Objects.requireNonNull(cmp);

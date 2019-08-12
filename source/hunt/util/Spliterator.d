@@ -388,7 +388,6 @@ enum SpliteratorCharacteristic {
  * @param (T) the type of elements returned by this Spliterator
  *
  * @see Collection
- * @since 1.8
  */
 interface Spliterator(T) {
 //     /**

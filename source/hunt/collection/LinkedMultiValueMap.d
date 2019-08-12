@@ -31,7 +31,6 @@ import std.range;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @since 3.0
  */
 class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 

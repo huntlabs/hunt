@@ -52,7 +52,6 @@ import hunt.logging.ConsoleLogger;
  * @author  Josh Bloch
  * @author  Neal Gafter
  * @see Collection
- * @since 1.2
  */
 abstract class AbstractCollection(E) : Collection!E {
     /**

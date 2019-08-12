@@ -87,7 +87,6 @@ class ArrayHelper
      *         if {@code fromIndex > toIndex}
      * @throws ArrayIndexOutOfBoundsException
      *         if {@code fromIndex < 0 or toIndex > a.length}
-     * @since 1.6
      */
     public static int binarySearch(T)(T[] a, int fromIndex, int toIndex, T key)
     {
@@ -193,7 +192,6 @@ class ArrayHelper
      *         if {@code fromIndex > toIndex}
      * @throws ArrayIndexOutOfBoundsException
      *         if {@code fromIndex < 0 or toIndex > a.length}
-     * @since 1.6
      */
     // public static  int binarySearch(T)(T[] a, int fromIndex, int toIndex, T key,
     //         Comparator <  ? super T > c)

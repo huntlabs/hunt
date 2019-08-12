@@ -40,7 +40,6 @@ import hunt.Object;
  * <a href="{@docRoot}/java.base/java/util/package-summary.html#CollectionsFramework">
  * Java Collections Framework</a>.
  *
- * @since 1.5
  * @author Doug Lea
  * @param (E) the type of elements held in this queue
  */

@@ -208,7 +208,6 @@ import core.thread;
  * sensible to serialize tasks only before or after, but not during,
  * execution. Serialization is not relied on during execution itself.
  *
- * @since 1.7
  * @author Doug Lea
  */
 abstract class ForkJoinTask(V) : Future!(V), IForkJoinTask {
@@ -949,7 +948,6 @@ static if(is(V == void))   {
      * null} by default) will be returned as the result of subsequent
      * invocations of {@code join} and related operations.
      *
-     * @since 1.8
      */
     final void quietlyComplete() {
         setDone();
@@ -1308,7 +1306,6 @@ static if(is(V == void)) {
      * Returns the tag for this task.
      *
      * @return the tag for this task
-     * @since 1.8
      */
     final short getForkJoinTaskTag() {
         return cast(short)status;
@@ -1319,7 +1316,6 @@ static if(is(V == void)) {
      *
      * @param newValue the new tag value
      * @return the previous value of the tag
-     * @since 1.8
      */
     final short setForkJoinTaskTag(short newValue) {
         while(true) {
@@ -1342,7 +1338,6 @@ static if(is(V == void)) {
      * @param update the new tag value
      * @return {@code true} if successful; i.e., the current value was
      * equal to {@code expect} and was changed to {@code update}.
-     * @since 1.8
      */
     final bool compareAndSetForkJoinTaskTag(short expect, short update) {
         for (int s;;) {
@@ -1894,7 +1889,6 @@ interface ICountedCompleter : IForkJoinTask {
  * new HeaderBuilder(p, ...).fork();
  * new BodyBuilder(p, ...).fork();}</pre>
  *
- * @since 1.8
  * @author Doug Lea
  */
 abstract class CountedCompleter(T) : ForkJoinTask!(T), ICountedCompleter {
@@ -2286,7 +2280,6 @@ abstract class CountedCompleter(T) : ForkJoinTask!(T), ICountedCompleter {
  * minimum granularity size (for example 10 here) for which you always
  * sequentially solve rather than subdividing.
  *
- * @since 1.7
  * @author Doug Lea
  */
 abstract class RecursiveTask(V) : ForkJoinTask!V {

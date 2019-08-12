@@ -100,7 +100,6 @@ interface List(E) : Collection!E {
      *         if the operator result is a null value and this list does
      *         not permit null elements
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @since 1.8
      */
     // final void replaceAll(UnaryOperator<E> operator) {
     //     Objects.requireNonNull(operator);
@@ -166,7 +165,6 @@ interface List(E) : Collection!E {
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      *         if the comparator is found to violate the {@link Comparator}
      *         contract
-     * @since 1.8
      */
     void sort(Comparator!E c) ;
 
@@ -385,7 +383,6 @@ interface List(E) : Collection!E {
      * {@link Spliterator#SUBSIZED}.
      *
      * @return a {@code Spliterator} over the elements in this list
-     * @since 1.8
      */
     // override
     // final Spliterator<E> spliterator() {

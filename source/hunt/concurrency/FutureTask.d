@@ -45,7 +45,6 @@ import hunt.logging.ConsoleLogger;
  * {@code protected} functionality that may be useful when creating
  * customized task classes.
  *
- * @since 1.5
  * @author Doug Lea
  * @param (V) The result type returned by this FutureTask's {@code get} methods
  */

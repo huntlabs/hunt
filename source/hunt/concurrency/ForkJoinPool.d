@@ -255,7 +255,6 @@ enum int MAXIMUM_QUEUE_CAPACITY = 1 << 26; // 64M
  * {@link RejectedExecutionException}) only when the pool is shut down
  * or internal resources have been exhausted.
  *
- * @since 1.7
  * @author Doug Lea
  */
 class ForkJoinPool : AbstractExecutorService { 
@@ -1911,7 +1910,6 @@ class ForkJoinPool : AbstractExecutorService {
      *         the caller is not permitted to modify threads
      *         because it does not hold {@link
      *         java.lang.RuntimePermission}{@code ("modifyThread")}
-     * @since 9
      */
     this(int parallelism,
                         ForkJoinWorkerThreadFactory factory,
@@ -2026,7 +2024,6 @@ class ForkJoinPool : AbstractExecutorService {
      * before exit.
      *
      * @return the common pool instance
-     * @since 1.8
      */
     static ForkJoinPool commonPool() {
         return common;
@@ -2201,7 +2198,6 @@ class ForkJoinPool : AbstractExecutorService {
      * Returns the targeted parallelism level of the common pool.
      *
      * @return the targeted parallelism level of the common pool
-     * @since 1.8
      */
     static int getCommonPoolParallelism() {
         return COMMON_PARALLELISM;
@@ -2929,7 +2925,6 @@ static interface ManagedBlocker {
  * UncaughtExceptionHandler, bool, int, int, int, Predicate, long, TimeUnit)
  * use it} in a {@code ForkJoinPool}.
  *
- * @since 1.7
  * @author Doug Lea
  */
 class ForkJoinWorkerThread : ThreadEx {
@@ -3102,7 +3097,6 @@ class ForkJoinWorkerThread : ThreadEx {
      * support extensions, and is unlikely to be useful otherwise.
      *
      * @return a task, or {@code null} if none are available
-     * @since 9
      */
     protected static IForkJoinTask pollSubmission() {
         ForkJoinWorkerThread t = cast(ForkJoinWorkerThread)Thread.getThis();
@@ -3620,7 +3614,6 @@ final class WorkQueue {
  * {@code async} methods. This may be useful for monitoring,
  * debugging, and tracking asynchronous activities.
  *
- * @since 1.8
  */
 interface AsynchronousCompletionTask {
 }

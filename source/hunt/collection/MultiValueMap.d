@@ -22,7 +22,6 @@ alias MultiStringsMap = MultiValuesMap!string;
  * Extension of the {@code Map} interface that stores multiple values.
  *
  * @author Arjen Poutsma
- * @since 3.0
  */
 interface MultiValueMap(K, V) : Map!(K, List!(V)) {
 
