@@ -179,12 +179,12 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     /**
      * The head (eldest) of the doubly linked list.
      */
-    LinkedHashMapEntry!(K, V)head;
+    LinkedHashMapEntry!(K, V) head;
 
     /**
      * The tail (youngest) of the doubly linked list.
      */
-    LinkedHashMapEntry!(K, V)tail;
+    LinkedHashMapEntry!(K, V) tail;
 
     /**
      * The iteration ordering method for this linked hash map: <tt>true</tt>
@@ -197,8 +197,8 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     // internal utilities
 
     // link at the end of list
-    private void linkNodeLast(LinkedHashMapEntry!(K, V)p) {
-        LinkedHashMapEntry!(K, V)last = tail;
+    private void linkNodeLast(LinkedHashMapEntry!(K, V) p) {
+        LinkedHashMapEntry!(K, V) last = tail;
         tail = p;
         if (last is null)
             head = p;
@@ -209,10 +209,10 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     }
 
     // apply src's links to dst
-    private void transferLinks(LinkedHashMapEntry!(K, V)src,
-                               LinkedHashMapEntry!(K, V)dst) {
-        LinkedHashMapEntry!(K, V)b = dst.before = src.before;
-        LinkedHashMapEntry!(K, V)a = dst.after = src.after;
+    private void transferLinks(LinkedHashMapEntry!(K, V) src,
+                               LinkedHashMapEntry!(K, V) dst) {
+        LinkedHashMapEntry!(K, V) b = dst.before = src.before;
+        LinkedHashMapEntry!(K, V) a = dst.after = src.after;
         if (b is null)
             head = dst;
         else
@@ -257,7 +257,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     }
 
     override void afterNodeRemoval(HashMapNode!(K, V) e) { // unlink
-        LinkedHashMapEntry!(K, V)p =
+        LinkedHashMapEntry!(K, V) p =
             cast(LinkedHashMapEntry!(K, V))e, b = p.before, a = p.after;
         p.before = p.after = null;
         if (b is null)
@@ -274,14 +274,14 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
         LinkedHashMapEntry!(K, V) first;
         if (evict && (first = head) !is null && removeEldestEntry(first)) {
             K key = first.key;
-            removeNode(hash(key), key, null, false, true);
+            removeNode(hash(key), key, V.init, false, true);
         }
     }
 
     override void afterNodeAccess(HashMapNode!(K, V) e) { // move node to last
-        LinkedHashMapEntry!(K, V)last;
+        LinkedHashMapEntry!(K, V) last;
         if (accessOrder && (last = tail) != e) {
-            LinkedHashMapEntry!(K, V)p =
+            LinkedHashMapEntry!(K, V) p =
                 cast(LinkedHashMapEntry!(K, V))e, b = p.before, a = p.after;
             p.after = null;
             if (b is null)
@@ -304,7 +304,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     }
 
     // void internalWriteEntries(java.io.ObjectOutputStream s) {
-    //     for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after) {
+    //     for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after) {
     //         s.writeObject(e.key);
     //         s.writeObject(e.value);
     //     }
@@ -388,7 +388,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
      *         specified value
      */
     override bool containsValue(V value) {
-        for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after) {
+        for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after) {
             V v = e.value;
             if (v == value) //  || (value !is null && value.equals(v))
                 return true;
@@ -413,8 +413,12 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
      */
     override V get(K key) {
         HashMapNode!(K, V) e = getNode(hash(key), key);
+static if(is(V == class)) {
         if (e is null)
             return null;
+} else {
+        if (e is null) throw new NoSuchElementException();
+}
         if (accessOrder)
             afterNodeAccess(e);
         return e.value;
@@ -531,7 +535,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //         if (action is null)
     //             throw new NullPointerException();
     //         int mc = modCount;
-    //         for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
+    //         for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after)
     //             action.accept(e.key);
     //         if (modCount != mc)
     //             throw new ConcurrentModificationException();
@@ -580,7 +584,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //     //     if (action is null)
     //     //         throw new NullPointerException();
     //     //     int mc = modCount;
-    //     //     for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
+    //     //     for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after)
     //     //         action.accept(e.value);
     //     //     if (modCount != mc)
     //     //         throw new ConcurrentModificationException();
@@ -643,7 +647,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //     //     if (action is null)
     //     //         throw new NullPointerException();
     //     //     int mc = modCount;
-    //     //     for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
+    //     //     for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after)
     //     //         action.accept(e);
     //     //     if (modCount != mc)
     //     //         throw new ConcurrentModificationException();
@@ -656,7 +660,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
     //     if (function is null)
     //         throw new NullPointerException();
     //     int mc = modCount;
-    //     for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
+    //     for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after)
     //         e.value = function.apply(e.key, e.value);
     //     if (modCount != mc)
     //         throw new ConcurrentModificationException();
@@ -671,7 +675,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
 
         int result = 0;
         int mc = modCount;
-        for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
+        for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after)
         {
             result = dg(e.key, e.value);
             if(result != 0) return result;
@@ -690,7 +694,7 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
 
         int result = 0;
         int mc = modCount;
-        for (LinkedHashMapEntry!(K, V)e = head; e !is null; e = e.after)
+        for (LinkedHashMapEntry!(K, V) e = head; e !is null; e = e.after)
         {
             result = dg(e);
             if(result != 0) return result;

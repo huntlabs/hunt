@@ -866,4 +866,5 @@ alias assertThat = Assert.assertThat;
 alias assertEquals = Assert.assertEquals;
 alias assertNotNull = Assert.assertNotNull;
 alias assertNull = Assert.assertNull;
+alias assertSame = Assert.assertSame;
 alias fail = Assert.fail;

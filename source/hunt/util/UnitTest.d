@@ -101,7 +101,7 @@ writeln("=================================");
 						}
 						
 						// execute a test 
-						alias expectedType = typeof(testUDAs[0].expected);
+						alias expectedType = typeof(testWithUDAs[0].expected);
 						static if(is(expectedType : Throwable)) {
 							str ~= "try { t." ~ memberName ~ "(); } catch(" ~ fullyQualifiedName!expectedType ~ 
 								" ex) { version(HUNT_DEBUG) { warning(ex.msg); } }\n";

@@ -10,7 +10,7 @@
  */
 module hunt.util.Common;
 
-alias Void = Object;
+// alias Void = Object;
 
 /**
  * Implementing this interface allows an object to be the target of
@@ -547,7 +547,7 @@ class NoopCallback : Callback {
      * @return True if the callback is known to never block the caller
      */
     bool isNonBlocking() {
-        return false;
+        return true;
     }
 }
 
