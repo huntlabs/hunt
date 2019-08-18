@@ -143,8 +143,6 @@ class ObjectUtils {
 		// }
 		return false;
 	}
-
-
 }
 
 
@@ -154,6 +152,38 @@ bool isInstanceOf(T, S)(S obj) if(is(S == class) || is(S == interface)) {
 }
 
 
+mixin template ValuesMemberTempate(T) if (is(T == struct) || is(T == class)) {
+    import std.concurrency : initOnce;
+    import std.traits;
+    
+	static T[] values() {
+		__gshared T[] inst;
+        
+        return initOnce!inst({
+            T[] r;
+            enum s = __getValues!(r.stringof, T)();
+            // pragma(msg, s);
+            mixin(s);
+            return r;
+        }());
+	}
+
+	private static string __getValues(string name, T)() {
+		string str;
+
+		foreach (string memberName; __traits(derivedMembers, typeof(this))) {
+			alias memberType = typeof(__traits(getMember, typeof(this), memberName));
+			static if (is(memberType : T)) {
+				str ~= name ~ " ~= " ~ memberName ~ ";\r\n";
+			}
+		}
+
+		return str;
+	}
+}
+
+
+deprecated("Using ValuesMemberTempate instead.")
 mixin template GetConstantValues(T) if (is(T == struct) || is(T == class)) {
 	static T[] values() {
 		T[] r;
