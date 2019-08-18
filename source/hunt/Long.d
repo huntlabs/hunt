@@ -505,7 +505,7 @@ class Long : AbstractNumber!long {
      * @param shift the log2 of the base to format in (4 for hex, 3 for octal, 1 for binary)
      */
     static string toUnsignedString0(long val, int shift) {
-        // assert shift > 0 && shift <=5 : "Illegal shift value";
+        assert(shift > 0 && shift <=5, "Illegal shift value");
         int mag = Long.SIZE - Long.numberOfLeadingZeros(val);
         int chars = max(((mag + (shift - 1)) / shift), 1);
         char[] buf = new char[chars];

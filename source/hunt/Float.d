@@ -94,6 +94,46 @@ class Float : AbstractNumber!float {
 
 
     /**
+     * Returns a representation of the specified floating-point value
+     * according to the IEEE 754 floating-point "single format" bit
+     * layout, preserving Not-a-Number (NaN) values.
+     *
+     * <p>Bit 31 (the bit that is selected by the mask
+     * {@code 0x80000000}) represents the sign of the floating-point
+     * number.
+     * Bits 30-23 (the bits that are selected by the mask
+     * {@code 0x7f800000}) represent the exponent.
+     * Bits 22-0 (the bits that are selected by the mask
+     * {@code 0x007fffff}) represent the significand (sometimes called
+     * the mantissa) of the floating-point number.
+     *
+     * <p>If the argument is positive infinity, the result is
+     * {@code 0x7f800000}.
+     *
+     * <p>If the argument is negative infinity, the result is
+     * {@code 0xff800000}.
+     *
+     * <p>If the argument is NaN, the result is the integer representing
+     * the actual NaN value.  Unlike the {@code floatToIntBits}
+     * method, {@code floatToRawIntBits} does not collapse all the
+     * bit patterns encoding a NaN to a single "canonical"
+     * NaN value.
+     *
+     * <p>In all cases, the result is an integer that, when given to the
+     * {@link #intBitsToFloat(int)} method, will produce a
+     * floating-point value the same as the argument to
+     * {@code floatToRawIntBits}.
+     *
+     * @param   value   a floating-point number.
+     * @return the bits that represent the floating-point number.
+     */
+    static int floatToRawIntBits(float value) {
+        byte* ptr = cast(byte*)&value;
+        // trace("%(%02X %)", ptr[0..float.sizeof]);
+        return *(cast(int*)ptr);
+    }
+
+    /**
      * Returns the {@code float} value corresponding to a given
      * bit representation.
      * The argument is considered to be a representation of a
@@ -153,8 +193,9 @@ class Float : AbstractNumber!float {
      *          pattern.
      */
     static float intBitsToFloat(int bits) {
-        implementationMissing(false);
-        return 0;
+        byte* ptr = cast(byte*)&bits;
+        // trace("%(%02X %)", ptr[0..float.sizeof]);
+        return *(cast(float*)ptr);
     }
 
     /**
@@ -171,7 +212,6 @@ class Float : AbstractNumber!float {
      * @param   value   the value to be represented by the {@code Float}.
      */
     this(float value) {
-        // this.value = value;
         super(value);
     }
 
@@ -182,7 +222,6 @@ class Float : AbstractNumber!float {
      * @param   value   the value to be represented by the {@code Float}.
      */
     this(double value) {
-        // this.value = cast(float)value;
         super(cast(float)value);
     }
 

@@ -96,6 +96,46 @@ class Double : AbstractNumber!double {
     enum int BYTES = SIZE / 8;
 
 
+    /**
+     * Returns a representation of the specified floating-point value
+     * according to the IEEE 754 floating-point "double
+     * format" bit layout, preserving Not-a-Number (NaN) values.
+     *
+     * <p>Bit 63 (the bit that is selected by the mask
+     * {@code 0x8000000000000000L}) represents the sign of the
+     * floating-point number. Bits
+     * 62-52 (the bits that are selected by the mask
+     * {@code 0x7ff0000000000000L}) represent the exponent. Bits 51-0
+     * (the bits that are selected by the mask
+     * {@code 0x000fffffffffffffL}) represent the significand
+     * (sometimes called the mantissa) of the floating-point number.
+     *
+     * <p>If the argument is positive infinity, the result is
+     * {@code 0x7ff0000000000000L}.
+     *
+     * <p>If the argument is negative infinity, the result is
+     * {@code 0xfff0000000000000L}.
+     *
+     * <p>If the argument is NaN, the result is the {@code long}
+     * integer representing the actual NaN value.  Unlike the
+     * {@code doubleToLongBits} method,
+     * {@code doubleToRawLongBits} does not collapse all the bit
+     * patterns encoding a NaN to a single "canonical" NaN
+     * value.
+     *
+     * <p>In all cases, the result is a {@code long} integer that,
+     * when given to the {@link #longBitsToDouble(long)} method, will
+     * produce a floating-point value the same as the argument to
+     * {@code doubleToRawLongBits}.
+     *
+     * @param   value   a {@code double} precision floating-point number.
+     * @return the bits that represent the floating-point number.
+     */
+    static long doubleToRawLongBits(double value){
+        byte* ptr = cast(byte*)&value;
+        // trace("%(%02X %)", ptr[0..double.sizeof]);
+        return *(cast(long*)ptr);
+    }
 
     /**
      * Returns the {@code double} value corresponding to a given
@@ -159,8 +199,9 @@ class Double : AbstractNumber!double {
      *          bit pattern.
      */
     static double longBitsToDouble(long bits) {
-        implementationMissing(false);
-        return 0;
+        byte* ptr = cast(byte*)&bits;
+        // trace("%(%02X %)", ptr[0..double.sizeof]);
+        return *(cast(double*)ptr);
     }
 
     /**
@@ -177,7 +218,6 @@ class Double : AbstractNumber!double {
      * @param   value   the value to be represented by the {@code Double}.
      */
     this(double value) {
-        // this.value = value;
         super(value);
     }
 
