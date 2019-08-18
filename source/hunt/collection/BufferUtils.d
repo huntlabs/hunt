@@ -137,8 +137,10 @@ class BufferUtils {
      * @return Buffer
      */
     static ByteBuffer allocateDirect(int capacity) {
+        // FIXME: Needing refactor or cleanup -@zxp at 8/17/2019, 1:03:57 PM        
+        // 
         ByteBuffer buf = new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity); 
-        buf.limit(0);
+        // buf.limit(0);
         return buf;
     }
 
