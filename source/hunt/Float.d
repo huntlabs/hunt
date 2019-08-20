@@ -14,8 +14,12 @@ module hunt.Float;
 import hunt.Exceptions;
 import hunt.Nullable;
 import hunt.Number;
-import std.conv;
 
+import std.conv;
+import std.math;
+
+/**
+*/
 class Float : AbstractNumber!float {
     /**
      * A constant holding the positive infinity of type
@@ -92,6 +96,96 @@ class Float : AbstractNumber!float {
      */
     enum int BYTES = SIZE / 8;
 
+    /**
+     * Constructs a newly allocated {@code Float} object that
+     * represents the primitive {@code float} argument.
+     *
+     * @param   value   the value to be represented by the {@code Float}.
+     */
+    this(float value) {
+        super(value);
+    }
+
+    /**
+     * Constructs a newly allocated {@code Float} object that
+     * represents the argument converted to type {@code float}.
+     *
+     * @param   value   the value to be represented by the {@code Float}.
+     */
+    this(double value) {
+        super(cast(float)value);
+    }
+
+
+    static float parseFloat(string s) {
+        return to!float(s);
+    }
+
+    /**
+     * Constructs a newly allocated {@code Float} object that
+     * represents the floating-point value of type {@code float}
+     * represented by the string. The string is converted to a
+     * {@code float} value as if by the {@code valueOf} method.
+     *
+     * @param      s   a string to be converted to a {@code Float}.
+     * @throws  NumberFormatException  if the string does not contain a
+     *               parsable number.
+     * @see        java.lang.Float#valueOf(java.lang.string)
+     */
+    this(string s){
+        super(parseFloat(s));
+    }
+
+    /**
+     * Returns {@code true} if this {@code Float} value is a
+     * Not-a-Number (NaN), {@code false} otherwise.
+     *
+     * @return  {@code true} if the value represented by this object is
+     *          NaN; {@code false} otherwise.
+     */
+    bool isNaN() {
+        return isNaN(value);
+    }
+
+    /**
+     * Returns {@code true} if this {@code Float} value is
+     * infinitely large in magnitude, {@code false} otherwise.
+     *
+     * @return  {@code true} if the value represented by this object is
+     *          positive infinity or negative infinity;
+     *          {@code false} otherwise.
+     */
+    bool isInfinite() {
+        return isInfinite(value);
+    }
+
+    /**
+     * Returns a hash code for a {@code double} value; compatible with
+     * {@code Double.hashCode()}.
+     *
+     * @param value the value to hash
+     * @return a hash code value for a {@code double} value.
+     */
+    override size_t toHash() @safe nothrow {
+        return hashOf(value);
+    }
+
+    /**
+     * Returns a {@code Float} instance representing the specified
+     * {@code float} value.
+     * If a new {@code Float} instance is not required, this method
+     * should generally be used in preference to the constructor
+     * {@link #Float(float)}, as this method is likely to yield
+     * significantly better space and time performance by caching
+     * frequently requested values.
+     *
+     * @param  f a float value.
+     * @return a {@code Float} instance representing {@code f}.
+     * @since  1.5
+     */
+    static Float valueOf(float f) {
+        return new Float(f);
+    }
 
     /**
      * Returns a representation of the specified floating-point value
@@ -199,102 +293,40 @@ class Float : AbstractNumber!float {
     }
 
     /**
-     * The value of the Float.
+     * Returns {@code true} if the specified number is a
+     * Not-a-Number (NaN) value, {@code false} otherwise.
      *
-     * @serial
-     */
-    // private  float value;
-
-    /**
-     * Constructs a newly allocated {@code Float} object that
-     * represents the primitive {@code float} argument.
-     *
-     * @param   value   the value to be represented by the {@code Float}.
-     */
-    this(float value) {
-        super(value);
-    }
-
-    /**
-     * Constructs a newly allocated {@code Float} object that
-     * represents the argument converted to type {@code float}.
-     *
-     * @param   value   the value to be represented by the {@code Float}.
-     */
-    this(double value) {
-        super(cast(float)value);
-    }
-
-
-    static float parseFloat(string s) {
-        return to!float(s);
-    }
-
-    /**
-     * Constructs a newly allocated {@code Float} object that
-     * represents the floating-point value of type {@code float}
-     * represented by the string. The string is converted to a
-     * {@code float} value as if by the {@code valueOf} method.
-     *
-     * @param      s   a string to be converted to a {@code Float}.
-     * @throws  NumberFormatException  if the string does not contain a
-     *               parsable number.
-     * @see        java.lang.Float#valueOf(java.lang.string)
-     */
-    // Float(string s) throws NumberFormatException {
-    //     value = parseFloat(s);
-    // }
-
-    /**
-     * Returns {@code true} if this {@code Float} value is a
-     * Not-a-Number (NaN), {@code false} otherwise.
-     *
-     * @return  {@code true} if the value represented by this object is
-     *          NaN; {@code false} otherwise.
-     */
-    // bool isNaN() {
-    //     return isNaN(value);
-    // }
-
-    /**
-     * Returns {@code true} if this {@code Float} value is
-     * infinitely large in magnitude, {@code false} otherwise.
-     *
-     * @return  {@code true} if the value represented by this object is
-     *          positive infinity or negative infinity;
+     * @param   v   the value to be tested.
+     * @return  {@code true} if the argument is NaN;
      *          {@code false} otherwise.
      */
-    // bool isInfinite() {
-    //     return isInfinite(value);
-    // }
-
-
-    /**
-     * Returns a {@code Float} instance representing the specified
-     * {@code float} value.
-     * If a new {@code Float} instance is not required, this method
-     * should generally be used in preference to the constructor
-     * {@link #Float(float)}, as this method is likely to yield
-     * significantly better space and time performance by caching
-     * frequently requested values.
-     *
-     * @param  f a float value.
-     * @return a {@code Float} instance representing {@code f}.
-     * @since  1.5
-     */
-    static Float valueOf(float f) {
-        return new Float(f);
+    static bool isNaN(float v) {
+        return std.math.isNaN(v);
     }
 
     /**
-     * Returns a hash code for a {@code double} value; compatible with
-     * {@code Double.hashCode()}.
+     * Returns {@code true} if the specified number is infinitely
+     * large in magnitude, {@code false} otherwise.
      *
-     * @param value the value to hash
-     * @return a hash code value for a {@code double} value.
+     * @param   v   the value to be tested.
+     * @return  {@code true} if the argument is positive infinity or
+     *          negative infinity; {@code false} otherwise.
      */
-    override size_t toHash() @safe nothrow {
-        return hashOf(value);
+    static bool isInfinite(float v) {
+        return std.math.isInfinity(v);
+    }
+
+    /**
+     * Returns {@code true} if the argument is a finite floating-point
+     * value; returns {@code false} otherwise (for NaN and infinity
+     * arguments).
+     *
+     * @param f the {@code float} value to be tested
+     * @return {@code true} if the argument is a finite
+     * floating-point value, {@code false} otherwise.
+     */
+     static bool isFinite(float f) {
+        return std.math.isInfinity(f);
     }
 
 }
