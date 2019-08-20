@@ -14,7 +14,9 @@ module hunt.Double;
 import hunt.Exceptions;
 import hunt.Nullable;
 import hunt.Number;
+
 import std.conv;
+import std.math;
 
 class Double : AbstractNumber!double {
     
@@ -99,6 +101,45 @@ class Double : AbstractNumber!double {
     /**
      * Returns a representation of the specified floating-point value
      * according to the IEEE 754 floating-point "double
+     * format" bit layout.
+     *
+     * <p>Bit 63 (the bit that is selected by the mask
+     * {@code 0x8000000000000000L}) represents the sign of the
+     * floating-point number. Bits
+     * 62-52 (the bits that are selected by the mask
+     * {@code 0x7ff0000000000000L}) represent the exponent. Bits 51-0
+     * (the bits that are selected by the mask
+     * {@code 0x000fffffffffffffL}) represent the significand
+     * (sometimes called the mantissa) of the floating-point number.
+     *
+     * <p>If the argument is positive infinity, the result is
+     * {@code 0x7ff0000000000000L}.
+     *
+     * <p>If the argument is negative infinity, the result is
+     * {@code 0xfff0000000000000L}.
+     *
+     * <p>If the argument is NaN, the result is
+     * {@code 0x7ff8000000000000L}.
+     *
+     * <p>In all cases, the result is a {@code long} integer that, when
+     * given to the {@link #longBitsToDouble(long)} method, will produce a
+     * floating-point value the same as the argument to
+     * {@code doubleToLongBits} (except all NaN values are
+     * collapsed to a single "canonical" NaN value).
+     *
+     * @param   value   a {@code double} precision floating-point number.
+     * @return the bits that represent the floating-point number.
+     */
+    static long doubleToLongBits(double value) @trusted nothrow {
+        if (!isNaN(value)) {
+            return doubleToRawLongBits(value);
+        }
+        return 0x7ff8000000000000L;
+    }
+
+    /**
+     * Returns a representation of the specified floating-point value
+     * according to the IEEE 754 floating-point "double
      * format" bit layout, preserving Not-a-Number (NaN) values.
      *
      * <p>Bit 63 (the bit that is selected by the mask
@@ -131,7 +172,7 @@ class Double : AbstractNumber!double {
      * @param   value   a {@code double} precision floating-point number.
      * @return the bits that represent the floating-point number.
      */
-    static long doubleToRawLongBits(double value){
+    static long doubleToRawLongBits(double value) @trusted nothrow {
         byte* ptr = cast(byte*)&value;
         // trace("%(%02X %)", ptr[0..double.sizeof]);
         return *(cast(long*)ptr);
@@ -238,18 +279,25 @@ class Double : AbstractNumber!double {
 
     /**
      * Returns {@code true} if this {@code Double} value is
+     * infinitely large in magnitude, {@code false} otherwise.
+     *
+     * @return  {@code true} if the value represented by this object is
+     *          positive infinity or negative infinity;
+     *          {@code false} otherwise.
+     */
+    bool isInfinite() {
+        return isInfinite(value);
+    }
+
+    /**
+     * Returns {@code true} if this {@code Double} value is
      * a Not-a-Number (NaN), {@code false} otherwise.
      *
      * @return  {@code true} if the value represented by this object is
      *          NaN; {@code false} otherwise.
      */
-    static bool isNaN(double v) {
-        return isNaN(v);
-    }
-
-
-    static double parseDouble(string s) {
-        return to!double(s);
+    bool isNaN() @trusted nothrow {
+        return isNaN(value);
     }
 
     /**
@@ -260,10 +308,61 @@ class Double : AbstractNumber!double {
      *          positive infinity or negative infinity;
      *          {@code false} otherwise.
      */
-    // bool isInfinite() {
-    //     return isInfinite(value);
-    // }
+    bool isInfinite() {
+        return isInfinite(value);
+    }
 
+    /**
+     * Returns a hash code for a {@code double} value; compatible with
+     * {@code Double.hashCode()}.
+     *
+     * @param value the value to hash
+     * @return a hash code value for a {@code double} value.
+     */
+    override size_t toHash() @safe nothrow {
+        return hashOf(value);
+    }
+
+    static double parseDouble(string s) {
+        return to!double(s);
+    }
+
+    /**
+     * Returns {@code true} if this {@code Double} value is
+     * a Not-a-Number (NaN), {@code false} otherwise.
+     *
+     * @return  {@code true} if the value represented by this object is
+     *          NaN; {@code false} otherwise.
+     */
+    static bool isNaN(double v) @trusted nothrow {
+        return std.math.isNaN(v);
+    }
+
+    /**
+     * Returns {@code true} if the specified number is infinitely
+     * large in magnitude, {@code false} otherwise.
+     *
+     * @param   v   the value to be tested.
+     * @return  {@code true} if the value of the argument is positive
+     *          infinity or negative infinity; {@code false} otherwise.
+     */
+    static bool isInfinite(double v) {
+        return std.math.isInfinity(v);
+    }
+
+    /**
+     * Returns {@code true} if the argument is a finite floating-point
+     * value; returns {@code false} otherwise (for NaN and infinity
+     * arguments).
+     *
+     * @param d the {@code double} value to be tested
+     * @return {@code true} if the argument is a finite
+     * floating-point value, {@code false} otherwise.
+     * @since 1.8
+     */
+    static bool isFinite(double d) {
+        return std.math.isInfinity(d);
+    }
 
     /**
      * Returns a {@code Double} instance representing the specified
@@ -280,17 +379,6 @@ class Double : AbstractNumber!double {
      */
     static Double valueOf(double d) {
         return new Double(d);
-    }
-
-    /**
-     * Returns a hash code for a {@code double} value; compatible with
-     * {@code Double.hashCode()}.
-     *
-     * @param value the value to hash
-     * @return a hash code value for a {@code double} value.
-     */
-    override size_t toHash() @safe nothrow {
-        return hashOf(value);
     }
 }
 
