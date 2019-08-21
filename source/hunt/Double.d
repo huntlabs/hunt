@@ -279,18 +279,6 @@ class Double : AbstractNumber!double {
 
     /**
      * Returns {@code true} if this {@code Double} value is
-     * infinitely large in magnitude, {@code false} otherwise.
-     *
-     * @return  {@code true} if the value represented by this object is
-     *          positive infinity or negative infinity;
-     *          {@code false} otherwise.
-     */
-    bool isInfinite() {
-        return isInfinite(value);
-    }
-
-    /**
-     * Returns {@code true} if this {@code Double} value is
      * a Not-a-Number (NaN), {@code false} otherwise.
      *
      * @return  {@code true} if the value represented by this object is
