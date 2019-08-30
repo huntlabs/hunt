@@ -525,7 +525,7 @@ int compare(T)(T x, T y) nothrow if(isOrderingComparable!(T)) {
 
 // FIXME: Needing refactor or cleanup -@zxp at 12/30/2018, 9:43:22 AM
 // opCmp in a class, struct or interface should be nothrow.
-bool lessThan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
+bool lessThan(T)(ref T a, ref T b) nothrow if(isOrderingComparable!(T)) {
     try {
         return a < b;
     } catch(Exception ex) {
@@ -534,7 +534,7 @@ bool lessThan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
     }
 }
 
-bool greaterthan(T)(T a, T b) nothrow if(isOrderingComparable!(T)) {
+bool greaterthan(T)(ref T a, ref T b) nothrow if(isOrderingComparable!(T)) {
     try {
         return a > b;
     } catch(Exception ex) {
