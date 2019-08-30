@@ -84,7 +84,6 @@ interface Number {
      *
      * @return  the numeric value represented by this object after conversion
      *          to type {@code byte}.
-     * @since   1.1
      */
     byte byteValue();
 
@@ -96,7 +95,6 @@ interface Number {
      *
      * @return  the numeric value represented by this object after conversion
      *          to type {@code short}.
-     * @since   1.1
      */
     short shortValue();
 

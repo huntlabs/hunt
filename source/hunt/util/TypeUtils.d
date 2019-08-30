@@ -33,6 +33,8 @@ unittest {
 struct TypeUtils {
 
     static string getSimpleName(TypeInfo info) {
+        if(info is null)
+            return "null";
         string name = info.toString();
         ptrdiff_t index = lastIndexOf(name, '.');
         if(index == -1)

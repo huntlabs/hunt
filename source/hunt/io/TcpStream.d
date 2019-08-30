@@ -240,7 +240,7 @@ class TcpStream : AbstractStream {
             throw new Exception("The connection is down!");
         }
 
-        // version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             infof("data buffered (%d bytes): fd=%d", buffer.limit(), this.handle);
         _isWritting = true;
         // initializeWriteQueue();
@@ -258,11 +258,13 @@ class TcpStream : AbstractStream {
             throw new Exception("The connection is down!");
         }
 
-        version (HUNT_IO_DEBUG) {
+        version (HUNT_IO_DEBUG_MORE) {
+            infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
+        } else  version (HUNT_IO_DEBUG) {
             if (data.length <= 32)
-                infof("fd: %d, %d bytes: %(%02X %)", this.handle, data.length, data[0 .. $]);
+                infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
             else
-                infof("fd: %d, %d bytes: %(%02X %)", this.handle, data.length, data[0 .. 32]);
+                infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. 32]);
         }
 
         if ((_writeQueue.isEmpty()) && !_isWritting) {
