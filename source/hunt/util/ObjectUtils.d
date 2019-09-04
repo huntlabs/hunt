@@ -180,6 +180,32 @@ mixin template ValuesMemberTempate(T) if (is(T == struct) || is(T == class)) {
 
 		return str;
 	}
+
+	static T[string] namedValues() {
+		__gshared T[string] inst;
+        
+        return initOnce!inst({
+            T[string] r;
+            enum s = __getNamedValues!(r.stringof, T)();
+            // pragma(msg, s);
+            mixin(s);
+            return r;
+        }());
+	}
+
+
+	private static string __getNamedValues(string name, T)() {
+		string str;
+
+		foreach (string memberName; __traits(derivedMembers, typeof(this))) {
+			alias memberType = typeof(__traits(getMember, typeof(this), memberName));
+			static if (is(memberType : T)) {
+				str ~= name ~ "[\"" ~ memberName ~ "\"] = " ~ memberName ~ ";\r\n";
+			}
+		}
+
+		return str;
+	}
 }
 
 
