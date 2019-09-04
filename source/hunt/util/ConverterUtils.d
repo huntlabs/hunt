@@ -6,9 +6,10 @@ import hunt.util.Common;
 import hunt.util.Traits;
 
 import std.conv;
+import std.format;
 import std.string;
 import std.typecons;
-
+import std.ascii;
 
 /**
 */
@@ -117,6 +118,17 @@ struct ConverterUtils {
             buf.append(cast(char) c);
         }
         return buf.toString();
+    }
+
+    static string toHexString(LetterCase letterCase = LetterCase.upper)(const(ubyte)[] b, 
+            string separator="", string prefix="") {
+        static if(letterCase == LetterCase.upper) {
+            string fmt = "%(" ~ prefix ~ "%02X" ~ separator ~ "%)";
+        } else {
+            string fmt = "%(" ~ prefix ~ "%02x" ~ separator ~ "%)";
+        }
+
+        return format(fmt, b);
     }
 
     /* ------------------------------------------------------------ */
