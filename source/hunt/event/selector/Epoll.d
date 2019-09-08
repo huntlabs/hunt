@@ -40,6 +40,9 @@ import hunt.event.timer;
 import hunt.system.Error;
 import hunt.concurrency.TaskPool;
 
+static if (!is(typeof(EPOLL_CLOEXEC)))
+	enum EPOLL_CLOEXEC = 0x80000;
+
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
 
@@ -64,11 +67,11 @@ class AbstractSelector : Selector {
 
         // http://man7.org/linux/man-pages/man2/epoll_create.2.html
         /*
-         * epoll_create expects a size as a hint to the kernel about how to
-         * dimension internal structures. We can't predict the size in advance.
+         * Set the close-on-exec (FD_CLOEXEC) flag on the new file descriptor.
+         * See the description of the O_CLOEXEC flag in open(2) for reasons why
+         * this may be useful.
          */
-        _epollFD = epoll_create1(0);
-        // _epollFD = epoll_create(256);
+        _epollFD = epoll_create1(EPOLL_CLOEXEC);
         if (_epollFD < 0)
             throw new IOException("epoll_create failed");
         
