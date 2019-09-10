@@ -91,7 +91,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
             // It's prossible that there are more data waitting for read in the read I/O space.
             if (len == _readBuffer.length) {
-                version (HUNT_DEBUG) infof("Need read again");
+                version (HUNT_IO_DEBUG) infof("Read buffer is full read %d bytes. Need to read again.", len);
                 isDone = false;
             }
         } else if (len == Socket.ERROR) {
