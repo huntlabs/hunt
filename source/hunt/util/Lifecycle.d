@@ -11,7 +11,10 @@
 
 module hunt.util.Lifecycle;
 
+import core.atomic;
+
 import hunt.util.Common;
+import hunt.logging.ConsoleLogger;
 
 /**
  * A common interface defining methods for start/stop lifecycle control.
@@ -167,7 +170,6 @@ interface SmartLifecycle : Lifecycle, Phased {
 /**
 */
 abstract class AbstractLifecycle : Lifecycle {
-	import core.atomic;
 
     protected shared bool _isRunning;
 
@@ -186,13 +188,17 @@ abstract class AbstractLifecycle : Lifecycle {
     void start() {
         if (cas(&_isRunning, false, true)) {
 			initialize();
-        }
+        } else {
+			version(HUNT_DEBUG) warning("Starting repeatedly!");
+		}
     }
 
     void stop() {
         if (cas(&_isRunning, true, false)) {
 			destroy();
-        }
+        } else {
+			version(HUNT_DEBUG) warning("Stopping repeatedly!");
+		}
     }
 
     abstract protected void initialize();
