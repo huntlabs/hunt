@@ -1486,8 +1486,6 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
      * support NavigableMap.  It translates an old-version SubMap into
      * a new-version AscendingSubMap. This class is never otherwise
      * used.
-     *
-     * @serial include
      */
     private class SubMap : AbstractMap!(K,V), SortedMap!(K,V) {
 
@@ -1529,6 +1527,10 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
 
         override V[] values() {
             return super.values;
+        }
+
+        override Object clone() {
+            return super.clone();
         }
     }
 
@@ -2400,7 +2402,11 @@ class TreeMap(K,V) : AbstractMap!(K,V), NavigableMap!(K,V)
 
         override string toString() {
             return super.toString();
-        }    
+        } 
+
+        override Object clone() {
+            return super.clone();
+        }   
 }
 
 
@@ -2631,6 +2637,10 @@ abstract static class NavigableSubMap(K,V) : AbstractMap!(K,V) , NavigableMap!(K
 
     override string toString() {
         return super.toString();
+    }
+
+    override Object clone() {
+        return super.clone();
     }    
 
     override bool isEmpty() {

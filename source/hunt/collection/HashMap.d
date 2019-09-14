@@ -412,7 +412,7 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      */
     override V get(K key) {
         HashMapNode!(K, V) e = getNode(hash(key), key);
-        static if(is(V == class) || is(V == interface)) {
+        static if(is(V == class) || is(V == interface) || isSomeString!(V)) {
             return e is null ? V.init : e.value;
         } else {
             if(e is null) {
