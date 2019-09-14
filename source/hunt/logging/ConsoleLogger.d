@@ -219,7 +219,7 @@ class ConsoleLogger {
             string func = __FUNCTION__)(string msg, string level) {
         enum lineNum = std.conv.to!string(line);
         string time_prior = Clock.currTime.toString();
-        string tid = std.conv.to!string(getTid());
+        string tid = std.conv.to!string(cast(size_t)getTid());
 
         // writeln("fullname: ",func);
         string fun = func;

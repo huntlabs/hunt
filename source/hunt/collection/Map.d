@@ -23,7 +23,7 @@ import std.range.interfaces : InputRange;
 
 /**
 */
-interface Map(K,V) : Iterable!(K,V), IObject {
+interface Map(K,V) : Iterable!(K,V), IObject, Cloneable {
     // Query Operations
 
     /**
