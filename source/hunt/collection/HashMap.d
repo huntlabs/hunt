@@ -357,6 +357,7 @@ class HashMap(K,V) : AbstractMap!(K,V) {
      * true (relayed to method afterNodeInsertion).
      */
     final void putMapEntries(Map!(K, V) m, bool evict) {
+        assert(m !is null);
         int s = m.size();
         if (s > 0) {
             if (table is null) { // pre-size
