@@ -94,8 +94,6 @@ class FuturePromise(T) : Future!T, Promise!T {
 	}
 
 	T get() {
-		version (HUNT_DEBUG)
-			infof("promise status: isDone=%s", _done);
 		if (!_done) {
 			_doneLocker.lock();
 			scope (exit)
@@ -104,22 +102,20 @@ class FuturePromise(T) : Future!T, Promise!T {
 				info("Waiting for a promise...");
 			_doneCondition.wait();
 		}
-		version (HUNT_DEBUG)
-			info("Got a promise");
+		version (HUNT_DEBUG) info("Got a promise");
 
 		if (_cause is null) {
-			version (HUNT_DEBUG)
-				warning("no cause!");
+			version (HUNT_DEBUG) warning("no cause!");
 			new ExecutionException("no cause!");
 		}
 
 		if (_cause is COMPLETED)
 			return _result;
+
 		CancellationException c = cast(CancellationException) _cause;
-		if (c !is null)
-			throw c;
-		version (HUNT_DEBUG)
-			warning(_cause.msg);
+		if (c !is null) throw c;
+		
+		version (HUNT_DEBUG) warning(_cause.msg);
 		throw new ExecutionException(_cause.msg);
 	}
 
