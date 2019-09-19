@@ -56,7 +56,10 @@ abstract class AbstractChannel : Channel {
             _isClosing = false;
             _isClosed = true;
         } else {
-            debug warningf("The channel[fd=%d] has already been closed or closing", this.handle);
+            version (HUNT_IO_DEBUG) {
+                warningf("The channel[fd=%d] has already been closed (%s) or closing (%s)", 
+                 this.handle, _isClosed, _isClosing);
+            }
         }
     }
 

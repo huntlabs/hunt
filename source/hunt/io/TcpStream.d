@@ -127,7 +127,7 @@ class TcpStream : AbstractStream {
         connect(_remoteAddress);
     }
 
-    protected override void doConnect(Address addr) {
+    protected override void doConnect(Address addr) nothrow {
         try {
             version (HUNT_DEBUG)
                 tracef("connecting to %s...", addr);
@@ -140,12 +140,16 @@ class TcpStream : AbstractStream {
             _localAddress = this.socket.localAddress();
             start();
             _isConnected = true;
-        } catch (Exception ex) {
-            warningf("Exception: %s, Message: %s", typeid(ex), ex.message);
-        }
 
-        if (_connectionHandler !is null)
-            _connectionHandler(_isConnected);
+            if (_connectionHandler !is null) {
+                _connectionHandler(_isConnected);
+            }
+
+        } catch (Throwable ex) {
+            // Must try the best to catch all the exceptions. It's because it will executed in another thread.
+            version(HUNT_DEBUG) warning(ex);
+            else warning(ex.msg);
+        }
 
     }
 
@@ -351,7 +355,7 @@ protected:
                     warningf("Some data has not been sent yet: fd=%d", this.handle);
                 }
 
-                infof("closing a connection with: %s", this.remoteAddress);
+                infof("closing a connection with: %s, fd=%d", this.remoteAddress, this.handle);
             }
 
             resetWriteStatus();
