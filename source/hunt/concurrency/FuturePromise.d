@@ -116,7 +116,8 @@ class FuturePromise(T) : Future!T, Promise!T {
 		if (c !is null) throw c;
 		
 		version (HUNT_DEBUG) warning(_cause.msg);
-		throw new ExecutionException(_cause.msg);
+		version (HUNT_DEBUG_MORE) warning(_cause);
+		throw new ExecutionException(_cause);
 	}
 
 	T get(Duration timeout) {
