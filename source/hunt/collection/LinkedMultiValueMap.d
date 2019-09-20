@@ -19,6 +19,7 @@ import hunt.collection.MultiValueMap;
 import hunt.collection.Map;
 import hunt.collection.Set;
 import hunt.Object;
+import hunt.util.ObjectUtils;
 
 import std.range;
 
@@ -253,10 +254,8 @@ class LinkedMultiValueMap(K, V) : MultiValueMap!(K, V) {
 	 * @see LinkedMultiValueMap#LinkedMultiValueMap(Map)
 	 * @see #deepCopy()
 	 */
-	// override
-	// LinkedMultiValueMap!(K, V) clone() {
-	// 	return new LinkedMultiValueMap!(K, V)(this);
-	// }
+
+    mixin CloneMemberTemplate!(typeof(this));	
 
     bool opEquals(IObject o) {
         return opEquals(cast(Object)o);
