@@ -413,12 +413,14 @@ class LinkedHashMap(K, V) : HashMap!(K, V)
      */
     override V get(K key) {
         HashMapNode!(K, V) e = getNode(hash(key), key);
-static if(is(V == class)) {
-        if (e is null)
-            return null;
-} else {
-        if (e is null) throw new NoSuchElementException();
-}
+        if (e is null) {
+            static if(is(V == class) || is(V == interface) || is(V == string)) {
+                return null;
+            } else {
+                throw new NoSuchElementException();
+            }
+        }
+
         if (accessOrder)
             afterNodeAccess(e);
         return e.value;
