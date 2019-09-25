@@ -203,22 +203,50 @@ class Greeting : GreetingBase {
     string content; // test for the same fieldname
 
     SysTime creationTime;
+    SysTime[] nullTimes;
+    SysTime[] times;
     
     @Exclude
     long currentTime;
     
     byte[] bytes;
     string[] members;
+    Guest[] guests;
+    
 
     this() {
         super();
-        settings = new GreetingSettings();
+        initialization();
     }
 
     this(int id, string content) {
         super(id, content);
         this.content = ">>> " ~ content ~ " <<<";
+        initialization();
+    }
+
+    private void initialization() {
+
         settings = new GreetingSettings();
+
+        times = new SysTime[2];
+        times[0] = Clock.currTime;
+        times[1] = Clock.currTime;
+
+        guests = new Guest[1];
+        guests[0] = new Guest();
+        guests[0].name = "guest01";
+
+
+    }
+
+    void addGuest(string name, int age) {
+
+        Guest g = new Guest();
+        g.name = name;
+        g.age = age;
+
+        guests ~= g;
     }
 
     void setColor(string color) {
@@ -246,4 +274,10 @@ class Greeting : GreetingBase {
                 content, creationTime, currentTime);
         return s;
     }
+}
+
+
+class Guest {
+    string name;
+    int age;
 }
