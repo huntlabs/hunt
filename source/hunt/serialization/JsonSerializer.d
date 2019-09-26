@@ -392,7 +392,7 @@ final class JsonSerializer {
 
     /// ditto
     static JSONValue toJson(OnlyPublic onlyPublic, TraverseBase traverseBase,
-            IncludeMeta includeMeta, T)
+            IncludeMeta includeMeta = IncludeMeta.no, T)
             (T value) if (is(T == class)) {
         return serializeObject!(onlyPublic, traverseBase, includeMeta, T)(value);
     }
