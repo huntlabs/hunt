@@ -58,7 +58,14 @@ abstract class Selector {
         }
         this.timeout = timeout;
         version (HUNT_IO_DEBUG) trace("runAsync ...");
-        Thread th = new Thread((){ doRun(handler); });
+        Thread th = new Thread(() { 
+            try {
+                doRun(handler); 
+            } catch (Throwable t) {
+                warning(t.msg);
+                version(HUNT_DEBUG) warning(t.toString());
+            }
+        });
         // th.isDaemon = true; // unstable
         th.start();
     }
