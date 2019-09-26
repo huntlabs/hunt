@@ -37,10 +37,6 @@ interface JsonSerializable {
 }
 
 
-static if(CompilerHelper.isLessThan(2085)) {
-    pragma(msg, "Warning: The minimum required version of D compiler is 2.086.");
-} else {
-
 /**
  * 
  */
@@ -215,7 +211,7 @@ final class JsonSerializer {
 
     static T fromJson(T : JSONValue, bool canThrow = false)(auto ref const(JSONValue) json) {
         import std.typecons : nullable;
-        return json.nullable;
+        return json.nullable.get();
     }
 
     static T fromJson(T, bool canThrow = false)
@@ -370,30 +366,42 @@ final class JsonSerializer {
     /*                                   toJson                                   */
     /* -------------------------------------------------------------------------- */
 
-
     /**
      * class
      */
-    static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no, 
-            TraverseBase traverseBase = TraverseBase.yes, 
-            IncludeMeta includeMeta = IncludeMeta.no, T)
+    static JSONValue toJson(T)(T value) if (is(T == class)) {
+        return serializeObject!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no)(value);
+    }
+
+    /// ditto
+    static JSONValue toJson(OnlyPublic onlyPublic, T)
             (T value) if (is(T == class)) {
+        return serializeObject!(onlyPublic, TraverseBase.yes, IncludeMeta.no)(value);
+    }
 
-        version(HUNT_DEBUG_MORE) {
-            tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, T = %s",
-                traverseBase, onlyPublic, includeMeta, T.stringof);
-        }
+    static JSONValue toJson(TraverseBase traverseBase, T)
+            (T value) if (is(T == class)) {
+        return serializeObject!(OnlyPublic.no, traverseBase, IncludeMeta.no)(value);
+    }
 
-        // static if(is(T : JsonSerializable)) {
-        //     static if(includeMeta == IncludeMeta.yes) {
-        //         return toJson!(JsonSerializable)(value);
-        //     } else {
-        //         return value.jsonSerialize();
-        //     }
-        // } else {
-        //     return serializeObject!(onlyPublic, traverseBase, includeMeta, T)(value);
-        // }
+    /// ditto
+    static JSONValue toJson(IncludeMeta includeMeta, T)
+            (T value) if (is(T == class)) {
+        return serializeObject!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no)(value);
+    }
 
+    /// ditto
+    static JSONValue toJson(OnlyPublic onlyPublic, TraverseBase traverseBase,
+            IncludeMeta includeMeta, T)
+            (T value) if (is(T == class)) {
+        return serializeObject!(onlyPublic, traverseBase, includeMeta, T)(value);
+    }
+
+    deprecated("Using the other form of toJson instead.")
+    static JSONValue toJson(T, TraverseBase traverseBase = TraverseBase.yes,
+            OnlyPublic onlyPublic = OnlyPublic.no, 
+            IncludeMeta includeMeta = IncludeMeta.no)
+            (T value) if (is(T == class)) {
         return serializeObject!(onlyPublic, traverseBase, includeMeta, T)(value);
     }
 
@@ -431,7 +439,7 @@ final class JsonSerializer {
                     tracef("baseClasses[0]: %s", baseClasses[0].stringof);
                 }
                 static if(!is(baseClasses[0] == Object)) {
-                    JSONValue superResult = toJson!(onlyPublic, traverseBase, includeMeta, baseClasses[0])(value);
+                    JSONValue superResult = serializeObject!(onlyPublic, traverseBase, includeMeta, baseClasses[0])(value);
                     if(!superResult.isNull)
                         result["super"] = superResult;
                 }
@@ -470,6 +478,9 @@ final class JsonSerializer {
         }
     }
 
+    /**
+     * Object's memeber
+     */
     private static void serializeMember(string member, 
             OnlyPublic onlyPublic = OnlyPublic.no, 
             TraverseBase traverseBase = TraverseBase.yes,
@@ -590,7 +601,7 @@ final class JsonSerializer {
     }
 
     /**
-     * class[] obj
+     * class[]
      */
     static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no, 
             TraverseBase traverseBase = TraverseBase.yes,
@@ -600,13 +611,13 @@ final class JsonSerializer {
         if(value is null) {
             return JSONValue(JSONValue[].init);
         } else {
-            return JSONValue(value.map!(item => toJson!(onlyPublic, traverseBase, includeMeta)(item))()
+            return JSONValue(value.map!(item => serializeObject!(onlyPublic, traverseBase, includeMeta)(item))()
                     .map!(json => json.isNull ? JSONValue(null) : json).array);
         }
     }
     
     /**
-     * struct[] obj
+     * struct[]
      */
     static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no,
             TraverseBase traverseBase = TraverseBase.no,
@@ -640,4 +651,8 @@ final class JsonSerializer {
     }
 
 }
-}
+
+
+alias toJson = JsonSerializer.toJson;
+
+alias fromJson = JsonSerializer.fromJson;
