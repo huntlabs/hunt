@@ -370,31 +370,42 @@ final class JsonSerializer {
      * class
      */
     static JSONValue toJson(T)(T value) if (is(T == class)) {
-        return serializeObject!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no)(value);
+        return toJson!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no)(value);
     }
 
     /// ditto
     static JSONValue toJson(OnlyPublic onlyPublic, T)
             (T value) if (is(T == class)) {
-        return serializeObject!(onlyPublic, TraverseBase.yes, IncludeMeta.no)(value);
+        return toJson!(onlyPublic, TraverseBase.yes, IncludeMeta.no)(value);
     }
 
     static JSONValue toJson(TraverseBase traverseBase, T)
             (T value) if (is(T == class)) {
-        return serializeObject!(OnlyPublic.no, traverseBase, IncludeMeta.no)(value);
+        return toJson!(OnlyPublic.no, traverseBase, IncludeMeta.no)(value);
     }
 
     /// ditto
     static JSONValue toJson(IncludeMeta includeMeta, T)
             (T value) if (is(T == class)) {
-        return serializeObject!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no)(value);
+        return toJson!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no)(value);
     }
 
     /// ditto
     static JSONValue toJson(OnlyPublic onlyPublic, TraverseBase traverseBase,
             IncludeMeta includeMeta = IncludeMeta.no, T)
             (T value) if (is(T == class)) {
-        return serializeObject!(onlyPublic, traverseBase, includeMeta, T)(value);
+        
+        version(HUNT_DEBUG_MORE) {
+            info("======== current type: class " ~ T.stringof);
+            tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, T: %s",
+                traverseBase, onlyPublic, includeMeta, T.stringof);
+        }
+        static if(is(T : JsonSerializable)) {
+            // JsonSerializable first
+            return toJson!(JsonSerializable, IncludeMeta.no)(value);
+        } else {
+            return serializeObject!(onlyPublic, traverseBase, includeMeta, T)(value);
+        }
     }
 
     deprecated("Using the other form of toJson instead.")
@@ -410,12 +421,12 @@ final class JsonSerializer {
      */
     static JSONValue serializeObject(OnlyPublic onlyPublic = OnlyPublic.no, 
             TraverseBase traverseBase = TraverseBase.yes, 
-            IncludeMeta includeMeta = IncludeMeta.yes, T) 
+            IncludeMeta includeMeta = IncludeMeta.yes,  T)  //int depth=-1,
             (T value) if (is(T == class)) {
         import std.traits : isSomeFunction, isType;
-        // import std.typecons : nullable;
 
         version(HUNT_DEBUG_MORE) {
+            info("======== current type: class " ~ T.stringof);
             tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, T: %s",
                 traverseBase, onlyPublic, includeMeta, T.stringof);
         }
@@ -429,7 +440,7 @@ final class JsonSerializer {
         static if(includeMeta == IncludeMeta.yes) {
             result[MetaTypeName] = typeid(T).name;
         }
-        version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: class " ~ T.stringof);
+        // version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: class " ~ T.stringof);
         
         // super fields
         static if(traverseBase) {
@@ -468,7 +479,7 @@ final class JsonSerializer {
         } else {
             auto result = JSONValue();
             // version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: struct " ~ T.stringof);
-            version(HUNT_DEBUG_MORE) trace("======== current type: struct " ~ T.stringof);
+            version(HUNT_DEBUG_MORE) info("======== current type: struct " ~ T.stringof);
                 
             static foreach (string member; FieldNameTuple!T) {
                 serializeMember!(member, onlyPublic, traverseBase, includeMeta)(value, result);
@@ -487,7 +498,7 @@ final class JsonSerializer {
             IncludeMeta includeMeta = IncludeMeta.no, T)
             (T obj, ref JSONValue result) {
 
-        version(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
+        // version(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
 
         alias currentMember = __traits(getMember, T, member);
 
@@ -510,7 +521,7 @@ final class JsonSerializer {
 
         static if(canSerialize) {
             alias memberType = typeof(currentMember);
-            version(HUNT_DEBUG_MORE) infof("memberType: %s", memberType.stringof);
+            version(HUNT_DEBUG_MORE) infof("memberType: %s in %s", memberType.stringof, T.stringof);
 
             JSONValue json;
 
@@ -579,11 +590,19 @@ final class JsonSerializer {
     /**
      * JsonSerializable
      */
-    static JSONValue toJson(T)(T value) if (is(T == interface) && is(T : JsonSerializable)) {
+    static JSONValue toJson(T, IncludeMeta includeMeta = IncludeMeta.yes)
+                    (T value) if (is(T == interface) && is(T : JsonSerializable)) {
+        version(HUNT_DEBUG_MORE) {
+            infof("======== current type: interface = %s, Object = %s", 
+                T.stringof, typeid(cast(Object)value).name);
+        }
+
         JSONValue v = value.jsonSerialize();
-        auto itemPtr = MetaTypeName in v;
-        if(itemPtr is null)
-            v[MetaTypeName] = typeid(cast(Object)value).name;
+        static if(includeMeta == IncludeMeta.yes) {
+            auto itemPtr = MetaTypeName in v;
+            if(itemPtr is null)
+                v[MetaTypeName] = typeid(cast(Object)value).name;
+        }
         version(HUNT_DEBUG_MORE) trace(v.toString());
         return v;
     }
