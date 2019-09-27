@@ -152,7 +152,8 @@ class GreetingSettings : ISettings {
 
 
     JSONValue jsonSerialize() {
-        return JsonSerializer.serializeObject(this);
+        return JsonSerializer.serializeObject!(OnlyPublic.no,
+                TraverseBase.no, IncludeMeta.no)(this);
         // JSONValue v;
         // v["_color"] = _color;
         // return v;
