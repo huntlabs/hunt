@@ -129,8 +129,7 @@ class JsonSerializerTest {
     void testMetaType() {
 
         Greeting gt = new Greeting();
-        JSONValue jv = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.no)(gt);
+        JSONValue jv = JsonSerializer.toJson!(SerializationOptions())(gt);
         // trace(jv.toPrettyString());
 
         auto itemPtr = MetaTypeName in jv;
@@ -144,8 +143,7 @@ class JsonSerializerTest {
 
 /* -------------------------IncludeMeta.yes----------------------------------- */
 
-        jv = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.yes)(gt);
+        jv = JsonSerializer.toJson!(SerializationOptions.Full)(gt);
         // trace(jv.toPrettyString());
 
         itemPtr = MetaTypeName in jv;
@@ -169,8 +167,7 @@ class JsonSerializerTest {
         gt.setColor("Red");
         gt.setContent("Hello");
         gt.addGuest("gest02", 25);
-        JSONValue jv = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.no)(gt);
+        JSONValue jv = JsonSerializer.toJson(gt);
         // trace(jv.toPrettyString());
 
         Greeting gt1 = JsonSerializer.fromJson!(Greeting)(jv);
@@ -179,8 +176,7 @@ class JsonSerializerTest {
         assert(gt1 !is null);
         // trace(gt1.getContent());
 
-        JSONValue jv1 = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.no)(gt1);
+        JSONValue jv1 = JsonSerializer.toJson(gt1);
         // trace(jv1.toPrettyString());
 
         // trace(jv.toString());
@@ -361,7 +357,7 @@ class JsonSerializerTest {
         JSONValue json = JsonSerializer.toJson(greetings);
         trace(json);
         
-        json = JsonSerializer.toJson!(OnlyPublic.yes, TraverseBase.no)(greetings);
+        json = JsonSerializer.toJson!(SerializationOptions.OnlyPublicWithNull)(greetings);
         trace(json);
     }
 
@@ -375,13 +371,13 @@ class JsonSerializerTest {
         greetings[0].setPrivateMember("private member");
 
         JSONValue json = JsonSerializer.toJson(greetings);
-        info(json.toPrettyString());
+        // info(json.toPrettyString());
         
-        json = JsonSerializer.toJson!(OnlyPublic.yes, TraverseBase.no)(greetings);
-        info(json.toPrettyString());
+        json = JsonSerializer.toJson!(SerializationOptions.OnlyPublicWithNull)(greetings);
+        // info(json.toPrettyString());
 
-        json = JsonSerializer.toJson!(OnlyPublic.yes, TraverseBase.yes)(greetings);
-        info(json.toPrettyString());
+        json = JsonSerializer.toJson!(SerializationOptions.Lite)(greetings);
+        // info(json.toPrettyString());
 
     }
 
@@ -423,8 +419,7 @@ class JsonSerializerTest {
         const(JSONValue)* itemPtr;
 
         // depth -1
-        jv = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.no)(gt);
+        jv = JsonSerializer.toJson!(SerializationOptions.Normal)(gt);
         // trace(jv.toPrettyString());
 
         itemPtr = "guests" in jv;
@@ -437,8 +432,7 @@ class JsonSerializerTest {
         assert(itemPtr !is null);
 
         // depth 0
-        jv = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.no, 0)(gt);
+        jv = JsonSerializer.toJson!(SerializationOptions.Normal.depth(0))(gt);
         // trace(jv.toPrettyString());
         itemPtr = "guests" in jv;
         assert(itemPtr is null);
@@ -450,9 +444,8 @@ class JsonSerializerTest {
         assert(itemPtr is null);
 
         // depth 1
-        jv = JsonSerializer.toJson!(OnlyPublic.no, 
-            TraverseBase.yes, IncludeMeta.no, 1)(gt);
-        trace(jv.toPrettyString());
+        jv = JsonSerializer.toJson!(SerializationOptions.Normal.depth(1))(gt);
+        // trace(jv.toPrettyString());
 
         itemPtr = "guests" in jv;
         assert(itemPtr !is null);

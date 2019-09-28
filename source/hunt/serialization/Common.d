@@ -4,6 +4,71 @@ import std.typecons : Flag;
 
 
 /**
+ * 
+ */
+struct SerializationOptions {
+    enum Default = SerializationOptions();
+    enum Full = SerializationOptions().includeMeta(true);
+    enum Lite = SerializationOptions().traverseBase(false).ignoreNull(true).depth(0);
+    enum Normal = SerializationOptions().ignoreNull(true);
+
+    enum OnlyPublicWithNull = SerializationOptions().onlyPublic(true).traverseBase(false).depth(0);
+    enum OnlyPublicLite = OnlyPublicWithNull.ignoreNull(true);
+
+    private bool _onlyPublic = false;
+
+    private bool _traverseBase = true;
+
+    private bool _includeMeta = false;
+
+    private bool _ignoreNull = false;
+
+    private int _depth = -1;
+
+/* --------------------------------------------------- properties --------------------------------------------------- */
+
+    bool onlyPublic() { return _onlyPublic; }
+
+    SerializationOptions onlyPublic(bool flag) {
+        SerializationOptions r = this;
+        r._onlyPublic = flag;
+        return r;
+    }
+
+    bool traverseBase() { return _traverseBase; }
+
+    SerializationOptions traverseBase(bool flag) {
+        SerializationOptions r = this;
+        r._traverseBase = flag;
+        return r;
+    }
+
+    bool includeMeta() { return _includeMeta; }
+
+    SerializationOptions includeMeta(bool flag) {
+        SerializationOptions r = this;
+        r._includeMeta = flag;
+        return r;
+    }
+
+    bool ignoreNull() { return _ignoreNull; }
+
+    SerializationOptions ignoreNull(bool flag) {
+        SerializationOptions r = this;
+        r._ignoreNull = flag;
+        return r;
+    }
+
+    int depth() { return _depth; }
+
+    SerializationOptions depth(int depth) {
+        SerializationOptions r = this;
+        r._depth = depth;
+        return r;
+    }
+}
+
+/**
    Flag indicating whether to traverse the base class.
 */
 alias TraverseBase = Flag!"traverseBase";
@@ -13,15 +78,15 @@ alias TraverseBase = Flag!"traverseBase";
 */
 alias OnlyPublic = Flag!"onlyPublic";
 
-
 /**
    Flag indicating whether to include the meta data (especially for a class or an interface).
 */
 alias IncludeMeta = Flag!"includeMeta";
 
-
-
-// alias OnlyPublic = Flag!"onlyPublic";
+/**
+   Flag indicating whether to ignore the null member.
+*/
+alias IgnoreNull = Flag!"ignoreNull";
 
 
 /// attributes for json
@@ -31,6 +96,8 @@ alias IncludeMeta = Flag!"includeMeta";
  * Excludes the field from both encoding and decoding.
  */
 enum Exclude;
+
+alias Ignore = Exclude;
 
 /**
  * Includes this even if it would otherwise be excluded.

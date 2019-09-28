@@ -370,65 +370,58 @@ final class JsonSerializer {
      * class
      */
     static JSONValue toJson(int depth=-1, T)(T value) if (is(T == class)) {
-        return toJson!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no, depth)(value);
+        enum options = SerializationOptions().depth(depth);
+        return toJson!(options)(value);
     }
+
 
     /// ditto
-    static JSONValue toJson(OnlyPublic onlyPublic, int depth=-1, T)
-            (T value) if (is(T == class)) {
-        return toJson!(onlyPublic, TraverseBase.yes, IncludeMeta.no, depth)(value);
-    }
-
-    static JSONValue toJson(TraverseBase traverseBase, int depth=-1, T)
-            (T value) if (is(T == class)) {
-        return toJson!(OnlyPublic.no, traverseBase, IncludeMeta.no, depth)(value);
-    }
-
-    /// ditto
-    static JSONValue toJson(IncludeMeta includeMeta, int depth=-1, T)
-            (T value) if (is(T == class)) {
-        return toJson!(OnlyPublic.no, TraverseBase.yes, IncludeMeta.no, depth)(value);
-    }
-
-    /// ditto
-    static JSONValue toJson(OnlyPublic onlyPublic, TraverseBase traverseBase,
-            IncludeMeta includeMeta = IncludeMeta.no, int depth=-1, T)
+    static JSONValue toJson(SerializationOptions options, T)
             (T value) if (is(T == class)) {
         
         version(HUNT_DEBUG_MORE) {
             info("======== current type: class " ~ T.stringof);
-            tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, depth = %d, T: %s",
-                traverseBase, onlyPublic, includeMeta, depth, T.stringof);
+            tracef("%s, T: %s",
+                options, T.stringof);
         }
         static if(is(T : JsonSerializable)) {
             // JsonSerializable first
             return toJson!(JsonSerializable, IncludeMeta.no)(value);
         } else {
-            return serializeObject!(onlyPublic, traverseBase, includeMeta, depth, T)(value);
+            return serializeObject!(options, T)(value);
         }
     }
 
-    deprecated("Using the other form of toJson instead.")
+    deprecated("Using the other form of toJson(options) instead.")
     static JSONValue toJson(T, TraverseBase traverseBase,
             OnlyPublic onlyPublic = OnlyPublic.no, 
             IncludeMeta includeMeta = IncludeMeta.no)
             (T value) if (is(T == class)) {
-        return serializeObject!(onlyPublic, traverseBase, includeMeta, -1, T)(value);
+        enum options = SerializationOptions(onlyPublic, traverseBase, includeMeta);
+        return serializeObject!(options, T)(value);
+    }
+
+
+    deprecated("Using serializeObject(SerializationOptions) instead.")
+    static JSONValue serializeObject(OnlyPublic onlyPublic, TraverseBase traverseBase,
+        IncludeMeta includeMeta, T) (T value) if (is(T == class)) {
+
+        enum options = SerializationOptions(onlyPublic, traverseBase, includeMeta);
+        return serializeObject!(options, T)(value);
     }
 
     /**
      * class object
      */
-    static JSONValue serializeObject(OnlyPublic onlyPublic = OnlyPublic.no, 
-            TraverseBase traverseBase = TraverseBase.yes, 
-            IncludeMeta includeMeta = IncludeMeta.yes, int depth=-1, T)
+    static JSONValue serializeObject(SerializationOptions options = SerializationOptions.Full, T)
             (T value) if (is(T == class)) {
         import std.traits : isSomeFunction, isType;
 
         version(HUNT_DEBUG_MORE) {
             info("======== current type: class " ~ T.stringof);
-            tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, T: %s",
-                traverseBase, onlyPublic, includeMeta, T.stringof);
+            tracef("%s, T: %s", options, T.stringof);
+            // tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, T: %s",
+            //     traverseBase, onlyPublic, includeMeta, T.stringof);
         }
 
         if (value is null) {
@@ -437,21 +430,20 @@ final class JsonSerializer {
         }
 
         auto result = JSONValue();
-        static if(includeMeta == IncludeMeta.yes) {
+        static if(options.includeMeta) {
             result[MetaTypeName] = typeid(T).name;
         }
         // version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: class " ~ T.stringof);
         
         // super fields
-        static if(traverseBase) {
+        static if(options.traverseBase) {
             alias baseClasses = BaseClassesTuple!T;
             static if(baseClasses.length >= 1) {
                 version(HUNT_DEBUG_MORE) {
                     tracef("baseClasses[0]: %s", baseClasses[0].stringof);
                 }
                 static if(!is(baseClasses[0] == Object)) {
-                    JSONValue superResult = serializeObject!(onlyPublic, 
-                            traverseBase, includeMeta, depth, baseClasses[0])(value);
+                    JSONValue superResult = serializeObject!(options, baseClasses[0])(value);
                     if(!superResult.isNull)
                         result["super"] = superResult;
                 }
@@ -460,7 +452,7 @@ final class JsonSerializer {
         
         // current fields
 		static foreach (string member; FieldNameTuple!T) {
-            serializeMember!(member, onlyPublic, traverseBase, includeMeta, depth)(value, result);
+            serializeMember!(member, options)(value, result);
         }
 
         return result;
@@ -469,10 +461,7 @@ final class JsonSerializer {
     /**
      * struct
      */
-    static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no, 
-            TraverseBase traverseBase = TraverseBase.yes, 
-            IncludeMeta includeMeta = IncludeMeta.no, 
-            int depth=-1, T)(T value)
+    static JSONValue toJson(SerializationOptions options = SerializationOptions(), T)(T value)
             if (is(T == struct) && !is(T == SysTime)) {
 
         static if(is(T == JSONValue)) {
@@ -483,7 +472,7 @@ final class JsonSerializer {
             version(HUNT_DEBUG_MORE) info("======== current type: struct " ~ T.stringof);
                 
             static foreach (string member; FieldNameTuple!T) {
-                serializeMember!(member, onlyPublic, traverseBase, includeMeta, depth)(value, result);
+                serializeMember!(member, options)(value, result);
             }
 
             return result;
@@ -494,17 +483,14 @@ final class JsonSerializer {
      * Object's memeber
      */
     private static void serializeMember(string member, 
-            OnlyPublic onlyPublic = OnlyPublic.no, 
-            TraverseBase traverseBase = TraverseBase.yes,
-            IncludeMeta includeMeta = IncludeMeta.no,
-            int depth=-1, T)
+            SerializationOptions options = SerializationOptions.Default, T)
             (T obj, ref JSONValue result) {
 
         // version(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
 
         alias currentMember = __traits(getMember, T, member);
 
-        static if(onlyPublic) {
+        static if(options.onlyPublic) {
             static if (__traits(getProtection, currentMember) == "public") {
                 enum canSerialize = true;
             } else {
@@ -517,8 +503,8 @@ final class JsonSerializer {
         }
         
         version(HUNT_DEBUG_MORE) {
-            tracef("name: %s, onlyPublic: %s, traverseBase: %s, includeMeta: %s, depth: %d", 
-                member, onlyPublic, traverseBase, includeMeta, depth);
+            tracef("name: %s, %s", 
+                member, options);
         }
 
         static if(canSerialize) {
@@ -528,43 +514,21 @@ final class JsonSerializer {
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
                 version(HUNT_DEBUG) warning("skipped a interface member(not JsonSerializable): " ~ member);
             } else {
-                JSONValue json;
                 auto m = __traits(getMember, obj, member);
-                static if(is(memberType == interface) && is(memberType : JsonSerializable)) {
-                    static if(depth == -1 || depth > 0) { json = toJson!(JsonSerializable)(m);}
-                } else static if(is(memberType == SysTime)) {
-                    json = toJson!SysTime(m);
-                } else static if(is(memberType == class)) {
-                    if(m !is null) {
-                        static if(depth > 0) json = toJson!(onlyPublic, traverseBase, includeMeta, depth-1)(m); 
-                        else static if(depth == -1) json = toJson!(onlyPublic, traverseBase, includeMeta)(m); 
-                    }
-                } else static if(is(memberType == struct)) {
-                    // json = toJson!(onlyPublic, traverseBase, includeMeta)(m); 
-                    static if(depth > 0) json = toJson!(onlyPublic, traverseBase, includeMeta, depth-1)(m); 
-                    else static if(depth == -1) json = toJson!(onlyPublic, traverseBase, includeMeta)(m); 
-                } else static if(is(memberType : U[], U)) { 
-                    if(m is null) {
-                            // json = JSONValue[].init;
-                    } else {
-                        static if (is(U == class) || is(U == struct) || is(U == interface)) {
-                            // class[] obj; struct[] obj;
-                        
-                            // json = toJson!(onlyPublic, traverseBase, includeMeta)(m);
-                            static if(depth > 0) json = toJson!(onlyPublic, traverseBase, includeMeta, depth-1)(m); 
-                            else static if(depth == -1) json = toJson!(onlyPublic, traverseBase, includeMeta)(m); 
-                        } else {
-                            json = toJson(m);
-                        }
-                    }
-                } else {
-                    json = toJson(m);
-                }
+                auto json = serializeMember!(options)(m);
+
                 version(HUNT_DEBUG_MORE) {
                     tracef("name: %s, value: %s", member, json.toString());
                 }
 
-                if (!json.isNull) {
+                bool canSetValue = true;
+                if(json.isNull) {
+                    static if(options.ignoreNull) {
+                        canSetValue = false;
+                    }
+                }
+
+                if (canSetValue) {
                         // trace(result);
                     if(!result.isNull) {
                         auto jsonItemPtr = member in result;
@@ -574,10 +538,56 @@ final class JsonSerializer {
                     }
                     result[member] = json;
                 }
-
             }
         } else {
             version(HUNT_DEBUG_MORE) tracef("skipped member, name: %s", member);
+        }
+    }
+
+    private static JSONValue serializeMember(SerializationOptions options, T)(T m) {
+        JSONValue json;
+        enum depth = options.depth;
+        static if(is(T == interface) && is(T : JsonSerializable)) {
+            static if(depth == -1 || depth > 0) { json = toJson!(JsonSerializable)(m);}
+        } else static if(is(T == SysTime)) {
+            json = toJson!SysTime(m);
+        } else static if(is(T == class)) {
+            if(m !is null) {
+                json = serializeObjectMember!(options)(m);
+            }
+        } else static if(is(T == struct)) {
+            json = serializeObjectMember!(options)(m);
+        } else static if(is(T : U[], U)) { 
+            if(m is null) {
+                static if(!options.ignoreNull) {
+                    json = JSONValue[].init;
+                }
+            } else {
+                static if (is(U == class) || is(U == struct) || is(U == interface)) {
+                    // class[] obj; struct[] obj;
+                    json = serializeObjectMember!(options)(m);
+                } else {
+                    json = toJson(m);
+                }
+            }
+        } else {
+            json = toJson(m);
+        }
+
+        return json;
+        
+    }
+
+    private static JSONValue serializeObjectMember(SerializationOptions options = 
+            SerializationOptions.Default, T)(ref T m) {
+        enum depth = options.depth;
+        static if(depth > 0) {
+            enum SerializationOptions memeberOptions = options.depth(options.depth-1);
+            return toJson!(memeberOptions)(m);
+        } else static if(depth == -1) {
+            return toJson!(options)(m);
+        } else {
+            return JSONValue.init;
         }
     }
 
@@ -610,7 +620,7 @@ final class JsonSerializer {
         }
 
         JSONValue v = value.jsonSerialize();
-        static if(includeMeta == IncludeMeta.yes) {
+        static if(includeMeta) {
             auto itemPtr = MetaTypeName in v;
             if(itemPtr is null)
                 v[MetaTypeName] = typeid(cast(Object)value).name;
@@ -633,30 +643,60 @@ final class JsonSerializer {
         return JSONValue(value);
     }
 
+    // deprecated("Using toJson(SerializationOptions) instead.")
+    // static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no, 
+    //         TraverseBase traverseBase = TraverseBase.yes,
+    //         IncludeMeta includeMeta = IncludeMeta.no, 
+    //         int depth=-1, T : U[], U)
+    //         (T value) 
+    //         if(is(T : U[], U) && is(U == class)) {
+    //     if(value is null) {
+    //         return JSONValue(JSONValue[].init);
+    //     } else {
+    //         return toJson!(SerializationOptions(onlyPublic, traverseBase, includeMeta, true, depth))(value);
+    //         // return JSONValue(value.map!(item => serializeObject!(onlyPublic, traverseBase, includeMeta, depth)(item))()
+    //         //         .map!(json => json.isNull ? JSONValue(null) : json).array);
+    //     }
+    // }
+
     /**
      * class[]
      */
-    static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no, 
-            TraverseBase traverseBase = TraverseBase.yes,
-            IncludeMeta includeMeta = IncludeMeta.no, 
-            int depth=-1, T : U[], U)
-            (T value) 
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal, 
+            T : U[], U) (T value) 
             if(is(T : U[], U) && is(U == class)) {
         if(value is null) {
             return JSONValue(JSONValue[].init);
         } else {
-            return JSONValue(value.map!(item => serializeObject!(onlyPublic, traverseBase, includeMeta, depth)(item))()
+            return JSONValue(value.map!(item => serializeObject!(options)(item))()
                     .map!(json => json.isNull ? JSONValue(null) : json).array);
         }
     }
     
+
+    // deprecated("Using toJson(SerializationOptions) instead.")
+    // static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no,
+    //         TraverseBase traverseBase = TraverseBase.no,
+    //         IncludeMeta includeMeta = IncludeMeta.no,
+    //         int depth=-1,  
+    //         T : U[], U)(T value) if(is(U == struct)) {
+    //     if(value is null) {
+    //         return JSONValue(JSONValue[].init);
+    //     } else {
+    //         static if(is(U == SysTime)) {
+    //             return JSONValue(value.map!(item => toJson(item))()
+    //                     .map!(json => json.isNull ? JSONValue(null) : json).array);
+    //         } else {
+    //             return JSONValue(value.map!(item => toJson!(onlyPublic, traverseBase, includeMeta, depth)(item))()
+    //                     .map!(json => json.isNull ? JSONValue(null) : json).array);
+    //         }
+    //     }
+    // }
+
     /**
      * struct[]
      */
-    static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no,
-            TraverseBase traverseBase = TraverseBase.no,
-            IncludeMeta includeMeta = IncludeMeta.no,
-            int depth=-1,  
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
             T : U[], U)(T value) if(is(U == struct)) {
         if(value is null) {
             return JSONValue(JSONValue[].init);
@@ -665,7 +705,7 @@ final class JsonSerializer {
                 return JSONValue(value.map!(item => toJson(item))()
                         .map!(json => json.isNull ? JSONValue(null) : json).array);
             } else {
-                return JSONValue(value.map!(item => toJson!(onlyPublic, traverseBase, includeMeta, depth)(item))()
+                return JSONValue(value.map!(item => toJson!(options)(item))()
                         .map!(json => json.isNull ? JSONValue(null) : json).array);
             }
         }
@@ -674,11 +714,18 @@ final class JsonSerializer {
     /**
      * U[K]
      */
-    static JSONValue toJson(T : U[K], U, K)(T value) if (isAssociativeArray!T) {
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
+            T : U[K], U, K)(T value) {
         auto result = JSONValue();
 
         foreach (key; value.keys) {
-            auto json = toJson(value[key]);
+            static if(is(U == SysTime)) {
+                auto json = toJson(value[key]);
+            } else static if(is(U == class) || is(U == struct) || is(U == interface)) {
+                auto json = toJson!(options)(value[key]);
+            } else {
+                auto json = toJson(value[key]);
+            }
             result[key.to!string] = json.isNull ? JSONValue(null) : json;
         }
 
