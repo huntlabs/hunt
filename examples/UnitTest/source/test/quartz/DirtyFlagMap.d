@@ -272,7 +272,7 @@ class DirtyFlagMap(K, V) : Map!(K, V), Cloneable, JsonSerializable {
 
     JSONValue jsonSerialize() {
         JSONValue r = JsonSerializer.serializeObject!(OnlyPublic.no,
-        TraverseBase.no, IncludeMeta.no, typeof(this))(this);
+        TraverseBase.no, IncludeMeta.no)(this);
         // string[] keys = map.byKey.array;
         
         // static if(is(V == class)) {

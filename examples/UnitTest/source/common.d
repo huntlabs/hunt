@@ -150,7 +150,6 @@ class GreetingSettings : ISettings {
         this._color = c;
     }
 
-
     JSONValue jsonSerialize() {
         return JsonSerializer.serializeObject!(OnlyPublic.no,
                 TraverseBase.no, IncludeMeta.no)(this);
