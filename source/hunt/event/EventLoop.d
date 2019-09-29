@@ -31,10 +31,9 @@ final class EventLoop : AbstractSelector {
         super(number, divider);
     }
 
-
     override void stop() {
         if(!isRuning) {
-            version (HUNT_DEBUG) trace("The event loop is not running.");
+            version (HUNT_DEBUG) warning("The event loop is not running.");
             return;
         }
         

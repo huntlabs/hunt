@@ -341,7 +341,7 @@ class DateTimeHelper {
         }
     }
 
-    static void stopClock() {
+    static void stopClock() @nogc {
         atomicStore(_isClockRunning, false);
     }
 
@@ -383,9 +383,9 @@ class DateTimeHelper {
         // startClock();
     }
 
-    shared static ~this() {
+    shared static ~this() @nogc {
         if (cas(&_isClockRunning, true, false)) {
-            dateThread.join();
+            // dateThread.join();
         }
     }
 

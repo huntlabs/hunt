@@ -87,7 +87,12 @@ abstract class Selector {
         version (HUNT_IO_DEBUG)
             tracef("Selector stopping. _running=%s", _running); 
         if(cas(&_running, true, false)) {
-            onStop();
+            try {
+                onStop();
+            } catch(Throwable t) {
+                warning(t.msg);
+                version(HUNT_DEBUG) warning(t);
+            }
         }
     }
 
@@ -97,15 +102,15 @@ abstract class Selector {
     }
 
     /**
-     * Tells whether or not this selector is open.
+     * Tells whether or not this selector is running.
      *
-     * @return <tt>true</tt> if, and only if, this selector is open
+     * @return <tt>true</tt> if, and only if, this selector is running
      */
-    bool isOpen() {
+    bool isRuning() {
         return _running;
     }
 
-    alias isRuning = isOpen;
+    alias isOpen = isRuning;
 
     /**
         timeout: in millisecond

@@ -51,8 +51,8 @@ class AbstractSelector : Selector {
         register(_eventChannel);
     }
 
-    ~this() {
-        dispose();
+    ~this() @nogc {
+        // dispose();
     }
 
     override void dispose() {
@@ -65,7 +65,7 @@ class AbstractSelector : Selector {
         _eventChannel.close();
         int r = core.sys.posix.unistd.close(_kqueueFD);
         if(r != 0) {
-            warningf("error: %d", r);
+            version(HUNT_DEBUG) warningf("error: %d", r);
         }
 
         super.dispose();

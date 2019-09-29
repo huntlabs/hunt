@@ -26,7 +26,7 @@ class EpollEventChannel : EventChannel {
     }
 
     ~this() {
-        close();
+        // close();
     }
 
     override void trigger() {
