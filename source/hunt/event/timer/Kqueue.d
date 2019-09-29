@@ -34,8 +34,8 @@ class AbstractTimer : TimerChannelBase {
         _readBuffer = new UintObject();
     }
 
-    ~this() {
-        close();
+    ~this() @nogc {
+        // close();
     }
 
     bool readTimer(scope SimpleActionHandler read) {

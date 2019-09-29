@@ -22,8 +22,8 @@ class KqueueEventChannel : EventChannel {
         this.handle = _pair[1].handle;
     }
 
-    ~this() {
-        close();
+    ~this() @nogc {
+        // close();
     }
 
     override void trigger() {

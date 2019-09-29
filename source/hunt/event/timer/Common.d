@@ -160,8 +160,8 @@ private:
     The timer parent's class.
 */
 abstract class WheelTimer {
-    ~this() {
-        stop();
+    ~this() @nogc {
+        // stop();
     }
     /**
         the function will be called when the timer timeout.

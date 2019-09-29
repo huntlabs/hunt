@@ -41,8 +41,8 @@ abstract class AbstractTimer : TimerChannelBase {
         // setTimer();
     }
 
-    ~this() {
-        close();
+    ~this() @nogc {
+        // close();
     }
 
     private bool setTimer() {
