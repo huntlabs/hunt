@@ -129,7 +129,7 @@ enum TimeUnit : string {
 
 // return unix timestamp
 long time() {
-    return DateTimeHelper.timestamp;
+    return DateTime.timestamp;
 }
 
 // return formated time string from timestamp
@@ -177,9 +177,14 @@ string date(string format, long timestamp = 0) {
     return timeString;
 }
 
+
+deprecated("Using DateTime instead.")
+alias DateTimeHelper = DateTime;
+
 /**
-*/
-class DateTimeHelper {
+ * 
+ */
+class DateTime {
     /**
      * Returns the current time in milliseconds.  Note that
      * while the unit of time of the return value is a millisecond,

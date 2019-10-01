@@ -14,7 +14,7 @@ import hunt.logging;
 import hunt.util.DateTime;
 
 void main() {
-	DateTimeHelper.startClock();
+	DateTime.startClock();
 
 	setLoggingLevel(LogLevel.LOG_DEBUG);
 	LogConf conf;

@@ -57,7 +57,7 @@ version (NativeTimer) {
 	import hunt.event;
 
 	void main() {
-		DateTimeHelper.startClock();
+		DateTime.startClock();
 		EventLoop loop = new EventLoop();
 
 		bool isTimer1Running = true;
