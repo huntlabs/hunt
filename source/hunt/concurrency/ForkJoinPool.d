@@ -1198,7 +1198,7 @@ class ForkJoinPool : AbstractExecutorService {
                     break;                        // quiescent shutdown
                 } else if (rc <= 0 && pred != 0 && phase == cast(int)c) {
                     long nc = (UC_MASK & (c - TC_UNIT)) | (SP_MASK & pred);
-                    MonoTime d = MonoTime.currTime + keepAlive; // DateTimeHelper.currentTimeMillis();
+                    MonoTime d = MonoTime.currTime + keepAlive; // DateTime.currentTimeMillis();
                     LockSupport.parkUntil(this, d);
                     if (ctl == c &&               // drop on timeout if all idle
                         d - MonoTime.currTime <= TIMEOUT_SLOP.msecs &&

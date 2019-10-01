@@ -2,7 +2,7 @@ module hunt.concurrency.ThreadLocalRandom;
 
 import hunt.concurrency.atomic.AtomicHelper;
 import hunt.util.DateTime;
-import std.datetime;
+import std.datetime : Clock;
 
 
 /**
@@ -80,7 +80,7 @@ class ThreadLocalRandom {
     enum string BAD_SIZE  = "size must be non-negative";    
 
     shared static this() {
-        seeder = mix64(DateTimeHelper.currentTimeMillis()) ^
+        seeder = mix64(DateTime.currentTimeMillis()) ^
                          mix64(Clock.currStdTime()*100);
     }
 
