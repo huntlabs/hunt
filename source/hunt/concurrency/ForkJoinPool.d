@@ -3354,22 +3354,13 @@ final class WorkQueue {
             (d = (s = top) - (b = base)) > 0) {
             if ((md & FIFO) == 0 || d == 1) {
                 auto index = (cap - 1) & --s;
-                t = cast(IForkJoinTask)a[index];
-                a[index] = null;
+                t = AtomicHelper.getAndSet(a[index], cast(IForkJoinTask)null);
                 if(t !is null) {
                     AtomicHelper.store(this.top, s);
                 }
-                // FIXME: Needing refactor or cleanup -@zxp at 2019/2/9 9:10:45
-                // 
-                // if ((t = cast(IForkJoinTask)
-                //      AtomicHelper.getAndSet(a[(cap - 1) & --s], null)) !is null)
-                    // AtomicHelper.store(this.top, s);
             } else {
-                // t = cast(IForkJoinTask)
-                //       AtomicHelper.getAndSet(a[(cap - 1) & b++], null)
                 auto index = (cap - 1) & b++;
-                t = cast(IForkJoinTask)a[index];
-                a[index] = null;
+                t = AtomicHelper.getAndSet(a[index], cast(IForkJoinTask)null);
                 if (t !is null) {
                     AtomicHelper.store(this.base, b);
                 }
