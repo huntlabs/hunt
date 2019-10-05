@@ -72,7 +72,7 @@ final class JsonSerializer {
     */
     static T fromJson(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
-            if (is(T == class) && is(typeof(new T()))) {
+            if (is(T == class) && __traits(compiles, new T())) { // is(typeof(new T()))
 
         if (json.type() != JSONType.object) {
             return handleException!(T, canThrow)(json, "wrong object type", defaultValue);
