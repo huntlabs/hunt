@@ -39,13 +39,9 @@ class AtomicHelper {
         return v - delta;
     }
 
-    static T getAndSet(T, U)(ref T stuff, U newValue) {
-        //TODO: Tasks pending completion -@zxp at 12/16/2018, 11:15:45 AM
-        // exchange
-        // https://issues.dlang.org/show_bug.cgi?id=15007
-        T v = stuff;
-        store(stuff, newValue);
-        return v;
+    static T getAndSet(T, U)(ref T stuff, U newValue) 
+            if(__traits( compiles, { stuff = newValue; } )) {
+        return cast(T)atomicExchange(cast(shared)&stuff, cast(shared)newValue);
     }
 
     static T getAndBitwiseOr(T, U)(ref T stuff, U value) {
