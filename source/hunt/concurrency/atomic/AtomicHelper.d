@@ -12,6 +12,7 @@
 module hunt.concurrency.atomic.AtomicHelper;
 
 import core.atomic;
+import hunt.util.Common;
 
 class AtomicHelper {
     static void store(T)(ref T stuff, T newVal) {
@@ -41,7 +42,13 @@ class AtomicHelper {
 
     static T getAndSet(T, U)(ref T stuff, U newValue) 
             if(__traits( compiles, { stuff = newValue; } )) {
-        return cast(T)atomicExchange(cast(shared)&stuff, cast(shared)newValue);
+        static if(CompilerHelper.isGreaterThan(2088)) {
+            return cast(T)atomicExchange(cast(shared)&stuff, cast(shared)newValue);
+        } else {
+            T v = stuff;
+            store(stuff, newValue);
+            return v;            
+        }
     }
 
     static T getAndBitwiseOr(T, U)(ref T stuff, U value) {
