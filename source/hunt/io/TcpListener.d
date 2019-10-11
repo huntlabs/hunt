@@ -204,6 +204,6 @@ static if (CompilerHelper.isLessThan(2078)) {
     
 }
 
- version (AArch64) {
-        enum SO_REUSEPORT = 15;
-    }
+version (AArch64) {
+    enum SO_REUSEPORT = 15;
+}
