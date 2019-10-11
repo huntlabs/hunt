@@ -241,7 +241,8 @@ class TcpStream : AbstractStream {
         assert(buffer !is null);
 
         if (!_isConnected) {
-            throw new Exception("The connection is down!");
+            throw new Exception(format("The connection is down! remote: %s", 
+                this.remoteAddress.toString()));
         }
 
         version (HUNT_IO_DEBUG)

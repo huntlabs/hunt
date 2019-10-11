@@ -171,9 +171,9 @@ class AbstractSelector : Selector {
         if (timeout <= 0) { /* Indefinite or no wait */
             do {
                 // http://man7.org/linux/man-pages/man2/epoll_wait.2.html
+                // https://stackoverflow.com/questions/6870158/epoll-wait-fails-due-to-eintr-how-to-remedy-this/6870391#6870391
                 len = epoll_wait(_epollFD, events.ptr, events.length, cast(int) timeout);
-            }
-            while ((len == -1) && (errno == EINTR));
+            } while ((len == -1) && (errno == EINTR));
         } else { /* Bounded wait; bounded restarts */
             len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
@@ -210,7 +210,7 @@ class AbstractSelector : Selector {
         infof("handling event: selector=%d, events=%d, channel=%d", this._epollFD, event, channel.handle);
 
         try {
-            if (isClosed(event)) {
+            if (isClosed(event)) { // && errno != EINTR
                 /* An error has occured on this fd, or the socket is not
                     ready for reading (why were we notified then?) */
                 version (HUNT_IO_DEBUG) {

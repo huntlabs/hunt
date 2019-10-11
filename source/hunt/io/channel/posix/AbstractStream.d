@@ -301,7 +301,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool checkAllWriteDone() {
         version (HUNT_IO_DEBUG) {
             import std.conv;
-            tracef("checking remaining: fd=%d, writeQueue: %s", this.handle, 
+            tracef("checking remaining: fd=%d, writeQueue empty: %s", this.handle, 
                 _writeQueue.isEmpty().to!string());
         }
 
