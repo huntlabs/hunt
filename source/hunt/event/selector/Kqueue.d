@@ -11,14 +11,16 @@
 
 module hunt.event.selector.Kqueue;
 
+
 // dfmt off
 version(HAVE_KQUEUE):
 // dfmt on
 import hunt.event.selector.Selector;
-import hunt.io.channel;
 import hunt.event.timer.Kqueue;
 import hunt.Exceptions;
+import hunt.io.channel;
 import hunt.logging.ConsoleLogger;
+import hunt.util.Common;
 
 import std.exception;
 import std.socket;
@@ -336,4 +338,6 @@ extern (C) {
             Kevent* eventlist, int nevents, const timespec* timeout) @nogc nothrow;
 }
 
-enum SO_REUSEPORT = 0x0200;
+static if (CompilerHelper.isLessThan(2078)) {
+    enum SO_REUSEPORT = 0x0200;
+}
