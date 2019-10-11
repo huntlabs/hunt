@@ -16,13 +16,8 @@ class AtomicTest {
         AtomicHelper.store(value, 12);
     }
 
-    void atomicStore1(MemoryOrder ms = MemoryOrder.seq, T, V1)(ref shared T val, V1 newval ) {
-        val = newval;
-    }
-
     void testBasic01() {
         Fruit f = new Fruit("apple", 5.8f);
-        // atomicStore1((cast(shared Fruit)fruit), cast(shared)f); // bad
         atomicStore(*(cast(shared)&fruit), cast(shared)f);
 
         assert(fruit !is null);
@@ -42,5 +37,54 @@ class AtomicTest {
         
         int v = AtomicHelper.load(value);
         assert(v == 12);
+    }
+
+    void testGetAndSet01() {
+        Fruit f = new Fruit("apple", 5.8f);
+        Fruit f1 = new Fruit("banana", 3.8f);
+
+        {
+
+            Fruit old = AtomicHelper.getAndSet(f, f1);
+            // trace(old.toString());
+            // trace(f.toString());
+            assert(old.getName() == "apple");
+            assert(f.getName() == "banana");
+        }
+
+        // Fruit rr = cast(Fruit)atomicExchange(cast(shared)&f, cast(shared)f1);
+        // trace(rr.toString());
+
+        {
+            value = 12;
+
+            int old = AtomicHelper.getAndSet(value, 23);
+            // tracef("old: %d, new: %d", old, value);
+
+            assert(old == 12 && value == 23);
+        }
+
+    }
+    
+    void testGetAndSet02() {
+        Fruit[] fruits = [
+            new Fruit("apple", 5.8f),
+            new Fruit("banana", 3.8f),
+            new Fruit("peach", 4.6f)
+        ];
+
+
+        Fruit old = AtomicHelper.getAndSet(fruits[1], null);
+        // trace(old.toString());
+        // trace(f.toString());
+        assert(old.getName() == "banana");
+        assert(fruits[0] !is null);
+        assert(fruits[0].getName() == "apple");
+
+        assert(fruits[1] is null);
+
+        assert(fruits[2] !is null);
+        assert(fruits[2].getName() == "peach");
+
     }
 }

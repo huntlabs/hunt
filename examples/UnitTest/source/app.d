@@ -60,7 +60,7 @@ void main()
 
     // testUnits!(MagedQueueTest);
 
-    // testUnits!(AtomicTest);
+    testUnits!(AtomicTest);
     // testUnits!(BigIntegerTest);
 
     // testUnits!(CompletableFutureTest);
@@ -92,11 +92,9 @@ void main()
     // testUnits!(ConverterUtilsTest);
     // testUnits!(DeductionTest);
 
-static if(CompilerHelper.isGreaterThan (2086)) {
-    testUnits!(JsonSerializerTest);
+    // testUnits!(JsonSerializerTest);
     // testUnits!(SerializationTest);
     // testUnits!(ObjectMappingTest);
-}
 
     // testUnits!(ByteBufferTest);
 
