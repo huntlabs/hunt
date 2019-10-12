@@ -86,7 +86,6 @@ abstract class AbstractStream : AbstractSocketChannel {
 
         tryNextBufferWrite();
     }
-    private shared bool _isBusyWritting = false;
     
     protected override void onClose() {
         _isWritting = false;
@@ -139,7 +138,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         DWORD dwSent = 0;
         _iocpwrite.channel = this;
         _iocpwrite.operation = IocpOperation.write;
-            // tracef("To write %d bytes, fd=%d, %s", bufferLength, this.socket.handle(), cast(void*)this);
+        // tracef("To write %d bytes, fd=%d", data.length, this.socket.handle());
         version (HUNT_IO_DEBUG) {
             size_t bufferLength = data.length;
             tracef("To write %d bytes, fd=%d", bufferLength, this.socket.handle());
@@ -168,8 +167,6 @@ abstract class AbstractStream : AbstractSocketChannel {
             errorf("Socket error on write: fd=%d, message=%s", this.handle, this.erroString);
             this.close();
         }
-
-        // dup data
 
         return dwSent;
     }
@@ -228,13 +225,13 @@ abstract class AbstractStream : AbstractSocketChannel {
         } 
         
         // keep thread-safe here
-        if(!cas(&_isBusyWritting, false, true)) {
+        if(!cas(&_isSingleWriteBusy, false, true)) {
             version (HUNT_IO_DEBUG) warningf("busy writing. fd=%d", this.handle);
             return;
         }
 
         scope(exit) {
-            _isBusyWritting = false;
+            _isSingleWriteBusy = false;
         }
 
         clearError();
@@ -253,16 +250,16 @@ abstract class AbstractStream : AbstractSocketChannel {
         const(ubyte)[] data = cast(const(ubyte)[])writeBuffer.getRemaining();
         size_t nBytes = doWrite(data);
 
-        // version (HUNT_IO_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("written data: %d bytes, fd=%d", nBytes, this.handle);
         if(nBytes == data.length) {
             writeBuffer = null;
         } else if (nBytes > 0) { 
             writeBuffer.nextGetIndex(cast(int)nBytes);
-            // version (HUNT_IO_DEBUG)
+            version (HUNT_IO_DEBUG)
                 warningf("remaining data: %d / %d, fd=%d", data.length - nBytes, data.length, this.handle);
         } else { 
-            // version (HUNT_DEBUG)
+            version (HUNT_IO_DEBUG)
             warningf("I/O busy: writing. fd=%d", this.handle);
         }   
     }
@@ -299,15 +296,26 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         if (isWriteCancelling) {
+            version (HUNT_IO_DEBUG) tracef("write cancelled.");
             resetWriteStatus();
             return;
         }
 
+        while(_isSingleWriteBusy) {
+            // version(HUNT_IO_DEBUG) 
+            info("waiting for last writting get finished...");
+        }
+
+        version (HUNT_IO_DEBUG) {
+            tracef("write done once: %d bytes, isWritting: %s, writeBuffer: %s, fd=%d",
+                 nBytes, _isWritting, writeBuffer is null, this.handle);
+        }
+
         if (writeBuffer !is null && writeBuffer.hasRemaining()) {
+            version (HUNT_IO_DEBUG) tracef("try to write the remaining in buffer.");
             writeBufferRemaining();
         }  else {
-            version (HUNT_IO_DEBUG)
-                tracef("try to write next buffer");
+            version (HUNT_IO_DEBUG) tracef("try to write next buffer.");
             tryNextBufferWrite();
         }
     }
@@ -335,14 +343,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
+    private shared bool _isSingleWriteBusy = false; // keep a single I/O write operation atomic
     private const(ubyte)[] _readBuffer;
     private const(ubyte)[] sendDataBuffer;
     private const(ubyte)[] sendDataBackupBuffer;
-    private ByteBuffer writeBuffer;
+    private ByteBuffer writeBuffer; 
 
     private IocpContext _iocpread;
     private IocpContext _iocpwrite;
-
-    // private WSABUF _dataReadBuffer;
-    // private WSABUF _dataWriteBuffer;
 }
