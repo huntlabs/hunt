@@ -46,7 +46,7 @@ class AbstractSelector : Selector {
         assert(channel !is null);
         ChannelType ct = channel.type;
         auto fd = channel.handle;
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("register, channel(fd=%d, type=%s)", fd, ct);
 
         if (ct == ChannelType.Timer) {
@@ -57,7 +57,7 @@ class AbstractSelector : Selector {
             _timer.timeWheel().addNewTimer(timerChannel.timer, timerChannel.wheelSize());
         } else if (ct == ChannelType.TCP
                 || ct == ChannelType.Accept || ct == ChannelType.UDP) {
-            version (HUNT_DEBUG)
+            version (HUNT_IO_DEBUG)
                 trace("Run CreateIoCompletionPort on socket: ", fd);
 
             // _event.setNext(channel);
@@ -132,7 +132,7 @@ class AbstractSelector : Selector {
 
     private void handleChannelEvent(IocpOperation op, AbstractChannel channel, DWORD bytes) {
 
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             infof("ev.operation: %s, fd=%d", op, channel.handle);
 
         switch (op) {
@@ -182,7 +182,7 @@ class AbstractSelector : Selector {
 
         if (len == 0 || channel.isClosed) {
             version (HUNT_DEBUG)
-                info("channel closed");
+                infof("channel [fd=%d] closed", channel.handle);
             return;
         }
 

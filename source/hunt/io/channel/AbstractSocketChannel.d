@@ -14,7 +14,7 @@ import core.stdc.stdint;
 */
 abstract class AbstractSocketChannel : AbstractChannel {
 
-    protected shared bool _isWritting = false;
+    protected shared bool _isWritting = false; // keep a data write operation atomic
 
     this(Selector loop, ChannelType type) {
         super(loop, type);
