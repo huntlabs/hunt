@@ -101,7 +101,6 @@ import hunt.text.Common;
  * @author  Akira Tanaka
  * @author  Martin Buchholz
  * @author  Ulf Zibis
- * @since   1.0
  */
 class Char : Nullable!char {
     /**
@@ -136,7 +135,6 @@ class Char : Nullable!char {
      * The constant value of this field is the smallest value of type
      * {@code char}, {@code '\u005Cu0000'}.
      *
-     * @since   1.0.2
      */
     enum char MIN_VALUE = '\u0000';
 
@@ -144,7 +142,6 @@ class Char : Nullable!char {
      * The constant value of this field is the largest value of type
      * {@code char}, {@code '\u005CuFFFF'}.
      *
-     * @since   1.0.2
      */
     // enum char MAX_VALUE = '\uFFFF';
 
@@ -152,7 +149,6 @@ class Char : Nullable!char {
      * The {@code Class} instance representing the primitive type
      * {@code char}.
      *
-     * @since   1.1
      */
     // 
     // enum Class<Character> TYPE = (Class<Character>) Class.getPrimitiveClass("char");
@@ -167,181 +163,151 @@ class Char : Nullable!char {
 
     /**
      * General category "Cn" in the Unicode specification.
-     * @since   1.1
      */
     enum byte UNASSIGNED = 0;
 
     /**
      * General category "Lu" in the Unicode specification.
-     * @since   1.1
      */
     enum byte UPPERCASE_LETTER = 1;
 
     /**
      * General category "Ll" in the Unicode specification.
-     * @since   1.1
      */
     enum byte LOWERCASE_LETTER = 2;
 
     /**
      * General category "Lt" in the Unicode specification.
-     * @since   1.1
      */
     enum byte TITLECASE_LETTER = 3;
 
     /**
      * General category "Lm" in the Unicode specification.
-     * @since   1.1
      */
     enum byte MODIFIER_LETTER = 4;
 
     /**
      * General category "Lo" in the Unicode specification.
-     * @since   1.1
      */
     enum byte OTHER_LETTER = 5;
 
     /**
      * General category "Mn" in the Unicode specification.
-     * @since   1.1
      */
     enum byte NON_SPACING_MARK = 6;
 
     /**
      * General category "Me" in the Unicode specification.
-     * @since   1.1
      */
     enum byte ENCLOSING_MARK = 7;
 
     /**
      * General category "Mc" in the Unicode specification.
-     * @since   1.1
      */
     enum byte COMBINING_SPACING_MARK = 8;
 
     /**
      * General category "Nd" in the Unicode specification.
-     * @since   1.1
      */
     enum byte DECIMAL_DIGIT_NUMBER = 9;
 
     /**
      * General category "Nl" in the Unicode specification.
-     * @since   1.1
      */
     enum byte LETTER_NUMBER = 10;
 
     /**
      * General category "No" in the Unicode specification.
-     * @since   1.1
      */
     enum byte OTHER_NUMBER = 11;
 
     /**
      * General category "Zs" in the Unicode specification.
-     * @since   1.1
      */
     enum byte SPACE_SEPARATOR = 12;
 
     /**
      * General category "Zl" in the Unicode specification.
-     * @since   1.1
      */
     enum byte LINE_SEPARATOR = 13;
 
     /**
      * General category "Zp" in the Unicode specification.
-     * @since   1.1
      */
     enum byte PARAGRAPH_SEPARATOR = 14;
 
     /**
      * General category "Cc" in the Unicode specification.
-     * @since   1.1
      */
     enum byte CONTROL = 15;
 
     /**
      * General category "Cf" in the Unicode specification.
-     * @since   1.1
      */
     enum byte FORMAT = 16;
 
     /**
      * General category "Co" in the Unicode specification.
-     * @since   1.1
      */
     enum byte PRIVATE_USE = 18;
 
     /**
      * General category "Cs" in the Unicode specification.
-     * @since   1.1
      */
     enum byte SURROGATE = 19;
 
     /**
      * General category "Pd" in the Unicode specification.
-     * @since   1.1
      */
     enum byte DASH_PUNCTUATION = 20;
 
     /**
      * General category "Ps" in the Unicode specification.
-     * @since   1.1
      */
     enum byte START_PUNCTUATION = 21;
 
     /**
      * General category "Pe" in the Unicode specification.
-     * @since   1.1
      */
     enum byte END_PUNCTUATION = 22;
 
     /**
      * General category "Pc" in the Unicode specification.
-     * @since   1.1
      */
     enum byte CONNECTOR_PUNCTUATION = 23;
 
     /**
      * General category "Po" in the Unicode specification.
-     * @since   1.1
      */
     enum byte OTHER_PUNCTUATION = 24;
 
     /**
      * General category "Sm" in the Unicode specification.
-     * @since   1.1
      */
     enum byte MATH_SYMBOL = 25;
 
     /**
      * General category "Sc" in the Unicode specification.
-     * @since   1.1
      */
     enum byte CURRENCY_SYMBOL = 26;
 
     /**
      * General category "Sk" in the Unicode specification.
-     * @since   1.1
      */
     enum byte MODIFIER_SYMBOL = 27;
 
     /**
      * General category "So" in the Unicode specification.
-     * @since   1.1
      */
     enum byte OTHER_SYMBOL = 28;
 
     /**
      * General category "Pi" in the Unicode specification.
-     * @since   1.4
      */
     enum byte INITIAL_QUOTE_PUNCTUATION = 29;
 
     /**
      * General category "Pf" in the Unicode specification.
-     * @since   1.4
      */
     enum byte FINAL_QUOTE_PUNCTUATION = 30;
 
@@ -555,7 +521,6 @@ class Char : Nullable!char {
      *
      * @param  c a char value.
      * @return a {@code Character} instance representing {@code c}.
-     * @since  1.5
      */
     static Char valueOf(char c) {
         if (c <= 127) { // must cache
@@ -591,7 +556,6 @@ class Char : Nullable!char {
      * @param   codePoint the character (Unicode code point) to be tested.
      * @return  2 if the character is a valid supplementary character; 1 otherwise.
      * @see     Character#isSupplementaryCodePoint(int)
-     * @since   1.5
      */
     static int charCount(int codePoint) {
         return codePoint >= MIN_SUPPLEMENTARY_CODE_POINT ? 2 : 1;
@@ -607,7 +571,6 @@ class Char : Nullable!char {
      * @param  low the low-surrogate code unit
      * @return the supplementary code point composed from the
      *         specified surrogate pair.
-     * @since  1.5
      */
     static int toCodePoint(char high, char low) {
         // Optimized form of:
@@ -637,7 +600,6 @@ class Char : Nullable!char {
      *
      * @see     Character#isSpaceChar(char)
      * @see     Character#isWhitespace(char)
-     * @since   1.1
      */
     public static bool isISOControl(char ch) {
         return isISOControl(cast(int)ch);
@@ -655,7 +617,6 @@ class Char : Nullable!char {
      *          {@code false} otherwise.
      * @see     Character#isSpaceChar(int)
      * @see     Character#isWhitespace(int)
-     * @since   1.5
      */
     public static bool isISOControl(int codePoint) {
         // Optimized form of:
@@ -679,7 +640,6 @@ class Char : Nullable!char {
      *         {@code codePoint}'s UTF-16 representation.
      * @throws IllegalArgumentException if the specified
      * {@code codePoint} is not a valid Unicode code point.
-     * @since  1.5
      */
     public static char[] toChars(int codePoint) {
         if (isBmpCodePoint(codePoint)) {
@@ -704,7 +664,6 @@ class Char : Nullable!char {
      * @return {@code true} if the specified code point is between
      *         {@link #MIN_VALUE} and {@link #MAX_VALUE} inclusive;
      *         {@code false} otherwise.
-     * @since  1.7
      */
     public static bool isBmpCodePoint(int codePoint) {
         return codePoint >>> 16 == 0;
@@ -724,7 +683,6 @@ class Char : Nullable!char {
      *         {@link #MIN_CODE_POINT} and
      *         {@link #MAX_CODE_POINT} inclusive;
      *         {@code false} otherwise.
-     * @since  1.5
      */
     public static bool isValidCodePoint(int codePoint) {
         // Optimized form of:
@@ -761,7 +719,6 @@ class Char : Nullable!char {
      * @param   codePoint a supplementary character (Unicode code point)
      * @return  the trailing surrogate code unit used to represent the
      *          character in the UTF-16 encoding
-     * @since   1.7
      */
     public static char lowSurrogate(int codePoint) {
         return cast(char) ((codePoint & 0x3ff) + MIN_LOW_SURROGATE);
@@ -790,7 +747,6 @@ class Char : Nullable!char {
      * @param   codePoint a supplementary character (Unicode code point)
      * @return  the leading surrogate code unit used to represent the
      *          character in the UTF-16 encoding
-     * @since   1.7
      */
     public static char highSurrogate(int codePoint) {
         return cast(char) ((codePoint >>> 10)
@@ -817,7 +773,6 @@ class Char : Nullable!char {
      * @throws IndexOutOfBoundsException if the value
      * {@code index} is negative or not less than
      * {@link CharSequence#length() seq.length()}.
-     * @since  1.5
      */
     public static int codePointAt(string seq, int index) {
         char c1 = seq.charAt(index);
@@ -848,7 +803,6 @@ class Char : Nullable!char {
      *         {@code false} otherwise.
      * @see    Character#isLowSurrogate(char)
      * @see    Character.UnicodeBlock#of(int)
-     * @since  1.5
      */
     public static bool isHighSurrogate(char ch) {
         // Help VM constant-fold; MAX_HIGH_SURROGATE + 1 == MIN_LOW_SURROGATE
@@ -872,7 +826,6 @@ class Char : Nullable!char {
      *         {@link #MAX_LOW_SURROGATE} inclusive;
      *         {@code false} otherwise.
      * @see    Character#isHighSurrogate(char)
-     * @since  1.5
      */
     public static bool isLowSurrogate(char ch) {
         return ch >= MIN_LOW_SURROGATE && ch < (MAX_LOW_SURROGATE + 1);
@@ -944,7 +897,6 @@ class Char : Nullable!char {
      * @see     Character#isTitleCase(int)
      * @see     Character#isUnicodeIdentifierStart(int)
      * @see     Character#isUpperCase(int)
-     * @since   1.5
      */
     // public static bool isLetter(int codePoint) {
     //     return ((((1 << Char.UPPERCASE_LETTER) |

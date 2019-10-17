@@ -24,7 +24,6 @@ import hunt.math.Helper;
 class PushbackInputStream : FilterInputStream {
     /**
      * The pushback buffer.
-     * @since   1.1
      */
     protected byte[] buf;
 
@@ -34,7 +33,6 @@ class PushbackInputStream : FilterInputStream {
      * <code>buf.length</code>; when the buffer is full, <code>pos</code> is
      * equal to zero.
      *
-     * @since   1.1
      */
     protected int pos;
 
@@ -56,7 +54,6 @@ class PushbackInputStream : FilterInputStream {
      * @param  inputStream    the input stream from which bytes will be read.
      * @param  size  the size of the pushback buffer.
      * @exception IllegalArgumentException if {@code size <= 0}
-     * @since  1.1
      */
     public this(InputStream inputStream, int size) {
         super(inputStream);
@@ -195,7 +192,6 @@ class PushbackInputStream : FilterInputStream {
      *            buffer for the specified number of bytes,
      *            or this input stream has been closed by
      *            invoking its {@link #close()} method.
-     * @since     1.1
      */
     public void unread(byte[] b, int off, int len)  {
         ensureOpen();
@@ -218,7 +214,6 @@ class PushbackInputStream : FilterInputStream {
      *            buffer for the specified number of bytes,
      *            or this input stream has been closed by
      *            invoking its {@link #close()} method.
-     * @since     1.1
      */
     public void unread(byte[] b)  {
         unread(b, 0, cast(int)(b.length));
@@ -273,7 +268,6 @@ class PushbackInputStream : FilterInputStream {
      *             or an I/O error occurs.
      * @see        java.io.FilterInputStream#inputStream
      * @see        java.io.InputStream#skip(long n)
-     * @since      1.2
      */
     override
     public long skip(long n)  {

@@ -25,7 +25,6 @@ import std.container.array;
  * <p>Applications should not create their own file descriptors.
  *
  * @author  Pavani Diwanji
- * @since   JDK1.0
  */
 final class FileDescriptor {
 
@@ -136,7 +135,6 @@ final class FileDescriptor {
      *        Thrown when the buffers cannot be flushed,
      *        or because the system cannot guarantee that all the
      *        buffers have been synchronized with physical media.
-     * @since     JDK1.1
      */
     void sync() {        
         implementationMissing(false);

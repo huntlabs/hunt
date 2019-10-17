@@ -20,7 +20,6 @@ module hunt.io.ObjectInput;
  * @see java.io.InputStream
  * @see java.io.ObjectOutputStream
  * @see java.io.ObjectInputStream
- * @since   1.1
  */
 
 import hunt.io.DataInput;

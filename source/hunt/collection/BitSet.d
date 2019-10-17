@@ -52,7 +52,6 @@ import std.conv;
  * @author  Arthur van Hoff
  * @author  Michael McCloskey
  * @author  Martin Buchholz
- * @since   1.0
  */
 class BitSet  { // : Cloneable, java.io.Serializable
     /*
@@ -359,7 +358,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *
      * @param  bitIndex the index of the bit to flip
      * @throws IndexOutOfBoundsException if the specified index is negative
-     * @since  1.4
      */
     void flip(size_t bitIndex) {
         if (bitIndex < 0)
@@ -384,7 +382,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
     //  * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
     //  *         or {@code toIndex} is negative, or {@code fromIndex} is
     //  *         larger than {@code toIndex}
-    //  * @since  1.4
     //  */
     // void flip(int fromIndex, int toIndex) {
     //     checkRange(fromIndex, toIndex);
@@ -423,7 +420,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *
      * @param  bitIndex a bit index
      * @throws IndexOutOfBoundsException if the specified index is negative
-     * @since  1.0
      */
     void set(size_t bitIndex) {
         if (bitIndex < 0)
@@ -443,7 +439,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @param  bitIndex a bit index
      * @param  value a bool value to set
      * @throws IndexOutOfBoundsException if the specified index is negative
-     * @since  1.4
      */
     void set(int bitIndex, bool value) {
         if (value)
@@ -461,7 +456,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
      *         or {@code toIndex} is negative, or {@code fromIndex} is
      *         larger than {@code toIndex}
-     * @since  1.4
      */
     void set(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
@@ -505,7 +499,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
      *         or {@code toIndex} is negative, or {@code fromIndex} is
      *         larger than {@code toIndex}
-     * @since  1.4
      */
     void set(int fromIndex, int toIndex, bool value) {
         if (value)
@@ -519,7 +512,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *
      * @param  bitIndex the index of the bit to be cleared
      * @throws IndexOutOfBoundsException if the specified index is negative
-     * @since  1.0
      */
     void clear(size_t bitIndex) {
         if (bitIndex < 0)
@@ -544,7 +536,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
      *         or {@code toIndex} is negative, or {@code fromIndex} is
      *         larger than {@code toIndex}
-     * @since  1.4
      */
     void clear(size_t fromIndex, size_t toIndex) {
         checkRange(fromIndex, toIndex);
@@ -624,7 +615,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
      *         or {@code toIndex} is negative, or {@code fromIndex} is
      *         larger than {@code toIndex}
-     * @since  1.4
      */
     BitSet get(size_t fromIndex, size_t toIndex) {
         checkRange(fromIndex, toIndex);
@@ -690,7 +680,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @return the index of the next set bit, or {@code -1} if there
      *         is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
-     * @since  1.4
      */
     size_t nextSetBit(size_t fromIndex) {
         if (fromIndex < 0)
@@ -720,7 +709,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @param  fromIndex the index to start checking from (inclusive)
      * @return the index of the next clear bit
      * @throws IndexOutOfBoundsException if the specified index is negative
-     * @since  1.4
      */
     size_t nextClearBit(int fromIndex) {
         // Neither spec nor implementation handle bitsets of maximal length.
@@ -764,7 +752,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *         is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *         than {@code -1}
-     * @since  1.7
      */
     size_t previousSetBit(size_t fromIndex) {
         if (fromIndex < 0) {
@@ -802,7 +789,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *         is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *         than {@code -1}
-     * @since  1.7
      */
     size_t previousClearBit(size_t fromIndex) {
         if (fromIndex < 0) {
@@ -835,7 +821,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * if the {@code BitSet} contains no set bits.
      *
      * @return the logical size of this {@code BitSet}
-     * @since  1.2
      */
     size_t length() {
         if (wordsInUse == 0)
@@ -850,7 +835,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * to {@code true}.
      *
      * @return bool indicating whether this {@code BitSet} is empty
-     * @since  1.4
      */
     bool isEmpty() {
         return wordsInUse == 0;
@@ -863,7 +847,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * @param  set {@code BitSet} to intersect with
      * @return bool indicating whether this {@code BitSet} intersects
      *         the specified {@code BitSet}
-     * @since  1.4
      */
     bool intersects(BitSet set) {
         for (size_t i = min(wordsInUse, set.wordsInUse) - 1; i >= 0; i--)
@@ -876,7 +859,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      * Returns the number of bits set to {@code true} in this {@code BitSet}.
      *
      * @return the number of bits set to {@code true} in this {@code BitSet}
-     * @since  1.4
      */
     size_t cardinality() {
         size_t sum = 0;
@@ -989,7 +971,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
      *
      * @param  set the {@code BitSet} with which to mask this
      *         {@code BitSet}
-     * @since  1.2
      */
     void andNot(BitSet set) {
         // Perform logical (a & !b) on words in common
@@ -1204,7 +1185,6 @@ class BitSet  { // : Cloneable, java.io.Serializable
     //  * bit set is modified during that operation then the result is undefined.
     //  *
     //  * @return a stream of integers representing set indices
-    //  * @since 1.8
     //  */
     // IntStream stream() {
     //     class BitSetSpliterator implements Spliterator.OfInt {

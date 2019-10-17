@@ -21,7 +21,6 @@ module hunt.io.ObjectOutput;
  * @see java.io.InputStream
  * @see java.io.ObjectOutputStream
  * @see java.io.ObjectInputStream
- * @since   1.1
  */
 import hunt.io.DataOutput;
 import hunt.util.Common;

@@ -166,7 +166,6 @@ shared static this() {
  * garbage collector after the appropriate reachability changes are detected.
  *
  * @author   Mark Reinhold
- * @since    1.2
  */
 
 class ReferenceQueue(T) {

@@ -110,7 +110,6 @@ import std.range;
  * @see     HashSet
  * @see     TreeSet
  * @see     Hashtable
- * @since   1.4
  */
 
 class LinkedHashSet(E) : HashSet!(E) {

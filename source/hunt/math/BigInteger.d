@@ -1246,21 +1246,18 @@ class BigInteger : Number {
     /**
      * The BigInteger constant zero.
      *
-     * @since   1.2
      */
     __gshared static BigInteger ZERO;
 
     /**
      * The BigInteger constant one.
      *
-     * @since   1.2
      */
     __gshared static BigInteger ONE;
 
     /**
      * The BigInteger constant two.
      *
-     * @since   9
      */
     __gshared static BigInteger TWO;
 
@@ -1272,7 +1269,6 @@ class BigInteger : Number {
     /**
      * The BigInteger constant ten.
      *
-     * @since   1.5
      */
     __gshared static BigInteger TEN;
 
@@ -2434,7 +2430,6 @@ class BigInteger : Number {
      *         {@code (i * sqrt(-val))} where <i>i</i> is the
      *         <i>imaginary unit</i> and is equal to
      *         {@code sqrt(-1)}.)
-     * @since  9
      */
     BigInteger sqrt() {
         if (this._signum < 0) {
@@ -2457,7 +2452,6 @@ class BigInteger : Number {
      *         <i>imaginary unit</i> and is equal to
      *         {@code sqrt(-1)}.)
      * @see #sqrt()
-     * @since  9
      */
     BigInteger[] sqrtAndRemainder() {
         BigInteger s = sqrt();
@@ -4690,7 +4684,6 @@ class BigInteger : Number {
      * @throws ArithmeticException if the value of {@code this} will
      * not exactly fit in a {@code long}.
      * @see BigInteger#longValue
-     * @since  1.8
      */
     long longValueExact() {
         if (mag.length <= 2 && bitLength() <= 63)
@@ -4709,7 +4702,6 @@ class BigInteger : Number {
      * @throws ArithmeticException if the value of {@code this} will
      * not exactly fit in an {@code int}.
      * @see BigInteger#intValue
-     * @since  1.8
      */
     int intValueExact() {
         if (mag.length <= 1 && bitLength() <= 31)
@@ -4728,7 +4720,6 @@ class BigInteger : Number {
      * @throws ArithmeticException if the value of {@code this} will
      * not exactly fit in a {@code short}.
      * @see BigInteger#shortValue
-     * @since  1.8
      */
     short shortValueExact() {
         if (mag.length <= 1 && bitLength() <= 31) {
@@ -4749,7 +4740,6 @@ class BigInteger : Number {
      * @throws ArithmeticException if the value of {@code this} will
      * not exactly fit in a {@code byte}.
      * @see BigInteger#byteValue
-     * @since  1.8
      */
     byte byteValueExact() {
         if (mag.length <= 1 && bitLength() <= 31) {
@@ -7105,7 +7095,6 @@ class MutableBigInteger {
  *
  * @see     BigInteger
  * @author  Michael McCloskey
- * @since   1.3
  */
 
 class SignedMutableBigInteger : MutableBigInteger {
@@ -7217,7 +7206,6 @@ class SignedMutableBigInteger : MutableBigInteger {
  *
  * @see     BigInteger
  * @author  Michael McCloskey
- * @since   1.3
  */
 class BitSieve {
     /**

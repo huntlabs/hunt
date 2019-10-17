@@ -89,7 +89,6 @@ import hunt.text.Common;
  *
  * @author  unascribed
  * @see     java.io.StreamTokenizer
- * @since   JDK1.0
  */
 
 class StringTokenizer : Iterable!string {

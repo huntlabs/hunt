@@ -181,7 +181,6 @@ class Float : AbstractNumber!float {
      *
      * @param  f a float value.
      * @return a {@code Float} instance representing {@code f}.
-     * @since  1.5
      */
     static Float valueOf(float f) {
         return new Float(f);

@@ -161,7 +161,6 @@ final class MathHelper {
     //  * @param   angdeg   an angle, in degrees
     //  * @return  the measurement of the angle {@code angdeg}
     //  *          in radians.
-    //  * @since   1.2
     //  */
     // static double toRadians(double angdeg) {
     //     return angdeg * DEGREES_TO_RADIANS;
@@ -177,7 +176,6 @@ final class MathHelper {
     //  * @param   angrad   an angle, in radians
     //  * @return  the measurement of the angle {@code angrad}
     //  *          in degrees.
-    //  * @since   1.2
     //  */
     // static double toDegrees(double angrad) {
     //     return angrad * RADIANS_TO_DEGREES;
@@ -1523,7 +1521,6 @@ final class MathHelper {
     //  * computed, as if with unlimited range and precision, and rounded
     //  * once to the nearest {@code double} value
     //  *
-    //  * @since 9
     //  */
     // @HotSpotIntrinsicCandidate
     // static double fma(double a, double b, double c) {
@@ -1640,7 +1637,6 @@ final class MathHelper {
     //  * computed, as if with unlimited range and precision, and rounded
     //  * once to the nearest {@code float} value
     //  *
-    //  * @since 9
     //  */
     // @HotSpotIntrinsicCandidate
     // static float fma(float a, float b, float c) {
@@ -1693,7 +1689,6 @@ final class MathHelper {
     //  * @param d the floating-point value whose ulp is to be returned
     //  * @return the size of an ulp of the argument
     //  * @author Joseph D. Darcy
-    //  * @since 1.5
     //  */
     // static double ulp(double d) {
     //     int exp = getExponent(d);
@@ -1744,7 +1739,6 @@ final class MathHelper {
     //  * @param f the floating-point value whose ulp is to be returned
     //  * @return the size of an ulp of the argument
     //  * @author Joseph D. Darcy
-    //  * @since 1.5
     //  */
     // static float ulp(float f) {
     //     int exp = getExponent(f);
@@ -1788,7 +1782,6 @@ final class MathHelper {
     //  * @param d the floating-point value whose signum is to be returned
     //  * @return the signum function of the argument
     //  * @author Joseph D. Darcy
-    //  * @since 1.5
     //  */
     // static double signum(double d) {
     //     return (d == 0.0 || Double.isNaN(d))?d:copySign(1.0, d);
@@ -1809,7 +1802,6 @@ final class MathHelper {
     //  * @param f the floating-point value whose signum is to be returned
     //  * @return the signum function of the argument
     //  * @author Joseph D. Darcy
-    //  * @since 1.5
     //  */
     // static float signum(float f) {
     //     return (f == 0.0f || Float.isNaN(f))?f:copySign(1.0f, f);
@@ -1838,7 +1830,6 @@ final class MathHelper {
     //  *
     //  * @param   x The number whose hyperbolic sine is to be returned.
     //  * @return  The hyperbolic sine of {@code x}.
-    //  * @since 1.5
     //  */
     // static double sinh(double x) {
     //     return StrictMath.sinh(x);
@@ -1866,7 +1857,6 @@ final class MathHelper {
     //  *
     //  * @param   x The number whose hyperbolic cosine is to be returned.
     //  * @return  The hyperbolic cosine of {@code x}.
-    //  * @since 1.5
     //  */
     // static double cosh(double x) {
     //     return StrictMath.cosh(x);
@@ -1906,7 +1896,6 @@ final class MathHelper {
     //  *
     //  * @param   x The number whose hyperbolic tangent is to be returned.
     //  * @return  The hyperbolic tangent of {@code x}.
-    //  * @since 1.5
     //  */
     // static double tanh(double x) {
     //     return StrictMath.tanh(x);
@@ -1935,7 +1924,6 @@ final class MathHelper {
     //  * @param y a value
     //  * @return sqrt(<i>x</i><sup>2</sup>&nbsp;+<i>y</i><sup>2</sup>)
     //  * without intermediate overflow or underflow
-    //  * @since 1.5
     //  */
     // static double hypot(double x, double y) {
     //     return StrictMath.hypot(x, y);
@@ -1973,7 +1961,6 @@ final class MathHelper {
     //  * @param   x   the exponent to raise <i>e</i> to in the computation of
     //  *              <i>e</i><sup>{@code x}</sup>&nbsp;-1.
     //  * @return  the value <i>e</i><sup>{@code x}</sup>&nbsp;-&nbsp;1.
-    //  * @since 1.5
     //  */
     // static double expm1(double x) {
     //     return StrictMath.expm1(x);
@@ -2010,7 +1997,6 @@ final class MathHelper {
     //  * @param   x   a value
     //  * @return the value ln({@code x}&nbsp;+&nbsp;1), the natural
     //  * log of {@code x}&nbsp;+&nbsp;1
-    //  * @since 1.5
     //  */
     // static double log1p(double x) {
     //     return StrictMath.log1p(x);
@@ -2029,7 +2015,6 @@ final class MathHelper {
     //  * @param sign   the parameter providing the sign of the result
     //  * @return a value with the magnitude of {@code magnitude}
     //  * and the sign of {@code sign}.
-    //  * @since 1.6
     //  */
     // static double copySign(double magnitude, double sign) {
     //     return Double.longBitsToDouble((Double.doubleToRawLongBits(sign) &
@@ -2052,7 +2037,6 @@ final class MathHelper {
     //  * @param sign   the parameter providing the sign of the result
     //  * @return a value with the magnitude of {@code magnitude}
     //  * and the sign of {@code sign}.
-    //  * @since 1.6
     //  */
     // static float copySign(float magnitude, float sign) {
     //     return Float.intBitsToFloat((Float.floatToRawIntBits(sign) &
@@ -2074,7 +2058,6 @@ final class MathHelper {
     //  * </ul>
     //  * @param f a {@code float} value
     //  * @return the unbiased exponent of the argument
-    //  * @since 1.6
     //  */
     // static int getExponent(float f) {
     //     /*
@@ -2098,7 +2081,6 @@ final class MathHelper {
     //  * </ul>
     //  * @param d a {@code double} value
     //  * @return the unbiased exponent of the argument
-    //  * @since 1.6
     //  */
     // static int getExponent(double d) {
     //     /*
@@ -2148,7 +2130,6 @@ final class MathHelper {
     //  * be returned
     //  * @return The floating-point number adjacent to {@code start} in the
     //  * direction of {@code direction}.
-    //  * @since 1.6
     //  */
     // static double nextAfter(double start, double direction) {
     //     /*
@@ -2232,7 +2213,6 @@ final class MathHelper {
     //  * be returned
     //  * @return The floating-point number adjacent to {@code start} in the
     //  * direction of {@code direction}.
-    //  * @since 1.6
     //  */
     // static float nextAfter(float start, double direction) {
     //     /*
@@ -2302,7 +2282,6 @@ final class MathHelper {
     //  * @param d starting floating-point value
     //  * @return The adjacent floating-point value closer to positive
     //  * infinity.
-    //  * @since 1.6
     //  */
     // static double nextUp(double d) {
     //     // Use a single conditional and handle the likely cases first.
@@ -2338,7 +2317,6 @@ final class MathHelper {
     //  * @param f starting floating-point value
     //  * @return The adjacent floating-point value closer to positive
     //  * infinity.
-    //  * @since 1.6
     //  */
     // static float nextUp(float f) {
     //     // Use a single conditional and handle the likely cases first.
@@ -2374,7 +2352,6 @@ final class MathHelper {
     //  * @param d  starting floating-point value
     //  * @return The adjacent floating-point value closer to negative
     //  * infinity.
-    //  * @since 1.8
     //  */
     // static double nextDown(double d) {
     //     if (Double.isNaN(d) || d == Double.NEGATIVE_INFINITY)
@@ -2411,7 +2388,6 @@ final class MathHelper {
     //  * @param f  starting floating-point value
     //  * @return The adjacent floating-point value closer to negative
     //  * infinity.
-    //  * @since 1.8
     //  */
     // static float nextDown(float f) {
     //     if (Float.isNaN(f) || f == Float.NEGATIVE_INFINITY)
@@ -2453,7 +2429,6 @@ final class MathHelper {
     //  * @param d number to be scaled by a power of two.
     //  * @param scaleFactor power of 2 used to scale {@code d}
     //  * @return {@code d} &times; 2<sup>{@code scaleFactor}</sup>
-    //  * @since 1.6
     //  */
     // static double scalb(double d, int scaleFactor) {
     //     /*
@@ -2560,7 +2535,6 @@ final class MathHelper {
     //  * @param f number to be scaled by a power of two.
     //  * @param scaleFactor power of 2 used to scale {@code f}
     //  * @return {@code f} &times; 2<sup>{@code scaleFactor}</sup>
-    //  * @since 1.6
     //  */
     // static float scalb(float f, int scaleFactor) {
     //     // magnitude of a power of two so large that scaling a finite

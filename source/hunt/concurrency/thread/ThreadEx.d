@@ -102,7 +102,6 @@ interface UncaughtExceptionHandler {
  * These states are virtual machine states which do not reflect
  * any operating system thread states.
  *
- * @since   1.5
  * @see #getState
  */
 enum ThreadState {
@@ -1061,7 +1060,6 @@ class Parker {
  * parent thread group or any other thread groups.
  *
  * @author  unascribed
- * @since   1.0
  */
 /* The locking strategy for this code is to try to lock only one level of the
  * tree wherever possible, but otherwise to lock from the bottom up.
@@ -1109,7 +1107,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @throws  SecurityException  if the current thread cannot create a
      *               thread in the specified thread group.
      * @see     java.lang.ThreadGroupEx#checkAccess()
-     * @since   1.0
      */
     this(string name) {
         ThreadEx t = cast(ThreadEx)Thread.getThis();
@@ -1134,7 +1131,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *               thread in the specified thread group.
      * @see     java.lang.SecurityException
      * @see     java.lang.ThreadGroupEx#checkAccess()
-     * @since   1.0
      */
     this(ThreadGroupEx parent, string name) {
         // this(checkParentAccess(parent), parent, name);
@@ -1171,7 +1167,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * Returns the name of this thread group.
      *
      * @return  the name of this thread group.
-     * @since   1.0
      */
     final string getName() {
         return name;
@@ -1191,7 +1186,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @see        java.lang.ThreadGroupEx#checkAccess()
      * @see        java.lang.SecurityException
      * @see        java.lang.RuntimePermission
-     * @since   1.0
      */
     final ThreadGroupEx getParent() {
         if (parent !is null)
@@ -1207,7 +1201,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @return  the maximum priority that a thread in this thread group
      *          can have.
      * @see     #setMaxPriority
-     * @since   1.0
      */
     final int getMaxPriority() {
         return maxPriority;
@@ -1220,7 +1213,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @return  {@code true} if this thread group is a daemon thread group;
      *          {@code false} otherwise.
-     * @since   1.0
      */
     final bool isDaemon() {
         return daemon;
@@ -1230,7 +1222,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * Tests if this thread group has been destroyed.
      *
      * @return  true if this object is destroyed
-     * @since   1.1
      */
     bool isDestroyed() {
         return destroyed;
@@ -1252,7 +1243,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *               this thread group.
      * @see        java.lang.SecurityException
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.0
      */
     final void setDaemon(bool daemon) {
         // checkAccess();
@@ -1285,7 +1275,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @see        #getMaxPriority
      * @see        java.lang.SecurityException
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.0
      */
     final void setMaxPriority(int pri) {
         int ngroupsSnapshot;
@@ -1318,7 +1307,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @return  {@code true} if this thread group is the thread group
      *          argument or one of its ancestor thread groups;
      *          {@code false} otherwise.
-     * @since   1.0
      */
     final bool parentOf(ThreadGroupEx g) {
         for (; g !is null ; g = g.parent) {
@@ -1340,7 +1328,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @throws     SecurityException  if the current thread is not allowed to
      *               access this thread group.
      * @see        java.lang.SecurityManager#checkAccess(java.lang.ThreadGroupEx)
-     * @since      1.0
      */
     final void checkAccess() {
         // SecurityManager security = System.getSecurityManager();
@@ -1364,7 +1351,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *          group and in any other thread group that has this thread
      *          group as an ancestor
      *
-     * @since   1.0
      */
     int activeCount() {
         int result;
@@ -1411,7 +1397,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      *
-     * @since   1.0
      */
     int enumerate(Thread[] list) {
         checkAccess();
@@ -1449,7 +1434,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      *
-     * @since   1.0
      */
     int enumerate(Thread[] list, bool recurse) {
         checkAccess();
@@ -1506,7 +1490,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @return  the number of active thread groups with this thread group as
      *          an ancestor
      *
-     * @since   1.0
      */
     int activeGroupCount() {
         int ngroupsSnapshot;
@@ -1550,7 +1533,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      *
-     * @since   1.0
      */
     int enumerate(ThreadGroupEx[] list) {
         checkAccess();
@@ -1588,7 +1570,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      *
-     * @since   1.0
      */
     int enumerate(ThreadGroupEx[] list, bool recurse) {
         checkAccess();
@@ -1644,7 +1625,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @see        java.lang.SecurityException
      * @see        java.lang.Thread#stop()
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.0
      * @deprecated    This method is inherently unsafe.  See
      *     {@link Thread#stop} for details.
      */
@@ -1669,7 +1649,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @see        java.lang.Thread#interrupt()
      * @see        java.lang.SecurityException
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.2
      */
     final void interrupt() {
         int ngroupsSnapshot;
@@ -1707,7 +1686,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @see        java.lang.Thread#suspend()
      * @see        java.lang.SecurityException
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.0
      * @deprecated    This method is inherently deadlock-prone.  See
      *     {@link Thread#suspend} for details.
      */
@@ -1768,7 +1746,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @see        java.lang.SecurityException
      * @see        java.lang.Thread#resume()
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.0
      * @deprecated    This method is used solely in conjunction with
      *       {@code Thread.suspend} and {@code ThreadGroupEx.suspend},
      *       both of which have been deprecated, as they are inherently
@@ -1809,7 +1786,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * @throws     SecurityException  if the current thread cannot modify this
      *               thread group.
      * @see        java.lang.ThreadGroupEx#checkAccess()
-     * @since      1.0
      */
     final void destroy() {
         int ngroupsSnapshot;
@@ -2035,7 +2011,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * Prints information about this thread group to the standard
      * output. This method is useful only for debugging.
      *
-     * @since   1.0
      */
     void list() {
         // list(System.out, 0);
@@ -2100,7 +2075,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @param   t   the thread that is about to exit.
      * @param   e   the uncaught exception.
-     * @since   1.0
      */
     void uncaughtException(Thread t, Throwable e) {
         if (parent !is null) {
@@ -2123,7 +2097,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      *
      * @param b bool to allow or disallow suspension
      * @return true on success
-     * @since   1.1
      * @deprecated The definition of this call depends on {@link #suspend},
      *             which is deprecated.  Further, the behavior of this call
      *             was never specified.
@@ -2137,7 +2110,6 @@ class ThreadGroupEx : UncaughtExceptionHandler {
      * Returns a string representation of this Thread group.
      *
      * @return  a string representation of this thread group.
-     * @since   1.0
      */
     // string toString() {
     //     return getClass().getName() + "[name=" + getName() + ",maxpri=" + maxPriority + "]";

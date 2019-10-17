@@ -193,7 +193,6 @@ class Writer : Appendable, Closeable, Flushable {
      * @throws  IOException
      *          If an I/O error occurs
      *
-     * @since  1.5
      */
     Writer append(const(char)[] csq) {
         write(cast(string)csq);
@@ -236,7 +235,6 @@ class Writer : Appendable, Closeable, Flushable {
      * @throws  IOException
      *          If an I/O error occurs
      *
-     * @since  1.5
      */
     Writer append(const(char)[] csq, int start, int end) {
         if (csq.empty()) csq = "null";

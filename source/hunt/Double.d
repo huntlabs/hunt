@@ -346,7 +346,6 @@ class Double : AbstractNumber!double {
      * @param d the {@code double} value to be tested
      * @return {@code true} if the argument is a finite
      * floating-point value, {@code false} otherwise.
-     * @since 1.8
      */
     static bool isFinite(double d) {
         return std.math.isInfinity(d);
@@ -363,7 +362,6 @@ class Double : AbstractNumber!double {
      *
      * @param  d a double value.
      * @return a {@code Double} instance representing {@code d}.
-     * @since  1.5
      */
     static Double valueOf(double d) {
         return new Double(d);

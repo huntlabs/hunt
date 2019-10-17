@@ -381,7 +381,6 @@ class Integer : AbstractNumber!int
      *
      * @param  i an {@code int} value.
      * @return an {@code Integer} instance representing {@code i}.
-     * @since  1.5
      */
     static Integer valueOf(int i)
     {

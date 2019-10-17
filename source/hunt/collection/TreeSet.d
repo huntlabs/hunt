@@ -89,7 +89,6 @@ import std.concurrency : initOnce;
  * @see     Comparable
  * @see     Comparator
  * @see     TreeMap
- * @since   1.2
  */
 
 class TreeSet(E) : AbstractSet!(E), NavigableSet!(E) //, Cloneable

@@ -51,7 +51,6 @@ import std.stdio;
  * @see     java.io.FileDescriptor
  * @see     java.io.FileInputStream
  * @see     java.nio.file.Files#newOutputStream
- * @since   1.0
  */
 class FileOutputStream : OutputStream
 {
@@ -137,7 +136,6 @@ class FileOutputStream : OutputStream
      *               <code>checkWrite</code> method denies write access
      *               to the file.
      * @see        java.lang.SecurityManager#checkWrite(java.lang.string)
-     * @since     1.1
      */
     this(string name, bool append) {
         if(name.empty)

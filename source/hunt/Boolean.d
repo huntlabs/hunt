@@ -30,7 +30,6 @@ import std.concurrency : initOnce;
  * {@code bool}.
  *
  * @author  Arthur van Hoff
- * @since   JDK1.0
  */
 class Boolean : Nullable!bool {
     /**
@@ -55,7 +54,6 @@ class Boolean : Nullable!bool {
     /**
      * The Class object representing the primitive type bool.
      *
-     * @since   JDK1.1
     //  */
     // @SuppressWarnings("unchecked")
     // static  Class<Boolean> TYPE = (Class<Boolean>) Class.getPrimitiveClass("bool");
@@ -187,7 +185,6 @@ class Boolean : Nullable!bool {
      *
      * @param  b a bool value.
      * @return a {@code Boolean} instance representing {@code b}.
-     * @since  1.4
      */
     static Boolean valueOf(bool b) {
         return (b ? TRUE : FALSE);
@@ -315,7 +312,6 @@ class Boolean : Nullable!bool {
      *          this object represents false and the argument represents true
      * @throws  NullPointerException if the argument is {@code null}
      * @see     Comparable
-     * @since  1.5
      */
     int compareTo(Boolean b) {
         return compare(this.value, b.value);

@@ -97,7 +97,6 @@ void testxxx() {
  * @see     java.lang.StringBuffer
  * @see     java.lang.StringBuilder
  * @see     java.nio.charset.Charset
- * @since   1.0
  * @jls     15.18.1 String Concatenation Operator +
  */
 
@@ -294,7 +293,6 @@ final class String : Nullable!string {
      *          If {@code offset} is negative, {@code count} is negative, or
      *          {@code offset} is greater than {@code codePoints.length - count}
      *
-     * @since  1.5
      */
     String(int[] codePoints, int offset, int count) {
         checkBoundsOffCount(offset, count, codePoints.length);
@@ -443,7 +441,6 @@ final class String : Nullable!string {
      *          If {@code offset} is negative, {@code length} is negative, or
      *          {@code offset} is greater than {@code bytes.length - length}
      *
-     * @since  1.1
      */
     String(byte bytes[], int offset, int length, String charsetName)
             throws UnsupportedEncodingException {
@@ -484,7 +481,6 @@ final class String : Nullable!string {
      *          If {@code offset} is negative, {@code length} is negative, or
      *          {@code offset} is greater than {@code bytes.length - length}
      *
-     * @since  1.6
      */
     String(byte bytes[], int offset, int length, Charset charset) {
         if (charset == null)
@@ -517,7 +513,6 @@ final class String : Nullable!string {
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      *
-     * @since  1.1
      */
     String(byte bytes[], String charsetName)
             throws UnsupportedEncodingException {
@@ -542,7 +537,6 @@ final class String : Nullable!string {
      *         The {@linkplain java.nio.charset.Charset charset} to be used to
      *         decode the {@code bytes}
      *
-     * @since  1.6
      */
     String(byte bytes[], Charset charset) {
         this(bytes, 0, bytes.length, charset);
@@ -572,7 +566,6 @@ final class String : Nullable!string {
      *          If {@code offset} is negative, {@code length} is negative, or
      *          {@code offset} is greater than {@code bytes.length - length}
      *
-     * @since  1.1
      */
     String(byte bytes[], int offset, int length) {
         checkBoundsOffCount(offset, length, bytes.length);
@@ -595,7 +588,6 @@ final class String : Nullable!string {
      * @param  bytes
      *         The bytes to be decoded into characters
      *
-     * @since  1.1
      */
     String(byte[] bytes) {
         this(bytes, 0, bytes.length);
@@ -627,7 +619,6 @@ final class String : Nullable!string {
      * @param   builder
      *          A {@code StringBuilder}
      *
-     * @since  1.5
      */
     String(StringBuilder builder) {
         this(builder, null);
@@ -702,7 +693,6 @@ final class String : Nullable!string {
      * @exception  IndexOutOfBoundsException  if the {@code index}
      *             argument is negative or not less than the length of this
      *             string.
-     * @since      1.5
      */
     int codePointAt(int index) {
         if (isLatin1()) {
@@ -734,7 +724,6 @@ final class String : Nullable!string {
      * @exception IndexOutOfBoundsException if the {@code index}
      *            argument is less than 1 or greater than the length
      *            of this string.
-     * @since     1.5
      */
     int codePointBefore(int index) {
         int i = index - 1;
@@ -766,7 +755,6 @@ final class String : Nullable!string {
      * {@code beginIndex} is negative, or {@code endIndex}
      * is larger than the length of this {@code String}, or
      * {@code beginIndex} is larger than {@code endIndex}.
-     * @since  1.5
      */
     int codePointCount(int beginIndex, int endIndex) {
         if (beginIndex < 0 || beginIndex > endIndex ||
@@ -918,7 +906,6 @@ final class String : Nullable!string {
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      *
-     * @since  1.1
      */
     byte[] getBytes(String charsetName)
             throws UnsupportedEncodingException {
@@ -942,7 +929,6 @@ final class String : Nullable!string {
      *
      * @return  The resultant byte array
      *
-     * @since  1.6
      */
     byte[] getBytes(Charset charset) {
         if (charset == null) throw new NullPointerException();
@@ -960,7 +946,6 @@ final class String : Nullable!string {
      *
      * @return  The resultant byte array
      *
-     * @since      1.1
      */
     byte[] getBytes() {
         // return StringCoding.encode(coder(), value);
@@ -1016,7 +1001,6 @@ final class String : Nullable!string {
      *          sequence of characters as the specified {@code StringBuffer},
      *          {@code false} otherwise
      *
-     * @since  1.4
      */
     boolean contentEquals(StringBuffer sb) {
         return contentEquals((CharSequence)sb);
@@ -1062,7 +1046,6 @@ final class String : Nullable!string {
      *          sequence of char values as the specified sequence, {@code
      *          false} otherwise
      *
-     * @since  1.5
      */
     boolean contentEquals(CharSequence cs) {
         // Argument is a StringBuffer, StringBuilder
@@ -1198,7 +1181,6 @@ final class String : Nullable!string {
      * The {@link java.text.Collator} class provides locale-sensitive comparison.
      *
      * @see     java.text.Collator
-     * @since   1.2
      */
     static final Comparator<String> CASE_INSENSITIVE_ORDER
                                          = new CaseInsensitiveComparator();
@@ -1239,7 +1221,6 @@ final class String : Nullable!string {
      *          specified String is greater than, equal to, or less
      *          than this String, ignoring case considerations.
      * @see     java.text.Collator
-     * @since   1.2
      */
     int compareToIgnoreCase(String str) {
         return CASE_INSENSITIVE_ORDER.compare(this, str);
@@ -1451,7 +1432,6 @@ final class String : Nullable!string {
      *          argument is an empty string or is equal to this
      *          {@code String} object as determined by the
      *          {@link #equals(Object)} method.
-     * @since   1.0
      */
     boolean startsWith(String prefix) {
         return startsWith(prefix, 0);
@@ -2465,7 +2445,6 @@ final class String : Nullable!string {
      * @see     java.lang.String#toLowerCase()
      * @see     java.lang.String#toUpperCase()
      * @see     java.lang.String#toUpperCase(Locale)
-     * @since   1.1
      */
     String toLowerCase(Locale locale) {
         return isLatin1() ? StringLatin1.toLowerCase(this, value, locale)
@@ -2547,7 +2526,6 @@ final class String : Nullable!string {
      * @see     java.lang.String#toUpperCase()
      * @see     java.lang.String#toLowerCase()
      * @see     java.lang.String#toLowerCase(Locale)
-     * @since   1.1
      */
     String toUpperCase(Locale locale) {
         return isLatin1() ? StringLatin1.toUpperCase(this, value, locale)
@@ -2706,7 +2684,6 @@ final class String : Nullable!string {
      * @return  A formatted string
      *
      * @see  java.util.Formatter
-     * @since  1.5
      */
     static String format(String format, Object... args) {
         return new Formatter().format(format, args).toString();
@@ -2747,7 +2724,6 @@ final class String : Nullable!string {
      * @return  A formatted string
      *
      * @see  java.util.Formatter
-     * @since  1.5
      */
     static String format(Locale l, String format, Object... args) {
         return new Formatter(l).format(format, args).toString();

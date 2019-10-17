@@ -159,7 +159,6 @@ class Long : AbstractNumber!long {
      *
      * @param  l a long value.
      * @return a {@code Long} instance representing {@code l}.
-     * @since  1.5
      */
     static Long valueOf(long l) {
         int offset = 128;
@@ -421,7 +420,6 @@ class Long : AbstractNumber!long {
      *          (base&nbsp;16).
      * @see #parseUnsignedLong(string, int)
      * @see #toUnsignedString(long, int)
-     * @since   JDK 1.0.2
      */
     static string toHexString(long i) {
         return toUnsignedString0(i, 4);
@@ -460,7 +458,6 @@ class Long : AbstractNumber!long {
      *          value represented by the argument in octal (base&nbsp;8).
      * @see #parseUnsignedLong(string, int)
      * @see #toUnsignedString(long, int)
-     * @since   JDK 1.0.2
      */
     static string toOctalString(long i) {
         return toUnsignedString0(i, 3);
@@ -493,7 +490,6 @@ class Long : AbstractNumber!long {
      *          value represented by the argument in binary (base&nbsp;2).
      * @see #parseUnsignedLong(string, int)
      * @see #toUnsignedString(long, int)
-     * @since   JDK 1.0.2
      */
     static string toBinaryString(long i) {
         return toUnsignedString0(i, 1);

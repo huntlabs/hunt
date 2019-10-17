@@ -159,7 +159,6 @@ interface Comparator(T) {
     //  *
     //  * @return a comparator that imposes the reverse ordering of this
     //  *         comparator.
-    //  * @since 1.8
     //  */
     // Comparator!(T) reversed() {
     //     return Collections.reverseOrder(this);
@@ -188,7 +187,6 @@ interface Comparator(T) {
     //  * @return a lexicographic-order comparator composed of this and then the
     //  *         other comparator
     //  * @throws NullPointerException if the argument is null.
-    //  * @since 1.8
     //  */
     // Comparator!(T) thenComparing(Comparator<T> other) {
     //     Objects.requireNonNull(other);
@@ -213,7 +211,6 @@ interface Comparator(T) {
     //  * @throws NullPointerException if either argument is null.
     //  * @see #comparing(Function, Comparator)
     //  * @see #thenComparing(Comparator)
-    //  * @since 1.8
     //  */
     // !(U) Comparator!(T) thenComparing(
     //         Function<T, U> keyExtractor,
@@ -237,7 +234,6 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null.
     //  * @see #comparing(Function)
     //  * @see #thenComparing(Comparator)
-    //  * @since 1.8
     //  */
     // <U extends Comparable<U>> Comparator!(T) thenComparing(
     //         Function<T, U> keyExtractor)
@@ -258,7 +254,6 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null.
     //  * @see #comparingInt(ToIntFunction)
     //  * @see #thenComparing(Comparator)
-    //  * @since 1.8
     //  */
     // Comparator!(T) thenComparingInt(ToIntFunction<T> keyExtractor) {
     //     return thenComparing(comparingInt(keyExtractor));
@@ -277,7 +272,6 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null.
     //  * @see #comparingLong(ToLongFunction)
     //  * @see #thenComparing(Comparator)
-    //  * @since 1.8
     //  */
     // Comparator!(T) thenComparingLong(ToLongFunction<T> keyExtractor) {
     //     return thenComparing(comparingLong(keyExtractor));
@@ -296,7 +290,6 @@ interface Comparator(T) {
     //  * @throws NullPointerException if the argument is null.
     //  * @see #comparingDouble(ToDoubleFunction)
     //  * @see #thenComparing(Comparator)
-    //  * @since 1.8
     //  */
     // Comparator!(T) thenComparingDouble(ToDoubleFunction<T> keyExtractor) {
     //     return thenComparing(comparingDouble(keyExtractor));
@@ -313,7 +306,6 @@ interface Comparator(T) {
     //  * @return a comparator that imposes the reverse of the <i>natural
     //  *         ordering</i> on {@code Comparable} objects.
     //  * @see Comparable
-    //  * @since 1.8
     //  */
     // static <T extends Comparable<T>> Comparator!(T) reverseOrder() {
     //     return Collections.reverseOrder();
@@ -330,7 +322,6 @@ interface Comparator(T) {
     //  * @return a comparator that imposes the <i>natural ordering</i> on {@code
     //  *         Comparable} objects.
     //  * @see Comparable
-    //  * @since 1.8
     //  */
     // @SuppressWarnings("unchecked")
     // static <T extends Comparable<T>> Comparator!(T) naturalOrder() {
@@ -352,7 +343,6 @@ interface Comparator(T) {
     //  * @return a comparator that considers {@code null} to be less than
     //  *         non-null, and compares non-null objects with the supplied
     //  *         {@code Comparator}.
-    //  * @since 1.8
     //  */
     // static !(T) Comparator!(T) nullsFirst(Comparator<T> comparator) {
     //     return new Comparators.NullComparator<>(true, comparator);
@@ -373,7 +363,6 @@ interface Comparator(T) {
     //  * @return a comparator that considers {@code null} to be greater than
     //  *         non-null, and compares non-null objects with the supplied
     //  *         {@code Comparator}.
-    //  * @since 1.8
     //  */
     // static !(T) Comparator!(T) nullsLast(Comparator<T> comparator) {
     //     return new Comparators.NullComparator<>(false, comparator);
@@ -404,7 +393,6 @@ interface Comparator(T) {
     //  * @return a comparator that compares by an extracted key using the
     //  *         specified {@code Comparator}
     //  * @throws NullPointerException if either argument is null
-    //  * @since 1.8
     //  */
     // static <T, U> Comparator!(T) comparing(
     //         Function<T, U> keyExtractor,
@@ -439,7 +427,6 @@ interface Comparator(T) {
     //  *         Comparable} sort key
     //  * @return a comparator that compares by an extracted key
     //  * @throws NullPointerException if the argument is null
-    //  * @since 1.8
     //  */
     // static <T, U extends Comparable<U>> Comparator!(T) comparing(
     //         Function<T, U> keyExtractor)
@@ -462,7 +449,6 @@ interface Comparator(T) {
     //  * @return a comparator that compares by an extracted key
     //  * @see #comparing(Function)
     //  * @throws NullPointerException if the argument is null
-    //  * @since 1.8
     //  */
     // static !(T) Comparator!(T) comparingInt(ToIntFunction<T> keyExtractor) {
     //     Objects.requireNonNull(keyExtractor);
@@ -483,7 +469,6 @@ interface Comparator(T) {
     //  * @return a comparator that compares by an extracted key
     //  * @see #comparing(Function)
     //  * @throws NullPointerException if the argument is null
-    //  * @since 1.8
     //  */
     // static !(T) Comparator!(T) comparingLong(ToLongFunction<T> keyExtractor) {
     //     Objects.requireNonNull(keyExtractor);
@@ -504,7 +489,6 @@ interface Comparator(T) {
     //  * @return a comparator that compares by an extracted key
     //  * @see #comparing(Function)
     //  * @throws NullPointerException if the argument is null
-    //  * @since 1.8
     //  */
     // static!(T) Comparator!(T) comparingDouble(ToDoubleFunction<T> keyExtractor) {
     //     Objects.requireNonNull(keyExtractor);

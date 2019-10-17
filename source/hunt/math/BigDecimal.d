@@ -238,7 +238,6 @@ class BigDecimal : Number
      * method to obtain and set the value if it might be 0.  This
      * field is mutable until set nonzero.
      *
-     * @since  1.5
      */
     private int precision;
 
@@ -324,21 +323,18 @@ class BigDecimal : Number
     //     /**
     //      * The value 0, with a scale of 0.
     //      *
-    //      * @since  1.5
     //      */
     __gshared BigDecimal ZERO;
 
     //     /**
     //      * The value 1, with a scale of 0.
     //      *
-    //      * @since  1.5
     //      */
     __gshared BigDecimal ONE;
 
     //     /**
     //      * The value 10, with a scale of 0.
     //      *
-    //      * @since  1.5
     //      */
     //     static final BigDecimal TEN =
     //         ZERO_THROUGH_TEN[10];
@@ -385,7 +381,6 @@ class BigDecimal : Number
     //      * @throws NumberFormatException if {@code in} is not a valid
     //      *         representation of a {@code BigDecimal} or the defined subarray
     //      *         is not wholly within {@code in}.
-    //      * @since  1.5
     //      */
     //     BigDecimal(char[] in, int offset, int len) {
     //         this(in,offset,len,MathContext.UNLIMITED);
@@ -412,7 +407,6 @@ class BigDecimal : Number
     //      * @throws NumberFormatException if {@code in} is not a valid
     //      *         representation of a {@code BigDecimal} or the defined subarray
     //      *         is not wholly within {@code in}.
-    //      * @since  1.5
     //      */
     //     BigDecimal(char[] in, int offset, int len, MathContext mc) {
     //         // protect against huge length.
@@ -685,7 +679,6 @@ class BigDecimal : Number
     //      * @param in {@code char} array that is the source of characters.
     //      * @throws NumberFormatException if {@code in} is not a valid
     //      *         representation of a {@code BigDecimal}.
-    //      * @since  1.5
     //      */
     this(char[] inp)
     {
@@ -710,7 +703,6 @@ class BigDecimal : Number
     //      *         rounding mode is {@code UNNECESSARY}.
     //      * @throws NumberFormatException if {@code in} is not a valid
     //      *         representation of a {@code BigDecimal}.
-    //      * @since  1.5
     //      */
     // BigDecimal(char[] in, MathContext mc) {
     //     this(in, 0, in.length, mc);
@@ -834,7 +826,6 @@ class BigDecimal : Number
     //      *         rounding mode is {@code UNNECESSARY}.
     //      * @throws NumberFormatException if {@code val} is not a valid
     //      *         representation of a BigDecimal.
-    //      * @since  1.5
     //      */
     //     BigDecimal(string val, MathContext mc) {
     //         this(val.toCharArray(), 0, val.length(), mc);
@@ -905,7 +896,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         RoundingMode is UNNECESSARY.
     //      * @throws NumberFormatException if {@code val} is infinite or NaN.
-    //      * @since  1.5
     //      */
     //     BigDecimal(double val, MathContext mc) {
     //         if (Double.isInfinite(val) || Double.isNaN(val))
@@ -1013,7 +1003,6 @@ class BigDecimal : Number
     //      * @param  mc the context to use.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal(BigInteger val, MathContext mc) {
     //         this(val,0,mc);
@@ -1048,7 +1037,6 @@ class BigDecimal : Number
     //      * @param  mc the context to use.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal(BigInteger unscaledVal, int scale, MathContext mc) {
     //         long compactVal = compactValFor(unscaledVal);
@@ -1094,7 +1082,6 @@ class BigDecimal : Number
      *
      * @param val {@code int} value to be converted to
      *            {@code BigDecimal}.
-     * @since  1.5
      */
     this(int val)
     {
@@ -1112,7 +1099,6 @@ class BigDecimal : Number
     //      * @param  mc the context to use.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal(int val, MathContext mc) {
     //         int mcp = mc.precision;
@@ -1140,7 +1126,6 @@ class BigDecimal : Number
      * scale of the {@code BigDecimal} is zero.
      *
      * @param val {@code long} value to be converted to {@code BigDecimal}.
-     * @since  1.5
      */
     this(long val)
     {
@@ -1158,7 +1143,6 @@ class BigDecimal : Number
     //      * @param  mc the context to use.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal(long val, MathContext mc) {
     //         int mcp = mc.precision;
@@ -1290,7 +1274,6 @@ class BigDecimal : Number
     //      * @return a {@code BigDecimal} whose value is equal to or approximately
     //      *         equal to the value of {@code val}.
     //      * @throws NumberFormatException if {@code val} is infinite or NaN.
-    //      * @since  1.5
     //      */
     //     static BigDecimal valueOf(double val) {
     //         // Reminder: a zero double returns '0.0', so we cannot fastpath
@@ -1339,7 +1322,6 @@ class BigDecimal : Number
     //      * @return {@code this + augend}, rounded as necessary.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal add(BigDecimal augend, MathContext mc) {
     //         if (mc.precision == 0)
@@ -1491,7 +1473,6 @@ class BigDecimal : Number
     //      * @return {@code this - subtrahend}, rounded as necessary.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal subtract(BigDecimal subtrahend, MathContext mc) {
     //         if (mc.precision == 0)
@@ -1536,7 +1517,6 @@ class BigDecimal : Number
     //      * @return {@code this * multiplicand}, rounded as necessary.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal multiply(BigDecimal multiplicand, MathContext mc) {
     //         if (mc.precision == 0)
@@ -1618,7 +1598,6 @@ class BigDecimal : Number
     //      *         {@code roundingMode==RoundingMode.UNNECESSARY} and
     //      *         the specified scale is insufficient to represent the result
     //      *         of the division exactly.
-    //      * @since 1.5
     //      */
     //     BigDecimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode) {
     //         return divide(divisor, scale, roundingMode.oldMode);
@@ -1671,7 +1650,6 @@ class BigDecimal : Number
     //      *         {@code roundingMode==RoundingMode.UNNECESSARY} and
     //      *         {@code this.scale()} is insufficient to represent the result
     //      *         of the division exactly.
-    //      * @since 1.5
     //      */
     //     BigDecimal divide(BigDecimal divisor, RoundingMode roundingMode) {
     //         return this.divide(divisor, scale, roundingMode.oldMode);
@@ -1688,7 +1666,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if the exact quotient does not have a
     //      *         terminating decimal expansion
     //      * @return {@code this / divisor}
-    //      * @since 1.5
     //      * @author Joseph D. Darcy
     //      */
     BigDecimal divide(BigDecimal divisor)
@@ -1753,7 +1730,6 @@ class BigDecimal : Number
     //      *         rounding mode is {@code UNNECESSARY} or
     //      *         {@code mc.precision == 0} and the quotient has a
     //      *         non-terminating decimal expansion.
-    //      * @since  1.5
     //      */
     //     BigDecimal divide(BigDecimal divisor, MathContext mc) {
     //         int mcp = mc.precision;
@@ -1807,7 +1783,6 @@ class BigDecimal : Number
     //      * @param  divisor value by which this {@code BigDecimal} is to be divided.
     //      * @return The integer part of {@code this / divisor}.
     //      * @throws ArithmeticException if {@code divisor==0}
-    //      * @since  1.5
     //      */
     BigDecimal divideToIntegralValue(BigDecimal divisor)
     {
@@ -1862,7 +1837,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if {@code divisor==0}
     //      * @throws ArithmeticException if {@code mc.precision} {@literal >} 0 and the result
     //      *         requires a precision of more than {@code mc.precision} digits.
-    //      * @since  1.5
     //      * @author Joseph D. Darcy
     //      */
     //     BigDecimal divideToIntegralValue(BigDecimal divisor, MathContext mc) {
@@ -1925,7 +1899,6 @@ class BigDecimal : Number
     //      * @param  divisor value by which this {@code BigDecimal} is to be divided.
     //      * @return {@code this % divisor}.
     //      * @throws ArithmeticException if {@code divisor==0}
-    //      * @since  1.5
     //      */
     //     BigDecimal remainder(BigDecimal divisor) {
     //         BigDecimal divrem[] = this.divideAndRemainder(divisor);
@@ -1954,7 +1927,6 @@ class BigDecimal : Number
     //      *         {@literal >} 0 and the result of {@code this.divideToIntgralValue(divisor)} would
     //      *         require a precision of more than {@code mc.precision} digits.
     //      * @see    #divideToIntegralValue(java.math.BigDecimal, java.math.MathContext)
-    //      * @since  1.5
     //      */
     //     BigDecimal remainder(BigDecimal divisor, MathContext mc) {
     //         BigDecimal divrem[] = this.divideAndRemainder(divisor, mc);
@@ -1979,7 +1951,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if {@code divisor==0}
     //      * @see    #divideToIntegralValue(java.math.BigDecimal, java.math.MathContext)
     //      * @see    #remainder(java.math.BigDecimal, java.math.MathContext)
-    //      * @since  1.5
     //      */
     //     BigDecimal[] divideAndRemainder(BigDecimal divisor) {
     //         // we use the identity  x = i * y + r to determine r
@@ -2014,7 +1985,6 @@ class BigDecimal : Number
     //      *         require a precision of more than {@code mc.precision} digits.
     //      * @see    #divideToIntegralValue(java.math.BigDecimal, java.math.MathContext)
     //      * @see    #remainder(java.math.BigDecimal, java.math.MathContext)
-    //      * @since  1.5
     //      */
     //     BigDecimal[] divideAndRemainder(BigDecimal divisor, MathContext mc) {
     //         if (mc.precision == 0)
@@ -2060,7 +2030,6 @@ class BigDecimal : Number
     //      * the exact result cannot fit in {@code mc.getPrecision()}
     //      * digits.
     //      * @see BigInteger#sqrt()
-    //      * @since  9
     //      */
     //     BigDecimal sqrt(MathContext mc) {
     //         int signum = signum();
@@ -2333,7 +2302,6 @@ class BigDecimal : Number
     //      * @param  n power to raise this {@code BigDecimal} to.
     //      * @return <code>this!(sup)n</sup></code>
     //      * @throws ArithmeticException if {@code n} is out of range.
-    //      * @since  1.5
     //      */
     //     BigDecimal pow(int n) {
     //         if (n < 0 || n > 999999999)
@@ -2392,7 +2360,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}, or {@code n} is out
     //      *         of range.
-    //      * @since  1.5
     //      */
     //     BigDecimal pow(int n, MathContext mc) {
     //         if (mc.precision == 0)
@@ -2453,7 +2420,6 @@ class BigDecimal : Number
     //      * @return {@code abs(this)}, rounded as necessary.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since 1.5
     //      */
     //     BigDecimal abs(MathContext mc) {
     //         return (signum() < 0 ? negate(mc) : plus(mc));
@@ -2481,7 +2447,6 @@ class BigDecimal : Number
     //      * @return {@code -this}, rounded as necessary.
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
-    //      * @since  1.5
     //      */
     //     BigDecimal negate(MathContext mc) {
     //         return negate().plus(mc);
@@ -2497,7 +2462,6 @@ class BigDecimal : Number
     //      *
     //      * @return {@code this}.
     //      * @see #negate()
-    //      * @since  1.5
     //      */
     //     BigDecimal plus() {
     //         return this;
@@ -2516,7 +2480,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if the result is inexact but the
     //      *         rounding mode is {@code UNNECESSARY}.
     //      * @see    #round(MathContext)
-    //      * @since  1.5
     //      */
     //     BigDecimal plus(MathContext mc) {
     //         if (mc.precision == 0)                 // no rounding please
@@ -2557,7 +2520,6 @@ class BigDecimal : Number
     //      * <p>The precision of a zero value is 1.
     //      *
     //      * @return the precision of this {@code BigDecimal}.
-    //      * @since  1.5
     //      */
     //     int precision() {
     //         int result = precision;
@@ -2578,7 +2540,6 @@ class BigDecimal : Number
     //      * 10!(sup)this.scale()</sup>)</code>.)
     //      *
     //      * @return the unscaled value of this {@code BigDecimal}.
-    //      * @since  1.2
     //      */
     //     BigInteger unscaledValue() {
     //         return this.inflated();
@@ -2698,7 +2659,6 @@ class BigDecimal : Number
     //      *         {@code UNNECESSARY} and the
     //      *         {@code BigDecimal}  operation would require rounding.
     //      * @see    #plus(MathContext)
-    //      * @since  1.5
     //      */
     //     BigDecimal round(MathContext mc) {
     //         return plus(mc);
@@ -2731,7 +2691,6 @@ class BigDecimal : Number
     //      *         and the specified scaling operation would require
     //      *         rounding.
     //      * @see    RoundingMode
-    //      * @since  1.5
     //      */
     //     BigDecimal setScale(int newScale, RoundingMode roundingMode) {
     //         return setScale(newScale, roundingMode.oldMode);
@@ -2933,7 +2892,6 @@ class BigDecimal : Number
     //      * @throws ArithmeticException if the scale would be
     //      *         outside the range of a 32-bit integer.
     //      *
-    //      * @since 1.5
     //      */
     //     BigDecimal scaleByPowerOfTen(int n) {
     //         return new BigDecimal(intVal, intCompact,
@@ -2953,7 +2911,6 @@ class BigDecimal : Number
     //      *
     //      * @return a numerically equal {@code BigDecimal} with any
     //      * trailing zeros removed.
-    //      * @since 1.5
     //      */
     //     BigDecimal stripTrailingZeros() {
     //         if (intCompact == 0 || (intVal !is null && intVal.signum() == 0)) {
@@ -3272,7 +3229,6 @@ class BigDecimal : Number
     //      *
     //      * @return string representation of this {@code BigDecimal}, using
     //      *         engineering notation if an exponent is needed.
-    //      * @since  1.5
     //      */
     //     string toEngineeringString() {
     //         return layoutChars(false);
@@ -3422,7 +3378,6 @@ class BigDecimal : Number
      * @return this {@code BigDecimal} converted to a {@code BigInteger}.
      * @throws ArithmeticException if {@code this} has a nonzero
      *         fractional part.
-     * @since  1.5
      */    
     BigInteger toBigIntegerExact()
     {
@@ -3464,7 +3419,6 @@ class BigDecimal : Number
     //      * @return this {@code BigDecimal} converted to a {@code long}.
     //      * @throws ArithmeticException if {@code this} has a nonzero
     //      *         fractional part, or will not fit in a {@code long}.
-    //      * @since  1.5
     //      */
     //     long longValueExact() {
     //         if (intCompact != INFLATED && scale == 0)
@@ -3534,7 +3488,6 @@ class BigDecimal : Number
     //      * @return this {@code BigDecimal} converted to an {@code int}.
     //      * @throws ArithmeticException if {@code this} has a nonzero
     //      *         fractional part, or will not fit in an {@code int}.
-    //      * @since  1.5
     //      */
     //     int intValueExact() {
     //        long num;
@@ -3554,7 +3507,6 @@ class BigDecimal : Number
     //      * @return this {@code BigDecimal} converted to a {@code short}.
     //      * @throws ArithmeticException if {@code this} has a nonzero
     //      *         fractional part, or will not fit in a {@code short}.
-    //      * @since  1.5
     //      */
     //     short shortValueExact() {
     //        long num;
@@ -3574,7 +3526,6 @@ class BigDecimal : Number
     //      * @return this {@code BigDecimal} converted to a {@code byte}.
     //      * @throws ArithmeticException if {@code this} has a nonzero
     //      *         fractional part, or will not fit in a {@code byte}.
-    //      * @since  1.5
     //      */
     //     byte byteValueExact() {
     //        long num;
@@ -3706,7 +3657,6 @@ class BigDecimal : Number
     //      * this.scale()]}.
     //      *
     //      * @return the size of an ulp of {@code this}
-    //      * @since 1.5
     //      */
     //     BigDecimal ulp() {
     //         return BigDecimal.valueOf(1, this.scale(), 1);
@@ -5699,7 +5649,6 @@ class BigDecimal : Number
      *
      * @return  the numeric value represented by this object after conversion
      *          to type {@code byte}.
-     * @since   1.1
      */
     override byte byteValue()
     {
@@ -5714,7 +5663,6 @@ class BigDecimal : Number
      *
      * @return  the numeric value represented by this object after conversion
      *          to type {@code short}.
-     * @since   1.1
      */
     override short shortValue()
     {

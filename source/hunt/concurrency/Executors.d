@@ -102,7 +102,6 @@ class Executors {
     //  * @param parallelism the targeted parallelism level
     //  * @return the newly created thread pool
     //  * @throws IllegalArgumentException if {@code parallelism <= 0}
-    //  * @since 1.8
     //  */
     // static ExecutorService newWorkStealingPool(int parallelism) {
     //     return new ForkJoinPool
@@ -118,7 +117,6 @@ class Executors {
     //  *
     //  * @return the newly created thread pool
     //  * @see #newWorkStealingPool(int)
-    //  * @since 1.8
     //  */
     // static ExecutorService newWorkStealingPool() {
     //     return new ForkJoinPool

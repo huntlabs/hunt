@@ -39,7 +39,6 @@ import std.traits;
  * @author      Arthur van Hoff
  * @jls 5.1.2 Widening Primitive Conversions
  * @jls 5.1.3 Narrowing Primitive Conversions
- * @since   1.0
  */
 // class Number(T) : Nullable!(T) if(isNumeric!T) {
 interface Number {
