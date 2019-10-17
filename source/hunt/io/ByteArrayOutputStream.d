@@ -211,7 +211,6 @@ class ByteArrayOutputStream : OutputStream {
      * required.
      *
      * @return string decoded from the buffer's contents.
-     * @since  JDK1.1
      */
     override string toString() {
         return cast(string)(buf[0 .. count]);
@@ -233,7 +232,6 @@ class ByteArrayOutputStream : OutputStream {
      * @return     string decoded from the buffer's contents.
      * @exception  UnsupportedEncodingException
      *             If the named charset is not supported
-     * @since      JDK1.1
      */
     string toString(string charsetName) {
         return cast(string)(buf[0..count]); // , charsetName);

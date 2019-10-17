@@ -38,7 +38,6 @@ version(HUNT_DEBUG) {
  * the contained input stream.
  *
  * @author  Arthur van Hoff
- * @since   1.0
  */
 class BufferedInputStream : FilterInputStream {
 

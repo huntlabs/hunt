@@ -48,7 +48,6 @@ import std.stdio;
  * @see     java.io.FileDescriptor
  * @see     java.io.FileOutputStream
  * @see     java.nio.file.Files#newInputStream
- * @since   1.0
  */
 class FileInputStream : InputStream {
     /* File Descriptor - handle to the open file */

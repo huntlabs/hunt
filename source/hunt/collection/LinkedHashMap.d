@@ -148,7 +148,6 @@ import std.range;
  * @see     HashMap
  * @see     TreeMap
  * @see     Hashtable
- * @since   1.4
  */
 class LinkedHashMap(K, V) : HashMap!(K, V)
 {

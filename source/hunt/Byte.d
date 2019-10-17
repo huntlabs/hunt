@@ -30,7 +30,6 @@ import std.conv;
  * @author  Nakul Saraiya
  * @author  Joseph D. Darcy
  * @see     java.lang.Number
- * @since   JDK1.1
  */
 class Byte : AbstractNumber!(byte) {
 
@@ -87,7 +86,6 @@ class Byte : AbstractNumber!(byte) {
      *
      * @param  b a byte value.
      * @return a {@code Byte} instance representing {@code b}.
-     * @since  1.5
      */
     // static Byte valueOf(byte b) {
     //      int offset = 128;

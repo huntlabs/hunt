@@ -1111,7 +1111,6 @@ final class Locale // : Cloneable
     //  * @see java.util.Locale.IsoCountryCode
     //  * @throws NullPointerException if type is null
     //  * @return a {@code Set} of ISO country codes for the specified type.
-    //  * @since 9
     //  */
     // static Set!(string) getISOCountries(IsoCountryCode type) {
     //     assert(type);
@@ -1227,7 +1226,6 @@ final class Locale // : Cloneable
     //  *
     //  * @return a copy of this {@code Locale} with no extensions, or {@code this}
     //  *         if {@code this} has no extensions
-    //  * @since 1.8
     //  */
     // Locale stripExtensions() {
     //     return hasExtensions() ? Locale.getInstance(baseLocale, null) : this;
@@ -1246,7 +1244,6 @@ final class Locale // : Cloneable
     //  * @throws IllegalArgumentException if key is not well-formed
     //  * @see #PRIVATE_USE_EXTENSION
     //  * @see #UNICODE_LOCALE_EXTENSION
-    //  * @since 1.7
     //  */
     // string getExtension(char key) {
     //     if (!LocaleExtensions.isValidKey(key)) {
@@ -1262,7 +1259,6 @@ final class Locale // : Cloneable
     //  *
     //  * @return The set of extension keys, or the empty set if this locale has
     //  * no extensions.
-    //  * @since 1.7
     //  */
     // Set<Character> getExtensionKeys() {
     //     if (!hasExtensions()) {
@@ -1277,7 +1273,6 @@ final class Locale // : Cloneable
     //  * returned set is unmodifiable.
     //  *
     //  * @return The set of attributes.
-    //  * @since 1.7
     //  */
     // Set!(string) getUnicodeLocaleAttributes() {
     //     if (!hasExtensions()) {
@@ -1298,7 +1293,6 @@ final class Locale // : Cloneable
     //  * locale does not define the key.
     //  * @throws IllegalArgumentException if the key is not well-formed
     //  * @throws NullPointerException if <code>key</code> is null
-    //  * @since 1.7
     //  */
     string getUnicodeLocaleType(string key) {
         /* if (!isUnicodeExtensionKey(key)) {
@@ -1314,7 +1308,6 @@ final class Locale // : Cloneable
     //  *
     //  * @return The set of Unicode locale keys, or the empty set if this locale has
     //  * no Unicode locale keywords.
-    //  * @since 1.7
     //  */
     // Set!(string) getUnicodeLocaleKeys() {
     //     if (localeExtensions is null) {
@@ -1475,7 +1468,6 @@ final class Locale // : Cloneable
     //  *
     //  * @return a BCP47 language tag representing the locale
     //  * @see #forLanguageTag(string)
-    //  * @since 1.7
     //  */
     // string toLanguageTag() {
     //     if (languageTag !is null) {
@@ -1658,7 +1650,6 @@ final class Locale // : Cloneable
     //  * @throws NullPointerException if <code>languageTag</code> is <code>null</code>
     //  * @see #toLanguageTag()
     //  * @see java.util.Locale.Builder#setLanguageTag(string)
-    //  * @since 1.7
     //  */
     // static Locale forLanguageTag(string languageTag) {
     //     LanguageTag tag = LanguageTag.parse(languageTag, null);
@@ -1795,7 +1786,6 @@ final class Locale // : Cloneable
     //  *
     //  * @return the display name of the script code for the current default
     //  *     {@link LocaleCategory#DISPLAY DISPLAY} locale
-    //  * @since 1.7
     //  */
     // string getDisplayScript() {
     //     return getDisplayScript(getDefault(Category.DISPLAY));
@@ -1811,7 +1801,6 @@ final class Locale // : Cloneable
     //  * @return the display name of the script code for the current default
     //  * {@link LocaleCategory#DISPLAY DISPLAY} locale
     //  * @throws NullPointerException if <code>inLocale</code> is <code>null</code>
-    //  * @since 1.7
     //  */
     // string getDisplayScript(Locale inLocale) {
     //     return getDisplaystring(script, null, inLocale, DISPLAY_SCRIPT);
@@ -2262,7 +2251,6 @@ final class Locale // : Cloneable
     //  * Serializes this <code>Locale</code> to the specified <code>ObjectOutputStream</code>.
     //  * @param out the <code>ObjectOutputStream</code> to write
     //  * @throws IOException
-    //  * @since 1.7
     //  */
     // private void writeObject(ObjectOutputStream out) throws IOException {
     //     ObjectOutputStream.PutField fields = out.putFields();
@@ -2281,7 +2269,6 @@ final class Locale // : Cloneable
     //  * @throws IOException
     //  * @throws ClassNotFoundException
     //  * @throws IllformedLocaleException
-    //  * @since 1.7
     //  */
     // private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     //     ObjectInputStream.GetField fields = in.readFields();
@@ -2435,7 +2422,6 @@ final class Locale // : Cloneable
     //  * fields to their default values.
     //  *
     //  * @see Locale#forLanguageTag
-    //  * @since 1.7
     //  */
     // static final class Builder {
     //     private final InternalLocaleBuilder localeBuilder;
@@ -2845,7 +2831,6 @@ final class Locale // : Cloneable
     //  * @see #filter(List, Collection, FilteringMode)
     //  * @see #filterTags(List, Collection, FilteringMode)
     //  *
-    //  * @since 1.8
     //  */
     // static enum FilteringMode {
     //     /**
@@ -2918,7 +2903,6 @@ final class Locale // : Cloneable
     //  * @see #lookup
     //  * @see #lookupTag
     //  *
-    //  * @since 1.8
     //  */
     // static final class LanguageRange {
 
@@ -3269,7 +3253,6 @@ final class Locale // : Cloneable
     //  *     are included in the given list when
     //  *     {@link FilteringMode#REJECT_EXTENDED_RANGES} is specified
     //  *
-    //  * @since 1.8
     //  */
     // static List<Locale> filter(List<LanguageRange> priorityList,
     //                                   Collection<Locale> locales,
@@ -3295,7 +3278,6 @@ final class Locale // : Cloneable
     //  * @throws NullPointerException if {@code priorityList} or {@code locales}
     //  *     is {@code null}
     //  *
-    //  * @since 1.8
     //  */
     // static List<Locale> filter(List<LanguageRange> priorityList,
     //                                   Collection<Locale> locales) {
@@ -3330,7 +3312,6 @@ final class Locale // : Cloneable
     //  *     are included in the given list when
     //  *     {@link FilteringMode#REJECT_EXTENDED_RANGES} is specified
     //  *
-    //  * @since 1.8
     //  */
     // static List<string> filterTags(List<LanguageRange> priorityList,
     //                                       Collection<string> tags,
@@ -3364,7 +3345,6 @@ final class Locale // : Cloneable
     //  * @throws NullPointerException if {@code priorityList} or {@code tags} is
     //  *     {@code null}
     //  *
-    //  * @since 1.8
     //  */
     // static List<string> filterTags(List<LanguageRange> priorityList,
     //                                       Collection<string> tags) {
@@ -3383,7 +3363,6 @@ final class Locale // : Cloneable
     //  * @throws NullPointerException if {@code priorityList} or {@code tags} is
     //  *     {@code null}
     //  *
-    //  * @since 1.8
     //  */
     // static Locale lookup(List<LanguageRange> priorityList,
     //                             Collection<Locale> locales) {
@@ -3405,7 +3384,6 @@ final class Locale // : Cloneable
     //  * @throws NullPointerException if {@code priorityList} or {@code tags} is
     //  *     {@code null}
     //  *
-    //  * @since 1.8
     //  */
     // static string lookupTag(List<LanguageRange> priorityList,
     //                                Collection<string> tags) {

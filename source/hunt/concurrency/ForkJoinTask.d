@@ -1293,7 +1293,6 @@ static if(is(V == void)) {
     //  * support extensions, and is unlikely to be useful otherwise.
     //  *
     //  * @return a task, or {@code null} if none are available
-    //  * @since 9
     //  */
     // protected static IForkJoinTask pollSubmission() {
     //     ForkJoinWorkerThread t = cast(ForkJoinWorkerThread)Thread.getThis();

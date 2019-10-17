@@ -166,7 +166,6 @@ import std.range;
  *
  * @author Doug Lea
  * @author Josh Bloch
- * @since  1.6
  * @param !E the type of elements held in this collection
  */
 interface Deque(E) : Queue!E {

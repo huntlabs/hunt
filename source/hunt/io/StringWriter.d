@@ -21,7 +21,6 @@ import std.string;
  * {@code IOException}.
  *
  * @author      Mark Reinhold
- * @since       1.1
  */
 
 class StringWriter : Writer {

@@ -61,7 +61,6 @@ class ByteArrayInputStream : InputStream {
      * If no mark has been set, then the value of mark is the offset
      * passed to the constructor (or 0 if the offset was not supplied).
      *
-     * @since   JDK1.1
      */
     protected int _mark = 0;
 
@@ -233,7 +232,6 @@ class ByteArrayInputStream : InputStream {
      * <code>markSupported</code> method of <code>ByteArrayInputStream</code>
      * always returns <code>true</code>.
      *
-     * @since   JDK1.1
      */
     override bool markSupported() {
         return true;
@@ -252,7 +250,6 @@ class ByteArrayInputStream : InputStream {
      * <p> Note: The <code>readAheadLimit</code> for this class
      *  has no meaning.
      *
-     * @since   JDK1.1
      */
     override void mark(int readAheadLimit) {
         _mark = pos;

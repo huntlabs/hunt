@@ -33,7 +33,6 @@ version(HUNT_DEBUG) {
  * and fields.
  *
  * @author  Jonathan Payne
- * @since   1.0
  */
 class FilterInputStream : InputStream {
     /**

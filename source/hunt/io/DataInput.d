@@ -138,7 +138,6 @@ module hunt.io.DataInput;
  * @author  Frank Yellin
  * @see     java.io.DataInputStream
  * @see     java.io.DataOutput
- * @since   1.0
  */
 public
 interface DataInput {

@@ -32,7 +32,6 @@ version(HUNT_DEBUG) {
  * methods as well as provide additional methods and fields.
  *
  * @author  Jonathan Payne
- * @since   1.0
  */
 class FilterOutputStream : OutputStream {
     /**

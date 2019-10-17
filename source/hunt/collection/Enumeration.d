@@ -44,7 +44,6 @@ import std.range;
  * @see     java.util.Vector#elements()
  *
  * @author  Lee Boynton
- * @since   JDK1.0
  */
 interface Enumeration(E) {
     /**

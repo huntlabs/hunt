@@ -78,7 +78,6 @@ import std.range;
  * @see     Set
  * @see     TreeSet
  * @see     HashMap
- * @since   1.2
  */
 class HashSet(E) : AbstractSet!E, Set!E {
 

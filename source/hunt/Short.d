@@ -28,7 +28,6 @@ import std.conv;
  * @author  Nakul Saraiya
  * @author  Joseph D. Darcy
  * @see     java.lang.Number
- * @since   JDK1.1
  */
 class Short : AbstractNumber!short /*implements Comparable<Short> */{
 
@@ -215,7 +214,6 @@ class Short : AbstractNumber!short /*implements Comparable<Short> */{
      *
      * @param  s a short value.
      * @return a {@code Short} instance representing {@code s}.
-     * @since  1.5
      */
     // static Short valueOf(short s) {
     //      int offset = 128;
