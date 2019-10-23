@@ -10,8 +10,6 @@
  */
 module hunt.util.Common;
 
-// alias Void = Object;
-
 /**
  * Implementing this interface allows an object to be the target of
  * the "for-each loop" statement. 

@@ -334,6 +334,13 @@ abstract class InputStream : Closeable {
         throw new IOException("mark/reset not supported");
     }
 
+    /** 
+     * set a new position
+     */
+    void position(int index) {
+        throw new IOException("reset not supported");
+    }
+
     /**
      * Tests if this input stream supports the <code>mark</code> and
      * <code>reset</code> methods. Whether or not <code>mark</code> and
@@ -349,7 +356,6 @@ abstract class InputStream : Closeable {
     bool markSupported() {
         return false;
     }
-
 }
 
 

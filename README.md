@@ -26,7 +26,7 @@ A refined core library for D programming language.
  * [hunt-framework](https://github.com/huntlabs/hunt-framework) – Hunt is a high-level D Programming Language Web framework that encourages rapid development and clean, pragmatic design. It lets you build high-performance Web applications quickly and easily.
 
 ## Requirements
-D Compiler 2.086+.
+D Compiler 2.088+.
 
 ## Avaliable versions
 | Identifier | Description | 
