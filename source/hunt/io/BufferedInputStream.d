@@ -448,6 +448,21 @@ class BufferedInputStream : FilterInputStream {
         pos = markpos;
     }
 
+    override void position(int index) {
+        getBufIfOpen(); // Cause exception if closed
+        if(index < 0 || index > count + inputStream.available())
+            throw new IOException("Out of range");
+        
+        if(index >= count) {
+            inputStream.position(index - count);
+            pos = count;
+        } else {
+            inputStream.position(0);
+            pos = index;
+        }
+    }
+
+
     /**
      * Tests if this input stream supports the <code>mark</code>
      * and <code>reset</code> methods. The <code>markSupported</code>

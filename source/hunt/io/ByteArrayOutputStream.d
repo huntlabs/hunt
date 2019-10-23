@@ -177,10 +177,11 @@ class ByteArrayOutputStream : OutputStream {
      * @return  the current contents of this output stream, as a byte array.
      * @see     hunt.io.ByteArrayOutputStream#size()
      */
-    byte[] toByteArray() {
-        // FIXME: Needing refactor or cleanup -@zxp at 7/25/2018, 10:02:15 AM
-        // 
-        return buf[0 .. count]; // .dup; // Arrays.copyOf(buf, count);
+    byte[] toByteArray(bool canCopy = true) {
+        if(canCopy)
+            return buf[0 .. count].dup; 
+        else
+            return buf[0 .. count]; 
     }
 
     byte[] getBuffer() {
