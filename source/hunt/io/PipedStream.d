@@ -37,7 +37,7 @@ interface PipedStream : Closeable {
 class ByteArrayPipedStream : PipedStream {
 
     private ByteArrayOutputStream outStream;
-    private ByteArrayInputStream inStream;
+    // private ByteArrayInputStream inStream;
     private int size;
 
     this(int size) {
@@ -45,19 +45,20 @@ class ByteArrayPipedStream : PipedStream {
     }
 
     void close() {
-        inStream = null;
+        // inStream = null;
         outStream = null;
     }
 
-    InputStream getInputStream() {
-        if (inStream is null) {
-            inStream = new ByteArrayInputStream(outStream.toByteArray());
-            outStream = null;
-        }
-        return inStream;
+    ByteArrayInputStream getInputStream() {
+        return new ByteArrayInputStream(outStream.toByteArray());
+        // if (inStream is null) {
+        //     inStream = new ByteArrayInputStream(outStream.toByteArray());
+        //     // outStream = null;
+        // }
+        // return inStream;
     }
 
-    OutputStream getOutputStream() {
+    ByteArrayOutputStream getOutputStream() {
         if (outStream is null) {
             outStream = new ByteArrayOutputStream(size);
         }
@@ -66,11 +67,12 @@ class ByteArrayPipedStream : PipedStream {
 }
 
 /**
-*/
+ * 
+ */
 class FilePipedStream : PipedStream {
 
-    private OutputStream output;
-    private InputStream input;
+    private BufferedOutputStream output;
+    // private BufferedInputStream input;
     private string temp;
 
     this() {
@@ -90,27 +92,28 @@ class FilePipedStream : PipedStream {
         try {
             temp.remove();
         } finally {
-            if (input !is null)
-                input.close();
+            // if (input !is null)
+            //     input.close();
 
             if (output !is null)
                 output.close();
         }
 
-        input = null;
+        // input = null;
         output = null;
         temp = null;
     }
 
 
-    InputStream getInputStream() {
-        if (input is null) {
-            input = new BufferedInputStream(new FileInputStream(temp));
-        }
-        return input;
+    BufferedInputStream getInputStream() {
+        // if (input is null) {
+        //     input = new BufferedInputStream(new FileInputStream(temp));
+        // }
+        // return input;
+        return new BufferedInputStream(new FileInputStream(temp));
     }
 
-    OutputStream getOutputStream() {
+    BufferedOutputStream getOutputStream() {
         if (output is null) {
             output = new BufferedOutputStream(new FileOutputStream(temp));
         }

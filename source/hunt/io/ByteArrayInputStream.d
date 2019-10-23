@@ -264,6 +264,11 @@ class ByteArrayInputStream : InputStream {
         pos = _mark;
     }
 
+    override void position(int index) {
+        if(index < 0 || index>count)
+            throw new IOException("Out of range");
+        pos = index;
+    }
     /**
      * Closing a <tt>ByteArrayInputStream</tt> has no effect. The methods in
      * this class can be called after the stream has been closed without
