@@ -12,6 +12,7 @@
 module hunt.io.FileOutputStream;
 
 import hunt.Exceptions;
+import hunt.logging.ConsoleLogger;
 import hunt.io.Common;
 
 import std.array;
@@ -173,101 +174,17 @@ class FileOutputStream : OutputStream
      */
     this(File file) {
         this.file = file;
+
+        version(HUNT_DEBUG) {
+            infof("Outputing to file: %s", file.name());
+        }
+
         initialize();
     }
 
     private void initialize() {
         closeLock = new Object();
     }
-
-    /**
-     * Creates a file output stream to write to the file represented by
-     * the specified <code>File</code> object. If the second argument is
-     * <code>true</code>, then bytes will be written to the end of the file
-     * rather than the beginning. A new <code>FileDescriptor</code> object is
-     * created to represent this file connection.
-     * <p>
-     * First, if there is a security manager, its <code>checkWrite</code>
-     * method is called with the path represented by the <code>file</code>
-     * argument as its argument.
-     * <p>
-     * If the file exists but is a directory rather than a regular file, does
-     * not exist but cannot be created, or cannot be opened for any other
-     * reason then a <code>FileNotFoundException</code> is thrown.
-     *
-     * @param      file               the file to be opened for writing.
-     * @param     append      if <code>true</code>, then bytes will be written
-     *                   to the end of the file rather than the beginning
-     * @exception  FileNotFoundException  if the file exists but is a directory
-     *                   rather than a regular file, does not exist but cannot
-     *                   be created, or cannot be opened for any other reason
-     * @exception  SecurityException  if a security manager exists and its
-     *               <code>checkWrite</code> method denies write access
-     *               to the file.
-     * @see        java.io.File#getPath()
-     * @see        java.lang.SecurityException
-     * @see        java.lang.SecurityManager#checkWrite(java.lang.string)
-     */
-    // this(File file, bool append) {
-    //     string name = (file != null ? file.getPath() : null);
-    //     SecurityManager security = System.getSecurityManager();
-    //     if (security != null) {
-    //         security.checkWrite(name);
-    //     }
-    //     if (name == null) {
-    //         throw new NullPointerException();
-    //     }
-    //     if (file.isInvalid()) {
-    //         throw new FileNotFoundException("Invalid file path");
-    //     }
-    //     this.fd = new FileDescriptor();
-    //     fd.attach(this);
-    //     this.path = name;
-
-    //     open(name, append);
-    //     altFinalizer = getFinalizer(this);
-    //     if (altFinalizer == null) {
-    //         FileCleanable.register(fd);   // open sets the fd, register the cleanup
-    //     }
-    // }
-
-    /**
-     * Creates a file output stream to write to the specified file
-     * descriptor, which represents an existing connection to an actual
-     * file in the file system.
-     * <p>
-     * First, if there is a security manager, its <code>checkWrite</code>
-     * method is called with the file descriptor <code>fdObj</code>
-     * argument as its argument.
-     * <p>
-     * If <code>fdObj</code> is null then a <code>NullPointerException</code>
-     * is thrown.
-     * <p>
-     * This constructor does not throw an exception if <code>fdObj</code>
-     * is {@link java.io.FileDescriptor#valid() invalid}.
-     * However, if the methods are invoked on the resulting stream to attempt
-     * I/O on the stream, an <code>IOException</code> is thrown.
-     *
-     * @param      fdObj   the file descriptor to be opened for writing
-     * @exception  SecurityException  if a security manager exists and its
-     *               <code>checkWrite</code> method denies
-     *               write access to the file descriptor
-     * @see        java.lang.SecurityManager#checkWrite(java.io.FileDescriptor)
-     */
-    // this(FileDescriptor fdObj) {
-    //     SecurityManager security = System.getSecurityManager();
-    //     if (fdObj == null) {
-    //         throw new NullPointerException();
-    //     }
-    //     if (security != null) {
-    //         security.checkWrite(fdObj);
-    //     }
-    //     this.fd = fdObj;
-    //     this.path = null;
-    //     this.altFinalizer = null;
-
-    //     fd.attach(this);
-    // }
 
     /**
      * Opens a file, with the specified name, for overwriting or appending.
