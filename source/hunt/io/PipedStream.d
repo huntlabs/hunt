@@ -76,12 +76,12 @@ class FilePipedStream : PipedStream {
     private string temp;
 
     this() {
-        import std.uuid;
-        this(tempDir() ~ dirSeparator ~ randomUUID().toString());
+        this(tempDir());
     }
 
     this(string tempdir) {
-        temp = tempdir;
+        import std.uuid;
+        temp = tempdir  ~ dirSeparator ~ "hunt-" ~ randomUUID().toString();
     }
 
     void close() {

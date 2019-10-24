@@ -59,19 +59,8 @@ class FileInputStream : InputStream {
      */
     private string path;
     private File file;
-
-    // private FileChannel channel;
-
     private Object closeLock;
-
     private bool closed;
-
-    // private final Object altFinalizer;
-
-
-    private void initialized() {
-        closeLock = new Object();
-    }
 
     /**
      * Creates a <code>FileInputStream</code> by
@@ -135,6 +124,7 @@ class FileInputStream : InputStream {
      */
     this(File file) {
         this.file = file;
+        closeLock = new Object();
         // string name = (file != null ? file.getPath() : null);
         // SecurityManager security = System.getSecurityManager();
         // if (security != null) {
