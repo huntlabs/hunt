@@ -53,6 +53,11 @@ class MimeType {
 	 * A string equivalent of {@link MimeType#APPLICATION_XML}.
 	 */
 	enum string APPLICATION_XML_VALUE = "application/xml";
+    
+    /** 
+     * 
+     */
+	enum string APPLICATION_X_WWW_FORM_VALUE = "application/x-www-form-urlencoded";
 
 	/**
 	 * A string equivalent of {@link MimeType#IMAGE_GIF}.
@@ -82,7 +87,46 @@ class MimeType {
 	/**
 	 * A string equivalent of {@link MimeType#TEXT_XML}.
 	 */
-	enum string TEXT_XML_VALUE = "text/xml";        
+	enum string TEXT_XML_VALUE = "text/xml";   
+
+    /** 
+     * 
+     */
+	enum string TEXT_JSON_VALUE = "text/json"; 
+
+    /**
+     * The "mixed" subtype of "multipart" is intended for use when the body parts are independent and
+     * need to be bundled in a particular order. Any "multipart" subtypes that an implementation does
+     * not recognize must be treated as being of subtype "mixed".
+     */
+    enum string MULTIPART_MIXED_VALUE = "multipart/mixed";
+
+    /**
+     * The "multipart/alternative" type is syntactically identical to "multipart/mixed", but the
+     * semantics are different. In particular, each of the body parts is an "alternative" version of
+     * the same information.
+     */
+    enum string MULTIPART_ALTERNATIVE_VALUE = "multipart/alternative";
+
+    /**
+     * This type is syntactically identical to "multipart/mixed", but the semantics are different. In
+     * particular, in a digest, the default {@code Content-Type} value for a body part is changed from
+     * "text/plain" to "message/rfc822".
+     */
+    enum string MULTIPART_DIGEST_VALUE = "multipart/digest";
+
+    /**
+     * This type is syntactically identical to "multipart/mixed", but the semantics are different. In
+     * particular, in a parallel entity, the order of body parts is not significant.
+     */
+    enum string MULTIPART_PARALLEL_VALUE = "multipart/parallel";
+
+    /**
+     * The media-type multipart/form-data follows the rules of all multipart MIME data streams as
+     * outlined in RFC 2046. In forms, there are a series of fields to be supplied by the user who
+     * fills out the form. Each field has a name. Within a given form, the names are unique.
+     */
+    enum string MULTIPART_FORM_VALUE = "multipart/form-data";         
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -93,6 +137,7 @@ class MimeType {
     __gshared MimeType APPLICATION_JSON_8859_1;
     __gshared MimeType APPLICATION_JSON_UTF_8;
     __gshared MimeType APPLICATION_OCTET_STREAM;
+    __gshared MimeType APPLICATION_X_WWW_FORM;
 
     __gshared MimeType FORM_ENCODED;
 
@@ -120,6 +165,12 @@ class MimeType {
     __gshared MimeType TEXT_JSON_8859_1;
     __gshared MimeType TEXT_JSON_UTF_8;
 
+    __gshared MimeType MULTIPART_MIXED;
+    __gshared MimeType MULTIPART_ALTERNATIVE;
+    __gshared MimeType MULTIPART_DIGEST;
+    __gshared MimeType MULTIPART_PARALLEL;
+    __gshared MimeType MULTIPART_FORM;
+
     __gshared Array!MimeType values;
 
     shared static this() {
@@ -131,6 +182,7 @@ class MimeType {
         APPLICATION_JSON_UTF_8 = new MimeType("application/json;charset=utf-8", APPLICATION_JSON);
         APPLICATION_OCTET_STREAM = new MimeType(APPLICATION_OCTET_STREAM_VALUE);
         APPLICATION_XML = new MimeType(APPLICATION_XML_VALUE, StandardCharsets.UTF_8);
+        APPLICATION_X_WWW_FORM = new MimeType(APPLICATION_X_WWW_FORM_VALUE);
 
         IMAGE_GIF = new MimeType(IMAGE_GIF_VALUE);
         IMAGE_JPEG = new MimeType(IMAGE_JPEG_VALUE);
@@ -142,7 +194,7 @@ class MimeType {
         TEXT_HTML = new MimeType(TEXT_HTML_VALUE);
         TEXT_PLAIN = new MimeType(TEXT_PLAIN_VALUE);
         TEXT_XML = new MimeType(TEXT_XML_VALUE);
-        TEXT_JSON = new MimeType("text/json", StandardCharsets.UTF_8);
+        TEXT_JSON = new MimeType(TEXT_JSON_VALUE, StandardCharsets.UTF_8);
 
         TEXT_HTML_8859_1 = new MimeType("text/html;charset=iso-8859-1", TEXT_HTML);
         TEXT_HTML_UTF_8 = new MimeType("text/html;charset=utf-8", TEXT_HTML);
@@ -156,12 +208,19 @@ class MimeType {
         TEXT_JSON_8859_1 = new MimeType("text/json;charset=iso-8859-1", TEXT_JSON);
         TEXT_JSON_UTF_8 = new MimeType("text/json;charset=utf-8", TEXT_JSON);
 
+        MULTIPART_MIXED = new MimeType(MULTIPART_MIXED_VALUE);
+        MULTIPART_ALTERNATIVE = new MimeType(MULTIPART_ALTERNATIVE_VALUE);
+        MULTIPART_DIGEST = new MimeType(MULTIPART_DIGEST_VALUE);
+        MULTIPART_PARALLEL = new MimeType(MULTIPART_PARALLEL_VALUE);
+        MULTIPART_FORM = new MimeType(MULTIPART_FORM_VALUE);
+
         values.insertBack(ALL);
         values.insertBack(APPLICATION_JSON);
         values.insertBack(APPLICATION_XML);
         values.insertBack(APPLICATION_JSON_8859_1);
         values.insertBack(APPLICATION_JSON_UTF_8);
         values.insertBack(APPLICATION_OCTET_STREAM);
+        values.insertBack(APPLICATION_X_WWW_FORM);
         
         values.insertBack(IMAGE_GIF);
         values.insertBack(IMAGE_JPEG);
@@ -182,13 +241,19 @@ class MimeType {
         values.insertBack(TEXT_XML_UTF_8);
         values.insertBack(TEXT_JSON_8859_1);
         values.insertBack(TEXT_JSON_UTF_8);
+        
+        values.insertBack(MULTIPART_MIXED);
+        values.insertBack(MULTIPART_ALTERNATIVE);
+        values.insertBack(MULTIPART_DIGEST);
+        values.insertBack(MULTIPART_PARALLEL);
+        values.insertBack(MULTIPART_FORM);
     }
 
 
     private string _string;
     private MimeType _base;
     private ByteBuffer _buffer;
-    // private Charset _charset;
+    private Charset _charset;
     private string _charsetString;
     private bool _assumedCharset;
 
@@ -196,17 +261,12 @@ class MimeType {
         _string = s;
         _buffer = BufferUtils.toBuffer(s);
         _base = this;
-        // _charset = null;
-        _charsetString = null;
-        _assumedCharset = false;
-    }
-
-    this(string s, MimeType base) {
-        _string = s;
-        _buffer = BufferUtils.toBuffer(s);
-        _base = base;
+        
         ptrdiff_t i = s.indexOf(";charset=");
         // _charset = Charset.forName(s.substring(i + 9));
+        if(i == -1)
+            i = s.indexOf("; charset=");
+
         if(i == -1) {
             _charsetString = null;
             _assumedCharset = true;
@@ -214,24 +274,30 @@ class MimeType {
             _charsetString = s[i + 9 .. $].toLower();
             _assumedCharset = false;
         }
+        _charset = _charsetString;
+    }
+
+    this(string s, MimeType base) {
+        this(s);
+        _base = base;
     }
 
     this(string s, string charset) {
         _string = s;
         _base = this;
         _buffer = BufferUtils.toBuffer(s);
-        // _charset = charset;
+        _charset = charset;
         _charsetString = charset.toLower();
-        _assumedCharset = true;
+        _assumedCharset = false;
     }
 
     // ByteBuffer asBuffer() {
     //     return _buffer.asReadOnlyBuffer();
     // }
 
-    // Charset getCharset() {
-    //     return _charset;
-    // }
+    Charset getCharset() {
+        return _charset;
+    }
 
     string getCharsetString() {
         return _charsetString;
