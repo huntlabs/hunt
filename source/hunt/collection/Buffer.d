@@ -348,13 +348,13 @@ abstract class Buffer
      */
     final int nextPutIndex() {                          // package-private
         if (_position >= _limit)
-            throw new BufferOverflowException("");
+            throw new BufferOverflowException(format("limit=%d, position=%d", _limit, _position));
         return _position++;
     }
 
     final int nextPutIndex(int nb) {                    // package-private
         if (_limit - _position < nb)
-            throw new BufferOverflowException("");
+            throw new BufferOverflowException(format("limit=%d, position=%d, nb=%d", _limit, _position, nb));
         int p = _position;
         _position += nb;
         return p;
