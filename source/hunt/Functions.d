@@ -47,12 +47,21 @@ alias Action5(T1, T2, T3, T4, T5) = void delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5
  */
 alias Action6(T1, T2, T3, T4, T5, T6) = void delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
 
+// alias Action1 = ActionN;
+// alias Action2 = ActionN;
+// alias Action3 = ActionN;
+// alias Action4 = ActionN;
+// alias Action5 = ActionN;
+// alias Action6 = ActionN;
 
 /**
  * A vector-argument action.
  */
-alias ActionN(T) = void delegate(T[] args...);
+// alias ActionN(T) = void delegate(T[] args...);
 
+template ActionN(T...) if(T.length > 0)  {
+    alias ActionN = void delegate(T);
+}
 
 /**
  *  Represents a function.
@@ -92,6 +101,10 @@ alias Func6(T1, T2, T3, T4, T5, T6, R) = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, 
 alias FuncN(T, R) = R delegate(T[] args...);
 
 
+// template Function(R, T...) {
+//     alias Function = R delegate(T);
+// }
+
 /**
 */
 class EventArgs {
@@ -99,9 +112,9 @@ class EventArgs {
 }
 
 
-alias EventHandler = Action2!(Object, EventArgs); 
+alias EventHandler = ActionN!(Object, EventArgs); 
 alias SimpleEventHandler = Action;
-alias SimpleActionHandler = Action1!(Object);
+alias SimpleActionHandler = ActionN!(Object);
 
 /**
  * Represents an operation that accepts a single input argument and returns no

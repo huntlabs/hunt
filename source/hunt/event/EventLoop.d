@@ -33,7 +33,7 @@ final class EventLoop : AbstractSelector {
 
     override void stop() {
         if(isStopping()) {
-            // version (HUNT_IO_DEBUG) 
+            version (HUNT_IO_DEBUG) 
             warningf("The event loop %d is stopping.", number);
             return;
         }
