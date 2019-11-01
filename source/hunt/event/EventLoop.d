@@ -32,14 +32,16 @@ final class EventLoop : AbstractSelector {
     }
 
     override void stop() {
-        if(!isRuning) {
-            version (HUNT_DEBUG) warning("The event loop is not running.");
+        if(isStopping()) {
+            // version (HUNT_IO_DEBUG) 
+            warningf("The event loop %d is stopping.", number);
             return;
         }
         
-        version (HUNT_DEBUG) trace("Stopping event loop...");
+        version (HUNT_IO_DEBUG) 
+        tracef("Stopping event loop %d...", number);
         if(isSelfThread()) {
-            version (HUNT_DEBUG) info("Try to stop the event loop in another thread");
+            version (HUNT_IO_DEBUG) infof("Try to stop the event loop %d in another thread", number);
             auto stopTask = task(&stop);
             taskPool.put(stopTask);
         } else {

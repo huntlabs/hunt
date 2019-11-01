@@ -15,7 +15,9 @@ http://tutorials.jenkov.com/java-nio/selectors.html
 */
 abstract class Selector {
 
-    private shared bool _running;
+    private shared bool _running = false;
+    private shared bool _isStopping = false;
+    private bool _isReady;
     protected size_t number;
     protected size_t divider;
     protected AbstractChannel[] channels;
@@ -33,6 +35,31 @@ abstract class Selector {
         this.divider = divider;
         channels = new AbstractChannel[maxChannels];
     }
+
+    size_t getId() {
+        return number;
+    }
+
+    bool isReady() {
+        return _isReady;
+    }
+
+
+    /**
+     * Tells whether or not this selector is running.
+     *
+     * @return <tt>true</tt> if, and only if, this selector is running
+     */
+    bool isRuning() {
+        return _running;
+    }
+
+    alias isOpen = isRuning;
+
+    bool isStopping() {
+        return _isStopping;
+    }
+
 
     abstract bool register(AbstractChannel channel);
 
@@ -53,7 +80,7 @@ abstract class Selector {
     */
     void runAsync(long timeout = -1, SimpleEventHandler handler = null) {
         if(_running) {
-            version (HUNT_IO_DEBUG) trace("The selector is running already...");
+            version (HUNT_IO_DEBUG) warningf("The current selector %d has being running already!", number);
             return;
         }
         this.timeout = timeout;
@@ -79,14 +106,14 @@ abstract class Selector {
             }
             onLoop(timeout);
         } else {
-            version (HUNT_DEBUG) warning("The current selector is running!");
+            version (HUNT_DEBUG) warningf("The current selector %d has being running already!", number);
         }  
     }
 
     void stop() {
         version (HUNT_IO_DEBUG)
-            tracef("Selector stopping. _running=%s", _running); 
-        if(cas(&_running, true, false)) {
+            tracef("Stopping selector %d. _running=%s, _isStopping=%s", number, _running, _isStopping); 
+        if(cas(&_isStopping, false, true)) {
             try {
                 onStop();
             } catch(Throwable t) {
@@ -102,29 +129,20 @@ abstract class Selector {
     }
 
     /**
-     * Tells whether or not this selector is running.
-     *
-     * @return <tt>true</tt> if, and only if, this selector is running
-     */
-    bool isRuning() {
-        return _running;
-    }
-
-    alias isOpen = isRuning;
-
-    /**
         timeout: in millisecond
     */
     protected void onLoop(long timeout = -1) {
-        // _running = true;
+        _isReady = true;
         idleTime = timeout;
         do {
             // wakeup();
             doSelect(timeout);
             // infof("Selector rolled once. isRuning: %s", isRuning);
         }
-        while (_running);
-        version(HUNT_DEBUG) info("Selector loop existed.");
+        while (!_isStopping);
+        _isReady = false;
+        _running = false;
+        version(HUNT_DEBUG) infof("Selector %d existed.", number);
         dispose();
     }
 

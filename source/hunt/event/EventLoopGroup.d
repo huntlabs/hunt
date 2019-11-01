@@ -15,7 +15,6 @@ import hunt.system.Memory;
 import hunt.event.EventLoop;
 import hunt.logging;
 import hunt.util.Lifecycle;
-// import std.stdio;
 
 import core.atomic;
 
@@ -51,18 +50,27 @@ class EventLoopGroup : Lifecycle {
         if (!cas(&_isRunning, true, false))
             return;
 
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             trace("stopping EventLoopGroup...");
-        foreach (pool; eventLoopPool) {
+        foreach (EventLoop pool; eventLoopPool) {
             pool.stop();
         }
 
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             trace("EventLoopGroup stopped.");
     }
 
 	bool isRunning() {
         return _isRunning;
+    }
+
+    bool isReady() {
+        
+        foreach (EventLoop pool; eventLoopPool) {
+            if(!pool.isReady()) return false;
+        }
+
+        return true;
     }
 
     @property size_t size() {
