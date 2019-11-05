@@ -372,7 +372,7 @@ class ThreadEx : Thread, Runnable {
      *  https://stackoverflow.com/questions/8579657/whats-the-difference-between-thread-start-and-runnable-run
      */
     void run() {
-        version(HUNT_CONCURRENCY_DEBUG) {
+        version(HUNT_CONCURRENCY_DEBUG_MORE) {
             infof("trying to run a target %s...", target is null ? "(null)" : "");
         }
         if (target !is null) {
