@@ -21,6 +21,7 @@ import core.time;
 import std.conv;
 import std.stdio;
 
+// https://www.journaldev.com/2340/java-scheduler-scheduledexecutorservice-scheduledthreadpoolexecutor-example
 // https://www.cnblogs.com/huhx/p/baseusejavaScheduledExecutorService.html
 class ScheduledThreadPoolTest {
 
