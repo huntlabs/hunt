@@ -24,17 +24,17 @@ class TcpInputStream : InputStream {
     }
 
     private void dataReceived(ByteBuffer buffer) {
-        version(HUNT_DEBUG) trace("data enqueue...");
+        version(HUNT_IO_DEBUG) trace("data enqueue...");
         bufferQueue.enqueue(buffer);
     }
 
     override int read(byte[] b, int off, int len) {
-        version(HUNT_DEBUG) info("waitting....");
+        version(HUNT_IO_DEBUG) info("waitting....");
         // TODO: Tasks pending completion -@zxp at 7/20/2019, 11:32:52 AM
         // Support timeout
         ByteBuffer buffer = bufferQueue.dequeue();
         int r = buffer.remaining();
-        version(HUNT_DEBUG) info("read....", buffer.toString());
+        version(HUNT_IO_DEBUG) info("read....", buffer.toString());
         r =  min(len, r);
 
         // buffer.get(b, off, r);
@@ -43,9 +43,9 @@ class TcpInputStream : InputStream {
     }
 
     override int read() {
-        version(HUNT_DEBUG) trace("waitting....");
+        version(HUNT_IO_DEBUG) trace("waitting....");
         ByteBuffer buffer = bufferQueue.dequeue();
-        version(HUNT_DEBUG) trace("read....");
+        version(HUNT_IO_DEBUG) trace("read....");
         return buffer.get();
     }
 

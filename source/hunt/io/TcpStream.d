@@ -147,8 +147,8 @@ class TcpStream : AbstractStream {
 
         } catch (Throwable ex) {
             // Must try the best to catch all the exceptions. It's because it will executed in another thread.
+            debug warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
-            else warning(ex.msg);
         }
 
     }
