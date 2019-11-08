@@ -609,7 +609,7 @@ class Assert {
      */
     static void assertSame(T, size_t line = __LINE__, string file = __FILE__)(
             string message, T expected, T actual) {
-        if (expected == actual) {
+        if (expected is actual) {
             return;
         }
         failNotSame!(T, line, file)(message, expected, actual);
