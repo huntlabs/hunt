@@ -141,14 +141,20 @@ class TcpStream : AbstractStream {
             start();
             _isConnected = true;
 
-            if (_connectionHandler !is null) {
-                _connectionHandler(_isConnected);
-            }
-
         } catch (Throwable ex) {
             // Must try the best to catch all the exceptions. It's because it will executed in another thread.
             debug warning(ex.msg);
-            version(HUNT_DEBUG) warning(ex);
+            version(HUNT_IO_DEBUG) warning(ex);
+            _isConnected = false;
+        }
+
+        if (_connectionHandler !is null) {
+            try {
+                _connectionHandler(_isConnected);
+            } catch(Exception ex) {
+                debug warning(ex.msg);
+                version(HUNT_IO_DEBUG) warning(ex);
+            }
         }
 
     }
