@@ -32,13 +32,12 @@ common_dep = declare_dependency(
 )
 
 pkgc.generate(common_lib, name: 'hunt-common',
-              subdirs: 'd/hunt-common',
+              subdirs: 'd/hunt/hunt',
               version: meson.project_version(),
               description: 'Hunt common library.',
               d_module_versions: d_mod_version,
 )
 
-subdir('collection')
 subdir('concurrency')
 subdir('event')
 subdir('io')
@@ -48,3 +47,4 @@ subdir('serialization')
 subdir('system')
 subdir('text')
 subdir('util')
+subdir('collection')

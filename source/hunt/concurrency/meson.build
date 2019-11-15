@@ -55,7 +55,7 @@ concurrency_lib = library('hunt-concurrency',
 
 pkgc.generate(concurrency_lib,
               name: 'hunt-concurrency',
-              subdirs: 'd/hunt-concurrency',
+              subdirs: 'd/hunt/hunt/concurrency',
               version: meson.project_version(),
               description: 'Hunt concurrency library.',
               d_module_versions: d_mod_version,

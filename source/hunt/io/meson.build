@@ -55,7 +55,7 @@ io_lib = library('hunt-io',
 
 pkgc.generate(io_lib,
               name: 'hunt-io',
-              subdirs: 'd/hunt-io',
+              subdirs: 'd/hunt/hunt/io',
               version: meson.project_version(),
               description: 'Hunt io library.',
               d_module_versions: d_mod_version,

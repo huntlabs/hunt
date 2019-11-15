@@ -23,7 +23,7 @@ system_lib = library('hunt-system',
 
 pkgc.generate(system_lib,
               name: 'hunt-system',
-              subdirs: 'd/hunt-system',
+              subdirs: 'd/hunt/hunt/system',
               version: meson.project_version(),
               description: 'Hunt system library.',
               d_module_versions: d_mod_version,

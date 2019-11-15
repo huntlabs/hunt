@@ -25,7 +25,7 @@ event_lib = library('hunt-event',
 
 pkgc.generate(event_lib,
               name: 'hunt-event',
-              subdirs: 'd/hunt-event',
+              subdirs: 'd/hunt/hunt/event',
               version: meson.project_version(),
               description: 'Hunt event library.',
               d_module_versions: d_mod_version,

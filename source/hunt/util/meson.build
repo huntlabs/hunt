@@ -35,7 +35,7 @@ util_lib = library('hunt-util',
 
 pkgc.generate(util_lib,
               name: 'hunt-util',
-              subdirs: 'd/hunt-util',
+              subdirs: 'd/hunt/hunt/util',
               version: meson.project_version(),
               description: 'Hunt util library.',
               d_module_versions: d_mod_version,
