@@ -36,4 +36,4 @@ hunt_test = executable('hunt-test',
     include_directories: include_directories('source'),
 )
 
-test('test_hunt_all', hunt_test)
+test('test-hunt', hunt_test)
