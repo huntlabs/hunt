@@ -16,7 +16,7 @@ math_lib = library('hunt-math',
 
 pkgc.generate(math_lib,
               name: 'hunt-math',
-              subdirs: 'd/hunt-math',
+              subdirs: 'd/hunt/hunt/math',
               version: meson.project_version(),
               description: 'Hunt math library.',
               d_module_versions: d_mod_version,

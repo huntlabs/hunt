@@ -62,7 +62,7 @@ collection_lib = library('hunt-collection',
 
 pkgc.generate(collection_lib,
               name: 'hunt-collection',
-              subdirs: 'd/hunt-collection',
+              subdirs: 'd/hunt/hunt/collection',
               version: meson.project_version(),
               description: 'Hunt collection library.',
               d_module_versions: d_mod_version,

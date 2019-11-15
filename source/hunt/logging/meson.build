@@ -16,7 +16,7 @@ logging_lib = library('hunt-logging',
 
 pkgc.generate(logging_lib,
               name: 'hunt-logging',
-              subdirs: 'd/hunt-logging',
+              subdirs: 'd/hunt/hunt/logging',
               version: meson.project_version(),
               description: 'Hunt logging library.',
               d_module_versions: d_mod_version,

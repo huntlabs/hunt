@@ -30,7 +30,7 @@ text_lib = library('hunt-text',
 
 pkgc.generate(text_lib,
               name: 'hunt-text',
-              subdirs: 'd/hunt-text',
+              subdirs: 'd/hunt/hunt/text',
               version: meson.project_version(),
               description: 'Hunt text library.',
               d_module_versions: d_mod_version,
