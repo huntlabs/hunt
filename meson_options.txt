@@ -1,0 +1,9 @@
+option('docs',
+    description: 'Build docs',
+    type: 'boolean',
+)
+
+option('examples',
+    description: 'Build examples',
+    type: 'boolean',
+)
