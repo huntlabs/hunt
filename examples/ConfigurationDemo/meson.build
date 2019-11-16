@@ -1,12 +1,24 @@
-conf_demo_src = [
-    'source/app.d',
-    'source/settings.d',
-]
+app_config_dir = join_paths(hunt_doc_dir, 'examples', 'ConfigurationDemo')
+
+conf = configuration_data()
+
+conf.set('CONF_PREFIX', app_config_dir)
+
+app_src = configure_file(
+    input: 'source/app.d',
+    output: 'app.d',
+    configuration: conf,
+)
 
 executable('hunt-config-demo',
-    conf_demo_src,
+    ['source/settings.d', app_src],
     dependencies: hunt_dep,
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
     install: true,
+)
+
+install_data(
+    ['application.conf', 'test.config', 'test2.config'],
+    install_dir: app_config_dir,
 )

@@ -26,12 +26,14 @@ inc_prefix = join_paths(get_option('prefix'), get_option('includedir'), 'd', 'hu
 
 src_inc = include_directories('source')
 
+hunt_doc_dir = join_paths(get_option('prefix'), get_option('datadir'), 'doc', 'hunt')
+
 subdir('source')
 
 subdir('examples')
 
 install_subdir('docs',
-    install_dir: join_paths(get_option('datadir'), 'doc', 'hunt'),
+    install_dir: hunt_doc_dir,
     strip_directory: true,
 )
 
