@@ -30,6 +30,9 @@ subdir('source')
 
 subdir('examples')
 
-#subdir('docs')
+install_subdir('docs',
+    install_dir: join_paths(get_option('datadir'), 'doc', 'hunt'),
+    strip_directory: true,
+)
 
 #subdir('resources')
