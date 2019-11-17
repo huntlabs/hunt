@@ -257,6 +257,5 @@ pkgc.generate(hunt_lib,
     name: 'hunt',
     subdirs: 'd/hunt/hunt',
     version: meson.project_version(),
-    description: 'Hunt library.',
-    d_module_versions: d_mod_version,
+    description: 'Hunt: A refined core library for D programming language.',
 )
