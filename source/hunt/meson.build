@@ -254,7 +254,7 @@ hunt_dep = declare_dependency(
 )
 
 pkgc.generate(hunt_lib,
-    name: 'hunt',
+    name: 'hunt-1',
     subdirs: 'd/hunt/hunt',
     version: meson.project_version(),
     description: 'Hunt: A refined core library for D programming language.',
