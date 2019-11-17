@@ -218,7 +218,6 @@ hunt_src = [
     'util/Lifecycle.d',
     'util/Locale.d',
     'util/MimeType.d',
-    'util/MimeTypeUtils.d',
     'util/ObjectUtils.d',
     'util/Serialize.d',
     'util/Spliterator.d',
@@ -230,8 +229,18 @@ hunt_src = [
     'util/WeakReference.d',
 ]
 
+conf = configuration_data()
+
+conf.set('DATA_PREFIX', hunt_data_dir)
+
+mime_type_utils_d = configure_file(
+    input: 'util/MimeTypeUtils.d',
+    output: 'MimeTypeUtils.d',
+    configuration: conf,
+)
+
 hunt_lib = library('hunt',
-    hunt_src,
+    [hunt_src, mime_type_utils_d],
     install: true,
     version: meson.project_version(),
     soversion: project_soversion,
