@@ -28,6 +28,8 @@ src_inc = include_directories('source')
 
 hunt_doc_dir = join_paths(get_option('prefix'), get_option('datadir'), 'doc', 'hunt')
 
+hunt_data_dir = join_paths(get_option('prefix'), get_option('datadir'), 'hunt')
+
 subdir('source')
 
 subdir('examples')
@@ -37,4 +39,4 @@ install_subdir('docs',
     strip_directory: true,
 )
 
-#subdir('resources')
+install_subdir('resources', install_dir: hunt_data_dir)
