@@ -49,3 +49,7 @@ examples/UnitTest/unittest
 hunt-test-*
 test.config
 mixin_output.d
+
+# meson build directories
+build
+_build
