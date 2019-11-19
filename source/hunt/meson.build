@@ -246,6 +246,7 @@ hunt_lib = library('hunt',
     soversion: project_soversion,
     d_module_versions: d_mod_version,
     include_directories: src_inc,
+    d_unittest: false,
 )
 
 hunt_dep = declare_dependency(
@@ -259,3 +260,18 @@ pkgc.generate(hunt_lib,
     version: meson.project_version(),
     description: 'Hunt: A refined core library for D programming language.',
 )
+
+# Fail to compile as of now
+#hunt_test_exe = executable(
+#    'hunt-text-exe',
+#    [hunt_src, mime_type_utils_d],
+#    include_directories: src_inc,
+#    d_unittest: true,
+#    d_args: '-main',
+#    d_module_versions: d_mod_version,
+#)
+
+#test(
+#    'hunt-test',
+#    hunt_test_exe,
+#)
