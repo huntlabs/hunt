@@ -254,7 +254,8 @@ hunt_dep = declare_dependency(
     include_directories: src_inc,
 )
 
-pkgc.generate(hunt_lib,
+pkgc.generate(
+    hunt_lib,
     name: 'hunt-1',
     subdirs: 'd/hunt',
     version: meson.project_version(),

@@ -2,6 +2,8 @@ project(
   'hunt', 'd',
   version: '1.5.0',
   license: 'Apache-2.0',
+  # https://github.com/mesonbuild/meson/issues/3337
+  meson_version: '>=0.46',
 )
 
 project_soversion = 0
@@ -40,3 +42,16 @@ install_subdir('docs',
 )
 
 install_subdir('resources', install_dir: hunt_data_dir)
+
+lines = ['',
+    'Hunt version:    ' + meson.project_version(),
+    'Buildtype:       ' + get_option('buildtype'),
+    'D Versions:      ' + ' '.join(d_mod_version),
+    'Target OS:       ' + host_machine.system(),
+    'Prefix:          ' + get_option('prefix'),
+]
+
+indent = '        '
+summary = indent + ('\n' + indent).join(lines)
+message('Configuration summary:\n@0@\n'.format(summary))
+
