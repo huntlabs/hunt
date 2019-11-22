@@ -8,4 +8,5 @@ executable('hunt-logger-demo',
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
     install: true,
+    link_args: '-link-defaultlib-shared',
 )

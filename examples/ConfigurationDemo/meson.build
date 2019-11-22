@@ -10,12 +10,14 @@ app_src = configure_file(
     configuration: conf,
 )
 
-executable('hunt-config-demo',
+executable(
+    'hunt-config-demo',
     ['source/settings.d', app_src],
     dependencies: hunt_dep,
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
     install: true,
+    link_args: '-link-defaultlib-shared',
 )
 
 install_data(
