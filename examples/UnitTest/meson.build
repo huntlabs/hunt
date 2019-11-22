@@ -28,12 +28,14 @@ unittest_src = [
     'source/test/ThreadTest.d',
 ]
 
-hunt_test = executable('hunt-test',
+hunt_test = executable(
+    'hunt-test',
     unittest_src,
     dependencies: hunt_dep,
     d_unittest: true,
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
+    link_args: '-link-defaultlib-shared',
 )
 
 test('test-hunt', hunt_test)

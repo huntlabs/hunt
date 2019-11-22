@@ -4,6 +4,7 @@ executable('hunt-udp-client-demo',
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
     install: true,
+    link_args: '-link-defaultlib-shared',
 )
 
 executable('hunt-udp-server-demo',
@@ -12,4 +13,5 @@ executable('hunt-udp-server-demo',
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
     install: true,
+    link_args: '-link-defaultlib-shared',
 )
