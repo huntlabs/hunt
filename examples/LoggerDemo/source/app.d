@@ -10,13 +10,13 @@
  */
 
 import std.stdio;
-import hunt.logging;
+import hunt.logging.Logger;
 import hunt.util.DateTime;
 
 void main() {
 	DateTime.startClock();
 
-	setLoggingLevel(LogLevel.LOG_DEBUG);
+	//setLoggingLevel(LogLevel.LOG_DEBUG);
 	LogConf conf;
 	conf.disableConsole = true;
 	conf.level = LogLevel.LOG_DEBUG;

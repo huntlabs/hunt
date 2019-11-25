@@ -37,12 +37,24 @@ import std.uni;
 */
 class MimeTypeUtils {
 
+    // Allow installing resources into a shared dir
+    private static string getResourcePrefix() {
+        mixin("string resourcePrefix = \"@DATA_PREFIX@\";");
+        // We don't want meson to replace the CONF_PREFIX here too,
+        // otherwise this would always be true.
+        if (resourcePrefix == join(["@DATA", "_PREFIX@"])) {
+            return dirName(thisExePath()) ~ "/resources";
+        } else {
+            return buildPath(resourcePrefix, "resources");
+        }
+    }
+
     // private __gshared static ByteBuffer[string] TYPES; // = new ArrayTrie<>(512);
     private static Map!(string, string) __dftMimeMap() {
         __gshared Map!(string, string) m;
         return initOnce!m({
             Map!(string, string) _m = new HashMap!(string, string)();
-            string resourcePath = dirName(thisExePath()) ~ "/resources";
+            auto resourcePath = getResourcePrefix();
             string resourceName = buildPath(resourcePath, "mime.properties");
             loadMimeProperties(resourceName, _m);
             return _m;
@@ -73,7 +85,7 @@ class MimeTypeUtils {
                     _assumedEncodings.put(type.asString(), type.getCharsetString());
             }
 
-            string resourcePath = dirName(thisExePath()) ~ "/resources";
+            auto resourcePath = getResourcePrefix();
             string resourceName = buildPath(resourcePath, "encoding.properties");
             loadEncodingProperties(resourceName);
             return true;
