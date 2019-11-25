@@ -3,6 +3,7 @@ import std.conv;
 import std.stdio;
 import std.file;
 import std.exception;
+import std.path;
 
 import hunt.util.Configuration;
 import hunt.logging.ConsoleLogger;
@@ -32,12 +33,28 @@ void main() {
 
 }
 
+// Allow loading the configuration from some prefix in case we're
+// installed somewhere and not run in the repo.
+string convertConfigPathToRelative(string configName) {
+	mixin("string confPrefix = \"@CONF_PREFIX@\";");
+	// We don't want meson to replace the CONF_PREFIX here too,
+	// otherwise this would always be true.
+	if (confPrefix == join(["@CONF", "_PREFIX@"])) {
+		return configName;
+	} else {
+		auto relConfPath = relativePath(confPrefix, std.file.getcwd);
+		return buildPath(relConfPath,  configName);
+	}
+}
+
 void testApplicationConfig() {
-	ConfigBuilder manager = new ConfigBuilder("application.conf");
+	ConfigBuilder manager;
+
+	manager = new ConfigBuilder(convertConfigPathToRelative("application.conf"));
 
 	// writeln("x======", manager.hunt.application.name);
 // FIXME: Needing refactor or cleanup -@zxp at 1/9/2019, 6:37:48 PM
-// 
+//
 	// assert(manager.hunt.application.name == "MYSITE");
 	assert(manager.hunt.application.encoding.value() == "UTF-8");
 	assert(manager.hunt.application.encoding.value() == "UTF-8");
@@ -49,7 +66,7 @@ void testApplicationConfig() {
 }
 
 void testConfig1() {
-	ConfigBuilder conf = new ConfigBuilder("test.config");
+	ConfigBuilder conf = new ConfigBuilder(convertConfigPathToRelative("test.config"));
 
 	assertThrown!(EmptyValueException)(conf.app.node1.node2.node3.node4.value());
 
@@ -73,7 +90,7 @@ void testConfig1() {
 }
 
 void testConfig2() {
-	auto conf = new ConfigBuilder("test.config", "dev");
+	auto conf = new ConfigBuilder(convertConfigPathToRelative("test.config"), "dev");
 	assert(conf.http.listen.value.as!long() == 100);
 	assert(conf.http.listen.as!long() == 100);
 	string buildMode = conf.app.buildMode.value();
@@ -82,7 +99,7 @@ void testConfig2() {
 }
 
 void testConfigBuilder1() {
-	ConfigBuilder manager = new ConfigBuilder("test.config");
+	ConfigBuilder manager = new ConfigBuilder(convertConfigPathToRelative("test.config"));
 
 	BuilderTest1Config config = manager.build!BuilderTest1Config();
 
@@ -107,7 +124,7 @@ void testConfigBuilder1() {
 }
 
 void testConfigBuilder2() {
-	ConfigBuilder manager = new ConfigBuilder("test.config");
+	ConfigBuilder manager = new ConfigBuilder(convertConfigPathToRelative("test.config"));
 
 	TestConfig config = manager.build!(TestConfig, "app")();
 
@@ -133,7 +150,7 @@ void testConfigBuilder2() {
 }
 
 void testConfigBuilder3() {
-	ConfigBuilder manager = new ConfigBuilder("test.config");
+	ConfigBuilder manager = new ConfigBuilder(convertConfigPathToRelative("test.config"));
 
 	TestConfigEx config = manager.build!(TestConfigEx, "app")();
 
@@ -146,7 +163,7 @@ void testConfigBuilder3() {
 void testArrayConfig() {
 
 	writeln("\n\n===== testing Array Config =====\n");
-	ConfigBuilder manager = new ConfigBuilder("test2.config");
+	ConfigBuilder manager = new ConfigBuilder(convertConfigPathToRelative("test2.config"));
 
 	assert(manager["name"].value() == "Test ArrayConfig");
 	assert(manager["servers[0]"]["port"].value() == "81");
