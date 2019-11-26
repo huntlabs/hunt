@@ -31,7 +31,7 @@ D Compiler 2.088+.
 ## Avaliable versions
 | Identifier | Description | 
 |--------|--------|
-| HUNT_DEBUG |  Used to output debug messages |
+| HUNT_DEBUG |  Used to log some debug messages |
 
 ## Benchmarks
 ![Benchmark](docs/images/benchmark.png)
@@ -39,14 +39,15 @@ D Compiler 2.088+.
 For details, see [here](docs/benchmark.md).
 
 ## Thanks
- * @shove70
- * @n8sh
+ * @Cogitri
  * @deviator
  * @jasonwhite
  * @Kripth
+ * @n8sh
+ * @shove70
 
 ## TODO
 - [ ] Better performance
 - [ ] Better APIs
 - [ ] More examples
-- [ ] Improve serialization (JSON and Binary)
+- [ ] Improve serialization (JSON, XML and Binary)
