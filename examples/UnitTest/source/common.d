@@ -135,8 +135,23 @@ interface ISettings : JsonSerializable {
     void color(string c);
 }
 
-class GreetingSettings : ISettings {
+abstract class GreetingSettingsBase : ISettings {
+
+    string city;
+    string name;
+
+    JSONValue jsonSerialize() {
+        return JSONValue();
+    }
+    void jsonDeserialize(const(JSONValue) value) {
+
+    }
+}
+
+class GreetingSettings : GreetingSettingsBase {
     string _color;
+
+    string name;
 
     this() {
         _color = "black";
@@ -150,14 +165,17 @@ class GreetingSettings : ISettings {
         this._color = c;
     }
 
-    JSONValue jsonSerialize() {
-        return JsonSerializer.serializeObject!(SerializationOptions.Default.traverseBase(false))(this);
+    override JSONValue jsonSerialize() {
+        warning("abcd");
+        // return JsonSerializer.serializeObject!(SerializationOptions.Default.traverseBase(false))(this);
+        return JsonSerializer.serializeObject!(SerializationOptions.Default)(this);
         // JSONValue v;
         // v["_color"] = _color;
+        // v["_city"] = city;
         // return v;
     }
     
-    void jsonDeserialize(const(JSONValue) value) {
+    override void jsonDeserialize(const(JSONValue) value) {
         info(value.toString());
         _color = value["_color"].str;
     }

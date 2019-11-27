@@ -551,6 +551,8 @@ final class JsonSerializer {
             static if(depth == -1 || depth > 0) { json = toJson!(JsonSerializable)(m);}
         } else static if(is(T == SysTime)) {
             json = toJson!SysTime(m);
+        // } else static if(isSomeString!T) {
+        //     json = toJson(m);
         } else static if(is(T == class)) {
             if(m !is null) {
                 json = serializeObjectMember!(options)(m);
@@ -560,7 +562,11 @@ final class JsonSerializer {
         } else static if(is(T : U[], U)) { 
             if(m is null) {
                 static if(!options.ignoreNull) {
-                    json = JSONValue[].init;
+                    static if(isSomeString!T) {
+                        json = toJson(m);
+                    } else {
+                        json = JSONValue[].init;
+                    }
                 }
             } else {
                 static if (is(U == class) || is(U == struct) || is(U == interface)) {

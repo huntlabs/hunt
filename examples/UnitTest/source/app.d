@@ -60,7 +60,7 @@ void main()
 
     // testUnits!(MagedQueueTest);
 
-    testUnits!(AtomicTest);
+    // testUnits!(AtomicTest);
     // testUnits!(BigIntegerTest);
 
     // testUnits!(CompletableFutureTest);
@@ -92,7 +92,7 @@ void main()
     // testUnits!(ConverterUtilsTest);
     // testUnits!(DeductionTest);
 
-    // testUnits!(JsonSerializerTest);
+    testUnits!(JsonSerializerTest);
     // testUnits!(SerializationTest);
     // testUnits!(ObjectMappingTest);
 
