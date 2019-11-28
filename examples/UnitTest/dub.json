@@ -8,6 +8,7 @@
 		"hunt" :{"path": "../../"}
 	},
 	"versions": [
-		"HUNT_DEBUG",  "HUNT_DEBUG_MORE", "HUNT_CONCURRENCY_DEBUG"
-	]
+		"HUNT_DEBUG"
+	],
+    "debugVersions": ["HUNT_DEBUG_MORE", "HUNT_CONCURRENCY_DEBUG"]
 }
