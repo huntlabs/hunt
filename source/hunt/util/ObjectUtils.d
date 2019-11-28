@@ -279,10 +279,10 @@ mixin template CloneMemberTemplate(T, TopLevel topLevel = TopLevel.no, alias onC
 			throw new Exception("Can't create an instance for " ~ T.stringof);
 		}
 
-		version(HUNT_DEBUG_MORE) pragma(msg, "========\n clone type: " ~ T.stringof);
+		// version(HUNT_DEBUG_MORE) pragma(msg, "========\n clone type: " ~ T.stringof);
 		static foreach (string fieldName; FieldNameTuple!T) {
 			version(HUNT_DEBUG_MORE) {
-				pragma(msg, "clone field=" ~ fieldName);
+				// pragma(msg, "clone field=" ~ fieldName);
 				tracef("cloning: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
 			}
 			__traits(getMember, copy, fieldName) = __traits(getMember, this, fieldName);

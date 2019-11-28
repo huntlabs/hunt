@@ -174,7 +174,6 @@ class GreetingSettings : GreetingSettingsBase {
     }
 
     override JSONValue jsonSerialize() {
-        warning("abcd");
         // return JsonSerializer.serializeObject!(SerializationOptions.Default.traverseBase(false))(this);
         // return JsonSerializer.serializeObject!(SerializationOptions.Default)(this);
 
