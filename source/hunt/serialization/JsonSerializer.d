@@ -162,7 +162,7 @@ final class JsonSerializer {
                 if(jsonItemPtr is null) {
                     version(HUNT_DEBUG) warningf("No data available for member: %s", member);
                 } else {
-                    version(HUNT_DEBUG_MORE) tracef("available data: %s = %s", member, jsonItemPtr.toString());
+                    debug(HUNT_DEBUG_MORE) tracef("available data: %s = %s", member, jsonItemPtr.toString());
                     __traits(getMember, target, member) = fromJson!(memberType, false)(*jsonItemPtr);
                 }
             }                    
@@ -379,7 +379,7 @@ final class JsonSerializer {
     static JSONValue toJson(SerializationOptions options, T)
             (T value) if (is(T == class)) {
         
-        version(HUNT_DEBUG_MORE) {
+        debug(HUNT_DEBUG_MORE) {
             info("======== current type: class " ~ T.stringof);
             tracef("%s, T: %s",
                 options, T.stringof);
@@ -417,7 +417,7 @@ final class JsonSerializer {
             (T value) if (is(T == class)) {
         import std.traits : isSomeFunction, isType;
 
-        version(HUNT_DEBUG_MORE) {
+        debug(HUNT_DEBUG_MORE) {
             info("======== current type: class " ~ T.stringof);
             tracef("%s, T: %s", options, T.stringof);
             // tracef("traverseBase = %s, onlyPublic = %s, includeMeta = %s, T: %s",
@@ -433,13 +433,13 @@ final class JsonSerializer {
         static if(options.includeMeta) {
             result[MetaTypeName] = typeid(T).name;
         }
-        // version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: class " ~ T.stringof);
+        // debug(HUNT_DEBUG_MORE) pragma(msg, "======== current type: class " ~ T.stringof);
         
         // super fields
         static if(options.traverseBase) {
             alias baseClasses = BaseClassesTuple!T;
             static if(baseClasses.length >= 1) {
-                version(HUNT_DEBUG_MORE) {
+                debug(HUNT_DEBUG_MORE) {
                     tracef("baseClasses[0]: %s", baseClasses[0].stringof);
                 }
                 static if(!is(baseClasses[0] == Object)) {
@@ -468,8 +468,8 @@ final class JsonSerializer {
             return value;
         } else {
             auto result = JSONValue();
-            // version(HUNT_DEBUG_MORE) pragma(msg, "======== current type: struct " ~ T.stringof);
-            version(HUNT_DEBUG_MORE) info("======== current type: struct " ~ T.stringof);
+            // debug(HUNT_DEBUG_MORE) pragma(msg, "======== current type: struct " ~ T.stringof);
+            debug(HUNT_DEBUG_MORE) info("======== current type: struct " ~ T.stringof);
                 
             static foreach (string member; FieldNameTuple!T) {
                 serializeMember!(member, options)(value, result);
@@ -486,7 +486,7 @@ final class JsonSerializer {
             SerializationOptions options = SerializationOptions.Default, T)
             (T obj, ref JSONValue result) {
 
-        // version(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
+        // debug(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
 
         alias currentMember = __traits(getMember, T, member);
 
@@ -502,14 +502,14 @@ final class JsonSerializer {
             enum canSerialize = true;
         }
         
-        version(HUNT_DEBUG_MORE) {
+        debug(HUNT_DEBUG_MORE) {
             tracef("name: %s, %s", 
                 member, options);
         }
 
         static if(canSerialize) {
             alias memberType = typeof(currentMember);
-            version(HUNT_DEBUG_MORE) infof("memberType: %s in %s", memberType.stringof, T.stringof);
+            debug(HUNT_DEBUG_MORE) infof("memberType: %s in %s", memberType.stringof, T.stringof);
 
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
                 version(HUNT_DEBUG) warning("skipped a interface member(not JsonSerializable): " ~ member);
@@ -517,7 +517,7 @@ final class JsonSerializer {
                 auto m = __traits(getMember, obj, member);
                 auto json = serializeMember!(options)(m);
 
-                version(HUNT_DEBUG_MORE) {
+                debug(HUNT_DEBUG_MORE) {
                     tracef("name: %s, value: %s", member, json.toString());
                 }
 
@@ -540,7 +540,7 @@ final class JsonSerializer {
                 }
             }
         } else {
-            version(HUNT_DEBUG_MORE) tracef("skipped member, name: %s", member);
+            debug(HUNT_DEBUG_MORE) tracef("skipped member, name: %s", member);
         }
     }
 
@@ -620,7 +620,7 @@ final class JsonSerializer {
      */
     static JSONValue toJson(T, IncludeMeta includeMeta = IncludeMeta.yes)
                     (T value) if (is(T == interface) && is(T : JsonSerializable)) {
-        version(HUNT_DEBUG_MORE) {
+        debug(HUNT_DEBUG_MORE) {
             infof("======== current type: interface = %s, Object = %s", 
                 T.stringof, typeid(cast(Object)value).name);
         }
@@ -633,7 +633,7 @@ final class JsonSerializer {
         }
         // TODO: Tasks pending completion -@zhangxueping at 2019-09-28T07:45:09+08:00
         // remove the MetaTypeName memeber
-        version(HUNT_DEBUG_MORE) trace(v.toString());
+        debug(HUNT_DEBUG_MORE) trace(v.toString());
         return v;
     }
 

@@ -85,7 +85,7 @@ class BufferedOutputStream : OutputStream {
 
     override
     void flush()  {
-        version(HUNT_DEBUG_MORE) {
+        debug(HUNT_DEBUG_MORE) {
             tracef("remaining: %d bytes", count);
         }
         if (count > 0) {

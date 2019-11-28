@@ -279,9 +279,9 @@ mixin template CloneMemberTemplate(T, TopLevel topLevel = TopLevel.no, alias onC
 			throw new Exception("Can't create an instance for " ~ T.stringof);
 		}
 
-		// version(HUNT_DEBUG_MORE) pragma(msg, "========\n clone type: " ~ T.stringof);
+		// debug(HUNT_DEBUG_MORE) pragma(msg, "========\n clone type: " ~ T.stringof);
 		static foreach (string fieldName; FieldNameTuple!T) {
-			version(HUNT_DEBUG_MORE) {
+			debug(HUNT_DEBUG_MORE) {
 				// pragma(msg, "clone field=" ~ fieldName);
 				tracef("cloning: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
 			}
@@ -372,7 +372,7 @@ void mappingObject(T, U)(T src, ref U dst) if(is(U == struct)) {
 	foreach (targetMemberName; FieldNameTuple!U) {		
 		foreach (sourceMemberName; FieldNameTuple!T) {
 			static if(targetMemberName == sourceMemberName) {
-				version(HUNT_DEBUG_MORE) {
+				debug(HUNT_DEBUG_MORE) {
 					tracef("mapping: name=%s, value=%s", targetMemberName, __traits(getMember, src, sourceMemberName));
 				}
 				__traits(getMember, dst, targetMemberName) = __traits(getMember, src, sourceMemberName);
@@ -389,7 +389,7 @@ void mappingObject(T, U)(T src, U dst)
 	foreach (targetMemberName; FieldNameTuple!U) {		
 		foreach (sourceMemberName; FieldNameTuple!T) {
 			static if(targetMemberName == sourceMemberName) {
-				version(HUNT_DEBUG_MORE) {
+				debug(HUNT_DEBUG_MORE) {
 					tracef("mapping: name=%s, value=%s", targetMemberName, __traits(getMember, src, sourceMemberName));
 				}
 				__traits(getMember, dst, targetMemberName) = __traits(getMember, src, sourceMemberName);

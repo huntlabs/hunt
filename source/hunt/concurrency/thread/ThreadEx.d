@@ -840,7 +840,7 @@ class Parker {
     // is unparking you, so don't wait. And spurious returns are fine, so there
     // is no need to track notifications.
     void park(Duration time) {
-        version(HUNT_CONCURRENCY_DEBUG) {
+        debug(HUNT_CONCURRENCY_DEBUG) {
             tracef("try to park a thread %s",
                 time <= Duration.zero ? "forever" : "in " ~ time.toString());
         }
@@ -851,7 +851,7 @@ class Parker {
         const int c = _counter;
         if(c > 0) {
             atomicStore(_counter, 0);
-            version(HUNT_CONCURRENCY_DEBUG) infof("no need to park, counter=%s", c);
+            debug(HUNT_CONCURRENCY_DEBUG) infof("no need to park, counter=%s", c);
             return;
         }
 
@@ -902,7 +902,7 @@ class Parker {
     }
 
     void park(MonoTime time) {
-        version(HUNT_CONCURRENCY_DEBUG) {
+        debug(HUNT_CONCURRENCY_DEBUG) {
             Duration d = time - MonoTime.currTime;
             tracef("try to park a thread %s",  
                 d <= Duration.zero ? "forever" : "in " ~ d.toString());
@@ -914,7 +914,7 @@ class Parker {
         const int c = _counter;
         if(c > 0) {
             atomicStore(_counter, 0);
-            version(HUNT_CONCURRENCY_DEBUG) infof("no need to park, counter=%s", c);
+            debug(HUNT_CONCURRENCY_DEBUG) infof("no need to park, counter=%s", c);
             return;
         }
 
@@ -967,7 +967,7 @@ class Parker {
     }
 
     void unpark() {
-        version(HUNT_CONCURRENCY_DEBUG) {
+        debug(HUNT_CONCURRENCY_DEBUG) {
             tracef("try to unpark a thread");
         }
         _mutex.lock();

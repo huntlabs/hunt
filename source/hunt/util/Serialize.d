@@ -1430,14 +1430,14 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
 */
 mixin template SerializationMember(T) {
 	import std.traits;
-	version(HUNT_DEBUG_MORE) import hunt.logging.ConsoleLogger;
+	debug(HUNT_DEBUG_MORE) import hunt.logging.ConsoleLogger;
 
     alias baseClasses = BaseClassesTuple!T;
 
     static if(baseClasses.length == 1 && is(baseClasses[0] == Object)) {
         ubyte[] serialize() {
             ubyte[] bytes = cast(ubyte[]).serialize!(T, false)(this);
-            version(HUNT_DEBUG_MORE) 
+            debug(HUNT_DEBUG_MORE) 
 				tracef("this level (%s), length: %d, data: %(%02X %)", T.stringof, bytes.length, bytes);
             return bytes;
         }
@@ -1449,13 +1449,13 @@ mixin template SerializationMember(T) {
 		// pragma(msg, T.stringof);
         override ubyte[] serialize() {
             auto bytes = cast(ubyte[])hunt.util.Serialize.serialize!(T, false)(this);
-            version(HUNT_DEBUG_MORE) 
+            debug(HUNT_DEBUG_MORE) 
 				tracef("current level (%s), length: %d, data: %(%02X %)", T.stringof, bytes.length, bytes);
             
             ubyte[] data = super.serialize();
             data[1] = cast(ubyte)(data[1] + bytes.length - 2);
             data ~= bytes[2..$];
-            version(HUNT_DEBUG_MORE) 
+            debug(HUNT_DEBUG_MORE) 
 				tracef("all levels (%s), length: %d, data: %(%02X %)", T.stringof, data.length, data);
 
             // auto bytes = cast(ubyte[])hunt.util.Serialize.serialize(this);
