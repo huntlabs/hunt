@@ -669,12 +669,11 @@ final class JsonSerializer {
      * class[]
      */
     static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal, 
-            T : U[], U) (T value) 
-            if(is(T : U[], U) && is(U == class)) {
+            T : U[], U) (T value) if(is(T : U[], U) && is(U == class)) {
         if(value is null) {
             return JSONValue(JSONValue[].init);
         } else {
-            return JSONValue(value.map!(item => serializeObject!(options)(item))()
+            return JSONValue(value.map!(item => toJson!(options)(item))()
                     .map!(json => json.isNull ? JSONValue(null) : json).array);
         }
     }

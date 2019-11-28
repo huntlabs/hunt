@@ -140,11 +140,15 @@ abstract class GreetingSettingsBase : ISettings {
     string city;
     string name;
 
-    JSONValue jsonSerialize() {
-        return JSONValue();
-    }
-    void jsonDeserialize(const(JSONValue) value) {
+    abstract JSONValue jsonSerialize();
+    // JSONValue jsonSerialize() {
+    //     JSONValue v;
+    //     v["_city"] = city;
+    //     return v;
+    // }
 
+    void jsonDeserialize(const(JSONValue) value) {
+        // do nothing
     }
 }
 
@@ -152,9 +156,13 @@ class GreetingSettings : GreetingSettingsBase {
     string _color;
 
     string name;
-
+    
     this() {
         _color = "black";
+    }
+
+    this(string color) {
+        _color = color;
     }
 
     string color() {
@@ -168,11 +176,13 @@ class GreetingSettings : GreetingSettingsBase {
     override JSONValue jsonSerialize() {
         warning("abcd");
         // return JsonSerializer.serializeObject!(SerializationOptions.Default.traverseBase(false))(this);
-        return JsonSerializer.serializeObject!(SerializationOptions.Default)(this);
-        // JSONValue v;
-        // v["_color"] = _color;
-        // v["_city"] = city;
-        // return v;
+        // return JsonSerializer.serializeObject!(SerializationOptions.Default)(this);
+
+        // JSONValue v = super.jsonSerialize();
+        JSONValue v;
+        v["_city"] = city;
+        v["_color"] = _color;
+        return v;        
     }
     
     override void jsonDeserialize(const(JSONValue) value) {

@@ -55,23 +55,23 @@ class JsonSerializerTest {
 //         // writeln(s);
 //     }
 
-    void testBasic() {
-        // {
-        //     string[string] map;
-        //     map["greeting"] = null;
-        //     JSONValue json = JsonSerializer.toJson( map);
-        //     trace(json.toString());
-        //     json = JSONValue(map);
-        //     trace(json.toString());
-        // }
+    // void testBasic() {
+    //     {
+    //         string[string] map;
+    //         map["greeting"] = null;
+    //         JSONValue json = JsonSerializer.toJson( map);
+    //         trace(json.toString());
+    //         json = JSONValue(map);
+    //         trace(json.toString());
+    //     }
 
-        {
-            GreetingBase greeting = new GreetingBase(1, null);
-            JSONValue json = JsonSerializer.toJson(greeting);
-            trace(json.toString());
-        }
-        // assert(json.toString() == `{"content":"Hello","id":1}`);
-    }
+    //     {
+    //         GreetingBase greeting = new GreetingBase(1, null);
+    //         JSONValue json = JsonSerializer.toJson(greeting);
+    //         trace(json.toString());
+    //     }
+    //     // assert(json.toString() == `{"content":"Hello","id":1}`);
+    // }
 
 //     void testMemberMissing() {
 //         GreetingBase greeting = new GreetingBase(1, "Hello");
@@ -364,40 +364,53 @@ class JsonSerializerTest {
 //         assert(jv1 == jv2);
 //     }
 
-//     void testArrayToJson() {
-//         assert(JsonSerializer.toJson([0, 1, 2]) == JSONValue([0, 1, 2]));
-//         assert(JsonSerializer.toJson(["hello", "world"]) == JSONValue(["hello", "world"]));
+    // void testArrayToJson() {
+    //     assert(JsonSerializer.toJson([0, 1, 2]) == JSONValue([0, 1, 2]));
+    //     assert(JsonSerializer.toJson(["hello", "world"]) == JSONValue(["hello", "world"]));
 
-//         GreetingBase[] greetings;
-//         greetings ~= new GreetingBase(1, "Hello");
-//         greetings ~= new GreetingBase(2, "World");
+    //     GreetingBase[] greetings;
+    //     greetings ~= new GreetingBase(1, "Hello");
+    //     greetings ~= new GreetingBase(2, "World");
 
-//         JSONValue json = JsonSerializer.toJson(greetings);
-//         trace(json);
+    //     JSONValue json = JsonSerializer.toJson(greetings);
+    //     trace(json);
         
-//         json = JsonSerializer.toJson!(SerializationOptions.OnlyPublicWithNull)(greetings);
-//         trace(json);
-//     }
+    //     json = JsonSerializer.toJson!(SerializationOptions.OnlyPublicWithNull)(greetings);
+    //     trace(json);
+    // }
 
+    // void testArrayToJson02() {
 
-//     void testArrayToJson02() {
+    //     Greeting[] greetings;
+    //     greetings ~= new Greeting(1, "Hello");
+    //     greetings ~= new Greeting(2, "World");
 
-//         Greeting[] greetings;
-//         greetings ~= new Greeting(1, "Hello");
-//         greetings ~= new Greeting(2, "World");
+    //     greetings[0].setPrivateMember("private member");
 
-//         greetings[0].setPrivateMember("private member");
-
-//         JSONValue json = JsonSerializer.toJson(greetings);
-//         // info(json.toPrettyString());
+    //     JSONValue json = JsonSerializer.toJson(greetings);
+    //     // info(json.toPrettyString());
         
-//         json = JsonSerializer.toJson!(SerializationOptions.OnlyPublicWithNull)(greetings);
-//         // info(json.toPrettyString());
+    //     json = JsonSerializer.toJson!(SerializationOptions.OnlyPublicWithNull)(greetings);
+    //     // info(json.toPrettyString());
 
-//         json = JsonSerializer.toJson!(SerializationOptions.Lite)(greetings);
-//         // info(json.toPrettyString());
+    //     json = JsonSerializer.toJson!(SerializationOptions.Lite)(greetings);
+    //     // info(json.toPrettyString());
 
-//     }
+    // }
+
+
+
+    void testArrayToJson03() {
+        GreetingSettings[] settings;
+        settings ~= new GreetingSettings("Red");
+        settings ~= new GreetingSettings("Yellow");
+        JSONValue json = JsonSerializer.toJson(settings);
+        info(json.toPrettyString());
+
+        json = JsonSerializer.toJson(new GreetingSettings("Red"));
+        info(json.toPrettyString());
+
+    }
 
 //     void testAssociativeArrayToJson() {
 //         assert(JsonSerializer.toJson(["hello" : 16, "world" : 42]) == JSONValue(["hello" : 16, "world" : 42]));
