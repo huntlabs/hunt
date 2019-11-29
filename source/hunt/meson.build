@@ -245,6 +245,7 @@ hunt_lib = library('hunt',
     version: meson.project_version(),
     soversion: project_soversion,
     d_module_versions: d_mod_version,
+    d_debug: d_debug,
     include_directories: src_inc,
     link_args: ['-shared', '-link-defaultlib-shared'],
 )
