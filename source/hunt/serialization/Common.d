@@ -95,9 +95,10 @@ alias IgnoreNull = Flag!"ignoreNull";
 /**
  * Excludes the field from both encoding and decoding.
  */
-enum Exclude;
+enum Ignore;
 
-alias Ignore = Exclude;
+deprecated("Using Ignore instead.")
+alias Exclude = Ignore;
 
 /**
  * Includes this even if it would otherwise be excluded.
