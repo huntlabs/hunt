@@ -26,6 +26,9 @@ import std.traits;
 
 enum MetaTypeName = "__metatype__";
 
+
+enum JsonIgnore;
+
 /**
  * 
  */
@@ -109,7 +112,7 @@ final class JsonSerializer {
 
         try {
             static foreach (string member; FieldNameTuple!T) {
-                    deserializeMembers!(member)(result, json);
+                deserializeMember!(member)(result, json);
             }
         } catch (JSONException e) {
             return handleException!(T, canThrow)(json, e.msg, defaultValue);
@@ -124,7 +127,7 @@ final class JsonSerializer {
 
         static foreach (string member; FieldNameTuple!T) {
             // current fields
-            deserializeMembers!(member)(target, json);
+            deserializeMember!(member)(target, json);
         }
     }
 
@@ -135,28 +138,39 @@ final class JsonSerializer {
 
         static foreach (string member; FieldNameTuple!T) {
             // current fields
-            deserializeMembers!(member)(target, json);
+            deserializeMember!(member)(target, json);
         }
 
         // super fields
-        alias baseClasses = BaseClassesTuple!T;
-        static if(traverseBase && baseClasses.length >= 1) {
-            auto jsonItemPtr = "super" in json;
-            if(jsonItemPtr !is null) {
-                deserializeObject!(baseClasses[0], traverseBase)(target, *jsonItemPtr);
+        static if(traverseBase) {
+            alias baseClasses = BaseClassesTuple!T;
+            alias BaseType = baseClasses[0];
+
+            static if(baseClasses.length >= 1 && !is(BaseType == Object)) {
+                debug(HUNT_DEBUG_MORE) {
+                    infof("TODO: deserializing fields in base %s for %s", BaseType.stringof, T.stringof);
+                }
+                auto jsonItemPtr = "super" in json;
+                if(jsonItemPtr !is null) {
+                    deserializeObject!(BaseType, traverseBase)(target, *jsonItemPtr);
+                }
             }
         }
     }
 
-    private static void deserializeMembers(string member, T)
+    private static void deserializeMember(string member, T)
             (ref T target, auto ref const(JSONValue) json) {
 
-        static if(!hasUDA!(__traits(getMember, T, member), Exclude)) {
+        alias memberType = typeof(__traits(getMember, T, member));
+        debug(HUNT_DEBUG_MORE) {
+            infof("deserializing member: %s %s", memberType.stringof, member);
+        }
 
-            alias memberType = typeof(__traits(getMember, T, member));
+        static if(!hasUDA!(__traits(getMember, T, member), Ignore) && 
+            !hasUDA!(__traits(getMember, T, member), JsonIgnore)) {
 
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
-                version(HUNT_DEBUG) warning("skipped a member: " ~ member);
+                version(HUNT_DEBUG) warning("skipped a interface member (not XmlSerializable): " ~ member);
             } else {
                 auto jsonItemPtr = member in json;
                 if(jsonItemPtr is null) {
@@ -166,6 +180,10 @@ final class JsonSerializer {
                     __traits(getMember, target, member) = fromJson!(memberType, false)(*jsonItemPtr);
                 }
             }                    
+        } else {
+            version(HUNT_DEBUG) {
+                infof("Ignore a member: %s %s", memberType.stringof, member);
+            }
         }
     }
 
@@ -439,11 +457,13 @@ final class JsonSerializer {
         static if(options.traverseBase) {
             alias baseClasses = BaseClassesTuple!T;
             static if(baseClasses.length >= 1) {
+
+                alias BaseType = baseClasses[0];
                 debug(HUNT_DEBUG_MORE) {
-                    tracef("baseClasses[0]: %s", baseClasses[0].stringof);
+                    tracef("BaseType: %s", BaseType.stringof);
                 }
-                static if(!is(baseClasses[0] == Object)) {
-                    JSONValue superResult = serializeObject!(options, baseClasses[0])(value);
+                static if(!is(BaseType == Object)) {
+                    JSONValue superResult = serializeObject!(options, BaseType)(value);
                     if(!superResult.isNull)
                         result["super"] = superResult;
                 }
@@ -496,7 +516,7 @@ final class JsonSerializer {
             } else {
                 enum canSerialize = false;
             }
-        } else static if(hasUDA!(currentMember, Exclude)) {
+        } else static if(hasUDA!(currentMember, Ignore) || hasUDA!(currentMember, JsonIgnore)) {
             enum canSerialize = false;
         } else {
             enum canSerialize = true;
@@ -607,14 +627,6 @@ final class JsonSerializer {
             return JSONValue(value.toString());
     }
 
-    // static Nullable!JSONValue toJson(N : Nullable!T, T)(N value) {
-    //     return value.isNull ? Nullable!JSONValue() : Nullable!JSONValue(toJson!T(value.get()));
-    // }
-
-    // static JSONValue toJson(T)(T value) if (is(T == JSONValue)) {
-    //     return value;
-    // }
-
     /**
      * JsonSerializable
      */
@@ -637,6 +649,9 @@ final class JsonSerializer {
         return v;
     }
 
+    /**
+     * Basic type
+     */
     static JSONValue toJson(T)(T value) if (isBasicType!T) {
         return JSONValue(value);
     }
@@ -648,22 +663,6 @@ final class JsonSerializer {
             if (is(T : U[], U) && (isBasicType!U || isSomeString!U)) {
         return JSONValue(value);
     }
-
-    // deprecated("Using toJson(SerializationOptions) instead.")
-    // static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no, 
-    //         TraverseBase traverseBase = TraverseBase.yes,
-    //         IncludeMeta includeMeta = IncludeMeta.no, 
-    //         int depth=-1, T : U[], U)
-    //         (T value) 
-    //         if(is(T : U[], U) && is(U == class)) {
-    //     if(value is null) {
-    //         return JSONValue(JSONValue[].init);
-    //     } else {
-    //         return toJson!(SerializationOptions(onlyPublic, traverseBase, includeMeta, true, depth))(value);
-    //         // return JSONValue(value.map!(item => serializeObject!(onlyPublic, traverseBase, includeMeta, depth)(item))()
-    //         //         .map!(json => json.isNull ? JSONValue(null) : json).array);
-    //     }
-    // }
 
     /**
      * class[]
@@ -678,26 +677,6 @@ final class JsonSerializer {
         }
     }
     
-
-    // deprecated("Using toJson(SerializationOptions) instead.")
-    // static JSONValue toJson(OnlyPublic onlyPublic = OnlyPublic.no,
-    //         TraverseBase traverseBase = TraverseBase.no,
-    //         IncludeMeta includeMeta = IncludeMeta.no,
-    //         int depth=-1,  
-    //         T : U[], U)(T value) if(is(U == struct)) {
-    //     if(value is null) {
-    //         return JSONValue(JSONValue[].init);
-    //     } else {
-    //         static if(is(U == SysTime)) {
-    //             return JSONValue(value.map!(item => toJson(item))()
-    //                     .map!(json => json.isNull ? JSONValue(null) : json).array);
-    //         } else {
-    //             return JSONValue(value.map!(item => toJson!(onlyPublic, traverseBase, includeMeta, depth)(item))()
-    //                     .map!(json => json.isNull ? JSONValue(null) : json).array);
-    //         }
-    //     }
-    // }
-
     /**
      * struct[]
      */
@@ -717,16 +696,16 @@ final class JsonSerializer {
     }
 
     /**
-     * U[K]
+     * V[K]
      */
     static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
-            T : U[K], U, K)(T value) {
+            T : V[K], V, K)(T value) {
         auto result = JSONValue();
 
         foreach (key; value.keys) {
-            static if(is(U == SysTime)) {
+            static if(is(V == SysTime)) {
                 auto json = toJson(value[key]);
-            } else static if(is(U == class) || is(U == struct) || is(U == interface)) {
+            } else static if(is(V == class) || is(V == struct) || is(V == interface)) {
                 auto json = toJson!(options)(value[key]);
             } else {
                 auto json = toJson(value[key]);

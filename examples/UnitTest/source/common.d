@@ -232,7 +232,7 @@ class Greeting : GreetingBase {
     SysTime[] nullTimes;
     SysTime[] times;
     
-    @Exclude
+    @Ignore // @JsonIgnore
     long currentTime;
     
     byte[] bytes;

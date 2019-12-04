@@ -55,7 +55,7 @@ class JsonSerializerTest {
         // writeln(s);
     }
 
-    void testBasic() {
+    void testBasic02() {
         {
             string[string] map;
             map["greeting"] = null;
