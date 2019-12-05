@@ -26,8 +26,20 @@ import std.traits;
 
 enum MetaTypeName = "__metatype__";
 
+/* -------------------------------------------------------------------------- */
+/*                                 Annotations                                */
+/* -------------------------------------------------------------------------- */
+
+// https://github.com/FasterXML/jackson-annotations
+// http://tutorials.jenkov.com/java-json/jackson-annotations.html
 
 enum JsonIgnore;
+
+enum JsonInclude;
+
+struct JsonProperty {
+    string name;
+}
 
 /**
  * 
@@ -71,8 +83,8 @@ final class JsonSerializer {
     }
 
     /**
-    Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
-    */
+     * Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
+     */
     static T fromJson(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == class) && __traits(compiles, new T())) { // is(typeof(new T()))
@@ -160,30 +172,43 @@ final class JsonSerializer {
 
     private static void deserializeMember(string member, T)
             (ref T target, auto ref const(JSONValue) json) {
-
-        alias memberType = typeof(__traits(getMember, T, member));
+        
+        alias currentMember = __traits(getMember, T, member);
+        alias memberType = typeof(currentMember);
         debug(HUNT_DEBUG_MORE) {
             infof("deserializing member: %s %s", memberType.stringof, member);
         }
 
-        static if(!hasUDA!(__traits(getMember, T, member), Ignore) && 
-            !hasUDA!(__traits(getMember, T, member), JsonIgnore)) {
-
+        static if(hasUDA!(currentMember, Ignore) || hasUDA!(currentMember, JsonIgnore)) { 
+            version(HUNT_DEBUG) {
+                infof("Ignore a member: %s %s", memberType.stringof, member);
+            }                
+        } else {
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
                 version(HUNT_DEBUG) warning("skipped a interface member (not XmlSerializable): " ~ member);
             } else {
-                auto jsonItemPtr = member in json;
+
+                alias jsonPropertyUDAs = getUDAs!(currentMember, JsonProperty);
+                static if(jsonPropertyUDAs.length > 0) {
+                    enum PropertyName = jsonPropertyUDAs[0].name;
+                    enum jsonKeyName = (PropertyName.length == 0) ? member : PropertyName;
+                } else {
+                    enum jsonKeyName = member;
+                }
+
+                auto jsonItemPtr = jsonKeyName in json;
                 if(jsonItemPtr is null) {
-                    version(HUNT_DEBUG) warningf("No data available for member: %s", member);
+                    version(HUNT_DEBUG) {
+                        if(jsonKeyName != member)
+                            warningf("No data available for member: %s as %s", member, jsonKeyName);
+                        else
+                            warningf("No data available for member: %s", member);
+                    }
                 } else {
                     debug(HUNT_DEBUG_MORE) tracef("available data: %s = %s", member, jsonItemPtr.toString());
                     __traits(getMember, target, member) = fromJson!(memberType, false)(*jsonItemPtr);
                 }
-            }                    
-        } else {
-            version(HUNT_DEBUG) {
-                infof("Ignore a member: %s %s", memberType.stringof, member);
-            }
+            }   
         }
     }
 
@@ -523,8 +548,7 @@ final class JsonSerializer {
         }
         
         debug(HUNT_DEBUG_MORE) {
-            tracef("name: %s, %s", 
-                member, options);
+            tracef("name: %s, %s", member, options);
         }
 
         static if(canSerialize) {
@@ -535,6 +559,15 @@ final class JsonSerializer {
                 version(HUNT_DEBUG) warning("skipped a interface member(not JsonSerializable): " ~ member);
             } else {
                 auto m = __traits(getMember, obj, member);
+
+                alias jsonPropertyUDAs = getUDAs!(currentMember, JsonProperty);
+                static if(jsonPropertyUDAs.length > 0) {
+                    enum PropertyName = jsonPropertyUDAs[0].name;
+                    enum jsonKeyName = (PropertyName.length == 0) ? member : PropertyName;
+                } else {
+                    enum jsonKeyName = member;
+                }
+
                 auto json = serializeMember!(options)(m);
 
                 debug(HUNT_DEBUG_MORE) {
@@ -551,12 +584,12 @@ final class JsonSerializer {
                 if (canSetValue) {
                         // trace(result);
                     if(!result.isNull) {
-                        auto jsonItemPtr = member in result;
+                        auto jsonItemPtr = jsonKeyName in result;
                         if(jsonItemPtr !is null) {
                             version(HUNT_DEBUG) warning("overrided field: " ~ member);
                         }
                     }
-                    result[member] = json;
+                    result[jsonKeyName] = json;
                 }
             }
         } else {
