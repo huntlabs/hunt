@@ -111,6 +111,8 @@ class JsonSerializerTest {
 
     @Test void testGetAsClass01() {
         Greeting gt = new Greeting();
+        gt.initialization();
+
         gt.setPrivateMember("private member");
         gt.id = 123;
         gt.content = "Hello, world!";
@@ -119,7 +121,7 @@ class JsonSerializerTest {
         gt.setColor("Red");
         gt.setContent("Hello");
         JSONValue jv = JsonSerializer.toJson(gt);
-        // trace("====>", jv.toPrettyString(), "====");
+        trace("====>", jv.toPrettyString(), "====");
 
         Greeting gt1 = JsonSerializer.fromJson!(Greeting)(jv);
         // trace("gt====>", gt, "====");
@@ -138,6 +140,11 @@ class JsonSerializerTest {
         assert(gt.getContent() == gt1.getContent());
         assert(gt1.getContent() == "Hello");
 
+        string[] members = gt1.members;
+        assert(members.length >=2);
+        assert(members[0] == "Alice");
+        // warning(members);
+
         JSONValue parametersInJson;
         parametersInJson["name"] = "Hunt";
         string parameterModel = JsonSerializer.getItemAs!(string)(parametersInJson, "name");
@@ -147,6 +154,7 @@ class JsonSerializerTest {
     void testMetaType() {
 
         Greeting gt = new Greeting();
+        gt.initialization();
         JSONValue jv = JsonSerializer.toJson!(SerializationOptions())(gt);
         // trace(jv.toPrettyString());
 
@@ -177,6 +185,7 @@ class JsonSerializerTest {
     void testComplexMembers() {
         
         Greeting gt = new Greeting();
+        gt.initialization();
         gt.setPrivateMember("private member");
         gt.id = 123;
         gt.content = "Hello, world!";
@@ -337,7 +346,7 @@ class JsonSerializerTest {
         assert(JsonSerializer.fromJson!(string[])(JSONValue("Hello")) == ["Hello"]);
     }
 
-    /// To Json
+    /* --------------------------------- To Json -------------------------------- */
 
     void testNullableToJson()  {
         import std.typecons;
@@ -384,6 +393,8 @@ class JsonSerializerTest {
         Greeting[] greetings;
         greetings ~= new Greeting(1, "Hello");
         greetings ~= new Greeting(2, "World");
+        greetings[0].initialization();
+        greetings[1].initialization();
 
         greetings[0].setPrivateMember("private member");
 
@@ -445,6 +456,7 @@ class JsonSerializerTest {
 
     void testDepth() {
         Greeting gt = new Greeting();
+        gt.initialization();
         gt.setPrivateMember("private member");
         gt.id = 123;
         gt.content = "Hello, world!";

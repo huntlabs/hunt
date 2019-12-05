@@ -236,28 +236,34 @@ class Greeting : GreetingBase {
     long currentTime;
     
     byte[] bytes;
+
+    @JsonProperty("Persons")
     string[] members;
     Guest[] guests;
     
 
     this() {
         super();
-        initialization();
+        // initialization();
     }
 
     this(int id, string content) {
         super(id, content);
         this.content = ">>> " ~ content ~ " <<<";
-        initialization();
+        // initialization();
     }
 
-    private void initialization() {
+    void initialization() {
 
         settings = new GreetingSettings();
 
         times = new SysTime[2];
         times[0] = Clock.currTime;
         times[1] = Clock.currTime;
+
+        members = new string[2];
+        members[0] = "Alice";
+        members[1] = "Bob";        
 
         guests = new Guest[1];
         guests[0] = new Guest();
