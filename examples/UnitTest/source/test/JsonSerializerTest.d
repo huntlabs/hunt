@@ -37,7 +37,7 @@ class JsonSerializerTest {
             }
         }`;
 
-        const testClass = JsonSerializer.fromJson!TestClass(parseJSON(jsonString));
+        const testClass = JsonSerializer.toObject!TestClass(parseJSON(jsonString));
         assert(testClass.integer == 42);
         assert(testClass.floating == 3.0);
         assert(testClass.text == "Hello world");
@@ -81,7 +81,7 @@ class JsonSerializerTest {
         // 
         enum string jsonStr = `{"content":"Hello World"}`;
 
-        GreetingBase greeting1 = JsonSerializer.fromJson!GreetingBase(jsonStr);
+        GreetingBase greeting1 = JsonSerializer.toObject!GreetingBase(jsonStr);
         trace(greeting1.toString());
 
         assert(greeting1.id == 0);
@@ -93,7 +93,7 @@ class JsonSerializerTest {
         assert(greeting.getContent() == "Hello World");
 
         // 
-        GreetingModel greetingModel = JsonSerializer.fromJson!GreetingModel(jsonStr);
+        GreetingModel greetingModel = JsonSerializer.toObject!GreetingModel(jsonStr);
         assert(greetingModel.id == 0);
         assert(greetingModel.content == "Hello World");
         trace(greetingModel);
@@ -123,7 +123,7 @@ class JsonSerializerTest {
         JSONValue jv = JsonSerializer.toJson(gt);
         trace("====>", jv.toPrettyString(), "====");
 
-        Greeting gt1 = JsonSerializer.fromJson!(Greeting)(jv);
+        Greeting gt1 = JsonSerializer.toObject!(Greeting)(jv);
         // trace("gt====>", gt, "====");
         // trace("gt1====>", gt1, "====");
         assert(gt1 !is null);
@@ -197,7 +197,7 @@ class JsonSerializerTest {
         JSONValue jv = JsonSerializer.toJson(gt);
         // trace(jv.toPrettyString());
 
-        Greeting gt1 = JsonSerializer.fromJson!(Greeting)(jv);
+        Greeting gt1 = JsonSerializer.toObject!(Greeting)(jv);
         // trace("gt====>", gt, "====");
         // trace("gt1====>", gt1, "====");
         assert(gt1 !is null);
@@ -233,7 +233,7 @@ class JsonSerializerTest {
         // trace(jv);
         SysTime st2 = SysTime.fromSimpleString(jv.str);
         // trace(st2.toString());
-        st2 = JsonSerializer.fromJson!(SysTime)(jv);
+        st2 = JsonSerializer.toObject!(SysTime)(jv);
         // trace(st2.toString());
         assert(st1 == st2);
     }
@@ -245,7 +245,7 @@ class JsonSerializerTest {
         // trace(jv.toString());
         const(JSONValue)* ptr = "stdtime" in jv;
         if(ptr !is null) {
-            SysTime st2 = JsonSerializer.fromJson!(SysTime)(*ptr);
+            SysTime st2 = JsonSerializer.toObject!(SysTime)(*ptr);
             // trace(st2.toString());
             assert(st1 == st2);
         }
@@ -253,47 +253,47 @@ class JsonSerializerTest {
 
     void testGetAsBasic02() {
         // auto json = JSONValue(42);
-        // auto result = fromJson!(Nullable!int)(json);
+        // auto result = toObject!(Nullable!int)(json);
         // assert(!result.isNull && result.get() == json.integer);
 
         // json = JSONValue(null);
-        // assert(JsonSerializer.fromJson!(Nullable!int)(json).isNull);
+        // assert(JsonSerializer.toObject!(Nullable!int)(json).isNull);
 
-        assert(JsonSerializer.fromJson!JSONValue(JSONValue(42)) == JSONValue(42));
+        assert(JsonSerializer.toObject!JSONValue(JSONValue(42)) == JSONValue(42));
     }
 
     void testGetAsNumeric() {
-        assert(JsonSerializer.fromJson!float(JSONValue(3.0)) == 3.0);
-        assert(JsonSerializer.fromJson!int(JSONValue(42)) == 42);
-        assert(JsonSerializer.fromJson!uint(JSONValue(42U)) == 42U);
-        assert(JsonSerializer.fromJson!char(JSONValue('a')) == 'a');
+        assert(JsonSerializer.toObject!float(JSONValue(3.0)) == 3.0);
+        assert(JsonSerializer.toObject!int(JSONValue(42)) == 42);
+        assert(JsonSerializer.toObject!uint(JSONValue(42U)) == 42U);
+        assert(JsonSerializer.toObject!char(JSONValue('a')) == 'a');
 
         // quirky JSON cases
 
-        assert(JsonSerializer.fromJson!int(JSONValue(null)) == 0);
-        assert(JsonSerializer.fromJson!int(JSONValue(false)) == 0);
-        assert(JsonSerializer.fromJson!int(JSONValue(true)) == 1);
-        assert(JsonSerializer.fromJson!int(JSONValue("42")) == 42);
-        assert(JsonSerializer.fromJson!char(JSONValue("a")) == 'a');
+        assert(JsonSerializer.toObject!int(JSONValue(null)) == 0);
+        assert(JsonSerializer.toObject!int(JSONValue(false)) == 0);
+        assert(JsonSerializer.toObject!int(JSONValue(true)) == 1);
+        assert(JsonSerializer.toObject!int(JSONValue("42")) == 42);
+        assert(JsonSerializer.toObject!char(JSONValue("a")) == 'a');
     }
 
     void testGetAsBool() {
-        assert(JsonSerializer.fromJson!bool(JSONValue(false)) == false);
-        assert(JsonSerializer.fromJson!bool(JSONValue(true)) == true);
+        assert(JsonSerializer.toObject!bool(JSONValue(false)) == false);
+        assert(JsonSerializer.toObject!bool(JSONValue(true)) == true);
 
         // quirky JSON cases
 
-        assert(JsonSerializer.fromJson!bool(JSONValue(null)) == false);
-        assert(JsonSerializer.fromJson!bool(JSONValue(0.0)) == false);
-        assert(JsonSerializer.fromJson!bool(JSONValue(0)) == false);
-        assert(JsonSerializer.fromJson!bool(JSONValue(0U)) == false);
-        assert(JsonSerializer.fromJson!bool(JSONValue("")) == false);
+        assert(JsonSerializer.toObject!bool(JSONValue(null)) == false);
+        assert(JsonSerializer.toObject!bool(JSONValue(0.0)) == false);
+        assert(JsonSerializer.toObject!bool(JSONValue(0)) == false);
+        assert(JsonSerializer.toObject!bool(JSONValue(0U)) == false);
+        assert(JsonSerializer.toObject!bool(JSONValue("")) == false);
 
-        assert(JsonSerializer.fromJson!bool(JSONValue(3.0)) == true);
-        assert(JsonSerializer.fromJson!bool(JSONValue(42)) == true);
-        assert(JsonSerializer.fromJson!bool(JSONValue(42U)) == true);
-        assert(JsonSerializer.fromJson!bool(JSONValue("Hello world")) == true);
-        assert(JsonSerializer.fromJson!bool(JSONValue(new int[0])) == true);        
+        assert(JsonSerializer.toObject!bool(JSONValue(3.0)) == true);
+        assert(JsonSerializer.toObject!bool(JSONValue(42)) == true);
+        assert(JsonSerializer.toObject!bool(JSONValue(42U)) == true);
+        assert(JsonSerializer.toObject!bool(JSONValue("Hello world")) == true);
+        assert(JsonSerializer.toObject!bool(JSONValue(new int[0])) == true);        
     }
 
     void testGetAsString() {
@@ -302,48 +302,48 @@ class JsonSerializerTest {
             delete_ = "delete"
         }
 
-        assert(JsonSerializer.fromJson!Operation(JSONValue("create")) == Operation.create);
-        assert(JsonSerializer.fromJson!Operation(JSONValue("delete")) == Operation.delete_);
+        assert(JsonSerializer.toObject!Operation(JSONValue("create")) == Operation.create);
+        assert(JsonSerializer.toObject!Operation(JSONValue("delete")) == Operation.delete_);
 
         auto json = JSONValue("Hello");
-        assert(JsonSerializer.fromJson!string(json) == json.str);
-        assert(JsonSerializer.fromJson!(char[])(json) == json.str);
-        assert(JsonSerializer.fromJson!(wstring)(json) == "Hello"w);
-        assert(JsonSerializer.fromJson!(wchar[])(json) == "Hello"w);
-        assert(JsonSerializer.fromJson!(dstring)(json) == "Hello"d);
-        assert(JsonSerializer.fromJson!(dchar[])(json) == "Hello"d);
+        assert(JsonSerializer.toObject!string(json) == json.str);
+        assert(JsonSerializer.toObject!(char[])(json) == json.str);
+        assert(JsonSerializer.toObject!(wstring)(json) == "Hello"w);
+        assert(JsonSerializer.toObject!(wchar[])(json) == "Hello"w);
+        assert(JsonSerializer.toObject!(dstring)(json) == "Hello"d);
+        assert(JsonSerializer.toObject!(dchar[])(json) == "Hello"d);
 
         // beware of the fact that JSONValue treats chars as integers; this returns "97" and not "a"
-        assert(JsonSerializer.fromJson!string(JSONValue('a')) != "a");
-        assert(JsonSerializer.fromJson!string(JSONValue("a")) == "a");
+        assert(JsonSerializer.toObject!string(JSONValue('a')) != "a");
+        assert(JsonSerializer.toObject!string(JSONValue("a")) == "a");
 
         enum TestEnum : string {
             hello = "hello",
             world = "world"
         }
 
-        assert(JsonSerializer.fromJson!TestEnum(JSONValue("hello")) == TestEnum.hello);
-        assert(JsonSerializer.fromJson!TestEnum(JSONValue("world")) == TestEnum.world);
+        assert(JsonSerializer.toObject!TestEnum(JSONValue("hello")) == TestEnum.hello);
+        assert(JsonSerializer.toObject!TestEnum(JSONValue("world")) == TestEnum.world);
 
         // quirky JSON cases
 
-        assert(JsonSerializer.fromJson!string(JSONValue(null)) == "null");
-        assert(JsonSerializer.fromJson!string(JSONValue(false)) == "false");
-        assert(JsonSerializer.fromJson!string(JSONValue(true)) == "true");
+        assert(JsonSerializer.toObject!string(JSONValue(null)) == "null");
+        assert(JsonSerializer.toObject!string(JSONValue(false)) == "false");
+        assert(JsonSerializer.toObject!string(JSONValue(true)) == "true");
     }
 
     void testGetAsArray() {
-        assert(JsonSerializer.fromJson!(int[])(JSONValue([0, 1, 2, 3])) == [0, 1, 2, 3]);
+        assert(JsonSerializer.toObject!(int[])(JSONValue([0, 1, 2, 3])) == [0, 1, 2, 3]);
 
         // quirky JSON cases
-        assert(JsonSerializer.fromJson!(byte[], false)(JSONValue([0, 1, 2, 3])) == [0, 1, 2, 3]);
-        assert(JsonSerializer.fromJson!(int[])(JSONValue(null)) == []);
-        assert(JsonSerializer.fromJson!(int[])(JSONValue(false)) == [0]);
-        assert(JsonSerializer.fromJson!(bool[])(JSONValue(true)) == [true]);
-        assert(JsonSerializer.fromJson!(float[])(JSONValue(3.0)) == [3.0]);
-        assert(JsonSerializer.fromJson!(int[])(JSONValue(42)) == [42]);
-        assert(JsonSerializer.fromJson!(uint[])(JSONValue(42U)) == [42U]);
-        assert(JsonSerializer.fromJson!(string[])(JSONValue("Hello")) == ["Hello"]);
+        assert(JsonSerializer.toObject!(byte[], false)(JSONValue([0, 1, 2, 3])) == [0, 1, 2, 3]);
+        assert(JsonSerializer.toObject!(int[])(JSONValue(null)) == []);
+        assert(JsonSerializer.toObject!(int[])(JSONValue(false)) == [0]);
+        assert(JsonSerializer.toObject!(bool[])(JSONValue(true)) == [true]);
+        assert(JsonSerializer.toObject!(float[])(JSONValue(3.0)) == [3.0]);
+        assert(JsonSerializer.toObject!(int[])(JSONValue(42)) == [42]);
+        assert(JsonSerializer.toObject!(uint[])(JSONValue(42U)) == [42U]);
+        assert(JsonSerializer.toObject!(string[])(JSONValue("Hello")) == ["Hello"]);
     }
 
     /* --------------------------------- To Json -------------------------------- */
