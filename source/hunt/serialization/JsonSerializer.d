@@ -35,8 +35,6 @@ enum MetaTypeName = "__metatype__";
 
 enum JsonIgnore;
 
-enum JsonInclude;
-
 struct JsonProperty {
     string name;
 }
@@ -68,24 +66,24 @@ final class JsonSerializer {
             return handleException!(T, canThrow)(json, "wrong member type", defaultValue);
         }
         else {
-            return fromJson!T(*item); // , defaultValue
+            return toObject!T(*item); // , defaultValue
         }
     }
 
-    static T fromJson(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
+    static T toObject(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
             (string json, T defaultValue = T.init) if (is(T == class)) {
-        return fromJson!(T, traverseBase, canThrow)(parseJSON(json));
+        return toObject!(T, traverseBase, canThrow)(parseJSON(json));
     }
 
-    static T fromJson(T, bool canThrow = false)
+    static T toObject(T, bool canThrow = false)
             (string json, T defaultValue = T.init) if (!is(T == class)) {
-        return fromJson!(T, canThrow)(parseJSON(json));
+        return toObject!(T, canThrow)(parseJSON(json));
     }
 
     /**
      * Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
      */
-    static T fromJson(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
+    static T toObject(T, TraverseBase traverseBase = TraverseBase.yes, bool canThrow = false)
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == class) && __traits(compiles, new T())) { // is(typeof(new T()))
 
@@ -110,7 +108,7 @@ final class JsonSerializer {
 
     /**
     */
-    static T fromJson(T, bool canThrow = false)(
+    static T toObject(T, bool canThrow = false)(
             auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == struct) && !is(T == SysTime)) {
 
@@ -206,13 +204,13 @@ final class JsonSerializer {
                     }
                 } else {
                     debug(HUNT_DEBUG_MORE) tracef("available data: %s = %s", member, jsonItemPtr.toString());
-                    __traits(getMember, target, member) = fromJson!(memberType, false)(*jsonItemPtr);
+                    __traits(getMember, target, member) = toObject!(memberType, false)(*jsonItemPtr);
                 }
             }   
         }
     }
 
-    static T fromJson(T, bool canThrow = false)(
+    static T toObject(T, bool canThrow = false)(
             auto ref const(JSONValue) json, 
             T defaultValue = T.init) 
             if(is(T == interface) && is(T : JsonSerializable)) {
@@ -232,7 +230,7 @@ final class JsonSerializer {
     
     }
 
-    static T fromJson(T, bool canThrow = false)(
+    static T toObject(T, bool canThrow = false)(
             auto ref const(JSONValue) json, 
             T defaultValue = T.init) 
             if(is(T == SysTime)) {
@@ -247,17 +245,17 @@ final class JsonSerializer {
         }
     }
 
-    // static N fromJson(N : Nullable!T, T, bool canThrow = false)(auto ref const(JSONValue) json) {
+    // static N toObject(N : Nullable!T, T, bool canThrow = false)(auto ref const(JSONValue) json) {
 
-    //     return (json.type == JSONType.null_) ? N() : fromJson!T(json).nullable;
+    //     return (json.type == JSONType.null_) ? N() : toObject!T(json).nullable;
     // }
 
-    static T fromJson(T : JSONValue, bool canThrow = false)(auto ref const(JSONValue) json) {
+    static T toObject(T : JSONValue, bool canThrow = false)(auto ref const(JSONValue) json) {
         import std.typecons : nullable;
         return json.nullable.get();
     }
 
-    static T fromJson(T, bool canThrow = false)
+    static T toObject(T, bool canThrow = false)
             (auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (isNumeric!T || isSomeChar!T) {
 
@@ -301,7 +299,7 @@ final class JsonSerializer {
         }
     }
 
-    static T fromJson(T, bool canThrow = false)
+    static T toObject(T, bool canThrow = false)
             (auto ref const(JSONValue) json) if (isBoolean!T) {
 
         switch (json.type) {
@@ -325,7 +323,7 @@ final class JsonSerializer {
         }
     }
 
-    static T fromJson(T, bool canThrow = false)(auto ref const(JSONValue) json, T defaultValue = T.init)
+    static T toObject(T, bool canThrow = false)(auto ref const(JSONValue) json, T defaultValue = T.init)
             if (isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring)) {
 
         static if (is(T == enum)) {
@@ -343,7 +341,7 @@ final class JsonSerializer {
         }
     }
 
-    static T fromJson(T : U[], bool canThrow = false, U)
+    static T toObject(T : U[], bool canThrow = false, U)
             (auto ref const(JSONValue) json, 
             T defaultValue = T.init)
             if (isArray!T && !isSomeString!T && !is(T : string) && !is(T
@@ -354,14 +352,14 @@ final class JsonSerializer {
             return [];
 
         case JSONType.false_:
-            return [fromJson!U(JSONValue(false))];
+            return [toObject!U(JSONValue(false))];
 
         case JSONType.true_:
-            return [fromJson!U(JSONValue(true))];
+            return [toObject!U(JSONValue(true))];
 
         case JSONType.array:
             return json.array
-                .map!(value => fromJson!U(value))
+                .map!(value => toObject!U(value))
                 .array
                 .to!T;
 
@@ -369,11 +367,11 @@ final class JsonSerializer {
             return handleException!(T, canThrow)(json, "", defaultValue);
 
         default:
-            return [fromJson!U(json)];
+            return [toObject!U(json)];
         }
     }
 
-    static T fromJson(T : U[K], bool canThrow = false, U, K)(
+    static T toObject(T : U[K], bool canThrow = false, U, K)(
             auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (isAssociativeArray!T) {
         
@@ -385,14 +383,14 @@ final class JsonSerializer {
 
         case JSONType.object:
             foreach (key, value; json.object) {
-                result[key.to!K] = fromJson!U(value);
+                result[key.to!K] = toObject!U(value);
             }
 
             break;
 
         case JSONType.array:
             foreach (key, value; json.array) {
-                result[key.to!K] = fromJson!U(value);
+                result[key.to!K] = toObject!U(value);
             }
 
             break;
@@ -749,9 +747,15 @@ final class JsonSerializer {
         return result;
     }
 
+
+    deprecated("Using toObject instead.")
+    alias fromJson = toObject;
 }
 
 
 alias toJson = JsonSerializer.toJson;
+alias toObject = JsonSerializer.toObject;
 
-alias fromJson = JsonSerializer.fromJson;
+
+deprecated("Using toObject instead.")
+alias fromJson = JsonSerializer.toObject;
