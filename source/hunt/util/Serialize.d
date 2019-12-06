@@ -825,10 +825,18 @@ size_t getsize(T)(T t, RefClass stack, uint level) if (is(T == enum))
 
 public:
 
+T unserialize(T)(const(ubyte)[] data ) {
+	return unserialize!(T)(cast(const byte[])data);
+}
+
 T unserialize(T)(const byte[] data )
 {
 	long parse_index;
 	return unserialize!T(data, parse_index);
+}
+
+T unserialize(T)(const(ubyte)[] data, out long parse_index ) {
+	return unserialize!(T)(cast(const byte[])data, parse_index);
 }
 
 T unserialize(T)(const byte[] data, out long parse_index )
