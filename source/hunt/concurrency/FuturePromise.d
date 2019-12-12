@@ -25,12 +25,12 @@ import std.format;
 import std.datetime;
 
 /**
-*/
+ * 
+ */
 class FuturePromise(T) : Future!T, Promise!T {
 	private __gshared Exception COMPLETED;
 	private shared bool _done;
 	private Exception _cause;
-	private T _result;
 	private string _id;
 	private Mutex _doneLocker;
 	private Condition _doneCondition;
@@ -52,6 +52,19 @@ class FuturePromise(T) : Future!T, Promise!T {
 		_id = id;
 	}
 
+static if(is(T == void)) {
+		
+	void succeeded() {
+		if (cas(&_done, false, true)) {
+			_cause = COMPLETED;
+			_doneCondition.notifyAll();
+		}
+	}
+
+} else {
+
+	private T _result;
+
 	void succeeded(T result) {
 		if (cas(&_done, false, true)) {
 			_result = result;
@@ -59,6 +72,8 @@ class FuturePromise(T) : Future!T, Promise!T {
 			_doneCondition.notifyAll();
 		}
 	}
+
+}
 
 	void failed(Exception cause) {
 		if (cas(&_done, false, true)) {
@@ -69,7 +84,9 @@ class FuturePromise(T) : Future!T, Promise!T {
 
 	bool cancel(bool mayInterruptIfRunning) {
 		if (cas(&_done, false, true)) {
-			_result = T.init;
+			static if(!is(T == void)) {
+				_result = T.init;
+			}
 			_cause = new CancellationException("");
 			_doneCondition.notifyAll();
 			return true;
@@ -109,8 +126,13 @@ class FuturePromise(T) : Future!T, Promise!T {
 			new ExecutionException("no cause!");
 		}
 
-		if (_cause is COMPLETED)
-			return _result;
+		if (_cause is COMPLETED) {
+			static if(is(T == void)) {
+				return;
+			} else {
+				return _result;
+			}
+		}
 
 		CancellationException c = cast(CancellationException) _cause;
 		if (c !is null) throw c;
@@ -134,8 +156,13 @@ class FuturePromise(T) : Future!T, Promise!T {
 				throw new TimeoutException();
 		}
 
-		if (_cause is COMPLETED)
-			return _result;
+		if (_cause is COMPLETED) {
+			static if(is(T == void)) {
+				return;
+			} else {
+				return _result;
+			}
+		}
 
 		TimeoutException t = cast(TimeoutException) _cause;
 		if (t !is null)
@@ -149,6 +176,10 @@ class FuturePromise(T) : Future!T, Promise!T {
 	}
 
 	override string toString() {
-		return format("FutureCallback@%x{%b,%b,%s}", toHash(), _done, _cause is COMPLETED, _result);
+		static if(is(T == void)) {
+			return format("FutureCallback@%x{%b, %b, void}", toHash(), _done, _cause is COMPLETED);
+		} else {
+			return format("FutureCallback@%x{%b, %b, %s}", toHash(), _done, _cause is COMPLETED, _result);
+		}
 	}
 }
