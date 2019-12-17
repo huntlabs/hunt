@@ -5,7 +5,7 @@ executable('hunt-tcp-client-demo',
     d_debug: d_debug,
     include_directories: include_directories('source'),
     install: true,
-    link_args: '-link-defaultlib-shared',
+    link_args: link_runtime_shared_arg,
 )
 
 executable('hunt-tcp-server-demo',
@@ -15,5 +15,5 @@ executable('hunt-tcp-server-demo',
     d_debug: d_debug,
     include_directories: include_directories('source'),
     install: true,
-    link_args: '-link-defaultlib-shared',
+    link_args: link_runtime_shared_arg,
 )
