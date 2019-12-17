@@ -283,6 +283,7 @@ mixin template CloneMemberTemplate(T, TopLevel topLevel = TopLevel.no, alias onC
 		static foreach (string fieldName; FieldNameTuple!T) {
 			debug(HUNT_DEBUG_MORE) {
 				// pragma(msg, "clone field=" ~ fieldName);
+				import hunt.logging.ConsoleLogger;
 				tracef("cloning: name=%s, value=%s", fieldName, __traits(getMember, this, fieldName));
 			}
 			__traits(getMember, copy, fieldName) = __traits(getMember, this, fieldName);
