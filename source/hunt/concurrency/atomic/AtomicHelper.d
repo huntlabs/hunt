@@ -24,7 +24,15 @@ class AtomicHelper {
     }
 
     static bool compareAndSet(T, V1, V2)(ref T stuff, V1 testVal, lazy V2 newVal) {
-        return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
+        static if(is(T == interface)) {
+            return core.atomic.cas(cast(Object*)&stuff, cast(Object)testVal, cast(Object)newVal);
+            // FIXME: Needing refactor or cleanup -@zhangxueping at 2019-12-17T13:52:10+08:00
+            // More tests needed
+            // return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
+        } else {
+            return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
+        }
+        // return core.atomic.cas(cast(shared)&stuff, testVal, newVal);
     }
 
     static T increment(T, U)(ref T stuff, U delta = 1) if (__traits(isIntegral, T)) {
