@@ -413,7 +413,8 @@ class Byte : AbstractNumber!(byte) {
 
 
 /**
-*/
+ * 
+ */
 class Bytes : Nullable!(byte[]) {
 
     this(byte[] bs) {
@@ -424,7 +425,8 @@ class Bytes : Nullable!(byte[]) {
 
 
 /**
-*/
+ * 
+ */
 enum ByteOrder {
     BigEndian,
     LittleEndian

@@ -25,10 +25,14 @@ class AtomicHelper {
 
     static bool compareAndSet(T, V1, V2)(ref T stuff, V1 testVal, lazy V2 newVal) {
         static if(is(T == interface)) {
-            return core.atomic.cas(cast(Object*)&stuff, cast(Object)testVal, cast(Object)newVal);
+            import hunt.util.Common;
+            static if(CompilerHelper.isGreaterThan(2089)) {
+                return core.atomic.cas(cast(Object*)&stuff, cast(Object)testVal, cast(Object)newVal);
+            } else {
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2019-12-17T13:52:10+08:00
             // More tests needed
-            // return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
+                return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
+            }
         } else {
             return core.atomic.cas(cast(shared)&stuff, cast(shared)testVal, cast(shared)newVal);
         }
