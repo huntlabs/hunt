@@ -35,7 +35,7 @@ hunt_test = executable(
     d_unittest: true,
     d_module_versions: d_mod_version,
     include_directories: include_directories('source'),
-    link_args: '-link-defaultlib-shared',
+    link_args: link_runtime_shared_arg,
 )
 
 test('test-hunt', hunt_test)

@@ -247,7 +247,7 @@ hunt_lib = library('hunt',
     d_module_versions: d_mod_version,
     d_debug: d_debug,
     include_directories: src_inc,
-    link_args: ['-shared', '-link-defaultlib-shared'],
+    link_args: ['-shared', link_runtime_shared_arg],
 )
 
 hunt_dep = declare_dependency(

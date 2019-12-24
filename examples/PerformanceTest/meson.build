@@ -8,7 +8,7 @@ performance_test = executable('hunt-performance-test',
     d_module_versions: d_mod_version,
     d_debug: d_debug,
     include_directories: include_directories('source'),
-    link_args: '-link-defaultlib-shared',
+    link_args: link_runtime_shared_arg,
 )
 
 #Disable for now; gets stuck
