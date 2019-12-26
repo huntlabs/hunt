@@ -22,9 +22,10 @@ import hunt.event;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
 
+import std.exception;
 import std.format;
 import std.socket;
-import std.exception;
+import std.string;
 
 import core.atomic;
 import core.thread;
@@ -36,7 +37,8 @@ version (HAVE_EPOLL) {
 
 
 /**
-*/
+ * 
+ */
 class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
     protected shared bool _isConnected; // It's always true for server.
@@ -92,10 +94,25 @@ class TcpStream : AbstractStream {
         if(addresses is null) {
             throw new SocketException("Can't resolve hostname: " ~ hostname);
         }
-        version(HUNT_IO_DEBUG) {
-            infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, addresses[0].toAddrString(), port);
+        Address selectedAddress;
+        foreach(Address addr; addresses) {
+            string ip = addr.toAddrString();
+            if(ip.startsWith("::")) // skip IPV6
+                continue;
+            if(ip.length <= 16) {
+                selectedAddress = addr;
+                break;
+            }
         }
-        connect(addresses[0]); // always select the first one.
+
+        if(selectedAddress is null) {
+            warning("No IPV4 avaliable");
+            selectedAddress = addresses[0];
+        }
+        version(HUNT_IO_DEBUG) {
+            infof("connecting with: hostname=%s, ip=%s, port=%d ", hostname, selectedAddress.toAddrString(), port);
+        }
+        connect(selectedAddress); // always select the first one.
     }
 
     void connect(Address addr) {
