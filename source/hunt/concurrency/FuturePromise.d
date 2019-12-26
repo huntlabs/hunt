@@ -55,6 +55,10 @@ class FuturePromise(T) : Future!T, Promise!T {
 static if(is(T == void)) {
 		
 	void succeeded() {
+		_doneLocker.lock();
+		scope (exit)
+			_doneLocker.unlock();
+
 		if (cas(&_done, false, true)) {
 			_cause = COMPLETED;
 			_doneCondition.notifyAll();
@@ -66,6 +70,9 @@ static if(is(T == void)) {
 	private T _result;
 
 	void succeeded(T result) {
+		_doneLocker.lock();
+		scope (exit)
+			_doneLocker.unlock();
 		if (cas(&_done, false, true)) {
 			_result = result;
 			_cause = COMPLETED;
@@ -76,6 +83,9 @@ static if(is(T == void)) {
 }
 
 	void failed(Exception cause) {
+		_doneLocker.lock();
+		scope (exit)
+			_doneLocker.unlock();
 		if (cas(&_done, false, true)) {
 			_cause = cause;
 			_doneCondition.notifyAll();
@@ -83,6 +93,10 @@ static if(is(T == void)) {
 	}
 
 	bool cancel(bool mayInterruptIfRunning) {
+		_doneLocker.lock();
+		scope (exit)
+			_doneLocker.unlock();
+
 		if (cas(&_done, false, true)) {
 			static if(!is(T == void)) {
 				_result = T.init;
@@ -95,9 +109,15 @@ static if(is(T == void)) {
 	}
 
 	bool isCancelled() {
+		_doneLocker.lock();
+		scope (exit)
+			_doneLocker.unlock();
+
 		if (_done) {
 			try {
 				// _latch.await();
+				// TODO: Tasks pending completion -@zhangxueping at 2019-12-26T15:18:42+08:00
+				// 
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e.msg);
 			}
@@ -115,9 +135,12 @@ static if(is(T == void)) {
 			_doneLocker.lock();
 			scope (exit)
 				_doneLocker.unlock();
-			version (HUNT_DEBUG)
-				info("Waiting for a promise...");
-			_doneCondition.wait();
+				
+			if(!_done) {
+				version (HUNT_DEBUG)
+					info("Waiting for a promise...");
+				_doneCondition.wait();
+			}
 		}
 		version (HUNT_DEBUG) info("Got a promise");
 
@@ -150,10 +173,12 @@ static if(is(T == void)) {
 			scope (exit)
 				_doneLocker.unlock();
 
-			version (HUNT_DEBUG)
-				infof("Waiting for a promise in %s...", timeout);
-			if (!_doneCondition.wait(timeout))
-				throw new TimeoutException();
+			if(!_done) {
+				version (HUNT_DEBUG)
+					infof("Waiting for a promise in %s...", timeout);
+				if (!_doneCondition.wait(timeout))
+					throw new TimeoutException("Timeout in " ~ timeout.toString());
+			}
 		}
 
 		if (_cause is COMPLETED) {
