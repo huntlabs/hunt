@@ -1,5 +1,4 @@
 language: d
-dist: bionic
 sudo: true
 os:
   - linux
@@ -10,6 +9,7 @@ os:
 
 d:
   - dmd
+    dist: bionic
   - ldc
 
 # before_install:
