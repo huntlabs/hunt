@@ -1,4 +1,5 @@
 language: d
+dist: bionic
 sudo: true
 os:
   - linux
@@ -9,8 +10,8 @@ os:
 
 d:
   - dmd
-    dist: bionic
-  - ldc
+# ldc will fail on Xenial
+#  - ldc
 
 # before_install:
 #   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
