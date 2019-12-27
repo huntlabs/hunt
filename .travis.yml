@@ -1,11 +1,13 @@
 language: d
+dist: bionic
 sudo: true
 os:
   - linux
   - osx
 # Use Docker for now, Travis doesn't want to use Bionic yet and Xenial is too old.
-services:
-  - docker
+# services:
+#  - docker
+
 d:
   - dmd
   - ldc
