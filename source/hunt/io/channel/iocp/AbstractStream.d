@@ -302,7 +302,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         while(_isSingleWriteBusy) {
-            // version(HUNT_IO_DEBUG) 
+            version(HUNT_IO_DEBUG) 
             info("waiting for last writting get finished...");
         }
 

@@ -53,7 +53,7 @@ class TcpStream : AbstractStream {
         else
             _tcpOption = option;
         super(loop, family, _tcpOption.bufferSize);
-        version(HUNT_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
+        version(HUNT_IO_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         _isClient = true;
