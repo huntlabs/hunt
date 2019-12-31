@@ -5,38 +5,38 @@ os:
   - linux
   - osx
 # Use Docker for now, Travis doesn't want to use Bionic yet and Xenial is too old.
-# services:
-#  - docker
+services:
+ - docker
 
 d:
   - dmd
 # ldc will fail on Xenial
-#  - ldc
+ - ldc
 
-# before_install:
-#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ninja; fi
-#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip3 install 'meson==0.51.2'; fi
-#   - |
-#     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-#       if [[ "$DC" == dmd ]]; then
-#         docker run -d --name "dlang" -v $(pwd):/travis dlang2/dmd-ubuntu tail -f /dev/null
-#       else
-#         docker run -d --name "dlang" -v $(pwd):/travis dlang2/ldc-ubuntu tail -f /dev/null
-#       fi
-#       docker ps
-#     fi
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ninja; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip3 install 'meson==0.51.2'; fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      if [[ "$DC" == dmd ]]; then
+        docker run -d --name "dlang" -v $(pwd):/travis dlang2/dmd-ubuntu tail -f /dev/null
+      else
+        docker run -d --name "dlang" -v $(pwd):/travis dlang2/ldc-ubuntu tail -f /dev/null
+      fi
+      docker ps
+    fi
 
-# install:
-#   - |
-#     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-#       docker exec -t dlang bash -c "apt-get update; apt-get install -y meson binutils python3-pip && pip3 install 'meson==0.51.2'"
-#     fi
+install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      docker exec -t dlang bash -c "apt-get update; apt-get install -y meson binutils python3-pip && pip3 install 'meson==0.51.2'"
+    fi
 
-# script:
-#   - dub test --compiler=${DC}
-#   # Can't build on MacOS: https://github.com/mesonbuild/meson/issues/6075
-#   - |
-#     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-#       docker exec -t dlang bash -c "cd /travis && meson --buildtype=release build && ninja -C build test"
-#     fi
+script:
+  - dub test --compiler=${DC}
+  # Can't build on MacOS: https://github.com/mesonbuild/meson/issues/6075
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      docker exec -t dlang bash -c "cd /travis && meson --buildtype=release build && ninja -C build test"
+    fi
