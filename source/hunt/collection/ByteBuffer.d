@@ -21,7 +21,8 @@ import std.bitmanip;
 
 
 /**
-*/
+ * 
+ */
 abstract class ByteBuffer : Buffer {
     protected byte[] hb; // Non-null only for heap buffers
 
