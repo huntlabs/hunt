@@ -1,10 +1,15 @@
 module hunt.concurrency.SimpleQueue;
 
+import hunt.Exceptions;
+import hunt.logging.ConsoleLogger;
+
 import core.thread;
 import core.sync.semaphore : Semaphore;
 import core.sync.condition;
 import core.sync.mutex : Mutex;
 import core.atomic;
+
+import std.datetime;
 
 // ported from https://github.com/qznc/d-queues
 
@@ -192,7 +197,8 @@ class NonBlockingQueue(T) : Queue!T {
 
 
 /**
-*/
+ * 
+ */
 class SimpleQueue(T) : Queue!T {
     private QueueNode!T head;
     private QueueNode!T tail;
@@ -213,10 +219,33 @@ class SimpleQueue(T) : Queue!T {
     T dequeue() {
         T e = void;
         while (!tryDequeue(e)) {
+            Thread.yield();
+            version(HUNT_DANGER_DEBUG) warning("Running here");
         }
-        // tryDequeue(e);
         return e;
     }
+
+    T dequeue(Duration timeout) {
+        T e = void;
+        auto start = Clock.currTime;
+        bool r = tryDequeue(e);
+        while (!r && Clock.currTime < start + timeout) {
+            debug {
+                Duration dur = Clock.currTime - start;
+                if(dur > 15.seconds) {
+                    warningf("There is no element available in %s", dur);
+                }
+            }
+            Thread.yield();
+            r = tryDequeue(e);
+        }
+
+        if (!r) {
+            throw new TimeoutException("Timeout in " ~ timeout.toString());
+        }
+        return e;
+    }
+
 
     bool tryDequeue(out T e) {
         auto nxt = this.head.nxt;
