@@ -33,16 +33,11 @@ class FuturePromise(T) : Future!T, Promise!T {
 	private bool _isResultAvaliable = false;
 	private Exception _cause;
 	private string _id;
-	// private Mutex _doneLocker;
-	// private Condition _doneCondition;
-
 	shared static this() {
 		COMPLETED = new Exception("");
 	}
 
 	this() {
-		// _doneLocker = new Mutex();
-		// _doneCondition = new Condition(_doneLocker);
 	}
 
 	string id() {
@@ -61,13 +56,8 @@ static if(is(T == void)) {
 	 * 	2) return a flag to indicate whether this option is successful.
 	 */
 	void succeeded() {
-		// _doneLocker.lock();
-		// scope (exit)
-		// 	_doneLocker.unlock();
-
 		if (cas(&_done, false, true)) {
 			_cause = COMPLETED;
-			// _doneCondition.notifyAll();
 			_isResultAvaliable = true;
 		} else {
 			warning("This promise has been done, and can't be set again.");
@@ -82,14 +72,10 @@ static if(is(T == void)) {
 	 * 	2) return a flag to indicate whether this option is successful.
 	 */
 	void succeeded(T result) {
-		// _doneLocker.lock();
-		// scope (exit)
-		// 	_doneLocker.unlock();
 		if (cas(&_done, false, true)) {
 			_result = result;
 			_cause = COMPLETED;
 			_isResultAvaliable = true;
-			// _doneCondition.notifyAll();
 		} else {
 			warning("This promise has been done, and can't be set again.");
 		}
@@ -103,23 +89,15 @@ static if(is(T == void)) {
 	 * 	2) return a flag to indicate whether this option is successful.
 	 */
 	void failed(Exception cause) {
-		// _doneLocker.lock();
-		// scope (exit)
-		// 	_doneLocker.unlock();
 		if (cas(&_done, false, true)) {
 			_cause = cause;
 			_isResultAvaliable = true;
-			// _doneCondition.notifyAll();
 		} else {
 			warning("This promise has been done, and can't be set again.");
 		}
 	}
 
 	bool cancel(bool mayInterruptIfRunning) {
-		// _doneLocker.lock();
-		// scope (exit)
-		// 	_doneLocker.unlock();
-
 		if (cas(&_done, false, true)) {
 			static if(!is(T == void)) {
 				_result = T.init;
@@ -133,10 +111,6 @@ static if(is(T == void)) {
 	}
 
 	bool isCancelled() {
-		// _doneLocker.lock();
-		// scope (exit)
-		// 	_doneLocker.unlock();
-
 		if (_done) {
 			try {
 				// _latch.await();
@@ -155,18 +129,6 @@ static if(is(T == void)) {
 	}
 
 	T get() {
-		// if (!_done) {
-		// 	// _doneLocker.lock();
-		// 	// scope (exit)
-		// 	// 	_doneLocker.unlock();
-				
-		// 	if(!_done) {
-		// 		version (HUNT_DEBUG)
-		// 			info("Waiting for a promise...");
-		// 		_doneCondition.wait();
-		// 	}
-		// }
-
 		// waitting for the result
 		version (HUNT_DEBUG) info("Waiting for a promise...");
 		while(!_isResultAvaliable) {
@@ -176,11 +138,6 @@ static if(is(T == void)) {
 
 		version (HUNT_DEBUG) info("Got a promise");
 		assert(_cause !is null);
-
-		// if (_cause is null) {
-		// 	version (HUNT_DEBUG) warning("no cause!");
-		// 	new ExecutionException("no cause!");
-		// }
 
 		if (_cause is COMPLETED) {
 			static if(is(T == void)) {
@@ -196,27 +153,12 @@ static if(is(T == void)) {
 			throw c;
 		}
 		
-		warning("Get a exception in a promise: ", _cause.msg);
+		debug warning("Get a exception in a promise: ", _cause.msg);
 		version (HUNT_DEBUG) warning(_cause);
 		throw new ExecutionException(_cause);
 	}
 
 	T get(Duration timeout) {
-		// version (HUNT_DEBUG)
-		// 	tracef("promise status: isDone=%s", _done);
-		// if (!_done) {
-		// 	// _doneLocker.lock();
-		// 	// scope (exit)
-		// 	// 	_doneLocker.unlock();
-
-		// 	if(!_done) {
-		// 		version (HUNT_DEBUG)
-		// 			infof("Waiting for a promise in %s...", timeout);
-		// 		if (!_doneCondition.wait(timeout))
-		// 			throw new TimeoutException("Timeout in " ~ timeout.toString());
-		// 	}
-		// }
-
 		// waitting for the result
 		if(!_isResultAvaliable) {
 			version (HUNT_DEBUG) {
@@ -228,17 +170,8 @@ static if(is(T == void)) {
             }
 
 			if (!_isResultAvaliable) {
-				warningf("Timeout for a promise in %s...", timeout);
+				debug warningf("Timeout for a promise in %s...", timeout);
 				failed(new TimeoutException("Timeout in " ~ timeout.toString()));
-				// if (cas(&_done, false, true)) {
-				// 	// version (HUNT_DEBUG) 
-				// 	{
-				// 		warningf("Timeout for a promise in %s...", timeout);
-				// 	}
-				// 	throw new TimeoutException("Timeout in " ~ timeout.toString());
-				// } else {
-				// 	error("state conflict for done");
-				// }
             }
 
 			version (HUNT_DEBUG) {
