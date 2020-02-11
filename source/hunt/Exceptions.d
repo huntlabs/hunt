@@ -102,7 +102,7 @@ class IllegalArgumentException : Exception {
 
 class RuntimeException : Exception {
     this(Throwable ex) {
-        super("", ex);
+        super(ex.msg, ex);
     }
 
     /++
