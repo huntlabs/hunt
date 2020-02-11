@@ -168,14 +168,11 @@ class FileOutputStream : OutputStream
      * @exception  SecurityException  if a security manager exists and its
      *               <code>checkWrite</code> method denies write access
      *               to the file.
-     * @see        java.io.File#getPath()
-     * @see        java.lang.SecurityException
-     * @see        java.lang.SecurityManager#checkWrite(java.lang.string)
      */
     this(File file) {
         this.file = file;
 
-        version(HUNT_DEBUG) {
+        version(HUNT_DEBUG_MORE) {
             infof("Outputing to file: %s", file.name());
         }
 
