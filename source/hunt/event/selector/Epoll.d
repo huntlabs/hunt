@@ -226,8 +226,8 @@ class AbstractSelector : Selector {
                 // May be triggered twice for a channel, for example:
                 // events=8197, fd=13
                 // events=8221, fd=13
-                // The remote connection broken abnormally, so we should close the peer socket forcely.
-                channel.close(); 
+                // The remote connection broken abnormally, so the channel should be notified.
+                channel.onClose(); 
             } else if (event == EPOLLIN) {
                 version (HUNT_IO_DEBUG)
                     tracef("channel read event: fd=%d", channel.handle);

@@ -61,7 +61,8 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract protected void onDisconnected();
 
     /**
-    */
+     * 
+     */
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
@@ -122,14 +123,19 @@ abstract class AbstractStream : AbstractSocketChannel {
         return isDone;
     }
 
-    protected override void onClose() {
-        super.onClose();
-        version (HUNT_IO_DEBUG_MORE) {
-            tracef("_isWritting=%s, writeBuffer is empty: %s, _writeQueue is empty: %s", 
-                _isWritting, writeBuffer is null, _writeQueue.isEmpty());
-        }
-        // resetWriteStatus();
+    // override protected void onClose() {
+    //     super.onClose();
+    //     version (HUNT_IO_DEBUG_MORE) {
+    //         tracef("_isWritting=%s, writeBuffer is empty: %s, _writeQueue is empty: %s", 
+    //             _isWritting, writeBuffer is null, _writeQueue.isEmpty());
+    //     }
+    //     // resetWriteStatus();
+    // }
 
+    override protected void doClose() {
+        version (HUNT_IO_DEBUG) {
+            infof("peer socket closing: fd=%d", this.handle);
+        }
         if(this.socket is null) {
             import core.sys.posix.unistd;
             core.sys.posix.unistd.close(this.handle);

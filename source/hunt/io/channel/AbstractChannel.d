@@ -8,8 +8,10 @@ import core.atomic;
 import std.bitmanip;
 import std.socket : socket_t;
 
+
 /**
-*/
+ * 
+ */
 abstract class AbstractChannel : Channel {
     socket_t handle = socket_t.init;
     ErrorEventHandler errorHandler;
@@ -26,35 +28,40 @@ abstract class AbstractChannel : Channel {
     }
 
     /**
-    */
+     * 
+     */
     bool isRegistered() {
         return _isRegistered;
     }
 
     /**
-    */
+     * 
+     */
     bool isClosing() {
         return _isClosing;
     }
 
     /**
-    */
+     * 
+     */
     bool isClosed() {
         return _isClosed;
     }
 
     /**
-    */
+     * 
+     */
     void close() {
         if (!_isClosed && cas(&_isClosing, false, true) ) {
             version (HUNT_IO_DEBUG_MORE)
                 tracef("channel[fd=%d] closing...", this.handle);
-            onClose();
+            onClose(); // closing
+            doClose(); // close
+            // closed
+            _isClosing = false;
             version (HUNT_IO_DEBUG)
                 tracef("channel[fd=%d] closed", this.handle);
-            
-            _isClosing = false;
-            _isClosed = true;
+                
         } else {
             version (HUNT_IO_DEBUG) {
                 warningf("The channel[fd=%d] has already been closed (%s) or closing (%s)", 
@@ -63,7 +70,11 @@ abstract class AbstractChannel : Channel {
         }
     }
 
-    protected void onClose() {
+    protected void doClose() {
+
+    }
+
+     void onClose() {
         version (HUNT_IO_DEBUG)
             tracef("onClose [fd=%d]...", this.handle);
 
@@ -76,6 +87,8 @@ abstract class AbstractChannel : Channel {
 
         version (HUNT_IO_DEBUG_MORE)
             tracef("onClose done [fd=%d]...", this.handle);
+        
+        _isClosed = true;
     }
 
     protected void errorOccurred(string msg) {

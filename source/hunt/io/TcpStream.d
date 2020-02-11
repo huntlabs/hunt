@@ -377,7 +377,6 @@ protected:
                 if (!_writeQueue.isEmpty) {
                     warningf("Some data has not been sent yet: fd=%d", this.handle);
                 }
-
                 infof("closing a connection with: %s, fd=%d", this.remoteAddress, this.handle);
             }
 

@@ -52,7 +52,7 @@ class EpollEventChannel : EventChannel {
         }
     }
 
-    override protected void onClose() {
+    override void onClose() {
         version (HUNT_IO_DEBUG) tracef("onClose, [fd=%d]...", this.handle);
         super.onClose();
         core.sys.posix.unistd.close(this.handle);
