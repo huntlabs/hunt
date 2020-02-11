@@ -348,7 +348,7 @@ class Locale {
 
      static Locale getUserDefault() {
         string info = set(LocaleCategory.ALL);
-        version (HUNT_DEBUG) {
+        version (HUNT_DEBUG_MORE) {
             tracef("Locale(ALL):%s ", info);
         }
         return query(LocaleCategory.MESSAGES);
@@ -375,7 +375,7 @@ class Locale {
         }
 
         string localInfo = cast(string)fromStringz(lc);
-        version(HUNT_DEBUG) tracef("category=%s, locale: %s", cat, localInfo);
+        version(HUNT_DEBUG_MORE) tracef("category=%s, locale: %s", cat, localInfo);
         return parse(localInfo);
     }
 
