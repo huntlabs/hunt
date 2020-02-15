@@ -66,9 +66,10 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
-        // ubyte[BufferSize] _readBuffer;
-        // ptrdiff_t len = this.socket.receive(cast(void[]) _readBuffer);
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
+
+        // ubyte[] rb = new ubyte[BufferSize];
+        // ptrdiff_t len = read(this.handle, cast(void*) rb.ptr, rb.length);
         version (HUNT_IO_DEBUG) {
             tracef("reading[fd=%d]: %d bytes", this.handle, len);
             if (len <= 32)
@@ -82,6 +83,9 @@ abstract class AbstractStream : AbstractSocketChannel {
                 _bufferForRead.limit(cast(int)len);
                 _bufferForRead.position(0);
                 dataReceivedHandler(_bufferForRead);
+                
+                // ByteBuffer bb = BufferUtils.wrap(cast(byte[])rb[0..len]);
+                // dataReceivedHandler(bb);
             }
 
             // size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
