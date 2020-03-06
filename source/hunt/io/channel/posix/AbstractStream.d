@@ -105,7 +105,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             // check more error status
             this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
             if (_error) {
-                this._erroString = getErrorMessage(errno);
+                this._errorMessage = getErrorMessage(errno);
             } else {
                 debug warningf("warning on read: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
@@ -114,27 +114,16 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(errno == ECONNRESET) {
                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                 onDisconnected();
-                // this.close();
             }
         }
         else {
             version (HUNT_DEBUG)
                 infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
             onDisconnected();
-            // this.close();
         }
 
         return isDone;
     }
-
-    // override protected void onClose() {
-    //     super.onClose();
-    //     version (HUNT_IO_DEBUG_MORE) {
-    //         tracef("_isWritting=%s, writeBuffer is empty: %s, _writeQueue is empty: %s", 
-    //             _isWritting, writeBuffer is null, _writeQueue.isEmpty());
-    //     }
-    //     // resetWriteStatus();
-    // }
 
     override protected void doClose() {
         version (HUNT_IO_DEBUG) {
@@ -155,7 +144,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
 
     /**
-     *Try to write a block of data.
+     * Try to write a block of data.
      */
     protected ptrdiff_t tryWrite(const ubyte[] data) {
         clearError();
@@ -163,43 +152,51 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_IO_DEBUG)
             tracef("try to write: %d bytes, fd=%d", data.length, this.handle);
         const nBytes = write(this.handle, data.ptr, data.length);
-        version (HUNT_IO_DEBUG)
-            tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+        // version (HUNT_IO_DEBUG)
+            // tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
         if (nBytes > 0) {
             return nBytes;
-        } else if (nBytes == Socket.ERROR) {
+        }
+        
+        if (nBytes == Socket.ERROR) {
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
             // EPIPE/Broken pipe: 
             // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
-            this._error = (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK);
-            if (this._error) {
-                this._erroString = getErrorMessage(errno);
-            } else {
+            // https://github.com/angrave/SystemProgramming/wiki/Networking%2C-Part-7%3A-Nonblocking-I-O%2C-select%28%29%2C-and-epoll
+            
+            if(errno == EAGAIN) {
+                version (HUNT_IO_DEBUG) {
+                    warningf("warning on write: fd=%d, errno=%d, message=%s", this.handle,
+                        errno, getErrorMessage(errno));
+                }
+            } else if(errno == EINTR || errno == EWOULDBLOCK) {
+                // https://stackoverflow.com/questions/38964745/can-a-socket-become-writeable-after-an-ewouldblock-but-before-an-epoll-wait
                 debug warningf("warning on write: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
-            }
-
-            if(errno == ECONNRESET) {
-                // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
-                onDisconnected();
-                // this.close();
+                // eventLoop.update(this);
+            } else {
+                this._error = true;
+                this._errorMessage = getErrorMessage(errno);
+                if(errno == ECONNRESET) {
+                    // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
+                    onDisconnected();
+                } 
             }
         } else {
-            version (HUNT_IO_DEBUG) {
+            version (HUNT_DEBUG) {
                 warningf("nBytes=%d, message: %s", nBytes, lastSocketError());
                 assert(false, "Undefined behavior!");
-            }
-            else {
+            } else {
                 this._error = true;
-                this._erroString = getErrorMessage(errno);
             }
         }
 
-        if (this.isError) {
-            string msg = format("Socket error on write: fd=%d, message=%s",
-                    this.handle, this.erroString);
+        if (this._error) {
+            this._errorMessage = getErrorMessage(errno);
+            string msg = format("Socket error on write: fd=%d, code: %d, message=%s",
+                    this.handle, errno, this.errorMessage);
             debug errorf(msg);
             errorOccurred(msg);
         }
@@ -210,30 +207,39 @@ abstract class AbstractStream : AbstractSocketChannel {
     private bool tryNextWrite(ByteBuffer buffer) {
         const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
         version (HUNT_IO_DEBUG) {
-            tracef("writting data from a buffer [fd=%d], %d bytes, buffer: %s", 
+            tracef("writting from a buffer [fd=%d], %d bytes, buffer: %s", 
                 this.handle, data.length, buffer.toString());
         }
 
+        ptrdiff_t remaining = data.length;
         if(data.length == 0)
             return true;
 
-        size_t nBytes = tryWrite(data);
-        version (HUNT_IO_DEBUG) {
-            tracef("write out once: fd=%d, %d / %d bytes, buffer: %s", 
-                this.handle, nBytes, data.length, buffer.toString());
-        }
+        while(remaining > 0 && !_error && !isClosing() && !isWriteCancelling) {
+            ptrdiff_t nBytes = tryWrite(data);
+            version (HUNT_IO_DEBUG) 
+            {
+                tracef("write out once: fd=%d, %d / %d bytes, remaining: %d buffer: %s", 
+                    this.handle, nBytes, data.length, remaining, buffer.toString());
+            }
 
-        if (nBytes > 0) {
-            buffer.nextGetIndex(cast(int)nBytes);
-            if(!buffer.hasRemaining()) {
-                version (HUNT_IO_DEBUG)
-                    tracef("A buffer is written out. fd=%d", this.handle);
-                // buffer.clear();
-                return true;
+            if (nBytes > 0) {
+                remaining -= nBytes;
+                data = data[nBytes .. $];
             }
         }
-
-        return false;        
+        
+        version (HUNT_IO_DEBUG) {
+            if(remaining == 0) {
+                    tracef("A buffer is written out. fd=%d", this.handle);
+                return true;
+            } else {
+                warningf("Writing cancelled or an error ocurred. fd=%d", this.handle);
+                return false;
+            }
+        } else {
+            return remaining == 0;
+        }
     }
 
     void resetWriteStatus() {
@@ -246,25 +252,28 @@ abstract class AbstractStream : AbstractSocketChannel {
      * Should be thread-safe.
      */
     override void onWrite() {
-        version (HUNT_IO_DEBUG) {
+        version (HUNT_IO_DEBUG) 
+        {
             tracef("checking status, isWritting: %s, writeBuffer: %s", 
                 _isWritting, writeBuffer is null ? "null" : writeBuffer.toString());
         }
 
         if(!_isWritting) {
-            version (HUNT_IO_DEBUG) infof("No data needs to be written out. fd=%d", this.handle);
+            version (HUNT_IO_DEBUG) 
+            infof("No data needs to be written out. fd=%d", this.handle);
             return;
         }
 
         if(isClosing() && isWriteCancelling) {
-            version (HUNT_IO_DEBUG) infof("Write cancelled or closed, fd=%d", this.handle);
+            version (HUNT_DEBUG) infof("Write cancelled or closed, fd=%d", this.handle);
             resetWriteStatus();
             return;
         }
 
         // keep thread-safe here
         if(!cas(&_isBusyWritting, false, true)) {
-            version (HUNT_IO_DEBUG) warningf("busy writing. fd=%d", this.handle);
+            // version (HUNT_IO_DEBUG) 
+            warningf("busy writing. fd=%d", this.handle);
             return;
         }
 
@@ -276,10 +285,12 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;
             } else {
-                version (HUNT_IO_DEBUG) {
-                    tracef("waiting to try again... fd=%d, writeBuffer: %s", 
+                version (HUNT_IO_DEBUG) 
+                {
+                    infof("waiting to try again... fd=%d, writeBuffer: %s", 
                         this.handle, writeBuffer.toString());
                 }
+                // eventLoop.update(this);
                 return;
             }
             version (HUNT_IO_DEBUG)
@@ -290,7 +301,8 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        version (HUNT_IO_DEBUG) {
+        version (HUNT_IO_DEBUG) 
+        {
             tracef("start to write [fd=%d], writeBuffer %s empty", this.handle, writeBuffer is null ? "is" : "is not");
         }
 
@@ -300,10 +312,12 @@ abstract class AbstractStream : AbstractSocketChannel {
                 checkAllWriteDone();            
             } else {
             version (HUNT_IO_DEBUG)
-                tracef("waiting to try again: fd=%d, writeBuffer: %s", this.handle, writeBuffer.toString());
+                infof("waiting to try again: fd=%d, writeBuffer: %s", this.handle, writeBuffer.toString());
+                
+                // eventLoop.update(this);
             }
             version (HUNT_IO_DEBUG)
-                tracef("running here, fd=%d", this.handle);
+                warningf("running here, fd=%d", this.handle);
         }
     }
     private shared bool _isBusyWritting = false;

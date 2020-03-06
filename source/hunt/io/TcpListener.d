@@ -173,7 +173,7 @@ class TcpListener : AbstractListener {
 
             if (this.isError) {
                 canRead = false;
-                error("listener error: ", this.erroString);
+                error("listener error: ", this.errorMessage);
                 this.close();
             }
         }

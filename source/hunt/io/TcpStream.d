@@ -28,6 +28,7 @@ import std.socket;
 import std.string;
 
 import core.atomic;
+import core.stdc.errno;
 import core.thread;
 import core.time;
 
@@ -361,8 +362,8 @@ protected:
         }
 
         if (this.isError) {
-            string msg = format("Socket error on read: fd=%d, message: %s",
-                    this.handle, this.erroString);
+            string msg = format("Socket error on read: fd=%d, code=%d, message: %s",
+                    this.handle, errno, this.errorMessage);
             debug errorf(msg);
             if (!isClosed())
                 errorOccurred(msg);

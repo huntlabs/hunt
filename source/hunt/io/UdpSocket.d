@@ -94,7 +94,7 @@ class UdpSocket : AbstractDatagramSocket {
                 if (this.isError) {
                     canRead = false;
                     this.close();
-                    error("UDP socket error: ", this.erroString);
+                    error("UDP socket error: ", this.errorMessage);
                 }
             }
         }());
