@@ -164,7 +164,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         checkErro(nRet, SOCKET_ERROR);
 
         if (this.isError) {
-            errorf("Socket error on write: fd=%d, message=%s", this.handle, this.erroString);
+            errorf("Socket error on write: fd=%d, message=%s", this.handle, this.errorMessage);
             this.close();
         }
 
@@ -203,7 +203,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 warningf("undefined behavior on thread %d", getTid());
             } else {
                 this._error = true;
-                this._erroString = "undefined behavior on thread";
+                this._errorMessage = "undefined behavior on thread";
             }
         }
     }
