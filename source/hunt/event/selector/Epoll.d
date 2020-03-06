@@ -40,9 +40,6 @@ import hunt.event.timer;
 import hunt.system.Error;
 import hunt.concurrency.TaskPool;
 
-static if (!is(typeof(EPOLL_CLOEXEC)))
-	enum EPOLL_CLOEXEC = 0x80000;
-
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
 
@@ -158,6 +155,15 @@ class AbstractSelector : Selector {
             return true;
         } else {
             warningf("deregister channel failed: fd=%d", fd);
+            return false;
+        }
+    }
+
+    override bool update(AbstractChannel channel) {
+        if (epollCtl(channel, EPOLL_CTL_MOD)) {
+            return true;
+        } else {
+            warningf("update channel failed: fd=%d", fd);
             return false;
         }
     }

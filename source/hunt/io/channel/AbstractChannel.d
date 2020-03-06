@@ -193,15 +193,18 @@ mixin template OverrideErro() {
         return _error;
     }
 
-    string erroString() {
-        return _erroString;
+    deprecated("Using errorMessage instead.")
+    alias erroString = errorMessage;
+
+    string errorMessage() {
+        return _errorMessage;
     }
 
     void clearError() {
         _error = false;
-        _erroString = "";
+        _errorMessage = "";
     }
 
     bool _error = false;
-    string _erroString;
+    string _errorMessage;
 }

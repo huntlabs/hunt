@@ -55,7 +55,7 @@ protected:
             if (this.isError) {
                 canRead = false;
                 this.close();
-                error("the Timer Read is error: ", this.erroString);
+                error("the Timer Read is error: ", this.errorMessage);
             }
         }
     }
