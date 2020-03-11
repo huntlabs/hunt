@@ -27,17 +27,22 @@ import hunt.logging;
 import hunt.Exceptions;
 
 /**
-*/
+ * 
+ */
 struct Configuration {
     string name;
-
-    this(string str) {
-        name = str;
-    }
 }
 
 /**
-*/
+ * 
+ */
+struct ConfigurationFile {
+    string name;
+}
+
+/**
+ * 
+ */
 struct Value {
     this(bool opt) {
         optional = opt;
@@ -61,7 +66,8 @@ class EmptyValueException : Exception {
 }
 
 /**
-*/
+ * 
+ */
 T as(T = string)(string value, T v = T.init) {
     if (value.empty)
         return v;
@@ -92,7 +98,8 @@ T as(T = string)(string value, T v = T.init) {
 private auto ArrayItemParttern = ctRegex!(`(\w+)\[([0-9]+)\]`);
 
 /**
-*/
+ * 
+ */
 class ConfigurationItem {
     ConfigurationItem parent;
 
@@ -340,9 +347,10 @@ class ConfigBuilder {
             // version(HUNT_CONFIG_DEBUG) pragma(msg, "node name: " ~ nodeName);
             return buildItem!(T)(this.subItem(nodeName));
         } else static if (hasUDA!(T, Configuration)) {
-            enum name = getUDAs!(T, Configuration)[0].name;
+            enum string name = getUDAs!(T, Configuration)[0].name;
             // pragma(msg,  "node name: " ~ name);
-            static if (name.length > 0) {
+            // warning("node name: ", name);
+            static if (!name.empty) {
                 return buildItem!(T)(this.subItem(name));
             } else {
                 return buildItem!(T)(this.rootItem);
