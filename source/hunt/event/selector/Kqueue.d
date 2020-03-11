@@ -37,7 +37,8 @@ import core.sys.posix.unistd;
 import core.sys.posix.time;
 
 /**
-*/
+ * 
+ */
 class AbstractSelector : Selector {
     // kevent array size
     enum int NUM_KEVENTS = 128;

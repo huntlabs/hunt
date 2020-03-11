@@ -41,7 +41,7 @@ mixin template CheckIocpError() {
             import hunt.system.Error;
             warningf("erro=%d, dwLastError=%d", erro, dwLastError);
             this._error = true;
-            this._erroString = getErrorMessage(dwLastError); // format("IOCP error: code=%s", dwLastError);
+            this._errorMessage = getErrorMessage(dwLastError); // format("IOCP error: code=%s", dwLastError);
         }
     }
 }
