@@ -144,7 +144,7 @@ abstract class Selector {
         while (!_isStopping);
         _isReady = false;
         _running = false;
-        version(HUNT_DEBUG) infof("Selector %d existed.", number);
+        version(HUNT_DEBUG_MORE) infof("Selector %d existed.", number);
         dispose();
     }
 
