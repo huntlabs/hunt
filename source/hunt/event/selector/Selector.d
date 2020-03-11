@@ -65,7 +65,7 @@ abstract class Selector {
 
     abstract bool deregister(AbstractChannel channel);
 
-    abstract bool update(AbstractChannel channel) { return true; }
+    bool update(AbstractChannel channel) { return true; }
 
     protected abstract int doSelect(long timeout);
 
