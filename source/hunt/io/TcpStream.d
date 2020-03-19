@@ -374,11 +374,11 @@ protected:
         bool lastConnectStatus = _isConnected;
         super.onClose();
         if(lastConnectStatus) {
-            version (HUNT_DEBUG) {
+            version (HUNT_IO_DEBUG) {
                 if (!_writeQueue.isEmpty) {
                     warningf("Some data has not been sent yet: fd=%d", this.handle);
                 }
-                infof("closing a connection with: %s, fd=%d", this.remoteAddress, this.handle);
+                infof("Closing a connection with: %s, fd=%d", this.remoteAddress, this.handle);
             }
 
             resetWriteStatus();
