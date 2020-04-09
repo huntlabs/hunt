@@ -2,15 +2,135 @@ module test.SerializationTest;
 
 
 import hunt.logging.ConsoleLogger;
-import hunt.util.Common;
-import hunt.util.Serialize;
 import hunt.util.ObjectUtils;
-
+import hunt.serialization.BinarySerialization;
 import std.conv;
 import std.format;
 import std.json;
+import std.stdio;
 
-class SerializationTest {
+struct Friend
+{
+  string name;
+}
+
+class User
+{
+  int  _age ;
+  string _name;
+  string[int] _jobs;
+  Home[] _homes;
+  Friend _friend;
+
+  this()
+  {
+  }
+
+  this(string name)
+  {
+    this._name = name;
+  }
+
+  void setAge(int age)
+  {
+    this._age = age;
+  }
+
+  int getAge()
+  {
+    return this._age;
+  }
+
+  void setJobs(string[int] jobs)
+  {
+    this._jobs = jobs;
+  }
+
+  string[int] getJobs()
+  {
+    return this._jobs;
+  }
+
+  void setHome(Home[] homes)
+  {
+    this._homes = homes;
+  }
+
+  Home[] getHome()
+  {
+    return this._homes;
+  }
+
+  void setFriend(Friend friend)
+  {
+    this._friend = friend;
+  }
+
+  Friend getFriend()
+  {
+    return this._friend;
+  }
+
+  void setName(string name)
+  {
+    this._name = name;
+  }
+
+  string getName()
+  {
+    return this._name;
+  }
+
+}
+
+class Home
+{
+  string _addr;
+  this()
+  {
+
+  }
+  this(string addr)
+  {
+    this._addr = addr;
+  }
+
+  void setAddr(string addr)
+  {
+    this._addr = addr;
+  }
+
+  string getAddr()
+  {
+    return this._addr;
+  }
+}
+
+void main()
+{
+
+  User      user      = new User();
+  user.setAge(20);
+  user.setName ("Colin");
+
+  string[int] jobs;
+  jobs[1] = "Designer";
+
+  user.setJobs(jobs);
+  user.setHome([new Home("shanghai"), new Home("shenzhen")]);
+
+  Friend friend ;
+  friend.name = "Bob";
+  user.setFriend(friend);
+
+
+  auto buffer  = serialize(user);
+  auto another = unserialize!User(buffer);
+
+  writefln("%s",another.getJobs()[1]);
+}
+
+//class SerializationTest {
 
     // void testAssociativeArray() {
 
@@ -48,7 +168,7 @@ class SerializationTest {
 
     //     a = new A();
     //     a.name = "Bob";
-        
+
     //     bytes = a.serialize();
     //     tracef("length: %d, data: %(%02X %)", bytes.length, bytes);
 
@@ -93,166 +213,166 @@ class SerializationTest {
     //     test1(user1);
     //     test1(user2);
     // }
-}
+//}
 
-void test1(T)(T t) {
-    assert(unserialize!T(serialize(t)) == t);
-    assert(serialize(t).length == getsize(t));
-
-    assert(toObject!T(toJson(t)) == t);
-}
-
-
-class A : Serializable {
-    private int id;
-    string name;
-
-    override string toString() {
-        return format("id=%d, name=%s", id, name);
-    }
-
-    mixin SerializationMember!(typeof(this));
-
-    // abstract void test();
-}
-
-
-class B1 : A {
-
-    // It's not necessary
-    // mixin SerializationMember!(typeof(this));
-}
-
-class B : B1 {
-    int age;
-    float height;
-
-    override bool opEquals(Object o) {
-        if(o is null)
-            return false;
-        B b = cast(B) o;
-        if(b is null) 
-            return false;
-        
-        return b.name == this.name && b.age == this.age && b.id == this.id && b.height == this.height;
-    }
-
-    override string toString() {
-        return format("name=%s, age=%d, height=%0.1f", name, age, height);
-    }
-
-    mixin SerializationMember!(typeof(this));
-
-    // override void test() {
-
-    // }
-}
-
-
-
-class C {
-    int age;
-    string name;
-    T3 t3;
-    override bool opEquals(Object c) {
-        auto c1 = cast(C) c;
-        return age == c1.age && name == c1.name && t3 == c1.t3;
-    }
-
-    C clone() {
-        auto c = new C();
-        c.age = age;
-        c.name = name;
-        c.t3 = t3;
-        return c;
-    }
-}
-
-class C2 {
-    C[] c;
-    C c1;
-    T1 t1;
-    override bool opEquals(Object c) {
-        auto c2 = cast(C2) c;
-        return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
-    }
-}
-
-//ref test
-class School {
-    string name;
-    User[] users;
-    override bool opEquals(Object c) {
-        auto school = cast(School) c;
-        return school.name == this.name;
-    }
-}
-
-class User {
-    int age;
-    string name;
-    School school;
-    override bool opEquals(Object c) {
-        auto user = cast(User) c;
-        return user.age == this.age && user.name == this.name && user.school == this.school;
-    }
-}
-
-
-struct J {
-    string data;
-    JSONValue val;
-
-}
-
-enum MONTH {
-    M1,
-    M2
-}
-
-enum WEEK : int {
-    K1 = 1,
-    K2 = 2
-}
-
-enum DAY : string {
-    D1 = "one",
-    D2 = "two"
-}
-
-class Date1 {
-    MONTH month;
-    WEEK week;
-    DAY day;
-    override bool opEquals(Object c) {
-        auto date = cast(Date1) c;
-        return date.month == this.month && date.week == this.week && date.day == this.day;
-    }
-
-}
-
-struct T1 {
-    bool b;
-    byte ib;
-    ubyte ub;
-    short ish;
-    ushort ush;
-    int ii;
-    uint ui;
-    long il;
-    ulong ul;
-    string s;
-    uint[10] sa;
-    long[] sb;
-}
-
-struct T2 {
-    string n;
-    T1[] t;
-}
-
-struct T3 {
-    T1 t1;
-    T2 t2;
-    string[] name;
-}
+//void test1(T)(T t) {
+//    assert(unserialize!T(serialize(t)) == t);
+//    assert(serialize(t).length == getsize(t));
+//
+//    assert(toObject!T(toJson(t)) == t);
+//}
+//
+//
+//class A : Serializable {
+//    private int id;
+//    string name;
+//
+//    override string toString() {
+//        return format("id=%d, name=%s", id, name);
+//    }
+//
+//    mixin SerializationMember!(typeof(this));
+//
+//    // abstract void test();
+//}
+//
+//
+//class B1 : A {
+//
+//    // It's not necessary
+//    // mixin SerializationMember!(typeof(this));
+//}
+//
+//class B : B1 {
+//    int age;
+//    float height;
+//
+//    override bool opEquals(Object o) {
+//        if(o is null)
+//            return false;
+//        B b = cast(B) o;
+//        if(b is null)
+//            return false;
+//
+//        return b.name == this.name && b.age == this.age && b.id == this.id && b.height == this.height;
+//    }
+//
+//    override string toString() {
+//        return format("name=%s, age=%d, height=%0.1f", name, age, height);
+//    }
+//
+//    mixin SerializationMember!(typeof(this));
+//
+//    // override void test() {
+//
+//    // }
+//}
+//
+//
+//
+//class C {
+//    int age;
+//    string name;
+//    T3 t3;
+//    override bool opEquals(Object c) {
+//        auto c1 = cast(C) c;
+//        return age == c1.age && name == c1.name && t3 == c1.t3;
+//    }
+//
+//    C clone() {
+//        auto c = new C();
+//        c.age = age;
+//        c.name = name;
+//        c.t3 = t3;
+//        return c;
+//    }
+//}
+//
+//class C2 {
+//    C[] c;
+//    C c1;
+//    T1 t1;
+//    override bool opEquals(Object c) {
+//        auto c2 = cast(C2) c;
+//        return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
+//    }
+//}
+//
+////ref test
+//class School {
+//    string name;
+//    User[] users;
+//    override bool opEquals(Object c) {
+//        auto school = cast(School) c;
+//        return school.name == this.name;
+//    }
+//}
+//
+//class User {
+//    int age;
+//    string name;
+//    School school;
+//    override bool opEquals(Object c) {
+//        auto user = cast(User) c;
+//        return user.age == this.age && user.name == this.name && user.school == this.school;
+//    }
+//}
+//
+//
+//struct J {
+//    string data;
+//    JSONValue val;
+//
+//}
+//
+//enum MONTH {
+//    M1,
+//    M2
+//}
+//
+//enum WEEK : int {
+//    K1 = 1,
+//    K2 = 2
+//}
+//
+//enum DAY : string {
+//    D1 = "one",
+//    D2 = "two"
+//}
+//
+//class Date1 {
+//    MONTH month;
+//    WEEK week;
+//    DAY day;
+//    override bool opEquals(Object c) {
+//        auto date = cast(Date1) c;
+//        return date.month == this.month && date.week == this.week && date.day == this.day;
+//    }
+//
+//}
+//
+//struct T1 {
+//    bool b;
+//    byte ib;
+//    ubyte ub;
+//    short ish;
+//    ushort ush;
+//    int ii;
+//    uint ui;
+//    long il;
+//    ulong ul;
+//    string s;
+//    uint[10] sa;
+//    long[] sb;
+//}
+//
+//struct T2 {
+//    string n;
+//    T1[] t;
+//}
+//
+//struct T3 {
+//    T1 t1;
+//    T2 t2;
+//    string[] name;
+//}
