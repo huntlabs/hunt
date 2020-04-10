@@ -71,4 +71,9 @@ struct BinaryDeserializer {
     _buffer = _buffer[length .. $];
     return res;
   }
+
+  bool isNullObj()
+  {
+    return _buffer[0 .. 4] == NULL ? true : false;
+  }
 }
