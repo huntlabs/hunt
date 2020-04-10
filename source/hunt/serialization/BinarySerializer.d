@@ -1,8 +1,8 @@
-module binary.serialization.BinarySerializer;
+module hunt.serialization.BinarySerializer;
 
 import std.array: Appender;
 import std.traits;
-import binary.serialization.specify;
+import hunt.serialization.specify;
 
 
 struct BinarySerializer

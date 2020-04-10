@@ -1,6 +1,6 @@
-module binary.serialization.BinaryDeserializer;
+module hunt.serialization.BinaryDeserializer;
 
-import binary.serialization.specify;
+import hunt.serialization.specify;
 import std.traits;
 
 struct BinaryDeserializer {
