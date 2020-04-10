@@ -1,9 +1,9 @@
-module binary.serialization.specify;
+module hunt.serialization.specify;
 
 import std.traits;
 import std.range;
-import binary.serialization.BinarySerializer;
-import binary.serialization.BinaryDeserializer;
+import hunt.serialization.BinarySerializer;
+import hunt.serialization.BinaryDeserializer;
 
 template PtrType(T) {
   static if(is(T == bool) || is(T == char)) {
