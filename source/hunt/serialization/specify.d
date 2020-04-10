@@ -1,8 +1,9 @@
-module hunt.serialization.specify;
+module binary.serialization.specify;
 
 import std.traits;
 import std.range;
-import hunt.serialization.BinarySerializer;
+import binary.serialization.BinarySerializer;
+import binary.serialization.BinaryDeserializer;
 
 template PtrType(T) {
   static if(is(T == bool) || is(T == char)) {
@@ -79,11 +80,11 @@ void specify(C, T)(auto ref C obj, ref T val) if(is(T == string))
 
   static if (is (C == BinarySerializer))
   {
-      obj.putRaw(cast(ubyte[])val);
+    obj.putRaw(cast(ubyte[])val);
   }
   else
   {
-      val = cast(string) obj.putRaw(len).idup;
+    val = cast(string) obj.putRaw(len).idup;
   }
 }
 
@@ -128,8 +129,7 @@ void specify(C, T)(auto ref C obj, ref T val) if(is(T == enum))
   specify(obj , cast(Unqual!(OriginalType!(T)))val );
 }
 
-//自定义数组
-void specify(C, T)(auto ref C obj, ref T val) if(isInputRange!T && !isInfinite!T && !is(T == string) && !isStaticArray!T && !isAssociativeArray!T)
+void specify(C, T)(auto ref C obj, ref T val) if(is(C == BinarySerializer) && isInputRange!T && !isInfinite!T && !is(T == string) && !isStaticArray!T && !isAssociativeArray!T)
 {
   enum hasLength = is(typeof(() { auto l = val.length; }));
   ushort length = cast(ushort)val.length;
@@ -154,6 +154,36 @@ void specify(C, T)(auto ref C obj, ref T val) if(isAggregateType!T && !isInputRa
   loopMembers(obj , val);
 }
 
+//自定义数组
+void specify(C, T)(auto ref C obj, ref T val) if(isDecerealiser!C && !isOutputRange!(T, ubyte) && isDynamicArray!T && !is(T == string)) {
+  ushort length;
+
+  specify(obj,length);
+  decerealiseArrayImpl(obj, val, length);
+}
+
+void decerealiseArrayImpl(C, T, U)(auto ref C obj, ref T val, U length) if(is(T == E[], E) && isDecerealiser!C)
+{
+
+  ulong neededBytes(T)(ulong length) {
+    alias E = ElementType!T;
+    static if(isScalarType!E)
+      return length * E.sizeof;
+    else static if(isInputRange!E)
+      return neededBytes!E(length);
+    else
+      return 0;
+  }
+
+  immutable needed = neededBytes!T(length);
+
+  static if(is(Unqual!(ElementType!T): ubyte) && T.sizeof == 1) {
+    val = obj.putRaw(length).dup;
+  } else {
+    if(val.length != length) val.length = cast(uint)length;
+    foreach(ref e; val) obj.specify(e);
+  }
+}
 
 
 void specifyPtr(C, T)(auto ref C obj, ref T val)
@@ -220,3 +250,11 @@ void specifyClass(C, T)(auto ref C obj, ref T val) if(is(T == class))
   specifyBaseClass(obj, val);
   loopMembersImpl!T(obj, val);
 }
+
+void checkDecerealiser(T)() {
+  //static assert(T.type == CerealType.ReadBytes);
+  auto dec = T();
+  ulong bl = dec.bytesLeft;
+}
+
+enum isDecerealiser(T) =  (is (T == BinaryDeserializer) && is(typeof(checkDecerealiser!T))) ;
