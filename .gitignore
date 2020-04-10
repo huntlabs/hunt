@@ -53,3 +53,7 @@ mixin_output.d
 # meson build directories
 build
 _build
+
+# idea
+.idea
+*.iml
