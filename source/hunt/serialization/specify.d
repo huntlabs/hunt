@@ -17,6 +17,7 @@ template PtrType(T) {
     }
 }
 
+enum NULL = [110, 117, 108, 108];
 
 void specify(C, T)(auto ref C obj, ref T val) if(is(T == wchar)) {
   specify(obj , *cast(ushort*)&val);
@@ -199,6 +200,26 @@ void loopMembers(C, T)(auto ref C obj, ref T val) if(is(T == struct))
 
 void loopMembers(C, T)(auto ref C obj, ref T val) if(is(T == class))
 {
+
+  static if(is (C == BinarySerializer))
+  {
+    if (val is null)
+    {
+      obj.putRaw(NULL);
+      return;
+    }
+    //assert(val !is null, "null value cannot be serialised");
+  }
+
+  static if (is (C == BinaryDeserializer))
+  {
+    if (obj.isNullObj)
+    {
+      val = null;
+      return;
+    }
+  }
+
   static if(is(typeof(() { val = new T; }))) {
     if(val is null) val = new T;
   } else {

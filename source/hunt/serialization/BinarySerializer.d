@@ -61,4 +61,9 @@ struct BinarySerializer
     _buffer.put(val);
   }
 
+  bool isNullObj()
+  {
+    return false;
+  }
+
 }
