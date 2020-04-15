@@ -201,7 +201,6 @@ class AbstractSelector : Selector {
                     if (channel is null) {
                         debug warningf("channel is null");
                     } else {
-                        // handeChannel(channel, events[i].events);
                         handeChannelEvent(channel, events[i].events);
                     }
                 }

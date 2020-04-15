@@ -136,15 +136,16 @@ abstract class Selector {
     protected void onLoop(long timeout = -1) {
         _isReady = true;
         idleTime = timeout;
+
         do {
-            // wakeup();
+            // version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
             doSelect(timeout);
             // infof("Selector rolled once. isRuning: %s", isRuning);
-        }
-        while (!_isStopping);
+        } while (!_isStopping);
+
         _isReady = false;
         _running = false;
-        version(HUNT_DEBUG_MORE) infof("Selector %d existed.", number);
+        version(HUNT_DEBUG_MORE) infof("Selector %d exited.", number);
         dispose();
     }
 
