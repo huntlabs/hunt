@@ -48,8 +48,7 @@ private bool atomicCasUbyte(T)(ref T stuff, T testVal, T newVal)
 
 
 /**
- * 
- */
+*/
 class AbstractTask : Runnable {
 
     Throwable exception;
@@ -165,7 +164,7 @@ This class serves two purposes:
     which is also necessary to allow the daemon threads to be properly
     terminated.
 */
-final class ParallelismThread : Thread {
+private final class ParallelismThread : Thread {
     this(void delegate() dg) {
         super(dg);
         taskQueue = new NonBlockingQueue!(AbstractTask)();

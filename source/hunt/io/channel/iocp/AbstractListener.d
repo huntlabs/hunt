@@ -1,7 +1,7 @@
 module hunt.io.channel.iocp.AbstractListener;
 
 // dfmt off
-version (HAVE_IOCP) : 
+version (HAVE_IOCP) :
 // dfmt on
 
 import hunt.event.selector.Selector;
@@ -66,7 +66,7 @@ abstract class AbstractListener : AbstractSocketChannel {
         //                    cast(uint) value.length);
         version (HUNT_DEBUG)
             tracef("slisten=%s, slink=%s", slisten, slink);
-        setsockopt(slink, SocketOptionLevel.SOCKET, 0x700B, cast(void*)&slisten, slisten.sizeof);
+        setsockopt(slink, SocketOptionLevel.SOCKET, 212992, cast(void*)&slisten, slisten.sizeof);
         if (handler !is null)
             handler(this._clientSocket);
 
@@ -78,7 +78,7 @@ abstract class AbstractListener : AbstractSocketChannel {
     }
 
     override void onClose() {
-        
+
         // version (HUNT_DEBUG)
         //     tracef("_isWritting=%s", _isWritting);
         // _isWritting = false;

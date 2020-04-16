@@ -8,11 +8,19 @@ import hunt.logging.ConsoleLogger;
 
 import core.atomic;
 import core.thread;
-
+import hunt.collection.ByteBuffer;
+import hunt.collection.BufferUtils;
 
 /**
 http://tutorials.jenkov.com/java-nio/selectors.html
 */
+
+struct ReadBuffer
+{
+    bool isUsed = false;
+    ByteBuffer buffer = null;
+}
+
 abstract class Selector {
 
     private shared bool _running = false;
@@ -24,6 +32,10 @@ abstract class Selector {
     protected long idleTime = -1; // in millisecond
     protected int fd;
 
+    private size_t _eachBufferSize;
+    protected int readBufferSize = 2000;
+    protected ReadBuffer[] readBufferArray;
+
     private long timeout = -1; // in millisecond
     private Thread _thread;
 
@@ -34,6 +46,43 @@ abstract class Selector {
         this.number = number;
         this.divider = divider;
         channels = new AbstractChannel[maxChannels];
+    }
+
+    private void InitReadBufferArray(size_t eachBufferSize)
+    {
+        readBufferArray = new ReadBuffer[readBufferSize];
+        for(int i = 0 ; i < readBufferSize ; ++ i)
+        {
+              ReadBuffer rdBuffer;
+              rdBuffer.buffer = BufferUtils.allocate(eachBufferSize);
+              readBufferArray[i] = rdBuffer;
+        }
+    }
+
+    ByteBuffer getReadBuffer(ref int index)
+    {
+        foreach( i ; 0 .. readBufferSize)
+        {
+          if(!readBufferArray[i].isUsed)
+          {
+              readBufferArray[i].isUsed = true;
+              index = i;
+              return readBufferArray[i].buffer;
+          }
+        }
+        ReadBuffer newBuffer;
+        newBuffer.isUsed = true;
+        newBuffer.buffer = BufferUtils.allocate(_eachBufferSize);
+        readBufferArray ~= newBuffer;
+        index = readBufferSize;
+        readBufferSize += 1;
+        return newBuffer.buffer;
+    }
+
+    void putReadBuffer(int index)
+    {
+        readBufferArray[index].isUsed = false;
+        readBufferArray[index].buffer.rewind;
     }
 
     size_t getId() {
@@ -80,16 +129,17 @@ abstract class Selector {
     /**
         timeout: in millisecond
     */
-    void runAsync(long timeout = -1, SimpleEventHandler handler = null) {
+    void runAsync(size_t readBufferSize ,long timeout = -1, SimpleEventHandler handler = null ) {
         if(_running) {
             version (HUNT_IO_DEBUG) warningf("The current selector %d has being running already!", number);
             return;
         }
         this.timeout = timeout;
+        InitReadBufferArray(readBufferSize);
         version (HUNT_IO_DEBUG) trace("runAsync ...");
-        Thread th = new Thread(() { 
+        Thread th = new Thread(() {
             try {
-                doRun(handler); 
+                doRun(handler);
             } catch (Throwable t) {
                 warning(t.msg);
                 version(HUNT_DEBUG) warning(t.toString());
@@ -98,7 +148,7 @@ abstract class Selector {
         // th.isDaemon = true; // unstable
         th.start();
     }
-    
+
     private void doRun(SimpleEventHandler handler=null) {
         if(cas(&_running, false, true)) {
             version (HUNT_IO_DEBUG) trace("running selector...");
@@ -109,12 +159,12 @@ abstract class Selector {
             onLoop(timeout);
         } else {
             version (HUNT_DEBUG) warningf("The current selector %d has being running already!", number);
-        }  
+        }
     }
 
     void stop() {
         version (HUNT_IO_DEBUG)
-            tracef("Stopping selector %d. _running=%s, _isStopping=%s", number, _running, _isStopping); 
+            tracef("Stopping selector %d. _running=%s, _isStopping=%s", number, _running, _isStopping);
         if(cas(&_isStopping, false, true)) {
             try {
                 onStop();
@@ -126,7 +176,7 @@ abstract class Selector {
     }
 
     protected void onStop() {
-        version (HUNT_IO_DEBUG) 
+        version (HUNT_IO_DEBUG)
             tracef("stopping.");
     }
 
@@ -136,16 +186,15 @@ abstract class Selector {
     protected void onLoop(long timeout = -1) {
         _isReady = true;
         idleTime = timeout;
-
         do {
-            // version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
+            // wakeup();
             doSelect(timeout);
             // infof("Selector rolled once. isRuning: %s", isRuning);
-        } while (!_isStopping);
-
+        }
+        while (!_isStopping);
         _isReady = false;
         _running = false;
-        version(HUNT_DEBUG_MORE) infof("Selector %d exited.", number);
+        version(HUNT_DEBUG_MORE) infof("Selector %d existed.", number);
         dispose();
     }
 
@@ -171,7 +220,7 @@ abstract class Selector {
         _startedHandler = null;
         _stoppeddHandler = null;
     }
-    
+
     bool isSelfThread() {
         return _thread is Thread.getThis();
     }

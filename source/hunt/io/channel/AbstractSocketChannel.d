@@ -41,12 +41,18 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
     protected Socket _socket;
 
+    protected void onDisconnected()
+    {
+
+    }
+
     override void close() {
         // if (_isClosing) {
         //     // debug warningf("already closed [fd=%d]", this.handle);
         //     return;
         // }
         // _isClosing = true;
+        onDisconnected();
         version (HUNT_IO_MORE)
             tracef("socket channel closing [fd=%d]...", this.handle);
 

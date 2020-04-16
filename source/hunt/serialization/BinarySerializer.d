@@ -1,57 +1,69 @@
 module hunt.serialization.BinarySerializer;
 
-import std.array : Appender;
+import std.array: Appender;
 import std.traits;
-import hunt.serialization.Specify;
+import hunt.serialization.specify;
 
 
-/**
- * 
- */
-struct BinarySerializer {
-    private {
-        Appender!(ubyte[]) _buffer;
-    }
+struct BinarySerializer
+{
+  private
+  {
+    Appender!(ubyte[]) _buffer;
+  }
 
-    ubyte[] oArchive(T)(T val) if (!isArray!T && !isAssociativeArray!T) {
-        Unqual!T copy = val;
-        specify(this, copy);
-        return _buffer.data();
-    }
 
-    ubyte[] oArchive(T)(const ref T val)
-            if (!isDynamicArray!T && !isAssociativeArray!T && !isAggregateType!T) {
-        T copy = val;
-        specify(this, copy);
-        return _buffer.data();
-    }
+  //不是数组
+  ubyte[] oArchive(T)(T val)  if(!isArray!T && !isAssociativeArray!T)
+  {
+    Unqual!T copy = val;
+    specify(this, copy);
+    return _buffer.data();
+  }
 
-    ubyte[] oArchive(T)(const(T)[] val) {
-        auto copy = (cast(T[]) val).dup;
-        specify(this, copy);
-        return _buffer.data();
-    }
+  //基础类型
+  ubyte[] oArchive(T)(const ref T val) if(!isDynamicArray!T && !isAssociativeArray!T && !isAggregateType!T)
+  {
+    T copy = val;
+    specify(this, copy);
+    return _buffer.data();
+  }
 
-    ubyte[] oArchive(K, V)(const(V[K]) val) {
-        auto copy = cast(V[K]) val.dup;
-        specify(this, copy);
-        return _buffer.data();
-    }
+  //数组
+  ubyte[] oArchive(T)(const(T)[] val)
+  {
+    auto copy = (cast(T[])val).dup;
+    specify(this, copy);
+    return _buffer.data();
+  }
 
-    void putUbyte(ref ubyte val) {
-        _buffer.put(val);
-    }
+  //关联数组
+  ubyte[] oArchive(K, V)(const(V[K]) val)
+  {
+    auto copy = cast(V[K])val.dup;
+    specify(this, copy);
+    return _buffer.data();
+  }
 
-    void putClass(T)(T val) if (is(T == class)) {
-        specifyClass(this, val);
-    }
 
-    void putRaw(ubyte[] val) {
-        _buffer.put(val);
-    }
+  void putUbyte (ref ubyte val)
+  {
+    _buffer.put(val);
+  }
 
-    bool isNullObj() {
-        return false;
-    }
+  void putClass(T)(T val)  if(is(T == class))
+  {
+    specifyClass(this,val);
+  }
+
+  void putRaw(ubyte[] val)
+  {
+    _buffer.put(val);
+  }
+
+  bool isNullObj()
+  {
+    return false;
+  }
 
 }

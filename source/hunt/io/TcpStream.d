@@ -38,9 +38,9 @@ version (HAVE_EPOLL) {
 
 
 /**
- * 
+ *
  */
-class TcpStream : AbstractStream {
+static class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
     protected shared bool _isConnected; // It's always true for server.
 
@@ -55,7 +55,7 @@ class TcpStream : AbstractStream {
             _tcpOption = option;
         super(loop, family, _tcpOption.bufferSize);
         version(HUNT_IO_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
-        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
+       // this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         _isClient = true;
         _isConnected = false;
@@ -74,6 +74,7 @@ class TcpStream : AbstractStream {
 
         _isClient = false;
         _isConnected = true;
+        this.socket.setOption(SocketOptionLevel.TCP, SocketOption.TCP_NODELAY, true);
         setKeepalive();
     }
 
@@ -190,7 +191,7 @@ class TcpStream : AbstractStream {
         } else version (HAVE_IOCP) {
             if (_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
-                // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
+                // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT,
                 //     _tcpOption.keepaliveProbes);
                 // version (HUNT_DEBUG) checkKeepAlive();
             }
@@ -265,7 +266,7 @@ class TcpStream : AbstractStream {
         assert(buffer !is null);
 
         if (!_isConnected) {
-            throw new Exception(format("The connection is down! remote: %s", 
+            throw new Exception(format("The connection is down! remote: %s",
                 this.remoteAddress.toString()));
         }
 
@@ -340,7 +341,7 @@ class TcpStream : AbstractStream {
         }
         if (disconnectionHandler !is null)
             disconnectionHandler();
-            
+
         this.close();
     }
 
@@ -372,7 +373,9 @@ protected:
 
     override void onClose() {
         bool lastConnectStatus = _isConnected;
+        super.onDisconnected();
         super.onClose();
+        super.doClose();
         if(lastConnectStatus) {
             version (HUNT_IO_DEBUG) {
                 if (!_writeQueue.isEmpty) {

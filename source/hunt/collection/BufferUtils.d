@@ -105,7 +105,7 @@ class BufferUtils {
         ];
 
     shared static this() {
-        EMPTY_BUFFER = new HeapByteBuffer(new byte[0], 0, 0); 
+        EMPTY_BUFFER = new HeapByteBuffer(new byte[0], 0, 0);
         EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
     }
     /* ------------------------------------------------------------ */
@@ -121,7 +121,7 @@ class BufferUtils {
     static ByteBuffer allocate(size_t capacity) {
         ByteBuffer buf = new HeapByteBuffer(cast(int)capacity, cast(int)capacity);
         // FIXME: Needing refactor or cleanup -@zxp at 3/20/2019, 5:49:08 PM
-        // 
+        //
         // buf.limit(0);
         return buf;
     }
@@ -137,9 +137,9 @@ class BufferUtils {
      * @return Buffer
      */
     static ByteBuffer allocateDirect(int capacity) {
-        // FIXME: Needing refactor or cleanup -@zxp at 8/17/2019, 1:03:57 PM        
-        // 
-        ByteBuffer buf = new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity); 
+        // FIXME: Needing refactor or cleanup -@zxp at 8/17/2019, 1:03:57 PM
+        //
+        ByteBuffer buf = new HeapByteBuffer(capacity, capacity); // DirectByteBuffer(capacity);
         // buf.limit(0);
         return buf;
     }
@@ -922,7 +922,7 @@ class BufferUtils {
             return EMPTY_BUFFER;
         byte[] bytes = cast(byte[]) s.dup;
         // TODO: Tasks pending completion -@zxp at 8/25/2018, 3:11:29 PM
-        // ByteBuffer.allocateDirect(bytes.length); 
+        // ByteBuffer.allocateDirect(bytes.length);
         ByteBuffer buf = new HeapByteBuffer(cast(int) bytes.length, cast(int) bytes.length);
         buf.put(bytes);
         buf.flip();

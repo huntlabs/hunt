@@ -8,7 +8,7 @@ import core.sync.semaphore : Semaphore;
 import core.sync.condition;
 import core.sync.mutex : Mutex;
 import core.atomic;
-
+import std.experimental.allocator;
 import std.datetime;
 
 // ported from https://github.com/qznc/d-queues
@@ -18,7 +18,7 @@ import std.datetime;
     by Maged and Michael. "*/
 
 /** Basic interface for all queues implemented here.
-    Is an input and output range. 
+    Is an input and output range.
 */
 interface Queue(T) {
     /** Atomically put one element into the queue. */
@@ -40,7 +40,7 @@ private class QueueNode(T) {
     QueueNode!T nxt;
     T value;
 
-    this() {} 
+    this() {}
 
     this(T value) {
         this.value = value;
@@ -120,7 +120,7 @@ class BlockingQueue(T) : Queue!T {
         this.head_lock.lock();
         scope (exit)
             this.head_lock.unlock();
-        
+
         auto n = new QueueNode!T();
         this.head = this.tail = n;
     }
@@ -177,7 +177,7 @@ class NonBlockingQueue(T) : Queue!T {
 
         if(nxt is null)
             return false;
-        
+
         if (cas(&this.head, dummy, nxt)) {
             e = cast(T)nxt.value;
             return true;
@@ -189,7 +189,7 @@ class NonBlockingQueue(T) : Queue!T {
         return this.head.nxt is null;
     }
 
-    void clear() {        
+    void clear() {
         shared n = new QueueNode!T();
         this.head = this.tail = n;
     }
@@ -197,9 +197,9 @@ class NonBlockingQueue(T) : Queue!T {
 
 
 /**
- * 
+ *
  */
-class SimpleQueue(T) : Queue!T {
+static class SimpleQueue(T) : Queue!T {
     private QueueNode!T head;
     private QueueNode!T tail;
 
@@ -210,7 +210,7 @@ class SimpleQueue(T) : Queue!T {
 
     void enqueue(T t) {
         auto end = new QueueNode!T(t);
-        
+
         auto tl = this.tail;
         this.tail = end;
         tl.nxt = end; // acces
@@ -251,7 +251,7 @@ class SimpleQueue(T) : Queue!T {
         auto nxt = this.head.nxt;
         if(nxt is null)
             return false;
-        
+
         this.head = nxt;
         e = cast(T)nxt.value;
         return true;
@@ -262,8 +262,9 @@ class SimpleQueue(T) : Queue!T {
         return this.head.nxt is null;
     }
 
-    void clear() {        
-        auto n = new QueueNode!T();
+    void clear() {
+        auto n = theAllocator.make!(QueueNode!T);
+        //auto n = new QueueNode!T();
         this.head = this.tail = n;
     }
 }

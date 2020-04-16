@@ -48,8 +48,8 @@ interface Lifecycle {
 	 * <p>Should not throw an exception if the component is already running.
 	 * <p>In the case of a container, this will propagate the start signal to all
 	 * components that apply.
-	 */    
-	void start();
+	 */
+	void start(size_t readBufferSize);
 
 	/**
 	 * Stop this component, typically in a synchronous fashion, such that the component is
@@ -174,7 +174,7 @@ abstract class AbstractLifecycle : Lifecycle {
     protected shared bool _isRunning;
 
     this() {
-       
+
     }
 
     bool isRunning() {

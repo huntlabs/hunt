@@ -11,7 +11,7 @@ import std.format;
 
 /**
 */
-class HeapByteBuffer : ByteBuffer {
+static class HeapByteBuffer : ByteBuffer {
 
     // For speed these fields are actually declared in X-Buffer;
     // these declarations are here as documentation
@@ -156,7 +156,7 @@ class HeapByteBuffer : ByteBuffer {
         // short r = 0;
         // short* ptr = &r;
         // ptr[0]=hb[index+1]; // bigEndian
-        // ptr[1]=hb[index]; 
+        // ptr[1]=hb[index];
         // if (bigEndian)
         //     return makeShort(hb[index], hb[index + 1]);
         // else
@@ -272,7 +272,7 @@ class HeapByteBuffer : ByteBuffer {
         buf[offset + 2] = pick(i2, i1);
         buf[offset + 3] = pick(i3, i0);
     }
-    
+
     private static void putIntUnaligned(byte[] buf, size_t offset, int x) {
         if ((offset & 3) == 0) {
             _putInt(buf, offset, x);
@@ -310,7 +310,7 @@ class HeapByteBuffer : ByteBuffer {
 
     private static int getIntUnaligned(byte[] buf, size_t offset, bool bigEndian) {
         return convEndian(bigEndian, getIntUnaligned(buf, offset));
-    }    
+    }
 
     /**
      * Fetches a value at some byte offset into a given Java object.
@@ -398,7 +398,7 @@ class HeapByteBuffer : ByteBuffer {
     // These methods write integers to memory from smaller parts
     // provided by their caller.  The ordering in which these parts
     // are written is the native endianness of this platform.
-    private static void putLongParts(byte[] buf, size_t offset, byte i0, byte i1, byte i2, 
+    private static void putLongParts(byte[] buf, size_t offset, byte i0, byte i1, byte i2,
         byte i3, byte i4, byte i5, byte i6, byte i7) {
         buf[offset + 0] = pick(i0, i7);
         buf[offset + 1] = pick(i1, i6);
