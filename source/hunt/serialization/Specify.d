@@ -79,6 +79,17 @@ void specify(C, T)(auto ref C obj, ref T val) if (is(T == string)) {
     }
 }
 
+void specify(U, C, T)(auto ref C obj, ref T val) if(is(T == string)) {
+    U length = cast(U)val.length;
+    assert(length == val.length, "overflow");
+    specify(obj,length);
+
+    static if(is(C == BinarySerializer))
+        obj.putRaw(cast(ubyte[])val);
+    else
+        val = cast(string) obj.putRaw(length).idup;
+}
+
 void specify(C, T)(auto ref C obj, ref T val) if (isAssociativeArray!T) {
     ushort length = cast(ushort) val.length;
     specify(obj, length);

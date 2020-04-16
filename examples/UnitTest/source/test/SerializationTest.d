@@ -92,26 +92,26 @@ class Home {
 
 class SerializationTest {
 
-    // void testObject() {
-    //     User user = new User();
-    //     user.setAge(20);
-    //     user.setName("Colin");
+    void testObject() {
+        User user = new User();
+        user.setAge(20);
+        user.setName("Colin");
 
-    //     string[int] jobs;
-    //     jobs[1] = "Designer";
+        string[int] jobs;
+        jobs[1] = "Designer";
 
-    //     user.setJobs(jobs);
-    //     user.setHome([new Home("shanghai"), new Home("shenzhen")]);
+        user.setJobs(jobs);
+        user.setHome([new Home("shanghai"), new Home("shenzhen")]);
 
-    //     Friend friend;
-    //     friend.name = "Bob";
-    //     user.setFriend(friend);
+        Friend friend;
+        friend.name = "Bob";
+        user.setFriend(friend);
 
-    //     auto buffer = serialize(user);
-    //     auto another = unserialize!User(buffer);
+        auto buffer = serialize(user);
+        auto another = unserialize!User(buffer);
 
-    //     tracef("%s", another.getJobs()[1]);
-    // }
+        tracef("%s", another.getJobs()[1]);
+    }
 
     void testBasicType() {
         string message = "test message";
