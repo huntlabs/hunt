@@ -1,6 +1,6 @@
 module hunt.serialization.BinaryDeserializer;
 
-import hunt.serialization.specify;
+import hunt.serialization.Specify;
 import std.traits;
 
 /**

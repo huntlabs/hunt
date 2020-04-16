@@ -2,7 +2,7 @@ module hunt.serialization.BinarySerializer;
 
 import std.array : Appender;
 import std.traits;
-import hunt.serialization.specify;
+import hunt.serialization.Specify;
 
 
 /**
