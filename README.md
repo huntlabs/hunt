@@ -50,4 +50,3 @@ For details, see [here](docs/benchmark.md).
 - [ ] Better performance
 - [ ] Better APIs
 - [ ] More examples
-- [ ] Improve serialization (JSON, XML and Binary)
