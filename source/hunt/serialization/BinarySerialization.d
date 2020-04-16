@@ -12,3 +12,7 @@ T unserialize(T)(ubyte[] buffer) {
     auto deserializer = BinaryDeserializer(buffer);
     return deserializer.iArchive!T;
 }
+
+
+alias toObject = unserialize;
+alias toBinary = serialize;
