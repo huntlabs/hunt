@@ -40,7 +40,7 @@ import hunt.event.timer;
 import hunt.system.Error;
 import hunt.concurrency.TaskPool;
   import std.stdio;
-
+  import std.experimental.allocator;
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
 
@@ -74,6 +74,7 @@ class AbstractSelector : Selector {
             throw new IOException("epoll_create failed");
 
         _eventChannel = new EpollEventChannel(this);
+        //_eventChannel = theAllocator.make!EpollEventChannel(this);
         register(_eventChannel);
     }
 
@@ -120,6 +121,7 @@ class AbstractSelector : Selector {
 
             size_t length = max(cast(size_t)(index * 3 / 2), 16);
             AbstractChannel[] arr = new AbstractChannel[length];
+           // AbstractChannel[] arr = theAllocator.make!(AbstractChannel[length]);
             arr[0 .. channels.length] = channels[0 .. $];
             channels = arr;
         }

@@ -10,7 +10,7 @@ import core.atomic;
 import core.thread;
 import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;
-
+import std.experimental.allocator;
 /**
 http://tutorials.jenkov.com/java-nio/selectors.html
 */
@@ -46,6 +46,7 @@ abstract class Selector {
         this.number = number;
         this.divider = divider;
         channels = new AbstractChannel[maxChannels];
+        //channels = theAllocator.make!(AbstractChannel[maxChannels]);
     }
 
     private void InitReadBufferArray(size_t eachBufferSize)

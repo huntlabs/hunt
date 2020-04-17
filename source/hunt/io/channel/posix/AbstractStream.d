@@ -85,10 +85,14 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
+        if(_readBuffer.length == 0)
+        {
+            return false;
+        }
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
 
-        // ubyte[] rb = new ubyte[BufferSize];
-        // ptrdiff_t len = read(this.handle, cast(void*) rb.ptr, rb.length);
+         //ubyte[] rb = new ubyte[BufferSize];
+         //ptrdiff_t len = read(this.handle, cast(void*) rb.ptr, rb.length);
         version (HUNT_IO_DEBUG) {
             tracef("reading[fd=%d]: %d bytes", this.handle, len);
             if (len <= 32)

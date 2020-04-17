@@ -343,6 +343,7 @@ class DateTime {
     static void startClock() {
         if (cas(&_isClockRunning, false, true)) {
             dateThread.start();
+
         }
     }
 

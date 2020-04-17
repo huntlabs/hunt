@@ -27,7 +27,7 @@ import hunt.util.ConverterUtils;
 import std.conv;
 import std.range;
 
-
+import std.experimental.allocator;
 /**
  * Buffer utility methods.
  * <p>
@@ -120,6 +120,8 @@ class BufferUtils {
      */
     static ByteBuffer allocate(size_t capacity) {
         ByteBuffer buf = new HeapByteBuffer(cast(int)capacity, cast(int)capacity);
+
+       // ByteBuffer buf = theAllocator.make!HeapByteBuffer(cast(int)capacity, cast(int)capacity);
         // FIXME: Needing refactor or cleanup -@zxp at 3/20/2019, 5:49:08 PM
         //
         // buf.limit(0);

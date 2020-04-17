@@ -17,6 +17,7 @@ import hunt.logging;
 import hunt.util.Lifecycle;
 
 import core.atomic;
+import std.experimental.allocator;
 
 /**
 */
@@ -25,9 +26,10 @@ class EventLoopGroup : Lifecycle {
     this(size_t size = (totalCPUs - 1)) {
         size_t _size = size > 0 ? size : 1;
         eventLoopPool = new EventLoop[_size];
-
+        //eventLoopPool = theAllocator.make!(EventLoop[_size]);
         foreach (i; 0 .. _size) {
             eventLoopPool[i] = new EventLoop(i, _size);
+          //eventLoopPool[i] = theAllocator.make!(EventLoop(i, _size));
         }
     }
 

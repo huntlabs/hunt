@@ -55,7 +55,7 @@ static class TcpStream : AbstractStream {
             _tcpOption = option;
         super(loop, family, _tcpOption.bufferSize);
         version(HUNT_IO_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
-       // this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
+        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
 
         _isClient = true;
         _isConnected = false;
@@ -74,7 +74,8 @@ static class TcpStream : AbstractStream {
 
         _isClient = false;
         _isConnected = true;
-        this.socket.setOption(SocketOptionLevel.TCP, SocketOption.TCP_NODELAY, true);
+        //this.socket.blocking(false);
+        //this.socket.setOption(SocketOptionLevel.TCP, SocketOption.TCP_NODELAY, true);
         setKeepalive();
     }
 
