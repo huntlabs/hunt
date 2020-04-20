@@ -71,7 +71,7 @@ class AbstractSelector : Selector {
         _epollFD = epoll_create1(EPOLL_CLOEXEC);
         if (_epollFD < 0)
             throw new IOException("epoll_create failed");
-        
+
         _eventChannel = new EpollEventChannel(this);
         register(_eventChannel);
     }
@@ -98,8 +98,8 @@ class AbstractSelector : Selector {
 
     override void onStop() {
         version (HUNT_IO_DEBUG)
-            infof("Selector stopping. fd=%d, id: %d", _epollFD, number);  
-               
+            infof("Selector stopping. fd=%d, id: %d", _epollFD, number);
+
         if(!_eventChannel.isClosed()) {
             _eventChannel.trigger();
             // _eventChannel.onWrite();
@@ -227,12 +227,12 @@ class AbstractSelector : Selector {
                                     channel.handle, errno, getErrorMessage(errno));
                     }
                 }
-                // FIXME: Needing refactor or cleanup -@zxp at 2/28/2019, 3:25:24 PM   
+                // FIXME: Needing refactor or cleanup -@zxp at 2/28/2019, 3:25:24 PM
                 // May be triggered twice for a channel, for example:
                 // events=8197, fd=13
                 // events=8221, fd=13
                 // The remote connection broken abnormally, so the channel should be notified.
-                channel.onClose(); 
+                channel.onClose();
             } else if (event == EPOLLIN) {
                 version (HUNT_IO_DEBUG)
                     tracef("channel read event: fd=%d", channel.handle);
@@ -327,6 +327,7 @@ class AbstractSelector : Selector {
         epoll_event ev;
         buildEpollEvent(channel, ev);
         int res = 0;
+
         do {
             res = epoll_ctl(_epollFD, opcode, fd, &ev);
         }
