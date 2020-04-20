@@ -11,6 +11,7 @@
 
 module hunt.io.channel.Common;
 
+import hunt.io.ErrorKind;
 import hunt.collection.ByteBuffer;
 import hunt.concurrency.SimpleQueue;
 import hunt.concurrency.TaskPool;
@@ -23,7 +24,7 @@ import std.socket;
 
 alias DataReceivedHandler = void delegate(ByteBuffer buffer);
 alias AcceptHandler = void delegate(Socket socket);
-alias ErrorEventHandler = Action1!(string);
+alias ErrorEventHandler = Action1!(IoError);
 
 alias ConnectionHandler = void delegate(bool isSucceeded);
 alias UdpDataHandler = void delegate(const(ubyte)[] data, Address addr);
