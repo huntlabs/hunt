@@ -34,18 +34,27 @@ class JsonSerializerTest {
                 "json": {
                     "key": "value"
                 }
+            },
+            "member" : {
+                "name" : "Bob"
             }
         }`;
 
-        const testClass = JsonSerializer.toObject!TestClass(parseJSON(jsonString));
+        const TestClass testClass = JsonSerializer.toObject!TestClass(parseJSON(jsonString));
         assert(testClass.integer == 42);
         assert(testClass.floating == 3.0);
         assert(testClass.text == "Hello world");
         assert(testClass.array == [0, 1, 2]);
+
         const dictionary = ["key1" : "value1", "key2" : "value2", "key3" : "value3"];
         assert(testClass.dictionary == dictionary);
+
+        // struct
         assert(testClass.testStruct.uinteger == 16);
         assert(testClass.testStruct.json["key"].str == "value");
+
+        // class
+        assert(testClass.member.name == "Bob");
 
         TestClass testClass02 = new TestClass();
         testClass02.integer = 12;
@@ -523,8 +532,10 @@ struct TestStruct
 {
     uint uinteger;
     JSONValue json;
+}
 
-    // TestClass testClass;
+class ClassMember {
+    string name;
 }
 
 class TestClass
@@ -535,4 +546,5 @@ class TestClass
     int[] array;
     string[string] dictionary;
     TestStruct testStruct;
+    ClassMember member;
 }
