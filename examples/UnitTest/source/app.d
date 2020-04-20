@@ -92,8 +92,8 @@ void main()
     // testUnits!(ConverterUtilsTest);
     // testUnits!(DeductionTest);
 
-    // testUnits!(JsonSerializerTest);
-    testUnits!(SerializationTest);
+    testUnits!(JsonSerializerTest);
+    // testUnits!(SerializationTest);
     // testUnits!(ObjectMappingTest);
 
     // testUnits!(ByteBufferTest);
