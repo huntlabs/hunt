@@ -75,7 +75,7 @@ class AbstractSelector : Selector {
     }
 
     override void onStop() {
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             infof("Selector stopping. fd=%d", _kqueueFD);  
                
         if(!_eventChannel.isClosed()) {
@@ -88,7 +88,7 @@ class AbstractSelector : Selector {
         assert(channel !is null);
         
         const int fd = channel.handle;
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
             tracef("register channel: fd=%d, type=%s", fd, channel.type);
 
         int err = -1;
@@ -190,7 +190,7 @@ class AbstractSelector : Selector {
         foreach (i; 0 .. result) {
             AbstractChannel channel = cast(AbstractChannel)(events[i].udata);
             ushort eventFlags = events[i].flags;
-            version (HUNT_DEBUG)
+            version (HUNT_IO_DEBUG)
             infof("handling event: events=%d, fd=%d", eventFlags, channel.handle);
 
             if (eventFlags & EV_ERROR) {
@@ -199,7 +199,7 @@ class AbstractSelector : Selector {
                 continue;
             }
             if (eventFlags & EV_EOF) {
-                version (HUNT_DEBUG) infof("channel[fd=%d] closed", channel.handle);
+                version (HUNT_IO_DEBUG) infof("channel[fd=%d] closed", channel.handle);
                 channel.close();
                 continue;
             }
@@ -211,7 +211,7 @@ class AbstractSelector : Selector {
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint filter) {
-        version (HUNT_DEBUG)
+        version (HUNT_IO_DEBUG)
         infof("handling event: events=%d, fd=%d", filter, channel.handle);
         try {
             if(filter == EVFILT_TIMER) {
