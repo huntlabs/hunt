@@ -107,7 +107,8 @@ final class JsonSerializer {
     }
 
     /**
-    */
+     * 
+     */
     static T toObject(T, bool canThrow = false)(
             auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (is(T == struct) && !is(T == SysTime)) {
@@ -122,7 +123,7 @@ final class JsonSerializer {
 
         try {
             static foreach (string member; FieldNameTuple!T) {
-                deserializeMember!(member)(result, json);
+                deserializeMember!(member, TraverseBase.no)(result, json);
             }
         } catch (JSONException e) {
             return handleException!(T, canThrow)(json, e.msg, defaultValue);
@@ -137,7 +138,7 @@ final class JsonSerializer {
 
         static foreach (string member; FieldNameTuple!T) {
             // current fields
-            deserializeMember!(member)(target, json);
+            deserializeMember!(member, TraverseBase.no)(target, json);
         }
     }
 
@@ -148,7 +149,7 @@ final class JsonSerializer {
 
         static foreach (string member; FieldNameTuple!T) {
             // current fields
-            deserializeMember!(member)(target, json);
+            deserializeMember!(member, traverseBase)(target, json);
         }
 
         // super fields
@@ -168,7 +169,7 @@ final class JsonSerializer {
         }
     }
 
-    private static void deserializeMember(string member, T)
+    private static void deserializeMember(string member, TraverseBase traverseBase = TraverseBase.yes, T)
             (ref T target, auto ref const(JSONValue) json) {
         
         alias currentMember = __traits(getMember, T, member);
@@ -204,7 +205,11 @@ final class JsonSerializer {
                     }
                 } else {
                     debug(HUNT_DEBUG_MORE) tracef("available data: %s = %s", member, jsonItemPtr.toString());
-                    __traits(getMember, target, member) = toObject!(memberType, false)(*jsonItemPtr);
+                    static if(is(memberType == class)) {
+                        __traits(getMember, target, member) = toObject!(memberType)(*jsonItemPtr);
+                    } else {
+                        __traits(getMember, target, member) = toObject!(memberType, false)(*jsonItemPtr);
+                    }
                 }
             }   
         }
