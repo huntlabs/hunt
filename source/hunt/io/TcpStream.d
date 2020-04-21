@@ -13,6 +13,7 @@ module hunt.io.TcpStream;
 
 import hunt.io.channel.Common;
 import hunt.io.TcpStreamOptions;
+import hunt.io.IoError;
 
 import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;
@@ -38,7 +39,7 @@ version (HAVE_EPOLL) {
 
 
 /**
- * 
+ *
  */
 class TcpStream : AbstractStream {
     SimpleEventHandler closeHandler;
@@ -145,21 +146,27 @@ class TcpStream : AbstractStream {
         connect(_remoteAddress);
     }
 
-    protected override void doConnect(Address addr) nothrow {
+    protected override bool doConnect(Address addr)  {
         try {
             version (HUNT_DEBUG)
                 tracef("connecting to %s...", addr);
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
             this.socket.blocking = true;
-            super.doConnect(addr);
-            this.socket.blocking = false;
-            setKeepalive();
-            _localAddress = this.socket.localAddress();
-            start();
-            _isConnected = true;
+            if(super.doConnect(addr))
+            {
+              this.socket.blocking = false;
+              setKeepalive();
+              _localAddress = this.socket.localAddress();
+              start();
+              _isConnected = true;
+            } else
+            {
+                errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
+                _isConnected = false;
+            }
 
-        } catch (Throwable ex) {
+        } catch (SocketOSException ex) {
             // Must try the best to catch all the exceptions. It's because it will executed in another thread.
             debug warning(ex.msg);
             version(HUNT_IO_DEBUG) warning(ex);
@@ -174,7 +181,7 @@ class TcpStream : AbstractStream {
                 version(HUNT_IO_DEBUG) warning(ex);
             }
         }
-
+        return true;
     }
 
     // www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/
@@ -190,7 +197,7 @@ class TcpStream : AbstractStream {
         } else version (HAVE_IOCP) {
             if (_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
-                // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT, 
+                // this.setOption(SocketOptionLevel.TCP, cast(SocketOption) TCP_KEEPCNT,
                 //     _tcpOption.keepaliveProbes);
                 // version (HUNT_DEBUG) checkKeepAlive();
             }
@@ -217,33 +224,33 @@ class TcpStream : AbstractStream {
         }
     }
 
-    TcpStream onConnected(ConnectionHandler handler) {
+    TcpStream connected(ConnectionHandler handler) {
         _connectionHandler = handler;
         return this;
     }
 
-    TcpStream onReceived(DataReceivedHandler handler) {
+    TcpStream received(DataReceivedHandler handler) {
         dataReceivedHandler = handler;
         return this;
     }
 
-    TcpStream onWrited(SimpleActionHandler handler) {
+    TcpStream writed(SimpleActionHandler handler) {
         dataWriteDoneHandler = handler;
         return this;
     }
-    alias onWritten = onWrited;
+    alias onWritten = writed;
 
-    TcpStream onClosed(SimpleEventHandler handler) {
+    TcpStream closed(SimpleEventHandler handler) {
         closeHandler = handler;
         return this;
     }
 
-    TcpStream onDisconnected(SimpleEventHandler handler) {
+    TcpStream disconnected(SimpleEventHandler handler) {
         disconnectionHandler = handler;
         return this;
     }
 
-    TcpStream onError(ErrorEventHandler handler) {
+    TcpStream error(ErrorEventHandler handler) {
         errorHandler = handler;
         return this;
     }
@@ -265,7 +272,7 @@ class TcpStream : AbstractStream {
         assert(buffer !is null);
 
         if (!_isConnected) {
-            throw new Exception(format("The connection is down! remote: %s", 
+            throw new Exception(format("The connection is down! remote: %s",
                 this.remoteAddress.toString()));
         }
 
@@ -340,7 +347,7 @@ class TcpStream : AbstractStream {
         }
         if (disconnectionHandler !is null)
             disconnectionHandler();
-            
+
         this.close();
     }
 
@@ -361,13 +368,13 @@ protected:
             doRead();
         }
 
-        if (this.isError) {
-            string msg = format("Socket error on read: fd=%d, code=%d, message: %s",
-                    this.handle, errno, this.errorMessage);
-            debug errorf(msg);
-            if (!isClosed())
-                errorOccurred(msg);
-        }
+        //if (this.isError) {
+        //    string msg = format("Socket error on read: fd=%d, code=%d, message: %s",
+        //            this.handle, errno, this.errorMessage);
+        //    debug errorf(msg);
+        //    if (!isClosed())
+        //        errorOccurred(msg);
+        //}
     }
 
     override void onClose() {

@@ -2,6 +2,7 @@ module hunt.io.channel.AbstractChannel;
 
 import hunt.event.selector.Selector;
 import hunt.io.channel.Common;
+import hunt.io.IoError;
 import hunt.logging.ConsoleLogger;
 
 import core.atomic;
@@ -10,7 +11,7 @@ import std.socket : socket_t;
 
 
 /**
- * 
+ *
  */
 abstract class AbstractChannel : Channel {
     socket_t handle = socket_t.init;
@@ -28,28 +29,28 @@ abstract class AbstractChannel : Channel {
     }
 
     /**
-     * 
+     *
      */
     bool isRegistered() {
         return _isRegistered;
     }
 
     /**
-     * 
+     *
      */
     bool isClosing() {
         return _isClosing;
     }
 
     /**
-     * 
+     *
      */
     bool isClosed() {
         return _isClosed;
     }
 
     /**
-     * 
+     *
      */
     void close() {
         if (!_isClosed && cas(&_isClosing, false, true) ) {
@@ -61,10 +62,10 @@ abstract class AbstractChannel : Channel {
             _isClosing = false;
             version (HUNT_IO_DEBUG)
                 tracef("channel[fd=%d] closed", this.handle);
-                
+
         } else {
             version (HUNT_IO_DEBUG) {
-                warningf("The channel[fd=%d] has already been closed (%s) or closing (%s)", 
+                warningf("The channel[fd=%d] has already been closed (%s) or closing (%s)",
                  this.handle, _isClosed, _isClosing);
             }
         }
@@ -87,14 +88,14 @@ abstract class AbstractChannel : Channel {
 
         version (HUNT_IO_DEBUG_MORE)
             tracef("onClose done [fd=%d]...", this.handle);
-        
+
         _isClosed = true;
     }
 
-    protected void errorOccurred(string msg) {
+    protected void errorOccurred(ErrorCode code, string msg) {
         debug warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
         if (errorHandler !is null) {
-            errorHandler(msg);
+            errorHandler(new IoError(code, msg));
         }
     }
 

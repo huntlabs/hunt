@@ -10,6 +10,7 @@ import hunt.event.selector.Selector;
 import hunt.Functions;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
+import hunt.io.IoError;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
 
@@ -33,8 +34,8 @@ abstract class AbstractStream : AbstractSocketChannel {
     private ByteBuffer writeBuffer;
 
     /**
-    * Warning: The received data is stored a inner buffer. For a data safe, 
-    * you would make a copy of it. 
+    * Warning: The received data is stored a inner buffer. For a data safe,
+    * you would make a copy of it.
     */
     protected DataReceivedHandler dataReceivedHandler;
     protected SimpleEventHandler disconnectionHandler;
@@ -61,7 +62,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract protected void onDisconnected();
 
     /**
-     * 
+     *
      */
     protected bool tryRead() {
         bool isDone = true;
@@ -83,7 +84,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 _bufferForRead.limit(cast(int)len);
                 _bufferForRead.position(0);
                 dataReceivedHandler(_bufferForRead);
-                
+
                 // ByteBuffer bb = BufferUtils.wrap(cast(byte[])rb[0..len]);
                 // dataReceivedHandler(bb);
             }
@@ -106,6 +107,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
             if (_error) {
                 this._errorMessage = getErrorMessage(errno);
+                errorOccurred(ErrorCode.INTERRUPTED , "read buffer error");
             } else {
                 debug warningf("warning on read: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
@@ -114,6 +116,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(errno == ECONNRESET) {
                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                 onDisconnected();
+                errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
             }
         }
         else {
@@ -158,14 +161,14 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (nBytes > 0) {
             return nBytes;
         }
-        
+
         if (nBytes == Socket.ERROR) {
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
-            // EPIPE/Broken pipe: 
+            // EPIPE/Broken pipe:
             // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
             // https://github.com/angrave/SystemProgramming/wiki/Networking%2C-Part-7%3A-Nonblocking-I-O%2C-select%28%29%2C-and-epoll
-            
+
             if(errno == EAGAIN) {
                 version (HUNT_IO_DEBUG) {
                     warningf("warning on write: fd=%d, errno=%d, message=%s", this.handle,
@@ -182,7 +185,8 @@ abstract class AbstractStream : AbstractSocketChannel {
                 if(errno == ECONNRESET) {
                     // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                     onDisconnected();
-                } 
+                    errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
+                }
             }
         } else {
             version (HUNT_DEBUG) {
@@ -193,13 +197,13 @@ abstract class AbstractStream : AbstractSocketChannel {
             }
         }
 
-        if (this._error) {
-            this._errorMessage = getErrorMessage(errno);
-            string msg = format("Socket error on write: fd=%d, code: %d, message=%s",
-                    this.handle, errno, this.errorMessage);
-            debug errorf(msg);
-            errorOccurred(msg);
-        }
+        //if (this._error) {
+        //    this._errorMessage = getErrorMessage(errno);
+        //    string msg = format("Socket error on write: fd=%d, code: %d, message=%s",
+        //            this.handle, errno, this.errorMessage);
+        //    debug errorf(msg);
+        //    errorOccurred(msg);
+        //}
 
         return 0;
     }
@@ -207,7 +211,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     private bool tryNextWrite(ByteBuffer buffer) {
         const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
         version (HUNT_IO_DEBUG) {
-            tracef("writting from a buffer [fd=%d], %d bytes, buffer: %s", 
+            tracef("writting from a buffer [fd=%d], %d bytes, buffer: %s",
                 this.handle, data.length, buffer.toString());
         }
 
@@ -217,9 +221,9 @@ abstract class AbstractStream : AbstractSocketChannel {
 
         while(remaining > 0 && !_error && !isClosing() && !isWriteCancelling) {
             ptrdiff_t nBytes = tryWrite(data);
-            version (HUNT_IO_DEBUG) 
+            version (HUNT_IO_DEBUG)
             {
-                tracef("write out once: fd=%d, %d / %d bytes, remaining: %d buffer: %s", 
+                tracef("write out once: fd=%d, %d / %d bytes, remaining: %d buffer: %s",
                     this.handle, nBytes, data.length, remaining, buffer.toString());
             }
 
@@ -228,7 +232,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 data = data[nBytes .. $];
             }
         }
-        
+
         version (HUNT_IO_DEBUG) {
             if(remaining == 0) {
                     tracef("A buffer is written out. fd=%d", this.handle);
@@ -252,14 +256,14 @@ abstract class AbstractStream : AbstractSocketChannel {
      * Should be thread-safe.
      */
     override void onWrite() {
-        version (HUNT_IO_DEBUG) 
+        version (HUNT_IO_DEBUG)
         {
-            tracef("checking status, isWritting: %s, writeBuffer: %s", 
+            tracef("checking status, isWritting: %s, writeBuffer: %s",
                 _isWritting, writeBuffer is null ? "null" : writeBuffer.toString());
         }
 
         if(!_isWritting) {
-            version (HUNT_IO_DEBUG) 
+            version (HUNT_IO_DEBUG)
             infof("No data needs to be written out. fd=%d", this.handle);
             return;
         }
@@ -272,7 +276,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
         // keep thread-safe here
         if(!cas(&_isBusyWritting, false, true)) {
-            // version (HUNT_IO_DEBUG) 
+            // version (HUNT_IO_DEBUG)
             warningf("busy writing. fd=%d", this.handle);
             return;
         }
@@ -285,9 +289,9 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(tryNextWrite(writeBuffer)) {
                 writeBuffer = null;
             } else {
-                version (HUNT_IO_DEBUG) 
+                version (HUNT_IO_DEBUG)
                 {
-                    infof("waiting to try again... fd=%d, writeBuffer: %s", 
+                    infof("waiting to try again... fd=%d, writeBuffer: %s",
                         this.handle, writeBuffer.toString());
                 }
                 // eventLoop.update(this);
@@ -301,19 +305,19 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        version (HUNT_IO_DEBUG) 
+        version (HUNT_IO_DEBUG)
         {
             tracef("start to write [fd=%d], writeBuffer %s empty", this.handle, writeBuffer is null ? "is" : "is not");
         }
 
         if(_writeQueue.tryDequeue(writeBuffer)) {
             if(tryNextWrite(writeBuffer)) {
-                writeBuffer = null;  
-                checkAllWriteDone();            
+                writeBuffer = null;
+                checkAllWriteDone();
             } else {
             version (HUNT_IO_DEBUG)
                 infof("waiting to try again: fd=%d, writeBuffer: %s", this.handle, writeBuffer.toString());
-                
+
                 // eventLoop.update(this);
             }
             version (HUNT_IO_DEBUG)
@@ -325,12 +329,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool checkAllWriteDone() {
         version (HUNT_IO_DEBUG) {
             import std.conv;
-            tracef("checking remaining: fd=%d, writeQueue empty: %s", this.handle, 
+            tracef("checking remaining: fd=%d, writeQueue empty: %s", this.handle,
                 _writeQueue.isEmpty().to!string());
         }
 
         if(_writeQueue.isEmpty()) {
-            resetWriteStatus();        
+            resetWriteStatus();
             version (HUNT_IO_DEBUG)
                 infof("All data are written out: fd=%d", this.handle);
             if(dataWriteDoneHandler !is null)
@@ -341,8 +345,14 @@ abstract class AbstractStream : AbstractSocketChannel {
         return false;
     }
 
-    protected void doConnect(Address addr) {
-        this.socket.connect(addr);
+    protected bool doConnect(Address addr) {
+        try {
+            this.socket.connect(addr);
+        } catch (SocketOSException e)
+        {
+            return false;
+        }
+        return true;
     }
 
     void cancelWrite() {

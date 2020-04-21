@@ -13,6 +13,7 @@ module hunt.io.TcpListener;
 
 import hunt.io.TcpStream;
 import hunt.io.TcpStreamOptions;
+import hunt.io.IoError;
 
 import hunt.event;
 import hunt.Exceptions;
@@ -28,6 +29,7 @@ import core.time;
 
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
 alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, size_t bufferSize);
+alias EventErrorHandler = void delegate(IoError error);
 
 /**
 */
@@ -42,6 +44,7 @@ class TcpListener : AbstractListener {
     AcceptEventHandler acceptHandler;
     SimpleEventHandler closeHandler;
     PeerCreateHandler peerCreateHandler;
+    EventErrorHandler errorHandler;
 
     this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
         _tcpStreamoption = TcpStreamOptions.create();
@@ -52,8 +55,14 @@ class TcpListener : AbstractListener {
             super(loop, family);
     }
 
-    TcpListener onConnectionAccepted(AcceptEventHandler handler) {
+    TcpListener accepted(AcceptEventHandler handler) {
         acceptHandler = handler;
+        return this;
+    }
+
+    TcpListener error(EventErrorHandler handler)
+    {
+        errorHandler = handler;
         return this;
     }
 
@@ -76,10 +85,19 @@ class TcpListener : AbstractListener {
     }
 
     TcpListener bind(Address addr) {
+        try {
+        this.socket.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, true);
         this.socket.bind(addr);
         this.socket.blocking = _isBlocking;
         _localAddress = _socket.localAddress();
         _isBinded = true;
+        } catch (SocketOSException e)
+        {
+            if (errorHandler !is null)
+            {
+                this.errorHandler(new IoError(ErrorCode.ADDRINUSE , e.msg));
+            }
+        }
         return this;
     }
 
@@ -151,30 +169,39 @@ class TcpListener : AbstractListener {
             version (HUNT_DEBUG)
                 trace("listening...");
 
-            canRead = onAccept((Socket socket) {
+            try
+            {
+              canRead = onAccept((Socket socket) {
 
                 version (HUNT_DEBUG) {
-                    infof("new connection from %s, fd=%d",
-                        socket.remoteAddress.toString(), socket.handle());
+                  infof("new connection from %s, fd=%d",
+                  socket.remoteAddress.toString(), socket.handle());
                 }
 
                 if (acceptHandler !is null) {
-                    TcpStream stream;
-                    if (peerCreateHandler is null) {
-                        stream = new TcpStream(_inLoop, socket, _tcpStreamoption);
-                    }
-                    else
-                        stream = peerCreateHandler(this, socket, _tcpStreamoption.bufferSize);
+                  TcpStream stream;
+                  if (peerCreateHandler is null) {
+                    stream = new TcpStream(_inLoop, socket, _tcpStreamoption);
+                  }
+                  else
+                    stream = peerCreateHandler(this, socket, _tcpStreamoption.bufferSize);
 
-                    acceptHandler(this, stream);
-                    stream.start();
+                  acceptHandler(this, stream);
+                  stream.start();
                 }
-            });
+              });
 
-            if (this.isError) {
+              if (this.isError) {
                 canRead = false;
-                error("listener error: ", this.errorMessage);
+                hunt.logging.ConsoleLogger.error("listener error: ", this.errorMessage);
                 this.close();
+              }
+            } catch (SocketOSException e)
+            {
+                if (errorHandler !is null)
+                {
+                    errorHandler(new IoError(ErrorCode.OTHER , e.msg));
+                }
             }
         }
     }
@@ -201,7 +228,7 @@ static if (CompilerHelper.isLessThan(2078)) {
     } else version (ARM) {
         enum SO_REUSEPORT = 15;
     }
-    
+
 }
 
 version (AArch64) {
