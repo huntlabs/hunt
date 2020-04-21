@@ -1,6 +1,6 @@
 module hunt.io.IoError;
 
-enum ErrorKind
+enum ErrorCode
 {
     NOTFOUND,           //An entity was not found, often a file.
     PERMISSIONENIED,    //The operation lacked the necessary privileges to complete.
@@ -26,11 +26,11 @@ class IoError
 {
     private
     {
-        ErrorKind _errorCode;
+        ErrorCode _errorCode;
         string    _errorMsg;
     }
 
-    public ErrorKind errorCode()
+    public ErrorCode errorCode()
     {
         return _errorCode;
     }
@@ -40,7 +40,7 @@ class IoError
         return  _errorMsg;
     }
 
-    this(ErrorKind code , string msg)
+    this(ErrorCode code , string msg)
     {
         this._errorCode = code;
         this._errorMsg = msg;

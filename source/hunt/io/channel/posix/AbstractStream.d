@@ -107,7 +107,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
             if (_error) {
                 this._errorMessage = getErrorMessage(errno);
-                errorOccurred(ErrorKind.INTERRUPTED , "read buffer error");
+                errorOccurred(ErrorCode.INTERRUPTED , "read buffer error");
             } else {
                 debug warningf("warning on read: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
@@ -116,7 +116,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             if(errno == ECONNRESET) {
                 // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                 onDisconnected();
-                errorOccurred(ErrorKind.CONNECTIONEESET , "connection reset by peer");
+                errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
             }
         }
         else {
@@ -185,7 +185,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 if(errno == ECONNRESET) {
                     // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                     onDisconnected();
-                    errorOccurred(ErrorKind.CONNECTIONEESET , "connection reset by peer");
+                    errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
                 }
             }
         } else {

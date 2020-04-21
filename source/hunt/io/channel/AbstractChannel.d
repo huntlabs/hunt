@@ -92,7 +92,7 @@ abstract class AbstractChannel : Channel {
         _isClosed = true;
     }
 
-    protected void errorOccurred(ErrorKind code, string msg) {
+    protected void errorOccurred(ErrorCode code, string msg) {
         debug warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
         if (errorHandler !is null) {
             errorHandler(new IoError(code, msg));

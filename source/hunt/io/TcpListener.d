@@ -95,7 +95,7 @@ class TcpListener : AbstractListener {
         {
             if (errorHandler !is null)
             {
-                this.errorHandler(new IoError(ErrorKind.ADDRINUSE , e.msg));
+                this.errorHandler(new IoError(ErrorCode.ADDRINUSE , e.msg));
             }
         }
         return this;
@@ -200,7 +200,7 @@ class TcpListener : AbstractListener {
             {
                 if (errorHandler !is null)
                 {
-                    errorHandler(new IoError(ErrorKind.OTHER , e.msg));
+                    errorHandler(new IoError(ErrorCode.OTHER , e.msg));
                 }
             }
         }
