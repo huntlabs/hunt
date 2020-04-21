@@ -162,7 +162,7 @@ class TcpStream : AbstractStream {
               _isConnected = true;
             } else
             {
-                errorOccurred(ErrorKind.CONNECTIONEFUSED,"Connection refused");
+                errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
                 _isConnected = false;
             }
 
