@@ -1,0 +1,26 @@
+{
+	"name": "timer",
+    "copyright": "Copyright (C) 2018-2019, HuntLabs",
+    "homepage": "https://www.huntlabs.net/",
+	"description": "A timer example for Hunt.",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"hunt": {
+			"path": "../../"
+		}
+	},
+	"versions": ["HUNT_DEBUG"],
+	"configurations": [
+		{
+			"name": "default",
+			"targetType": "executable"
+		},
+		{
+			"name": "native",
+			"targetType": "executable",
+			"versions": [
+				"NativeTimer"
+			]
+		}
+	]
+}
