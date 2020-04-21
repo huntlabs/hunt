@@ -19,6 +19,55 @@ import std.format : formattedWrite;
 import std.string;
 
 
+int monthByName(string month) {
+    if (month == "Jan")
+        return 0;
+    if (month == "Feb")
+        return 1;
+    if (month == "Mar")
+        return 2;
+    if (month == "Apr")
+        return 3;
+    if (month == "May")
+        return 4;
+    if (month == "Jun")
+        return 5;
+    if (month == "Jul")
+        return 6;
+    if (month == "Aug")
+        return 7;
+    if (month == "Sep")
+        return 8;
+    if (month == "Oct")
+        return 9;
+    if (month == "Nov")
+        return 10;
+    if (month == "Dec")
+        return 11;
+
+    return -1;
+}
+
+int weekDayByName(string wday) {
+    if (wday == "Sun")
+        return 0;
+    if (wday == "Mon")
+        return 1;
+    if (wday == "Tue")
+        return 2;
+    if (wday == "Wed")
+        return 3;
+    if (wday == "Thu")
+        return 4;
+    if (wday == "Fri")
+        return 5;
+    if (wday == "Sat")
+        return 6;
+
+    return -1;
+}
+
+
 short monthToShort(Month month) {
     short resultMonth;
     switch (month) {
