@@ -13,7 +13,7 @@ import hunt.collection.BufferUtils;
 import hunt.concurrency.SimpleQueue;
 
 /**
- * 
+ *
  */
 class TcpInputStream : InputStream {
 
@@ -26,7 +26,7 @@ class TcpInputStream : InputStream {
         _bufferQueue = new SimpleQueue!ByteBuffer();
         _timeout = timeout;
         _tcp = tcp;
-        _tcp.onReceived(&dataReceived);
+        _tcp.received(&dataReceived);
     }
 
     private void dataReceived(ByteBuffer buffer) {
@@ -38,7 +38,7 @@ class TcpInputStream : InputStream {
             ByteBuffer copy = BufferUtils.allocate(size);
             copy.put(buffer).flip();
             version(HUNT_NET_DEBUG) tracef("data enqueue (%s)...", copy.toString());
-            _bufferQueue.enqueue(copy); 
+            _bufferQueue.enqueue(copy);
         }
     }
 
