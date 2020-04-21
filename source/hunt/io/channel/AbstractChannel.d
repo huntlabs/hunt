@@ -2,7 +2,7 @@ module hunt.io.channel.AbstractChannel;
 
 import hunt.event.selector.Selector;
 import hunt.io.channel.Common;
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 import hunt.logging.ConsoleLogger;
 
 import core.atomic;

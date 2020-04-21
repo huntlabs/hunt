@@ -1,0 +1,14 @@
+{
+	"name": "unittest",
+	"description": "All the unittests for hunt.",
+	"copyright": "Copyright (C) 2015-2019, HuntLabs.net",
+	"homepage": "https://www.huntlabs.net",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"hunt" :{"path": "../../"}
+	},
+	"versions": [
+		"HUNT_DEBUG"
+	],
+    "debugVersions": ["HUNT_DEBUG_MORE", "HUNT_CONCURRENCY_DEBUG"]
+}
