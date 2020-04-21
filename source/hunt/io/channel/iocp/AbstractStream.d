@@ -122,15 +122,21 @@ abstract class AbstractStream : AbstractSocketChannel {
         checkErro(nRet, SOCKET_ERROR);
     }
 
-    protected void doConnect(Address addr) {
-        Address binded = createAddress(this.socket.addressFamily);
-        this.socket.bind(binded);
-        _iocpwrite.channel = this;
-        _iocpwrite.operation = IocpOperation.connect;
-        int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
-                cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
-                &_iocpwrite.overlapped);
-        checkErro(nRet, SOCKET_ERROR);
+    protected bool doConnect(Address addr) {
+        try {
+            Address binded = createAddress(this.socket.addressFamily);
+            this.socket.bind(binded);
+            _iocpwrite.channel = this;
+            _iocpwrite.operation = IocpOperation.connect;
+            int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
+            cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
+            &_iocpwrite.overlapped);
+            checkErro(nRet, SOCKET_ERROR);
+        } catch (SocketOSException e)
+        {
+            return false;
+        }
+        return true;
     }
 
     private uint doWrite(const(ubyte)[] data) {
@@ -141,17 +147,23 @@ abstract class AbstractStream : AbstractSocketChannel {
         // tracef("To write %d bytes, fd=%d", data.length, this.socket.handle());
         version (HUNT_IO_DEBUG) {
             size_t bufferLength = data.length;
-            tracef("To write %d bytes, fd=%d", bufferLength, this.socket.handle());
+            tracef("To write %d bytes", bufferLength);
             if (bufferLength > 32)
                 tracef("%(%02X %) ...", data[0 .. 32]);
             else
-                tracef("%(%02X %)", data[0 .. $]);
+                tracef("%s", data);
         }
-
+         size_t bufferLength = data.length;
+            tracef("To write %d bytes", bufferLength);
+            tracef("%s", data);
         WSABUF _dataWriteBuffer;
 
         _dataWriteBuffer.buf = cast(char*) data.ptr;
         _dataWriteBuffer.len = cast(uint) data.length;
+        if (this.socket.handle() == INVALID_SOCKET)
+        {
+            tracef("nonononono");
+        }
         int nRet = WSASend(cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
                 dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
 
