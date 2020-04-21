@@ -11,7 +11,7 @@
 
 module hunt.io.channel.Common;
 
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 import hunt.collection.ByteBuffer;
 import hunt.concurrency.SimpleQueue;
 import hunt.concurrency.TaskPool;

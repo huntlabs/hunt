@@ -10,7 +10,7 @@ import hunt.event.selector.Selector;
 import hunt.Functions;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
 

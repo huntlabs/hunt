@@ -13,7 +13,7 @@ module hunt.io.TcpListener;
 
 import hunt.io.TcpStream;
 import hunt.io.TcpStreamOptions;
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 
 import hunt.event;
 import hunt.Exceptions;

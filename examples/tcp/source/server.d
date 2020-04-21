@@ -16,7 +16,7 @@ import hunt.concurrency.thread.Helper;
 import hunt.event;
 import hunt.io.TcpListener;
 import hunt.io.TcpStream;
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 import hunt.logging;
 import hunt.util.Timer;
 

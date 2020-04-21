@@ -13,7 +13,7 @@ module hunt.io.TcpStream;
 
 import hunt.io.channel.Common;
 import hunt.io.TcpStreamOptions;
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 
 import hunt.collection.ByteBuffer;
 import hunt.collection.BufferUtils;

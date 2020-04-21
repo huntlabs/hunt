@@ -1,4 +1,4 @@
-module hunt.io.ErrorKind;
+module hunt.io.IoError;
 
 enum ErrorKind
 {
@@ -21,7 +21,6 @@ enum ErrorKind
     OTHER,              //Any I/O error not part of this list.
     UNEXPECTEDEOF       //An error returned when an operation could not be completed because an "end of file" was reached prematurely.
 }
-
 
 class IoError
 {

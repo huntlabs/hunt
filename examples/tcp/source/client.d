@@ -2,7 +2,7 @@
 import hunt.collection.ByteBuffer;
 import hunt.event;
 import hunt.io.TcpStream;
-import hunt.io.ErrorKind;
+import hunt.io.IoError;
 import hunt.logging;
 
 import core.thread;
