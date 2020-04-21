@@ -10,5 +10,6 @@
 	"versions": [
 		"HUNT_DEBUG"
 	],
+	"targetType": "executable",
     "debugVersions": ["HUNT_DEBUG_MORE", "HUNT_CONCURRENCY_DEBUG"]
 }

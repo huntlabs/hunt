@@ -1023,11 +1023,6 @@ JSONValue toJson(T)(T t, RefClass stack, uint level) if (is(T == struct))
 			mixin(toJsonMembers!(T,true));
 		else
 			mixin(toJsonMembers!(T,false));
-
-
-
-
-		
 		return j;
 	}
 }
