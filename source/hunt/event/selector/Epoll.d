@@ -232,7 +232,8 @@ class AbstractSelector : Selector {
                 // events=8197, fd=13
                 // events=8221, fd=13
                 // The remote connection broken abnormally, so the channel should be notified.
-                channel.onClose();
+                // channel.onClose(); // More tests are needed
+                channel.close();
             } else if (event == EPOLLIN) {
                 version (HUNT_IO_DEBUG)
                     tracef("channel read event: fd=%d", channel.handle);
