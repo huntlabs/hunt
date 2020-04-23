@@ -49,23 +49,28 @@ abstract class AbstractSocketChannel : AbstractChannel {
         // _isClosing = true;
         version (HUNT_IO_MORE)
             tracef("socket channel closing [fd=%d]...", this.handle);
-
-        if (isBusy()) {
-            import std.parallelism;
-
-            version (HUNT_DEBUG)
-                warning("Close operation delayed");
-            auto theTask = task(() {
-                super.close();
-                while (isBusy()) {
-                    version (HUNT_DEBUG)
-                        infof("waitting for idle [fd=%d]...", this.handle);
-                    // Thread.sleep(20.msecs);
-                }
-            });
-            taskPool.put(theTask);
-        } else {
+        version (HAVE_IOCP)
+        {
             super.close();
+        } else
+        {
+            if (isBusy()) {
+                import std.parallelism;
+
+                version (HUNT_DEBUG)
+                    warning("Close operation delayed");
+                auto theTask = task(() {
+                    super.close();
+                    while (isBusy()) {
+                        version (HUNT_DEBUG)
+                            infof("waitting for idle [fd=%d]...", this.handle);
+                        // Thread.sleep(20.msecs);
+                    }
+                });
+                taskPool.put(theTask);
+            } else {
+                super.close();
+            }
         }
     }
 

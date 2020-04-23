@@ -21,10 +21,10 @@ import hunt.io.channel;
 import hunt.event.timer;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
-
+import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;
 import std.conv;
-
+import std.container : DList;
 /**
 */
 class AbstractSelector : Selector {
@@ -63,22 +63,27 @@ class AbstractSelector : Selector {
             // _event.setNext(channel);
             CreateIoCompletionPort(cast(HANDLE) fd, _iocpHandle,
                     cast(size_t)(cast(void*) channel), 0);
+
+            //cast(AbstractStream)channel)
         } else {
             warningf("Can't register a channel: %s", ct);
         }
+
+        (cast(AbstractStream)channel).beginRead();
         return true;
     }
 
     override bool deregister(AbstractChannel channel) {
         // FIXME: Needing refactor or cleanup -@Administrator at 8/28/2018, 3:28:18 PM
         // https://stackoverflow.com/questions/6573218/removing-a-handle-from-a-i-o-completion-port-and-other-questions-about-iocp
-        //tracef("deregister (fd=%d)", channel.handle);
+        tracef("deregister (fd=%d)", channel.handle);
 
         // IocpContext _data;
         // _data.channel = channel;
         // _data.operation = IocpOperation.close;
         // PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
-
+        //(cast(AbstractStream)channel).stopAction();
+        //WaitForSingleObject
         return true;
     }
 
@@ -91,12 +96,27 @@ class AbstractSelector : Selector {
     //     PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
     // }
 
+    void putTast(AbstractStream stream)
+    {
+        _queue.insertBack(stream);
+    }
+
     override void onLoop(long timeout = -1) {
         _timer.init();
         super.onLoop(timeout);
     }
 
     protected override int doSelect(long t) {
+        //if(!_queue.empty)
+        //{
+        //    auto task = _queue.front();
+        //    if (task !is null)
+        //    {
+        //        task.beginRead();
+        //    }
+        //    _queue.removeFront();
+        //}
+        //trace("ssssss");
         auto timeout = _timer.doWheel();
         OVERLAPPED* overlapped;
         ULONG_PTR key = 0;
@@ -108,25 +128,39 @@ class AbstractSelector : Selector {
 
         // trace("timeout=", timeout);
         const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes, &key,
-                &overlapped, timeout);
+                &overlapped, INFINITE);
 
         IocpContext* ev = cast(IocpContext*) overlapped;
         if (ret == 0) {
-            const auto erro = GetLastError();
-            // About ERROR_OPERATION_ABORTED
-            // https://stackoverflow.com/questions/7228703/the-i-o-operation-has-been-aborted-because-of-either-a-thread-exit-or-an-applica
-            if (erro == WAIT_TIMEOUT || erro == ERROR_OPERATION_ABORTED) // 
+            if (overlapped is null)
+            {
                 return ret;
-            
+            }
+            if (key == 0)
+            {
+                return ret;
+            }
+            const auto erro = GetLastError();
+            //// About ERROR_OPERATION_ABORTED
+            //// https://stackoverflow.com/questions/7228703/the-i-o-operation-has-been-aborted-because-of-either-a-thread-exit-or-an-applica
+            if (erro == WAIT_TIMEOUT || erro == ERROR_OPERATION_ABORTED) //
+                return ret;
+
             debug warningf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
             assert(ev !is null);
             AbstractChannel channel = ev.channel;
             if (channel !is null && !channel.isClosed())
+            {
                 channel.close();
-        } else if (ev is null || ev.channel is null)
-            warning("ev is null or ev.watche is null");
-        else
+            }
+
+        }
+        //else if (ev is null || ev.channel is null)
+        //    warning("ev is null or ev.watche is null");
+        else {
             handleChannelEvent(ev.operation, ev.channel, bytes);
+        }
+
         return ret;
     }
 
@@ -134,30 +168,40 @@ class AbstractSelector : Selector {
 
         version (HUNT_IO_DEBUG)
             infof("ev.operation: %s, fd=%d", op, channel.handle);
+        try {
+            switch (op) {
+                case IocpOperation.accept:
+               // channel.onRead();
+                warningf("accept ............................");
+                break;
+                case IocpOperation.connect:
+                onSocketRead(channel, 0);
+                warningf("connect ............................");
+                break;
+                case IocpOperation.read:
+                onSocketRead(channel, bytes);
+                warningf("read ............................");
+                break;
+                case IocpOperation.write:
+                onSocketWrite(channel, bytes);
+                warningf("write ............................");
+                break;
+                case IocpOperation.event:
+                warningf("event ............................");
+                channel.onRead();
+                break;
+                case IocpOperation.close:
+                warningf("close -------------------------: %d", channel.handle);
+                break;
+                default:
+                warning("unsupported operation type -------------------------: ", op);
+                break;
+            }
+        } catch (Exception e)
+        {
 
-        switch (op) {
-        case IocpOperation.accept:
-            channel.onRead();
-            break;
-        case IocpOperation.connect:
-            onSocketRead(channel, 0);
-            break;
-        case IocpOperation.read:
-            onSocketRead(channel, bytes);
-            break;
-        case IocpOperation.write:
-            onSocketWrite(channel, bytes);
-            break;
-        case IocpOperation.event:
-            channel.onRead();
-            break;
-        case IocpOperation.close:
-            warningf("close: %d", channel.handle);
-            break;
-        default:
-            warning("unsupported operation type: ", op);
-            break;
         }
+
     }
 
     override void stop() {
@@ -180,9 +224,19 @@ class AbstractSelector : Selector {
             return;
         }
 
+        if (channel is null)
+        {
+            return;
+        }
+
+        (cast(AbstractStream)channel).setBusyWrite(false);
+
         if (len == 0 || channel.isClosed) {
-            version (HUNT_DEBUG)
-                infof("channel [fd=%d] closed", channel.handle);
+            //version (HUNT_DEBUG)
+            //    infof("channel [fd=%d] closed %d  %d", channel.handle, channel.isClosed,len);
+            //(cast(AbstractStream)channel).setFristRead(false);
+            //(cast(AbstractStream)channel).setBusyWrite(true);
+            //channel.close();
             return;
         }
 
@@ -192,6 +246,10 @@ class AbstractSelector : Selector {
             warning("The channel socket is null: ");
         } else {
             socketChannel.setRead(len);
+            if (!(cast(AbstractStream)channel).getFristRead)
+            {
+                (cast(AbstractStream)channel).setFristRead(true);
+            }
             channel.onRead();
         }
     }
@@ -207,10 +265,12 @@ class AbstractSelector : Selector {
             warning("The channel socket is null: ");
             return;
         }
+        warning("len ------------------------ %d",len);
         client.onWriteDone(len); // Notify the client about how many bytes actually sent.
     }
 
 private:
     HANDLE _iocpHandle;
     CustomTimer _timer;
+    DList!AbstractStream _queue;
 }

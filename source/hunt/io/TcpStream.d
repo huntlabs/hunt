@@ -38,6 +38,7 @@ version (HAVE_EPOLL) {
 }
 
 
+
 /**
  *
  */
@@ -47,6 +48,7 @@ class TcpStream : AbstractStream {
 
     private TcpStreamOptions _tcpOption;
     private int retryCount = 0;
+    private Selector _loop;
 
     // for client
     this(Selector loop, TcpStreamOptions option = null, AddressFamily family = AddressFamily.INET) {
@@ -57,9 +59,9 @@ class TcpStream : AbstractStream {
         super(loop, family, _tcpOption.bufferSize);
         version(HUNT_IO_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
-
         _isClient = true;
         _isConnected = false;
+        _loop = loop;
     }
 
     // for server
@@ -75,6 +77,7 @@ class TcpStream : AbstractStream {
 
         _isClient = false;
         _isConnected = true;
+        _loop = loop;
         setKeepalive();
     }
 
@@ -265,7 +268,11 @@ class TcpStream : AbstractStream {
         _inLoop.register(this);
         _isRegistered = true;
         version (HAVE_IOCP)
-            this.beginRead();
+        {
+            //auto iopc = cast(AbstractSelector)_loop;
+            //iopc.putTast(this);
+           // this.beginRead();
+        }
     }
 
     void write(ByteBuffer buffer) {
@@ -293,43 +300,48 @@ class TcpStream : AbstractStream {
         if (!_isConnected) {
             throw new Exception("The connection is down!");
         }
-
-        version (HUNT_IO_DEBUG_MORE) {
-            infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
-        } else  version (HUNT_IO_DEBUG) {
-            if (data.length <= 32)
+        version (HAVE_IOCP)
+        {
+            return write(BufferUtils.toBuffer(cast(byte[])data));
+        } else
+        {
+            version (HUNT_IO_DEBUG_MORE) {
                 infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
-            else
-                infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. 32]);
-        }
-
-        if ((_writeQueue.isEmpty()) && !_isWritting) {
-            _isWritting = true;
-            const(ubyte)[] d = data;
-
-            while (!isClosing() && !isWriteCancelling && d.length > 0) {
-                version (HUNT_IO_DEBUG)
-                    infof("to write directly %d bytes, fd=%d", d.length, this.handle);
-                size_t nBytes = tryWrite(d);
-
-                if (nBytes == d.length) {
-                    version (HUNT_IO_DEBUG)
-                        tracef("write all out at once: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
-                    checkAllWriteDone();
-                    break;
-                } else if (nBytes > 0) {
-                    version (HUNT_IO_DEBUG)
-                        tracef("write out partly: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
-                    d = d[nBytes .. $];
-                } else {
-                    version (HUNT_IO_DEBUG)
-                        warningf("buffering data: %d bytes, fd=%d", d.length, this.handle);
-                    _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
-                    break;
-                }
+            } else  version (HUNT_IO_DEBUG) {
+                if (data.length <= 32)
+                    infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
+                else
+                    infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. 32]);
             }
-        } else {
-            write(BufferUtils.toBuffer(cast(byte[]) data));
+
+            if ((_writeQueue.isEmpty()) && !_isWritting) {
+                _isWritting = true;
+                const(ubyte)[] d = data;
+
+                while (!isClosing() && !isWriteCancelling && d.length > 0) {
+                    version (HUNT_IO_DEBUG)
+                        infof("to write directly %d bytes, fd=%d", d.length, this.handle);
+                    size_t nBytes = tryWrite(d);
+
+                    if (nBytes == d.length) {
+                        version (HUNT_IO_DEBUG)
+                            tracef("write all out at once: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                        checkAllWriteDone();
+                        break;
+                    } else if (nBytes > 0) {
+                        version (HUNT_IO_DEBUG)
+                            tracef("write out partly: %d / %d bytes, fd=%d", nBytes, d.length, this.handle);
+                        d = d[nBytes .. $];
+                    } else {
+                        version (HUNT_IO_DEBUG)
+                            warningf("buffering data: %d bytes, fd=%d", d.length, this.handle);
+                        _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
+                        break;
+                    }
+                }
+            } else {
+                write(BufferUtils.toBuffer(cast(byte[]) data));
+            }
         }
     }
 
@@ -365,7 +377,11 @@ protected:
                     trace("continue reading...");
             }
         } else {
-            doRead();
+            if (!_isClosed)
+            {
+                doRead();
+            }
+
         }
 
         //if (this.isError) {
