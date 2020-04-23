@@ -10,6 +10,7 @@ import core.atomic;
 import core.sync.condition;
 import core.sync.mutex;
 
+import std.conv;
 import std.traits;
 
 private enum TaskStatus : ubyte {
@@ -62,6 +63,9 @@ class AbstractTask : Runnable {
         } catch (Throwable e) {
             exception = e;
             debug warning(e.msg);
+            version(HUNT_DEBUG) {
+                warning(e);
+            } 
         }
 
         atomicSetUbyte(taskStatus, TaskStatus.done);
@@ -166,13 +170,25 @@ This class serves two purposes:
     terminated.
 */
 final class ParallelismThread : Thread {
+
     this(void delegate() dg) {
         super(dg);
         taskQueue = new NonBlockingQueue!(AbstractTask)();
+        state = ThreadState.NEW;
     }
+
+    ThreadState state;
 
     TaskPool pool;
     NonBlockingQueue!(AbstractTask) taskQueue;
+}
+
+
+enum ThreadState {
+    NEW,
+    BUSY,
+    IDLE,
+    TERMINATED
 }
 
 /**
@@ -183,8 +199,9 @@ enum PoolState : ubyte {
     stopNow
 }
 
-/**
-*/
+/** 
+ *
+ */
 class TaskPool {
 
     private ParallelismThread[] pool;
@@ -235,9 +252,11 @@ class TaskPool {
         nextThreadIndex = 0;
 
         pool = new ParallelismThread[nWorkers];
-        foreach (ref poolThread; pool) {
+
+        foreach (size_t index, ref ParallelismThread poolThread; pool) {
             poolThread = new ParallelismThread(&startWorkLoop);
             poolThread.pool = this;
+            poolThread.name = "worker-thread-" ~ index.to!string();
             poolThread.start();
         }
     }
@@ -268,20 +287,30 @@ class TaskPool {
     // until they terminate.  It's also entered by non-worker threads when
     // finish() is called with the blocking variable set to true.
     private void executeWorkLoop() {
+        ParallelismThread workerThread = pool[threadIndex];
+        workerThread.state = ThreadState.IDLE;
+
         while (atomicReadUbyte(status) != PoolState.stopNow) {
-            AbstractTask task = pool[threadIndex].taskQueue.dequeue();
+            AbstractTask task = workerThread.taskQueue.dequeue();
             if (task is null) {
                 if (atomicReadUbyte(status) == PoolState.finishing) {
                     atomicSetUbyte(status, PoolState.stopNow);
-                    return;
+                    break;
                 }
             } else {
+                version(HUNT_IO_DEBUG) infof("running a task in thread: %s", workerThread.name());
+                workerThread.state = ThreadState.BUSY;
                 doJob(task);
+                workerThread.state = ThreadState.IDLE;
+                version(HUNT_IO_DEBUG) infof("A task finished in thread: %s", workerThread.name());
             }
         }
+
+        version(HUNT_IO_DEBUG) infof("Thread exited, threadIndex: %d, name: %s", threadIndex, workerThread.name());
+        workerThread.state = ThreadState.TERMINATED;
     }
 
-    private void doJob(AbstractTask job) {
+    private void doJob(AbstractTask job) nothrow {
         // assert(job.taskStatus == TaskStatus.processing);
 
         // scope (exit) {
@@ -293,7 +322,13 @@ class TaskPool {
         //         notifyWaiters();
         //     }
         // }
-        job.run();
+        
+        try {
+            job.run();
+        } catch(Throwable t) {
+            warning(t.msg);
+            version(HUNT_DEBUG) warning(t);
+        }
     }
 
     private void waiterLock() {
@@ -370,7 +405,20 @@ class TaskPool {
         int nWorkers = cast(int)pool.length;
         if(factor<0) factor = -factor;
         int i = factor % nWorkers;
-        // tracef("factor=%d, index=%d", factor, i);
-        pool[i].taskQueue.enqueue(task);
+        ParallelismThread selectedThread = pool[i];
+
+        // Make sure that an IDLE thread selected
+        int j = 0;
+        while(selectedThread.state != ThreadState.IDLE) {
+            i = (i+1) % nWorkers;
+            selectedThread = pool[i];
+            j++;
+            if(j >= nWorkers) {
+                j = 0;
+                version(HUNT_DEBUG) warning("All the worker threads are busy. Continue to select one...");
+            }
+        }
+        version(HUNT_IO_DEBUG) warningf("selected a thread: %s, index: %d", selectedThread.name(), i);
+        selectedThread.taskQueue.enqueue(task);
     }
 }
