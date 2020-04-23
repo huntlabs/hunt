@@ -277,7 +277,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         // keep thread-safe here
         if(!cas(&_isBusyWritting, false, true)) {
             // version (HUNT_IO_DEBUG)
-            warningf("busy writing. fd=%d", this.handle);
+            version(HUNT_DEBUG) warningf("busy writing. fd=%d", this.handle);
             return;
         }
 

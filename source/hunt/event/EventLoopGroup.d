@@ -19,15 +19,16 @@ import hunt.util.Lifecycle;
 import core.atomic;
 
 /**
-*/
+ * 
+ */
 class EventLoopGroup : Lifecycle {
 
     this(size_t size = (totalCPUs - 1)) {
         size_t _size = size > 0 ? size : 1;
-        eventLoopPool = new EventLoop[_size];
+        _eventLoops = new EventLoop[_size];
 
         foreach (i; 0 .. _size) {
-            eventLoopPool[i] = new EventLoop(i, _size);
+            _eventLoops[i] = new EventLoop(i, _size);
         }
     }
 
@@ -40,7 +41,7 @@ class EventLoopGroup : Lifecycle {
     */
     void start(long timeout) {
         if (cas(&_isRunning, false, true)) {
-            foreach (EventLoop pool; eventLoopPool) {
+            foreach (EventLoop pool; _eventLoops) {
                 pool.runAsync(timeout);
             }
         }
@@ -52,7 +53,7 @@ class EventLoopGroup : Lifecycle {
 
         version (HUNT_IO_DEBUG)
             trace("stopping EventLoopGroup...");
-        foreach (EventLoop pool; eventLoopPool) {
+        foreach (EventLoop pool; _eventLoops) {
             pool.stop();
         }
 
@@ -66,7 +67,7 @@ class EventLoopGroup : Lifecycle {
 
     bool isReady() {
         
-        foreach (EventLoop pool; eventLoopPool) {
+        foreach (EventLoop pool; _eventLoops) {
             if(!pool.isReady()) return false;
         }
 
@@ -74,11 +75,11 @@ class EventLoopGroup : Lifecycle {
     }
 
     @property size_t size() {
-        return eventLoopPool.length;
+        return _eventLoops.length;
     }
 
     EventLoop nextLoop(size_t factor) {
-       return eventLoopPool[factor % eventLoopPool.length];
+       return _eventLoops[factor % _eventLoops.length];
     }
 
     EventLoop nextLoop() {
@@ -87,18 +88,18 @@ class EventLoopGroup : Lifecycle {
             index = 0;
             atomicStore(_loopIndex, 0);
         }
-        index %= eventLoopPool.length;
-        return eventLoopPool[index];
+        index %= _eventLoops.length;
+        return _eventLoops[index];
     }
 
     EventLoop opIndex(size_t index) {
-        auto i = index % eventLoopPool.length;
-        return eventLoopPool[i];
+        auto i = index % _eventLoops.length;
+        return _eventLoops[i];
     }
 
     int opApply(scope int delegate(EventLoop) dg) {
         int ret = 0;
-        foreach (pool; eventLoopPool) {
+        foreach (pool; _eventLoops) {
             ret = dg(pool);
             if (ret)
                 break;
@@ -109,5 +110,5 @@ class EventLoopGroup : Lifecycle {
 private:
     shared int _loopIndex;
     shared bool _isRunning;
-    EventLoop[] eventLoopPool;
+    EventLoop[] _eventLoops;
 }

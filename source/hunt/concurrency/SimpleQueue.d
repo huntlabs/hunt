@@ -153,6 +153,7 @@ class NonBlockingQueue(T) : Queue!T {
                 cas(&this.tail, tl, cur);
                 continue;
             }
+
             shared(QueueNode!T) dummy = null;
             if (cas(&tl.nxt, dummy, end)) {
                 // successfull enqueued new end node
@@ -161,7 +162,7 @@ class NonBlockingQueue(T) : Queue!T {
         }
     }
 
-    T dequeue() {
+    T dequeue() nothrow {
         T e = void;
         while (!tryDequeue(e)) {
             Thread.yield();
@@ -170,7 +171,7 @@ class NonBlockingQueue(T) : Queue!T {
         return e;
     }
 
-    bool tryDequeue(out T e) {
+    bool tryDequeue(out T e) nothrow {
         auto dummy = this.head;
         auto tl = this.tail;
         auto nxt = dummy.nxt;
@@ -182,10 +183,11 @@ class NonBlockingQueue(T) : Queue!T {
             e = cast(T)nxt.value;
             return true;
         }
+        
         return tryDequeue(e);
     }
 
-    bool isEmpty() {
+    bool isEmpty() nothrow {
         return this.head.nxt is null;
     }
 
