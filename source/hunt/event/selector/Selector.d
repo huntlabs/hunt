@@ -137,11 +137,17 @@ abstract class Selector {
         _isReady = true;
         idleTime = timeout;
 
-        do {
-            // version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
+        version (HAVE_IOCP)
+        {
             doSelect(timeout);
-            // infof("Selector rolled once. isRuning: %s", isRuning);
-        } while (!_isStopping);
+        }else
+        {
+            do {
+                // version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
+                doSelect(timeout);
+                // infof("Selector rolled once. isRuning: %s", isRuning);
+            } while (!_isStopping);
+        }
 
         _isReady = false;
         _running = false;

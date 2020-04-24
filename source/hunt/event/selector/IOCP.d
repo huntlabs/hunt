@@ -24,6 +24,7 @@ import hunt.system.Error;
 import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;
 import std.conv;
+import std.socket;
 import std.container : DList;
 /**
 */
@@ -35,6 +36,7 @@ class AbstractSelector : Selector {
         if (_iocpHandle is null)
             errorf("CreateIoCompletionPort failed: %d\n", GetLastError());
         _timer.init();
+        _stopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     }
 
     ~this() {
@@ -69,7 +71,11 @@ class AbstractSelector : Selector {
             warningf("Can't register a channel: %s", ct);
         }
 
-        (cast(AbstractStream)channel).beginRead();
+        auto stream = cast(AbstractStream)channel;
+        if (stream.getFamily)
+        {
+            stream.beginRead();
+        }
         return true;
     }
 
@@ -122,46 +128,48 @@ class AbstractSelector : Selector {
         ULONG_PTR key = 0;
         DWORD bytes = 0;
 
-        // const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes,
-        //         &key, &overlapped, INFINITE);
-        // tracef("GetQueuedCompletionStatus, ret=%d", ret);
+        while( WAIT_OBJECT_0 != WaitForSingleObject(_stopEvent , 0))
+        {
+            const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes, &key,
+                    &overlapped, INFINITE);
 
-        // trace("timeout=", timeout);
-        const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes, &key,
-                &overlapped, INFINITE);
+            IocpContext* ev = cast(IocpContext*) overlapped;
 
-        IocpContext* ev = cast(IocpContext*) overlapped;
-        if (ret == 0) {
-            if (overlapped is null)
-            {
-                return ret;
+            if (ret == 0) {
+
+                DWORD dwErr = GetLastError();
+                if (WAIT_TIMEOUT == dwErr)
+                {
+                    continue;
+                }
+                else
+                {
+                    AbstractChannel channel = ev.channel;
+                    if (channel !is null && !channel.isClosed())
+                    {
+                        channel.close();
+                    }
+                    continue;
+                }
             }
-            if (key == 0)
-            {
-                return ret;
+            //else if (ev is null || ev.channel is null)
+            //    warning("ev is null or ev.watche is null");
+            else {
+                if (0 == bytes && (ev.operation == IocpOperation.read || ev.operation == IocpOperation.write))
+                {
+                    AbstractChannel channel = ev.channel;
+                    if (channel !is null && !channel.isClosed())
+                    {
+                        channel.close();
+                    }
+                    continue;
+                }else
+                {
+                    handleChannelEvent(ev.operation, ev.channel, bytes);
+                }
             }
-            const auto erro = GetLastError();
-            //// About ERROR_OPERATION_ABORTED
-            //// https://stackoverflow.com/questions/7228703/the-i-o-operation-has-been-aborted-because-of-either-a-thread-exit-or-an-applica
-            if (erro == WAIT_TIMEOUT || erro == ERROR_OPERATION_ABORTED) //
-                return ret;
-
-            debug warningf("error occurred, code=%d, message: %s", erro, getErrorMessage(erro));
-            assert(ev !is null);
-            AbstractChannel channel = ev.channel;
-            if (channel !is null && !channel.isClosed())
-            {
-                channel.close();
-            }
-
         }
-        //else if (ev is null || ev.channel is null)
-        //    warning("ev is null or ev.watche is null");
-        else {
-            handleChannelEvent(ev.operation, ev.channel, bytes);
-        }
-
-        return ret;
+        return 0;
     }
 
     private void handleChannelEvent(IocpOperation op, AbstractChannel channel, DWORD bytes) {
@@ -172,26 +180,27 @@ class AbstractSelector : Selector {
             switch (op) {
                 case IocpOperation.accept:
                // channel.onRead();
-                warningf("accept ............................");
+                //warningf("accept ............................");
                 break;
                 case IocpOperation.connect:
                 onSocketRead(channel, 0);
-                warningf("connect ............................");
+                (cast(AbstractStream)channel).beginRead();
+                //warningf("connect ............................");
                 break;
                 case IocpOperation.read:
                 onSocketRead(channel, bytes);
-                warningf("read ............................");
+                //warningf("read ........................ %d ",bytes);
                 break;
                 case IocpOperation.write:
                 onSocketWrite(channel, bytes);
-                warningf("write ............................");
+                //warningf("write ......................... %d", bytes);
                 break;
                 case IocpOperation.event:
-                warningf("event ............................");
+                //warningf("event ............................");
                 channel.onRead();
                 break;
                 case IocpOperation.close:
-                warningf("close -------------------------: %d", channel.handle);
+                //warningf("close -------------------------: %d", channel.handle);
                 break;
                 default:
                 warning("unsupported operation type -------------------------: ", op);
@@ -226,6 +235,7 @@ class AbstractSelector : Selector {
 
         if (channel is null)
         {
+            warning("channel is null");
             return;
         }
 
@@ -265,7 +275,7 @@ class AbstractSelector : Selector {
             warning("The channel socket is null: ");
             return;
         }
-        warning("len ------------------------ %d",len);
+       // warning("len ------------------------ %d",len);
         client.onWriteDone(len); // Notify the client about how many bytes actually sent.
     }
 
@@ -273,4 +283,5 @@ private:
     HANDLE _iocpHandle;
     CustomTimer _timer;
     DList!AbstractStream _queue;
+    HANDLE _stopEvent;
 }

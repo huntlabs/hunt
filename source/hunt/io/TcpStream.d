@@ -56,7 +56,7 @@ class TcpStream : AbstractStream {
             _tcpOption = TcpStreamOptions.create();
         else
             _tcpOption = option;
-        super(loop, family, _tcpOption.bufferSize);
+        super(loop, family, _tcpOption.bufferSize, false);
         version(HUNT_IO_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
         this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
         _isClient = true;
@@ -156,19 +156,35 @@ class TcpStream : AbstractStream {
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
             this.socket.blocking = true;
-            if(super.doConnect(addr))
+            version (HAVE_IOCP)
             {
-              this.socket.blocking = false;
-              setKeepalive();
-              _localAddress = this.socket.localAddress();
-              start();
-              _isConnected = true;
-            } else
+                start();
+                if(super.doConnect(addr))
+                {
+                    this.socket.blocking = false;
+                    setKeepalive();
+                    _localAddress = this.socket.localAddress();
+                    _isConnected = true;
+                } else
+                {
+                    errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
+                    _isConnected = false;
+                }
+            }else
             {
-                errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
-                _isConnected = false;
+                if(super.doConnect(addr))
+                {
+                    this.socket.blocking = false;
+                    setKeepalive();
+                    _localAddress = this.socket.localAddress();
+                    start();
+                    _isConnected = true;
+                } else
+                {
+                    errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
+                    _isConnected = false;
+                }
             }
-
         } catch (SocketOSException ex) {
             // Must try the best to catch all the exceptions. It's because it will executed in another thread.
             debug warning(ex.msg);
