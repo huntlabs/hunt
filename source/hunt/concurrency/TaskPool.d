@@ -11,6 +11,7 @@ import core.sync.condition;
 import core.sync.mutex;
 
 import std.conv;
+import std.format;
 import std.traits;
 
 private enum TaskStatus : ubyte {
@@ -85,7 +86,8 @@ class AbstractTask : Runnable {
 }
 
 /**
-*/
+ * 
+ */
 class Task(alias fun, Args...) : AbstractTask {
     Args _args;
 
@@ -178,11 +180,11 @@ final class ParallelismThread : Thread {
     }
 
     ThreadState state;
+    int factor = -1;
 
     TaskPool pool;
     NonBlockingQueue!(AbstractTask) taskQueue;
 }
-
 
 enum ThreadState {
     NEW,
@@ -192,11 +194,30 @@ enum ThreadState {
 }
 
 /**
-*/
+ * 
+ */
 enum PoolState : ubyte {
     running,
     finishing,
     stopNow
+}
+
+/**
+ * 
+ */
+class PoolStatus {
+    size_t total;
+
+    int active;
+
+    int idle;
+    
+    int waiting;
+
+    override string toString() {
+        return format("total: %d, active: %d, idle: %d, waiting: %d", 
+            total, active, idle, waiting);
+    }
 }
 
 /** 
@@ -289,6 +310,10 @@ class TaskPool {
     private void executeWorkLoop() {
         ParallelismThread workerThread = pool[threadIndex];
         workerThread.state = ThreadState.IDLE;
+        scope(exit) {
+            version(HUNT_IO_DEBUG) infof("Thread exited, threadIndex: %d, name: %s", threadIndex, workerThread.name());
+            workerThread.state = ThreadState.TERMINATED;
+        }
 
         while (atomicReadUbyte(status) != PoolState.stopNow) {
             AbstractTask task = workerThread.taskQueue.dequeue();
@@ -300,29 +325,22 @@ class TaskPool {
             } else {
                 version(HUNT_IO_DEBUG) infof("running a task in thread: %s", workerThread.name());
                 workerThread.state = ThreadState.BUSY;
+                // scope(exit) {
+                //     workerThread.state = ThreadState.IDLE;
+                // }
+                
                 doJob(task);
+                
                 workerThread.state = ThreadState.IDLE;
+                workerThread.factor = -1;
+
                 version(HUNT_IO_DEBUG) infof("A task finished in thread: %s", workerThread.name());
             }
         }
 
-        version(HUNT_IO_DEBUG) infof("Thread exited, threadIndex: %d, name: %s", threadIndex, workerThread.name());
-        workerThread.state = ThreadState.TERMINATED;
     }
 
-    private void doJob(AbstractTask job) nothrow {
-        // assert(job.taskStatus == TaskStatus.processing);
-
-        // scope (exit) {
-        //     // if (!isSingleTask)
-        //     {
-        //         waiterLock();
-        //         scope (exit)
-        //             waiterUnlock();
-        //         notifyWaiters();
-        //     }
-        // }
-        
+    private void doJob(AbstractTask job) nothrow {        
         try {
             job.run();
         } catch(Throwable t) {
@@ -408,17 +426,99 @@ class TaskPool {
         ParallelismThread selectedThread = pool[i];
 
         // Make sure that an IDLE thread selected
+        // int j = 0;
+        // while(selectedThread.state != ThreadState.IDLE) {
+        //     version(HUNT_IO_DEBUG) warningf("Worker thread is busy: %s, index: %d", selectedThread.name(), i);
+        //     i = (i+1) % nWorkers;
+        //     selectedThread = pool[i];
+        //     j++;
+        //     if(j >= nWorkers) {
+        //         j = 0;
+        //         version(HUNT_DEBUG) warning("All the worker threads are busy. Select one randomly.");
+        //         // No idle thread found after checking the whole pool.
+        //         // No wait. Select one randomly.
+        //         // Warning: It may be in a dead-lock status;
+        //         break;
+        //     }
+        // }
+
+        if(selectedThread.state != ThreadState.IDLE) {
+            version(HUNT_IO_DEBUG) {
+                warningf("The %s is busy, index: %d, factor: %d", selectedThread.name(), i, factor);
+            }
+
+            int lastFactor = selectedThread.factor;
+            if(lastFactor != -1 && lastFactor != factor) {
+                version(HUNT_DEBUG) {
+                    warningf("The factors collision detected, last: %d, current: %d. " ~ 
+                        "To remove this warning, increase the size of the task pool please!", 
+                        lastFactor, factor);
+                }
+
+                ParallelismThread newSelectedThread = getIdleThread(factor);
+                if(newSelectedThread !is null) {
+                    selectedThread = newSelectedThread;
+                    selectedThread.factor = factor;
+                } else {
+                    // TODO: Tasks pending completion -@zhangxueping at 2020-04-26T10:00:58+08:00
+                    // Create a new worker thread.
+                }
+            } else {
+                selectedThread.factor = factor;
+            }
+        } else {
+            selectedThread.factor = factor;
+        }
+
+        version(HUNT_IO_DEBUG) {
+            tracef("selected a thread: %s, index: %d", selectedThread.name(), i);
+            PoolStatus status = checkStatus();
+            warning(status.toString());
+        }
+
+        selectedThread.taskQueue.enqueue(task);
+    }
+
+    private ParallelismThread getIdleThread(int startIndex = 0) {
         int j = 0;
-        while(selectedThread.state != ThreadState.IDLE) {
-            i = (i+1) % nWorkers;
-            selectedThread = pool[i];
+        int nWorkers = cast(int)pool.length;
+        ParallelismThread selectedThread;
+
+        do {            
+            startIndex = (startIndex+1) % nWorkers;
+            selectedThread = pool[startIndex];
+            version(HUNT_IO_DEBUG) {
+                warningf("The worker thread status: %s, index: %d", 
+                selectedThread.name(), startIndex);
+            }
+
             j++;
             if(j >= nWorkers) {
                 j = 0;
-                version(HUNT_DEBUG) warning("All the worker threads are busy. Continue to select one...");
+                version(HUNT_DEBUG) warning("All the worker threads are busy. Then to select nothing.");
+                // No idle thread found after checking the whole pool.
+                // No wait. Select one randomly.
+                // Warning: It may be in a dead-lock status;
+                break;
             }
+        } while(selectedThread.state != ThreadState.IDLE);
+
+        return selectedThread;
+    }
+
+    PoolStatus checkStatus() {
+        PoolStatus status = new PoolStatus();
+
+        status.total = pool.length;
+        foreach (ParallelismThread th; pool) {
+            if(th.state == ThreadState.BUSY) {
+                status.active++;
+            } else if(th.state == ThreadState.IDLE) {
+                status.idle++;
+            }
+            // tracef("Current: %s, WorkerThread: %s, state: %s", Thread.getThis().name(), t.name(), t.state);
         }
-        version(HUNT_IO_DEBUG) warningf("selected a thread: %s, index: %d", selectedThread.name(), i);
-        selectedThread.taskQueue.enqueue(task);
+
+        return status;
     }
 }
