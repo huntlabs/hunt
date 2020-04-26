@@ -72,8 +72,7 @@ class AbstractSelector : Selector {
         }
 
         auto stream = cast(AbstractStream)channel;
-        if (stream.getFamily)
-        {
+        if (!stream.isClient()) {
             stream.beginRead();
         }
         return true;

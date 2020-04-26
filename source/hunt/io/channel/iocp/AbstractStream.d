@@ -21,8 +21,7 @@ import core.sys.windows.mswsock;
 
 import std.format;
 import std.socket;
-import core.sync.mutex;
-    import core.stdc.string;
+import core.stdc.string;
 
 /**
 TCP Peer
@@ -38,12 +37,11 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected DataReceivedHandler dataReceivedHandler;
     protected SimpleActionHandler dataWriteDoneHandler;
 
-    protected bool _serverPeer;
     protected ByteBuffer _bufferForRead;
     protected AddressFamily _family;
     private bool _Closed  = false;
 
-    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2 , bool serverPeer = true) {
+    this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         super(loop, ChannelType.TCP);
         // setFlag(ChannelFlag.Read, true);
         // setFlag(ChannelFlag.Write, true);
@@ -51,7 +49,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_IO_DEBUG)
             trace("Buffer size for read: ", bufferSize);
         // _readBuffer = new ubyte[bufferSize];
-        _serverPeer = serverPeer;
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.clear();
         _readBuffer = cast(ubyte[])_bufferForRead.array();
@@ -63,10 +60,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     mixin CheckIocpError;
 
-    bool getFamily()
-    {
-        return _serverPeer;
-    }
+    abstract bool isClient();
 
     override void onRead() {
         version (HUNT_IO_DEBUG)
@@ -121,48 +115,32 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     public void beginRead() {
-        //synchronized (_mutex){
+        // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
 
-            // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
-            //if (this._socket !is null)
-            //{
-        try
+        if (!_Closed )
         {
-            // synchronized (_mutex)
-            // {
-            if (!_Closed )
+            ///  _isSingleWriteBusy = true;
+
+            WSABUF _dataReadBuffer;
+            _dataReadBuffer.len = cast(uint) _readBuffer.length;
+            _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
+            memset(&_iocpread.overlapped , 0 ,_iocpread.overlapped.sizeof );
+            _iocpread.channel = this;
+            _iocpread.operation = IocpOperation.read;
+            DWORD dwReceived = 0;
+            DWORD dwFlags = 0;
+            version (HUNT_IO_DEBUG)
+                tracef("start receiving [fd=%d] ", this.socket.handle);
+            // _isSingleWriteBusy = true;
+            int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
+            &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+            if (nRet == SOCKET_ERROR && (GetLastError() != ERROR_IO_PENDING))
             {
-              ///  _isSingleWriteBusy = true;
-
-                WSABUF _dataReadBuffer;
-                _dataReadBuffer.len = cast(uint) _readBuffer.length;
-                _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
-                memset(&_iocpread.overlapped , 0 ,_iocpread.overlapped.sizeof );
-                _iocpread.channel = this;
-                _iocpread.operation = IocpOperation.read;
-                DWORD dwReceived = 0;
-                DWORD dwFlags = 0;
-                version (HUNT_IO_DEBUG)
-                    tracef("start receiving [fd=%d] ", this.socket.handle);
-               // _isSingleWriteBusy = true;
-                int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
-                &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-                if (nRet == SOCKET_ERROR && (GetLastError() != ERROR_IO_PENDING))
-                {
-                    _isSingleWriteBusy = false;
-                    close();
-                }
-                //checkErro(nRet, SOCKET_ERROR);
+                _isSingleWriteBusy = false;
+                close();
             }
-            // }
-        } catch (Exception e)
-        {
-
+            //checkErro(nRet, SOCKET_ERROR);
         }
-       // }
-
-
-        //}
     }
 
     protected bool doConnect(Address addr) {
@@ -184,67 +162,57 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     private uint doWrite(const(ubyte)[] data) {
-       // synchronized (_mutex){
-            DWORD dwSent = 0;//cast(DWORD)data.length;
-            DWORD dwFlags = 0;
-            try {
-                if ( !_Closed)
-                {
-                    memset(&_iocpwrite.overlapped , 0 ,_iocpwrite.overlapped.sizeof );
-                    _iocpwrite.channel = this;
-                    _iocpwrite.operation = IocpOperation.write;
-                    // tracef("To write %d bytes, fd=%d", data.length, this.socket.handle());
-                    version (HUNT_IO_DEBUG) {
-                        size_t bufferLength = data.length;
-                        tracef("To write %d bytes", bufferLength);
-                        if (bufferLength > 32)
-                            tracef("%(%02X %) ...", data[0 .. 32]);
-                        else
-                            tracef("%s", data);
-                    }
-                    // size_t bufferLength = data.length;
-                    //     tracef("To write %d bytes", bufferLength);
-                    //     tracef("%s", data);
-                    WSABUF _dataWriteBuffer;
+        DWORD dwSent = 0;//cast(DWORD)data.length;
+        DWORD dwFlags = 0;
 
-                    //char[] bf = new char[data.length];
-                    //memcpy(bf.ptr,data.ptr,data.length);
-                    //_dataWriteBuffer.buf =  bf.ptr;
-                    _dataWriteBuffer.buf = cast(char*) data.ptr;
-                    _dataWriteBuffer.len = cast(uint) data.length;
-                    _isSingleWriteBusy = true;
-                    int nRet = WSASend( cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
-                    dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-                    if (nRet != NO_ERROR && (GetLastError() != ERROR_IO_PENDING))
-                    {
-                        _isSingleWriteBusy = false;
-                        close();
-                    }
+        if ( !_Closed)
+        {
+            memset(&_iocpwrite.overlapped , 0 ,_iocpwrite.overlapped.sizeof );
+            _iocpwrite.channel = this;
+            _iocpwrite.operation = IocpOperation.write;
+            // tracef("To write %d bytes, fd=%d", data.length, this.socket.handle());
+            version (HUNT_IO_DEBUG) {
+                size_t bufferLength = data.length;
+                tracef("To write %d bytes", bufferLength);
+                if (bufferLength > 32)
+                    tracef("%(%02X %) ...", data[0 .. 32]);
+                else
+                    tracef("%s", data);
+            }
+            // size_t bufferLength = data.length;
+            //     tracef("To write %d bytes", bufferLength);
+            //     tracef("%s", data);
+            WSABUF _dataWriteBuffer;
 
-                    checkErro( nRet, SOCKET_ERROR);
-                }
-                //}
-            } catch(Exception e)
+            //char[] bf = new char[data.length];
+            //memcpy(bf.ptr,data.ptr,data.length);
+            //_dataWriteBuffer.buf =  bf.ptr;
+            _dataWriteBuffer.buf = cast(char*) data.ptr;
+            _dataWriteBuffer.len = cast(uint) data.length;
+            _isSingleWriteBusy = true;
+            int nRet = WSASend( cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
+            dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+            if (nRet != NO_ERROR && (GetLastError() != ERROR_IO_PENDING))
             {
                 _isSingleWriteBusy = false;
-                return 0;
+                close();
             }
 
+            checkErro( nRet, SOCKET_ERROR);
+        }
 
-            // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/9 12:18:20 pm
-            // Keep this to prevent the buffer corrupted. Why?
-            version (HUNT_IO_DEBUG) {
-                tracef("sent: %d / %d bytes, fd=%d", dwSent, bufferLength, this.handle);
-            }
+        // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/9 12:18:20 pm
+        // Keep this to prevent the buffer corrupted. Why?
+        version (HUNT_IO_DEBUG) {
+            tracef("sent: %d / %d bytes, fd=%d", dwSent, bufferLength, this.handle);
+        }
 
-            if (this.isError) {
-                errorf("Socket error on write: fd=%d, message=%s", this.handle, this.errorMessage);
-                this.close();
-            }
+        if (this.isError) {
+            errorf("Socket error on write: fd=%d, message=%s", this.handle, this.errorMessage);
+            this.close();
+        }
 
-            return dwSent;
-       // }
-
+        return dwSent;
     }
 
     protected void doRead() {
@@ -266,7 +234,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 dataReceivedHandler(_bufferForRead);
             }
 
-            if (_serverPeer)
+            if (!isClient())
             {
                 while(!_isSingleWriteBusy)
                 {

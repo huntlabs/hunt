@@ -58,6 +58,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         setFlag(ChannelFlag.ETMode, true);
     }
 
+    abstract bool isClient();
     abstract bool isConnected() nothrow;
     abstract protected void onDisconnected();
 
