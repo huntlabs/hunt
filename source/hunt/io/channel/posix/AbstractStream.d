@@ -73,13 +73,16 @@ abstract class AbstractStream : AbstractSocketChannel {
         // ptrdiff_t len = read(this.handle, cast(void*) rb.ptr, rb.length);
         version (HUNT_IO_DEBUG) {
             tracef("reading[fd=%d]: %d bytes", this.handle, len);
-            if (len <= 32)
-                infof("fd: %d, %d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. len]);
-            else
-                infof("fd: %d, 32/%d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. 32]);
         }
 
         if (len > 0) {
+            version(HUNT_IO_DEBUG) {
+                if (len <= 32)
+                    infof("fd: %d, %d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. len]);
+                else
+                    infof("fd: %d, 32/%d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. 32]);
+            }
+
             if (dataReceivedHandler !is null) {
                 _bufferForRead.limit(cast(int)len);
                 _bufferForRead.position(0);
@@ -118,8 +121,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 onDisconnected();
                 errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
             }
-        }
-        else {
+        } else {
             version (HUNT_DEBUG)
                 infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
             onDisconnected();
@@ -274,6 +276,8 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
+        // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-04-24T14:26:45+08:00
+        // More tests are needed
         // keep thread-safe here
         if(!cas(&_isBusyWritting, false, true)) {
             // version (HUNT_IO_DEBUG)
@@ -305,8 +309,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        version (HUNT_IO_DEBUG)
-        {
+        version (HUNT_IO_DEBUG) {
             tracef("start to write [fd=%d], writeBuffer %s empty", this.handle, writeBuffer is null ? "is" : "is not");
         }
 
@@ -320,8 +323,9 @@ abstract class AbstractStream : AbstractSocketChannel {
 
                 // eventLoop.update(this);
             }
-            version (HUNT_IO_DEBUG)
+            version (HUNT_IO_DEBUG) {
                 warningf("running here, fd=%d", this.handle);
+            }
         }
     }
     private shared bool _isBusyWritting = false;
