@@ -44,8 +44,7 @@ examples/test/unittest
 *-test-*
 .DS_Store
 *.zip
-hunt-test-*
-test.config
+*-test-*
 mixin_output.d
 
 # meson build directories
