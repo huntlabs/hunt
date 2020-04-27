@@ -31,17 +31,14 @@ __dummy.html
 # Examples
 
 examples/*/log.txt
-examples/Benchmark/hunt-benchmark
-examples/ConfigurationDemo/configuration
-examples/ContainerDemo/container-demo
-examples/UdpDemo/udp-demo
-examples/HttpServer/http-server
-examples/EventGroupDemo/http-server-powered
-examples/PerformanceTest/performance
-examples/TcpDemo/tcp-client
-examples/TcpDemo/tcp-server
-examples/Timer/timer
-examples/UnitTest/unittest
+examples/configuration/configuration
+examples/collecton/container-demo
+examples/udp/udp-demo
+examples/performance/performance
+examples/tcp/tcp-client
+examples/tcp/tcp-server
+examples/timer/timer
+examples/test/unittest
 
 # others
 *-test-*
