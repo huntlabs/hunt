@@ -89,6 +89,20 @@ class Home {
     }
 }
 
+/**
+ * 
+ */
+class MyClass {
+    this() {
+        myInner = new MyInner();
+    }
+
+    class MyInner {
+        string name;
+    }
+
+    MyInner myInner;
+}
 
 class SerializationTest {
 
@@ -120,6 +134,18 @@ class SerializationTest {
 
         string result = unserialize!(string)(buffer);
         tracef(result);
+    }
+
+    void testNestedClass() {
+
+        MyClass c = new MyClass();
+        c.myInner.name = "test name";
+
+        ubyte[] s = serialize(c);
+        MyClass result = unserialize!(MyClass)(s);
+        assert(result !is null);
+        assert(result.myInner !is null);
+        assert(result.myInner.name == "test name");
     }
 
     // void testAssociativeArray() {
@@ -228,7 +254,6 @@ class SerializationTest {
 //    // abstract void test();
 // }
 
-
 // class B1 : A {
 
 //    // It's not necessary
@@ -260,34 +285,32 @@ class SerializationTest {
 //    // }
 // }
 
-
-
 class C {
-   int age;
-   string name;
-   T3 t3;
-   override bool opEquals(Object c) {
-       auto c1 = cast(C) c;
-       return age == c1.age && name == c1.name && t3 == c1.t3;
-   }
+    int age;
+    string name;
+    T3 t3;
+    override bool opEquals(Object c) {
+        auto c1 = cast(C) c;
+        return age == c1.age && name == c1.name && t3 == c1.t3;
+    }
 
-   C clone() {
-       auto c = new C();
-       c.age = age;
-       c.name = name;
-       c.t3 = t3;
-       return c;
-   }
+    C clone() {
+        auto c = new C();
+        c.age = age;
+        c.name = name;
+        c.t3 = t3;
+        return c;
+    }
 }
 
 class C2 {
-   C[] c;
-   C c1;
-   T1 t1;
-   override bool opEquals(Object c) {
-       auto c2 = cast(C2) c;
-       return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
-   }
+    C[] c;
+    C c1;
+    T1 t1;
+    override bool opEquals(Object c) {
+        auto c2 = cast(C2) c;
+        return this.c == c2.c && c1 == c2.c1 && t1 == c2.t1;
+    }
 }
 //
 ////ref test
@@ -344,27 +367,27 @@ class C2 {
 //}
 //
 struct T1 {
-   bool b;
-   byte ib;
-   ubyte ub;
-   short ish;
-   ushort ush;
-   int ii;
-   uint ui;
-   long il;
-   ulong ul;
-   string s;
-   uint[10] sa;
-   long[] sb;
+    bool b;
+    byte ib;
+    ubyte ub;
+    short ish;
+    ushort ush;
+    int ii;
+    uint ui;
+    long il;
+    ulong ul;
+    string s;
+    uint[10] sa;
+    long[] sb;
 }
 
 struct T2 {
-   string n;
-   T1[] t;
+    string n;
+    T1[] t;
 }
 
 struct T3 {
-   T1 t1;
-   T2 t2;
-   string[] name;
+    T1 t1;
+    T2 t2;
+    string[] name;
 }
