@@ -52,7 +52,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.clear();
         _readBuffer = cast(ubyte[])_bufferForRead.array();
-        _writeQueue = new WritingBufferQueue();
+        // _writeQueue = new WritingBufferQueue();
         this.socket = new TcpSocket(family);
 
         loadWinsockExtension(this.handle);
@@ -332,7 +332,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
     
     protected bool checkAllWriteDone() {
-        if(_writeQueue.isEmpty() && writeBuffer is null) {
+        if(_writeQueue is null || _writeQueue.isEmpty() && writeBuffer is null) {
             resetWriteStatus();        
             version (HUNT_IO_DEBUG)
                 tracef("All data are written out. fd=%d", this.handle);
@@ -345,7 +345,8 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
     
     void resetWriteStatus() {
-        _writeQueue.clear();
+        if(_writeQueue !is null)
+            _writeQueue.clear();
         _isWritting = false;
         isWriteCancelling = false;
         sendDataBuffer = null;
@@ -418,11 +419,11 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract bool isConnected() nothrow;
     abstract protected void onDisconnected();
 
-    // protected void initializeWriteQueue() {
-    //     if (_writeQueue is null) {
-    //         _writeQueue = new WritingBufferQueue();
-    //     }
-    // }
+    protected void initializeWriteQueue() {
+        if (_writeQueue is null) {
+            _writeQueue = new WritingBufferQueue();
+        }
+    }
 
     SimpleEventHandler disconnectionHandler;
     

@@ -51,7 +51,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.limit(cast(int)bufferSize);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
-        _writeQueue = new WritingBufferQueue();
+        // _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
         setFlag(ChannelFlag.Write, true);
@@ -250,7 +250,8 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     void resetWriteStatus() {
-        _writeQueue.clear();
+        if(_writeQueue !is null)
+            _writeQueue.clear();
         atomicStore(_isWritting, false);
         isWriteCancelling = false;
     }
@@ -335,10 +336,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_IO_DEBUG) {
             import std.conv;
             tracef("checking remaining: fd=%d, writeQueue empty: %s", this.handle,
-                _writeQueue.isEmpty().to!string());
+               _writeQueue is null ||  _writeQueue.isEmpty().to!string());
         }
 
-        if(_writeQueue.isEmpty()) {
+        if(_writeQueue is null || _writeQueue.isEmpty()) {
             resetWriteStatus();
             version (HUNT_IO_DEBUG)
                 infof("All data are written out: fd=%d", this.handle);
@@ -348,6 +349,12 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
 
         return false;
+    }
+
+    protected void initializeWriteQueue() {
+        if (_writeQueue is null) {
+            _writeQueue = new WritingBufferQueue();
+        }
     }
 
     protected bool doConnect(Address addr) {

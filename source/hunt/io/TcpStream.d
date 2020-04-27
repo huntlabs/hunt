@@ -307,7 +307,7 @@ class TcpStream : AbstractStream {
         version (HUNT_IO_DEBUG)
             infof("data buffered (%d bytes): fd=%d", buffer.limit(), this.handle);
         _isWritting = true;
-        // initializeWriteQueue();
+        initializeWriteQueue();
         _writeQueue.enqueue(buffer);
         onWrite();
     }
@@ -335,7 +335,7 @@ class TcpStream : AbstractStream {
                     infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. 32]);
             }
 
-            if ((_writeQueue.isEmpty()) && !_isWritting) {
+            if (_writeQueue is null || (_writeQueue.isEmpty()) && !_isWritting) {
                 _isWritting = true;
                 const(ubyte)[] d = data;
 
@@ -356,6 +356,7 @@ class TcpStream : AbstractStream {
                     } else {
                         version (HUNT_IO_DEBUG)
                             warningf("buffering data: %d bytes, fd=%d", d.length, this.handle);
+                        initializeWriteQueue();
                         _writeQueue.enqueue(BufferUtils.toBuffer(cast(byte[]) d));
                         break;
                     }
@@ -419,7 +420,7 @@ protected:
         super.onClose();
         if(lastConnectStatus) {
             version (HUNT_IO_DEBUG) {
-                if (!_writeQueue.isEmpty) {
+                if (_writeQueue !is null && !_writeQueue.isEmpty) {
                     warningf("Some data has not been sent yet: fd=%d", this.handle);
                 }
                 infof("Closing a connection with: %s, fd=%d", this.remoteAddress, this.handle);
