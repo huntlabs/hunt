@@ -126,14 +126,15 @@ class AbstractSelector : Selector {
         OVERLAPPED* overlapped;
         ULONG_PTR key = 0;
         DWORD bytes = 0;
+        IocpContext* ev;
 
         while( WAIT_OBJECT_0 != WaitForSingleObject(_stopEvent , 0))
         {
             const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes, &key,
                     &overlapped, INFINITE);
 
-            IocpContext* ev = cast(IocpContext*) overlapped;
-
+            //IocpContext* ev = cast(IocpContext*) overlapped;
+            ev = cast(IocpContext *)( cast(PCHAR)(overlapped) - cast(ULONG_PTR)(&(cast(IocpContext*)0).overlapped));
             if (ret == 0) {
 
                 DWORD dwErr = GetLastError();
@@ -164,6 +165,8 @@ class AbstractSelector : Selector {
                     continue;
                 }else
                 {
+                    AbstractChannel channel = ev.channel;
+                    _array[channel] ~= overlapped;
                     handleChannelEvent(ev.operation, ev.channel, bytes);
                 }
             }
@@ -278,9 +281,15 @@ class AbstractSelector : Selector {
         client.onWriteDone(len); // Notify the client about how many bytes actually sent.
     }
 
+    public void  rmEventArray(AbstractChannel channel)
+    {
+        _array.remove(channel);
+    }
+
 private:
     HANDLE _iocpHandle;
     CustomTimer _timer;
     DList!AbstractStream _queue;
     HANDLE _stopEvent;
+    OVERLAPPED*[] [AbstractChannel] _array ;
 }

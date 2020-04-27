@@ -18,7 +18,7 @@ import core.atomic;
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
 import core.sys.windows.mswsock;
-
+import hunt.event.selector.IOCP;
 import std.format;
 import std.socket;
 import core.stdc.string;
@@ -92,6 +92,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         _isWritting = false;
          _Closed = true;
         resetWriteStatus();
+        (cast(AbstractSelector)_inLoop).rmEventArray(this);
         if(this._socket is null) {
             import core.sys.windows.winsock2;
             .closesocket(this.handle);
@@ -234,16 +235,11 @@ abstract class AbstractStream : AbstractSocketChannel {
                 dataReceivedHandler(_bufferForRead);
             }
 
-            if (!isClient())
-            {
-                while(!_isSingleWriteBusy)
-                {
-                    this.beginRead();
-                }
-            } else
+            if (isClient())
             {
                 this.beginRead();
             }
+
 
         } else if (readLen == 0) {
             version (HUNT_IO_DEBUG) {
@@ -284,6 +280,10 @@ abstract class AbstractStream : AbstractSocketChannel {
     private void tryNextBufferWrite() {
         if(checkAllWriteDone()){
             _isSingleWriteBusy = false;
+            if (!isClient())
+            {
+                this.beginRead();
+            }
             return;
         } 
         
