@@ -30,12 +30,12 @@ class IoError
         string    _errorMsg;
     }
 
-    public ErrorCode errorCode()
+    ErrorCode errorCode()
     {
         return _errorCode;
     }
 
-    public string errorMsg()
+    string errorMsg()
     {
         return  _errorMsg;
     }

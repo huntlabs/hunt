@@ -22,6 +22,7 @@ public import hunt.io.FilterInputStream;
 public import hunt.io.FilterOutputStream;
 public import hunt.io.PipedStream;
 public import hunt.io.IOUtils;
+public import hunt.io.IoError;
 
 public import hunt.io.TcpListener;
 public import hunt.io.TcpStream;

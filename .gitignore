@@ -33,7 +33,8 @@ __dummy.html
 examples/*/log.txt
 examples/configuration/configuration
 examples/collecton/container-demo
-examples/udp/udp-demo
+examples/udp/udp-client
+examples/udp/udp-server
 examples/performance/performance
 examples/tcp/tcp-client
 examples/tcp/tcp-server
