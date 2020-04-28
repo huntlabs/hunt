@@ -144,6 +144,7 @@ hunt_src = [
     'io/FileOutputStream.d',
     'io/FilterInputStream.d',
     'io/FilterOutputStream.d',
+    'io/IoError.d',
     'io/IOUtils.d',
     'io/ObjectInput.d',
     'io/ObjectOutput.d',
