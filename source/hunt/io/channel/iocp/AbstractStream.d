@@ -39,7 +39,6 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     protected ByteBuffer _bufferForRead;
     protected AddressFamily _family;
-    private bool _Closed  = false;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         super(loop, ChannelType.TCP);
@@ -90,7 +89,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     
     protected override void onClose() {
         _isWritting = false;
-         _Closed = true;
         resetWriteStatus();
         (cast(AbstractSelector)_inLoop).rmEventArray(this);
         if(this._socket is null) {
@@ -108,40 +106,30 @@ abstract class AbstractStream : AbstractSocketChannel {
         super.onClose();
     }
 
-    public void stopAction()
-    {
-        _isSingleWriteBusy = true;
-        _Closed = true;
-        _endFristRead = false;
-    }
-
     public void beginRead() {
         // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
 
-        if (!_Closed )
-        {
-            ///  _isSingleWriteBusy = true;
+        ///  _isSingleWriteBusy = true;
 
-            WSABUF _dataReadBuffer;
-            _dataReadBuffer.len = cast(uint) _readBuffer.length;
-            _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
-            memset(&_iocpread.overlapped , 0 ,_iocpread.overlapped.sizeof );
-            _iocpread.channel = this;
-            _iocpread.operation = IocpOperation.read;
-            DWORD dwReceived = 0;
-            DWORD dwFlags = 0;
-            version (HUNT_IO_DEBUG)
-                tracef("start receiving [fd=%d] ", this.socket.handle);
-            // _isSingleWriteBusy = true;
-            int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
-            &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-            if (nRet == SOCKET_ERROR && (GetLastError() != ERROR_IO_PENDING))
-            {
-                _isSingleWriteBusy = false;
-                close();
-            }
-            //checkErro(nRet, SOCKET_ERROR);
+        WSABUF _dataReadBuffer;
+        _dataReadBuffer.len = cast(uint) _readBuffer.length;
+        _dataReadBuffer.buf = cast(char*) _readBuffer.ptr;
+        memset(&_iocpread.overlapped , 0 ,_iocpread.overlapped.sizeof );
+        _iocpread.channel = this;
+        _iocpread.operation = IocpOperation.read;
+        DWORD dwReceived = 0;
+        DWORD dwFlags = 0;
+        version (HUNT_IO_DEBUG)
+            tracef("start receiving [fd=%d] ", this.socket.handle);
+        // _isSingleWriteBusy = true;
+        int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
+        &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+        if (nRet == SOCKET_ERROR && (GetLastError() != ERROR_IO_PENDING))
+        {
+            _isSingleWriteBusy = false;
+            close();
         }
+        //checkErro(nRet, SOCKET_ERROR);
     }
 
     protected bool doConnect(Address addr) {
@@ -166,41 +154,38 @@ abstract class AbstractStream : AbstractSocketChannel {
         DWORD dwSent = 0;//cast(DWORD)data.length;
         DWORD dwFlags = 0;
 
-        if ( !_Closed)
-        {
-            memset(&_iocpwrite.overlapped , 0 ,_iocpwrite.overlapped.sizeof );
-            _iocpwrite.channel = this;
-            _iocpwrite.operation = IocpOperation.write;
-            // tracef("To write %d bytes, fd=%d", data.length, this.socket.handle());
-            version (HUNT_IO_DEBUG) {
-                size_t bufferLength = data.length;
-                tracef("To write %d bytes", bufferLength);
-                if (bufferLength > 32)
-                    tracef("%(%02X %) ...", data[0 .. 32]);
-                else
-                    tracef("%s", data);
-            }
-            // size_t bufferLength = data.length;
-            //     tracef("To write %d bytes", bufferLength);
-            //     tracef("%s", data);
-            WSABUF _dataWriteBuffer;
-
-            //char[] bf = new char[data.length];
-            //memcpy(bf.ptr,data.ptr,data.length);
-            //_dataWriteBuffer.buf =  bf.ptr;
-            _dataWriteBuffer.buf = cast(char*) data.ptr;
-            _dataWriteBuffer.len = cast(uint) data.length;
-            _isSingleWriteBusy = true;
-            int nRet = WSASend( cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
-            dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-            if (nRet != NO_ERROR && (GetLastError() != ERROR_IO_PENDING))
-            {
-                _isSingleWriteBusy = false;
-                close();
-            }
-
-            checkErro( nRet, SOCKET_ERROR);
+        memset(&_iocpwrite.overlapped , 0 ,_iocpwrite.overlapped.sizeof );
+        _iocpwrite.channel = this;
+        _iocpwrite.operation = IocpOperation.write;
+        // tracef("To write %d bytes, fd=%d", data.length, this.socket.handle());
+        version (HUNT_IO_DEBUG) {
+            size_t bufferLength = data.length;
+            tracef("To write %d bytes", bufferLength);
+            if (bufferLength > 32)
+                tracef("%(%02X %) ...", data[0 .. 32]);
+            else
+                tracef("%s", data);
         }
+        // size_t bufferLength = data.length;
+        //     tracef("To write %d bytes", bufferLength);
+        //     tracef("%s", data);
+        WSABUF _dataWriteBuffer;
+
+        //char[] bf = new char[data.length];
+        //memcpy(bf.ptr,data.ptr,data.length);
+        //_dataWriteBuffer.buf =  bf.ptr;
+        _dataWriteBuffer.buf = cast(char*) data.ptr;
+        _dataWriteBuffer.len = cast(uint) data.length;
+        _isSingleWriteBusy = true;
+        int nRet = WSASend( cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
+        dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+        if (nRet != NO_ERROR && (GetLastError() != ERROR_IO_PENDING))
+        {
+            _isSingleWriteBusy = false;
+            close();
+        }
+
+        checkErro( nRet, SOCKET_ERROR);
 
         // FIXME: Needing refactor or cleanup -@Administrator at 2019/8/9 12:18:20 pm
         // Keep this to prevent the buffer corrupted. Why?

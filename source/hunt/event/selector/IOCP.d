@@ -26,8 +26,11 @@ import core.sys.windows.windows;
 import std.conv;
 import std.socket;
 import std.container : DList;
+
+
 /**
-*/
+ * 
+ */
 class AbstractSelector : Selector {
 
     this(size_t number, size_t divider, size_t maxChannels = 1500) {
@@ -72,9 +75,10 @@ class AbstractSelector : Selector {
         }
 
         auto stream = cast(AbstractStream)channel;
-        if (!stream.isClient()) {
+        if (stream !is null && !stream.isClient()) {
             stream.beginRead();
         }
+
         return true;
     }
 
