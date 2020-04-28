@@ -85,6 +85,7 @@ class AbstractSelector : Selector {
     override bool deregister(AbstractChannel channel) {
         // FIXME: Needing refactor or cleanup -@Administrator at 8/28/2018, 3:28:18 PM
         // https://stackoverflow.com/questions/6573218/removing-a-handle-from-a-i-o-completion-port-and-other-questions-about-iocp
+        version(HUNT_IO_DEBUG) 
         tracef("deregister (fd=%d)", channel.handle);
 
         // IocpContext _data;
@@ -125,7 +126,6 @@ class AbstractSelector : Selector {
         //    }
         //    _queue.removeFront();
         //}
-        //trace("ssssss");
         auto timeout = _timer.doWheel();
         OVERLAPPED* overlapped;
         ULONG_PTR key = 0;
@@ -182,41 +182,29 @@ class AbstractSelector : Selector {
 
         version (HUNT_IO_DEBUG)
             infof("ev.operation: %s, fd=%d", op, channel.handle);
-        try {
-            switch (op) {
-                case IocpOperation.accept:
-               // channel.onRead();
-                //warningf("accept ............................");
-                break;
-                case IocpOperation.connect:
-                onSocketRead(channel, 0);
-                (cast(AbstractStream)channel).beginRead();
-                //warningf("connect ............................");
-                break;
-                case IocpOperation.read:
-                onSocketRead(channel, bytes);
-                //warningf("read ........................ %d ",bytes);
-                break;
-                case IocpOperation.write:
-                onSocketWrite(channel, bytes);
-                //warningf("write ......................... %d", bytes);
-                break;
-                case IocpOperation.event:
-                //warningf("event ............................");
-                channel.onRead();
-                break;
-                case IocpOperation.close:
-                //warningf("close -------------------------: %d", channel.handle);
-                break;
-                default:
-                warning("unsupported operation type -------------------------: ", op);
-                break;
-            }
-        } catch (Exception e)
-        {
-
+        switch (op) {
+            case IocpOperation.accept:
+            channel.onRead();
+            break;
+            case IocpOperation.connect:
+            onSocketRead(channel, 0);
+            (cast(AbstractStream)channel).beginRead();
+            break;
+            case IocpOperation.read:
+            onSocketRead(channel, bytes);
+            break;
+            case IocpOperation.write:
+            onSocketWrite(channel, bytes);
+            break;
+            case IocpOperation.event:
+            channel.onRead();
+            break;
+            case IocpOperation.close:
+            break;
+            default:
+            warning("unsupported operation type -------------------------: ", op);
+            break;
         }
-
     }
 
     override void stop() {
@@ -245,13 +233,11 @@ class AbstractSelector : Selector {
             return;
         }
 
-        (cast(AbstractStream)channel).setBusyWrite(false);
+        // (cast(AbstractStream)channel).setBusyWrite(false);
 
         if (len == 0 || channel.isClosed) {
-            //version (HUNT_DEBUG)
-            //    infof("channel [fd=%d] closed %d  %d", channel.handle, channel.isClosed,len);
-            //(cast(AbstractStream)channel).setFristRead(false);
-            //(cast(AbstractStream)channel).setBusyWrite(true);
+            version (HUNT_IO_DEBUG)
+               infof("channel [fd=%d] closed %d  %d", channel.handle, channel.isClosed, len);
             //channel.close();
             return;
         }
@@ -262,10 +248,6 @@ class AbstractSelector : Selector {
             warning("The channel socket is null: ");
         } else {
             socketChannel.setRead(len);
-            if (!(cast(AbstractStream)channel).getFristRead)
-            {
-                (cast(AbstractStream)channel).setFristRead(true);
-            }
             channel.onRead();
         }
     }
@@ -281,7 +263,6 @@ class AbstractSelector : Selector {
             warning("The channel socket is null: ");
             return;
         }
-       // warning("len ------------------------ %d",len);
         client.onWriteDone(len); // Notify the client about how many bytes actually sent.
     }
 

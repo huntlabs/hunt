@@ -5,7 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) 启动",
+            "name": "(Windows) launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tcp-server.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false
+        },
+        {
+            "name": "(gdb) launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tcp-server",
@@ -17,7 +28,7 @@
             "MIMode": "gdb",
             "setupCommands": [
                 {
-                    "description": "为 gdb 启用整齐打印",
+                    "description": "gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }

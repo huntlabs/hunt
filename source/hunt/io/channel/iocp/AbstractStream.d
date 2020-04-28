@@ -133,21 +133,17 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     protected bool doConnect(Address addr) {
-        try {
-            Address binded = createAddress(this.socket.addressFamily);
-            _isSingleWriteBusy = true;
-            this.socket.bind(binded);
-            _iocpread.channel = this;
-            _iocpread.operation = IocpOperation.connect;
-            int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
-            cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
-            &_iocpread.overlapped);
-            checkErro(nRet, SOCKET_ERROR);
-        } catch (SocketOSException e)
-        {
-            return false;
-        }
-        return true;
+        Address binded = createAddress(this.socket.addressFamily);
+        _isSingleWriteBusy = true;
+        this.socket.bind(binded);
+        _iocpread.channel = this;
+        _iocpread.operation = IocpOperation.connect;
+        int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
+        cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
+        &_iocpread.overlapped);
+        checkErro(nRet, SOCKET_ERROR);
+        
+        return !this._error;
     }
 
     private uint doWrite(const(ubyte)[] data) {
@@ -294,7 +290,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     private void writeBufferRemaining() {
-        if (writeBuffer is null || _isSingleWriteBusy)
+        if (writeBuffer is null )
         {
             return;
         }
@@ -317,7 +313,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
     
     protected bool checkAllWriteDone() {
-        if(_writeQueue is null || _writeQueue.isEmpty() && writeBuffer is null) {
+        if(_writeQueue is null || (_writeQueue.isEmpty() && writeBuffer is null)) {
             resetWriteStatus();        
             version (HUNT_IO_DEBUG)
                 tracef("All data are written out. fd=%d", this.handle);
@@ -337,7 +333,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         sendDataBuffer = null;
         sendDataBackupBuffer = null;
         writeBuffer = null;
-        _isSingleWriteBusy = true;
+        _isSingleWriteBusy = false;
         _endFristRead = false;
     }
 
