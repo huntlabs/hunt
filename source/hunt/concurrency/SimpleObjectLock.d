@@ -18,18 +18,34 @@ class SimpleObjectLock {
     }
 
     void wait() {
+        _mutex.lock();
+        scope(exit) {
+            _mutex.unlock();
+        }
         _condition.wait();
     }
 
     void wait(Duration value) {
+        _mutex.lock();
+        scope(exit) {
+            _mutex.unlock();
+        }
         _condition.wait(value);
     }
 
     void notify() {
+        _mutex.lock();
+        scope(exit) {
+            _mutex.unlock();
+        }
         _condition.notify();
     }
 
     void notifyAll() {
+        _mutex.lock();
+        scope(exit) {
+            _mutex.unlock();
+        }
         _condition.notifyAll();
     }
 }
