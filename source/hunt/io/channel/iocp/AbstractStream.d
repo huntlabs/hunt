@@ -122,10 +122,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         version (HUNT_IO_DEBUG)
             tracef("start receiving [fd=%d] ", this.socket.handle);
         // _isSingleWriteBusy = true;
-        int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, &dwReceived, &dwFlags,
-        &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-        if (nRet == SOCKET_ERROR && (GetLastError() != ERROR_IO_PENDING))
-        {
+        int nRet = WSARecv(cast(SOCKET) this.socket.handle, &_dataReadBuffer, 1u, 
+            &dwReceived, &dwFlags, &_iocpread.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
+
+        if (nRet == SOCKET_ERROR && (GetLastError() != ERROR_IO_PENDING)) {
             _isSingleWriteBusy = false;
             close();
         }
@@ -138,9 +138,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         this.socket.bind(binded);
         _iocpread.channel = this;
         _iocpread.operation = IocpOperation.connect;
-        int nRet = ConnectEx(cast(SOCKET) this.socket.handle(),
-        cast(SOCKADDR*) addr.name(), addr.nameLen(), null, 0, null,
-        &_iocpread.overlapped);
+
+        int nRet = ConnectEx(cast(SOCKET) this.socket.handle(), cast(SOCKADDR*) addr.name(), 
+            addr.nameLen(), null, 0, null, &_iocpread.overlapped);
+
         checkErro(nRet, SOCKET_ERROR);
         
         return !this._error;

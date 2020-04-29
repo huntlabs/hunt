@@ -18,8 +18,6 @@ import hunt.Exceptions;
 import hunt.logging.ConsoleLogger;
 
 import core.atomic;
-import core.sync.condition;
-import core.sync.mutex;
 import core.thread;
 import std.format;
 import std.datetime;
@@ -104,7 +102,6 @@ static if(is(T == void)) {
 			}
 			_cause = new CancellationException("");
 			_isResultAvaliable = true;
-			// _doneCondition.notifyAll();
 			return true;
 		}
 		return false;

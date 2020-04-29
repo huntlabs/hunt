@@ -46,9 +46,11 @@ class EpollEventChannel : EventChannel {
         this.clearError();
         uint64_t value;
         int r = eventfd_read(this.handle, &value);
-        version (HUNT_IO_DEBUG) tracef("result=%d, value=%d, fd=%d", r, value, this.handle);
-        if(r != 0) {
-            warningf("error: %d", r);
+        version (HUNT_IO_DEBUG) {
+            tracef("result=%d, value=%d, fd=%d", r, value, this.handle);
+            if(r != 0) {
+                warningf("error: %d", r);
+            }
         }
     }
 
