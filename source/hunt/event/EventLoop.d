@@ -11,39 +11,49 @@
 
 module hunt.event.EventLoop;
 
+import hunt.concurrency.TaskPool;
 import hunt.io.channel.Common;
 import hunt.event.selector;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 
 import core.thread;
 import std.parallelism;
+import std.random;
+
+alias HuntTaskPool = hunt.concurrency.TaskPool.TaskPool;
 
 /**
-
-*/
+ * 
+ */
 final class EventLoop : AbstractSelector {
 
     this() {
-        super(0, 1);
+        int id = uniform(0, 1024);
+        super(id, 1);
     }
 
-    this(size_t number, size_t divider) {
-        super(number, divider);
+    this(HuntTaskPool pool) {
+        int id = uniform(0, 1024);
+        super(id, 1, pool);
+    }
+
+    this(size_t id, size_t divider, HuntTaskPool pool = null) {
+        super(id, divider, pool);
     }
 
     override void stop() {
         if(isStopping()) {
             version (HUNT_IO_DEBUG) 
-            warningf("The event loop %d is stopping.", number);
+            warningf("The event loop %d is stopping.", getId());
             return;
         }
         
         version (HUNT_IO_DEBUG) 
-        tracef("Stopping event loop %d...", number);
+        tracef("Stopping event loop %d...", getId());
         if(isSelfThread()) {
-            version (HUNT_IO_DEBUG) infof("Try to stop the event loop %d in another thread", number);
+            version (HUNT_IO_DEBUG) infof("Try to stop the event loop %d in another thread", getId());
             auto stopTask = task(&stop);
-            taskPool.put(stopTask);
+            std.parallelism.taskPool.put(stopTask);
         } else {
             super.stop();
         }

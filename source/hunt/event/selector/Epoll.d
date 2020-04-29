@@ -51,16 +51,19 @@ shared static this() {
 
 
 /**
-*/
+ * 
+ */
 class AbstractSelector : Selector {
     enum int NUM_KEVENTS = 1024;
     private int _epollFD;
     private bool isDisposed = false;
     private epoll_event[NUM_KEVENTS] events;
     private EventChannel _eventChannel;
+    private TaskPool _taskPool;
 
-    this(size_t number, size_t divider, size_t maxChannels = 1500) {
-        super(number, divider, maxChannels);
+    this(size_t id, size_t divider, TaskPool pool = null, size_t maxChannels = 1500) {
+        _taskPool = pool;
+        super(id, divider, maxChannels);
 
         // http://man7.org/linux/man-pages/man2/epoll_create.2.html
         /*
@@ -98,7 +101,7 @@ class AbstractSelector : Selector {
 
     override void onStop() {
         version (HUNT_IO_DEBUG)
-            infof("Selector stopping. fd=%d, id: %d", _epollFD, number);
+            infof("Selector stopping. fd=%d, id: %d", _epollFD, getId());
 
         if(!_eventChannel.isClosed()) {
             _eventChannel.trigger();
@@ -184,7 +187,16 @@ class AbstractSelector : Selector {
             len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
-        if(defaultPoolThreads > 0) {  // using worker thread
+        if(_taskPool is null) {
+            foreach (i; 0 .. len) {
+                AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+                if (channel is null) {
+                    debug warningf("channel is null");
+                } else {
+                    handeChannelEvent(channel, events[i].events);
+                }
+            }
+        } else {  // using worker thread
             foreach (i; 0 .. len) {
                 AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
                 if (channel is null) {
@@ -192,15 +204,6 @@ class AbstractSelector : Selector {
                 } else {
                     uint currentEvents = events[i].events;
                     workerPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
-                }
-            }
-        } else {
-            foreach (i; 0 .. len) {
-                AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-                if (channel is null) {
-                    debug warningf("channel is null");
-                } else {
-                    handeChannelEvent(channel, events[i].events);
                 }
             }
         }

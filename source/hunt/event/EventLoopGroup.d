@@ -11,9 +11,10 @@
 
 module hunt.event.EventLoopGroup;
 
-import hunt.system.Memory;
+import hunt.concurrency.TaskPool;
 import hunt.event.EventLoop;
 import hunt.logging;
+import hunt.system.Memory;
 import hunt.util.Lifecycle;
 
 import core.atomic;
@@ -22,13 +23,18 @@ import core.atomic;
  * 
  */
 class EventLoopGroup : Lifecycle {
+    private TaskPool _pool;
 
-    this(size_t size = (totalCPUs - 1)) {
-        size_t _size = size > 0 ? size : 1;
+    this(size_t ioThreadSize = (totalCPUs - 1), size_t workerThreadSize = 0) {
+        size_t _size = ioThreadSize > 0 ? ioThreadSize : 1;
         _eventLoops = new EventLoop[_size];
 
+        if(workerThreadSize > 0) {
+            _pool = new TaskPool(workerThreadSize, true);
+        } 
+
         foreach (i; 0 .. _size) {
-            _eventLoops[i] = new EventLoop(i, _size);
+            _eventLoops[i] = new EventLoop(i, _size, _pool);
         }
     }
 
@@ -74,7 +80,7 @@ class EventLoopGroup : Lifecycle {
         return true;
     }
 
-    @property size_t size() {
+    @property size_t ioThreadSize() {
         return _eventLoops.length;
     }
 

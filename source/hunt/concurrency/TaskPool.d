@@ -262,7 +262,7 @@ class TaskPool {
     /**
     Allows for custom number of worker threads.
     */
-    this(size_t nWorkers) {
+    this(size_t nWorkers, bool isDaemon = false) {
         if (nWorkers == 0)
             nWorkers = 1;
 
@@ -280,6 +280,8 @@ class TaskPool {
             poolThread.name = "worker-thread-" ~ index.to!string();
             poolThread.start();
         }
+
+        this.isDaemon = isDaemon;
     }
 
     bool isDaemon() @property @trusted {

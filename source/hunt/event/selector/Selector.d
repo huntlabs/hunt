@@ -18,7 +18,7 @@ abstract class Selector {
     private shared bool _running = false;
     private shared bool _isStopping = false;
     private bool _isReady;
-    protected size_t number;
+    protected size_t _id;
     protected size_t divider;
     protected AbstractChannel[] channels;
     protected long idleTime = -1; // in millisecond
@@ -30,14 +30,14 @@ abstract class Selector {
     private SimpleEventHandler _startedHandler;
     private SimpleEventHandler _stoppeddHandler;
 
-    this(size_t number, size_t divider, size_t maxChannels = 1500) {
-        this.number = number;
+    this(size_t id, size_t divider, size_t maxChannels = 1500) {
+        _id = id;
         this.divider = divider;
         channels = new AbstractChannel[maxChannels];
     }
 
     size_t getId() {
-        return number;
+        return _id;
     }
 
     bool isReady() {
@@ -82,7 +82,7 @@ abstract class Selector {
     */
     void runAsync(long timeout = -1, SimpleEventHandler handler = null) {
         if(_running) {
-            version (HUNT_IO_DEBUG) warningf("The current selector %d has being running already!", number);
+            version (HUNT_IO_DEBUG) warningf("The current selector %d has being running already!", _id);
             return;
         }
         this.timeout = timeout;
@@ -108,13 +108,13 @@ abstract class Selector {
             }
             onLoop(timeout);
         } else {
-            version (HUNT_DEBUG) warningf("The current selector %d has being running already!", number);
+            version (HUNT_DEBUG) warningf("The current selector %d has being running already!", _id);
         }  
     }
 
     void stop() {
         version (HUNT_IO_DEBUG)
-            tracef("Stopping selector %d. _running=%s, _isStopping=%s", number, _running, _isStopping); 
+            tracef("Stopping selector %d. _running=%s, _isStopping=%s", _id, _running, _isStopping); 
         if(cas(&_isStopping, false, true)) {
             try {
                 onStop();
@@ -151,7 +151,7 @@ abstract class Selector {
 
         _isReady = false;
         _running = false;
-        version(HUNT_DEBUG_MORE) infof("Selector %d exited.", number);
+        version(HUNT_DEBUG_MORE) infof("Selector %d exited.", _id);
         dispose();
     }
 
