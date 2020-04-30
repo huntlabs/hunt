@@ -80,7 +80,7 @@ class EventLoopGroup : Lifecycle {
         return true;
     }
 
-    @property size_t ioThreadSize() {
+    @property size_t size() {
         return _eventLoops.length;
     }
 
