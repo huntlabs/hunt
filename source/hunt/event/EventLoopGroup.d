@@ -28,7 +28,7 @@ class EventLoopGroup : Lifecycle {
     this(size_t ioThreadSize = (totalCPUs - 1), size_t workerThreadSize = 0) {
         size_t _size = ioThreadSize > 0 ? ioThreadSize : 1;
 
-        debug infof("ioThreadSize: %d, workerThreadSize: %d", ioThreadSize, workerThreadSize);
+        version(HUNT_DEBUG) infof("ioThreadSize: %d, workerThreadSize: %d", ioThreadSize, workerThreadSize);
 
         _eventLoops = new EventLoop[_size];
 
