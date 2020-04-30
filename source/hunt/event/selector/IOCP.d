@@ -25,6 +25,7 @@ import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;
 import std.conv;
 import std.socket;
+import hunt.concurrency.TaskPool;
 import std.container : DList;
 
 
@@ -33,7 +34,8 @@ import std.container : DList;
  */
 class AbstractSelector : Selector {
 
-    this(size_t number, size_t divider, size_t maxChannels = 1500) {
+    this(size_t number, size_t divider,TaskPool pool = null, size_t maxChannels = 1500) {
+        _taskPool = pool;
         super(number, divider, maxChannels);
         _iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 0);
         if (_iocpHandle is null)
@@ -277,4 +279,5 @@ private:
     DList!AbstractStream _queue;
     HANDLE _stopEvent;
     OVERLAPPED*[] [AbstractChannel] _array ;
+    TaskPool _taskPool;
 }

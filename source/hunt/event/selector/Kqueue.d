@@ -35,7 +35,7 @@ import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
 import core.sys.posix.time;
-
+import hunt.concurrency.TaskPool;
 /**
  * 
  */
@@ -46,8 +46,9 @@ class AbstractSelector : Selector {
     private Kevent[NUM_KEVENTS] events;
     private int _kqueueFD;
     private EventChannel _eventChannel;
-
-    this(size_t number, size_t divider, size_t maxChannels = 1500) {
+    private TaskPool _taskPool;
+    this(size_t number, size_t divider,TaskPool pool = null, size_t maxChannels = 1500) {
+        _taskPool = pool;
         super(number, divider, maxChannels);
         _kqueueFD = kqueue();
         _eventChannel = new KqueueEventChannel(this);
