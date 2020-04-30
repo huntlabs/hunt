@@ -175,7 +175,7 @@ final class ParallelismThread : Thread {
 
     this(void delegate() dg) {
         super(dg);
-        taskQueue = new NonBlockingQueue!(AbstractTask)();
+        taskQueue = new BlockingQueue!(AbstractTask)();
         state = ThreadState.NEW;
     }
 
@@ -183,7 +183,7 @@ final class ParallelismThread : Thread {
     int factor = -1;
 
     TaskPool pool;
-    NonBlockingQueue!(AbstractTask) taskQueue;
+    Queue!(AbstractTask) taskQueue;
 }
 
 enum ThreadState {
@@ -452,7 +452,7 @@ class TaskPool {
             int lastFactor = selectedThread.factor;
             if(lastFactor != -1 && lastFactor != factor) {
                 version(HUNT_DEBUG) {
-                    warningf("The factors collision detected, last: %d, current: %d. " ~ 
+                    warningf("A factor collision detected, last: %d, current: %d. " ~ 
                         "To remove this warning, increase the size of the task pool please!", 
                         lastFactor, factor);
                 }
@@ -497,7 +497,7 @@ class TaskPool {
             j++;
             if(j >= nWorkers) {
                 j = 0;
-                version(HUNT_DEBUG) warning("All the worker threads are busy. Then to select nothing.");
+                version(HUNT_DEBUG) warning("All the worker threads are busy. Then nothing selected.");
                 // No idle thread found after checking the whole pool.
                 // No wait. Select one randomly.
                 // Warning: It may be in a dead-lock status;

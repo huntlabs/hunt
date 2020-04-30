@@ -13,7 +13,7 @@ module hunt.event.EventLoopGroup;
 
 import hunt.concurrency.TaskPool;
 import hunt.event.EventLoop;
-import hunt.logging;
+import hunt.logging.ConsoleLogger;
 import hunt.system.Memory;
 import hunt.util.Lifecycle;
 
@@ -27,6 +27,9 @@ class EventLoopGroup : Lifecycle {
 
     this(size_t ioThreadSize = (totalCPUs - 1), size_t workerThreadSize = 0) {
         size_t _size = ioThreadSize > 0 ? ioThreadSize : 1;
+
+        debug infof("ioThreadSize: %d, workerThreadSize: %d", ioThreadSize, workerThreadSize);
+
         _eventLoops = new EventLoop[_size];
 
         if(workerThreadSize > 0) {

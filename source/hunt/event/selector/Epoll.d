@@ -203,7 +203,7 @@ class AbstractSelector : Selector {
                     debug warningf("channel is null");
                 } else {
                     uint currentEvents = events[i].events;
-                    workerPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
+                    _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
                 }
             }
         }
