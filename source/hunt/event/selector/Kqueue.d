@@ -47,6 +47,7 @@ class AbstractSelector : Selector {
     private int _kqueueFD;
     private EventChannel _eventChannel;
     private TaskPool _taskPool;
+    void*[] [AbstractChannel] _eventBuffer;
     this(size_t number, size_t divider,TaskPool pool = null, size_t maxChannels = 1500) {
         _taskPool = pool;
         super(number, divider, maxChannels);
@@ -162,7 +163,14 @@ class AbstractSelector : Selector {
         return true;
     }
 
+    public void rmEventArray(AbstractChannel channel)
+    {
+        _eventBuffer.remove(channel);
+    }
+
     protected override int doSelect(long timeout) {
+        // void* [] tmp;
+        // eventBuffer = tmp;
         timespec ts;
         timespec *tsp;
         // timeout is in milliseconds. Convert to struct timespec.
@@ -190,6 +198,7 @@ class AbstractSelector : Selector {
 
         foreach (i; 0 .. result) {
             AbstractChannel channel = cast(AbstractChannel)(events[i].udata);
+            _eventBuffer[channel] ~= events[i].udata;
             ushort eventFlags = events[i].flags;
             version (HUNT_IO_DEBUG)
             infof("handling event: events=%d, fd=%d", eventFlags, channel.handle);
@@ -197,11 +206,13 @@ class AbstractSelector : Selector {
             if (eventFlags & EV_ERROR) {
                 warningf("channel[fd=%d] has a error.", channel.handle);
                 channel.close();
+                rmEventArray(channel);
                 continue;
             }
             if (eventFlags & EV_EOF) {
                 version (HUNT_IO_DEBUG) infof("channel[fd=%d] closed", channel.handle);
                 channel.close();
+                rmEventArray(channel);
                 continue;
             }
 
