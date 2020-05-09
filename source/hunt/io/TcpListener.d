@@ -20,6 +20,7 @@ import hunt.Exceptions;
 import hunt.Functions;
 import hunt.logging.ConsoleLogger;
 import hunt.util.Common;
+import hunt.io.worker.WorkerGroup;
 
 import std.socket;
 import std.exception;
@@ -30,6 +31,8 @@ import core.time;
 alias AcceptEventHandler = void delegate(TcpListener sender, TcpStream stream);
 alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, size_t bufferSize);
 alias EventErrorHandler = void delegate(IoError error);
+
+WorkerGroup!AbstractStream gWorkerGroup = null;
 
 /**
 */
@@ -46,9 +49,14 @@ class TcpListener : AbstractListener {
     PeerCreateHandler peerCreateHandler;
     EventErrorHandler errorHandler;
 
-    this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024) {
+    this(EventLoop loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4 * 1024 , size_t workerThreadSize = 0) {
         _tcpStreamoption = TcpStreamOptions.create();
         _tcpStreamoption.bufferSize = bufferSize;
+        if (workerThreadSize > 0)
+        {
+          gWorkerGroup = new WorkerGroup!AbstractStream(workerThreadSize);
+          gWorkerGroup.run();
+        }
         version (HAVE_IOCP)
             super(loop, family, bufferSize);
         else

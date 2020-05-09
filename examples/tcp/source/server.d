@@ -31,9 +31,9 @@ void main() {
 
     debug writefln("Main thread: %s", getTid());
 
-    TaskPool pool = new TaskPool(8, true);
-    EventLoop loop = new EventLoop(pool);
-    TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
+    //TaskPool pool = new TaskPool(8, true);
+    EventLoop loop = new EventLoop();
+    TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512 , 8);
 
     // dfmt off
     listener

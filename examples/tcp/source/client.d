@@ -10,8 +10,8 @@ import std.parallelism;
 import std.socket;
 import std.stdio;
 
-// enum Host = "127.0.0.1";
-enum Host = "10.1.222.110";
+ enum Host = "127.0.0.1";
+//enum Host = "10.1.222.110";
 enum Port = 8080;
 
 void main() {

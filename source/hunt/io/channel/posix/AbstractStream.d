@@ -13,7 +13,7 @@ import hunt.io.channel.Common;
 import hunt.io.IoError;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
-
+import hunt.io.TcpListener;
 import std.format;
 import std.socket;
 
@@ -87,8 +87,14 @@ abstract class AbstractStream : AbstractSocketChannel {
             if (dataReceivedHandler !is null) {
                 _bufferForRead.limit(cast(int)len);
                 _bufferForRead.position(0);
-                dataReceivedHandler(_bufferForRead);
 
+                if (gWorkerGroup !is null)
+                {
+                  gWorkerGroup.put(this, BufferUtils.clone(_bufferForRead));
+                }else
+                {
+                  dataReceivedHandler(_bufferForRead);
+                }
                 // ByteBuffer bb = BufferUtils.wrap(cast(byte[])rb[0..len]);
                 // dataReceivedHandler(bb);
             }
@@ -370,4 +376,10 @@ abstract class AbstractStream : AbstractSocketChannel {
     void cancelWrite() {
         isWriteCancelling = true;
     }
+
+    DataReceivedHandler getDataReceivedHandler()
+    {
+        return dataReceivedHandler;
+    }
+
 }
