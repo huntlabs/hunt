@@ -11,9 +11,11 @@ import hunt.Functions;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.IoError;
+import hunt.io.worker.WorkerGroupObject;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
-import hunt.io.TcpListener;
+
+
 import std.format;
 import std.socket;
 
@@ -83,7 +85,6 @@ abstract class AbstractStream : AbstractSocketChannel {
                 else
                     infof("fd: %d, 32/%d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. 32]);
             }
-
             if (dataReceivedHandler !is null) {
                 _bufferForRead.limit(cast(int)len);
                 _bufferForRead.position(0);
@@ -142,11 +143,11 @@ abstract class AbstractStream : AbstractSocketChannel {
             infof("peer socket closing: fd=%d", this.handle);
         }
         if(this.socket is null) {
-            import core.sys.posix.unistd;
-            core.sys.posix.unistd.close(this.handle);
+          import core.sys.posix.unistd;
+          core.sys.posix.unistd.close(this.handle);
         } else {
-            this.socket.shutdown(SocketShutdown.BOTH);
-            this.socket.close();
+          this.socket.shutdown(SocketShutdown.BOTH);
+          this.socket.close();
         }
 
         version (HUNT_IO_DEBUG) {
