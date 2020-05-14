@@ -91,6 +91,11 @@ class EventLoopGroup : Lifecycle {
        return _eventLoops[factor % _eventLoops.length];
     }
 
+    // Warning:
+    //  It's dangerous because it may lead that the different io channels are 
+    //  assigned to the same slot in the same EventLoop. 
+    //  Then the last channel may be overwritten and be collected by GC.
+    deprecated("Using nextLoop(size_t factor) instead.")
     EventLoop nextLoop() {
         size_t index = atomicOp!"+="(_loopIndex, 1);
         if(index > 10000) {
