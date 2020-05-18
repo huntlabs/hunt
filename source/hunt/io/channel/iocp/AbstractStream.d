@@ -90,7 +90,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected override void onClose() {
         _isWritting = false;
         resetWriteStatus();
-        (cast(AbstractSelector)_inLoop).rmEventArray(this);
         if(this._socket is null) {
             import core.sys.windows.winsock2;
             .closesocket(this.handle);

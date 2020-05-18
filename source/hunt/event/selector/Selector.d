@@ -60,10 +60,54 @@ abstract class Selector {
         return _isStopping;
     }
 
+    bool register(AbstractChannel channel) {
+        assert(channel !is null);
+        int infd = cast(int) channel.handle;
+        size_t index = cast(size_t)(infd / divider);
 
-    abstract bool register(AbstractChannel channel);
+        if (index >= channels.length) {
+            debug warningf("expanding channels uplimit to %d", index);
+            import std.algorithm : max;
 
-    abstract bool deregister(AbstractChannel channel);
+            size_t length = max(cast(size_t)(index * 3 / 2), 16);
+            AbstractChannel[] arr = new AbstractChannel[length];
+            arr[0 .. channels.length] = channels[0 .. $];
+            channels = arr;
+        }
+
+        bool result = true;
+
+        version (HUNT_IO_DEBUG) {
+            if(channels[index] !is null) {
+                result = false;
+                warningf("The channel slot has been registered: fd=%d, slot=%d, selector: %d", infd, index, getId());
+            } else {
+                tracef("register channel: fd=%d, slot=%d, selector: %d", infd, index, getId());
+            }            
+        }
+
+        channels[index] = channel;
+
+        return result;
+    }
+
+    bool deregister(AbstractChannel channel) {
+        size_t fd = cast(size_t) channel.handle;
+        size_t index = cast(size_t)(fd / divider);
+        auto ch = channels[index];
+        bool result = true;
+
+        version (HUNT_IO_DEBUG) {
+            if(ch is null) {
+                result = false;
+                warning("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
+            } else {
+                tracef("deregister channel: fd=%d, slot=%d, selector: %d", fd, index, getId());
+            }
+        }
+        
+        return result;
+    }
 
     bool update(AbstractChannel channel) { return true; }
 
