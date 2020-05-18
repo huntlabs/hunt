@@ -108,26 +108,12 @@ class AbstractSelector : Selector {
     //     PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
     // }
 
-    void putTast(AbstractStream stream)
-    {
-        _queue.insertBack(stream);
-    }
-
     override void onLoop(long timeout = -1) {
         _timer.init();
         super.onLoop(timeout);
     }
 
     protected override int doSelect(long t) {
-        //if(!_queue.empty)
-        //{
-        //    auto task = _queue.front();
-        //    if (task !is null)
-        //    {
-        //        task.beginRead();
-        //    }
-        //    _queue.removeFront();
-        //}
         auto timeout = _timer.doWheel();
         OVERLAPPED* overlapped;
         ULONG_PTR key = 0;
@@ -184,27 +170,28 @@ class AbstractSelector : Selector {
 
         version (HUNT_IO_DEBUG)
             infof("ev.operation: %s, fd=%d", op, channel.handle);
+
         switch (op) {
             case IocpOperation.accept:
-            channel.onRead();
-            break;
+                channel.onRead();
+                break;
             case IocpOperation.connect:
-            onSocketRead(channel, 0);
-            (cast(AbstractStream)channel).beginRead();
-            break;
+                onSocketRead(channel, 0);
+                (cast(AbstractStream)channel).beginRead();
+                break;
             case IocpOperation.read:
-            onSocketRead(channel, bytes);
-            break;
+                onSocketRead(channel, bytes);
+                break;
             case IocpOperation.write:
-            onSocketWrite(channel, bytes);
-            break;
+                onSocketWrite(channel, bytes);
+                break;
             case IocpOperation.event:
-            channel.onRead();
-            break;
+                channel.onRead();
+                break;
             case IocpOperation.close:
-            break;
+                break;
             default:
-            warning("unsupported operation type -------------------------: ", op);
+                warning("unsupported operation type: ", op);
             break;
         }
     }
@@ -276,7 +263,6 @@ class AbstractSelector : Selector {
 private:
     HANDLE _iocpHandle;
     CustomTimer _timer;
-    DList!AbstractStream _queue;
     HANDLE _stopEvent;
     OVERLAPPED*[] [AbstractChannel] _array ;
     TaskPool _taskPool;

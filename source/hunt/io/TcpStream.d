@@ -290,9 +290,7 @@ class TcpStream : AbstractStream {
         _isRegistered = true;
         version (HAVE_IOCP)
         {
-            //auto iopc = cast(AbstractSelector)_loop;
-            //iopc.putTast(this);
-           // this.beginRead();
+        //    this.beginRead();
         }
     }
 
