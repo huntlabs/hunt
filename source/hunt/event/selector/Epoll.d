@@ -110,7 +110,6 @@ class AbstractSelector : Selector {
     }
 
     override bool register(AbstractChannel channel) {
-
         super.register(channel);
 
         // epoll_event e;
@@ -128,13 +127,13 @@ class AbstractSelector : Selector {
         if (epollCtl(channel, EPOLL_CTL_ADD)) {
             return true;
         } else {
-            debug warningf("failed to register channel: fd=%d", infd);
+            debug warningf("failed to register channel: fd=%d", channel.handle);
             return false;
         }
     }
 
     override bool deregister(AbstractChannel channel) {
-        super.register(channel);
+        super.deregister(channel);
 
         if (epollCtl(channel, EPOLL_CTL_DEL)) {
             return true;

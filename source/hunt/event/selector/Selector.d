@@ -81,15 +81,16 @@ abstract class Selector {
             AbstractChannel oldChannel = channels[index];
             if(oldChannel !is null) {
                 result = false;
-                warningf("Register collision, {old channel: %s, fd=%d};  {new channel: %s, fd=%d}; {slot=%d, selector: %d}", 
-                    cast(void*)oldChannel, oldChannel.handle,
-                    cast(void*)channel, infd,
-                    index, getId());
 
-                if(oldChannel.handle == channel.handle) {
-                    channels[index] = channel;
-                } else {
-                    // To find a empty slot
+                version(HUNT_IO_DEBUG) {
+                    warningf("Register collision, {old channel: %s, fd=%d};  {new channel: %s, fd=%d}; {slot=%d, selector: %d}", 
+                        cast(void*)oldChannel, oldChannel.handle,
+                        cast(void*)channel, infd,
+                        index, getId());
+                }
+
+                if(oldChannel.handle != channel.handle) {
+                    // Try to find a empty slot
                     size_t lastIndex = index;
                     while(channels[index] !is null) {
                         index = (index + 1) % channels.length;
@@ -122,8 +123,10 @@ abstract class Selector {
             } else {
                 if(oldChannel !is channel) {
                     result = false;
-                    warningf("deregistering a mismatched channel: old=%d, new=%d, slot=%d, selector: %d", 
-                        oldChannel.handle, fd, index, getId());
+                    version(HUNT_IO_DEBUG) {
+                        warningf("deregistering a mismatched channel: old=%d, new=%d, slot=%d, selector: %d", 
+                            oldChannel.handle, fd, index, getId());
+                    }
                 } else {
                     version (HUNT_IO_DEBUG) {
                         tracef("deregister channel: fd=%d, slot=%d, selector: %d", fd, index, getId());
