@@ -81,9 +81,9 @@ abstract class Selector {
             AbstractChannel oldChannel = channels[index];
             if(oldChannel !is null) {
                 result = false;
-
-                version(HUNT_IO_DEBUG) {
-                    warningf("Register collision, {old channel: %s, fd=%d};  {new channel: %s, fd=%d}; {slot=%d, selector: %d}", 
+                version(HUNT_DEBUG) {
+                    warningf("Register collision, {old channel: %s, fd=%d};  " ~ 
+                                "{new channel: %s, fd=%d}; {slot=%d, selector: %d}", 
                         cast(void*)oldChannel, oldChannel.handle,
                         cast(void*)channel, infd,
                         index, getId());
@@ -119,13 +119,17 @@ abstract class Selector {
             
             if(oldChannel is null) {
                 result = false;
-                warning("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
+                version(HUNT_DEBUG) {
+                    warning("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
+                }
             } else {
                 if(oldChannel !is channel) {
                     result = false;
-                    version(HUNT_IO_DEBUG) {
-                        warningf("deregistering a mismatched channel: old=%d, new=%d, slot=%d, selector: %d", 
-                            oldChannel.handle, fd, index, getId());
+                    version(HUNT_DEBUG) {
+                        warningf("deregistering a mismatched channel, " ~ 
+                            "{old: %s, fd=%d}; {new: %s, fd=%d}, {slot=%d, selector: %d}", 
+                            cast(void*)oldChannel, oldChannel.handle, 
+                            cast(void*)channel, fd, index, getId());
                     }
                 } else {
                     version (HUNT_IO_DEBUG) {
