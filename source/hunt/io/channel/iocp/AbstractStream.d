@@ -12,7 +12,7 @@ import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
-import hunt.concurrency.thread.Helper;
+import hunt.util.ThreadHelper;
 
 import core.atomic;
 import core.sys.windows.windows;
@@ -334,7 +334,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         sendDataBackupBuffer = null;
         writeBuffer = null;
         _isSingleWriteBusy = false;
-        _endFristRead = false;
     }
 
     /**
@@ -377,24 +376,13 @@ abstract class AbstractStream : AbstractSocketChannel {
             dataWriteDoneHandler(this);
         }
     }
+    
+    DataReceivedHandler getDataReceivedHandler() {
+        return dataReceivedHandler;
+    }
 
     void cancelWrite() {
         isWriteCancelling = true;
-    }
-
-    void setFristRead(bool read)
-    {
-        _endFristRead = read;
-    }
-
-    bool getFristRead()
-    {
-        return _endFristRead;
-    }
-
-    void setBusyWrite( bool write)
-    {
-        _isSingleWriteBusy = write;
     }
 
     abstract bool isConnected() nothrow;
@@ -411,7 +399,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected WritingBufferQueue _writeQueue;
     protected bool isWriteCancelling = false;
     private  bool _isSingleWriteBusy = false; // keep a single I/O write operation atomic
-    private  bool _endFristRead = false;
     private const(ubyte)[] _readBuffer;
     private const(ubyte)[] sendDataBuffer;
     private const(ubyte)[] sendDataBackupBuffer;

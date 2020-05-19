@@ -378,8 +378,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         isWriteCancelling = true;
     }
 
-    DataReceivedHandler getDataReceivedHandler()
-    {
+    DataReceivedHandler getDataReceivedHandler() {
         return dataReceivedHandler;
     }
 
