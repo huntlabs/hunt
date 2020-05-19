@@ -91,16 +91,6 @@ class EventLoopGroup : Lifecycle {
        return _eventLoops[factor % _eventLoops.length];
     }
 
-    EventLoop nextLoop() {
-        size_t index = atomicOp!"+="(_loopIndex, 1);
-        if(index > 10000) {
-            index = 0;
-            atomicStore(_loopIndex, 0);
-        }
-        index %= _eventLoops.length;
-        return _eventLoops[index];
-    }
-
     EventLoop opIndex(size_t index) {
         auto i = index % _eventLoops.length;
         return _eventLoops[i];

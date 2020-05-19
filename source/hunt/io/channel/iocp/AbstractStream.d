@@ -12,7 +12,7 @@ import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
-import hunt.util.ThreadHelper;
+import hunt.concurrency.thread.Helper;
 
 import core.atomic;
 import core.sys.windows.windows;
@@ -90,7 +90,6 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected override void onClose() {
         _isWritting = false;
         resetWriteStatus();
-        (cast(AbstractSelector)_inLoop).rmEventArray(this);
         if(this._socket is null) {
             import core.sys.windows.winsock2;
             .closesocket(this.handle);

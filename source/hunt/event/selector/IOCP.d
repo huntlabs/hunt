@@ -25,7 +25,7 @@ import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;
 import std.conv;
 import std.socket;
-import hunt.util.TaskPool;
+import hunt.concurrency.TaskPool;
 import std.container : DList;
 
 
@@ -55,6 +55,8 @@ class AbstractSelector : Selector {
         auto fd = channel.handle;
         version (HUNT_IO_DEBUG)
             tracef("register, channel(fd=%d, type=%s)", fd, ct);
+        
+        super.register(channel);
 
         if (ct == ChannelType.Timer) {
             AbstractTimer timerChannel = cast(AbstractTimer) channel;
@@ -90,13 +92,15 @@ class AbstractSelector : Selector {
         version(HUNT_IO_DEBUG) 
         tracef("deregister (fd=%d)", channel.handle);
 
+
+
         // IocpContext _data;
         // _data.channel = channel;
         // _data.operation = IocpOperation.close;
         // PostQueuedCompletionStatus(_iocpHandle, 0, 0, &_data.overlapped);
         //(cast(AbstractStream)channel).stopAction();
         //WaitForSingleObject
-        return true;
+        return super.deregister(channel);
     }
 
     // void weakUp() {
@@ -108,26 +112,12 @@ class AbstractSelector : Selector {
     //     PostQueuedCompletionStatus(_iocpHandle, 0, 0, null);
     // }
 
-    void putTast(AbstractStream stream)
-    {
-        _queue.insertBack(stream);
-    }
-
     override void onLoop(long timeout = -1) {
         _timer.init();
         super.onLoop(timeout);
     }
 
     protected override int doSelect(long t) {
-        //if(!_queue.empty)
-        //{
-        //    auto task = _queue.front();
-        //    if (task !is null)
-        //    {
-        //        task.beginRead();
-        //    }
-        //    _queue.removeFront();
-        //}
         auto timeout = _timer.doWheel();
         OVERLAPPED* overlapped;
         ULONG_PTR key = 0;
@@ -139,8 +129,8 @@ class AbstractSelector : Selector {
             const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes, &key,
                     &overlapped, INFINITE);
 
-            //IocpContext* ev = cast(IocpContext*) overlapped;
-            ev = cast(IocpContext *)( cast(PCHAR)(overlapped) - cast(ULONG_PTR)(&(cast(IocpContext*)0).overlapped));
+            ev = cast(IocpContext*) overlapped;
+            // ev = cast(IocpContext *)( cast(PCHAR)(overlapped) - cast(ULONG_PTR)(&(cast(IocpContext*)0).overlapped));
             if (ret == 0) {
 
                 DWORD dwErr = GetLastError();
@@ -171,8 +161,6 @@ class AbstractSelector : Selector {
                     continue;
                 }else
                 {
-                    AbstractChannel channel = ev.channel;
-                    _array[channel] ~= overlapped;
                     handleChannelEvent(ev.operation, ev.channel, bytes);
                 }
             }
@@ -184,27 +172,28 @@ class AbstractSelector : Selector {
 
         version (HUNT_IO_DEBUG)
             infof("ev.operation: %s, fd=%d", op, channel.handle);
+
         switch (op) {
             case IocpOperation.accept:
-            channel.onRead();
-            break;
+                channel.onRead();
+                break;
             case IocpOperation.connect:
-            onSocketRead(channel, 0);
-            (cast(AbstractStream)channel).beginRead();
-            break;
+                onSocketRead(channel, 0);
+                (cast(AbstractStream)channel).beginRead();
+                break;
             case IocpOperation.read:
-            onSocketRead(channel, bytes);
-            break;
+                onSocketRead(channel, bytes);
+                break;
             case IocpOperation.write:
-            onSocketWrite(channel, bytes);
-            break;
+                onSocketWrite(channel, bytes);
+                break;
             case IocpOperation.event:
-            channel.onRead();
-            break;
+                channel.onRead();
+                break;
             case IocpOperation.close:
-            break;
+                break;
             default:
-            warning("unsupported operation type -------------------------: ", op);
+                warning("unsupported operation type: ", op);
             break;
         }
     }
@@ -268,16 +257,10 @@ class AbstractSelector : Selector {
         client.onWriteDone(len); // Notify the client about how many bytes actually sent.
     }
 
-    public void  rmEventArray(AbstractChannel channel)
-    {
-        _array.remove(channel);
-    }
 
 private:
     HANDLE _iocpHandle;
     CustomTimer _timer;
-    DList!AbstractStream _queue;
     HANDLE _stopEvent;
-    OVERLAPPED*[] [AbstractChannel] _array ;
     TaskPool _taskPool;
 }

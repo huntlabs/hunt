@@ -79,11 +79,7 @@ abstract class AbstractChannel : Channel {
         version (HUNT_IO_DEBUG)
             tracef("onClose [fd=%d]...", this.handle);
         _isRegistered = false;
-        version (HAVE_IOCP) {
-            _inLoop.deregister(this);
-        } else {
-            _inLoop.deregister(this);
-        }
+        _inLoop.deregister(this);
         clear();
 
         version (HUNT_IO_DEBUG_MORE)

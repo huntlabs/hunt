@@ -110,22 +110,7 @@ class AbstractSelector : Selector {
     }
 
     override bool register(AbstractChannel channel) {
-        assert(channel !is null);
-        int infd = cast(int) channel.handle;
-        version (HUNT_IO_DEBUG)
-            tracef("register channel: fd=%d", infd);
-
-        size_t index = cast(size_t)(infd / divider);
-        if (index >= channels.length) {
-            debug warningf("expanding channels uplimit to %d", index);
-            import std.algorithm : max;
-
-            size_t length = max(cast(size_t)(index * 3 / 2), 16);
-            AbstractChannel[] arr = new AbstractChannel[length];
-            arr[0 .. channels.length] = channels[0 .. $];
-            channels = arr;
-        }
-        channels[index] = channel;
+        super.register(channel);
 
         // epoll_event e;
 
@@ -142,17 +127,13 @@ class AbstractSelector : Selector {
         if (epollCtl(channel, EPOLL_CTL_ADD)) {
             return true;
         } else {
-            debug warningf("failed to register channel: fd=%d", infd);
+            debug warningf("failed to register channel: fd=%d", channel.handle);
             return false;
         }
     }
 
     override bool deregister(AbstractChannel channel) {
-        size_t fd = cast(size_t) channel.handle;
-        size_t index = cast(size_t)(fd / divider);
-        version (HUNT_IO_DEBUG)
-            tracef("deregister channel: fd=%d, index=%d", fd, index);
-        channels[index] = null;
+        super.deregister(channel);
 
         if (epollCtl(channel, EPOLL_CTL_DEL)) {
             return true;

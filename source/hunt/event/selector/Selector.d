@@ -60,10 +60,90 @@ abstract class Selector {
         return _isStopping;
     }
 
+    bool register(AbstractChannel channel) {
+        assert(channel !is null);
+        int infd = cast(int) channel.handle;
+        size_t index = cast(size_t)(infd / divider);
 
-    abstract bool register(AbstractChannel channel);
+        if (index >= channels.length) {
+            debug warningf("expanding channels uplimit to %d", index);
+            import std.algorithm : max;
 
-    abstract bool deregister(AbstractChannel channel);
+            size_t length = max(cast(size_t)(index * 3 / 2), 16);
+            AbstractChannel[] arr = new AbstractChannel[length];
+            arr[0 .. channels.length] = channels[0 .. $];
+            channels = arr;
+        }
+
+        bool result = true;
+
+        debug {
+            AbstractChannel oldChannel = channels[index];
+            if(oldChannel !is null) {
+                result = false;
+                version(HUNT_DEBUG) {
+                    warningf("Register collision, {old channel: %s, fd=%d};  " ~ 
+                                "{new channel: %s, fd=%d}; {slot=%d, selector: %d}", 
+                        cast(void*)oldChannel, oldChannel.handle,
+                        cast(void*)channel, infd,
+                        index, getId());
+                }
+
+                if(oldChannel.handle != channel.handle) {
+                    // Try to find a empty slot
+                    size_t lastIndex = index;
+                    while(channels[index] !is null) {
+                        index = (index + 1) % channels.length;
+                        if(index == lastIndex) {
+                            warningf("All the slots are full on selector: %d", getId());
+                        }
+                    }
+                }
+            }
+        } 
+        
+        version (HUNT_IO_DEBUG) {
+            tracef("register channel: fd=%d, slot=%d, selector: %d", infd, index, getId());
+        }
+        channels[index] = channel;
+
+        return result;
+    }
+
+    bool deregister(AbstractChannel channel) {
+        size_t fd = cast(size_t) channel.handle;
+        size_t index = cast(size_t)(fd / divider);
+        bool result = true;
+        debug {
+            auto oldChannel = channels[index];
+            
+            if(oldChannel is null) {
+                result = false;
+                version(HUNT_DEBUG) {
+                    warning("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
+                }
+            } else {
+                if(oldChannel !is channel) {
+                    result = false;
+                    version(HUNT_DEBUG) {
+                        warningf("deregistering a mismatched channel, " ~ 
+                            "{old: %s, fd=%d}; {new: %s, fd=%d}, {slot=%d, selector: %d}", 
+                            cast(void*)oldChannel, oldChannel.handle, 
+                            cast(void*)channel, fd, index, getId());
+                    }
+                } else {
+                    version (HUNT_IO_DEBUG) {
+                        tracef("deregister channel: fd=%d, slot=%d, selector: %d", fd, index, getId());
+                    }
+                    channels[index] = null;
+                }
+            }
+        } else {
+            channels[index] = null;
+        }
+        
+        return result;
+    }
 
     bool update(AbstractChannel channel) { return true; }
 

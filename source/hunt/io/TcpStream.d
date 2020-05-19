@@ -157,7 +157,7 @@ class TcpStream : AbstractStream {
     protected override bool doConnect(Address addr)  {
         try {
             version (HUNT_DEBUG)
-                tracef("connecting to %s...", addr);
+                tracef("Connecting to %s...", addr);
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
             this.socket.blocking = true;
@@ -193,7 +193,7 @@ class TcpStream : AbstractStream {
         } catch (SocketOSException ex) {
             // Must try the best to catch all the exceptions. It's because it will executed in another thread.
             debug warning(ex.msg);
-            version(HUNT_IO_DEBUG) warning(ex);
+            version(HUNT_DEBUG) warning(ex);
             _isConnected = false;
         }
 
@@ -202,7 +202,7 @@ class TcpStream : AbstractStream {
                 _connectionHandler(_isConnected);
             } catch(Exception ex) {
                 debug warning(ex.msg);
-                version(HUNT_IO_DEBUG) warning(ex);
+                version(HUNT_DEBUG) warning(ex);
             }
         }
         return true;
@@ -290,9 +290,7 @@ class TcpStream : AbstractStream {
         _isRegistered = true;
         version (HAVE_IOCP)
         {
-            //auto iopc = cast(AbstractSelector)_loop;
-            //iopc.putTast(this);
-           // this.beginRead();
+        //    this.beginRead();
         }
     }
 
