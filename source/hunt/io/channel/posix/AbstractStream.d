@@ -4,8 +4,8 @@ module hunt.io.channel.posix.AbstractStream;
 version(Posix):
 // dfmt on
 
-import hunt.collection.BufferUtils;
-import hunt.collection.ByteBuffer;
+import hunt.io.BufferUtils;
+import hunt.io.ByteBuffer;
 import hunt.event.selector.Selector;
 import hunt.Functions;
 import hunt.io.channel.AbstractSocketChannel;

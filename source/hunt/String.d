@@ -1070,7 +1070,7 @@ final class String : Nullable!string {
         byte[] val = this.value;
         if (isLatin1()) {
             for (int i = 0; i < n; i++) {
-                if ((val[i] & 0xff) != cs.charAt(i)) {
+                if ((val[i] & 0xff) != cs[i]) {
                     return false;
                 }
             }
@@ -1141,7 +1141,7 @@ final class String : Nullable!string {
      * difference of the two character values at position {@code k} in
      * the two string -- that is, the value:
      * <blockquote><pre>
-     * this.charAt(k)-anotherString.charAt(k)
+     * this[k]-anotherString[k]
      * </pre></blockquote>
      * If there is no index position at which they differ, then the shorter
      * string lexicographically precedes the longer string. In this case,
@@ -1322,13 +1322,13 @@ final class String : Nullable!string {
      * <li>{@code ignoreCase} is {@code false} and there is some nonnegative
      * integer <i>k</i> less than {@code len} such that:
      * <blockquote><pre>
-     * this.charAt(toffset+k) != other.charAt(ooffset+k)
+     * this[toffset+k] != other[ooffset+k]
      * </pre></blockquote>
      * <li>{@code ignoreCase} is {@code true} and there is some nonnegative
      * integer <i>k</i> less than {@code len} such that:
      * <blockquote><pre>
-     * Character.toLowerCase(Character.toUpperCase(this.charAt(toffset+k))) !=
-     Character.toLowerCase(Character.toUpperCase(other.charAt(ooffset+k)))
+     * Character.toLowerCase(Character.toUpperCase(this[toffset+k])) !=
+     Character.toLowerCase(Character.toUpperCase(other[ooffset+k]))
      * </pre></blockquote>
      * </ul>
      *
@@ -2222,10 +2222,10 @@ final class String : Nullable!string {
          */
         char ch = 0;
         if (((regex.length() == 1 &&
-             ".$|()[{^?*+\\".indexOf(ch = regex.charAt(0)) == -1) ||
+             ".$|()[{^?*+\\".indexOf(ch = regex[0]) == -1) ||
              (regex.length() == 2 &&
-              regex.charAt(0) == '\\' &&
-              (((ch = regex.charAt(1))-'0')|('9'-ch)) < 0 &&
+              regex[0] == '\\' &&
+              (((ch = regex[1])-'0')|('9'-ch)) < 0 &&
               ((ch-'a')|('z'-ch)) < 0 &&
               ((ch-'A')|('Z'-ch)) < 0)) &&
             (ch < Character.MIN_HIGH_SURROGATE ||

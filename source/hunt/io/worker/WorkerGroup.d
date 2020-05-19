@@ -7,8 +7,8 @@ import core.sync.condition;
 import core.sync.mutex;
 import std.process;
 import hunt.io.channel;
-import hunt.collection.BufferUtils;
-import hunt.collection.ByteBuffer;
+import hunt.io.BufferUtils;
+import hunt.io.ByteBuffer;
 
 
 

@@ -13,7 +13,7 @@ module hunt.Char;
 
 import hunt.Nullable;
 import hunt.Exceptions;
-import hunt.text.Common;
+// import hunt.text.Common;
 /**
  * The {@code Character} class wraps a value of the primitive
  * type {@code char} in an object. An object of type
@@ -775,9 +775,9 @@ class Char : Nullable!char {
      * {@link CharSequence#length() seq.length()}.
      */
     public static int codePointAt(string seq, int index) {
-        char c1 = seq.charAt(index);
+        char c1 = seq[index];
         if (isHighSurrogate(c1) && ++index < seq.length) {
-            char c2 = seq.charAt(index);
+            char c2 = seq[index];
             if (isLowSurrogate(c2)) {
                 return toCodePoint(c1, c2);
             }

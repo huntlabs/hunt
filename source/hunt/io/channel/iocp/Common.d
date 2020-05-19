@@ -7,7 +7,7 @@ version (HAVE_IOCP) :
 pragma(lib, "Ws2_32");
 // dfmt on
 
-import hunt.collection.ByteBuffer;
+import hunt.io.ByteBuffer;
 import hunt.io.channel.AbstractChannel;
 import hunt.io.channel.Common;
 import hunt.logging.ConsoleLogger;

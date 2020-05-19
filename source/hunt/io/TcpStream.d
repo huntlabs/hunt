@@ -15,10 +15,10 @@ import hunt.io.channel.Common;
 import hunt.io.TcpStreamOptions;
 import hunt.io.IoError;
 
-import hunt.collection.ByteBuffer;
-import hunt.collection.BufferUtils;
+import hunt.io.ByteBuffer;
+import hunt.io.BufferUtils;
 import hunt.event.selector.Selector;
-import hunt.concurrency.SimpleQueue;
+import hunt.io.SimpleQueue;
 import hunt.event;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;

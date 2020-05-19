@@ -25,7 +25,7 @@ import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;
 import std.conv;
 import std.socket;
-import hunt.concurrency.TaskPool;
+import hunt.util.TaskPool;
 import std.container : DList;
 
 

@@ -4,12 +4,9 @@
 A refined core library for D programming language.
 
 ## Modules
- * hunt.concurrency
- * hunt.collection
  * hunt.event
  * hunt.io
  * hunt.logging
- * hunt.text
  * hunt.util
 
 ## Platforms
@@ -49,4 +46,3 @@ For details, see [here](docs/benchmark.md).
 ## TODO
 - [ ] Better performance
 - [ ] Better APIs
-- [ ] More examples

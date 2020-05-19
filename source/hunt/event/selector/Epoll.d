@@ -38,7 +38,7 @@ import hunt.io.channel;
 import hunt.logging.ConsoleLogger;
 import hunt.event.timer;
 import hunt.system.Error;
-import hunt.concurrency.TaskPool;
+import hunt.util.TaskPool;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;

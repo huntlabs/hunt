@@ -11,8 +11,8 @@
 
 module hunt.io.Common;
 
-import hunt.collection.ByteBuffer;
-import hunt.concurrency.CountingCallback;
+import hunt.io.ByteBuffer;
+// import hunt.concurrency.CountingCallback;
 import hunt.Exceptions;
 import hunt.logging;
 import hunt.util.Common;
@@ -516,6 +516,6 @@ abstract class OutputStream : Closeable, Flushable {
 // }
 
 
-interface BufferReaderHandler {
-	void readBuffer(ByteBuffer buf, CountingCallback countingCallback, long count);
-}
+// interface BufferReaderHandler {
+// 	void readBuffer(ByteBuffer buf, CountingCallback countingCallback, long count);
+// }

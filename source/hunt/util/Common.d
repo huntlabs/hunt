@@ -335,8 +335,7 @@ interface Closeable : AutoCloseable {
 /**
  * An object to which {@code char} sequences and values can be appended.  The
  * {@code Appendable} interface must be implemented by any class whose
- * instances are intended to receive formatted output from a {@link
- * java.util.Formatter}.
+ * instances are intended to receive formatted output from a formatter.
  *
  * <p> The characters to be appended should be valid Unicode characters as
  * described in <a href="Character.html#unicode">Unicode Character

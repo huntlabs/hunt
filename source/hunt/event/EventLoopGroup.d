@@ -11,7 +11,7 @@
 
 module hunt.event.EventLoopGroup;
 
-import hunt.concurrency.TaskPool;
+import hunt.util.TaskPool;
 import hunt.event.EventLoop;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Memory;

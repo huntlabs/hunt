@@ -1,4 +1,4 @@
-import hunt.collection.ByteBuffer;
+import hunt.io.ByteBuffer;
 import hunt.event;
 import hunt.io.TcpStream;
 import hunt.io.IoError;

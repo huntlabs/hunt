@@ -12,8 +12,9 @@
 module hunt.Boolean;
 
 import hunt.Nullable;
-import hunt.text;
+// import hunt.text;
 import std.traits;
+import std.string;
 
 import std.concurrency : initOnce;
 
@@ -160,7 +161,7 @@ class Boolean : Nullable!bool {
      * @return     the bool represented by the string argument
      */
     static bool parseBoolean(string s) {
-        return ((s.length != 0) && equalsIgnoreCase(s, "true"));
+        return ((s.length != 0) && icmp(s, "true") == 0);
     }
 
     /**

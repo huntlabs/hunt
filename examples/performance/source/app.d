@@ -1,7 +1,7 @@
 import std.stdio;
 
-import hunt.collection.ByteBuffer;
-import hunt.concurrency.thread.Helper;
+import hunt.io.ByteBuffer;
+import hunt.util.ThreadHelper;
 import hunt.event;
 import hunt.Functions;
 import hunt.io;

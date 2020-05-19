@@ -11,9 +11,9 @@
 
 import std.stdio;
 
-import hunt.collection.ByteBuffer;
-import hunt.concurrency.thread.Helper;
-import hunt.concurrency.TaskPool;
+import hunt.io.ByteBuffer;
+import hunt.util.ThreadHelper;
+import hunt.util.TaskPool;
 import hunt.event;
 import hunt.io.TcpListener;
 import hunt.io.TcpStream;
@@ -31,9 +31,8 @@ void main() {
 
     debug writefln("Main thread: %s", getTid());
 
-    //TaskPool pool = new TaskPool(8, true);
     EventLoop loop = new EventLoop();
-    TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512 , 8);
+    TcpListener listener = new TcpListener(loop, AddressFamily.INET, 512);
 
     // dfmt off
     listener

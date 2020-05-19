@@ -4,15 +4,15 @@ module hunt.io.channel.iocp.AbstractStream;
 version (HAVE_IOCP) : 
 // dfmt on
 
-import hunt.collection.ByteBuffer;
-import hunt.collection.BufferUtils;
+import hunt.io.ByteBuffer;
+import hunt.io.BufferUtils;
 import hunt.event.selector.Selector;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
-import hunt.concurrency.thread.Helper;
+import hunt.util.ThreadHelper;
 
 import core.atomic;
 import core.sys.windows.windows;

@@ -11,7 +11,7 @@
 
 module hunt.event.EventLoop;
 
-import hunt.concurrency.TaskPool;
+import hunt.util.TaskPool;
 import hunt.io.channel.Common;
 import hunt.event.selector;
 import hunt.logging.ConsoleLogger;
@@ -20,7 +20,7 @@ import core.thread;
 import std.parallelism;
 import std.random;
 
-alias HuntTaskPool = hunt.concurrency.TaskPool.TaskPool;
+alias HuntTaskPool = hunt.util.TaskPool.TaskPool;
 
 /**
  * 

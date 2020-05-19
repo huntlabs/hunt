@@ -12,9 +12,9 @@
 module hunt.io.channel.Common;
 
 import hunt.io.IoError;
-import hunt.collection.ByteBuffer;
-import hunt.concurrency.SimpleQueue;
-import hunt.concurrency.TaskPool;
+import hunt.io.ByteBuffer;
+import hunt.io.SimpleQueue;
+import hunt.util.TaskPool;
 import hunt.Functions;
 import hunt.system.Memory;
 
