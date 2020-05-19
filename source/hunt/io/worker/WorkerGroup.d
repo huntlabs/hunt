@@ -50,7 +50,7 @@ class WorkerGroup(T) {
     DList!Task          _queue;
     size_t              _threadSize;
     Thread[]            _threadPool;
-    size_t[ulong]       _threadIdMap;
+    size_t[ThreadID]       _threadIdMap;
     size_t              _threadIndex;
   }
 
