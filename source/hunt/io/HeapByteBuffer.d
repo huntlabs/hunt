@@ -3,9 +3,9 @@ module hunt.io.HeapByteBuffer;
 import hunt.io.ByteBuffer;
 import hunt.Exceptions;
 
-import hunt.Integer;
-import hunt.Long;
-import hunt.Short;
+// import hunt.Integer;
+// import hunt.Long;
+// import hunt.Short;
 
 import std.format;
 
@@ -312,38 +312,6 @@ class HeapByteBuffer : ByteBuffer {
         return convEndian(bigEndian, getIntUnaligned(buf, offset));
     }    
 
-    /**
-     * Fetches a value at some byte offset into a given Java object.
-     * More specifically, fetches a value within the given object
-     * <code>o</code> at the given offset, or (if <code>o</code> is
-     * null) from the memory address whose numerical value is the
-     * given offset.  <p>
-     *
-     * The specification of this method is the same as {@link
-     * #getLong(Object, long)} except that the offset does not need to
-     * have been obtained from {@link #objectFieldOffset} on the
-     * {@link java.lang.reflect.Field} of some Java field.  The value
-     * in memory is raw data, and need not correspond to any Java
-     * variable.  Unless <code>o</code> is null, the value accessed
-     * must be entirely within the allocated object.  The endianness
-     * of the value in memory is the endianness of the native platform.
-     *
-     * <p> The read will be atomic with respect to the largest power
-     * of two that divides the GCD of the offset and the storage size.
-     * For example, getLongUnaligned will make atomic reads of 2-, 4-,
-     * or 8-byte storage units if the offset is zero mod 2, 4, or 8,
-     * respectively.  There are no other guarantees of atomicity.
-     * <p>
-     * 8-byte atomicity is only guaranteed on platforms on which
-     * support atomic accesses to longs.
-     *
-     * @param o Java heap object in which the value resides, if any, else
-     *        null
-     * @param offset The offset in bytes from the start of the object
-     * @return the value fetched from the indicated object
-     * @throws RuntimeException No defined exceptions are thrown, not even
-     *         {@link NullPointerException}
-     */
     private static long getLongUnaligned(byte[] buf, size_t offset) {
         if ((offset & 7) == 0) {
             return _getLong(buf, offset);
@@ -372,7 +340,7 @@ class HeapByteBuffer : ByteBuffer {
      * additional argument which specifies the endianness of the value
      * as stored in memory.
      *
-     * @param o Java heap object in which the variable resides
+     * @param o heap object in which the variable resides
      * @param offset The offset in bytes from the start of the object
      * @param bigEndian The endianness of the value
      * @return the value fetched from the indicated object
@@ -384,7 +352,7 @@ class HeapByteBuffer : ByteBuffer {
     /**
      * As {@link #putLongUnaligned(Object, long, long)} but with an additional
      * argument which specifies the endianness of the value as stored in memory.
-     * @param o Java heap object in which the value resides
+     * @param o heap object in which the value resides
      * @param offset The offset in bytes from the start of the object
      * @param x the value to store
      * @param bigEndian The endianness of the value
@@ -527,12 +495,29 @@ class HeapByteBuffer : ByteBuffer {
                      | (toUnsignedInt(i1) << pickPos(8, 8)));
     }
 
+    private static short shortReverseBytes(short i) {
+        return cast(short) (((i & 0xFF00) >> 8) | (i << 8));
+    }
+
+    private static int intReverseBytes(int i) {
+        return (i << 24)            |
+               ((i & 0xff00) << 8)  |
+               ((i >>> 8) & 0xff00) |
+               (i >>> 24);
+    }
+
+    private static long longReverseBytes(long i) {
+        i = (i & 0x00ff00ff00ff00ffL) << 8 | (i >>> 8) & 0x00ff00ff00ff00ffL;
+        return (i << 48) | ((i & 0xffff0000L) << 16) |
+            ((i >>> 16) & 0xffff0000L) | (i >>> 48);
+    }
+
     version (LittleEndian) {
         // Maybe byte-reverse an integer
         // private static char convEndian(bool big, char n)   { return big == BE ? n : Char.reverseBytes(n); }
-        private static short convEndian(bool big, short n) { return big ? Short.reverseBytes(n) : n   ; }
-        private static int convEndian(bool big, int n)     { return big ? Integer.reverseBytes(n) : n ; }
-        private static long convEndian(bool big, long n)   { return big ? Long.reverseBytes(n) : n    ; }
+        private static short convEndian(bool big, short n) { return big ? shortReverseBytes(n) : n   ; }
+        private static int convEndian(bool big, int n)     { return big ? intReverseBytes(n) : n ; }
+        private static long convEndian(bool big, long n)   { return big ? longReverseBytes(n) : n    ; }
 
         private static byte  pick(byte  le, byte  be) { return le; }
         private static short pick(short le, short be) { return le; }
@@ -542,9 +527,9 @@ class HeapByteBuffer : ByteBuffer {
     } else {
         // Maybe byte-reverse an integer
         // private static char convEndian(bool big, char n)   { return big == BE ? n : Character.reverseBytes(n); }
-        private static short convEndian(bool big, short n) { return big ? n : Short.reverseBytes(n)    ; }
-        private static int convEndian(bool big, int n)     { return big ? n : Integer.reverseBytes(n)  ; }
-        private static long convEndian(bool big, long n)   { return big ? n : Long.reverseBytes(n)     ; }
+        private static short convEndian(bool big, short n) { return big ? n : shortReverseBytes(n)    ; }
+        private static int convEndian(bool big, int n)     { return big ? n : intReverseBytes(n)  ; }
+        private static long convEndian(bool big, long n)   { return big ? n : longReverseBytes(n)     ; }
 
         private static byte  pick(byte  le, byte  be) { return be; }
         private static short pick(short le, short be) { return be; }

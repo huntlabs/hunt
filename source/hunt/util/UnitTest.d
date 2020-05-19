@@ -11,7 +11,6 @@
 
 module hunt.util.UnitTest;
 
-import hunt.util.ObjectUtils;
 import core.time;
 
 void testUnits(T)() {

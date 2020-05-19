@@ -1,7 +1,7 @@
 module hunt.util.ConverterUtils;
 
 import hunt.Exceptions;
-import hunt.util.Common;
+import hunt.util.Appendable;
 import hunt.util.StringBuilder;
 import hunt.util.Traits;
 

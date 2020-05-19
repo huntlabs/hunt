@@ -181,9 +181,8 @@ abstract class Buffer
      * buf.flip();        // Flip buffer
      * out.write(buf);    // Write header + data to channel</pre></blockquote>
      *
-     * <p> This method is often used in conjunction with the {@link
-     * java.nio.ByteBuffer#compact compact} method when transferring data from
-     * one place to another.  </p>
+     * <p> This method is often used in conjunction with the compact method when 
+     * transferring data from one place to another.  </p>
      *
      * @return  This buffer
      */

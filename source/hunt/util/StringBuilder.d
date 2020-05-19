@@ -11,7 +11,7 @@
 
 module hunt.util.StringBuilder;
 
-import hunt.util.Common;
+import hunt.util.Appendable;
 
 import std.ascii;
 import std.algorithm;
@@ -22,7 +22,8 @@ import std.string;
 import std.uni;
 
 /**
-*/
+ * 
+ */
 class StringBuilder : Appendable {
     Appender!(byte[]) _buffer;
 
@@ -128,56 +129,50 @@ class StringBuilder : Appendable {
         // return cast(int)_buffer.data.countUntil(cast(byte[])s);
     }
 
-    char charAt(int idx)
-    {
-        if(length() > idx)
-           return _buffer.data[idx];
+    char charAt(int idx) {
+        if (length() > idx)
+            return _buffer.data[idx];
         else
             return ' ';
     }
 
-    public StringBuilder deleteCharAt(int index) {
-        if(index < length())
-        {
+    StringBuilder deleteCharAt(int index) {
+        if (index < length()) {
             auto data = _buffer.data.idup;
-            for(int i = index+1 ; i < data.length ; i++)
-            {
-                _buffer.data[i-1] = data[i];
+            for (int i = index + 1; i < data.length; i++) {
+                _buffer.data[i - 1] = data[i];
             }
-            setLength(cast(int)(data.length-1));
+            setLength(cast(int)(data.length - 1));
         }
         return this;
     }
 
-    public StringBuilder insert(int index, char c) {
-        if(index <= length())
-        {
+    StringBuilder insert(int index, char c) {
+        if (index <= length()) {
             auto data = _buffer.data.idup;
-            for(int i = index ; i < data.length ; i++)
-            {
-                _buffer.data[i+1] = data[i];
+            for (int i = index; i < data.length; i++) {
+                _buffer.data[i + 1] = data[i];
             }
             _buffer.data[index] = c;
-            setLength(cast(int)(data.length+1));
+            setLength(cast(int)(data.length + 1));
         }
         return this;
     }
 
-    public StringBuilder insert(int index, long data) {
+    StringBuilder insert(int index, long data) {
         auto bytes = cast(byte[])(to!string(data));
         auto start = index;
-        foreach( b; bytes) {
-            insert(start , cast(char)b);
+        foreach (b; bytes) {
+            insert(start, cast(char) b);
             start++;
         }
         return this;
     }
 
-    public StringBuilder replace(int start, int end, string str) {
-        if( start <= end && start < length() && end < length())
-        {
-            if(str.length >= end)
-                _buffer.data[start .. end ] = cast(byte[])(str[start .. end]);
+    StringBuilder replace(int start, int end, string str) {
+        if (start <= end && start < length() && end < length()) {
+            if (str.length >= end)
+                _buffer.data[start .. end] = cast(byte[])(str[start .. end]);
         }
         return this;
     }

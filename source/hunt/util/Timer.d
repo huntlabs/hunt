@@ -19,7 +19,8 @@ import hunt.Exceptions;
 import core.time;
 
 /**
-*/
+ * 
+ */
 class Timer : AbstractTimer {
 
     this(Selector loop) {

@@ -11,7 +11,7 @@
 
 module hunt.io;
 
-public import hunt.io.Common;
+// public import hunt.io.Common;
 // public import hunt.io.ByteArrayInputStream;
 // public import hunt.io.ByteArrayOutputStream;
 // public import hunt.io.BufferedInputStream;
@@ -21,7 +21,7 @@ public import hunt.io.Common;
 // public import hunt.io.FilterInputStream;
 // public import hunt.io.FilterOutputStream;
 // public import hunt.io.PipedStream;
-public import hunt.io.IOUtils;
+// public import hunt.io.IOUtils;
 public import hunt.io.IoError;
 
 public import hunt.io.TcpListener;

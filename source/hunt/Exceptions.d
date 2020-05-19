@@ -35,23 +35,6 @@ void implementationMissing(string name = __FUNCTION__, string file = __FILE__, i
         } else {
             assert(false, "Unsupported OS.");
         }
-
-        // version (HUNT_DEBUG) {
-        //     // import hunt.logging.ConsoleLogger;
-
-        //     // warningf("Implementation missing %s, in %s:%d", name, file, line);
-
-        //     version(Posix) {
-        //         enum PRINT_COLOR_NONE = "\033[m";
-        //         enum PRINT_COLOR_YELLOW = "\033[1;33m";
-        //         stderr.writefln(PRINT_COLOR_YELLOW ~ "Implementation missing %s, in %s:%d" ~ PRINT_COLOR_NONE,
-        //              name, file, line);
-        //     }
-        // }
-        // else {
-
-        //     stderr.writefln("======> Implementation missing %s, in %s:%d", name, file, line);
-        // }
     }
 }
 

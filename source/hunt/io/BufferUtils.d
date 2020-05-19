@@ -11,18 +11,12 @@
 
 module hunt.io.BufferUtils;
 
-// import hunt.text.Common;
-import hunt.util.StringBuilder;
-
-import hunt.util.Common;
-import hunt.io.ByteBuffer;
-// import hunt.io.Collection;
-// import hunt.io.Enumeration;
-import hunt.io.HeapByteBuffer;
-// import hunt.io.List;
-
 import hunt.Exceptions;
+import hunt.io.ByteBuffer;
+import hunt.io.HeapByteBuffer;
+
 import hunt.util.ConverterUtils;
+import hunt.util.StringBuilder;
 
 import std.conv;
 import std.range;
