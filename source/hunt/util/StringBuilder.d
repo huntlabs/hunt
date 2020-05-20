@@ -125,8 +125,6 @@ class StringBuilder : Appendable {
     int lastIndexOf(string s) {
         string source = cast(string) _buffer.data;
         return cast(int) source.lastIndexOf(s);
-
-        // return cast(int)_buffer.data.countUntil(cast(byte[])s);
     }
 
     char charAt(int idx) {
@@ -175,6 +173,10 @@ class StringBuilder : Appendable {
                 _buffer.data[start .. end] = cast(byte[])(str[start .. end]);
         }
         return this;
+    }
+
+    void clear() {
+        _buffer = Appender!(byte[]).init;
     }
 
     override string toString() {

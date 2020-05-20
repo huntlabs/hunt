@@ -12,7 +12,8 @@ import std.typecons;
 import std.ascii;
 
 /**
-*/
+ * 
+ */
 struct ConverterUtils {
 
     /**
