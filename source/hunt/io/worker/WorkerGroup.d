@@ -9,7 +9,7 @@ import std.process;
 import hunt.io.channel;
 import hunt.io.BufferUtils;
 import hunt.io.ByteBuffer;
-
+import hunt.io.worker.Worker;
 
 
 class WorkerGroup(T) {
@@ -19,39 +19,28 @@ class WorkerGroup(T) {
     _condition = new Condition(_mutex);
     _isExit = false;
     _threadSize = threadSize;
-    _threadIndex = 0;
+
+    _thread = new Thread(() {
+      doThreadProc();
+    });
+
     for(int i = 0 ; i < _threadSize ; ++i)
     {
-      Thread th = new Thread(() {
-        try {
-          doThreadProc();
-        } catch (Throwable t) {
-        }
-      });
-      _threadPool ~= th;
+        auto worker = new Worker!T();
+       _workers[i] = worker;
     }
 	}
 
-  class Task {
-    this (T obj , ByteBuffer buffer)
-    {
-        this.channel = obj;
-        this.buffer = buffer;
-    }
-    T channel;
-    ByteBuffer buffer;
-  }
 
   private
   {
     bool                _isExit;
     Condition           _condition;
     Mutex               _mutex;
-    DList!Task          _queue;
+    DList!(Task!T)      _queue;
     size_t              _threadSize;
-    Thread[]            _threadPool;
-    size_t[ThreadID]       _threadIdMap;
-    size_t              _threadIndex;
+    Thread              _thread;
+    Worker!T[size_t]    _workers;
   }
 
 
@@ -59,21 +48,27 @@ class WorkerGroup(T) {
   {
     if(obj !is null && buffer !is null)
     {
-      auto task = new Task(obj, buffer);
+      auto task = new Task!T(obj, buffer);
       _condition.mutex().lock();
       _queue.insertBack(task);
-      _condition.notifyAll();
+      _condition.notify();
       _condition.mutex().unlock();
     }
   }
 
+  void dispatch(Task!T task)
+  {
+      if (task !is null)
+      {
+        _workers[task.channel.handle % _threadSize].put(task);
+      }
+  }
+
   void doThreadProc()
   {
-      _threadIdMap[thisThreadID()] = _threadIndex;
-      _threadIndex++;
     	do
       {
-          Task task = null;
+          Task!T task = null;
           {
             _condition.mutex().lock();
             if (_queue.empty())
@@ -82,15 +77,7 @@ class WorkerGroup(T) {
             }else
             {
               task = _queue.front();
-              auto channel = task.channel;
-              if (channel !is null && (cast(size_t)channel.handle % _threadSize != _threadIdMap[thisThreadID()]))
-              {
-                task = null;
-                _condition.wait();
-              }else
-              {
-                _queue.removeFront();
-              }
+              _queue.removeFront();
             }
             _condition.mutex().unlock();
           }
@@ -100,16 +87,10 @@ class WorkerGroup(T) {
             break;
           }
 
-          if (task !is null && !((cast(AbstractChannel)(task.channel)).isClosed()))
-          {
-            auto handle  = task.channel.getDataReceivedHandler();
-            if (handle !is null)
-            {
-              handle(task.buffer);
-            }
-          }
+          dispatch(task);
 
       } while (!_isExit);
+
 	    return ;
   }
 
@@ -120,10 +101,11 @@ class WorkerGroup(T) {
 
   void run()
   {
-      foreach(i ; 0 .. _threadPool.length)
+      foreach(worker ; _workers.byValue)
       {
-        _threadPool[i].start();
+            worker.run();
       }
+      _thread.start();
   }
 }
 
