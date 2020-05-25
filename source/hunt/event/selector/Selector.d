@@ -119,8 +119,8 @@ abstract class Selector {
             
             if(oldChannel is null) {
                 result = false;
-                version(HUNT_DEBUG) {
-                    warning("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
+                version(HUNT_IO_DEBUG) {
+                    infof("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
                 }
             } else {
                 if(oldChannel !is channel) {
@@ -217,11 +217,9 @@ abstract class Selector {
         _isReady = true;
         idleTime = timeout;
 
-        version (HAVE_IOCP)
-        {
+        version (HAVE_IOCP) {
             doSelect(timeout);
-        }else
-        {
+        } else {
             do {
                 // version(HUNT_THREAD_DEBUG) warningf("Threads: %d", Thread.getAll().length);
                 doSelect(timeout);
@@ -231,7 +229,7 @@ abstract class Selector {
 
         _isReady = false;
         _running = false;
-        version(HUNT_DEBUG_MORE) infof("Selector %d exited.", _id);
+        version(HUNT_IO_DEBUG) infof("Selector %d exited.", _id);
         dispose();
     }
 

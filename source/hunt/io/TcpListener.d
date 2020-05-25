@@ -32,9 +32,9 @@ alias PeerCreateHandler = TcpStream delegate(TcpListener sender, Socket socket, 
 alias EventErrorHandler = void delegate(IoError error);
 
 
-
 /**
-*/
+ * 
+ */
 class TcpListener : AbstractListener {
     private bool _isSslEnabled = false;
     private bool _isBlocking = false;
@@ -135,6 +135,8 @@ class TcpListener : AbstractListener {
         } else version (Windows) {
             // https://docs.microsoft.com/en-us/windows/win32/winsock/using-so-reuseaddr-and-so-exclusiveaddruse
             // https://docs.microsoft.com/zh-cn/windows/win32/winsock/so-exclusiveaddruse
+            // TODO: Tasks pending completion -@Administrator at 2020-05-25T15:04:42+08:00
+            // More tests needed            
             import core.sys.windows.winsock2;
             this.socket.setOption(SocketOptionLevel.SOCKET, cast(SocketOption) SO_EXCLUSIVEADDRUSE, !flag);
         }

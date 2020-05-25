@@ -4,21 +4,22 @@ module hunt.io.channel.iocp.AbstractStream;
 version (HAVE_IOCP) : 
 // dfmt on
 
+import hunt.event.selector.Selector;
 import hunt.io.ByteBuffer;
 import hunt.io.BufferUtils;
-import hunt.event.selector.Selector;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
 import hunt.logging.ConsoleLogger;
 import hunt.Functions;
+import hunt.event.selector.IOCP;
+import hunt.system.Error;
 import hunt.util.ThreadHelper;
 
 import core.atomic;
 import core.sys.windows.windows;
 import core.sys.windows.winsock2;
 import core.sys.windows.mswsock;
-import hunt.event.selector.IOCP;
 import std.format;
 import std.socket;
 import core.stdc.string;
@@ -39,20 +40,21 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     protected ByteBuffer _bufferForRead;
     protected AddressFamily _family;
+    
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         super(loop, ChannelType.TCP);
         // setFlag(ChannelFlag.Read, true);
         // setFlag(ChannelFlag.Write, true);
 
-        version (HUNT_IO_DEBUG)
-            trace("Buffer size for read: ", bufferSize);
+        // version (HUNT_IO_DEBUG)
+        //     trace("Buffer size: ", bufferSize);
         // _readBuffer = new ubyte[bufferSize];
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.clear();
         _readBuffer = cast(ubyte[])_bufferForRead.array();
         // _writeQueue = new WritingBufferQueue();
-        this.socket = new TcpSocket(family);
+        // this.socket = new TcpSocket(family);
 
         loadWinsockExtension(this.handle);
     }
@@ -105,7 +107,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         super.onClose();
     }
 
-    public void beginRead() {
+    void beginRead() {
         // https://docs.microsoft.com/en-us/windows/desktop/api/winsock2/nf-winsock2-wsarecv
 
         ///  _isSingleWriteBusy = true;
@@ -138,12 +140,54 @@ abstract class AbstractStream : AbstractSocketChannel {
         _iocpread.channel = this;
         _iocpread.operation = IocpOperation.connect;
 
+        import std.datetime.stopwatch;
+        auto sw = StopWatch(AutoStart.yes);
+        sw.start();
+        scope(exit) {
+            sw.stop();
+        }
+
+        // https://docs.microsoft.com/en-us/windows/win32/api/mswsock/nc-mswsock-lpfn_connectex
         int nRet = ConnectEx(cast(SOCKET) this.socket.handle(), cast(SOCKADDR*) addr.name(), 
             addr.nameLen(), null, 0, null, &_iocpread.overlapped);
-
         checkErro(nRet, SOCKET_ERROR);
+
+        if(this._error) 
+            return false;
+
+        // https://docs.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-getsockopt
+        int seconds = 0;
+        int bytes = seconds.sizeof;
+        int iResult = 0;
+
+        CHECK: 
+        iResult = getsockopt(cast(SOCKET) this.socket.handle(), SOL_SOCKET, SO_CONNECT_TIME,
+                            cast(void*)&seconds, cast(PINT)&bytes);
+
+        bool result = false;
+        if ( iResult != NO_ERROR ) {
+            DWORD dwLastError = WSAGetLastError();
+            warningf("getsockopt(SO_CONNECT_TIME) failed with error: code=%d, message=%s", 
+                dwLastError, getErrorMessage(dwLastError));
+        } else {
+            if (seconds == 0xFFFFFFFF) {
+                version(HUNT_IO_DEBUG) warningf("Connection not established yet (destination: %s).", addr);
+                // so to check again
+                goto CHECK;
+            } else {
+                result = true;
+                version(HUNT_IO_DEBUG) {
+                    //
+                    infof("Connection has been established in %d msecs, destination: %s", sw.peek.total!"msecs", addr);
+                }
+                // https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+                enum SO_UPDATE_CONNECT_CONTEXT = 0x7010;
+                iResult = setsockopt(cast(SOCKET) this.socket.handle(), SOL_SOCKET, 
+                    SO_UPDATE_CONNECT_CONTEXT, NULL, 0 );
+            }
+        }
         
-        return !this._error;
+        return result;
     }
 
     private uint doWrite(const(ubyte)[] data) {
@@ -172,14 +216,14 @@ abstract class AbstractStream : AbstractSocketChannel {
         //_dataWriteBuffer.buf =  bf.ptr;
         _dataWriteBuffer.buf = cast(char*) data.ptr;
         _dataWriteBuffer.len = cast(uint) data.length;
-        _isSingleWriteBusy = true;
+        // _isSingleWriteBusy = true;
         int nRet = WSASend( cast(SOCKET) this.socket.handle(), &_dataWriteBuffer, 1, &dwSent,
         dwFlags, &_iocpwrite.overlapped, cast(LPWSAOVERLAPPED_COMPLETION_ROUTINE) null);
-        if (nRet != NO_ERROR && (GetLastError() != ERROR_IO_PENDING))
-        {
-            _isSingleWriteBusy = false;
-            close();
-        }
+        // if (nRet != NO_ERROR && (GetLastError() != ERROR_IO_PENDING))
+        // {
+        //     _isSingleWriteBusy = false;
+        //     // close();
+        // }
 
         checkErro( nRet, SOCKET_ERROR);
 
