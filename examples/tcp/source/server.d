@@ -38,6 +38,7 @@ void main() {
     // dfmt off
     listener
         .bind(8080)
+        // .reusePort(false)
         .listen(1024)
         .error((IoError error) {
             writefln("error occurred: %d  %s", error.errorCode, error.errorMsg);

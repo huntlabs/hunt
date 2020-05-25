@@ -54,14 +54,12 @@ abstract class AbstractChannel : Channel {
      */
     void close() {
         if (!_isClosed && cas(&_isClosing, false, true) ) {
-            version (HUNT_IO_DEBUG_MORE)
-                tracef("channel[fd=%d] closing...", this.handle);
+            version (HUNT_IO_DEBUG_MORE) tracef("channel[fd=%d] closing...", this.handle);
             onClose(); // closing
             doClose(); // close
             // closed
             _isClosing = false;
-            version (HUNT_IO_DEBUG)
-                tracef("channel[fd=%d] closed", this.handle);
+            version (HUNT_IO_DEBUG) tracef("channel[fd=%d] closed", this.handle);
 
         } else {
             version (HUNT_IO_DEBUG) {

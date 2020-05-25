@@ -10,16 +10,16 @@ import std.parallelism;
 import std.socket;
 import std.stdio;
 
-// enum Host = "127.0.0.1";
-enum Host = "10.1.222.110";
+enum Host = "127.0.0.1";
 enum Port = 8080;
 
 void main() {
 	trace("Start test...");
 	EventLoop loop = new EventLoop();
-
 	TcpStream client = new TcpStream(loop);
 	int count = 10;
+
+	// dfmt off
 	client.connected((bool isSucceeded) {
 		if (isSucceeded) {
 			writeln("connected with: ", client.remoteAddress.toString());
@@ -43,9 +43,13 @@ void main() {
 		} else {
 			client.close();
 		}
-	}).closed(() { writeln("The connection closed!"); loop.stop(); }).error((IoError error) {
+	}).closed(() { 
+		writeln("The connection closed!"); 
+		loop.stop(); 
+	}).error((IoError error) {
 		writefln("error occurred: %d  %s", error.errorCode, error.errorMsg);
 	}).connect(Host, Port);
 
+	// dfmt on
 	loop.run(100);
 }

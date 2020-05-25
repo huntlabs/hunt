@@ -360,8 +360,9 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool doConnect(Address addr) {
         try {
             this.socket.connect(addr);
-        } catch (SocketOSException e)
-        {
+        } catch (SocketOSException e) {
+            error(e.msg);
+            version(HUNT_DEBUG) error(e);
             return false;
         }
         return true;

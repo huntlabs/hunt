@@ -25,15 +25,14 @@ import std.process;
 import std.socket;
 import std.stdio;
 
-
-
 /**
-*/
+ * 
+ */
 mixin template CheckIocpError() {
     void checkErro(int ret, int erro = 0) {
         DWORD dwLastError = GetLastError();
         version (HUNT_IO_DEBUG)
-            infof("erro=%d, dwLastError=%d", erro, dwLastError);
+            infof("ret=%d, erro=%d, dwLastError=%d", ret, erro, dwLastError);
         if (ret != erro || dwLastError == 0)
             return;
 

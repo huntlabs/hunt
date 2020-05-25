@@ -124,47 +124,40 @@ class AbstractSelector : Selector {
         DWORD bytes = 0;
         IocpContext* ev;
 
-        while( WAIT_OBJECT_0 != WaitForSingleObject(_stopEvent , 0))
-        {
+        while( WAIT_OBJECT_0 != WaitForSingleObject(_stopEvent , 0) && !isStopping()) {
+            // https://docs.microsoft.com/zh-cn/windows/win32/api/ioapiset/nf-ioapiset-getqueuedcompletionstatus
             const int ret = GetQueuedCompletionStatus(_iocpHandle, &bytes, &key,
                     &overlapped, INFINITE);
-
+            
             ev = cast(IocpContext*) overlapped;
             // ev = cast(IocpContext *)( cast(PCHAR)(overlapped) - cast(ULONG_PTR)(&(cast(IocpContext*)0).overlapped));
             if (ret == 0) {
-
                 DWORD dwErr = GetLastError();
-                if (WAIT_TIMEOUT == dwErr)
-                {
+                if (WAIT_TIMEOUT == dwErr) {
                     continue;
-                }
-                else
-                {
+                } else {
+                    assert(ev !is null, "The IocpContext is null");
                     AbstractChannel channel = ev.channel;
-                    if (channel !is null && !channel.isClosed())
-                    {
+                    if (channel !is null && !channel.isClosed()) {
                         channel.close();
                     }
                     continue;
                 }
-            }
-            //else if (ev is null || ev.channel is null)
-            //    warning("ev is null or ev.watche is null");
-            else {
-                if (0 == bytes && (ev.operation == IocpOperation.read || ev.operation == IocpOperation.write))
-                {
+            } else if (ev is null || ev.channel is null) {
+               version(HUNT_IO_DEBUG) warningf("The ev is null or ev.watche is null. isStopping: %s", isStopping());
+            } else {
+                if (0 == bytes && (ev.operation == IocpOperation.read || ev.operation == IocpOperation.write)) {
                     AbstractChannel channel = ev.channel;
-                    if (channel !is null && !channel.isClosed())
-                    {
+                    if (channel !is null && !channel.isClosed()) {
                         channel.close();
                     }
                     continue;
-                }else
-                {
+                } else {
                     handleChannelEvent(ev.operation, ev.channel, bytes);
                 }
             }
         }
+
         return 0;
     }
 
@@ -228,7 +221,7 @@ class AbstractSelector : Selector {
 
         if (len == 0 || channel.isClosed) {
             version (HUNT_IO_DEBUG)
-               infof("channel [fd=%d] closed %d  %d", channel.handle, channel.isClosed, len);
+               infof("channel [fd=%d] closed. isClosed: %s, len: %d", channel.handle, channel.isClosed, len);
             //channel.close();
             return;
         }

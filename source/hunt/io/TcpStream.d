@@ -48,20 +48,21 @@ class TcpStream : AbstractStream {
 
     private TcpStreamOptions _tcpOption;
     private int retryCount = 0;
-    private Selector _loop;
 
     // for client
     this(Selector loop, TcpStreamOptions option = null, AddressFamily family = AddressFamily.INET) {
+        _isClient = true;
+        _isConnected = false;
+
         if (option is null)
             _tcpOption = TcpStreamOptions.create();
         else
             _tcpOption = option;
+        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
         super(loop, family, _tcpOption.bufferSize);
         version(HUNT_IO_DEBUG) tracef("buffer size: %d bytes", _tcpOption.bufferSize);
-        this.socket = new Socket(family, SocketType.STREAM, ProtocolType.TCP);
-        _isClient = true;
-        _isConnected = false;
-        _loop = loop;
+        
+
     }
 
     // for server
@@ -70,14 +71,13 @@ class TcpStream : AbstractStream {
             _tcpOption = TcpStreamOptions.create();
         else
             _tcpOption = option;
-        super(loop, socket.addressFamily, _tcpOption.bufferSize);
         this.socket = socket;
+        super(loop, socket.addressFamily, _tcpOption.bufferSize);
         _remoteAddress = socket.remoteAddress();
         _localAddress = socket.localAddress();
 
         _isClient = false;
         _isConnected = true;
-        _loop = loop;
         setKeepalive();
     }
 
@@ -160,47 +160,42 @@ class TcpStream : AbstractStream {
                 tracef("Connecting to %s...", addr);
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
-            this.socket.blocking = true;
-            version (HAVE_IOCP)
-            {
+            this.socket.blocking = false;
+            version (HAVE_IOCP) {
                 start();
-                if(super.doConnect(addr))
-                {
+                if(super.doConnect(addr)) {
                     this.socket.blocking = false;
                     setKeepalive();
                     _localAddress = this.socket.localAddress();
                     _isConnected = true;
-                } else
-                {
+                } else {
                     errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
                     _isConnected = false;
                 }
-            }else
-            {
-                if(super.doConnect(addr))
-                {
+            } else {
+                if(super.doConnect(addr)) {
                     this.socket.blocking = false;
                     setKeepalive();
                     _localAddress = this.socket.localAddress();
                     start();
                     _isConnected = true;
-                } else
-                {
+                } else {
                     errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
                     _isConnected = false;
                 }
             }
-        } catch (SocketOSException ex) {
-            // Must try the best to catch all the exceptions. It's because it will executed in another thread.
+        } catch (Throwable ex) {
+            // Must try the best to catch all the exceptions, because it will be executed in another thread.
             debug warning(ex.msg);
             version(HUNT_DEBUG) warning(ex);
+            errorOccurred(ErrorCode.CONNECTIONEFUSED,"Connection refused");
             _isConnected = false;
-        }
+        } 
 
         if (_connectionHandler !is null) {
             try {
                 _connectionHandler(_isConnected);
-            } catch(Exception ex) {
+            } catch(Throwable ex) {
                 debug warning(ex.msg);
                 version(HUNT_DEBUG) warning(ex);
             }

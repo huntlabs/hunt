@@ -76,7 +76,7 @@ abstract class AbstractSocketChannel : AbstractChannel {
 
     /// Get a socket option.
     /// Returns: The number of bytes written to $(D result).
-    //returns the length, in bytes, of the actual result - very different from getsockopt()
+    ///     returns the length, in bytes, of the actual result - very different from getsockopt()
     pragma(inline) final int getOption(SocketOptionLevel level, SocketOption option, void[] result) @trusted {
         return this._socket.getOption(level, option, result);
     }
