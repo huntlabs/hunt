@@ -20,7 +20,7 @@
 
 # DUB
 .dub
-dub.selections.json
+dub.*.json
 docs.json
 __dummy.html
 
@@ -29,7 +29,6 @@ __dummy.html
 *.lst
 
 # Examples
-
 examples/*/log.txt
 examples/configuration/configuration
 examples/collecton/container-demo

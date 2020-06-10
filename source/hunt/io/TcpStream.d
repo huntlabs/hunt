@@ -160,8 +160,8 @@ class TcpStream : AbstractStream {
                 tracef("Connecting to %s...", addr);
             // Address binded = createAddress(this.socket.addressFamily);
             // this.socket.bind(binded);
-            this.socket.blocking = false;
             version (HAVE_IOCP) {
+                this.socket.blocking = false;
                 start();
                 if(super.doConnect(addr)) {
                     this.socket.blocking = false;
@@ -173,6 +173,7 @@ class TcpStream : AbstractStream {
                     _isConnected = false;
                 }
             } else {
+                this.socket.blocking = true;
                 if(super.doConnect(addr)) {
                     this.socket.blocking = false;
                     setKeepalive();
