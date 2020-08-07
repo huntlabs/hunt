@@ -668,9 +668,19 @@ final class JsonSerializer {
      */
     static JSONValue toJson(T, IncludeMeta includeMeta = IncludeMeta.yes)
                     (T value) if (is(T == interface) && is(T : JsonSerializable)) {
+
         debug(HUNT_DEBUG_MORE) {
-            infof("======== current type: interface = %s, Object = %s", 
-                T.stringof, typeid(cast(Object)value).name);
+            if(value is null) {
+                infof("======== current type: interface = %s, Object = null", 
+                    T.stringof);
+            } else {
+                infof("======== current type: interface = %s, Object = %s", 
+                    T.stringof, typeid(cast(Object)value).name);
+            }
+        }
+        
+        if(value is null) {
+            return JSONValue(null);
         }
 
         JSONValue v = value.jsonSerialize();
