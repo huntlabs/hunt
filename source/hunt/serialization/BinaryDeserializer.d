@@ -1,5 +1,6 @@
 module hunt.serialization.BinaryDeserializer;
 
+import hunt.serialization.Common;
 import hunt.serialization.Specify;
 import std.traits;
 
@@ -24,34 +25,34 @@ struct BinaryDeserializer {
         return _buffer.length;
     }
 
-    T iArchive(T)()
+    T iArchive(SerializationOptions options, T)()
             if (!isDynamicArray!T && !isAssociativeArray!T && !is(T == class) && __traits(compiles, T())) {
         T obj;
-        specify(this, obj);
+        specify!(options)(this, obj);
         return obj;
     }
 
-    T iArchive(T)()
+    T iArchive(SerializationOptions options, T)()
             if (!isDynamicArray!T && !isAssociativeArray!T && !is(T == class)
                 && !__traits(compiles, T())) {
         T obj = void;
-        specify(this, obj);
+        specify!(options)(this, obj);
         return obj;
     }
 
-    T iArchive(T, A...)(A args) if (is(T == class)) {
+    T iArchive(SerializationOptions options, T, A...)(A args) if (is(T == class)) {
         T obj = new T(args);
-        specify(this, obj);
+        specify!(options)(this, obj);
         return obj;
     }
 
-    T iArchive(T)() if (isDynamicArray!T || isAssociativeArray!T) {
-        return iArchive!(T, ushort)();
+    T iArchive(SerializationOptions options, T)() if (isDynamicArray!T || isAssociativeArray!T) {
+        return iArchive!(options, T, ushort)();
     }
 
-    T iArchive(T, U)() if (isDynamicArray!T || isAssociativeArray!T) {
+    T iArchive(SerializationOptions options, T, U)() if (isDynamicArray!T || isAssociativeArray!T) {
         T obj;
-        specify!U(this, obj);
+        specify!(options)(this, obj);
         return obj;
     }
 
@@ -60,8 +61,8 @@ struct BinaryDeserializer {
         _buffer = _buffer[1 .. $];
     }
 
-    void putClass(T)(T val) if (is(T == class)) {
-        specifyClass(this, val);
+    void putClass(SerializationOptions options, T)(T val) if (is(T == class)) {
+        specifyClass!(options)(this, val);
     }
 
     auto putRaw(ushort length) {
