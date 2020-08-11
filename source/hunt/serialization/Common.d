@@ -23,6 +23,8 @@ struct SerializationOptions {
 
     private bool _ignoreNull = false;
 
+    private bool _canThrow = false;
+
     private int _depth = -1;
 
 /* --------------------------------------------------- properties --------------------------------------------------- */
@@ -56,6 +58,14 @@ struct SerializationOptions {
     SerializationOptions ignoreNull(bool flag) {
         SerializationOptions r = this;
         r._ignoreNull = flag;
+        return r;
+    }
+
+    bool canThrow() { return _canThrow; }
+
+    SerializationOptions canThrow(bool flag) {
+        SerializationOptions r = this;
+        r._canThrow = flag;
         return r;
     }
 

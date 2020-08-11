@@ -236,14 +236,24 @@ void loopMembersImpl(T, SerializationOptions options, C, VT)
         static if(!member.empty())
         {{
             alias currentMember = __traits(getMember, T, member);
-            static if(options.onlyPublic) {
+            alias memberType = typeof(currentMember);
+
+            static if(hasUDA!(currentMember, Ignore)) {
+                enum canDeserialize = false;
+                version(HUNT_DEBUG) {
+                    infof("Ignore a member: %s %s", memberType.stringof, member);
+                } 
+            } else static if(options.onlyPublic) {
                 static if (__traits(getProtection, currentMember) == "public") {
-                    specifyAggregateMember!(member, options)(obj, val);
+                    enum canDeserialize = true;
                 } else {
-                    debug(HUNT_DEBUG_MORE) pragma(msg, "Skipped non-public member: " ~ member);
-                    version(HUNT_DEBUG_MORE) tracef("Skipped non-public member: %s", member);
+                    enum canDeserialize = false;
                 }
             } else {
+                enum canDeserialize = true;
+            }
+
+            static if(canDeserialize) {
                 specifyAggregateMember!(member, options)(obj, val);
             }
         }}
