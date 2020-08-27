@@ -329,6 +329,7 @@ final class JsonSerializer {
         }
     }
 
+    /// bool
     static T toObject(T, SerializationOptions options = SerializationOptions.Default)
             (auto ref const(JSONValue) json) if (isBoolean!T) {
 
@@ -353,6 +354,7 @@ final class JsonSerializer {
         }
     }
 
+    /// string
     static T toObject(T, SerializationOptions options = SerializationOptions.Default)
             (auto ref const(JSONValue) json, T defaultValue = T.init)
                 if (isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring)) {
@@ -372,6 +374,7 @@ final class JsonSerializer {
         }
     }
 
+    /// Object array
     static T toObject(T : U[], SerializationOptions options = SerializationOptions.Default, U)
             (auto ref const(JSONValue) json, 
             T defaultValue = T.init)
@@ -379,29 +382,41 @@ final class JsonSerializer {
                 : wstring) && !is(T : dstring)) {
 
         switch (json.type) {
-        case JSONType.null_:
-            return [];
+            case JSONType.null_:
+                return [];
 
-        case JSONType.false_:
-            return [toObject!(U, options)(JSONValue(false))];
+            case JSONType.false_:
+                return [toObject!(U, options)(JSONValue(false))];
 
-        case JSONType.true_:
-            return [toObject!(U, options)(JSONValue(true))];
+            case JSONType.true_:
+                return [toObject!(U, options)(JSONValue(true))];
 
-        case JSONType.array:
-            return json.array
-                .map!(value => toObject!(U, options)(value))
-                .array
-                .to!T;
+            case JSONType.array:
+                return json.array
+                    .map!(value => toObject!(U, options)(value))
+                    .array
+                    .to!T;
 
-        case JSONType.object:
-            return handleException!(T, options.canThrow())(json, "", defaultValue);
+            case JSONType.object:
+                return handleException!(T, options.canThrow())(json, "", defaultValue);
 
-        default:
-            return [toObject!(U, options)(json)];
+            default:
+                // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-08-27T15:21:55+08:00
+                // More tests needed
+                U obj = toObject!(U, options)(json);
+                static if(is(U == class)) {
+                    if(obj is null) {
+                        return [];
+                    } else {
+                        return [obj];
+                    }
+                } else {
+                    return [obj];
+                }
         }
     }
 
+    /// AssociativeArray
     static T toObject(T : U[K], SerializationOptions options = SerializationOptions.Default, U, K)(
             auto ref const(JSONValue) json, T defaultValue = T.init) 
             if (isAssociativeArray!T) {
