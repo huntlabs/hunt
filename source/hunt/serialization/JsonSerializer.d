@@ -401,17 +401,17 @@ final class JsonSerializer {
                 return handleException!(T, options.canThrow())(json, "", defaultValue);
 
             default:
-                // FIXME: Needing refactor or cleanup -@zhangxueping at 2020-08-27T15:21:55+08:00
-                // More tests needed
-                U obj = toObject!(U, options)(json);
-                static if(is(U == class)) {
-                    if(obj is null) {
-                        return [];
-                    } else {
-                        return [obj];
-                    }
-                } else {
+                try {
+                    U obj = toObject!(U, options.canThrow(true))(json);
                     return [obj];
+                } catch(Exception ex) {
+                    warning(ex.msg);
+                    version(HUNT_DEBUG) warning(ex);
+                    if(options.canThrow)
+                        throw ex;
+                    else {
+                        return [];
+                    }
                 }
         }
     }
