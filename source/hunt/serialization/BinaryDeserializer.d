@@ -65,8 +65,11 @@ struct BinaryDeserializer {
         specifyClass!(options)(this, val);
     }
 
-    auto putRaw(ushort length) {
-        auto res = _buffer[0 .. length];
+    deprecated("Using take instead.")
+    alias putRaw = take;
+
+    const(ubyte)[] take(size_t length) {
+        const(ubyte)[] res = _buffer[0 .. length];
         _buffer = _buffer[length .. $];
         return res;
     }

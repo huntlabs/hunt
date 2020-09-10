@@ -21,7 +21,7 @@ template PtrType(T) {
     }
 }
 
-enum NULL = [110, 117, 108, 108];
+enum ubyte[] NULL = ['n', 'u', 'l', 'l'];
 
 void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (is(T == wchar)) {
     specify!(options)(obj, *cast(ushort*)&val);
@@ -79,7 +79,7 @@ void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (
     static if (is(C == BinarySerializer)) {
         obj.putRaw(cast(ubyte[]) val);
     } else {
-        val = cast(string) obj.putRaw(len).idup;
+        val = cast(string) obj.take(len).idup;
     }
 }
 
@@ -128,7 +128,7 @@ void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (
     specify!(options)(obj, cast(Unqual!(OriginalType!(T))) val);
 }
 
-void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
+void specify(SerializationOptions options, C, T : E[], E)(auto ref C obj, ref T val)
         if (is(C == BinarySerializer) && isInputRange!T && !isInfinite!T
             && !is(T == string) && !isStaticArray!T && !isAssociativeArray!T) {
     enum hasLength = is(typeof(() { auto l = val.length; }));
@@ -146,6 +146,8 @@ void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
 
 void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
         if (isAggregateType!T && !isInputRange!T && !isOutputRange!(T, ubyte)) {
+    
+    version(HUNT_DEBUG_MORE) tracef("Setting: %s, value: %s", T.stringof, val);
     loopMembers!(options, C, T)(obj, val);
 }
 
@@ -157,7 +159,7 @@ void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
     decerealiseArrayImpl!(options)(obj, val, length);
 }
 
-void decerealiseArrayImpl(SerializationOptions options, C, T, U)(auto ref C obj, ref T val, U length)
+void decerealiseArrayImpl(SerializationOptions options, C, T : E[], E, U)(auto ref C obj, ref T val, U length)
         if (is(T == E[], E) && isDecerealiser!C) {
 
     ulong neededBytes(T)(ulong length) {
@@ -177,6 +179,7 @@ void decerealiseArrayImpl(SerializationOptions options, C, T, U)(auto ref C obj,
     } else {
         if (val.length != length)
             val.length = cast(uint) length;
+
         foreach (ref e; val) {
             obj.specify!(options)(e);
         }
@@ -194,6 +197,8 @@ void loopMembers(SerializationOptions options, C, T)(auto ref C obj, ref T val) 
 
 void loopMembers(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (is(T == class)) {
 
+    version(HUNT_DEBUG_MORE) tracef("Setting: %s, value: %s", T.stringof, val);
+
     static if (is(C == BinarySerializer)) {
         if (val is null) {
             obj.putRaw(NULL);
@@ -204,6 +209,7 @@ void loopMembers(SerializationOptions options, C, T)(auto ref C obj, ref T val) 
 
     static if (is(C == BinaryDeserializer)) {
         if (obj.isNullObj) {
+            obj.take(NULL.length);
             val = null;
             return;
         }
@@ -212,8 +218,7 @@ void loopMembers(SerializationOptions options, C, T)(auto ref C obj, ref T val) 
     static if (is(typeof(() { val = new T; }))) {
         if (val is null)
             val = new T;
-    } else {
-    }
+    } 
 
     obj.putClass!(options, T)(val);
 }
@@ -279,8 +284,9 @@ void specifyMember(string member, SerializationOptions options, C, T)(auto ref C
     // } else {
     //     specify(obj, __traits(getMember, val, member));
     // }
+    version(HUNT_DEBUG_MORE) tracef("name: %s", member);
     specify!(options)(obj, __traits(getMember, val, member));
-    // specify(obj, __traits(getMember, val, member));
+    version(HUNT_DEBUG_MORE) infof("value: %s", __traits(getMember, val, member));
 }
 
 void specifyBaseClass(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (is(T == class)) {
