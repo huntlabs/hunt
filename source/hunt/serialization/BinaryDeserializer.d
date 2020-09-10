@@ -74,6 +74,27 @@ struct BinaryDeserializer {
         return res;
     }
 
+    // T takeAs(T, SerializationOptions options)() 
+    //     if (!is(T == enum) && (isSigned!T || isBoolean!T || is(T == char) || isFloatingPoint!T)) {
+    //     T r;
+    //     // T* val = &r;
+
+    //     // ubyte val0 = (val >> 24);
+    //     // ubyte val1 = cast(ubyte)(val >> 16);
+    //     // ubyte val2 = cast(ubyte)(val >> 8);
+    //     // ubyte val3 = val & 0xff;
+    //     // putUbyte(val0);
+    //     // putUbyte(val1);
+    //     // putUbyte(val2);
+    //     // putUbyte(val3);
+    //     // val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
+    //     return r;
+    // }
+
+    // T takeAs(T, SerializationOptions options)() {
+    //     return T.init;
+    // }
+
     bool isNullObj() {
         return _buffer[0 .. 4] == NULL ? true : false;
     }

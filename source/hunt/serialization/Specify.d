@@ -147,7 +147,7 @@ void specify(SerializationOptions options, C, T : E[], E)(auto ref C obj, ref T 
 void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
         if (isAggregateType!T && !isInputRange!T && !isOutputRange!(T, ubyte)) {
     
-    version(HUNT_DEBUG_MORE) tracef("Setting: %s, value: %s", T.stringof, val);
+    debug(HUNT_DEBUG_MORE) tracef("Setting: %s, value: %s", T.stringof, val);
     loopMembers!(options, C, T)(obj, val);
 }
 
@@ -197,7 +197,7 @@ void loopMembers(SerializationOptions options, C, T)(auto ref C obj, ref T val) 
 
 void loopMembers(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (is(T == class)) {
 
-    version(HUNT_DEBUG_MORE) tracef("Setting: %s, value: %s", T.stringof, val);
+    debug(HUNT_DEBUG_MORE) tracef("Setting: %s, value: %s", T.stringof, val);
 
     static if (is(C == BinarySerializer)) {
         if (val is null) {
@@ -259,35 +259,37 @@ void loopMembersImpl(T, SerializationOptions options, C, VT)
             }
 
             static if(canDeserialize) {
-                specifyAggregateMember!(member, options)(obj, val);
+                debug(HUNT_DEBUG_MORE) tracef("name: %s", member);
+                specify!(options)(obj, __traits(getMember, val, member));
+                debug(HUNT_DEBUG_MORE) infof("value: %s", __traits(getMember, val, member));
             }
         }}
     }    
 }
 
 
-void specifyAggregateMember(string member, SerializationOptions options, C, T)(auto ref C obj, ref T val) {
-    import std.meta : staticIndexOf;
+// void specifyAggregateMember(string member, SerializationOptions options, C, T)(auto ref C obj, ref T val) {
+//     import std.meta : staticIndexOf;
 
-    enum NoCereal;
-    enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
-                __traits(getMember, val, member)));
-    static if (noCerealIndex == -1) {
-        specifyMember!(member, options)(obj, val);
-    }
-}
+//     enum NoCereal;
+//     enum noCerealIndex = staticIndexOf!(NoCereal, __traits(getAttributes,
+//                 __traits(getMember, val, member)));
+//     static if (noCerealIndex == -1) {
+//         specifyMember!(member, options)(obj, val);
+//     }
+// }
 
-void specifyMember(string member, SerializationOptions options, C, T)(auto ref C obj, ref T val) {
-    // alias currentMember = __traits(getMember, val, member);
-    // static if(isAggregateType!(typeof(currentMember))) {
-    //     specify!(options)(obj, __traits(getMember, val, member));
-    // } else {
-    //     specify(obj, __traits(getMember, val, member));
-    // }
-    version(HUNT_DEBUG_MORE) tracef("name: %s", member);
-    specify!(options)(obj, __traits(getMember, val, member));
-    version(HUNT_DEBUG_MORE) infof("value: %s", __traits(getMember, val, member));
-}
+// void specifyMember(string member, SerializationOptions options, C, T)(auto ref C obj, ref T val) {
+//     // alias currentMember = __traits(getMember, val, member);
+//     // static if(isAggregateType!(typeof(currentMember))) {
+//     //     specify!(options)(obj, __traits(getMember, val, member));
+//     // } else {
+//     //     specify(obj, __traits(getMember, val, member));
+//     // }
+//     debug(HUNT_DEBUG_MORE) tracef("name: %s", member);
+//     specify!(options)(obj, __traits(getMember, val, member));
+//     debug(HUNT_DEBUG_MORE) infof("value: %s", __traits(getMember, val, member));
+// }
 
 void specifyBaseClass(SerializationOptions options, C, T)(auto ref C obj, ref T val) if (is(T == class)) {
     foreach (base; BaseTypeTuple!T) {
