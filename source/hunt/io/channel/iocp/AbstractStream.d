@@ -81,7 +81,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         //    return;
         //}
 
-        if(isClosing() && isWriteCancelling) {
+        if(isClosing() && _isWriteCancelling) {
             version (HUNT_IO_DEBUG) infof("Write cancelled, fd=%d", this.handle);
             resetWriteStatus();
             return;
@@ -373,7 +373,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         if(_writeQueue !is null)
             _writeQueue.clear();
         _isWritting = false;
-        isWriteCancelling = false;
+        _isWriteCancelling = false;
         sendDataBuffer = null;
         sendDataBackupBuffer = null;
         writeBuffer = null;
@@ -389,7 +389,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             tracef("write done once: %d bytes, isWritting: %s, writeBuffer: %s, fd=%d",
                  nBytes, _isWritting, writeBuffer is null, this.handle);
         }
-        //if (isWriteCancelling) {
+        //if (_isWriteCancelling) {
         //    version (HUNT_IO_DEBUG) tracef("write cancelled.");
         //    resetWriteStatus();
         //    return;
@@ -426,7 +426,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     void cancelWrite() {
-        isWriteCancelling = true;
+        _isWriteCancelling = true;
     }
 
     abstract bool isConnected() nothrow;
@@ -441,7 +441,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     SimpleEventHandler disconnectionHandler;
     
     protected WritingBufferQueue _writeQueue;
-    protected bool isWriteCancelling = false;
+    protected bool _isWriteCancelling = false;
     private  bool _isSingleWriteBusy = false; // keep a single I/O write operation atomic
     private const(ubyte)[] _readBuffer;
     private const(ubyte)[] sendDataBuffer;

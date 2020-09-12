@@ -46,7 +46,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected AddressFamily _family;
     protected ByteBuffer _bufferForRead;
     protected WritingBufferQueue _writeQueue;
-    protected bool isWriteCancelling = false;
+    protected bool _isWriteCancelling = false;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
@@ -118,17 +118,19 @@ abstract class AbstractStream : AbstractSocketChannel {
             this._error = errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK;
             if (_error) {
                 this._errorMessage = getErrorMessage(errno);
-                errorOccurred(ErrorCode.INTERRUPTED , "read buffer error");
+
+                if(errno == ECONNRESET) {
+                    // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
+                    onDisconnected();
+                    errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
+                } else {
+                    errorOccurred(ErrorCode.INTERRUPTED , "Error occurred on read");
+                }
             } else {
                 debug warningf("warning on read: fd=%d, errno=%d, message=%s", this.handle,
                         errno, getErrorMessage(errno));
             }
 
-            if(errno == ECONNRESET) {
-                // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
-                onDisconnected();
-                errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
-            }
         } else {
             version (HUNT_DEBUG)
                 infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
@@ -140,7 +142,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     override protected void doClose() {
         version (HUNT_IO_DEBUG) {
-            infof("peer socket closing: fd=%d", this.handle);
+            infof("peer socket %s closing: fd=%d", this.remoteAddress.toString(), this.handle);
         }
         if(this.socket is null) {
           import core.sys.posix.unistd;
@@ -149,9 +151,9 @@ abstract class AbstractStream : AbstractSocketChannel {
           this.socket.shutdown(SocketShutdown.BOTH);
           this.socket.close();
         }
-
+            
         version (HUNT_IO_DEBUG) {
-            infof("peer socket closed: fd=%d", this.handle);
+            infof("peer socket %s closed: fd=%d", this.remoteAddress.toString, this.handle);
         }
     }
 
@@ -159,14 +161,14 @@ abstract class AbstractStream : AbstractSocketChannel {
     /**
      * Try to write a block of data.
      */
-    protected ptrdiff_t tryWrite(const ubyte[] data) {
+    protected ptrdiff_t tryWrite(const(ubyte)[] data) {
         clearError();
         // const nBytes = this.socket.send(data);
         version (HUNT_IO_DEBUG)
             tracef("try to write: %d bytes, fd=%d", data.length, this.handle);
         const nBytes = write(this.handle, data.ptr, data.length);
-        // version (HUNT_IO_DEBUG)
-            // tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
+        version (HUNT_IO_DEBUG)
+            tracef("actually written: %d / %d bytes, fd=%d", nBytes, data.length, this.handle);
 
         if (nBytes > 0) {
             return nBytes;
@@ -176,7 +178,6 @@ abstract class AbstractStream : AbstractSocketChannel {
             // FIXME: Needing refactor or cleanup -@Administrator at 2018-5-8 16:07:38
             // check more error status
             // EPIPE/Broken pipe:
-            // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
             // https://github.com/angrave/SystemProgramming/wiki/Networking%2C-Part-7%3A-Nonblocking-I-O%2C-select%28%29%2C-and-epoll
 
             if(errno == EAGAIN) {
@@ -196,7 +197,13 @@ abstract class AbstractStream : AbstractSocketChannel {
                     // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                     onDisconnected();
                     errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
+                } else if(errno == EPIPE) {
+                    // https://stackoverflow.com/questions/6824265/sigpipe-broken-pipe
+                    // Handle SIGPIPE signal
+                    onDisconnected();
+                    errorOccurred(ErrorCode.BROKENPIPE , "Broken pipe detected!");
                 }
+
             }
         } else {
             version (HUNT_DEBUG) {
@@ -206,14 +213,6 @@ abstract class AbstractStream : AbstractSocketChannel {
                 this._error = true;
             }
         }
-
-        //if (this._error) {
-        //    this._errorMessage = getErrorMessage(errno);
-        //    string msg = format("Socket error on write: fd=%d, code: %d, message=%s",
-        //            this.handle, errno, this.errorMessage);
-        //    debug errorf(msg);
-        //    errorOccurred(msg);
-        //}
 
         return 0;
     }
@@ -229,7 +228,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         if(data.length == 0)
             return true;
 
-        while(remaining > 0 && !_error && !isClosing() && !isWriteCancelling) {
+        while(remaining > 0 && !_error && !isClosing() && !_isWriteCancelling) {
             ptrdiff_t nBytes = tryWrite(data);
             version (HUNT_IO_DEBUG)
             {
@@ -260,7 +259,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         if(_writeQueue !is null)
             _writeQueue.clear();
         atomicStore(_isWritting, false);
-        isWriteCancelling = false;
+        _isWriteCancelling = false;
     }
 
     /**
@@ -279,7 +278,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             return;
         }
 
-        if(isClosing() && isWriteCancelling) {
+        if(isClosing() && _isWriteCancelling) {
             version (HUNT_DEBUG) infof("Write cancelled or closed, fd=%d", this.handle);
             resetWriteStatus();
             return;
@@ -376,7 +375,11 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     void cancelWrite() {
-        isWriteCancelling = true;
+        _isWriteCancelling = true;
+    }
+
+    bool isWriteCancelling() {
+        return _isWriteCancelling;
     }
 
     DataReceivedHandler getDataReceivedHandler() {

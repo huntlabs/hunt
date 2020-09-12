@@ -294,7 +294,7 @@ class TcpStream : AbstractStream {
         assert(buffer !is null);
 
         if (!_isConnected) {
-            throw new Exception(format("The connection is down! remote: %s",
+            throw new Exception(format("The connection %s closed!",
                 this.remoteAddress.toString()));
         }
 
@@ -307,33 +307,57 @@ class TcpStream : AbstractStream {
     }
 
     /**
-    */
+     * 
+     */
     void write(const(ubyte)[] data) {
-        if (data.length == 0 || !_isConnected)
+
+        version (HUNT_IO_DEBUG_MORE) {
+            infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
+        } else  version (HUNT_IO_DEBUG) {
+            if (data.length <= 32)
+                infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
+            else
+                infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. 32]);
+        }
+
+        if(data is null) {
+            version(HUNT_DEBUG) {
+                warning("Writting a empty data on connection %s.", this.remoteAddress.toString());
+            }
             return;
+        }
 
         if (!_isConnected) {
-            throw new Exception("The connection is down!");
+            string msg = format("The connection %s is closed!", this.remoteAddress.toString());
+            throw new Exception(msg);
         }
-        version (HAVE_IOCP)
-        {
+
+        version (HAVE_IOCP) {
             return write(BufferUtils.toBuffer(cast(byte[])data));
-        } else
-        {
-            version (HUNT_IO_DEBUG_MORE) {
-                infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
-            } else  version (HUNT_IO_DEBUG) {
-                if (data.length <= 32)
-                    infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. $]);
-                else
-                    infof("%d bytes(fd=%d): %(%02X %)", data.length, this.handle, data[0 .. 32]);
-            }
+        } else {
 
             if (_writeQueue is null || (_writeQueue.isEmpty()) && !_isWritting) {
                 _isWritting = true;
                 const(ubyte)[] d = data;
 
-                while (!isClosing() && !isWriteCancelling && d.length > 0) {
+                // while (!isClosing() && !_isWriteCancelling && d.length > 0) {
+                while(d !is null) {
+                    if(isWriteCancelling()) {
+                        _errorMessage = format("The connection %s is cancelled!", this.remoteAddress.toString());
+                        _error = true;
+                        warningf(_errorMessage);
+                        throw new Exception(_errorMessage);
+                        // break;
+                    }
+
+                    if(isClosing() || isClosed()) {
+                        _errorMessage= format("The connection %s is closing or closed!", this.remoteAddress.toString());
+                        _error = true;
+                        warningf("%s, %s", isClosing(), isClosed());
+                        throw new Exception(_errorMessage);
+                        // break;
+                    }
+
                     version (HUNT_IO_DEBUG)
                         infof("to write directly %d bytes, fd=%d", d.length, this.handle);
                     size_t nBytes = tryWrite(d);
@@ -422,12 +446,14 @@ protected:
 
             resetWriteStatus();
             _isConnected = false;
-            version (HUNT_IO_DEBUG)
-                infof("notifying TCP stream down: fd=%d", this.handle);
+            version (HUNT_IO_DEBUG) {
+                infof("Raising a event on a TCP stream [%s] is down: fd=%d", 
+                    this.remoteAddress.toString(), this.handle);
+            }
+
             if (closeHandler !is null)
                 closeHandler();
         }
-
     }
 
 }
