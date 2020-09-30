@@ -23,7 +23,7 @@ struct SerializationOptions {
 
     private bool _ignoreNull = false;
 
-    private bool _canThrow = false;
+    private bool _canThrow = true;
 
     private int _depth = -1;
 
