@@ -11,7 +11,7 @@ import std.socket;
 import std.stdio;
 
  enum Host = "127.0.0.1";
-//enum Host = "10.1.222.110";
+// enum Host = "10.1.222.110";
 enum Port = 8080;
 
 void main() {
@@ -43,7 +43,9 @@ void main() {
 		} else {
 			client.close();
 		}
-	}).closed(() { writeln("The connection closed!"); loop.stop(); }).error((IoError error) {
+	}).closed(() { 
+		writeln("The connection closed!"); loop.stop(); 
+	}).error((IoError error) {
 		writefln("error occurred: %d  %s", error.errorCode, error.errorMsg);
 	}).connect(Host, Port);
 

@@ -16,7 +16,7 @@
             "externalConsole": false
         },
         {
-            "name": "(gdb) launch",
+            "name": "(gdb) launch-server",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tcp-server",

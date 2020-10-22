@@ -27,6 +27,8 @@ import std.exception;
 import std.datetime;
 import std.process;
 
+import core.thread;
+
 void main() {
 
     debug writefln("Main thread: %s", getTid());
@@ -53,6 +55,12 @@ void main() {
             }).closed(() {
                 debug writefln("connection closed, local: %s, remote: %s",
                 client.localAddress.toString(), client.remoteAddress.toString());
+                try {
+                    client.write([0x41, 0x42, 0x43]);
+                    client.write([0x46, 0x47, 0x48, 0x49]);
+                } catch(Exception ex) {
+                    warning(ex);
+                }
             }).error((IoError error) {
                 writefln("error occurred: %d  %s", error.errorCode, error.errorMsg);
             });
