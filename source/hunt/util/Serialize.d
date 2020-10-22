@@ -1179,7 +1179,7 @@ alias toJSON = toJson;
 deprecated("Using toObject instead.")
 alias toOBJ = toObject;
 
-////------------------------- toTextString ------
+/// toTextString
 /**
 Takes a tree of JSON values and returns the serialized string.
 

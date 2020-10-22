@@ -82,6 +82,7 @@ final class TimingWheel {
         add a Timer into the Wheel
         Params:
             tm  = the timer.
+            wheel = the wheel.
     */
     pragma(inline) void addNewTimer(WheelTimer tm, size_t wheel = 0) {
         size_t index;
