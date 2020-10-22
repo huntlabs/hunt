@@ -756,7 +756,7 @@ final class JsonSerializer {
      * class[]
      */
     static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal, 
-            T : U[], U) (T value) if(is(T : U[], U) && is(U == class)) {
+            T : U[], U) (T value) if(is(U == class)) {
         if(value is null) {
             return JSONValue(JSONValue[].init);
         } else {
@@ -802,6 +802,25 @@ final class JsonSerializer {
         }
 
         return result;
+    }
+
+    /**
+     * T[][]
+     */
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
+            T : S[], S : U[], U)(T value) if(isAggregateType!U) {
+
+        if(value is null) 
+            return JSONValue(JSONValue[].init);
+
+        
+        JSONValue[] items;
+        foreach(U[] element; value) {
+            items ~= toJson(element);
+        }
+
+        return JSONValue(items);
+
     }
 
 
