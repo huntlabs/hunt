@@ -9,6 +9,8 @@
  *
  */
 
+
+deprecated("It's buggy. Use hunt.serialization.JsonSerializer instead.")
 module hunt.util.Serialize;
 
 import std.traits;
@@ -1173,7 +1175,7 @@ T toObject(T)(JSONValue j)
 	return toObject!T(j, stack);
 }
 
-deprecated("Using toJson instead.")
+deprecated("Use toJson instead.")
 alias toJSON = toJson;
 
 deprecated("Using toObject instead.")
