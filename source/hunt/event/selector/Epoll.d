@@ -193,14 +193,19 @@ class AbstractSelector : Selector {
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint event) {
-        version (HUNT_IO_DEBUG)
-        infof("handling event: selector=%d, events=%d, channel=%d", this._epollFD, event, channel.handle);
+        version (HUNT_IO_DEBUG) {
+            infof("handling event: selector=%d, channel=%d, events=%d, isReadable: %s, isWritable: %s, isClosed: %s", 
+                this._epollFD, channel.handle, event, isReadable(event), isWritable(event), isClosed(event));
+        }
 
         try {
             if (isClosed(event)) { // && errno != EINTR
                 /* An error has occured on this fd, or the socket is not
                     ready for reading (why were we notified then?) */
                 version (HUNT_IO_DEBUG) {
+                    warningf("event=%d, isReadable: %s, isWritable: %s", 
+                        event, isReadable(event), isWritable(event));
+
                     if (isError(event)) {
                         warningf("channel error: fd=%s, event=%d, errno=%d, message=%s",
                                 channel.handle, event, errno, getErrorMessage(errno));
@@ -215,6 +220,15 @@ class AbstractSelector : Selector {
                 // events=8221, fd=13
                 // The remote connection broken abnormally, so the channel should be notified.
                 // channel.onClose(); // More tests are needed
+
+                if(isReadable(event)) {
+                    channel.onRead();
+                }
+
+                // if(isWritable(event)) {
+                //     channel.onWrite();
+                // }
+
                 channel.close();
             } else if (event == EPOLLIN) {
                 version (HUNT_IO_DEBUG)
@@ -230,7 +244,7 @@ class AbstractSelector : Selector {
                 channel.onWrite();
                 channel.onRead();
             } else {
-                debug warningf("this thread only for read/write/close events, event: %d", event);
+                debug warningf("Only read/write/close events can be handled, current event: %d", event);
             }
         } catch (Exception e) {
             debug {

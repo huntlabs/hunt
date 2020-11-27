@@ -54,3 +54,4 @@ _build
 # idea
 .idea
 *.iml
+core

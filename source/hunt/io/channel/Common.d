@@ -34,9 +34,7 @@ alias UdpDataHandler = void delegate(const(ubyte)[] data, Address addr);
 
     __gshared TaskPool pool;
     return initOnce!pool({
-        auto p = new TaskPool(defaultPoolThreads);
-        p.isDaemon = true;
-        return p;
+        return new TaskPool(defaultPoolThreads, true);
     }());
 }
 
