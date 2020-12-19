@@ -1,6 +1,6 @@
-module hunt.util.concurrency.TaskQueue;
+module hunt.util.concurrency.worker.TaskQueue;
 
-import hunt.util.concurrency.Task;
+import hunt.util.concurrency.worker.Task;
 
 /**
  * 

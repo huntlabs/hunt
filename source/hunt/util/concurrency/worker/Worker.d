@@ -1,8 +1,8 @@
-module hunt.util.concurrency.Worker;
+module hunt.util.concurrency.worker.Worker;
 
-import hunt.util.concurrency.Task;
-import hunt.util.concurrency.TaskQueue;
-import hunt.util.concurrency.WorkerThread;
+import hunt.util.concurrency.worker.Task;
+import hunt.util.concurrency.worker.TaskQueue;
+import hunt.util.concurrency.worker.WorkerThread;
 
 import core.thread;
 import core.sync.condition;
@@ -34,6 +34,7 @@ class Worker {
 
     private void initialize() {
         _workerThreads = new WorkerThread[_size];
+        _availableThreads = new WorkerThread[_size];
         
         foreach(size_t index; 0 .. _size) {
             WorkerThread thread = new WorkerThread(this, index);
@@ -48,9 +49,16 @@ class Worker {
         if(_isRunning)
             return;
         _isRunning = true;
+
+        // doRun() 
+        import std.parallelism;
+
+        auto t = task(&doRun);
+        t.executeInNewThread();
     }
 
     void stop() {
+        _isRunning = false;
         foreach(size_t index; 0 .. _size) {
             _workerThreads[index].stop();
             _availableThreads[index] = null;
@@ -74,19 +82,27 @@ class Worker {
     } 
 
     private void doRun() {
-        // while(!_taskQueue.isEmpty) {
-        //     Task task = _taskQueue.pop();
-        // }
+        while(_isRunning) {
+            try {
 
-        Task task = _taskQueue.pop();
+                trace("running...");
 
-        WorkerThread workerThread = findIdleThread();
-        if(workerThread is null) {
-            warning("No available worker thread found.");
-            return;
+                Task task = _taskQueue.pop();
+
+                WorkerThread workerThread = findIdleThread();
+                if(workerThread is null) {
+                    warning("No available worker thread found.");
+                    return;
+                }
+
+                workerThread.attatch(task);
+            } catch(Exception ex) {
+                warning(ex);
+            }
+
         }
 
-        workerThread.attatch(task);
+        warning("Done!");
 
     }
 

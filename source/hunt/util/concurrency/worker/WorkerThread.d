@@ -1,7 +1,7 @@
-module hunt.util.concurrency.WorkerThread;
+module hunt.util.concurrency.worker.WorkerThread;
 
-import hunt.util.concurrency.Task;
-import hunt.util.concurrency.Worker;
+import hunt.util.concurrency.worker.Task;
+import hunt.util.concurrency.worker.Worker;
 
 import core.thread;
 import core.sync.condition;

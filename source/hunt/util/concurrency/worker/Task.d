@@ -1,4 +1,4 @@
-module hunt.util.concurrency.Task;
+module hunt.util.concurrency.worker.Task;
 
 
 /**
