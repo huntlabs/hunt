@@ -1,7 +1,7 @@
-module hunt.util.concurrency.worker.MemoryQueue;
+module hunt.util.worker.MemoryQueue;
 
-import hunt.util.concurrency.worker.Task;
-import hunt.util.concurrency.worker.TaskQueue;
+import hunt.util.worker.Task;
+import hunt.util.worker.TaskQueue;
 
 import core.sync.condition;
 import core.sync.mutex;
