@@ -39,6 +39,7 @@ examples/tcp/tcp-client
 examples/tcp/tcp-server
 examples/timer/timer
 examples/test/unittest
+examples/worker/worker
 
 # others
 *-test-*

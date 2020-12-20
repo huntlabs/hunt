@@ -1,0 +1,13 @@
+{
+	"name": "worker",
+	"targetType": "executable",
+    "copyright": "Copyright (C) 2018-2020, HuntLabs",
+    "homepage": "https://www.huntlabs.net",
+	"description": "A simple demo for hunt.util.worker",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"hunt" : {
+			"path" : "../../"
+		}
+	}
+}
