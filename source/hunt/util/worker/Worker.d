@@ -84,9 +84,7 @@ class Worker {
     private void doRun() {
         while(_isRunning) {
             try {
-
-                trace("running...");
-
+                version(HUNT_IO_DEBUG) trace("running...");
                 Task task = _taskQueue.pop();
 
                 WorkerThread workerThread = findIdleThread();
@@ -99,10 +97,9 @@ class Worker {
             } catch(Exception ex) {
                 warning(ex);
             }
-
         }
 
-        warning("Done!");
+        version(HUNT_IO_DEBUG) warning("Done!");
 
     }
 

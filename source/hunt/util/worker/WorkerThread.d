@@ -6,6 +6,7 @@ import hunt.util.worker.Worker;
 
 import hunt.logging.ConsoleLogger;
 
+import core.memory;
 import core.thread;
 import core.sync.condition;
 import core.sync.mutex;
@@ -15,38 +16,6 @@ private enum WorkerState {
     Idle,
     Busy,
     Stopped
-}
-
-private Closeable[] _closeableObjects;
-
-void registerResoure(Closeable res) {
-    if (!inWorkerThread()) {
-        warningf("Only the objects in worker thread [%s] can be closed automaticaly.",
-                Thread.getThis().name());
-        return;
-    }
-
-    assert(res !is null);
-    _closeableObjects ~= res;
-}
-
-void releaseResoure(WorkerThread thread) nothrow {
-    Thread currentThread = Thread.getThis();
-
-    if (thread is currentThread) {
-
-        foreach (obj; _closeableObjects) {
-            try {
-                obj.close();
-            } catch (Throwable t) {
-                warning(t);
-            }
-        }
-        _closeableObjects = null;
-    } else {
-        warningf("The current thread [%s] is not a worker thread [%s]",
-                currentThread.name, thread.name);
-    }
 }
 
 bool inWorkerThread() {
@@ -66,6 +35,8 @@ class WorkerThread : Thread {
 
     private Condition _condition;
     private Mutex _mutex;
+
+    private Closeable[] _closeableObjects;
 
     /* For autonumbering anonymous threads. */
     // private static shared int threadInitNumber = 0;
@@ -110,11 +81,36 @@ class WorkerThread : Thread {
         }
     }
 
+
+    void registerResoure(Closeable res) {
+        // if (!inWorkerThread()) {
+        //     warningf("Only the objects in worker thread [%s] can be closed automaticaly.",
+        //             Thread.getThis().name());
+        //     return;
+        // }
+
+        assert(res !is null);
+        _closeableObjects ~= res;
+    }
+
+    private void collectResoure() nothrow {
+        foreach (obj; _closeableObjects) {
+            try {
+                obj.close();
+            } catch (Throwable t) {
+                warning(t);
+            }
+        }
+        _closeableObjects = null;
+        GC.collect();
+        GC.minimize();
+    }
+
     private void run() nothrow {
         while (_state != WorkerState.Stopped) {
 
             scope (exit) {
-                releaseResoure(this);
+                collectResoure();
             }
 
             try {
@@ -129,8 +125,7 @@ class WorkerThread : Thread {
 
     private void doRun() {
 
-        version (HUNT_DEBUG)
-            trace("Running");
+        version (HUNT_IO_DEBUG) trace("Running");
 
         _mutex.lock();
         scope (exit) {
