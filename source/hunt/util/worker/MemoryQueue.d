@@ -9,16 +9,20 @@ import core.sync.mutex;
 import std.container.slist;
 
 /**
- * 
+ * It's a thread-safe queue
  */
 class MemoryQueue : TaskQueue {
     private SList!Task _list;
-    private Condition _condition;
-    private Mutex _mutex;
+    private Mutex _headLock;
+    private Mutex _tailLock;
+
+    /** Wait queue for waiting takes */
+    private Condition _notEmpty;
 
     this() {
-        _mutex = new Mutex();
-        _condition = new Condition(_mutex);
+        _headLock = new Mutex();
+        _tailLock = new Mutex();
+        _notEmpty = new Condition(_headLock);
     }
 
     bool isEmpty() {
@@ -26,13 +30,12 @@ class MemoryQueue : TaskQueue {
     }
 
     Task pop() {
-        _mutex.lock();
-        scope(exit) {
-            _mutex.unlock();
-        }
+        _headLock.lock();
+        scope (exit)
+            _headLock.unlock();
 
         if(isEmpty()) {
-            _condition.wait();
+            _notEmpty.wait();
         }
 
         Task task = _list.front();
@@ -42,14 +45,54 @@ class MemoryQueue : TaskQueue {
     }
 
     void push(Task task) {
-        _mutex.lock();
-        scope(exit) {
-            _mutex.unlock();
-        }
+        _tailLock.lock();
+        scope (exit)
+            _tailLock.unlock();
 
         _list.insert(task);
 
-        _condition.notifyAll();
+        _notEmpty.notify();
     }
 }
 
+// class MemoryQueue : TaskQueue {
+//     private SList!Task _list;
+//     private Condition _condition;
+//     private Mutex _mutex;
+
+//     this() {
+//         _mutex = new Mutex();
+//         _condition = new Condition(_mutex);
+//     }
+
+//     bool isEmpty() {
+//         return _list.empty();
+//     }
+
+//     Task pop() {
+//         _mutex.lock();
+//         scope(exit) {
+//             _mutex.unlock();
+//         }
+
+//         if(isEmpty()) {
+//             _condition.wait();
+//         }
+
+//         Task task = _list.front();
+//         _list.removeFront();
+
+//         return task;
+//     }
+
+//     void push(Task task) {
+//         _mutex.lock();
+//         scope(exit) {
+//             _mutex.unlock();
+//         }
+
+//         _list.insert(task);
+
+//         _condition.notifyAll();
+//     }
+// }

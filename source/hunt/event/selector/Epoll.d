@@ -11,6 +11,8 @@
 
 module hunt.event.selector.Epoll;
 
+import core.thread;
+
 // dfmt off
 version(HAVE_EPOLL):
 
@@ -34,11 +36,11 @@ import core.sys.linux.epoll;
 
 import hunt.event.selector.Selector;
 import hunt.Exceptions;
-import hunt.io.channel;
-import hunt.logging.ConsoleLogger;
 import hunt.event.timer;
+import hunt.logging.ConsoleLogger;
+import hunt.io.channel;
 import hunt.system.Error;
-import hunt.util.TaskPool;
+import hunt.util.worker;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
@@ -49,7 +51,6 @@ shared static this() {
     fdLimit = fileLimit.rlim_max;
 }
 
-
 /**
  * 
  */
@@ -59,9 +60,9 @@ class AbstractSelector : Selector {
     private bool isDisposed = false;
     private epoll_event[NUM_KEVENTS] events;
     private EventChannel _eventChannel;
-    private TaskPool _taskPool;
+    private TaskQueue _taskPool;
 
-    this(size_t id, size_t divider, TaskPool pool = null, size_t maxChannels = 1500) {
+    this(size_t id, size_t divider, TaskQueue pool = null, size_t maxChannels = 1500) {
         _taskPool = pool;
         super(id, divider, maxChannels);
 
@@ -168,6 +169,10 @@ class AbstractSelector : Selector {
             len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
+version (HUNT_DEBUG) {
+            warningf("thread: %s", Thread.getThis().name());
+}
+            
         if(_taskPool is null) {
             foreach (i; 0 .. len) {
                 AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
@@ -184,7 +189,13 @@ class AbstractSelector : Selector {
                     debug warningf("channel is null");
                 } else {
                     uint currentEvents = events[i].events;
-                    _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
+
+		            _taskPool.push(new class Task {
+                        void execute() {
+                            handeChannelEvent(channel, currentEvents);
+                        }
+                    });
+                    // _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
                 }
             }
         }
@@ -193,6 +204,12 @@ class AbstractSelector : Selector {
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint event) {
+        version (HUNT_DEBUG) {
+            warningf("thread: %s", Thread.getThis().name());
+
+            Thread.sleep(300.msecs);
+        }
+
         version (HUNT_IO_DEBUG) {
             infof("handling event: selector=%d, channel=%d, events=%d, isReadable: %s, isWritable: %s, isClosed: %s", 
                 this._epollFD, channel.handle, event, isReadable(event), isWritable(event), isClosed(event));
