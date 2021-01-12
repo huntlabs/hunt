@@ -67,6 +67,7 @@ abstract class Selector {
         GC.addRoot(context);
         GC.setAttr(cast(void*)context, GC.BlkAttr.NO_MOVE);
         version (HUNT_IO_DEBUG) {
+            int infd = cast(int) channel.handle;
             tracef("Register channel@%s: fd=%d, selector: %d", context, infd, getId());
         }        
         return true;
