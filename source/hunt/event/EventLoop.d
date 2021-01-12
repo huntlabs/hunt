@@ -11,17 +11,16 @@
 
 module hunt.event.EventLoop;
 
-import hunt.util.worker;
-import hunt.io.channel.Common;
 import hunt.event.selector;
+import hunt.io.channel.Common;
 import hunt.logging.ConsoleLogger;
+import hunt.util.TaskPool;
 
 import core.thread;
 import std.parallelism;
 import std.random;
 
-
-alias HuntTaskPool = hunt.util.worker.TaskQueue.TaskQueue;
+alias HuntTaskPool = hunt.util.TaskPool.TaskPool;
 
 /**
  * 

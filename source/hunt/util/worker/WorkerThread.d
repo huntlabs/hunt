@@ -1,6 +1,7 @@
 module hunt.util.worker.WorkerThread;
 
 import hunt.util.Closeable;
+import hunt.util.ResoureManager;
 import hunt.util.worker.Task;
 import hunt.util.worker.Worker;
 
@@ -12,7 +13,8 @@ import core.sync.condition;
 import core.sync.mutex;
 import std.conv;
 
-private enum WorkerState {
+
+enum WorkerState {
     Idle,
     Busy,
     Stopped
@@ -31,12 +33,12 @@ class WorkerThread : Thread {
     private WorkerState _state;
     private size_t _index;
     private Task _task;
-    private Worker _worker;
+    // private Worker _worker;
 
     private Condition _condition;
     private Mutex _mutex;
 
-    private Closeable[] _closeableObjects;
+    // private Closeable[] _closeableObjects;
 
     /* For autonumbering anonymous threads. */
     // private static shared int threadInitNumber = 0;
@@ -44,8 +46,7 @@ class WorkerThread : Thread {
     //     return core.atomic.atomicOp!"+="(threadInitNumber, 1);
     // }
 
-    this(Worker worker, size_t index, size_t stackSize = 0) {
-        _worker = worker;
+    this(size_t index, size_t stackSize = 0) {
         _index = index;
         _state = WorkerState.Idle;
         _mutex = new Mutex();
@@ -60,6 +61,10 @@ class WorkerThread : Thread {
 
     bool isBusy() {
         return _state == WorkerState.Busy;
+    }
+
+    WorkerState state() {
+        return _state;
     }
 
     size_t index() {
@@ -82,35 +87,37 @@ class WorkerThread : Thread {
     }
 
 
-    void registerResoure(Closeable res) {
-        // if (!inWorkerThread()) {
-        //     warningf("Only the objects in worker thread [%s] can be closed automaticaly.",
-        //             Thread.getThis().name());
-        //     return;
-        // }
+    // void registerResoure(Closeable res) {
+    //     // if (!inWorkerThread()) {
+    //     //     warningf("Only the objects in worker thread [%s] can be closed automaticaly.",
+    //     //             Thread.getThis().name());
+    //     //     return;
+    //     // }
 
-        assert(res !is null);
-        _closeableObjects ~= res;
-    }
+    //     assert(res !is null);
+    //     _closeableObjects ~= res;
+    // }
 
-    private void collectResoure() nothrow {
-        foreach (obj; _closeableObjects) {
-            try {
-                obj.close();
-            } catch (Throwable t) {
-                warning(t);
-            }
-        }
-        _closeableObjects = null;
-        GC.collect();
-        GC.minimize();
-    }
+    // private void collectResoure() nothrow {
+    //     foreach (obj; _closeableObjects) {
+    //         try {
+    //             obj.close();
+    //         } catch (Throwable t) {
+    //             warning(t);
+    //         }
+    //     }
+    //     _closeableObjects = null;
+    //     GC.collect();
+    //     GC.minimize();
+    // }
 
     private void run() nothrow {
         while (_state != WorkerState.Stopped) {
 
+        version (HUNT_IO_DEBUG) tracef("%s Running...", this.name());
             scope (exit) {
                 collectResoure();
+        version (HUNT_IO_DEBUG) tracef("%s Done.", this.name());
             }
 
             try {
@@ -119,14 +126,11 @@ class WorkerThread : Thread {
                 warning(ex);
             }
 
-            _worker.setWorkerThreadAvailable(_index);
+            // _worker.setWorkerThreadAvailable(_index);
         }
     }
 
     private void doRun() {
-
-        version (HUNT_IO_DEBUG) trace("Running");
-
         _mutex.lock();
         scope (exit) {
             _state = WorkerState.Idle;

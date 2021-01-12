@@ -513,7 +513,10 @@ class TaskPool {
         PoolStatus status = new PoolStatus();
 
         status.total = pool.length;
-        foreach (ParallelismThread th; pool) {
+        foreach (size_t index, ParallelismThread th; pool) {
+            version(HUNT_IO_DEBUG) {
+                tracef("Thread[%d]: %s, state: %s", index, th.name, th.state);
+            }
             if(th.state == ThreadState.BUSY) {
                 status.active++;
             } else if(th.state == ThreadState.IDLE) {

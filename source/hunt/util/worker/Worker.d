@@ -20,7 +20,7 @@ class Worker {
     private size_t _size;
 
     private WorkerThread[] _workerThreads;
-    private WorkerThread[] _availableThreads;
+    // private WorkerThread[] _availableThreads;
 
     private TaskQueue _taskQueue;
     private bool _isRunning = false;
@@ -29,20 +29,36 @@ class Worker {
         _taskQueue = taskQueue;
         _size = size;
 
+        // version(HUNT_DEBUG) 
+        infof("Worker size: %d", size);
+
         initialize();
     }
 
     private void initialize() {
         _workerThreads = new WorkerThread[_size];
-        _availableThreads = new WorkerThread[_size];
+        // _availableThreads = new WorkerThread[_size];
         
         foreach(size_t index; 0 .. _size) {
-            WorkerThread thread = new WorkerThread(this, index);
+            WorkerThread thread = new WorkerThread(index);
             thread.start();
 
             _workerThreads[index] = thread;
-            _availableThreads[index] = thread;
+            // _availableThreads[index] = thread;
         }
+    }
+
+    void inspect() {
+        foreach(WorkerThread th; _workerThreads) {
+            tracef("Thread: %s,  state: %s", th.name, th.state());
+        }
+
+        // info("===============Available threads");
+
+        // foreach(WorkerThread th; _availableThreads) {
+        //     if(th !is null)
+        //     tracef("Thread: %s,  state: %s", th.name, th.state());
+        // }
     }
 
     void run() {
@@ -61,21 +77,23 @@ class Worker {
         _isRunning = false;
         foreach(size_t index; 0 .. _size) {
             _workerThreads[index].stop();
-            _availableThreads[index] = null;
+            // _availableThreads[index] = null;
         }
     }
 
-    void setWorkerThreadAvailable(size_t index) nothrow {
-        _availableThreads[index] = _workerThreads[index];
-    }
+    // void setWorkerThreadAvailable(size_t index) nothrow {
+    //     _availableThreads[index] = _workerThreads[index];
+    // }
 
     private WorkerThread findIdleThread() {
         foreach(size_t index; 0 .. _size) {
-            WorkerThread thread = _availableThreads[index];
-            if(thread !is null) {
-                _availableThreads[index] = null;
+            WorkerThread thread = _workerThreads[index];
+            if(!thread.isBusy)
                 return thread;
-            }
+            // if(thread !is null) {
+            //     _availableThreads[index] = null;
+            //     return thread;
+            // }
         }
 
         return null;
@@ -84,16 +102,23 @@ class Worker {
     private void doRun() {
         while(_isRunning) {
             try {
-                version(HUNT_IO_DEBUG) trace("running...");
+                version(HUNT_IO_DEBUG) info("running...");
                 Task task = _taskQueue.pop();
 
-                WorkerThread workerThread = findIdleThread();
-                if(workerThread is null) {
-                    warning("No available worker thread found.");
-                    return;
+                WorkerThread workerThread;
+                
+                do {
+                    workerThread = findIdleThread();
+                    if(workerThread is null) {
+                        warning("All worker threads are busy!");
+                        // return;
+                    }
+                } while(workerThread is null);
+
+                if(task !is null) {
+                    workerThread.attatch(task);
                 }
 
-                workerThread.attatch(task);
             } catch(Exception ex) {
                 warning(ex);
             }

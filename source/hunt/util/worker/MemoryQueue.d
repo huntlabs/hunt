@@ -3,8 +3,13 @@ module hunt.util.worker.MemoryQueue;
 import hunt.util.worker.Task;
 import hunt.util.worker.TaskQueue;
 
+import hunt.logging.ConsoleLogger;
+
+import core.atomic;
 import core.sync.condition;
 import core.sync.mutex;
+
+import core.time;
 
 import std.container.slist;
 
@@ -16,6 +21,9 @@ class MemoryQueue : TaskQueue {
     private Mutex _headLock;
     private Mutex _tailLock;
 
+    shared int putCounter;
+    shared int popCounter;
+
     /** Wait queue for waiting takes */
     private Condition _notEmpty;
 
@@ -25,18 +33,25 @@ class MemoryQueue : TaskQueue {
         _notEmpty = new Condition(_headLock);
     }
 
-    bool isEmpty() {
+    override bool isEmpty() {
         return _list.empty();
     }
 
-    Task pop() {
+    override Task pop() {
         _headLock.lock();
         scope (exit)
             _headLock.unlock();
 
         if(isEmpty()) {
-            _notEmpty.wait();
+            bool v = _notEmpty.wait(5.seconds);
+            if(!v) {
+                tracef("Timeout in 5 seconds. pop: %d, put: %d", popCounter, putCounter);
+                return null;
+            }
         }
+
+        
+        atomicOp!("+=")(popCounter, 1);
 
         Task task = _list.front();
         _list.removeFront();
@@ -44,14 +59,16 @@ class MemoryQueue : TaskQueue {
         return task;
     }
 
-    void push(Task task) {
-        _tailLock.lock();
+    override void push(Task task) {
+        _headLock.lock();
         scope (exit)
-            _tailLock.unlock();
+            _headLock.unlock();
+
+        atomicOp!("+=")(putCounter, 1);
 
         _list.insert(task);
 
-        _notEmpty.notify();
+        _notEmpty.notifyAll();
     }
 }
 

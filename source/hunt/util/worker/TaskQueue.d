@@ -5,7 +5,7 @@ import hunt.util.worker.Task;
 /**
  * 
  */
-interface TaskQueue {
+abstract class TaskQueue {
 
     bool isEmpty();
 

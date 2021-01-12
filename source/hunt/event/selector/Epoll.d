@@ -11,8 +11,6 @@
 
 module hunt.event.selector.Epoll;
 
-import core.thread;
-
 // dfmt off
 version(HAVE_EPOLL):
 
@@ -36,11 +34,11 @@ import core.sys.linux.epoll;
 
 import hunt.event.selector.Selector;
 import hunt.Exceptions;
-import hunt.event.timer;
-import hunt.logging.ConsoleLogger;
 import hunt.io.channel;
+import hunt.logging.ConsoleLogger;
+import hunt.event.timer;
 import hunt.system.Error;
-import hunt.util.worker;
+import hunt.util.TaskPool;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
@@ -51,6 +49,7 @@ shared static this() {
     fdLimit = fileLimit.rlim_max;
 }
 
+
 /**
  * 
  */
@@ -60,9 +59,9 @@ class AbstractSelector : Selector {
     private bool isDisposed = false;
     private epoll_event[NUM_KEVENTS] events;
     private EventChannel _eventChannel;
-    private TaskQueue _taskPool;
+    private TaskPool _taskPool;
 
-    this(size_t id, size_t divider, TaskQueue pool = null, size_t maxChannels = 1500) {
+    this(size_t id, size_t divider, TaskPool pool = null, size_t maxChannels = 1500) {
         _taskPool = pool;
         super(id, divider, maxChannels);
 
@@ -172,7 +171,7 @@ class AbstractSelector : Selector {
 version (HUNT_DEBUG) {
             warningf("thread: %s", Thread.getThis().name());
 }
-            
+
         if(_taskPool is null) {
             foreach (i; 0 .. len) {
                 AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
@@ -189,13 +188,7 @@ version (HUNT_DEBUG) {
                     debug warningf("channel is null");
                 } else {
                     uint currentEvents = events[i].events;
-
-		            _taskPool.push(new class Task {
-                        void execute() {
-                            handeChannelEvent(channel, currentEvents);
-                        }
-                    });
-                    // _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
+                    _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
                 }
             }
         }
@@ -207,7 +200,7 @@ version (HUNT_DEBUG) {
         version (HUNT_DEBUG) {
             warningf("thread: %s", Thread.getThis().name());
 
-            Thread.sleep(300.msecs);
+            // Thread.sleep(300.msecs);
         }
 
         version (HUNT_IO_DEBUG) {

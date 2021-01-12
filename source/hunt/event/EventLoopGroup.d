@@ -15,7 +15,7 @@ import hunt.event.EventLoop;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Memory;
 import hunt.util.Lifecycle;
-import hunt.util.worker;
+import hunt.util.TaskPool;
 
 import core.atomic;
 
@@ -23,8 +23,7 @@ import core.atomic;
  * 
  */
 class EventLoopGroup : Lifecycle {
-    private TaskQueue _pool;
-    private Worker _worker;
+    private TaskPool _pool;
 
     this(size_t ioThreadSize = (totalCPUs - 1), size_t workerThreadSize = 0) {
         size_t _size = ioThreadSize > 0 ? ioThreadSize : 1;
@@ -34,10 +33,7 @@ class EventLoopGroup : Lifecycle {
         _eventLoops = new EventLoop[_size];
 
         if(workerThreadSize > 0) {
-            // _pool = new TaskPool(workerThreadSize, true);
-            _pool = new MemoryQueue();
-            _worker = new Worker(_pool, workerThreadSize);
-            _worker.run();
+            _pool = new TaskPool(workerThreadSize, true);
         } 
 
         foreach (i; 0 .. _size) {
@@ -64,6 +60,10 @@ class EventLoopGroup : Lifecycle {
         if (!cas(&_isRunning, true, false))
             return;
 
+        if(_pool !is null)  {
+            _pool.stop();
+        }
+
         version (HUNT_IO_DEBUG)
             trace("stopping EventLoopGroup...");
         foreach (EventLoop pool; _eventLoops) {
@@ -85,6 +85,10 @@ class EventLoopGroup : Lifecycle {
         }
 
         return true;
+    }
+
+    TaskPool worker() {
+        return _pool;
     }
 
     @property size_t size() {
