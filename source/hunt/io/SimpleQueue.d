@@ -57,13 +57,15 @@ class BlockingQueue(T) : Queue!T {
 
     /** Wait queue for waiting takes */
     private Condition notEmpty;
+    private Duration _timeout;
 
-    this() {
+    this(Duration timeout = 5.seconds) {
         auto n = new QueueNode!T();
         this.head = this.tail = n;
         this.head_lock = new Mutex();
         this.tail_lock = new Mutex();
         notEmpty = new Condition(head_lock);
+        _timeout = timeout;
     }
 
     void enqueue(T t) {
@@ -92,7 +94,8 @@ class BlockingQueue(T) : Queue!T {
             } else {
                 if(isWaking)
                     return T.init;
-                notEmpty.wait();
+                bool r = notEmpty.wait(_timeout);
+                if(!r) return T.init;
             }
         }
         assert(0);

@@ -20,13 +20,14 @@ import std.exception;
 import std.socket;
 import std.string;
 
-import core.time;
-import core.stdc.string;
-import core.stdc.errno;
 import core.sys.posix.sys.types;
 import core.sys.posix.netinet.tcp;
 import core.sys.posix.netinet.in_;
 import core.sys.posix.unistd;
+import core.stdc.string;
+import core.stdc.errno;
+import core.time;
+import core.thread;
 
 import core.sys.posix.sys.resource;
 import core.sys.posix.sys.time;
@@ -143,14 +144,14 @@ class AbstractSelector : Selector {
         }
     }
 
-    override bool update(AbstractChannel channel) {
-        if (epollCtl(channel, EPOLL_CTL_MOD)) {
-            return true;
-        } else {
-            warningf("update channel failed: fd=%d", fd);
-            return false;
-        }
-    }
+    // override bool update(AbstractChannel channel) {
+    //     if (epollCtl(channel, EPOLL_CTL_MOD)) {
+    //         return true;
+    //     } else {
+    //         warningf("update channel failed: fd=%d", fd);
+    //         return false;
+    //     }
+    // }
 
     /**
         timeout: in millisecond
@@ -168,7 +169,7 @@ class AbstractSelector : Selector {
             len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
-version (HUNT_DEBUG) {
+version (HUNT_IO_DEBUG) {
             warningf("thread: %s", Thread.getThis().name());
 }
 
@@ -197,13 +198,10 @@ version (HUNT_DEBUG) {
     }
 
     private void handeChannelEvent(AbstractChannel channel, uint event) {
-        version (HUNT_DEBUG) {
+        version (HUNT_IO_DEBUG) {
             warningf("thread: %s", Thread.getThis().name());
 
             // Thread.sleep(300.msecs);
-        }
-
-        version (HUNT_IO_DEBUG) {
             infof("handling event: selector=%d, channel=%d, events=%d, isReadable: %s, isWritable: %s, isClosed: %s", 
                 this._epollFD, channel.handle, event, isReadable(event), isWritable(event), isClosed(event));
         }
@@ -224,13 +222,8 @@ version (HUNT_DEBUG) {
                                     channel.handle, errno, getErrorMessage(errno));
                     }
                 }
-                // FIXME: Needing refactor or cleanup -@zxp at 2/28/2019, 3:25:24 PM
-                // May be triggered twice for a channel, for example:
-                // events=8197, fd=13
-                // events=8221, fd=13
+                
                 // The remote connection broken abnormally, so the channel should be notified.
-                // channel.onClose(); // More tests are needed
-
                 if(isReadable(event)) {
                     channel.onRead();
                 }
