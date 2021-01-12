@@ -66,6 +66,9 @@ abstract class Selector {
         void* context = cast(void*)channel;
         GC.addRoot(context);
         GC.setAttr(cast(void*)context, GC.BlkAttr.NO_MOVE);
+        version (HUNT_IO_DEBUG) {
+            tracef("Register channel@%s: fd=%d, selector: %d", context, infd, getId());
+        }        
         return true;
         // int infd = cast(int) channel.handle;
         // size_t index = cast(size_t)(infd / divider);
@@ -119,6 +122,10 @@ abstract class Selector {
         void* context = cast(void*)channel;
         GC.removeRoot(context);
         GC.clrAttr(context, GC.BlkAttr.NO_MOVE);
+        version(HUNT_IO_DEBUG) {
+            size_t fd = cast(size_t) channel.handle;
+            infof("The channel@%s has been deregistered: fd=%d, selector: %d", context, fd, getId());
+        }        
         return true;
         // size_t fd = cast(size_t) channel.handle;
         // size_t index = cast(size_t)(fd / divider);
