@@ -39,7 +39,7 @@ import hunt.io.channel;
 import hunt.logging.ConsoleLogger;
 import hunt.event.timer;
 import hunt.system.Error;
-import hunt.util.TaskPool;
+import hunt.util.worker;
 
 /* Max. theoretical number of file descriptors on system. */
 __gshared size_t fdLimit = 0;
@@ -60,11 +60,9 @@ class AbstractSelector : Selector {
     private bool isDisposed = false;
     private epoll_event[NUM_KEVENTS] events;
     private EventChannel _eventChannel;
-    private TaskPool _taskPool;
 
-    this(size_t id, size_t divider, TaskPool pool = null, size_t maxChannels = 1500) {
-        _taskPool = pool;
-        super(id, divider, maxChannels);
+    this(size_t id, size_t divider, Worker worker = null, size_t maxChannels = 1500) {
+        super(id, divider, worker, maxChannels);
 
         // http://man7.org/linux/man-pages/man2/epoll_create.2.html
         /*
@@ -144,15 +142,6 @@ class AbstractSelector : Selector {
         }
     }
 
-    // override bool update(AbstractChannel channel) {
-    //     if (epollCtl(channel, EPOLL_CTL_MOD)) {
-    //         return true;
-    //     } else {
-    //         warningf("update channel failed: fd=%d", fd);
-    //         return false;
-    //     }
-    // }
-
     /**
         timeout: in millisecond
     */
@@ -173,7 +162,7 @@ version (HUNT_IO_DEBUG) {
             warningf("thread: %s", Thread.getThis().name());
 }
 
-        if(_taskPool is null) {
+        // if(_taskPool is null) {
             foreach (i; 0 .. len) {
                 AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
                 if (channel is null) {
@@ -182,17 +171,17 @@ version (HUNT_IO_DEBUG) {
                     handeChannelEvent(channel, events[i].events);
                 }
             }
-        } else {  // using worker thread
-            foreach (i; 0 .. len) {
-                AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-                if (channel is null) {
-                    debug warningf("channel is null");
-                } else {
-                    uint currentEvents = events[i].events;
-                    _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
-                }
-            }
-        }
+        // } else {  // using worker thread
+        //     foreach (i; 0 .. len) {
+        //         AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+        //         if (channel is null) {
+        //             debug warningf("channel is null");
+        //         } else {
+        //             uint currentEvents = events[i].events;
+        //             _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
+        //         }
+        //     }
+        // }
 
         return len;
     }

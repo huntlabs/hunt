@@ -4,16 +4,18 @@ module hunt.io.channel.posix.AbstractStream;
 version(Posix):
 // dfmt on
 
-import hunt.io.BufferUtils;
-import hunt.io.ByteBuffer;
 import hunt.event.selector.Selector;
 import hunt.Functions;
+import hunt.io.BufferUtils;
+import hunt.io.ByteBuffer;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.IoError;
+import hunt.io.SimpleQueue;
 import hunt.io.worker.WorkerGroupObject;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
+import hunt.util.worker;
 
 
 import std.format;
@@ -28,12 +30,59 @@ import core.sys.posix.unistd;
 enum string ResponseData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
 
 /**
+ * 
+ */
+class IoChannelTask : Task {
+    DataReceivedHandler dataReceivedHandler;
+    SimpleEventHandler finishedHandler;
+    SimpleQueue!(ByteBuffer) buffers;
+
+    this() {
+        buffers = new SimpleQueue!(ByteBuffer);
+    }
+
+    void execute() {
+        _status = TaskStatus.Processing;
+        tracef("Task Processing!");
+
+        scope(exit) {
+            _status = TaskStatus.Done;
+            tracef("Task Done!");
+            if(finishedHandler !is null) {
+                finishedHandler();
+            }
+        }
+
+        ByteBuffer buffer;
+        DataHandleStatus handleStatus = DataHandleStatus.Pending;
+
+        do {
+            buffer = buffers.dequeue();
+            if(buffer is null) {
+                break;
+            }
+
+            handleStatus = dataReceivedHandler(buffer);
+            tracef("handleStatus: %s", handleStatus);
+            
+            if(handleStatus == DataHandleStatus.Done && buffer.remaining() == 0) {
+                break;
+            }
+        } while(true);
+    }
+    
+}
+
+
+/**
 TCP Peer
 */
 abstract class AbstractStream : AbstractSocketChannel {
     enum BufferSize = 4096;
     private const(ubyte)[] _readBuffer;
     private ByteBuffer writeBuffer;
+
+    private IoChannelTask _task = null;
 
     /**
     * Warning: The received data is stored a inner buffer. For a data safe,
@@ -64,6 +113,47 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract bool isConnected() nothrow;
     abstract protected void onDisconnected();
 
+    private void onTaskFinished() {
+        _task = null;
+    }
+
+    private void onDataReceived(ptrdiff_t len) {
+
+        if (dataReceivedHandler is null) 
+            return;
+
+        Worker taskWorker = worker();
+
+        _bufferForRead.limit(cast(int)len);
+        _bufferForRead.position(0);
+
+        if(taskWorker is null) {
+            dataReceivedHandler(_bufferForRead);
+        } else {
+            ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
+
+            IoChannelTask task = _task;
+
+            if(task is null) {
+                task = IoChannelTask();
+                task.dataReceivedHandler = dataReceivedHandler;
+                task.finishedHandler = &onTaskFinished;
+                _task = task;
+                taskWorker.put(task);
+            }
+
+            task.buffers.enqueue(bufferCopy);
+        }
+
+        // if (gWorkerGroup !is null)
+        // {
+        //   gWorkerGroup.put(this, BufferUtils.clone(_bufferForRead));
+        // }else
+        // {
+            
+        // }
+    }
+
     /**
      *
      */
@@ -85,26 +175,8 @@ abstract class AbstractStream : AbstractSocketChannel {
                 else
                     infof("fd: %d, 32/%d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. 32]);
             }
-            if (dataReceivedHandler !is null) {
-                _bufferForRead.limit(cast(int)len);
-                _bufferForRead.position(0);
 
-                if (gWorkerGroup !is null)
-                {
-                  gWorkerGroup.put(this, BufferUtils.clone(_bufferForRead));
-                }else
-                {
-                  dataReceivedHandler(_bufferForRead);
-                }
-                // ByteBuffer bb = BufferUtils.wrap(cast(byte[])rb[0..len]);
-                // dataReceivedHandler(bb);
-            }
-
-            // size_t nBytes = tryWrite(cast(ubyte[])ResponseData);
-
-            // if(nBytes < ResponseData.length) {
-            //     warning("data lost");
-            // }
+            onDataReceived(len);
 
             // It's prossible that there are more data waitting for read in the read I/O space.
             if (len == _readBuffer.length) {

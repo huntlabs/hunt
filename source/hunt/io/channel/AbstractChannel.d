@@ -4,6 +4,7 @@ import hunt.event.selector.Selector;
 import hunt.io.channel.Common;
 import hunt.io.IoError;
 import hunt.logging.ConsoleLogger;
+import hunt.util.worker;
 
 import core.atomic;
 import std.bitmanip;
@@ -16,6 +17,8 @@ import std.socket : socket_t;
 abstract class AbstractChannel : Channel {
     socket_t handle = socket_t.init;
     ErrorEventHandler errorHandler;
+    
+    Worker taskWorker = null;
 
     protected bool _isRegistered = false;
     private shared bool _isClosing = false;

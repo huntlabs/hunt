@@ -11,101 +11,82 @@ import hunt.io.BufferUtils;
 import hunt.io.ByteBuffer;
 import hunt.io.worker.Worker;
 
-
 class WorkerGroup(T) {
 
-	this(size_t threadSize = 1) {
-    _mutex = new Mutex();
-    _condition = new Condition(_mutex);
-    _isExit = false;
-    _threadSize = threadSize;
+    this(size_t threadSize = 1) {
+        _mutex = new Mutex();
+        _condition = new Condition(_mutex);
+        _isExit = false;
+        _threadSize = threadSize;
 
-    _thread = new Thread(() {
-      doThreadProc();
-    });
+        _thread = new Thread(() { doThreadProc(); });
 
-    for(int i = 0 ; i < _threadSize ; ++i)
-    {
-        auto worker = new Worker!T();
-       _workers[i] = worker;
+        for (int i = 0; i < _threadSize; ++i) {
+            auto worker = new Worker!T();
+            _workers[i] = worker;
+        }
     }
-	}
 
-
-  private
-  {
-    bool                _isExit;
-    Condition           _condition;
-    Mutex               _mutex;
-    DList!(Task!T)      _queue;
-    size_t              _threadSize;
-    Thread              _thread;
-    Worker!T[size_t]    _workers;
-  }
-
-
-  void put(T obj , ByteBuffer buffer)
-  {
-    if(obj !is null && buffer !is null)
-    {
-      auto task = new Task!T(obj, buffer);
-      _condition.mutex().lock();
-      _queue.insertBack(task);
-      _condition.notify();
-      _condition.mutex().unlock();
+    private {
+        bool _isExit;
+        Condition _condition;
+        Mutex _mutex;
+        DList!(Task!T) _queue;
+        size_t _threadSize;
+        Thread _thread;
+        Worker!T[size_t] _workers;
     }
-  }
 
-  void dispatch(Task!T task)
-  {
-      if (task !is null)
-      {
-        _workers[task.channel.handle % _threadSize].put(task);
-      }
-  }
-
-  void doThreadProc()
-  {
-    	do
-      {
-          Task!T task = null;
-          {
+    void put(T obj, ByteBuffer buffer) {
+        if (obj !is null && buffer !is null) {
+            auto task = new Task!T(obj, buffer);
             _condition.mutex().lock();
-            if (_queue.empty())
-            {
-              _condition.wait();
-            }else
-            {
-              task = _queue.front();
-              _queue.removeFront();
-            }
+            _queue.insertBack(task);
+            _condition.notify();
             _condition.mutex().unlock();
-          }
+        }
+    }
 
-          if (_isExit)
-          {
-            break;
-          }
+    void dispatch(Task!T task) {
+        if (task !is null) {
+            _workers[task.channel.handle % _threadSize].put(task);
+        }
+    }
 
-          dispatch(task);
+    void doThreadProc() {
+        do {
+            Task!T task = null;
+            {
+                _condition.mutex().lock();
+                if (_queue.empty()) {
+                    _condition.wait();
+                } else {
+                    task = _queue.front();
+                    _queue.removeFront();
+                }
+                _condition.mutex().unlock();
+            }
 
-      } while (!_isExit);
+            if (_isExit) {
+                break;
+            }
 
-	    return ;
-  }
+            dispatch(task);
 
-  void stop()
-  {
-      _isExit = true;
-  }
+        }
+        while (!_isExit);
 
-  void run()
-  {
-      foreach(worker ; _workers.byValue)
-      {
+        return;
+    }
+
+    void stop() {
+        _isExit = true;
+    }
+
+    void run() {
+        foreach (worker; _workers.byValue) {
             worker.run();
-      }
-      _thread.start();
-  }
+        }
+        _thread.start();
+    }
 }
-

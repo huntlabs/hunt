@@ -21,8 +21,13 @@ import hunt.system.Memory;
 import core.atomic;
 import std.socket;
 
+enum DataHandleStatus {
+    Done,
+    Pending
+}
 
-alias DataReceivedHandler = void delegate(ByteBuffer buffer);
+
+alias DataReceivedHandler = DataHandleStatus delegate(ByteBuffer buffer);
 alias AcceptHandler = void delegate(Socket socket);
 alias ErrorEventHandler = Action1!(IoError);
 
