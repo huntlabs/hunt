@@ -14,13 +14,13 @@ module hunt.event.EventLoop;
 import hunt.event.selector;
 import hunt.io.channel.Common;
 import hunt.logging.ConsoleLogger;
-import hunt.util.TaskPool;
+import hunt.util.worker;
 
 import core.thread;
 import std.parallelism;
 import std.random;
 
-alias HuntTaskPool = hunt.util.TaskPool.TaskPool;
+// alias HuntTaskPool = hunt.util.TaskPool.TaskPool;
 
 /**
  * 
@@ -32,13 +32,13 @@ final class EventLoop : AbstractSelector {
         super(id, 1);
     }
 
-    this(HuntTaskPool pool) {
+    this(Worker worker) {
         int id = uniform(0, 1024);
-        super(id, 1, pool);
+        super(id, 1, worker);
     }
 
-    this(size_t id, size_t divider, HuntTaskPool pool = null) {
-        super(id, divider, pool);
+    this(size_t id, size_t divider, Worker worker = null) {
+        super(id, divider, worker);
     }
 
     override void stop() {

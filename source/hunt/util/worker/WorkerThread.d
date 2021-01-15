@@ -113,11 +113,11 @@ class WorkerThread : Thread {
 
     private void run() nothrow {
         while (_state != WorkerState.Stopped) {
+            version (HUNT_IO_DEBUG) tracef("%s Waiting..., state: %s", this.name(), _state);
 
-        version (HUNT_IO_DEBUG) tracef("%s Running...", this.name());
             scope (exit) {
                 collectResoure();
-        version (HUNT_IO_DEBUG) tracef("%s Done.", this.name());
+                version (HUNT_IO_DEBUG) tracef("%s Done. state: %s", this.name(), _state);
             }
 
             try {
@@ -128,6 +128,8 @@ class WorkerThread : Thread {
 
             // _worker.setWorkerThreadAvailable(_index);
         }
+        
+        version (HUNT_IO_DEBUG) tracef("%s Stopped. state: %s", this.name(), _state);
     }
 
     private void doRun() {
@@ -141,11 +143,8 @@ class WorkerThread : Thread {
         _state = WorkerState.Busy;
         Task task = _task;
 
-        if (task is null) {
-            warningf("No task attatch in ", this.name());
-        } else {
-            task.execute();
-        }
+        assert(task !is null, "No task attatch in " ~ this.name());
+        task.execute();
     }
 
 }

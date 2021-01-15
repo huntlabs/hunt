@@ -29,8 +29,9 @@ class Worker {
         _taskQueue = taskQueue;
         _size = size;
 
-        // version(HUNT_DEBUG) 
-        infof("Worker size: %d", size);
+        version(HUNT_DEBUG) {
+            infof("Worker size: %d", size);
+        }
 
         initialize();
     }
@@ -61,6 +62,10 @@ class Worker {
         // }
     }
 
+    void put(Task task) {
+        _taskQueue.push(task);
+    }
+
     void run() {
         if(_isRunning)
             return;
@@ -88,6 +93,10 @@ class Worker {
     private WorkerThread findIdleThread() {
         foreach(size_t index; 0 .. _size) {
             WorkerThread thread = _workerThreads[index];
+            version(HUNT_IO_DEBUG) {
+                tracef("Thread: %s, state: %s", thread.name, thread.state);
+            }
+
             if(!thread.isBusy)
                 return thread;
             // if(thread !is null) {
@@ -104,6 +113,13 @@ class Worker {
             try {
                 version(HUNT_IO_DEBUG) info("running...");
                 Task task = _taskQueue.pop();
+                if(task is null) {
+                    version(HUNT_IO_DEBUG) {
+                        warning("A null task popped!");
+                        inspect();
+                    }
+                    continue;
+                }
 
                 WorkerThread workerThread;
                 
@@ -112,12 +128,11 @@ class Worker {
                     if(workerThread is null) {
                         warning("All worker threads are busy!");
                         // return;
+                        Thread.sleep(1.seconds);
                     }
                 } while(workerThread is null);
 
-                if(task !is null) {
-                    workerThread.attatch(task);
-                }
+                workerThread.attatch(task);
 
             } catch(Exception ex) {
                 warning(ex);

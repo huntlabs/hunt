@@ -24,7 +24,7 @@ void registerResoure(Closeable res) {
 }
 
 void collectResoure() nothrow {
-    version (HUNT_IO_DEBUG) tracef("Collecting(Remains: %d)...", _closeableObjects.length);
+    version (HUNT_IO_DEBUG) tracef("Collecting (remains: %d)...", _closeableObjects.length);
 
     foreach (obj; _closeableObjects) {
         try {

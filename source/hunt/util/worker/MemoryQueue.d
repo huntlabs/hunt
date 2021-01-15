@@ -20,14 +20,18 @@ class MemoryQueue : TaskQueue {
     private SList!Task _list;
     private Mutex _headLock;
     private Mutex _tailLock;
+    private Duration _timeout;
 
+    version (HUNT_IO_DEBUG) {
     shared int putCounter;
     shared int popCounter;
+    }
 
     /** Wait queue for waiting takes */
     private Condition _notEmpty;
 
-    this() {
+    this(Duration timeout = 10.seconds) {
+        _timeout = timeout;
         _headLock = new Mutex();
         _tailLock = new Mutex();
         _notEmpty = new Condition(_headLock);
@@ -43,15 +47,18 @@ class MemoryQueue : TaskQueue {
             _headLock.unlock();
 
         if(isEmpty()) {
-            bool v = _notEmpty.wait(5.seconds);
+            bool v = _notEmpty.wait(_timeout);
             if(!v) {
-                tracef("Timeout in 5 seconds. pop: %d, put: %d", popCounter, putCounter);
+                version (HUNT_IO_DEBUG) {
+                    tracef("Timeout in %s. pop: %d, put: %d", _timeout, popCounter, putCounter);
+                }
                 return null;
             }
         }
 
-        
-        atomicOp!("+=")(popCounter, 1);
+        version (HUNT_IO_DEBUG) {
+            atomicOp!("+=")(popCounter, 1);
+        }
 
         Task task = _list.front();
         _list.removeFront();
@@ -64,7 +71,9 @@ class MemoryQueue : TaskQueue {
         scope (exit)
             _headLock.unlock();
 
-        atomicOp!("+=")(putCounter, 1);
+        version (HUNT_IO_DEBUG) {
+            atomicOp!("+=")(putCounter, 1);
+        }
 
         _list.insert(task);
 

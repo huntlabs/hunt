@@ -32,7 +32,7 @@ enum string ResponseData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection:
 /**
  * 
  */
-class IoChannelTask : Task {
+private class IoChannelTask : Task {
     DataReceivedHandler dataReceivedHandler;
     SimpleEventHandler finishedHandler;
     SimpleQueue!(ByteBuffer) buffers;
@@ -41,13 +41,14 @@ class IoChannelTask : Task {
         buffers = new SimpleQueue!(ByteBuffer);
     }
 
-    void execute() {
-        _status = TaskStatus.Processing;
-        tracef("Task Processing!");
+    override protected void doExecute() {
 
         scope(exit) {
-            _status = TaskStatus.Done;
-            tracef("Task Done!");
+            finish();
+            version(HUNT_IO_DEBUG) {
+                info("Task Done!");
+            }
+
             if(finishedHandler !is null) {
                 finishedHandler();
             }
@@ -62,10 +63,18 @@ class IoChannelTask : Task {
                 break;
             }
 
+            version(HUNT_IO_DEBUG) {
+                tracef("buffer: %s", buffer.toString());
+            }
+
             handleStatus = dataReceivedHandler(buffer);
-            tracef("handleStatus: %s", handleStatus);
+
+            version(HUNT_IO_DEBUG) {
+                tracef("Handle status: %s, buffer: %s", handleStatus, buffer.toString());
+            }
             
-            if(handleStatus == DataHandleStatus.Done && buffer.remaining() == 0) {
+            if(isTerminated() ||
+                handleStatus == DataHandleStatus.Done && !buffer.hasRemaining()) {
                 break;
             }
         } while(true);
@@ -122,12 +131,12 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (dataReceivedHandler is null) 
             return;
 
-        Worker taskWorker = worker();
+        Worker worker = taskWorker;
 
         _bufferForRead.limit(cast(int)len);
         _bufferForRead.position(0);
 
-        if(taskWorker is null) {
+        if(worker is null) {
             dataReceivedHandler(_bufferForRead);
         } else {
             ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
@@ -135,11 +144,11 @@ abstract class AbstractStream : AbstractSocketChannel {
             IoChannelTask task = _task;
 
             if(task is null) {
-                task = IoChannelTask();
+                task = new IoChannelTask();
                 task.dataReceivedHandler = dataReceivedHandler;
                 task.finishedHandler = &onTaskFinished;
                 _task = task;
-                taskWorker.put(task);
+                worker.put(task);
             }
 
             task.buffers.enqueue(bufferCopy);
@@ -226,6 +235,11 @@ abstract class AbstractStream : AbstractSocketChannel {
             
         version (HUNT_IO_DEBUG) {
             infof("peer socket %s closed: fd=%d", this.remoteAddress.toString, this.handle);
+        }
+
+        Task task = _task;
+        if(task !is null) {
+            task.stop();
         }
     }
 

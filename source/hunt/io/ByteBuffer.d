@@ -926,7 +926,7 @@ abstract class ByteBuffer : Buffer {
     T get(T)() if (!is(T == byte)) {
         enum len = T.sizeof;
         int index = ix(nextGetIndex(len));
-        ubyte[len] bytes = cast(ubyte[]) hb[index .. index + len];
+        ubyte[] bytes = cast(ubyte[]) hb[index .. index + len];
         return bigEndianToNative!T(bytes);
     }
 
@@ -1030,14 +1030,33 @@ abstract class ByteBuffer : Buffer {
         return offset + i;
     }
 
+    deprecated("Unsupported anymore.")
     string getString(size_t offset, size_t len) {
         return cast(string) hb[offset .. offset + len];
     }
 
-
-    byte[] getRemaining() {
+    byte[] peek(size_t offset, size_t len) {
+        return hb[offset .. offset + len];
+    }
+    
+    byte[] peekRemaining() {
         return hb[offset + position() .. offset + limit()];
     }
+
+    deprecated("Using peekRemaining instead.")
+    alias getRemaining = peekRemaining;
+    // byte[] getRemaining() {
+    //     // int len = remaining();
+    //     // int index = ix(nextGetIndex(len));
+    //     // import hunt.logging.ConsoleLogger;
+
+    //     // warningf("len: %d, next index: %s", len, index);
+
+    //     // byte[] buffer = hb[index .. index + len];
+
+    //     // return buffer;
+    //     return hb[offset + position() .. offset + limit()];
+    // }
 
     /**
      * Returns a string summarizing the state of this buffer.

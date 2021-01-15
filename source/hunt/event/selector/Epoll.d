@@ -158,30 +158,14 @@ class AbstractSelector : Selector {
             len = iepoll(_epollFD, events.ptr, events.length, cast(int) timeout);
         }
 
-version (HUNT_IO_DEBUG) {
-            warningf("thread: %s", Thread.getThis().name());
-}
-
-        // if(_taskPool is null) {
-            foreach (i; 0 .. len) {
-                AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-                if (channel is null) {
-                    debug warningf("channel is null");
-                } else {
-                    handeChannelEvent(channel, events[i].events);
-                }
+        foreach (i; 0 .. len) {
+            AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
+            if (channel is null) {
+                debug warningf("channel is null");
+            } else {
+                handeChannelEvent(channel, events[i].events);
             }
-        // } else {  // using worker thread
-        //     foreach (i; 0 .. len) {
-        //         AbstractChannel channel = cast(AbstractChannel)(events[i].data.ptr);
-        //         if (channel is null) {
-        //             debug warningf("channel is null");
-        //         } else {
-        //             uint currentEvents = events[i].events;
-        //             _taskPool.put(cast(int)channel.handle, makeTask(&handeChannelEvent, channel, currentEvents));
-        //         }
-        //     }
-        // }
+        }
 
         return len;
     }
