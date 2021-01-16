@@ -50,13 +50,12 @@ class AbstractSelector : Selector {
     }
 
     override bool register(AbstractChannel channel) {
-        assert(channel !is null);
+        super.register(channel);
+
         ChannelType ct = channel.type;
         auto fd = channel.handle;
         version (HUNT_IO_DEBUG)
             tracef("register, channel(fd=%d, type=%s)", fd, ct);
-        
-        super.register(channel);
 
         if (ct == ChannelType.Timer) {
             AbstractTimer timerChannel = cast(AbstractTimer) channel;
@@ -89,10 +88,8 @@ class AbstractSelector : Selector {
     override bool deregister(AbstractChannel channel) {
         // FIXME: Needing refactor or cleanup -@Administrator at 8/28/2018, 3:28:18 PM
         // https://stackoverflow.com/questions/6573218/removing-a-handle-from-a-i-o-completion-port-and-other-questions-about-iocp
-        version(HUNT_IO_DEBUG) 
-        tracef("deregister (fd=%d)", channel.handle);
-
-
+        version (HUNT_IO_DEBUG)
+            tracef("deregister, channel(fd=%d, type=%s)", channel.handle, channel.type);
 
         // IocpContext _data;
         // _data.channel = channel;

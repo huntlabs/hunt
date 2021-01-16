@@ -113,6 +113,9 @@ class AbstractSelector : Selector {
     override bool register(AbstractChannel channel) {
         super.register(channel);
 
+        version (HUNT_IO_DEBUG)
+            tracef("register, channel(fd=%d, type=%s)", channel.handle, channel.type);
+
         // epoll_event e;
 
         // e.data.fd = infd;
@@ -135,6 +138,8 @@ class AbstractSelector : Selector {
 
     override bool deregister(AbstractChannel channel) {
         super.deregister(channel);
+        version (HUNT_IO_DEBUG)
+            tracef("deregister, channel(fd=%d, type=%s)", channel.handle, channel.type);
 
         if (epollCtl(channel, EPOLL_CTL_DEL)) {
             return true;
