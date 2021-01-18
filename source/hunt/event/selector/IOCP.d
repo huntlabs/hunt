@@ -50,13 +50,12 @@ class AbstractSelector : Selector {
     }
 
     override bool register(AbstractChannel channel) {
-        assert(channel !is null);
+        super.register(channel);
+
         ChannelType ct = channel.type;
         auto fd = channel.handle;
         version (HUNT_IO_DEBUG)
             tracef("register, channel(fd=%d, type=%s)", fd, ct);
-        
-        super.register(channel);
 
         if (ct == ChannelType.Timer) {
             AbstractTimer timerChannel = cast(AbstractTimer) channel;

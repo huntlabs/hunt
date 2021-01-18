@@ -110,6 +110,9 @@ class AbstractSelector : Selector {
 
     override bool register(AbstractChannel channel) {
         super.register(channel);
+        
+        version (HUNT_IO_DEBUG)
+            tracef("register, channel(fd=%d, type=%s)", channel.handle, channel.type);
 
         // epoll_event e;
 
@@ -132,7 +135,11 @@ class AbstractSelector : Selector {
     }
 
     override bool deregister(AbstractChannel channel) {
-        super.deregister(channel);
+        scope(exit) {
+            super.deregister(channel);
+            version (HUNT_IO_DEBUG)
+                tracef("deregister, channel(fd=%d, type=%s)", channel.handle, channel.type);
+        }
 
         if (epollCtl(channel, EPOLL_CTL_DEL)) {
             return true;
@@ -191,7 +198,7 @@ class AbstractSelector : Selector {
                         warningf("channel error: fd=%s, event=%d, errno=%d, message=%s",
                                 channel.handle, event, errno, getErrorMessage(errno));
                     } else {
-                        tracef("channel closed: fd=%d, errno=%d, message=%s",
+                        infof("channel closed: fd=%d, errno=%d, message=%s",
                                     channel.handle, errno, getErrorMessage(errno));
                     }
                 }

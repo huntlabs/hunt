@@ -87,7 +87,7 @@ class AbstractSelector : Selector {
     }
 
     override bool register(AbstractChannel channel) {
-        assert(channel !is null);
+        super.register(channel);
         
         const int fd = channel.handle;
         version (HUNT_IO_DEBUG)
@@ -130,7 +130,12 @@ class AbstractSelector : Selector {
     }
 
     override bool deregister(AbstractChannel channel) {
-        assert(channel !is null);
+        scope(exit) {
+            super.deregister(channel);
+            version (HUNT_IO_DEBUG)
+                tracef("deregister, channel(fd=%d, type=%s)", channel.handle, channel.type);
+        }
+        
         const fd = channel.handle;
         if (fd < 0)
             return false;
