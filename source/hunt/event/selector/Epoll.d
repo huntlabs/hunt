@@ -137,9 +137,11 @@ class AbstractSelector : Selector {
     }
 
     override bool deregister(AbstractChannel channel) {
-        super.deregister(channel);
-        version (HUNT_IO_DEBUG)
-            tracef("deregister, channel(fd=%d, type=%s)", channel.handle, channel.type);
+        scope(exit) {
+            super.deregister(channel);
+            version (HUNT_IO_DEBUG)
+                tracef("deregister, channel(fd=%d, type=%s)", channel.handle, channel.type);
+        }
 
         if (epollCtl(channel, EPOLL_CTL_DEL)) {
             return true;
