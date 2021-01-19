@@ -7,11 +7,13 @@ import hunt.util.worker.Worker;
 
 import hunt.logging.ConsoleLogger;
 
+import core.atomic;
 import core.memory;
 import core.thread;
 import core.sync.condition;
 import core.sync.mutex;
 import std.conv;
+
 
 alias WorkerState = WorkerThreadState;
 
@@ -31,9 +33,10 @@ bool inWorkerThread() {
  */
 class WorkerThread : Thread {
 
-    private WorkerState _state;
+    private shared WorkerState _state;
     private size_t _index;
     private Task _task;
+    private Duration _timeout;
     // private Worker _worker;
 
     private Condition _condition;
@@ -47,8 +50,9 @@ class WorkerThread : Thread {
     //     return core.atomic.atomicOp!"+="(threadInitNumber, 1);
     // }
 
-    this(size_t index, size_t stackSize = 0) {
+    this(size_t index, Duration timeout = 5.seconds, size_t stackSize = 0) {
         _index = index;
+        _timeout = timeout;
         _state = WorkerState.Idle;
         _mutex = new Mutex();
         _condition = new Condition(_mutex);
@@ -73,58 +77,39 @@ class WorkerThread : Thread {
     }
 
     void attatch(Task task) {
-        if (_state == WorkerState.Idle) {
+        assert(task !is null);
+        bool r = cas(&_state, WorkerState.Idle, WorkerState.Busy);
+
+        if (r) {
+            version(HUNT_IO_DEBUG) {
+                infof("attatching task %d with thread %s", task.id, this.name);
+            }
 
             _mutex.lock();
             scope (exit) {
                 _mutex.unlock();
             }
-            _state = WorkerState.Busy;
-
-            infof("attatching task %d with thread %d", task.id, _index);
-
             _task = task;
             _condition.notify();
+            
         } else {
-            warningf("WorkerThread %s is unavailable.", this.name());
+            warningf("%s is unavailable. state: %s", this.name(), _state);
         }
     }
 
-
-    // void registerResoure(Closeable res) {
-    //     // if (!inWorkerThread()) {
-    //     //     warningf("Only the objects in worker thread [%s] can be closed automaticaly.",
-    //     //             Thread.getThis().name());
-    //     //     return;
-    //     // }
-
-    //     assert(res !is null);
-    //     _closeableObjects ~= res;
-    // }
-
-    // private void collectResoure() nothrow {
-    //     foreach (obj; _closeableObjects) {
-    //         try {
-    //             obj.close();
-    //         } catch (Throwable t) {
-    //             warning(t);
-    //         }
-    //     }
-    //     _closeableObjects = null;
-    //     GC.collect();
-    //     GC.minimize();
-    // }
-
     private void run() nothrow {
         while (_state != WorkerState.Stopped) {
-            version (HUNT_DEBUG) tracef("%s Waiting..., state: %s", this.name(), _state);
 
             scope (exit) {
-                _task = null;
                 collectResoure();
                 version (HUNT_DEBUG) tracef("%s Done. state: %s", this.name(), _state);
-                _state = WorkerState.Idle;
-            }
+                bool r = cas(&_state, WorkerState.Busy, WorkerState.Idle);
+                if(r) {
+                    _task = null;
+                } else {
+                    warning("Failed to set thread %s to Idle, its state is %s", this.name, _state);
+                }
+            } 
 
             try {
                 doRun();
@@ -137,26 +122,26 @@ class WorkerThread : Thread {
     }
 
     private void doRun() {
-        if(_task is null) {
+        version (HUNT_DEBUG) tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
+        Task task = _task;
+        while(task is null && _state != WorkerState.Stopped) {
             _mutex.lock();
             scope (exit) {
                 _mutex.unlock();
             }
-            _condition.wait();
-        }
-        // _state = WorkerState.Busy;
-        Task task = _task;
-
-        if(task is null)
-            warning("No task attatched in " ~ this.name());
-        else {
-            
-            version(HUNT_DEBUG) {
-                tracef("Try to exeucte task %d in thread %s, its status: %s", task.id, _index, task.status);
+            bool r = _condition.wait(_timeout);
+            if(r) {
+                task = _task;
+            } else {
+                version(HUNT_IO_DEBUG) warningf("No task attatched on thread %s", this.name);
             }
-
+        }
+       
+        if(task !is null) {
+            version(HUNT_DEBUG) {
+                tracef("Try to exeucte task %d in thread %s, its status: %s", task.id, this.name, task.status);
+            }
             task.execute();
         }
     }
-
 }
