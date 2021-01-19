@@ -60,6 +60,9 @@ private class IoChannelTask : Task {
         do {
             buffer = buffers.dequeue();
             if(buffer is null) {
+                version(HUNT_DEBUG) {
+                    warning("Null buffer poped");
+                }
                 break;
             }
 
