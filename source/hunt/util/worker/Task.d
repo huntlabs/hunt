@@ -77,14 +77,12 @@ abstract class Task {
 
     void execute() {
         if(cas(&_status, TaskStatus.Ready, TaskStatus.Processing)) {
-            version(HUNT_DEBUG) {
+            version(HUNT_IO_DEBUG) {
                 tracef("Task %d executing... status: %s", id, _status);
             }
             doExecute();
         } else {
-            version(HUNT_DEBUG) {
-                warningf("Failed to execute task %d. It's status: %s", id, _status);
-            }
+            warningf("Failed to execute task %d. It's status: %s", id, _status);
         }
     }
 }

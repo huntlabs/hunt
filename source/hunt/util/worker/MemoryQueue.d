@@ -22,10 +22,8 @@ class MemoryQueue : TaskQueue {
     private Mutex _tailLock;
     private Duration _timeout;
 
-    version (HUNT_DEBUG) {
-    shared int putCounter;
-    shared int popCounter;
-    }
+    shared int _incomings;
+    shared int _outgoings;
 
     /** Wait queue for waiting takes */
     private Condition _notEmpty;
@@ -49,15 +47,15 @@ class MemoryQueue : TaskQueue {
         if(isEmpty()) {
             bool v = _notEmpty.wait(_timeout);
             if(!v) {
-                version (HUNT_DEBUG) {
-                    tracef("Timeout in %s. pop: %d, put: %d", _timeout, popCounter, putCounter);
+                version (HUNT_IO_DEBUG) {
+                    tracef("Timeout in %s. pop: %d, put: %d", _timeout, _outgoings, _incomings);
                 }
                 return null;
             }
         }
 
-        version (HUNT_DEBUG) {
-            atomicOp!("+=")(popCounter, 1);
+        version (HUNT_METRIC) {
+            atomicOp!("+=")(_outgoings, 1);
         }
 
         Task task = _list.front();
@@ -71,8 +69,8 @@ class MemoryQueue : TaskQueue {
         scope (exit)
             _headLock.unlock();
 
-        version (HUNT_DEBUG) {
-            uint id = atomicOp!("+=")(putCounter, 1);
+        version (HUNT_METRIC) {
+            uint id = atomicOp!("+=")(_incomings, 1);
             task.id = id -1;
         }
 

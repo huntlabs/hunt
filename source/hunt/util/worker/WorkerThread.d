@@ -15,7 +15,6 @@ import core.sync.mutex;
 import std.conv;
 
 
-alias WorkerState = WorkerThreadState;
 
 enum WorkerThreadState {
     Idle,
@@ -33,7 +32,7 @@ bool inWorkerThread() {
  */
 class WorkerThread : Thread {
 
-    private shared WorkerState _state;
+    private shared WorkerThreadState _state;
     private size_t _index;
     private Task _task;
     private Duration _timeout;
@@ -53,7 +52,7 @@ class WorkerThread : Thread {
     this(size_t index, Duration timeout = 5.seconds, size_t stackSize = 0) {
         _index = index;
         _timeout = timeout;
-        _state = WorkerState.Idle;
+        _state = WorkerThreadState.Idle;
         _mutex = new Mutex();
         _condition = new Condition(_mutex);
         this.name = "WorkerThread-" ~ _index.to!string();
@@ -61,14 +60,14 @@ class WorkerThread : Thread {
     }
 
     void stop() {
-        _state = WorkerState.Stopped;
+        _state = WorkerThreadState.Stopped;
     }
 
     bool isBusy() {
-        return _state == WorkerState.Busy;
+        return _state == WorkerThreadState.Busy;
     }
 
-    WorkerState state() {
+    WorkerThreadState state() {
         return _state;
     }
 
@@ -78,7 +77,7 @@ class WorkerThread : Thread {
 
     void attatch(Task task) {
         assert(task !is null);
-        bool r = cas(&_state, WorkerState.Idle, WorkerState.Busy);
+        bool r = cas(&_state, WorkerThreadState.Idle, WorkerThreadState.Busy);
 
         if (r) {
             version(HUNT_IO_DEBUG) {
@@ -98,12 +97,14 @@ class WorkerThread : Thread {
     }
 
     private void run() nothrow {
-        while (_state != WorkerState.Stopped) {
+        while (_state != WorkerThreadState.Stopped) {
 
             scope (exit) {
+                version (HUNT_IO_DEBUG) {
+                    tracef("%s Done. state: %s", this.name(), _state);
+                }
                 collectResoure();
-                version (HUNT_DEBUG) tracef("%s Done. state: %s", this.name(), _state);
-                bool r = cas(&_state, WorkerState.Busy, WorkerState.Idle);
+                bool r = cas(&_state, WorkerThreadState.Busy, WorkerThreadState.Idle);
                 if(r) {
                     _task = null;
                 } else {
@@ -122,9 +123,12 @@ class WorkerThread : Thread {
     }
 
     private void doRun() {
-        version (HUNT_DEBUG) tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
+        version (HUNT_IO_DEBUG){
+            tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
+        }
+        
         Task task = _task;
-        while(task is null && _state != WorkerState.Stopped) {
+        while(task is null && _state != WorkerThreadState.Stopped) {
             _mutex.lock();
             scope (exit) {
                 _mutex.unlock();
@@ -133,12 +137,12 @@ class WorkerThread : Thread {
             if(r) {
                 task = _task;
             } else {
-                version(HUNT_IO_DEBUG) warningf("No task attatched on thread %s", this.name);
+                version(HUNT_IO_DEBUG) warningf("No task attatched on thread %s in %s", this.name, _timeout);
             }
         }
        
         if(task !is null) {
-            version(HUNT_DEBUG) {
+            version(HUNT_IO_DEBUG) {
                 tracef("Try to exeucte task %d in thread %s, its status: %s", task.id, this.name, task.status);
             }
             task.execute();

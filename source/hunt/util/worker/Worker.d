@@ -116,8 +116,8 @@ class Worker {
                 if(task is null) {
                     version(HUNT_IO_DEBUG) {
                         warning("A null task popped!");
+                        inspect();
                     }
-                    inspect();
                     continue;
                 }
 
