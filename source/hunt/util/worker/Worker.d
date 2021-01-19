@@ -116,8 +116,8 @@ class Worker {
                 if(task is null) {
                     version(HUNT_IO_DEBUG) {
                         warning("A null task popped!");
-                        inspect();
                     }
+                    inspect();
                     continue;
                 }
 
@@ -126,13 +126,18 @@ class Worker {
                 do {
                     workerThread = findIdleThread();
                     if(workerThread is null) {
-                        warning("All worker threads are busy!");
+                        version(HUNT_DEBUG) warning("All worker threads are busy!");
                         // return;
                         Thread.sleep(1.seconds);
+                        // Thread.sleep(500.msecs);
                     }
-                } while(workerThread is null);
+                } while(workerThread is null && _isRunning);
 
-                workerThread.attatch(task);
+                if(workerThread !is null) {
+                    workerThread.attatch(task);
+                } else {
+                    warning("Worker is exiting...");
+                }
 
             } catch(Exception ex) {
                 warning(ex);

@@ -13,10 +13,11 @@ import core.sync.condition;
 import core.sync.mutex;
 import std.conv;
 
+alias WorkerState = WorkerThreadState;
 
-enum WorkerState {
+enum WorkerThreadState {
     Idle,
-    Busy,
+    Busy, // occupied
     Stopped
 }
 
@@ -78,6 +79,9 @@ class WorkerThread : Thread {
             scope (exit) {
                 _mutex.unlock();
             }
+            _state = WorkerState.Busy;
+
+            infof("attatching task %d with thread %d", task.id, _index);
 
             _task = task;
             _condition.notify();
@@ -113,11 +117,13 @@ class WorkerThread : Thread {
 
     private void run() nothrow {
         while (_state != WorkerState.Stopped) {
-            version (HUNT_IO_DEBUG) tracef("%s Waiting..., state: %s", this.name(), _state);
+            version (HUNT_DEBUG) tracef("%s Waiting..., state: %s", this.name(), _state);
 
             scope (exit) {
+                _task = null;
                 collectResoure();
-                version (HUNT_IO_DEBUG) tracef("%s Done. state: %s", this.name(), _state);
+                version (HUNT_DEBUG) tracef("%s Done. state: %s", this.name(), _state);
+                _state = WorkerState.Idle;
             }
 
             try {
@@ -125,26 +131,32 @@ class WorkerThread : Thread {
             } catch (Throwable ex) {
                 warning(ex);
             }
-
-            // _worker.setWorkerThreadAvailable(_index);
         }
         
-        version (HUNT_IO_DEBUG) tracef("%s Stopped. state: %s", this.name(), _state);
+        version (HUNT_DEBUG) tracef("%s Stopped. state: %s", this.name(), _state);
     }
 
     private void doRun() {
-        _mutex.lock();
-        scope (exit) {
-            _state = WorkerState.Idle;
-            _mutex.unlock();
+        if(_task is null) {
+            _mutex.lock();
+            scope (exit) {
+                _mutex.unlock();
+            }
+            _condition.wait();
         }
-
-        _condition.wait();
-        _state = WorkerState.Busy;
+        // _state = WorkerState.Busy;
         Task task = _task;
 
-        assert(task !is null, "No task attatch in " ~ this.name());
-        task.execute();
+        if(task is null)
+            warning("No task attatched in " ~ this.name());
+        else {
+            
+            version(HUNT_DEBUG) {
+                tracef("Try to exeucte task %d in thread %s, its status: %s", task.id, _index, task.status);
+            }
+
+            task.execute();
+        }
     }
 
 }

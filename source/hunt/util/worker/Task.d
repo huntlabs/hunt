@@ -16,6 +16,8 @@ enum TaskStatus : ubyte {
 abstract class Task {
     protected shared TaskStatus _status;
 
+    uint id;
+
     this() {
         _status = TaskStatus.Ready;
     }
@@ -75,13 +77,13 @@ abstract class Task {
 
     void execute() {
         if(cas(&_status, TaskStatus.Ready, TaskStatus.Processing)) {
-            version(HUNT_IO_DEBUG) {
-                tracef("Task executing... status: %s", _status);
+            version(HUNT_DEBUG) {
+                tracef("Task %d executing... status: %s", id, _status);
             }
             doExecute();
         } else {
-            version(HUNT_IO_DEBUG) {
-                warningf("Failed to execute this task. Its status: %s", _status);
+            version(HUNT_DEBUG) {
+                warningf("Failed to execute task %d. It's status: %s", id, _status);
             }
         }
     }
