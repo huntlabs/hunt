@@ -25,7 +25,7 @@ import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;
 import std.conv;
 import std.socket;
-import hunt.util.TaskPool;
+import hunt.util.worker;
 import std.container : DList;
 
 
@@ -34,9 +34,8 @@ import std.container : DList;
  */
 class AbstractSelector : Selector {
 
-    this(size_t number, size_t divider,TaskPool pool = null, size_t maxChannels = 1500) {
-        _taskPool = pool;
-        super(number, divider, maxChannels);
+    this(size_t number, size_t divider, Worker worker = null, size_t maxChannels = 1500) {
+        super(number, divider, worker, maxChannels);
         _iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, null, 0, 0);
         if (_iocpHandle is null)
             errorf("CreateIoCompletionPort failed: %d\n", GetLastError());
@@ -254,5 +253,4 @@ private:
     HANDLE _iocpHandle;
     CustomTimer _timer;
     HANDLE _stopEvent;
-    TaskPool _taskPool;
 }

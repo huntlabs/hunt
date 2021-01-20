@@ -8,6 +8,7 @@ import hunt.event.selector.Selector;
 import hunt.io.ByteBuffer;
 import hunt.io.BufferUtils;
 import hunt.io.channel.AbstractSocketChannel;
+import hunt.io.channel.ChannelTask;
 import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
 import hunt.logging.ConsoleLogger;
@@ -15,6 +16,7 @@ import hunt.Functions;
 import hunt.event.selector.IOCP;
 import hunt.system.Error;
 import hunt.util.ThreadHelper;
+import hunt.util.worker;
 
 import core.atomic;
 import core.sys.windows.windows;
@@ -40,6 +42,8 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     protected ByteBuffer _bufferForRead;
     protected AddressFamily _family;
+
+    private ChannelTask _task = null;
     
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
@@ -250,21 +254,11 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (readLen > 0) {
             // import std.stdio;
             // writefln("length=%d, data: %(%02X %)", readLen, _readBuffer[0 .. readLen]);
-            version (HUNT_IO_DEBUG)
-                tracef("reading done: %d nbytes", readLen);
+            handleReceivedData(readLen);
 
-            auto ss = this.socket;
-            if (dataReceivedHandler !is null){
-                _bufferForRead.limit(cast(int)readLen);
-                _bufferForRead.position(0);
-                dataReceivedHandler(_bufferForRead);
-            }
-
-            if (isClient())
-            {
+            if (isClient()) {
                 this.beginRead();
             }
-
 
         } else if (readLen == 0) {
             version (HUNT_IO_DEBUG) {
@@ -282,6 +276,41 @@ abstract class AbstractStream : AbstractSocketChannel {
                 this._errorMessage = "undefined behavior on thread";
             }
         }
+    }
+
+    private void onTaskFinished() {
+        _task = null;
+    }   
+
+    private void handleReceivedData(ptrdiff_t len) {
+        version (HUNT_IO_DEBUG)
+            tracef("reading done: %d nbytes", readLen);
+
+        if (dataReceivedHandler is null) 
+            return;
+
+        Worker worker = taskWorker;
+        _bufferForRead.limit(cast(int)readLen);
+        _bufferForRead.position(0);
+        // dataReceivedHandler(_bufferForRead);
+
+        if(worker is null) {
+            dataReceivedHandler(_bufferForRead);
+        } else {
+            ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
+            ChannelTask task = _task;
+
+            if(task is null) {
+                task = new ChannelTask();
+                task.dataReceivedHandler = dataReceivedHandler;
+                task.finishedHandler = &onTaskFinished;
+                _task = task;
+                worker.put(task);
+            }
+
+            task.buffers.enqueue(bufferCopy);
+        }        
+
     }
 
     // try to write a block of data directly
@@ -420,6 +449,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             dataWriteDoneHandler(this);
         }
     }
+ 
     
     DataReceivedHandler getDataReceivedHandler() {
         return dataReceivedHandler;

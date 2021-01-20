@@ -9,10 +9,10 @@ import hunt.Functions;
 import hunt.io.BufferUtils;
 import hunt.io.ByteBuffer;
 import hunt.io.channel.AbstractSocketChannel;
+import hunt.io.channel.ChannelTask;
 import hunt.io.channel.Common;
 import hunt.io.IoError;
 import hunt.io.SimpleQueue;
-import hunt.io.worker.WorkerGroupObject;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
 import hunt.util.worker;
@@ -27,64 +27,6 @@ import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
-enum string ResponseData = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: Keep-Alive\r\nContent-Type: text/plain\r\nServer: Hunt/1.0\r\nDate: Wed, 17 Apr 2013 12:00:00 GMT\r\n\r\nHello, World!";
-
-/**
- * 
- */
-private class IoChannelTask : Task {
-    DataReceivedHandler dataReceivedHandler;
-    SimpleEventHandler finishedHandler;
-    SimpleQueue!(ByteBuffer) buffers;
-
-    this() {
-        buffers = new SimpleQueue!(ByteBuffer);
-    }
-
-    override protected void doExecute() {
-
-        scope(exit) {
-            finish();
-            version(HUNT_IO_DEBUG) {
-                info("Task Done!");
-            }
-
-            if(finishedHandler !is null) {
-                finishedHandler();
-            }
-        }
-
-        ByteBuffer buffer;
-        DataHandleStatus handleStatus = DataHandleStatus.Pending;
-
-        do {
-            buffer = buffers.dequeue();
-            if(buffer is null) {
-                version(HUNT_DEBUG) {
-                    warning("Null buffer poped");
-                }
-                break;
-            }
-
-            version(HUNT_IO_DEBUG) {
-                tracef("buffer: %s", buffer.toString());
-            }
-
-            handleStatus = dataReceivedHandler(buffer);
-
-            version(HUNT_IO_DEBUG) {
-                tracef("Handle status: %s, buffer: %s", handleStatus, buffer.toString());
-            }
-            
-            if(isTerminated() ||
-                handleStatus == DataHandleStatus.Done && !buffer.hasRemaining()) {
-                break;
-            }
-        } while(true);
-    }
-    
-}
-
 
 /**
 TCP Peer
@@ -93,8 +35,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     enum BufferSize = 4096;
     private const(ubyte)[] _readBuffer;
     private ByteBuffer writeBuffer;
-
-    private IoChannelTask _task = null;
+    private ChannelTask _task = null;
 
     /**
     * Warning: The received data is stored a inner buffer. For a data safe,
@@ -144,10 +85,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         } else {
             ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
 
-            IoChannelTask task = _task;
+            ChannelTask task = _task;
 
             if(task is null) {
-                task = new IoChannelTask();
+                task = new ChannelTask();
                 task.dataReceivedHandler = dataReceivedHandler;
                 task.finishedHandler = &onTaskFinished;
                 _task = task;
@@ -156,14 +97,6 @@ abstract class AbstractStream : AbstractSocketChannel {
 
             task.buffers.enqueue(bufferCopy);
         }
-
-        // if (gWorkerGroup !is null)
-        // {
-        //   gWorkerGroup.put(this, BufferUtils.clone(_bufferForRead));
-        // }else
-        // {
-            
-        // }
     }
 
     /**
