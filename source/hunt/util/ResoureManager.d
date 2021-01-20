@@ -24,17 +24,21 @@ void registerResoure(Closeable res) {
 }
 
 void collectResoure() nothrow {
-    version (HUNT_IO_DEBUG) tracef("Collecting (remains: %d)...", _closeableObjects.length);
+    version (HUNT_IO_DEBUG) {
+        tracef("Collecting (remains: %d)...", _closeableObjects.length);
+    }
 
-    foreach (obj; _closeableObjects) {
+    Closeable[] objects = _closeableObjects;
+    _closeableObjects = null;
+
+    foreach (obj; objects) {
         try {
             obj.close();
         } catch (Throwable t) {
             warning(t);
         }
     }
-    _closeableObjects = null;
 
-    GC.collect();
-    GC.minimize();
+    // GC.collect();
+    // GC.minimize();
 }
