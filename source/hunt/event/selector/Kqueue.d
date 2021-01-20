@@ -46,10 +46,10 @@ class AbstractSelector : Selector {
     private Kevent[NUM_KEVENTS] events;
     private int _kqueueFD;
     private EventChannel _eventChannel;
-    private TaskPool _taskPool;
-    // void*[] [AbstractChannel] _eventBuffer;
-    this(size_t number, size_t divider,TaskPool pool = null, size_t maxChannels = 1500) {
-        _taskPool = pool;
+    // private TaskPool _taskPool;
+
+    this(size_t number, size_t divider, TaskPool pool = null, size_t maxChannels = 1500) {
+        // _taskPool = pool;
         super(number, divider, maxChannels);
         _kqueueFD = kqueue();
         _eventChannel = new KqueueEventChannel(this);
@@ -168,11 +168,6 @@ class AbstractSelector : Selector {
         return true;
     }
 
-    // public void rmEventArray(AbstractChannel channel)
-    // {
-    //     _eventBuffer.remove(channel);
-    // }
-
     protected override int doSelect(long timeout) {
         // void* [] tmp;
         // eventBuffer = tmp;
@@ -203,7 +198,6 @@ class AbstractSelector : Selector {
 
         foreach (i; 0 .. result) {
             AbstractChannel channel = cast(AbstractChannel)(events[i].udata);
-            // _eventBuffer[channel] ~= events[i].udata;
             ushort eventFlags = events[i].flags;
             version (HUNT_IO_DEBUG)
             infof("handling event: events=%d, fd=%d", eventFlags, channel.handle);
