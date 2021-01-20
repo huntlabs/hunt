@@ -36,12 +36,9 @@ class WorkerThread : Thread {
     private size_t _index;
     private Task _task;
     private Duration _timeout;
-    // private Worker _worker;
 
     private Condition _condition;
     private Mutex _mutex;
-
-    // private Closeable[] _closeableObjects;
 
     /* For autonumbering anonymous threads. */
     // private static shared int threadInitNumber = 0;
