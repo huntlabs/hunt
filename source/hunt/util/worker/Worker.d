@@ -18,9 +18,7 @@ import hunt.logging.ConsoleLogger;
 class Worker {
 
     private size_t _size;
-
     private WorkerThread[] _workerThreads;
-    // private WorkerThread[] _availableThreads;
 
     private TaskQueue _taskQueue;
     private bool _isRunning = false;
@@ -38,20 +36,36 @@ class Worker {
 
     private void initialize() {
         _workerThreads = new WorkerThread[_size];
-        // _availableThreads = new WorkerThread[_size];
         
         foreach(size_t index; 0 .. _size) {
             WorkerThread thread = new WorkerThread(index);
             thread.start();
 
             _workerThreads[index] = thread;
-            // _availableThreads[index] = thread;
         }
     }
 
     void inspect() {
+
+        _taskQueue.inspect();
+
         foreach(WorkerThread th; _workerThreads) {
-            tracef("Thread: %s,  state: %s", th.name, th.state());
+            
+            Task task = th.task();
+
+            if(th.state() == WorkerThreadState.Busy) {
+                if(task is null) {
+                    warning("A dead worker thread detected: %s, %s", th.name, th.state());
+                } else {
+                    tracef("Thread: %s,  state: %s, lifeTime: %s", th.name, th.state(), task.lifeTime());
+                }
+            } else {
+                if(task is null) {
+                    tracef("Thread: %s,  state: %s", th.name, th.state());
+                } else {
+                    tracef("Thread: %s,  state: %s", th.name, th.state(), task.executionTime);
+                }
+            }
         }
 
         // info("===============Available threads");
@@ -91,18 +105,13 @@ class Worker {
     // }
 
     private WorkerThread findIdleThread() {
-        foreach(size_t index; 0 .. _size) {
-            WorkerThread thread = _workerThreads[index];
+        foreach(size_t index, WorkerThread thread; _workerThreads) {
             version(HUNT_IO_DEBUG) {
                 tracef("Thread: %s, state: %s", thread.name, thread.state);
             }
 
-            if(!thread.isBusy)
+            if(thread.isIdle())
                 return thread;
-            // if(thread !is null) {
-            //     _availableThreads[index] = null;
-            //     return thread;
-            // }
         }
 
         return null;
@@ -122,22 +131,23 @@ class Worker {
                 }
 
                 WorkerThread workerThread;
+                bool isAttatched = false;
                 
                 do {
                     workerThread = findIdleThread();
                     if(workerThread is null) {
-                        version(HUNT_DEBUG) warning("All worker threads are busy!");
-                        // return;
-                        Thread.sleep(1.seconds);
-                        // Thread.sleep(500.msecs);
-                    }
-                } while(workerThread is null && _isRunning);
+                        // version(HUNT_IO_DEBUG) 
+                        // warning("All worker threads are busy!");
+                        trace("All worker threads are busy!");
 
-                if(workerThread !is null) {
-                    workerThread.attatch(task);
-                } else {
-                    warning("Worker is exiting...");
-                }
+                        // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-01-21T11:24:11+08:00
+                        // 
+                        // Thread.sleep(1.seconds);
+                        // Thread.sleep(10.msecs);
+                    } else {
+                        isAttatched = workerThread.attatch(task);
+                    }
+                } while(!isAttatched && _isRunning);
 
             } catch(Exception ex) {
                 warning(ex);

@@ -3,6 +3,8 @@ module hunt.util.worker.Task;
 import core.atomic;
 import hunt.logging.ConsoleLogger;
 
+import std.datetime;
+
 enum TaskStatus : ubyte {
     Ready,
     Processing,
@@ -17,9 +19,30 @@ abstract class Task {
     protected shared TaskStatus _status;
 
     uint id;
+    
+    private MonoTime _createTime;
+    private MonoTime _startTime;
+    private MonoTime _endTime;
 
     this() {
         _status = TaskStatus.Ready;
+        _createTime = MonoTime.currTime;
+    }
+
+    Duration survivalTime() {
+        return _endTime - _createTime;
+    }
+
+    Duration executionTime() {
+        return _endTime - _startTime;
+    }
+
+    Duration lifeTime() {
+        if(_endTime > _createTime) {
+            return survivalTime();
+        } else {
+            return MonoTime.currTime - _createTime;
+        }
     }
 
     TaskStatus status() {
@@ -30,7 +53,7 @@ abstract class Task {
         return _status == TaskStatus.Ready;
     }
 
-    bool isBusy() {
+    bool isProcessing() {
         return _status == TaskStatus.Processing;
     }
 
@@ -63,6 +86,8 @@ abstract class Task {
 
         if(cas(&_status, TaskStatus.Processing, TaskStatus.Done) || 
             cas(&_status, TaskStatus.Ready, TaskStatus.Done)) {
+                
+            _endTime = MonoTime.currTime;
             version(HUNT_IO_DEBUG) {
                 infof("The task done.");
             }
@@ -70,6 +95,7 @@ abstract class Task {
             version(HUNT_IO_DEBUG) {
                 warningf("The task status: %s", _status);
             }
+            warningf("Failed to set the task status to Done: %s", _status);
         }
     }
 
@@ -80,9 +106,11 @@ abstract class Task {
             version(HUNT_IO_DEBUG) {
                 tracef("Task %d executing... status: %s", id, _status);
             }
+            _startTime = MonoTime.currTime;
             doExecute();
         } else {
-            warningf("Failed to execute task %d. It's status: %s", id, _status);
+            warningf("Failed to execute task %d. Its status is: %s", id, _status);
         }
     }
+
 }

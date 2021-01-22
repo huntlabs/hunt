@@ -78,4 +78,11 @@ class MemoryQueue : TaskQueue {
 
         _notEmpty.notifyAll();
     }
+
+
+version (HUNT_METRIC) {
+    override void inspect() {
+        tracef("incomings: %d, outgoings: %d", _incomings, _outgoings);
+    }
+}        
 }

@@ -12,4 +12,10 @@ abstract class TaskQueue {
     Task pop();
 
     void push(Task task);
+
+
+version (HUNT_METRIC) {
+    void inspect();
+}    
+    
 }
