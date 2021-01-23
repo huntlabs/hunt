@@ -3,13 +3,15 @@ module hunt.util.worker.Worker;
 import hunt.util.worker.Task;
 import hunt.util.worker.TaskQueue;
 import hunt.util.worker.WorkerThread;
+import hunt.logging.ConsoleLogger;
 
-import core.thread;
+import core.atomic;
 import core.sync.condition;
 import core.sync.mutex;
+import core.thread;
+
 import std.conv; 
 
-import hunt.logging.ConsoleLogger;
 
 
 /**
@@ -21,7 +23,7 @@ class Worker {
     private WorkerThread[] _workerThreads;
 
     private TaskQueue _taskQueue;
-    private bool _isRunning = false;
+    private shared bool _isRunning = false;
 
     this(TaskQueue taskQueue, size_t size = 8) {
         _taskQueue = taskQueue;
@@ -47,7 +49,9 @@ class Worker {
 
     void inspect() {
 
-        _taskQueue.inspect();
+        version(HUNT_METRIC) {
+            _taskQueue.inspect();
+        }
 
         foreach(WorkerThread th; _workerThreads) {
             
@@ -81,15 +85,12 @@ class Worker {
     }
 
     void run() {
-        if(_isRunning)
-            return;
-        _isRunning = true;
-
-        // doRun() 
-        import std.parallelism;
-
-        auto t = task(&doRun);
-        t.executeInNewThread();
+        bool r = cas(&_isRunning, false, true);
+        if(r) {
+            import std.parallelism;
+            auto t = task(&doRun);
+            t.executeInNewThread();
+        }
     }
 
     void stop() {
@@ -136,12 +137,7 @@ class Worker {
                 do {
                     workerThread = findIdleThread();
                     if(workerThread is null) {
-                        // version(HUNT_IO_DEBUG) 
-                        // warning("All worker threads are busy!");
-                        trace("All worker threads are busy!");
-
-                        // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-01-21T11:24:11+08:00
-                        // 
+                        // trace("All worker threads are busy!");
                         // Thread.sleep(1.seconds);
                         // Thread.sleep(10.msecs);
                     } else {
@@ -149,12 +145,12 @@ class Worker {
                     }
                 } while(!isAttatched && _isRunning);
 
-            } catch(Exception ex) {
+            } catch(Throwable ex) {
                 warning(ex);
             }
         }
 
-        version(HUNT_IO_DEBUG) warning("Done!");
+        version(HUNT_IO_DEBUG) warning("Worker stopped!");
 
     }
 

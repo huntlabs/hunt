@@ -27,6 +27,7 @@ import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
+shared int dataCounter = 0;
 
 /**
 TCP Peer
@@ -75,6 +76,8 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (dataReceivedHandler is null) 
             return;
 
+        uint id = atomicOp!("+=")(dataCounter, 1);
+
         Worker worker = taskWorker;
 
         _bufferForRead.limit(cast(int)len);
@@ -91,6 +94,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 task = new ChannelTask();
                 task.dataReceivedHandler = dataReceivedHandler;
                 task.finishedHandler = &onTaskFinished;
+                task.id = id;
                 _task = task;
                 worker.put(task);
             }

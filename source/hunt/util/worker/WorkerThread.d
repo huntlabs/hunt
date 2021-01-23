@@ -148,9 +148,9 @@ class WorkerThread : Thread {
         // tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
         
             _mutex.lock();
-            scope (exit) {
-                _mutex.unlock();
-            }  
+            // scope (exit) {
+            //     _mutex.unlock();
+            // }  
         
         Task task = _task;
         while(task is null && _state != WorkerThreadState.Stopped) {
@@ -178,6 +178,8 @@ class WorkerThread : Thread {
 
             }
         }
+
+        _mutex.unlock();
 
         if(task !is null) {
             version(HUNT_IO_DEBUG) {

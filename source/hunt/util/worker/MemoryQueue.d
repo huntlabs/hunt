@@ -71,12 +71,11 @@ class MemoryQueue : TaskQueue {
 
         version (HUNT_METRIC) {
             uint id = atomicOp!("+=")(_incomings, 1);
-            task.id = id -1;
         }
 
         _list.insert(task);
 
-        _notEmpty.notifyAll();
+        _notEmpty.notify();
     }
 
 
