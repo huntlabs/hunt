@@ -19,11 +19,11 @@ import std.container.slist;
 class MemoryQueue : TaskQueue {
     private SList!Task _list;
     private Mutex _headLock;
-    private Mutex _tailLock;
     private Duration _timeout;
+    private bool _isWaiting = false;
 
-    shared int _incomings;
-    shared int _outgoings;
+    shared int _incomings = 0;
+    shared int _outgoings = 0;
 
     /** Wait queue for waiting takes */
     private Condition _notEmpty;
@@ -31,7 +31,6 @@ class MemoryQueue : TaskQueue {
     this(Duration timeout = 10.seconds) {
         _timeout = timeout;
         _headLock = new Mutex();
-        _tailLock = new Mutex();
         _notEmpty = new Condition(_headLock);
     }
 
@@ -39,13 +38,24 @@ class MemoryQueue : TaskQueue {
         return _list.empty();
     }
 
+    size_t size() {
+        version (HUNT_METRIC) {
+            return _incomings - _outgoings;
+        } else {
+            throw new Exception("Unimplemented");
+        }
+    }
+
     override Task pop() {
         _headLock.lock();
-        scope (exit)
+        scope (exit) {
             _headLock.unlock();
+        }
 
         if(isEmpty()) {
+            _isWaiting = true;
             bool v = _notEmpty.wait(_timeout);
+            _isWaiting = false;
             if(!v) {
                 version (HUNT_IO_DEBUG) {
                     tracef("Timeout in %s. pop: %d, put: %d", _timeout, _outgoings, _incomings);
@@ -75,13 +85,14 @@ class MemoryQueue : TaskQueue {
 
         _list.insert(task);
 
-        _notEmpty.notify();
+        if(_isWaiting)
+            _notEmpty.notify();
     }
 
 
 version (HUNT_METRIC) {
     override void inspect() {
-        tracef("incomings: %d, outgoings: %d", _incomings, _outgoings);
+        tracef("incomings: %d, outgoings: %d, size: %d", _incomings, _outgoings, size());
     }
 }        
 }

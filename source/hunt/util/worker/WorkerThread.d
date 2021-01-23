@@ -100,71 +100,44 @@ class WorkerThread : Thread {
     private void run() nothrow {
         while (_state != WorkerThreadState.Stopped) {
 
-            // scope (exit) {
-            //     version (HUNT_IO_DEBUG) {
-            //         tracef("%s Done. state: %s", this.name(), _state);
-            //     }
-
-            //     // tracef("%s Done. state: %s", this.name(), _state);
-            //     collectResoure();
-            //     _task = null;
-            //     bool r = cas(&_state, WorkerThreadState.Busy, WorkerThreadState.Idle);
-            //     if(!r) {
-            //         warningf("Failed to set thread %s to Idle, its state is %s", this.name, _state);
-            //     }
-
-            //     if(_state != WorkerThreadState.Idle)
-            //     infof("%s Done. state: %s", this.name(), _state);
-            // } 
-
-            try {
-                doRun();
-            } catch (Throwable ex) {
-                warning(ex);
-            } finally {
+            scope (exit) {
                 version (HUNT_IO_DEBUG) {
                     tracef("%s Done. state: %s", this.name(), _state);
                 }
 
-                // tracef("%s Done. state: %s", this.name(), _state);
                 collectResoure();
-           
                 _task = null;
                 bool r = cas(&_state, WorkerThreadState.Busy, WorkerThreadState.Idle);
                 if(!r) {
                     warningf("Failed to set thread %s to Idle, its state is %s", this.name, _state);
                 }
-            }
+
+                // if(_state != WorkerThreadState.Idle)
+                //     infof("%s Done. state: %s", this.name(), _state);
+            } 
+
+            try {
+                doRun();
+            } catch (Throwable ex) {
+                warning(ex);
+            } 
         }
         
         version (HUNT_DEBUG) tracef("%s Stopped. state: %s", this.name(), _state);
     }
 
+    private bool _isWaiting = false;
+
     private void doRun() {
         // version (HUNT_IO_DEBUG) {
         //     tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
         // }
-
-        // tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
         
-            _mutex.lock();
-            // scope (exit) {
-            //     _mutex.unlock();
-            // }  
+        _mutex.lock();
         
-        Task task = _task;
-        while(task is null && _state != WorkerThreadState.Stopped) {
-
-            // _condition.wait();
-            // if(_task !is null) {
-            //     task = _task;
-            //     continue;
-            // }          
+        while(_task is null && _state != WorkerThreadState.Stopped) {
             bool r = _condition.wait(_timeout);
-            task = _task;
-            if(r) {
-                // task = _task;
-            } else {
+            if(!r) {
                 // version(HUNT_IO_DEBUG) 
                 // warningf("No task attatched on thread %s in %s, state: %s", this.name, _timeout, _state);
                 if(_state == WorkerThreadState.Busy) {
@@ -173,12 +146,12 @@ class WorkerThread : Thread {
                     } else {
                         warningf("more tests need for this status, thread %s in %s", this.name, _timeout);
                     }
-                    // _state = WorkerThreadState.Idle;
                 }
 
             }
         }
 
+        Task task = _task;
         _mutex.unlock();
 
         if(task !is null) {

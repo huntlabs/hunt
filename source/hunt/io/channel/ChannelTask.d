@@ -24,10 +24,10 @@ import core.atomic;
 class ChannelTask : Task {
     DataReceivedHandler dataReceivedHandler;
     SimpleEventHandler finishedHandler;
-    SimpleQueue!(ByteBuffer) buffers;
+    Queue!(ByteBuffer) buffers;
 
     this() {
-        buffers = new SimpleQueue!(ByteBuffer);
+        buffers = new BlockingQueue!(ByteBuffer);
     }
 
     override protected void doExecute() {

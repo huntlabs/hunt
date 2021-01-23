@@ -27,7 +27,7 @@ import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
-shared int dataCounter = 0;
+version(HUNT_METRIC) shared int dataCounter = 0;
 
 /**
 TCP Peer
@@ -68,7 +68,9 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract protected void onDisconnected();
 
     private void onTaskFinished() {
-        _task = null;
+        synchronized(this) {
+            _task = null;
+        }
     }
 
     private void onDataReceived(ptrdiff_t len) {
@@ -76,7 +78,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (dataReceivedHandler is null) 
             return;
 
-        uint id = atomicOp!("+=")(dataCounter, 1);
+        version(HUNT_METRIC) {
+            uint id = atomicOp!("+=")(dataCounter, 1);
+        }
 
         Worker worker = taskWorker;
 
@@ -88,18 +92,20 @@ abstract class AbstractStream : AbstractSocketChannel {
         } else {
             ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
 
-            ChannelTask task = _task;
+            synchronized(this) {
+                ChannelTask task = _task;
 
-            if(task is null) {
-                task = new ChannelTask();
-                task.dataReceivedHandler = dataReceivedHandler;
-                task.finishedHandler = &onTaskFinished;
-                task.id = id;
-                _task = task;
-                worker.put(task);
+                if(task is null) {
+                    task = new ChannelTask();
+                    task.dataReceivedHandler = dataReceivedHandler;
+                    task.finishedHandler = &onTaskFinished;
+                    version(HUNT_METRIC) task.id = id;
+                    _task = task;
+                    worker.put(task);
+                }
+
+                task.buffers.enqueue(bufferCopy);
             }
-
-            task.buffers.enqueue(bufferCopy);
         }
     }
 

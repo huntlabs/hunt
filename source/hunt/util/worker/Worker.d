@@ -97,13 +97,8 @@ class Worker {
         _isRunning = false;
         foreach(size_t index; 0 .. _size) {
             _workerThreads[index].stop();
-            // _availableThreads[index] = null;
         }
     }
-
-    // void setWorkerThreadAvailable(size_t index) nothrow {
-    //     _availableThreads[index] = _workerThreads[index];
-    // }
 
     private WorkerThread findIdleThread() {
         foreach(size_t index, WorkerThread thread; _workerThreads) {
@@ -136,10 +131,16 @@ class Worker {
                 
                 do {
                     workerThread = findIdleThread();
+
+                    // All worker threads are busy!
                     if(workerThread is null) {
+                        // version(HUNT_METRIC) {
+                        //     _taskQueue.inspect();
+                        // }
                         // trace("All worker threads are busy!");
                         // Thread.sleep(1.seconds);
                         // Thread.sleep(10.msecs);
+                        Thread.yield();
                     } else {
                         isAttatched = workerThread.attatch(task);
                     }
