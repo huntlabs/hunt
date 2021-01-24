@@ -111,9 +111,6 @@ class WorkerThread : Thread {
                 if(!r) {
                     warningf("Failed to set thread %s to Idle, its state is %s", this.name, _state);
                 }
-
-                // if(_state != WorkerThreadState.Idle)
-                //     infof("%s Done. state: %s", this.name(), _state);
             } 
 
             try {
@@ -129,36 +126,30 @@ class WorkerThread : Thread {
     private bool _isWaiting = false;
 
     private void doRun() {
-        // version (HUNT_IO_DEBUG) {
-        //     tracef("%s waiting in %s ..., state: %s", this.name(), _timeout, _state);
-        // }
-        
         _mutex.lock();
         
-        while(_task is null && _state != WorkerThreadState.Stopped) {
+        Task task = _task;
+        while(task is null && _state != WorkerThreadState.Stopped) {
             bool r = _condition.wait(_timeout);
-            if(!r) {
-                // version(HUNT_IO_DEBUG) 
-                // warningf("No task attatched on thread %s in %s, state: %s", this.name, _timeout, _state);
-                if(_state == WorkerThreadState.Busy) {
+            task = _task;
+
+            version(HUNT_IO_DEBUG) {
+                if(!r && _state == WorkerThreadState.Busy) {
                     if(task is null) {
                         warningf("No task attatched on a busy thread %s in %s, task: %s", this.name, _timeout);
                     } else {
                         warningf("more tests need for this status, thread %s in %s", this.name, _timeout);
                     }
                 }
-
             }
         }
 
-        Task task = _task;
         _mutex.unlock();
 
         if(task !is null) {
             version(HUNT_IO_DEBUG) {
                 tracef("Try to exeucte task %d in thread %s, its status: %s", task.id, this.name, task.status);
             }
-            // infof("Try to exeucte task %d in thread %s, thread: %s, task: %s", task.id, this.name, _state, task.status);
             task.execute();
         }
     }
