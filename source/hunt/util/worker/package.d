@@ -1,4 +1,4 @@
-module hunt.util.worker.worker;
+module hunt.util.worker;
 
 public import hunt.util.worker.MemoryQueue;
 public import hunt.util.worker.Task;

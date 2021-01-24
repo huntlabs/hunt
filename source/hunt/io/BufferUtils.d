@@ -1297,7 +1297,7 @@ class BufferUtils {
     }
 
     static ByteBuffer clone(ByteBuffer buf) {
-        byte[] bytes = buf.getRemaining();
+        byte[] bytes = buf.peekRemaining();
         ByteBuffer heapBuffer = new HeapByteBuffer(bytes.dup, 0, cast(int)bytes.length);
         return heapBuffer;
 

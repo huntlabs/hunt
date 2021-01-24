@@ -250,7 +250,7 @@ abstract class AbstractStream : AbstractSocketChannel {
     }
 
     private bool tryNextWrite(ByteBuffer buffer) {
-        const(ubyte)[] data = cast(const(ubyte)[])buffer.getRemaining();
+        const(ubyte)[] data = cast(const(ubyte)[])buffer.peekRemaining();
         version (HUNT_IO_DEBUG) {
             tracef("writting from a buffer [fd=%d], %d bytes, buffer: %s",
                 this.handle, data.length, buffer.toString());
