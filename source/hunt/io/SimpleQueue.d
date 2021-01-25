@@ -237,7 +237,7 @@ class SimpleQueue(T) : Queue!T {
         while (!r && Clock.currTime < start + timeout) {
             debug {
                 Duration dur = Clock.currTime - start;
-                if(dur > 15.seconds) {
+                if(dur > timeout) {
                     warningf("There is no element available in %s", dur);
                 }
             }
