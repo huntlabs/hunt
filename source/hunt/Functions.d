@@ -57,7 +57,7 @@ alias Action6(T1, T2, T3, T4, T5, T6) = void delegate(T1 t1, T2 t2, T3 t3, T4 t4
 /**
  * A vector-argument action.
  */
-// alias ActionN(T) = void delegate(T[] args...);
+// alias ActionN(T) = void delegate(T);
 
 template ActionN(T...) if(T.length > 0)  {
     alias ActionN = void delegate(T);
@@ -67,6 +67,13 @@ template ActionN(T...) if(T.length > 0)  {
  *  Represents a function.
  */
 alias Func(R) = R delegate();
+
+alias Func(T, R) = R delegate(T);
+alias Func(T1, T2, R) = R delegate(T1, T2);
+alias Func(T1, T2, T3, R) = R delegate(T1, T2, T3);
+alias Func(T1, T2, T3, T4, R) = R delegate(T1, T2, T3, T4);
+alias Func(T1, T2, T3, T4, T5, R) = R delegate(T1, T2, T3, T4, T5);
+alias Func(T1, T2, T3, T4, T5, T6, R) = R delegate(T1, T2, T3, T4, T5, T6);
 
 /**
  *  Represents a function with one argument.
@@ -98,7 +105,7 @@ alias Func5(T1, T2, T3, T4, T5, R) = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t
  */
 alias Func6(T1, T2, T3, T4, T5, T6, R) = R delegate(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);
 
-alias FuncN(T, R) = R delegate(T[] args...);
+// alias FuncN(T, R) = R delegate(T[] args...);
 
 
 // template Function(R, T...) {

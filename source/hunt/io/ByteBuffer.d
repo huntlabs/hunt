@@ -926,7 +926,7 @@ abstract class ByteBuffer : Buffer {
     T get(T)() if (!is(T == byte)) {
         enum len = T.sizeof;
         int index = ix(nextGetIndex(len));
-        ubyte[] bytes = cast(ubyte[]) hb[index .. index + len];
+        ubyte[len] bytes = cast(ubyte[]) hb[index .. index + len];
         return bigEndianToNative!T(bytes);
     }
 
