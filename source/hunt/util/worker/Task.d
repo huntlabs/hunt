@@ -1,8 +1,9 @@
 module hunt.util.worker.Task;
 
-import core.atomic;
+import hunt.util.queue;
 import hunt.logging.ConsoleLogger;
 
+import core.atomic;
 import std.datetime;
 
 enum TaskStatus : ubyte {
@@ -12,13 +13,16 @@ enum TaskStatus : ubyte {
     Done
 }
 
+alias TaskQueue = Queue!Task;
+alias MemoryTaskQueue = SimpleQueue!Task;
+
 /**
  * 
  */
 abstract class Task {
     protected shared TaskStatus _status;
 
-    uint id;
+    size_t id;
     
     private MonoTime _createTime;
     private MonoTime _startTime;

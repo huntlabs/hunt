@@ -1,7 +1,7 @@
 module hunt.util.worker.Worker;
 
 import hunt.util.worker.Task;
-import hunt.util.worker.TaskQueue;
+// import hunt.util.worker.TaskQueue;
 import hunt.util.worker.WorkerThread;
 import hunt.logging.ConsoleLogger;
 

@@ -1,14 +1,11 @@
-module hunt.util.worker.MemoryQueue;
-
-import hunt.util.worker.Task;
-import hunt.util.worker.TaskQueue;
+module hunt.util.queue.SimpleQueue;
 
 import hunt.logging.ConsoleLogger;
+import hunt.util.queue.Queue;
 
 import core.atomic;
 import core.sync.condition;
 import core.sync.mutex;
-
 import core.time;
 
 import std.container.slist;
@@ -16,8 +13,8 @@ import std.container.slist;
 /**
  * It's a thread-safe queue
  */
-class MemoryQueue : TaskQueue {
-    private SList!Task _list;
+class SimpleQueue(T) : Queue!(T) {
+    private SList!T _list;
     private Mutex _headLock;
     private Duration _timeout;
     private bool _isWaiting = false;
@@ -46,7 +43,7 @@ class MemoryQueue : TaskQueue {
         }
     }
 
-    override Task pop() {
+    override T pop() {
         _headLock.lock();
         scope (exit) {
             _headLock.unlock();
@@ -60,7 +57,7 @@ class MemoryQueue : TaskQueue {
                 version (HUNT_IO_DEBUG) {
                     tracef("Timeout in %s. pop: %d, put: %d", _timeout, _outgoings, _incomings);
                 }
-                return null;
+                return T.init;
             }
         }
 
@@ -68,13 +65,13 @@ class MemoryQueue : TaskQueue {
             atomicOp!("+=")(_outgoings, 1);
         }
 
-        Task task = _list.front();
+        T item = _list.front();
         _list.removeFront();
 
-        return task;
+        return item;
     }
 
-    override void push(Task task) {
+    override void push(T item) {
         _headLock.lock();
         scope (exit)
             _headLock.unlock();
@@ -83,7 +80,7 @@ class MemoryQueue : TaskQueue {
             uint id = atomicOp!("+=")(_incomings, 1);
         }
 
-        _list.insert(task);
+        _list.insert(item);
 
         if(_isWaiting)
             _notEmpty.notify();

@@ -34,7 +34,7 @@ class EventLoopGroup : Lifecycle {
         _eventLoops = new EventLoop[_size];
 
         if(workerThreadSize > 0) {
-            _pool = new MemoryQueue();
+            _pool = new MemoryTaskQueue();
             _worker = new Worker(_pool, workerThreadSize);
             _worker.run();
         } 

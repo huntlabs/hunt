@@ -8,27 +8,23 @@ import hunt.util.worker;
 
 
 class TestTask : Task {
-	private size_t _index;
 
-	this(size_t index) {
-		_index = index;
+	this(size_t id) {
+		this.id = id;
 	}
 
-	size_t index() {
-		return _index;
-	}
 
-	void execute() {
-		infof("Task %d is running.", index);
+	override void doExecute() {
+		infof("Task %d is running.", id);
 		Thread.sleep(1.seconds);
-		infof("Task %d is done.", index);
+		infof("Task %d is done.", id);
 	}
 }
 
 
 void main(string[] args) {
 
-	MemoryQueue memoryQueue = new MemoryQueue();
+	MemoryTaskQueue memoryQueue = new MemoryTaskQueue();
 	Worker worker = new Worker(memoryQueue);
 
 	worker.run();
