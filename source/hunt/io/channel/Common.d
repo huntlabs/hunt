@@ -102,14 +102,14 @@ final class BaseTypeObject(T) {
 
 
 
-version (HUNT_IO_WORKERPOOL) {
-    alias WritingBufferQueue = MagedNonBlockingQueue!ByteBuffer;
-} else {
-    alias WritingBufferQueue = SimpleQueue!ByteBuffer;
-}
+// version (HUNT_IO_WORKERPOOL) {
+//     alias WritingBufferQueue = MagedNonBlockingQueue!ByteBuffer;
+// } else {
+//     alias WritingBufferQueue = SimpleQueue!ByteBuffer;
+// }
 
 // alias WritingBufferQueue = MagedNonBlockingQueue!ByteBuffer;
-// alias WritingBufferQueue = SimpleQueue!ByteBuffer;
+alias WritingBufferQueue = SimpleQueue!ByteBuffer;
 // alias WritingBufferQueue = MagedBlockingQueue!ByteBuffer;
 
 /**

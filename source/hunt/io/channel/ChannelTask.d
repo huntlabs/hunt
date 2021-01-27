@@ -7,9 +7,10 @@ import hunt.io.ByteBuffer;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.IoError;
-import hunt.io.SimpleQueue;
+// import hunt.io.SimpleQueue;
 import hunt.logging.ConsoleLogger;
 import hunt.system.Error;
+import hunt.util.queue;
 import hunt.util.worker;
 
 
@@ -27,7 +28,7 @@ class ChannelTask : Task {
     Queue!(ByteBuffer) buffers;
 
     this() {
-        buffers = new BlockingQueue!(ByteBuffer);
+        buffers = new SimpleQueue!(ByteBuffer);
     }
 
     override protected void doExecute() {
@@ -47,10 +48,10 @@ class ChannelTask : Task {
         DataHandleStatus handleStatus = DataHandleStatus.Pending;
 
         do {
-            buffer = buffers.dequeue();
+            buffer = buffers.pop();
             if(buffer is null) {
-                version(HUNT_DEBUG) {
-                    warning("Null buffer poped");
+                version(HUNT_IO_DEBUG) {
+                    warning("A null buffer poped");
                 }
                 break;
             }

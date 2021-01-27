@@ -104,7 +104,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                     worker.put(task);
                 }
 
-                task.buffers.enqueue(bufferCopy);
+                task.buffers.push(bufferCopy);
             }
         }
     }

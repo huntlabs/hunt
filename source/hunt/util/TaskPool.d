@@ -322,7 +322,7 @@ class TaskPool {
             AbstractTask task = workerThread.taskQueue.dequeue();
             if (task is null) {
                 version(HUNT_IO_DEBUG) {
-                    // warningf("A empty task returned on thread: %s", workerThread.name);
+                    warningf("A empty task returned on thread: %s", workerThread.name);
                 }
             } else {
                 version(HUNT_IO_DEBUG) infof("running a task in thread: %s", workerThread.name());
