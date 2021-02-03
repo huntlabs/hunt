@@ -7,6 +7,7 @@ import hunt.io.channel.Common;
 import hunt.logging.ConsoleLogger;
 
 import core.atomic;
+import core.memory;
 import core.thread;
 
 
@@ -20,7 +21,6 @@ abstract class Selector {
     private bool _isReady;
     protected size_t _id;
     protected size_t divider;
-    protected AbstractChannel[] channels;
     protected long idleTime = -1; // in millisecond
     protected int fd;
 
@@ -33,7 +33,6 @@ abstract class Selector {
     this(size_t id, size_t divider, size_t maxChannels = 1500) {
         _id = id;
         this.divider = divider;
-        channels = new AbstractChannel[maxChannels];
     }
 
     size_t getId() {
@@ -62,87 +61,25 @@ abstract class Selector {
 
     bool register(AbstractChannel channel) {
         assert(channel !is null);
-        int infd = cast(int) channel.handle;
-        size_t index = cast(size_t)(infd / divider);
-
-        if (index >= channels.length) {
-            debug warningf("expanding channels uplimit to %d", index);
-            import std.algorithm : max;
-
-            size_t length = max(cast(size_t)(index * 3 / 2), 16);
-            AbstractChannel[] arr = new AbstractChannel[length];
-            arr[0 .. channels.length] = channels[0 .. $];
-            channels = arr;
-        }
-
-        bool result = true;
-
-        debug {
-            AbstractChannel oldChannel = channels[index];
-            if(oldChannel !is null) {
-                result = false;
-                version(HUNT_DEBUG) {
-                    warningf("Register collision, {old channel: %s, fd=%d};  " ~ 
-                                "{new channel: %s, fd=%d}; {slot=%d, selector: %d}", 
-                        cast(void*)oldChannel, oldChannel.handle,
-                        cast(void*)channel, infd,
-                        index, getId());
-                }
-
-                if(oldChannel.handle != channel.handle) {
-                    // Try to find a empty slot
-                    size_t lastIndex = index;
-                    while(channels[index] !is null) {
-                        index = (index + 1) % channels.length;
-                        if(index == lastIndex) {
-                            warningf("All the slots are full on selector: %d", getId());
-                        }
-                    }
-                }
-            }
-        } 
-        
+        void* context = cast(void*)channel;
+        GC.addRoot(context);
+        GC.setAttr(cast(void*)context, GC.BlkAttr.NO_MOVE);
         version (HUNT_IO_DEBUG) {
-            tracef("register channel: fd=%d, slot=%d, selector: %d", infd, index, getId());
-        }
-        channels[index] = channel;
-
-        return result;
+            int infd = cast(int) channel.handle;
+            tracef("Register channel@%s: fd=%d, selector: %d", context, infd, getId());
+        }        
+        return true;
     }
 
     bool deregister(AbstractChannel channel) {
-        size_t fd = cast(size_t) channel.handle;
-        size_t index = cast(size_t)(fd / divider);
-        bool result = true;
-        debug {
-            auto oldChannel = channels[index];
-            
-            if(oldChannel is null) {
-                result = false;
-                version(HUNT_IO_DEBUG) {
-                    infof("The channel has been deregistered: fd=%d, slot=%d, selector: %d", fd, index, getId());
-                }
-            } else {
-                if(oldChannel !is channel) {
-                    result = false;
-                    version(HUNT_DEBUG) {
-                        warningf("deregistering a mismatched channel, " ~ 
-                            "{old: %s, fd=%d}; {new: %s, fd=%d}, {slot=%d, selector: %d}", 
-                            cast(void*)oldChannel, oldChannel.handle, 
-                            cast(void*)channel, fd, index, getId());
-                    }
-                } else {
-                    version (HUNT_IO_DEBUG) {
-                        tracef("deregister channel: fd=%d, slot=%d, selector: %d", fd, index, getId());
-                    }
-                    channels[index] = null;
-                }
-            }
-        } else {
-            channels[index] = null;
-        }
-        
-        return result;
+        void* context = cast(void*)channel;
+        GC.removeRoot(context);
+        GC.clrAttr(context, GC.BlkAttr.NO_MOVE);
+        version(HUNT_IO_DEBUG) {
+            size_t fd = cast(size_t) channel.handle;
+            infof("The channel@%s has been deregistered: fd=%d, selector: %d", context, fd, getId());
+        }        
+        return true;
     }
 
     bool update(AbstractChannel channel) { return true; }

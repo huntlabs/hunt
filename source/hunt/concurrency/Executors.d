@@ -29,7 +29,6 @@ import hunt.Exceptions;
 import hunt.util.Common;
 import hunt.util.DateTime;
 
-import core.thread;
 import core.time;
 import std.conv;
 

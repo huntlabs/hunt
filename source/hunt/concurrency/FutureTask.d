@@ -18,7 +18,12 @@ import hunt.concurrency.thread;
 import hunt.Exceptions;
 import hunt.util.Common;
 
-import core.thread;
+static if(CompilerHelper.isGreaterThan(2093)) {
+    import core.thread.osthread;
+} else {
+    import core.thread;
+}
+
 import core.time;
 
 import hunt.concurrency.thread;
