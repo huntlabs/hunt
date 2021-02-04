@@ -24,31 +24,28 @@ import core.atomic;
  */
 class ChannelTask : Task {
     DataReceivedHandler dataReceivedHandler;
-    SimpleEventHandler finishedHandler;
-    Queue!(ByteBuffer) buffers;
+    private shared bool _isFinishing = false;
+    private Queue!(ByteBuffer) _buffers;
 
     this() {
-        buffers = new SimpleQueue!(ByteBuffer);
+        _buffers = new SimpleQueue!(ByteBuffer);
+    }
+
+    void put(ByteBuffer buffer) {
+        _buffers.push(buffer);
+    }
+
+    bool isFinishing () {
+        return _isFinishing;
     }
 
     override protected void doExecute() {
-
-        scope(exit) {
-            finish();
-            version(HUNT_IO_DEBUG) {
-                info("Task Done!");
-            }
-
-            if(finishedHandler !is null) {
-                finishedHandler();
-            }
-        }
 
         ByteBuffer buffer;
         DataHandleStatus handleStatus = DataHandleStatus.Pending;
 
         do {
-            buffer = buffers.pop();
+            buffer = _buffers.pop();
             if(buffer is null) {
                 version(HUNT_IO_DEBUG) {
                     warning("A null buffer poped");
@@ -66,8 +63,17 @@ class ChannelTask : Task {
                 tracef("Handle status: %s, buffer: %s", handleStatus, buffer.toString());
             }
             
-            if(isTerminated() ||
-                handleStatus == DataHandleStatus.Done && !buffer.hasRemaining()) {
+            _isFinishing = isTerminated();
+            if(!_isFinishing) {
+                _isFinishing = handleStatus == DataHandleStatus.Done && !buffer.hasRemaining() && _buffers.isEmpty();
+            }
+
+            if(_isFinishing) {
+                version(HUNT_DEBUG) {
+                    if(buffer.hasRemaining() || _buffers.isEmpty()) {
+                        warningf("The buffered data lost");
+                    }
+                }
                 break;
             }
         } while(true);

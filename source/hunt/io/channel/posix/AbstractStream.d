@@ -27,8 +27,13 @@ import core.stdc.string;
 import core.sys.posix.sys.socket : accept;
 import core.sys.posix.unistd;
 
-version(HUNT_METRIC) shared int dataCounter = 0;
+version(HUNT_METRIC) {
+    shared int dataCounter = 0;
+    // shared int dataCounter2 = 0;
+    shared int dataCounter3 = 0;
+    shared int remainer = 0;
 
+}
 /**
 TCP Peer
 */
@@ -67,46 +72,71 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract bool isConnected() nothrow;
     abstract protected void onDisconnected();
 
-    private void onTaskFinished() {
-        synchronized(this) {
-            _task = null;
-        }
-    }
+    // private void onTaskFinished(ChannelTask t) {
+        
+    //     atomicOp!("-=")(remainer, 1);
+    //     synchronized(this) {
+    //         if(_task is null) {
+    //             warning("task is null");
+    //         } else {
+    //             if(t.id != _task.id) {
+    //                 warningf("old: %d, current: %d", _task.id, t.id);
+    //             } else {
+                    
+    //                 // tracef("Task: %d, status: %d", t.id, t.status);
+    //             }
+    //         }
+    //         _task = null;
+    //     }
+    // }
 
     private void onDataReceived(ptrdiff_t len) {
 
         if (dataReceivedHandler is null) 
             return;
 
-        version(HUNT_METRIC) {
-            uint id = atomicOp!("+=")(dataCounter, 1);
-        }
-
-        Worker worker = taskWorker;
 
         _bufferForRead.limit(cast(int)len);
         _bufferForRead.position(0);
 
-        if(worker is null) {
+        // Worker worker = taskWorker;
+        if(taskWorker is null) {
             dataReceivedHandler(_bufferForRead);
         } else {
             ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
 
-            synchronized(this) {
-                ChannelTask task = _task;
-
-                if(task is null) {
-                    task = new ChannelTask();
-                    task.dataReceivedHandler = dataReceivedHandler;
-                    task.finishedHandler = &onTaskFinished;
-                    version(HUNT_METRIC) task.id = id;
-                    _task = task;
-                    worker.put(task);
-                }
-
-                task.buffers.push(bufferCopy);
+            version(HUNT_METRIC) {
+                uint id = atomicOp!("+=")(dataCounter, 1);
+                atomicOp!("+=")(remainer, 1);
             }
+
+            ChannelTask task = _task;
+
+            if(task is null || task.isFinishing()) {
+                task = createChannelTask();
+                _task = task;
+
+            } else {
+                version(HUNT_METRIC) {
+                    warningf("request: %d, old: %d, status: %s", id, task.id, task.status);
+                }
+            }
+
+            task.put(bufferCopy);
         }
+    }
+
+    private ChannelTask createChannelTask() {
+       auto xx = atomicOp!("+=")(dataCounter3, 1);
+        ChannelTask task = new ChannelTask();
+        task.dataReceivedHandler = dataReceivedHandler;
+        // task.finishedHandler = &onTaskFinished;
+        version(HUNT_METRIC) {
+            task.id = dataCounter;
+        }
+        
+        taskWorker.put(task);
+        return task;
     }
 
     /**

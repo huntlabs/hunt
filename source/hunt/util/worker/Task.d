@@ -14,7 +14,7 @@ enum TaskStatus : ubyte {
 }
 
 alias TaskQueue = Queue!Task;
-alias MemoryTaskQueue = SimpleQueue!Task;
+alias MemoryTaskQueue = SimpleQueue2!Task;
 
 /**
  * 
@@ -98,8 +98,8 @@ abstract class Task {
         } else {
             version(HUNT_IO_DEBUG) {
                 warningf("The task status: %s", _status);
+                warningf("Failed to set the task status to Done: %s", _status);
             }
-            warningf("Failed to set the task status to Done: %s", _status);
         }
     }
 
@@ -111,6 +111,12 @@ abstract class Task {
                 tracef("Task %d executing... status: %s", id, _status);
             }
             _startTime = MonoTime.currTime;
+            scope(exit) {
+                finish();
+                version(HUNT_IO_DEBUG) {
+                    info("Task Done!");
+                }
+            }
             doExecute();
         } else {
             warningf("Failed to execute task %d. Its status is: %s", id, _status);
