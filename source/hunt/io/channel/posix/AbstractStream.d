@@ -32,7 +32,7 @@ import core.sys.posix.unistd;
 TCP Peer
 */
 abstract class AbstractStream : AbstractSocketChannel {
-    enum BufferSize = 4096;
+    private size_t _bufferSize = 4096;
     private const(ubyte)[] _readBuffer;
     private ByteBuffer writeBuffer;
     private ChannelTask _task = null;
@@ -52,6 +52,7 @@ abstract class AbstractStream : AbstractSocketChannel {
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
+        _bufferSize = bufferSize;
         _bufferForRead = BufferUtils.allocate(bufferSize);
         _bufferForRead.limit(cast(int)bufferSize);
         _readBuffer = cast(ubyte[])_bufferForRead.array();
@@ -77,9 +78,11 @@ abstract class AbstractStream : AbstractSocketChannel {
         if(taskWorker is null) {
             dataReceivedHandler(_bufferForRead);
         } else {
-            ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
+            // ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
             ChannelTask task = _task;
 
+            // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-02-05T09:18:02+08:00
+            // More tests needed
             if(task is null || task.isFinishing()) {
                 task = createChannelTask();
                 _task = task;
@@ -90,7 +93,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 }
             }
 
-            task.put(bufferCopy);
+            task.put(_bufferForRead);
         }
     }
 
@@ -107,6 +110,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected bool tryRead() {
         bool isDone = true;
         this.clearError();
+
+        if(taskWorker !is null) {
+            _bufferForRead = BufferUtils.allocate(_bufferSize);
+            _bufferForRead.limit(cast(int)_bufferSize);
+            _readBuffer = cast(ubyte[])_bufferForRead.array();
+        }
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
 
         // ubyte[] rb = new ubyte[BufferSize];
