@@ -43,10 +43,12 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected ByteBuffer _bufferForRead;
     protected AddressFamily _family;
 
+    private size_t _bufferSize = 4096;
     private ChannelTask _task = null;
     
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
+        _bufferSize = bufferSize;
         super(loop, ChannelType.TCP);
         // setFlag(ChannelFlag.Read, true);
         // setFlag(ChannelFlag.Write, true);
@@ -278,10 +280,6 @@ abstract class AbstractStream : AbstractSocketChannel {
         }
     }
 
-    private void onTaskFinished() {
-        _task = null;
-    }   
-
     private void handleReceivedData(ptrdiff_t len) {
         version (HUNT_IO_DEBUG)
             tracef("reading done: %d nbytes", readLen);
@@ -289,28 +287,38 @@ abstract class AbstractStream : AbstractSocketChannel {
         if (dataReceivedHandler is null) 
             return;
 
-        Worker worker = taskWorker;
         _bufferForRead.limit(cast(int)readLen);
         _bufferForRead.position(0);
         // dataReceivedHandler(_bufferForRead);
 
-        if(worker is null) {
+        if(taskWorker is null) {
             dataReceivedHandler(_bufferForRead);
         } else {
             ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
             ChannelTask task = _task;
 
-            if(task is null) {
-                task = new ChannelTask();
-                task.dataReceivedHandler = dataReceivedHandler;
-                task.finishedHandler = &onTaskFinished;
+            // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-02-05T09:18:02+08:00
+            // More tests needed
+            if(task is null || task.isFinishing()) {
+                task = createChannelTask();
                 _task = task;
-                worker.put(task);
+
+            } else {
+                version(HUNT_METRIC) {
+                    warningf("Request peeding... Task status: %s", task.status);
+                }
             }
 
-            task.buffers.enqueue(bufferCopy);
+            task.put(bufferCopy);
         }        
 
+    }
+
+    private ChannelTask createChannelTask() {
+        ChannelTask task = new ChannelTask();
+        task.dataReceivedHandler = dataReceivedHandler;
+        taskWorker.put(task);
+        return task;
     }
 
     // try to write a block of data directly
@@ -367,7 +375,7 @@ abstract class AbstractStream : AbstractSocketChannel {
         {
             return;
         }
-        const(ubyte)[] data = cast(const(ubyte)[])writeBuffer.getRemaining();
+        const(ubyte)[] data = cast(const(ubyte)[])writeBuffer.peekRemaining();
 
         size_t nBytes = doWrite(data);
 
