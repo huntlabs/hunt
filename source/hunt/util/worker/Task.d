@@ -14,7 +14,7 @@ enum TaskStatus : ubyte {
 }
 
 alias TaskQueue = Queue!Task;
-alias MemoryTaskQueue = SimpleQueue2!Task;
+alias MemoryTaskQueue = SimpleQueue!Task;
 
 /**
  * 

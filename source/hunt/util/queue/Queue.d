@@ -11,9 +11,4 @@ abstract class Queue(T) {
 
     void push(T task);
 
-
-version (HUNT_METRIC) {
-    void inspect();
-}    
-    
 }

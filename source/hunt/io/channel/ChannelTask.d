@@ -70,7 +70,7 @@ class ChannelTask : Task {
 
             if(_isFinishing) {
                 version(HUNT_DEBUG) {
-                    if(buffer.hasRemaining() || _buffers.isEmpty()) {
+                    if(buffer.hasRemaining() || !_buffers.isEmpty()) {
                         warningf("The buffered data lost");
                     }
                 }

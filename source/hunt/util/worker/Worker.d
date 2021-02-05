@@ -49,35 +49,24 @@ class Worker {
 
     void inspect() {
 
-        version(HUNT_METRIC) {
-            _taskQueue.inspect();
-        }
-
-        // foreach(WorkerThread th; _workerThreads) {
+        foreach(WorkerThread th; _workerThreads) {
             
-        //     Task task = th.task();
+            Task task = th.task();
 
-        //     if(th.state() == WorkerThreadState.Busy) {
-        //         if(task is null) {
-        //             warning("A dead worker thread detected: %s, %s", th.name, th.state());
-        //         } else {
-        //             tracef("Thread: %s,  state: %s, lifeTime: %s", th.name, th.state(), task.lifeTime());
-        //         }
-        //     } else {
-        //         if(task is null) {
-        //             tracef("Thread: %s,  state: %s", th.name, th.state());
-        //         } else {
-        //             tracef("Thread: %s,  state: %s", th.name, th.state(), task.executionTime);
-        //         }
-        //     }
-        // }
-
-        // info("===============Available threads");
-
-        // foreach(WorkerThread th; _availableThreads) {
-        //     if(th !is null)
-        //     tracef("Thread: %s,  state: %s", th.name, th.state());
-        // }
+            if(th.state() == WorkerThreadState.Busy) {
+                if(task is null) {
+                    warning("A dead worker thread detected: %s, %s", th.name, th.state());
+                } else {
+                    tracef("Thread: %s,  state: %s, lifeTime: %s", th.name, th.state(), task.lifeTime());
+                }
+            } else {
+                if(task is null) {
+                    tracef("Thread: %s,  state: %s", th.name, th.state());
+                } else {
+                    tracef("Thread: %s,  state: %s", th.name, th.state(), task.executionTime);
+                }
+            }
+        }
     }
 
     void put(Task task) {
