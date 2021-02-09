@@ -5,6 +5,7 @@ import hunt.logging.ConsoleLogger;
 
 import core.atomic;
 import std.datetime;
+import std.format;
 
 enum TaskStatus : ubyte {
     Ready,
@@ -121,6 +122,10 @@ abstract class Task {
         } else {
             warningf("Failed to execute task %d. Its status is: %s", id, _status);
         }
+    }
+
+    override string toString() {
+        return format("id: %d, status: %s", id, _status);
     }
 
 }

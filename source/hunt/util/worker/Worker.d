@@ -11,6 +11,7 @@ import core.sync.mutex;
 import core.thread;
 
 import std.conv; 
+import std.concurrency;
 
 
 
@@ -21,6 +22,9 @@ class Worker {
 
     private size_t _size;
     private WorkerThread[] _workerThreads;
+    private Task[size_t] _tasks;
+    private Mutex _taskLocker;
+
 
     private TaskQueue _taskQueue;
     private shared bool _isRunning = false;
@@ -37,6 +41,7 @@ class Worker {
     }
 
     private void initialize() {
+        _taskLocker = new Mutex();
         _workerThreads = new WorkerThread[_size];
         
         foreach(size_t index; 0 .. _size) {
@@ -71,6 +76,45 @@ class Worker {
 
     void put(Task task) {
         _taskQueue.push(task);
+
+        _taskLocker.lock();
+        scope(exit) {
+            _taskLocker.unlock();
+        }
+
+        _tasks[task.id] = task;
+    }
+
+    Task get(size_t id) {
+        _taskLocker.lock();
+        scope(exit) {
+            _taskLocker.unlock();
+        } 
+
+        auto itemPtr = id in _tasks;
+        if(itemPtr is null) {
+            throw new Exception("Task does NOT exist: " ~ id.to!string);
+        }
+
+        return *itemPtr;
+    }
+
+    void remove(size_t id) {
+        _taskLocker.lock();
+        scope(exit) {
+            _taskLocker.unlock();
+        } 
+
+        _tasks.remove(id);
+    }
+
+    void clear() {
+        _taskLocker.lock();
+        scope(exit) {
+            _taskLocker.unlock();
+        } 
+        _tasks.clear();
+
     }
 
     void run() {
