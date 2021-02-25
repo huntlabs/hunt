@@ -116,7 +116,8 @@ class ConfigurationItem {
                 path = name;
             else
                 path = path ~ "." ~ name;
-            throw new EmptyValueException(format("The item for '%s' is undefined! ", path));
+            // throw new EmptyValueException(format("The item for '%s' is undefined! ", path));
+            warningf("The items for '%s' is undefined! Use the defaults now", path);
         }
         return v;
     }
@@ -137,7 +138,8 @@ class ConfigurationItem {
                 path = name;
             else
                 path = path ~ "." ~ name;
-            throw new EmptyValueException(format("The items for '%s' is undefined! ", path));
+            // throw new EmptyValueException(format("The items for '%s' is undefined! ", path));
+            warningf("The items for '%s' is undefined! Use the defaults now", path);
         }
         return r;
     }
