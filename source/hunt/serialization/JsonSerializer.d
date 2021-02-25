@@ -745,43 +745,44 @@ final class JsonSerializer {
     }
 
     /**
-     * string[]
+     * T[]
      */
-    static JSONValue toJson(T)(T value)
-            if (is(T : U[], U) && (isBasicType!U || isSomeString!U)) {
-        return JSONValue(value);
-    }
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value) {
 
-    /**
-     * class[]
-     */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, 
-            T : U[], U) (T value) if(is(U == class)) {
-        if(value is null) {
-            return JSONValue(JSONValue[].init);
-        } else {
-            return JSONValue(value.map!(item => toJson!(options)(item))()
-                    .map!(json => json.isNull ? JSONValue(null) : json).array);
-        }
-    }
-    
-    /**
-     * struct[]
-     */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default,
-            T : U[], U)(T value) if(is(U == struct)) {
-        if(value is null) {
-            return JSONValue(JSONValue[].init);
-        } else {
-            static if(is(U == SysTime)) {
-                return JSONValue(value.map!(item => toJson(item))()
-                        .map!(json => json.isNull ? JSONValue(null) : json).array);
+        static if(is(U == class)) { // class[]
+            if(value is null) {
+                return JSONValue(JSONValue[].init);
             } else {
                 return JSONValue(value.map!(item => toJson!(options)(item))()
                         .map!(json => json.isNull ? JSONValue(null) : json).array);
             }
+        } else static if(is(U == struct)) { // struct[]
+            if(value is null) {
+                return JSONValue(JSONValue[].init);
+            } else {
+                static if(is(U == SysTime)) {
+                    return JSONValue(value.map!(item => toJson(item))()
+                            .map!(json => json.isNull ? JSONValue(null) : json).array);
+                } else {
+                    return JSONValue(value.map!(item => toJson!(options)(item))()
+                            .map!(json => json.isNull ? JSONValue(null) : json).array);
+                }
+            }
+        } else static if(is(U : S[], S)) { // S[][]
+            if(value is null) 
+                return JSONValue(JSONValue[].init);
+
+            JSONValue[] items;
+            foreach(S[] element; value) {
+                items ~= toJson(element);
+            }
+
+            return JSONValue(items);
+        } else {
+            return JSONValue(value);
         }
     }
+
 
     /**
      * V[K]
@@ -803,26 +804,6 @@ final class JsonSerializer {
 
         return result;
     }
-
-    /**
-     * T[][]
-     */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default,
-            T : S[], S : U[], U)(T value) if(isAggregateType!U) {
-
-        if(value is null) 
-            return JSONValue(JSONValue[].init);
-
-        
-        JSONValue[] items;
-        foreach(U[] element; value) {
-            items ~= toJson(element);
-        }
-
-        return JSONValue(items);
-
-    }
-
 
     deprecated("Using toObject instead.")
     alias fromJson = toObject;
