@@ -755,7 +755,7 @@ final class JsonSerializer {
     /**
      * class[]
      */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal, 
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, 
             T : U[], U) (T value) if(is(U == class)) {
         if(value is null) {
             return JSONValue(JSONValue[].init);
@@ -768,7 +768,7 @@ final class JsonSerializer {
     /**
      * struct[]
      */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default,
             T : U[], U)(T value) if(is(U == struct)) {
         if(value is null) {
             return JSONValue(JSONValue[].init);
@@ -786,7 +786,7 @@ final class JsonSerializer {
     /**
      * V[K]
      */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default,
             T : V[K], V, K)(T value) {
         auto result = JSONValue();
 
@@ -807,7 +807,7 @@ final class JsonSerializer {
     /**
      * T[][]
      */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions.Normal,
+    static JSONValue toJson(SerializationOptions options = SerializationOptions.Default,
             T : S[], S : U[], U)(T value) if(isAggregateType!U) {
 
         if(value is null) 
