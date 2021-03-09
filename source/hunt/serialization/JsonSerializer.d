@@ -466,6 +466,16 @@ final class JsonSerializer {
     /// ditto
     static JSONValue toJson(SerializationOptions options, T)
             (T value) if (is(T == class)) {
+                
+        bool[size_t] serializationStates;
+        return toJson!(options)(value, serializationStates);
+    }
+
+    /**
+     * Implements for class to json
+     */
+    private static JSONValue toJson(SerializationOptions options, T)
+            (T value, ref bool[size_t] serializationStates) if (is(T == class)) {
         
         debug(HUNT_DEBUG_MORE) {
             info("======== current type: class " ~ T.stringof);
@@ -476,7 +486,13 @@ final class JsonSerializer {
             // JsonSerializable first
             return toJson!(JsonSerializable, IncludeMeta.no)(value);
         } else {
-            return serializeObject!(options, T)(value);
+            JSONValue v = serializeObject!(options, T)(value, serializationStates);
+
+            version(HUNT_DEBUG_MORE) {
+                error(serializationStates);
+            }
+
+            return v;
         }
     }
 
@@ -486,7 +502,8 @@ final class JsonSerializer {
             IncludeMeta includeMeta = IncludeMeta.no)
             (T value) if (is(T == class)) {
         enum options = SerializationOptions(onlyPublic, traverseBase, includeMeta);
-        return serializeObject!(options, T)(value);
+        bool[size_t] serializationStates;
+        return serializeObject!(options, T)(value, serializationStates);
     }
 
 
@@ -495,14 +512,15 @@ final class JsonSerializer {
         IncludeMeta includeMeta, T) (T value) if (is(T == class)) {
 
         enum options = SerializationOptions(onlyPublic, traverseBase, includeMeta);
-        return serializeObject!(options, T)(value);
+        bool[size_t] serializationStates;
+        return serializeObject!(options, T)(value, serializationStates);
     }
 
     /**
      * class object
      */
     static JSONValue serializeObject(SerializationOptions options = SerializationOptions.Full, T)
-            (T value) if (is(T == class)) {
+            (T value, ref bool[size_t] serializationStates) if (is(T == class)) {
         import std.traits : isSomeFunction, isType;
 
         debug(HUNT_DEBUG_MORE) {
@@ -516,6 +534,15 @@ final class JsonSerializer {
             version(HUNT_DEBUG) warning("value is null");
             return JSONValue(null);
         }
+
+        size_t objHash = value.toHash() + hashOf(T.stringof);
+        auto itemPtr = objHash in serializationStates;
+        if(itemPtr !is null && *itemPtr) {
+            warningf("%s serialized.", T.stringof);
+            return JSONValue(null);
+        }
+        
+        serializationStates[objHash] = true;
 
         auto result = JSONValue();
         static if(options.includeMeta) {
@@ -533,7 +560,7 @@ final class JsonSerializer {
                     tracef("BaseType: %s", BaseType.stringof);
                 }
                 static if(!is(BaseType == Object)) {
-                    JSONValue superResult = serializeObject!(options, BaseType)(value);
+                    JSONValue superResult = serializeObject!(options, BaseType)(value, serializationStates);
                     if(!superResult.isNull)
                         result["super"] = superResult;
                 }
@@ -542,7 +569,7 @@ final class JsonSerializer {
         
         // current fields
 		static foreach (string member; FieldNameTuple!T) {
-            serializeMember!(member, options)(value, result);
+            serializeMember!(member, options)(value, result, serializationStates);
         }
 
         return result;
@@ -551,8 +578,18 @@ final class JsonSerializer {
     /**
      * struct
      */
+    
     static JSONValue toJson(SerializationOptions options = SerializationOptions(), T)(T value)
             if (is(T == struct) && !is(T == SysTime)) {
+        bool[size_t] serializationStates;
+        return toJson!(options)(value, serializationStates);
+    }
+
+    /**
+     * Implements for struct to json
+     */
+    static JSONValue toJson(SerializationOptions options = SerializationOptions(), T)(T value, 
+            ref bool[size_t] serializationStates) if (is(T == struct) && !is(T == SysTime)) {
 
         static if(is(T == JSONValue)) {
             return value;
@@ -562,7 +599,7 @@ final class JsonSerializer {
             debug(HUNT_DEBUG_MORE) info("======== current type: struct " ~ T.stringof);
                 
             static foreach (string member; FieldNameTuple!T) {
-                serializeMember!(member, options)(value, result);
+                serializeMember!(member, options)(value, result, serializationStates);
             }
 
             return result;
@@ -574,7 +611,7 @@ final class JsonSerializer {
      */
     private static void serializeMember(string member, 
             SerializationOptions options = SerializationOptions.Default, T)
-            (T obj, ref JSONValue result) {
+            (T obj, ref JSONValue result, ref bool[size_t] serializationStates) {
 
         // debug(HUNT_DEBUG_MORE) pragma(msg, "\tfield=" ~ member);
 
@@ -613,7 +650,7 @@ final class JsonSerializer {
                     enum jsonKeyName = member;
                 }
 
-                auto json = serializeMember!(options)(m);
+                auto json = serializeMember!(options)(m, serializationStates);
 
                 debug(HUNT_DEBUG_MORE) {
                     tracef("name: %s, value: %s", member, json.toString());
@@ -642,7 +679,8 @@ final class JsonSerializer {
         }
     }
 
-    private static JSONValue serializeMember(SerializationOptions options, T)(T m) {
+    private static JSONValue serializeMember(SerializationOptions options, T)(T m, 
+            ref bool[size_t] serializationStates) {
         JSONValue json;
         enum depth = options.depth;
         static if(is(T == interface) && is(T : JsonSerializable)) {
@@ -653,10 +691,10 @@ final class JsonSerializer {
         //     json = toJson(m);
         } else static if(is(T == class)) {
             if(m !is null) {
-                json = serializeObjectMember!(options)(m);
+                json = serializeObjectMember!(options)(m, serializationStates);
             }
         } else static if(is(T == struct)) {
-            json = serializeObjectMember!(options)(m);
+            json = serializeObjectMember!(options)(m, serializationStates);
         } else static if(is(T : U[], U)) { 
             if(m is null) {
                 static if(!options.ignoreNull) {
@@ -669,7 +707,7 @@ final class JsonSerializer {
             } else {
                 static if (is(U == class) || is(U == struct) || is(U == interface)) {
                     // class[] obj; struct[] obj;
-                    json = serializeObjectMember!(options)(m);
+                    json = serializeObjectMember!(options)(m, serializationStates);
                 } else {
                     json = toJson(m);
                 }
@@ -683,13 +721,13 @@ final class JsonSerializer {
     }
 
     private static JSONValue serializeObjectMember(SerializationOptions options = 
-            SerializationOptions.Default, T)(ref T m) {
+            SerializationOptions.Default, T)(ref T m, ref bool[size_t] serializationStates) {
         enum depth = options.depth;
         static if(depth > 0) {
             enum SerializationOptions memeberOptions = options.depth(options.depth-1);
-            return toJson!(memeberOptions)(m);
+            return toJson!(memeberOptions)(m, serializationStates);
         } else static if(depth == -1) {
-            return toJson!(options)(m);
+            return toJson!(options)(m, serializationStates);
         } else {
             return JSONValue.init;
         }
@@ -747,13 +785,20 @@ final class JsonSerializer {
     /**
      * T[]
      */
+
     static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value) {
+        bool[size_t] serializationStates;
+        return toJson!(options)(value, serializationStates);
+    }
+
+    private static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value, 
+            ref bool[size_t] serializationStates) {
 
         static if(is(U == class)) { // class[]
             if(value is null) {
                 return JSONValue(JSONValue[].init);
             } else {
-                return JSONValue(value.map!(item => toJson!(options)(item))()
+                return JSONValue(value.map!(item => toJson!(options)(item, serializationStates))()
                         .map!(json => json.isNull ? JSONValue(null) : json).array);
             }
         } else static if(is(U == struct)) { // struct[]
@@ -764,7 +809,7 @@ final class JsonSerializer {
                     return JSONValue(value.map!(item => toJson(item))()
                             .map!(json => json.isNull ? JSONValue(null) : json).array);
                 } else {
-                    return JSONValue(value.map!(item => toJson!(options)(item))()
+                    return JSONValue(value.map!(item => toJson!(options)(item, serializationStates))()
                             .map!(json => json.isNull ? JSONValue(null) : json).array);
                 }
             }
@@ -774,7 +819,11 @@ final class JsonSerializer {
 
             JSONValue[] items;
             foreach(S[] element; value) {
-                items ~= toJson(element);
+                static if(is(S == struct) || is(S == class)) {
+                    items ~= toJson(element, serializationStates);
+                } else {
+                    items ~= toJson(element);
+                }
             }
 
             return JSONValue(items);

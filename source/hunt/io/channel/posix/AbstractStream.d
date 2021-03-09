@@ -76,9 +76,11 @@ abstract class AbstractStream : AbstractSocketChannel {
         _bufferForRead.position(0);
 
         if(taskWorker is null) {
+            // TODO: Tasks pending completion -@zhangxueping at 2021-03-09T09:59:00+08:00
+            // Using memory pool
+            // ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
             dataReceivedHandler(_bufferForRead);
         } else {
-            // ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
             ChannelTask task = _task;
 
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-02-05T09:18:02+08:00
