@@ -468,13 +468,13 @@ final class JsonSerializer {
             (T value) if (is(T == class)) {
                 
         bool[size_t] serializationStates;
-        return toJson!(options)(value, serializationStates);
+        return toJsonImpl!(options)(value, serializationStates);
     }
 
     /**
      * Implements for class to json
      */
-    private static JSONValue toJson(SerializationOptions options, T)
+    private static JSONValue toJsonImpl(SerializationOptions options, T)
             (T value, ref bool[size_t] serializationStates) if (is(T == class)) {
         
         debug(HUNT_DEBUG_MORE) {
@@ -582,13 +582,13 @@ final class JsonSerializer {
     static JSONValue toJson(SerializationOptions options = SerializationOptions(), T)(T value)
             if (is(T == struct) && !is(T == SysTime)) {
         bool[size_t] serializationStates;
-        return toJson!(options)(value, serializationStates);
+        return toJsonImpl!(options)(value, serializationStates);
     }
 
     /**
      * Implements for struct to json
      */
-    static JSONValue toJson(SerializationOptions options = SerializationOptions(), T)(T value, 
+    static JSONValue toJsonImpl(SerializationOptions options = SerializationOptions(), T)(T value, 
             ref bool[size_t] serializationStates) if (is(T == struct) && !is(T == SysTime)) {
 
         static if(is(T == JSONValue)) {
@@ -725,9 +725,9 @@ final class JsonSerializer {
         enum depth = options.depth;
         static if(depth > 0) {
             enum SerializationOptions memeberOptions = options.depth(options.depth-1);
-            return toJson!(memeberOptions)(m, serializationStates);
+            return toJsonImpl!(memeberOptions)(m, serializationStates);
         } else static if(depth == -1) {
-            return toJson!(options)(m, serializationStates);
+            return toJsonImpl!(options)(m, serializationStates);
         } else {
             return JSONValue.init;
         }
@@ -785,20 +785,19 @@ final class JsonSerializer {
     /**
      * T[]
      */
-
     static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value) {
         bool[size_t] serializationStates;
-        return toJson!(options)(value, serializationStates);
+        return toJsonImpl!(options)(value, serializationStates);
     }
 
-    private static JSONValue toJson(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value, 
+    private static JSONValue toJsonImpl(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value, 
             ref bool[size_t] serializationStates) {
 
         static if(is(U == class)) { // class[]
             if(value is null) {
                 return JSONValue(JSONValue[].init);
             } else {
-                return JSONValue(value.map!(item => toJson!(options)(item, serializationStates))()
+                return JSONValue(value.map!(item => toJsonImpl!(options)(item, serializationStates))()
                         .map!(json => json.isNull ? JSONValue(null) : json).array);
             }
         } else static if(is(U == struct)) { // struct[]
@@ -809,7 +808,7 @@ final class JsonSerializer {
                     return JSONValue(value.map!(item => toJson(item))()
                             .map!(json => json.isNull ? JSONValue(null) : json).array);
                 } else {
-                    return JSONValue(value.map!(item => toJson!(options)(item, serializationStates))()
+                    return JSONValue(value.map!(item => toJsonImpl!(options)(item, serializationStates))()
                             .map!(json => json.isNull ? JSONValue(null) : json).array);
                 }
             }
@@ -820,7 +819,7 @@ final class JsonSerializer {
             JSONValue[] items;
             foreach(S[] element; value) {
                 static if(is(S == struct) || is(S == class)) {
-                    items ~= toJson(element, serializationStates);
+                    items ~= toJsonImpl(element, serializationStates);
                 } else {
                     items ~= toJson(element);
                 }
@@ -838,13 +837,19 @@ final class JsonSerializer {
      */
     static JSONValue toJson(SerializationOptions options = SerializationOptions.Default,
             T : V[K], V, K)(T value) {
+        bool[size_t] serializationStates;
+        return toJsonImpl!(options)(value, serializationStates);
+    }
+
+    private static JSONValue toJsonImpl(SerializationOptions options = SerializationOptions.Default,
+            T : V[K], V, K)(T value, ref bool[size_t] serializationStates) {
         auto result = JSONValue();
 
         foreach (key; value.keys) {
             static if(is(V == SysTime)) {
                 auto json = toJson(value[key]);
             } else static if(is(V == class) || is(V == struct) || is(V == interface)) {
-                auto json = toJson!(options)(value[key]);
+                auto json = toJsonImpl!(options)(value[key], serializationStates);
             } else {
                 auto json = toJson(value[key]);
             }
