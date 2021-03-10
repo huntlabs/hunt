@@ -79,6 +79,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             // TODO: Tasks pending completion -@zhangxueping at 2021-03-09T09:59:00+08:00
             // Using memory pool
             // ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
+            // dataReceivedHandler(bufferCopy);
             dataReceivedHandler(_bufferForRead);
         } else {
             ChannelTask task = _task;
@@ -113,11 +114,13 @@ abstract class AbstractStream : AbstractSocketChannel {
         bool isDone = true;
         this.clearError();
 
-        if(taskWorker !is null) {
+        // TODO: Tasks pending completion -@zhangxueping at 2021-03-09T09:59:00+08:00
+        // Using memory pool        
+        // if(taskWorker !is null) {
             _bufferForRead = BufferUtils.allocate(_bufferSize);
             _bufferForRead.limit(cast(int)_bufferSize);
             _readBuffer = cast(ubyte[])_bufferForRead.array();
-        }
+        // }
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
 
         // ubyte[] rb = new ubyte[BufferSize];

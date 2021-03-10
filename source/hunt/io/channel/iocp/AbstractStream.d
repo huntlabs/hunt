@@ -291,10 +291,10 @@ abstract class AbstractStream : AbstractSocketChannel {
         _bufferForRead.position(0);
         // dataReceivedHandler(_bufferForRead);
 
+        ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
         if(taskWorker is null) {
-            dataReceivedHandler(_bufferForRead);
+            dataReceivedHandler(bufferCopy);
         } else {
-            ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
             ChannelTask task = _task;
 
             // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-02-05T09:18:02+08:00
