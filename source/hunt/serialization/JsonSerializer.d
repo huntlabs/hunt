@@ -779,6 +779,13 @@ final class JsonSerializer {
      * Basic type
      */
     static JSONValue toJson(T)(T value) if (isBasicType!T) {
+        static if(is(T == double) || is(T == float)) {
+            import std.math : isNaN;
+            if(isNaN(value)) {
+                warning("Uninitialized float/double value. It will be set to zero.");
+                value = 0;
+            }
+        }
         return JSONValue(value);
     }
 
