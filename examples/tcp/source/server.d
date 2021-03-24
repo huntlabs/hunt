@@ -46,10 +46,11 @@ void main() {
         .accepted((TcpListener sender, TcpStream client) {
             debug writefln("new connection from: %s", client.remoteAddress.toString());
             client.received((ByteBuffer buffer) {
-                ubyte[] data = cast(ubyte[]) buffer.getRemaining();
+                ubyte[] data = cast(ubyte[]) buffer.peekRemaining();
                 debug writeln("received bytes: ", data.length);
                 const(ubyte)[] sentData = data; // echo test
                 client.write(sentData);
+                return DataHandleStatus.Done;
             }).disconnected(() {
                 debug writefln("client disconnected: %s", client.remoteAddress.toString());
             }).closed(() {
