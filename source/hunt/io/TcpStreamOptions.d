@@ -3,7 +3,8 @@ module hunt.io.TcpStreamOptions;
 import core.time;
 
 /**
-*/
+ * 
+ */
 class TcpStreamOptions {
     
     // http://www.tldp.org/HOWTO/TCP-Keepalive-HOWTO/usingkeepalive.html
