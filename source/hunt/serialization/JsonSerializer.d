@@ -538,7 +538,7 @@ final class JsonSerializer {
         size_t objHash = value.toHash() + hashOf(T.stringof);
         auto itemPtr = objHash in serializationStates;
         if(itemPtr !is null && *itemPtr) {
-            warningf("%s serialized.", T.stringof);
+            debug(HUNT_DEBUG_MORE) tracef("%s serialized.", T.stringof);
             return JSONValue(null);
         }
         
