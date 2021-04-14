@@ -46,16 +46,16 @@ abstract class AbstractStream : AbstractSocketChannel {
     protected SimpleActionHandler dataWriteDoneHandler;
 
     protected AddressFamily _family;
-    protected ByteBuffer _bufferForRead;
+    // protected ByteBuffer _bufferForRead;
     protected WritingBufferQueue _writeQueue;
     protected bool _isWriteCancelling = false;
 
     this(Selector loop, AddressFamily family = AddressFamily.INET, size_t bufferSize = 4096 * 2) {
         this._family = family;
         _bufferSize = bufferSize;
-        _bufferForRead = BufferUtils.allocate(bufferSize);
-        _bufferForRead.limit(cast(int)bufferSize);
-        _readBuffer = cast(ubyte[])_bufferForRead.array();
+        // _bufferForRead = BufferUtils.allocate(bufferSize);
+        // _bufferForRead.limit(cast(int)bufferSize);
+        // _readBuffer = cast(ubyte[])_bufferForRead.array();
         // _writeQueue = new WritingBufferQueue();
         super(loop, ChannelType.TCP);
         setFlag(ChannelFlag.Read, true);
@@ -67,20 +67,20 @@ abstract class AbstractStream : AbstractSocketChannel {
     abstract bool isConnected() nothrow;
     abstract protected void onDisconnected();
 
-    private void onDataReceived(ptrdiff_t len) {
+    private void onDataReceived(ByteBuffer buffer) {
 
         if (dataReceivedHandler is null) 
             return;
 
-        _bufferForRead.limit(cast(int)len);
-        _bufferForRead.position(0);
+        // _bufferForRead.limit(cast(int)len);
+        // _bufferForRead.position(0);
 
         if(taskWorker is null) {
             // TODO: Tasks pending completion -@zhangxueping at 2021-03-09T09:59:00+08:00
             // Using memory pool
             // ByteBuffer bufferCopy = BufferUtils.clone(_bufferForRead);
             // dataReceivedHandler(bufferCopy);
-            dataReceivedHandler(_bufferForRead);
+            dataReceivedHandler(buffer);
         } else {
             ChannelTask task = _task;
 
@@ -96,7 +96,7 @@ abstract class AbstractStream : AbstractSocketChannel {
                 }
             }
 
-            task.put(_bufferForRead);
+            task.put(buffer);
         }
     }
 
@@ -117,9 +117,9 @@ abstract class AbstractStream : AbstractSocketChannel {
         // TODO: Tasks pending completion -@zhangxueping at 2021-03-09T09:59:00+08:00
         // Using memory pool        
         // if(taskWorker !is null) {
-            _bufferForRead = BufferUtils.allocate(_bufferSize);
+        ByteBuffer    _bufferForRead = BufferUtils.allocate(_bufferSize);
             _bufferForRead.limit(cast(int)_bufferSize);
-            _readBuffer = cast(ubyte[])_bufferForRead.array();
+        ubyte[]   _readBuffer = cast(ubyte[])_bufferForRead.array();
         // }
         ptrdiff_t len = read(this.handle, cast(void*) _readBuffer.ptr, _readBuffer.length);
 
@@ -137,7 +137,9 @@ abstract class AbstractStream : AbstractSocketChannel {
                     infof("fd: %d, 32/%d bytes: %(%02X %)", this.handle, len, _readBuffer[0 .. 32]);
             }
 
-            onDataReceived(len);
+            _bufferForRead.limit(cast(int)len);
+            _bufferForRead.position(0);
+            onDataReceived(_bufferForRead);
 
             // It's prossible that there are more data waitting for read in the read I/O space.
             if (len == _readBuffer.length) {
