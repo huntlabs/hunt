@@ -9,14 +9,14 @@ import core.sync.mutex;
 import core.time;
 import core.thread;
 
-import std.container.slist;
+import std.container.dlist;
 
 
 /**
  * It's a thread-safe queue
  */
 class SimpleQueue(T) : Queue!(T) {
-    private SList!T _list;
+    private DList!T _list;
     private Mutex _headLock;
     private Duration _timeout;
     private bool _isWaiting = false;
