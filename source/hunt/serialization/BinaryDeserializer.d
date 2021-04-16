@@ -4,6 +4,8 @@ import hunt.serialization.Common;
 import hunt.serialization.Specify;
 import std.traits;
 
+import hunt.logging.ConsoleLogger;
+
 /**
  * 
  */

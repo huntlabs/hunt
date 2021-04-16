@@ -151,13 +151,14 @@ void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
     loopMembers!(options, C, T)(obj, val);
 }
 
-void specify(SerializationOptions options, C, T)(auto ref C obj, ref T val)
-        if (isDecerealiser!C && !isOutputRange!(T, ubyte) && isDynamicArray!T && !is(T == string)) {
+void specify(SerializationOptions options, C, T : U[], U)(auto ref C obj, ref T val) 
+        if (isDecerealiser!C && !is(U == ubyte) && !is(T == string))  {
     ushort length;
 
     specify!(options)(obj, length);
     decerealiseArrayImpl!(options)(obj, val, length);
 }
+
 
 void decerealiseArrayImpl(SerializationOptions options, C, T : E[], E, U)(auto ref C obj, ref T val, U length)
         if (is(T == E[], E) && isDecerealiser!C) {
