@@ -370,7 +370,18 @@ final class JsonSerializer {
             return handleException!(T, options.canThrow())(json, 
                 " is not a member of " ~ typeid(T).toString(), defaultValue);
         } else {
-            return (json.type == JSONType.string ? json.str : json.toString()).to!T;
+            if(json.type == JSONType.string) {
+                static if(is(T == string)) {
+                    return json.str;
+                } else {
+                    return to!T(json.str);
+                }
+            } else if(json.type == JSONType.null_) {
+                return T.init;
+            } else {
+                return json.toString().to!T;
+            }
+            // return (json.type == JSONType.string ? json.str : json.toString()).to!T;
         }
     }
 
@@ -429,7 +440,6 @@ final class JsonSerializer {
 
         case JSONType.object:
             foreach (key, value; json.object) {
-                warning(typeid(value));
                 result[key.to!K] = toObject!(U, options)(value);
             }
 
@@ -538,7 +548,7 @@ final class JsonSerializer {
         size_t objHash = value.toHash() + hashOf(T.stringof);
         auto itemPtr = objHash in serializationStates;
         if(itemPtr !is null && *itemPtr) {
-            warningf("%s serialized.", T.stringof);
+            debug(HUNT_DEBUG_MORE) tracef("%s serialized.", T.stringof);
             return JSONValue(null);
         }
         
@@ -779,6 +789,13 @@ final class JsonSerializer {
      * Basic type
      */
     static JSONValue toJson(T)(T value) if (isBasicType!T) {
+        static if(is(T == double) || is(T == float)) {
+            import std.math : isNaN;
+            if(isNaN(value)) {
+                warning("Uninitialized float/double value. It will be set to zero.");
+                value = 0;
+            }
+        }
         return JSONValue(value);
     }
 
