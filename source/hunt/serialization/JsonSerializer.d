@@ -370,7 +370,18 @@ final class JsonSerializer {
             return handleException!(T, options.canThrow())(json, 
                 " is not a member of " ~ typeid(T).toString(), defaultValue);
         } else {
-            return (json.type == JSONType.string ? json.str : json.toString()).to!T;
+            if(json.type == JSONType.string) {
+                static if(is(T == string)) {
+                    return json.str;
+                } else {
+                    return to!T(json.str);
+                }
+            } else if(json.type == JSONType.null_) {
+                return T.init;
+            } else {
+                return json.toString().to!T;
+            }
+            // return (json.type == JSONType.string ? json.str : json.toString()).to!T;
         }
     }
 
@@ -429,7 +440,6 @@ final class JsonSerializer {
 
         case JSONType.object:
             foreach (key, value; json.object) {
-                warning(typeid(value));
                 result[key.to!K] = toObject!(U, options)(value);
             }
 
