@@ -29,10 +29,25 @@ import std.string;
 import std.typecons;
 import std.traits;
 
-// ThreadID getTid()
-// {
-//     return Thread.getThis.id;
-// }
+alias LogLayoutHandler = string delegate(string time_prior, string tid, string level, string myFunc, 
+				string msg, string file, size_t line);
+
+private {
+    __gshared LogLayoutHandler _layoutHandler;
+
+    LogLayoutHandler layoutHandler() {
+        if(_layoutHandler is null) {
+            _layoutHandler = (string time_prior, string tid, string level, string fun, 
+                    string msg, string file, size_t line) {
+
+                return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
+                ~ " | " ~ file ~ ":" ~ to!string(line);
+            };
+        }
+
+        return _layoutHandler;
+    }
+}
 
 version (Windows) {
     import core.sys.windows.wincon;
@@ -234,8 +249,13 @@ class ConsoleLogger {
             fun = func[index + 1 .. $];
         }
 
-        return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
-            ~ " | " ~ file ~ ":" ~ lineNum;
+		LogLayoutHandler handler = layoutHandler();
+		if(handler !is null) {
+			return handler(time_prior, tid, level, fun, msg, file, line);
+		} else {
+            return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
+                ~ " | " ~ file ~ ":" ~ lineNum;
+        }
     }
 
     // private static string defaultLayout(string context, string msg, string level)
@@ -359,6 +379,12 @@ class ConsoleLogger {
         }
     }
 }
+
+
+void setLogLayout(LogLayoutHandler handler) {
+	_layoutHandler = handler;
+}
+
 
 alias trace = ConsoleLogger.trace;
 alias tracef = ConsoleLogger.tracef;

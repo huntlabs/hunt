@@ -425,6 +425,8 @@ class DateTime {
             while (_isClockRunning) {
                 tick(cur);
                 cur = 1 - cur;
+                // BUG: Reported defects -@zhangxueping at 2021-05-12T19:17:53+08:00
+                // crashed
                 Thread.sleep(1.seconds);
             }
         });

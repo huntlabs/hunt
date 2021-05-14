@@ -33,9 +33,25 @@ import std.typecons;
 import std.traits;
 import std.string;
 
-
+alias LogLayoutHandler = string delegate(string time_prior, string tid, string level, string myFunc, 
+				string msg, string file, size_t line);
 
 private:
+
+__gshared LogLayoutHandler _layoutHandler;
+
+LogLayoutHandler layoutHandler() {
+	if(_layoutHandler is null) {
+		_layoutHandler = (string time_prior, string tid, string level, string myFunc, 
+				string msg, string file, size_t line) {
+
+			return time_prior ~ " (" ~ tid ~ ") [" ~ level ~ "] " ~ myFunc ~ 
+				" - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
+		};
+	}
+
+	return _layoutHandler;
+}
 
 class SizeBaseRollover
 {
@@ -460,8 +476,13 @@ protected:
 		else
 			myFunc = func;
 
-		return time_prior ~ " (" ~ tid ~ ") [" ~ toString(
-				level) ~ "] " ~ myFunc ~ " - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
+		LogLayoutHandler handler = layoutHandler();
+		if(handler !is null) {
+			return handler(time_prior, tid, toString(level), myFunc, msg, file, line);
+		} else {
+			return time_prior ~ " (" ~ tid ~ ") [" ~ toString(
+					level) ~ "] " ~ myFunc ~ " - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
+		}
 	}
 
 protected:
@@ -575,6 +596,10 @@ struct LogConf
 void logLoadConf(LogConf conf)
 {
 	g_logger = new Logger(conf);	
+}
+
+void setLogLayout(LogLayoutHandler handler) {
+	_layoutHandler = handler;
 }
 
 mixin(code!("logDebug", LogLevel.LOG_DEBUG));
