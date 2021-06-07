@@ -263,10 +263,36 @@ version (Windows)
 	}
 }
 
+
+string code(string func, LogLevel level, bool f = false)()
+{
+	return "void " ~ func
+		~ `(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		LogLayoutHandler handler = layoutHandler();
+
+		if(g_logger is null) {
+			Logger.writeFormatColor(`
+		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
+				? "f" : "") ~ `(args) , file , line , ` ~ level.stringof ~ `, handler));
+		} else {
+			g_logger.write(`
+		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
+				? "f" : "") ~ `(args) , file , line ,` ~ level.stringof ~ `, handler));
+		}
+	}`;
+}
+
+
+
+public:
+
 /**
-*/
+ * 
+ */
 class Logger
 {
+	private LogLayoutHandler _layoutHandler;
 
 	__gshared Logger[string] g_logger;
 	static Logger createLogger(string name , LogConf conf)
@@ -280,18 +306,9 @@ class Logger
 		return g_logger[name];
 	}
 
-	void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
+	this(LogConf conf, LogLayoutHandler handler = null)
 	{
-		write(level , toFormat(func , logFormat(args) , file , line , level));
-	}
-
-	void logf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
-	{
-		write(level , toFormat(func , logFormatf(args) , file , line , level));
-	}
-
-	this(LogConf conf)
-	{
+		_layoutHandler = handler;
 		_conf = conf;
 		string fileName = conf.fileName;
 
@@ -308,6 +325,81 @@ class Logger
 		immutable void* data = cast(immutable void*) this;
 		if(!_conf.fileName.empty)
 			_tid = spawn(&Logger.worker, data);
+	}
+
+	void logLayoutHandler(LogLayoutHandler handler) {
+		_layoutHandler = handler;
+	}
+
+
+	void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
+	{
+		write(level , toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+	}
+
+	void logf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
+	{
+		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+	}
+
+	void trace(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_DEBUG;
+		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+	}
+
+	void tracef(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_DEBUG;
+		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+	}
+
+	void info(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_INFO;
+		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+	}
+
+	void infof(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_INFO;
+		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+	}
+
+	void warning(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_WARNING;
+		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+	}
+
+	void warningf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_WARNING;
+		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+	}
+
+	void error(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_ERROR;
+		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+	}
+
+	void errorf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_ERROR;
+		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+	}
+
+	void critical(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_FATAL;
+		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+	}
+
+	void criticalf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+	{
+		enum LogLevel level = LogLevel.LOG_FATAL;
+		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
 	void write(LogLevel level, string msg)
@@ -462,7 +554,8 @@ protected:
 		return w.data;
 	}
 
-	static string toFormat(string func, string msg, string file, size_t line, LogLevel level)
+	static string toFormat(string func, string msg, string file, size_t line, 
+			LogLevel level, LogLayoutHandler handler= null)
 	{
 		import hunt.util.DateTime;
 		string time_prior = date("Y-m-d H:i:s");
@@ -476,7 +569,7 @@ protected:
 		else
 			myFunc = func;
 
-		LogLayoutHandler handler = layoutHandler();
+		// LogLayoutHandler handler = layoutHandler();
 		if(handler !is null) {
 			return handler(time_prior, tid, toString(level), myFunc, msg, file, line);
 		} else {
@@ -553,26 +646,6 @@ protected:
 		}
 	}
 }
-
-string code(string func, LogLevel level, bool f = false)()
-{
-	return "void " ~ func
-		~ `(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
-	{
-		if(g_logger is null)
-			Logger.writeFormatColor(`
-		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
-				? "f" : "") ~ `(args) , file , line , ` ~ level.stringof ~ `));
-		else
-			g_logger.write(`
-		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
-				? "f" : "") ~ `(args) , file , line ,` ~ level.stringof ~ ` ));
-	}`;
-}
-
-
-
-public:
 
 enum LogLevel
 {

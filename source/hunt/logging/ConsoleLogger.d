@@ -131,7 +131,8 @@ enum LogLevel {
 }
 
 /**
-*/
+ * 
+ */
 class ConsoleLogger {
     private __gshared LogLevel g_logLevel = LogLevel.Trace;
     private enum traceLevel = toString(LogLevel.Trace);

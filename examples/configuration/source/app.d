@@ -68,7 +68,9 @@ void testApplicationConfig() {
 void testConfig1() {
 	ConfigBuilder conf = new ConfigBuilder(convertConfigPathToRelative("test.config"));
 
-	assertThrown!(EmptyValueException)(conf.app.node1.node2.node3.node4.value());
+	assert(conf.app.node1.node2.node3.node4 is null);
+
+	// assertThrown!(EmptyValueException)(conf.app.node1.node2.node3.node4.value());
 
 	// assert(conf.app.subItem("package").name.value() == "Hunt package"); // use keyword as a node name
 	// assert(conf["app"]["package"]["name"].value() == "Hunt package"); // use keyword as a node name
