@@ -320,7 +320,8 @@ final class JsonSerializer {
     static T handleException(T, bool canThrow = false) (auto ref const(JSONValue) json, 
         string message, T defaultValue = T.init) {
         static if (canThrow) {
-            throw new JSONException(json.toString() ~ " is not a " ~ T.stringof ~ " type");
+            throw new JSONException(json.toString() ~ " is not a " ~ T.stringof ~ 
+                " type. The inner exception: " ~ message);
         } else {
         version (HUNT_DEBUG)
             warningf(" %s is not a %s type. Using the defaults instead! \n Exception: %s",
