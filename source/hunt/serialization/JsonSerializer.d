@@ -546,14 +546,17 @@ final class JsonSerializer {
             return JSONValue(null);
         }
 
-        size_t objHash = value.toHash() + hashOf(T.stringof);
-        auto itemPtr = objHash in serializationStates;
-        if(itemPtr !is null && *itemPtr) {
-            debug(HUNT_DEBUG_MORE) tracef("%s serialized.", T.stringof);
-            return JSONValue(null);
+        static if(options.canCircularDetect) {
+
+            size_t objHash = value.toHash() + hashOf(T.stringof);
+            auto itemPtr = objHash in serializationStates;
+            if(itemPtr !is null && *itemPtr) {
+                debug(HUNT_DEBUG_MORE) warningf("%s serialized.", T.stringof);
+                return JSONValue(null);
+            }
+            
+            serializationStates[objHash] = true;
         }
-        
-        serializationStates[objHash] = true;
 
         auto result = JSONValue();
         static if(options.includeMeta) {
