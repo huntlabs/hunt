@@ -320,7 +320,8 @@ final class JsonSerializer {
     static T handleException(T, bool canThrow = false) (auto ref const(JSONValue) json, 
         string message, T defaultValue = T.init) {
         static if (canThrow) {
-            throw new JSONException(json.toString() ~ " is not a " ~ T.stringof ~ " type");
+            throw new JSONException(json.toString() ~ " is not a " ~ T.stringof ~ 
+                " type. The inner exception: " ~ message);
         } else {
         version (HUNT_DEBUG)
             warningf(" %s is not a %s type. Using the defaults instead! \n Exception: %s",
@@ -545,14 +546,17 @@ final class JsonSerializer {
             return JSONValue(null);
         }
 
-        size_t objHash = value.toHash() + hashOf(T.stringof);
-        auto itemPtr = objHash in serializationStates;
-        if(itemPtr !is null && *itemPtr) {
-            debug(HUNT_DEBUG_MORE) tracef("%s serialized.", T.stringof);
-            return JSONValue(null);
+        static if(options.canCircularDetect) {
+
+            size_t objHash = value.toHash() + hashOf(T.stringof);
+            auto itemPtr = objHash in serializationStates;
+            if(itemPtr !is null && *itemPtr) {
+                debug(HUNT_DEBUG_MORE) warningf("%s serialized.", T.stringof);
+                return JSONValue(null);
+            }
+            
+            serializationStates[objHash] = true;
         }
-        
-        serializationStates[objHash] = true;
 
         auto result = JSONValue();
         static if(options.includeMeta) {

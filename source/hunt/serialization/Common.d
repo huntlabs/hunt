@@ -24,6 +24,8 @@ struct SerializationOptions {
     private bool _ignoreNull = false;
 
     private bool _canThrow = true;
+    
+    private bool _canCircularDetect = true;  // Circular Reference Detect
 
     private int _depth = -1;
 
@@ -66,6 +68,14 @@ struct SerializationOptions {
     SerializationOptions canThrow(bool flag) {
         SerializationOptions r = this;
         r._canThrow = flag;
+        return r;
+    }
+
+    bool canCircularDetect() { return _canCircularDetect; }
+
+    SerializationOptions canCircularDetect(bool flag) {
+        SerializationOptions r = this;
+        r._canCircularDetect = flag;
         return r;
     }
 
