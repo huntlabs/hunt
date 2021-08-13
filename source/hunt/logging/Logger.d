@@ -293,6 +293,7 @@ public:
 class Logger
 {
 	private LogLayoutHandler _layoutHandler;
+	private bool _isRunning = true;
 
 	__gshared Logger[string] g_logger;
 	static Logger createLogger(string name , LogConf conf)
@@ -331,6 +332,17 @@ class Logger
 		_layoutHandler = handler;
 	}
 
+	LogConf conf() {
+		return _conf;
+	}
+
+	void stop() {
+		_isRunning = false;
+	}
+
+	bool isRunning() {
+		return _isRunning;
+	}
 
 	void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
@@ -428,13 +440,19 @@ protected:
 
 	static void worker(immutable void* ptr)
 	{
+		import std.stdio;
 		Logger logger = cast(Logger) ptr;
-		bool flag = true;
-		while (flag)
+		while (logger !is null && logger.isRunning())
 		{
 			receive((string msg) {
 				logger.saveMsg(msg);
-			}, (OwnerTerminated e) { flag = false; }, (Variant any) {  });
+			}, (OwnerTerminated e) { 
+				version(HUNT_DEBUG_MORE) {
+					logger.saveMsg("Logger OwnerTerminated");
+				}
+			}, (Variant any) {
+				logger.saveMsg("Unknown data type");
+			  });
 		}
 	}
 
