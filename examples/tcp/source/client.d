@@ -43,6 +43,8 @@ void main() {
 		} else {
 			client.close();
 		}
+
+		return DataHandleStatus.Done;
 	}).closed(() { 
 		writeln("The connection closed!"); loop.stop(); 
 	}).error((IoError error) {
