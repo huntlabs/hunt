@@ -86,7 +86,7 @@ abstract class Task {
 
     void finish() {
         version(HUNT_IO_DEBUG) {
-            tracef("The task status: %s", _status);
+            tracef("The task %d status: %s", id, _status);
         }
 
         if(cas(&_status, TaskStatus.Processing, TaskStatus.Done) || 
@@ -94,11 +94,11 @@ abstract class Task {
                 
             _endTime = MonoTime.currTime;
             version(HUNT_IO_DEBUG) {
-                infof("The task done.");
+                infof("The task %d done.", id);
             }
         } else {
             version(HUNT_IO_DEBUG) {
-                warningf("The task status: %s", _status);
+                warningf("The task %d status: %s", _status, id);
                 warningf("Failed to set the task status to Done: %s", _status);
             }
         }
@@ -115,7 +115,7 @@ abstract class Task {
             scope(exit) {
                 finish();
                 version(HUNT_IO_DEBUG) {
-                    info("Task Done!");
+                    infof("Task %d Done!", id);
                 }
             }
             doExecute();

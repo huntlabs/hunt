@@ -11,4 +11,6 @@ abstract class Queue(T) {
 
     void push(T task);
 
+    void clear();
+
 }

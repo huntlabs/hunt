@@ -53,11 +53,14 @@ class SimpleQueue(T) : Queue!(T) {
             _isWaiting = false;
             if(!v) {
                 version (HUNT_IO_DEBUG) {
-                    tracef("Timeout in %s.", _timeout);
+                    infof("Timeout in %s.", _timeout);
                 }
                 return T.init;
             }
         }
+
+        if(_list.empty())   
+            return T.init;
 
         T item = _list.front();
         _list.removeFront();
@@ -75,5 +78,14 @@ class SimpleQueue(T) : Queue!(T) {
         if(_isWaiting) {
             _notEmpty.notify();
         }
+    }
+
+    override void clear() {
+        _headLock.lock();
+        scope (exit)
+            _headLock.unlock();
+        
+        _list.clear();
+        _notEmpty.notify();
     }
 }

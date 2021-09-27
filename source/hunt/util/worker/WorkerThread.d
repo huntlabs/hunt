@@ -51,7 +51,16 @@ class WorkerThread : Thread {
     }
 
     void stop() {
+        version(HUNT_IO_DEBUG) {
+            infof("Stopping thread %s", this.name);
+        }
         _state = WorkerThreadState.Stopped;
+
+        _mutex.lock();
+        scope (exit) {
+            _mutex.unlock();
+        }
+        _condition.notify();
     }
 
     bool isBusy() {
@@ -107,9 +116,14 @@ class WorkerThread : Thread {
 
                 collectResoure();
                 _task = null;
-                bool r = cas(&_state, WorkerThreadState.Busy, WorkerThreadState.Idle);
-                if(!r) {
-                    warningf("Failed to set thread %s to Idle, its state is %s", this.name, _state);
+
+                if(_state != WorkerThreadState.Stopped) {
+                    bool r = cas(&_state, WorkerThreadState.Busy, WorkerThreadState.Idle);
+                    version(HUNT_IO_DEBUG) {
+                        if(!r) {
+                            warningf("Failed to set thread %s to Idle, its state is %s", this.name, _state);
+                        }
+                    }
                 }
             } 
 

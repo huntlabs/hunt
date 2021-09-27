@@ -21,6 +21,7 @@ import std.concurrency;
 class Worker {
 
     private size_t _size;
+    private Thread _masterThread;
     private WorkerThread[] _workerThreads;
     private Task[size_t] _tasks;
     private Mutex _taskLocker;
@@ -120,16 +121,40 @@ class Worker {
     void run() {
         bool r = cas(&_isRunning, false, true);
         if(r) {
-            import std.parallelism;
-            auto t = task(&doRun);
-            t.executeInNewThread();
+            _masterThread = new Thread(&doRun);
+            _masterThread.start();
+            // import std.parallelism;
+            // auto t = task(&doRun);
+            // t.executeInNewThread();
         }
     }
 
     void stop() {
-        _isRunning = false;
-        foreach(size_t index; 0 .. _size) {
-            _workerThreads[index].stop();
+        bool r = cas(&_isRunning, true, false);
+
+        if(r) {
+            version(HUNT_IO_DEBUG) {
+                info("Stopping all the threads...");
+            }
+
+
+            foreach(size_t index; 0 .. _size) {
+                _workerThreads[index].stop();
+                _workerThreads[index].join();
+            }
+
+            
+            // To stop the master thread as soon as possible.
+            // _taskQueue.push(null); 
+            _taskQueue.clear();
+
+            if(_masterThread !is null) {
+                _masterThread.join();
+            }
+
+            version(HUNT_IO_DEBUG) {
+                info("All the threads stopped.");
+            }
         }
     }
 
@@ -151,6 +176,8 @@ class Worker {
             try {
                 version(HUNT_IO_DEBUG) info("running...");
                 Task task = _taskQueue.pop();
+                if(!_isRunning) break;
+                
                 if(task is null) {
                     version(HUNT_IO_DEBUG) {
                         warning("A null task popped!");
@@ -184,7 +211,7 @@ class Worker {
             }
         }
 
-        version(HUNT_IO_DEBUG) warning("Worker stopped!");
+        version(HUNT_IO_DEBUG) info("Worker stopped!");
 
     }
 
