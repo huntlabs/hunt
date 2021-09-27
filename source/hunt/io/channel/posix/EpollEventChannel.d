@@ -58,7 +58,7 @@ class EpollEventChannel : EventChannel {
         version (HUNT_IO_DEBUG) tracef("onClose, [fd=%d]...", this.handle);
         super.onClose();
         core.sys.posix.unistd.close(this.handle);
-        version (HUNT_IO_DEBUG_MORE) tracef("onClose done, [fd=%d]", this.handle);
+        version (HUNT_IO_DEBUG) tracef("onClose done, [fd=%d]", this.handle);
     }
 
 }

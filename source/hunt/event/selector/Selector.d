@@ -76,7 +76,7 @@ abstract class Selector {
         GC.setAttr(cast(void*)context, GC.BlkAttr.NO_MOVE);
         version (HUNT_IO_DEBUG) {
             int infd = cast(int) channel.handle;
-            tracef("Register channel@%s: fd=%d, selector: %d", context, infd, getId());
+            infof("Register channel@%s: fd=%d, selector: %d", context, infd, getId());
         }        
         return true;
     }
@@ -111,9 +111,24 @@ abstract class Selector {
             version (HUNT_IO_DEBUG) warningf("The current selector %d has being running already!", _id);
             return;
         }
+
         this.timeout = timeout;
-        version (HUNT_IO_DEBUG) trace("runAsync ...");
-        Thread th = new Thread(() { 
+        version (HUNT_IO_DEBUG) tracef("runAsync ... Thread: %d", Thread.getAll().length);
+        
+        // _workThread = new Thread(() { 
+        //     try {
+        //         doRun(handler); 
+        //     } catch (Throwable t) {
+        //         warning(t.msg);
+        //         version(HUNT_DEBUG) warning(t.toString());
+        //     }
+        // });
+        // // th.isDaemon = true; // unstable
+        // _workThread.start();
+
+        import std.parallelism;
+
+        auto workerTask = task(() { 
             try {
                 doRun(handler); 
             } catch (Throwable t) {
@@ -121,9 +136,12 @@ abstract class Selector {
                 version(HUNT_DEBUG) warning(t.toString());
             }
         });
-        // th.isDaemon = true; // unstable
-        th.start();
+        
+        taskPool.put(workerTask);
     }
+
+    // private Thread _workThread;
+
     
     private void doRun(SimpleEventHandler handler=null) {
         if(cas(&_running, false, true)) {
@@ -141,6 +159,7 @@ abstract class Selector {
     void stop() {
         version (HUNT_IO_DEBUG)
             tracef("Stopping selector %d. _running=%s, _isStopping=%s", _id, _running, _isStopping); 
+        
         if(cas(&_isStopping, false, true)) {
             try {
                 onStop();
@@ -148,6 +167,9 @@ abstract class Selector {
                 warning(t.msg);
                 version(HUNT_DEBUG) warning(t);
             }
+
+            // if(_workThread !is null)
+            //     _workThread.join;
         }
     }
 

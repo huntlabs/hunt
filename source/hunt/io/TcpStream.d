@@ -158,8 +158,6 @@ class TcpStream : AbstractStream {
         try {
             version (HUNT_DEBUG)
                 tracef("Connecting to %s...", addr);
-            // Address binded = createAddress(this.socket.addressFamily);
-            // this.socket.bind(binded);
             version (HAVE_IOCP) {
                 this.socket.blocking = false;
                 start();
@@ -211,6 +209,7 @@ class TcpStream : AbstractStream {
             infof("isKeepalive: %s, keepaliveTime: %d seconds, Interval: %d seconds", 
                 _tcpOption.isKeepalive, _tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
         }
+
         version (HAVE_EPOLL) {
             if (_tcpOption.isKeepalive) {
                 this.socket.setKeepAlive(_tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
@@ -332,7 +331,7 @@ class TcpStream : AbstractStream {
         }
 
         if (!_isConnected) {
-            string msg = format("The connection %s is closed!", this.remoteAddress.toString());
+            string msg = format("The connection %s is closed! Writting cancelled.", this.remoteAddress.toString());
             throw new Exception(msg);
         }
 
@@ -351,6 +350,7 @@ class TcpStream : AbstractStream {
                         _error = true;
                         warningf(_errorMessage);
                         throw new Exception(_errorMessage);
+                        // throw new IoError(ErrorCode.INTERRUPTED, _errorMessage);
                         // break;
                     }
 
@@ -358,7 +358,8 @@ class TcpStream : AbstractStream {
                         _errorMessage= format("The connection %s is closing or closed!", this.remoteAddress.toString());
                         _error = true;
                         warningf("%s, %s", isClosing(), isClosed());
-                        throw new Exception(_errorMessage);
+                        throw new Exception(_errorMessage); 
+                        // throw new IoError(ErrorCode.CONNECTIONABORTED, _errorMessage);
                         // break;
                     }
 

@@ -20,20 +20,22 @@ import core.thread;
 import std.parallelism;
 import std.random;
 
-// alias HuntTaskPool = hunt.util.TaskPool.TaskPool;
+import core.atomic;
 
 /**
  * 
  */
 final class EventLoop : AbstractSelector {
 
+    private static shared int idCounter = 0;
+
     this() {
-        int id = uniform(0, 1024);
+        int id = atomicOp!("+=")(idCounter, 1);
         super(id, 1);
     }
 
     this(Worker worker) {
-        int id = uniform(0, 1024);
+        int id = atomicOp!("+=")(idCounter, 1);
         super(id, 1, worker);
     }
 
@@ -48,13 +50,13 @@ final class EventLoop : AbstractSelector {
             return;
         }
         
-        version (HUNT_IO_DEBUG) 
-        tracef("Stopping event loop %d...", getId());
         if(isSelfThread()) {
             version (HUNT_IO_DEBUG) infof("Try to stop the event loop %d in another thread", getId());
             auto stopTask = task(&stop);
             std.parallelism.taskPool.put(stopTask);
         } else {
+            version (HUNT_IO_DEBUG) 
+            warningf("Stopping event loop %d...", getId());
             super.stop();
         }
     }
