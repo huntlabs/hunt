@@ -31,12 +31,12 @@ final class EventLoop : AbstractSelector {
 
     this() {
         int id = atomicOp!("+=")(idCounter, 1);
-        super(id, 1);
+        super(id-1, 1);
     }
 
     this(Worker worker) {
         int id = atomicOp!("+=")(idCounter, 1);
-        super(id, 1, worker);
+        super(id-1, 1, worker);
     }
 
     this(size_t id, size_t divider, Worker worker = null) {

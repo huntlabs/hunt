@@ -140,7 +140,7 @@ abstract class Selector {
         taskPool.put(workerTask);
     }
 
-    // private Thread _workThread;
+    private Thread _workThread;
 
     
     private void doRun(SimpleEventHandler handler=null) {
@@ -168,8 +168,8 @@ abstract class Selector {
                 version(HUNT_DEBUG) warning(t);
             }
 
-            // if(_workThread !is null)
-            //     _workThread.join;
+            if(_workThread !is null)
+                _workThread.join;
         }
     }
 

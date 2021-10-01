@@ -123,9 +123,6 @@ class Worker {
         if(r) {
             _masterThread = new Thread(&doRun);
             _masterThread.start();
-            // import std.parallelism;
-            // auto t = task(&doRun);
-            // t.executeInNewThread();
         }
     }
 
@@ -177,7 +174,7 @@ class Worker {
                 version(HUNT_IO_DEBUG) info("running...");
                 Task task = _taskQueue.pop();
                 if(!_isRunning) break;
-                
+
                 if(task is null) {
                     version(HUNT_IO_DEBUG) {
                         warning("A null task popped!");

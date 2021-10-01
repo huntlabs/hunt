@@ -38,11 +38,11 @@ void main() {
 
     // dfmt off
     listener
-        .bind(8080)
-        .listen(1024)
         .error((IoError error) {
             writefln("error occurred: %d  %s", error.errorCode, error.errorMsg);
         })
+        .bind(8080)
+        .listen(1024)
         .accepted((TcpListener sender, TcpStream client) {
             debug writefln("new connection from: %s", client.remoteAddress.toString());
             client.received((ByteBuffer buffer) {
