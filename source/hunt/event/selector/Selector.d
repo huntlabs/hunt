@@ -227,4 +227,11 @@ abstract class Selector {
     bool isSelfThread() {
         return _thread is Thread.getThis();
     }
+
+    override string toString() {
+        import std.format;
+        string str = format("Selector%d", this.getId());
+
+        return str;
+    }    
 }

@@ -132,9 +132,12 @@ class TcpStream : AbstractStream {
         _remoteAddress = addr;
         import std.parallelism;
 
-        auto connectionTask = task(&doConnect, addr);
-        taskPool.put(connectionTask);
-        // doConnect(addr);
+        version(HUNT_DEBUG) tracef("Try to connect to %s", addr);
+        // FIXME: Needing refactor or cleanup -@zhangxueping at 2021-10-12T10:02:52+08:00
+        // The task will not run when the concurrent number is over 15;
+        // auto connectionTask = task(&doConnect, addr);
+        // taskPool.put(connectionTask);
+        doConnect(addr);
     }
 
     void reconnect() {
@@ -155,6 +158,11 @@ class TcpStream : AbstractStream {
     }
 
     protected override bool doConnect(Address addr)  {
+        if(!this.socket.isAlive) {
+            warning("socket is not ready.");
+            return false;
+        }
+
         try {
             version (HUNT_DEBUG)
                 tracef("Connecting to %s...", addr);
