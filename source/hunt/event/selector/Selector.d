@@ -115,20 +115,7 @@ abstract class Selector {
         this.timeout = timeout;
         version (HUNT_IO_DEBUG) tracef("runAsync ... Thread: %d", Thread.getAll().length);
         
-        // _workThread = new Thread(() { 
-        //     try {
-        //         doRun(handler); 
-        //     } catch (Throwable t) {
-        //         warning(t.msg);
-        //         version(HUNT_DEBUG) warning(t.toString());
-        //     }
-        // });
-        // // th.isDaemon = true; // unstable
-        // _workThread.start();
-
-        import std.parallelism;
-
-        auto workerTask = task(() { 
+        _workThread = new Thread(() { 
             try {
                 doRun(handler); 
             } catch (Throwable t) {
@@ -136,8 +123,23 @@ abstract class Selector {
                 version(HUNT_DEBUG) warning(t.toString());
             }
         });
+        // th.isDaemon = true; // unstable
+        _workThread.start();
+
+        // BUG: Reported defects -@zhangxueping at 2021-10-12T18:25:30+08:00
+        // https://issues.dlang.org/show_bug.cgi?id=22346
+        // import std.parallelism;
+
+        // auto workerTask = task(() { 
+        //     try {
+        //         doRun(handler); 
+        //     } catch (Throwable t) {
+        //         warning(t.msg);
+        //         version(HUNT_DEBUG) warning(t.toString());
+        //     }
+        // });
         
-        taskPool.put(workerTask);
+        // taskPool.put(workerTask);
     }
 
     private Thread _workThread;
