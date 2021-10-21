@@ -30,7 +30,7 @@ import std.typecons;
 import std.traits;
 
 alias LogLayoutHandler = string delegate(string time_prior, string tid, string level, string myFunc, 
-				string msg, string file, size_t line);
+                string msg, string file, size_t line);
 
 private {
     __gshared LogLayoutHandler _layoutHandler;
@@ -40,8 +40,10 @@ private {
             _layoutHandler = (string time_prior, string tid, string level, string fun, 
                     string msg, string file, size_t line) {
 
-                return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
-                ~ " | " ~ file ~ ":" ~ to!string(line);
+                import std.format;
+                return format("%s | %s | %s | %s | %s | %s:%d", time_prior, tid, level, fun, msg, file, line);
+               /* return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
+                ~ " | " ~ file ~ ":" ~ to!string(line);*/
             };
         }
 
@@ -234,7 +236,7 @@ class ConsoleLogger {
 
     private static string layout(string file = __FILE__, size_t line = __LINE__,
             string func = __FUNCTION__)(string msg, string level) {
-        enum lineNum = std.conv.to!string(line);
+        //enum lineNum = std.conv.to!string(line);
         string time_prior = Clock.currTime.toString();
         string tid = std.conv.to!string(cast(size_t)getTid());
 
@@ -250,12 +252,14 @@ class ConsoleLogger {
             fun = func[index + 1 .. $];
         }
 
-		LogLayoutHandler handler = layoutHandler();
-		if(handler !is null) {
-			return handler(time_prior, tid, level, fun, msg, file, line);
-		} else {
-            return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
-                ~ " | " ~ file ~ ":" ~ lineNum;
+        LogLayoutHandler handler = layoutHandler();
+        if(handler !is null) {
+            return handler(time_prior, tid, level, fun, msg, file, line);
+        } else {
+            import std.format;
+            return format("%s | %s | %s | %s | %s | %s:%d", time_prior, tid, level, fun, msg, file, line);
+           /* return time_prior ~ " | " ~ tid ~ " | " ~ level ~ " | " ~ fun ~ " | " ~ msg
+                ~ " | " ~ file ~ ":" ~ lineNum;*/
         }
     }
 
@@ -383,7 +387,7 @@ class ConsoleLogger {
 
 
 void setLogLayout(LogLayoutHandler handler) {
-	_layoutHandler = handler;
+    _layoutHandler = handler;
 }
 
 

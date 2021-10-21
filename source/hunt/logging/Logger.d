@@ -44,9 +44,10 @@ LogLayoutHandler layoutHandler() {
 	if(_layoutHandler is null) {
 		_layoutHandler = (string time_prior, string tid, string level, string myFunc, 
 				string msg, string file, size_t line) {
-
-			return time_prior ~ " (" ~ tid ~ ") [" ~ level ~ "] " ~ myFunc ~ 
-				" - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
+			import std.format;
+			return format("%s (%s) [%s] %s - %s - %s:%d", time_prior, tid, level, myFunc, msg, file, line);
+			//return time_prior ~ " (" ~ tid ~ ") [" ~ level ~ "] " ~ myFunc ~
+			//	" - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
 		};
 	}
 
@@ -591,8 +592,10 @@ protected:
 		if(handler !is null) {
 			return handler(time_prior, tid, toString(level), myFunc, msg, file, line);
 		} else {
-			return time_prior ~ " (" ~ tid ~ ") [" ~ toString(
-					level) ~ "] " ~ myFunc ~ " - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
+			/*return time_prior ~ " (" ~ tid ~ ") [" ~ toString(
+					level) ~ "] " ~ myFunc ~ " - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);*/
+			import std.format;
+			return format("%s | %s | %s | %s | %s | %s:%d", time_prior, tid, level, myFunc, msg, file, line);
 		}
 	}
 
