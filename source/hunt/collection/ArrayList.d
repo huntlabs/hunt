@@ -18,15 +18,16 @@ import std.range;
 import std.traits;
 
 import hunt.Exceptions;
-import hunt.collection.Array;
 import hunt.collection.AbstractList;
 import hunt.collection.Collection;
 import hunt.collection.List;
 import hunt.util.Comparator;
 import hunt.util.Functional;
 
+
 /**
-*/
+ * 
+ */
 class ArrayList(E) : AbstractList!E {
 
     /**
@@ -34,20 +35,14 @@ class ArrayList(E) : AbstractList!E {
      */
     private enum int DEFAULT_CAPACITY = 10;
 
-    /**
-     * Shared empty array instance used for empty instances.
-     */
-    private enum Object[] EMPTY_ELEMENTDATA = [];
-
-    /**
-     * Shared empty array instance used for default sized empty instances. We
-     * distinguish this from EMPTY_ELEMENTDATA to know how much to inflate when
-     * first element is added.
-     */
-    private enum Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = [];
-
     
-    protected Array!(E) _array;
+    protected E[] _array;
+
+    /**
+     * The size of the ArrayList (the number of elements it contains).
+     *
+     */
+    private int _size = 0;
 
     /**
      * Constructs an empty list with the specified initial capacity.
@@ -57,24 +52,22 @@ class ArrayList(E) : AbstractList!E {
      *         is negative
      */
     this(int initialCapacity) {
-        _array.reserve(initialCapacity);
+        
+        if (initialCapacity > 0) {
+            this._array = new E[initialCapacity];
+        } else if (initialCapacity == 0) {
+            this._array = [];
+        } else {
+            throw new Exception("Illegal Capacity: " ~ initialCapacity.to!string());
+        }
         super();
-        // if (initialCapacity > 0) {
-        //     this._array = new Object[initialCapacity];
-        // } else if (initialCapacity == 0) {
-        //     this._array = EMPTY_ELEMENTDATA;
-        // } else {
-        //     throw new Exception("Illegal Capacity: "+
-        //                                        initialCapacity);
-        // }
     }
 
     /**
      * Constructs an empty list with an initial capacity of ten.
      */
     this() {
-        // this._array = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
-        _array.reserve(16);
+        _array = new E[DEFAULT_CAPACITY];
         super();
     }
 
@@ -86,19 +79,28 @@ class ArrayList(E) : AbstractList!E {
      * @param c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-    this(ref Array!E arr) {
-        _array = arr;
-    }
+    // this(E[] arr) {
+    //     _array = arr;
+    // }
 
     this(E[] arr) {
-        _array.insertBack(arr);
+        _array = new E[arr.length];
+        _array[0..arr.length] = arr[0..$];
+        _size = cast(int)arr.length;
     }
 
     this(Collection!E c) {
+        _array = new E[c.size()];
+        size_t index = 0;
         foreach(E e; c) {
-            _array.insertBack(e);
+            // _array.insertBack(e);
+            _array[index] = e;
+            index++;
         }
+        
+        _size = cast(int)index;
     }
+
 
     /**
      * Trims the capacity of this <tt>ArrayList</tt> instance to be the
@@ -158,7 +160,56 @@ class ArrayList(E) : AbstractList!E {
      */
     private enum int MAX_ARRAY_SIZE = int.max - 8;
 
+    /**
+     * Increases the capacity to ensure that it can hold at least the
+     * number of elements specified by the minimum capacity argument.
+     *
+     * @param minCapacity the desired minimum capacity
+     * @throws OutOfMemoryError if minCapacity is less than zero
+     */
+    private E[] grow(int minCapacity) {
+        E[] r = new E[newCapacity(minCapacity)];
+        r[0.._size] = _array[0.._size];
+        return r;
+    }
 
+    private E[] grow() {
+        return grow(size + 1);
+    }
+
+
+    /**
+     * Returns a capacity at least as large as the given minimum capacity.
+     * Returns the current capacity increased by 50% if that suffices.
+     * Will not return a capacity greater than MAX_ARRAY_SIZE unless
+     * the given minimum capacity is greater than MAX_ARRAY_SIZE.
+     *
+     * @param minCapacity the desired minimum capacity
+     * @throws OutOfMemoryError if minCapacity is less than zero
+     */
+    private int newCapacity(int minCapacity) {
+        // overflow-conscious code
+        int oldCapacity = cast(int)_array.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity <= 0) {
+            if (_array is null)
+                return max(DEFAULT_CAPACITY, minCapacity);
+            if (minCapacity < 0) // overflow
+                throw new OutOfMemoryError();
+            return minCapacity;
+        }
+        return (newCapacity - MAX_ARRAY_SIZE <= 0)
+            ? newCapacity
+            : hugeCapacity(minCapacity);
+    }
+
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) // overflow
+            throw new OutOfMemoryError();
+        return (minCapacity > MAX_ARRAY_SIZE)
+            ? int.max
+            : MAX_ARRAY_SIZE;
+    }
 
     /**
      * Returns the number of elements in this list.
@@ -166,7 +217,7 @@ class ArrayList(E) : AbstractList!E {
      * @return the number of elements in this list
      */
     override int size() {
-        return cast(int)_array.length;
+        return _size;
     }
 
     /**
@@ -175,7 +226,7 @@ class ArrayList(E) : AbstractList!E {
      * @return <tt>true</tt> if this list contains no elements
      */
     override bool isEmpty() {
-        return _array.empty;
+        return _array.length == 0;
     }
 
     /**
@@ -188,19 +239,8 @@ class ArrayList(E) : AbstractList!E {
      * @return <tt>true</tt> if this list contains the specified element
      */
     override bool contains(E o) const{
-        return _array[].canFind(o);
+        return _array.canFind(o);
     }
-
-
-    /**
-     * Returns a shallow copy of this <tt>ArrayList</tt> instance.  (The
-     * elements themselves are not copied.)
-     *
-     * @return a clone of this <tt>ArrayList</tt> instance
-     */
-    // Object clone() {
-
-    // }
 
     /**
      * Returns an array containing all of the elements in this list
@@ -217,17 +257,15 @@ class ArrayList(E) : AbstractList!E {
      *         proper sequence
      */
     override E[] toArray() {
-        return _array.array;
+        return _array[0.._size];
     }
-
-    
 
     // Positional Access Operations
 
-    // 
-    E elementData(int index) {
-        return _array[index];
-    }
+    // // 
+    // E elementData(int index) {
+    //     return _array[index];
+    // }
 
     /**
      * Returns the element at the specified position in this list.
@@ -239,7 +277,7 @@ class ArrayList(E) : AbstractList!E {
     override E get(int index) {
         rangeCheck(index);
 
-        return cast(E)_array[index];
+        return _array[index];
     }
 
     /**
@@ -271,7 +309,13 @@ class ArrayList(E) : AbstractList!E {
     //     return true;
     // }
     override bool add(E e) {
-        return _array.insertBack(e) >=0;
+        modCount++;
+        if(_size == _array.length) {
+            _array = grow();
+        }
+        _array[_size] = e;
+        _size++;
+        return true;
     }
 
     /**
@@ -284,13 +328,20 @@ class ArrayList(E) : AbstractList!E {
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     override void add(int index, E element) {
-        if(_array.length == 0)
-            _array.insertBack(element) ;
-        else {
-            if(index < 0) 
-                index = 0;
-            _array.insertBefore(_array[index .. $], element);
+        rangeCheckForAdd(index);
+        modCount++;
+        int s = size;
+        
+        if(s == _array.length) {
+            _array = grow();
         }
+        
+        for(int i = s; i>index; i--) {
+            _array[i] = _array[i-1];
+        }
+
+        _array[index] = element;
+        _size = s + 1;
     }
 
     alias add = AbstractList!(E).add;
@@ -305,8 +356,17 @@ class ArrayList(E) : AbstractList!E {
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     override E removeAt(int index) {
+        rangeCheck(index);
+
+        modCount++;
         E oldValue = _array[index];
-        _array.linearRemove(_array[index .. index+1]);
+        
+        int s = size;
+        for(int i = index; i<s-1; i++) {
+            _array[i] = _array[i+1];
+        }
+
+        _size = s - 1;
         return oldValue;
     }
 
@@ -323,23 +383,18 @@ class ArrayList(E) : AbstractList!E {
      * @param o element to be removed from this list, if present
      * @return <tt>true</tt> if this list contained the specified element
      */
-    override bool remove(E o)
-    {
+    override bool remove(E o) {
         int index = indexOf(o);
-        if(index < 0)   return false;
-        _array.linearRemove(_array[index .. index+1]);
+        if(index < 0)  return false;
+        removeAt(index);
         return true;
     }
 
     override int indexOf(E o) {
-        for(size_t i=0; i<_array.length; i++)
-        {
-            static if(is(E == class))
-            {
+        for(size_t i=0; i<_array.length; i++) {
+            static if(is(E == class)) {
                 if(_array[i] is o) return cast(int)i;
-            }
-            else
-            {
+            } else {
                 if(_array[i] == o) return cast(int)i;
             }
         }
@@ -361,7 +416,7 @@ class ArrayList(E) : AbstractList!E {
             throw new NullPointerException();
             
         int result = 0;
-        foreach(E v; _array) {
+        foreach(E v; _array[0.._size]) {
             result = dg(v);
             if(result != 0) return result;
         }
@@ -387,7 +442,7 @@ class ArrayList(E) : AbstractList!E {
      * be empty after this call returns.
      */
     override void clear() {
-        _array.clear();
+        _size = 0;
     }
 
     /**
@@ -459,7 +514,18 @@ class ArrayList(E) : AbstractList!E {
      *          toIndex < fromIndex})
      */
     protected void removeRange(int fromIndex, int toIndex) {
-        _array.linearRemove(_array[fromIndex..toIndex]);
+        if (fromIndex > toIndex) {
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(fromIndex, toIndex));
+        }
+        
+        modCount++;
+        // _array.linearRemove(_array[fromIndex..toIndex]);
+        int s = size;
+        for(int i = toIndex; i<s; i++) {
+            _array[fromIndex++] = _array[i];
+        }
+
+        _size = s - (toIndex - fromIndex);
     }
 
     /**
@@ -469,7 +535,7 @@ class ArrayList(E) : AbstractList!E {
      * which throws an ArrayIndexOutOfBoundsException if index is negative.
      */
     private void rangeCheck(int index) {
-        if (index >= _array.length)
+         if (index >= _size || index < 0)
             throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
 
@@ -477,7 +543,7 @@ class ArrayList(E) : AbstractList!E {
      * A version of rangeCheck used by add and addAll.
      */
     private void rangeCheckForAdd(int index) {
-        if (index > _array.length || index < 0)
+        if (index > _size || index < 0)
             throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
 
@@ -487,9 +553,17 @@ class ArrayList(E) : AbstractList!E {
      * this "outlining" performs best with both server and client VMs.
      */
     private string outOfBoundsMsg(int index) {
-        return "Index: "~index.to!string()~", Size: " ~ to!string(size());
+        return "Index: " ~ index.to!string() ~" , Size: " ~ to!string(size());
     }
 
+
+    /**
+     * A version used in checking (fromIndex > toIndex) condition
+     */
+    private static string outOfBoundsMsg(int fromIndex, int toIndex) {
+        return "From Index: " ~ fromIndex.to!string() ~ " > To Index: " ~ toIndex.to!string();
+    }
+    
     /**
      * Removes from this list all of its elements that are contained in the
      * specified collection.
@@ -669,9 +743,9 @@ class ArrayList(E) : AbstractList!E {
             
             int expectedModCount = modCount;
             if(isAscending)
-                std.algorithm.sort!(lessThan!E)(_array[]);
+                std.algorithm.sort!(lessThan!E)(_array);
             else
-                std.algorithm.sort!(greaterthan!E)(_array[]);
+                std.algorithm.sort!(greaterthan!E)(_array);
                 
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
@@ -682,7 +756,7 @@ class ArrayList(E) : AbstractList!E {
 
     override void sort(Comparator!E c) {
         int expectedModCount = modCount;
-        std.algorithm.sort!((a, b) => c.compare(a, b) < 0)(_array[]);
+        std.algorithm.sort!((a, b) => c.compare(a, b) < 0)(_array);
 
         if (modCount != expectedModCount)
             throw new ConcurrentModificationException();

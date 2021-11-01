@@ -1,4 +1,4 @@
-module ArrayListDemo;
+module test.ArrayListDemo;
 
 import common;
 
@@ -43,7 +43,7 @@ class ArrayListDemo
         al.add(2, "PLAY");
 
         assert(al.size() == 5);
-        assert(al[2] == "PLAY");
+        assert(al[2] == "PLAY", al[2]);
 
         writeln(al);
         writeln("Is arraylist empty? " ~ al.isEmpty().to!string());
@@ -60,6 +60,7 @@ class ArrayListDemo
         al.clear();
         writeln("After clear ArrayList:" ~ al.toString());
         assert(al.size() == 0);
+        assert(al.toArray() == []);
 
     }
 
@@ -193,5 +194,27 @@ class ArrayListDemo
             trace(s);
         }
     }
+
+    void testRemove() {
+        ArrayList!(string) arrl = new ArrayList!(string)();
+        //adding elements to the end
+        arrl.add("First");
+        arrl.add("Second");
+        arrl.add("Third");
+
+        tracef("size: %d", arrl.size());
+
+        List!(string) tokens = new ArrayList!(string)(arrl);
+        assert(tokens.size() == 3);
+
+        string token;
+        while(tokens.size() > 0) {
+            token = tokens.removeAt(0);
+            // tracef("%s removed", token);
+        }
+        assert(tokens.size() == 0);
+
+
+    }    
 
 }
