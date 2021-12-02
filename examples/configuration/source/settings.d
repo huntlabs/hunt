@@ -1,6 +1,7 @@
 module settings;
 
 import hunt.util.Configuration;
+import core.time;
 
 @Configuration("http")
 struct TestHttpConfig
@@ -87,6 +88,9 @@ class BuilderTest1Config
     int interval2 = 600;
 
     int interval3 = 700;
+
+    
+    Duration timeout;
 
 }
 

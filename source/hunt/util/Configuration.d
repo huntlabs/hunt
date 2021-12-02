@@ -23,6 +23,8 @@ import std.stdio;
 import std.string;
 import std.traits;
 
+import core.time;
+
 import hunt.logging;
 import hunt.Exceptions;
 
@@ -373,10 +375,15 @@ class ConfigBuilder {
     }
 
     private static T buildItem(T)(ConfigurationItem item) {
-        auto r = creatT!T();
-        enum generatedCode = buildSetFunction!(T, r.stringof, item.stringof)();
-        // pragma(msg, generatedCode);
-        mixin(generatedCode);
+        static if(is(T == core.time.Duration)) {
+            Duration r = item.as!(long).msecs;
+        } else {
+            auto r = creatT!T();
+            enum generatedCode = buildSetFunction!(T, r.stringof, item.stringof)();
+            // pragma(msg, generatedCode);
+            mixin(generatedCode);
+        }
+
         return r;
     }
 
