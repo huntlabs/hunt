@@ -2,6 +2,8 @@ module hunt.serialization.BinarySerializer;
 
 import std.array : Appender;
 import std.traits;
+
+import hunt.serialization.Common;
 import hunt.serialization.Specify;
 
 
@@ -13,28 +15,28 @@ struct BinarySerializer {
         Appender!(ubyte[]) _buffer;
     }
 
-    ubyte[] oArchive(T)(T val) if (!isArray!T && !isAssociativeArray!T) {
+    ubyte[] oArchive(SerializationOptions options, T)(T val) if (!isArray!T && !isAssociativeArray!T) {
         Unqual!T copy = val;
-        specify(this, copy);
+        specify!(options)(this, copy);
         return _buffer.data();
     }
 
-    ubyte[] oArchive(T)(const ref T val)
+    ubyte[] oArchive(SerializationOptions options, T)(const ref T val)
             if (!isDynamicArray!T && !isAssociativeArray!T && !isAggregateType!T) {
         T copy = val;
-        specify(this, copy);
+        specify!(options)(this, copy);
         return _buffer.data();
     }
 
-    ubyte[] oArchive(T)(const(T)[] val) {
+    ubyte[] oArchive(SerializationOptions options, T)(const(T)[] val) {
         auto copy = (cast(T[]) val).dup;
-        specify(this, copy);
+        specify!(options)(this, copy);
         return _buffer.data();
     }
 
-    ubyte[] oArchive(K, V)(const(V[K]) val) {
+    ubyte[] oArchive(SerializationOptions options, K, V)(const(V[K]) val) {
         auto copy = cast(V[K]) val.dup;
-        specify(this, copy);
+        specify!(options)(this, copy);
         return _buffer.data();
     }
 
@@ -42,8 +44,8 @@ struct BinarySerializer {
         _buffer.put(val);
     }
 
-    void putClass(T)(T val) if (is(T == class)) {
-        specifyClass(this, val);
+    void putClass(SerializationOptions options, T)(T val) if (is(T == class)) {
+        specifyClass!(options)(this, val);
     }
 
     void putRaw(ubyte[] val) {
