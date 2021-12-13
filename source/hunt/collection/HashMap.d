@@ -1529,7 +1529,8 @@ final class TreeNode(K, V) : LinkedHashMapEntry!(K, V) {
                 K k = x.key;
                 size_t h = x.hash;
                 for (TreeNode!(K, V) p = root;;) {
-                    size_t dir, ph;
+                    size_t ph;
+                    int dir;
                     K pk = p.key;
                     if ((ph = p.hash) > h)
                         dir = -1;
