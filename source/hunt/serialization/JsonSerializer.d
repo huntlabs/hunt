@@ -386,11 +386,11 @@ final class JsonSerializer {
         }
     }
 
-    /// Object array
+    /// Dynamic array
     static T toObject(T : U[], SerializationOptions options = SerializationOptions.Default, U)
             (auto ref const(JSONValue) json, 
             T defaultValue = T.init)
-            if (isArray!T && !isSomeString!T && !is(T : string) && !is(T
+            if (isDynamicArray!T && !isSomeString!T && !is(T : string) && !is(T
                 : wstring) && !is(T : dstring)) {
 
         switch (json.type) {
@@ -425,6 +425,58 @@ final class JsonSerializer {
                         return [];
                     }
                 }
+        }
+    }
+
+    /// Static array
+    static T toObject(T : U[], SerializationOptions options = SerializationOptions.Default, U)
+            (auto ref const(JSONValue) json, 
+            T defaultValue = T.init)
+            if (isStaticArray !T && !isSomeString!T && !is(T : string) && !is(T
+                : wstring) && !is(T : dstring)) {
+
+        enum ArrayLength = T.length;
+
+        switch (json.type) {
+            case JSONType.null_:
+                return T.init;
+
+            case JSONType.false_:
+                U[] r = [toObject!(U, options)(JSONValue(false))];
+                assert(r.length >= ArrayLength);
+                return r[0..ArrayLength];
+
+            case JSONType.true_:
+                U[] r = [toObject!(U, options)(JSONValue(true))];
+                assert(r.length >= ArrayLength);
+                return r[0..ArrayLength];
+
+            case JSONType.array:
+                U[] r = json.array
+                    .map!(value => toObject!(U, options)(value))
+                    .array
+                    .to!(U[]);
+                assert(r.length >= ArrayLength);
+                return r[0..ArrayLength];
+
+            case JSONType.object:
+                return handleException!(T, options.canThrow())(json, "", defaultValue);
+
+            default:
+
+                return handleException!(T, options.canThrow())(json, "", defaultValue);            
+                // try {
+                //     U obj = toObject!(U, options.canThrow(true))(json);
+                //     return [obj];
+                // } catch(Exception ex) {
+                //     warning(ex.msg);
+                //     version(HUNT_DEBUG) warning(ex);
+                //     if(options.canThrow)
+                //         throw ex;
+                //     else {
+                //         return [];
+                //     }
+                // }
         }
     }
 
@@ -710,20 +762,29 @@ final class JsonSerializer {
         } else static if(is(T == struct)) {
             json = serializeObjectMember!(options)(m, serializationStates);
         } else static if(is(T : U[], U)) { 
-            if(m is null) {
-                static if(!options.ignoreNull) {
-                    static if(isSomeString!T) {
-                        json = toJson(m);
-                    } else {
-                        json = JSONValue[].init;
-                    }
-                }
-            } else {
+            static if(isStaticArray!T) {
                 static if (is(U == class) || is(U == struct) || is(U == interface)) {
                     // class[] obj; struct[] obj;
                     json = serializeObjectMember!(options)(m, serializationStates);
                 } else {
                     json = toJson(m);
+                }
+            } else {
+                if(m is null) {
+                    static if(!options.ignoreNull) {
+                        static if(isSomeString!T) {
+                            json = toJson(m);
+                        } else {
+                            json = JSONValue[].init;
+                        }
+                    }
+                } else {
+                    static if (is(U == class) || is(U == struct) || is(U == interface)) {
+                        // class[] obj; struct[] obj;
+                        json = serializeObjectMember!(options)(m, serializationStates);
+                    } else {
+                        json = toJson(m);
+                    }
                 }
             }
         } else {
@@ -811,8 +872,15 @@ final class JsonSerializer {
         return toJsonImpl!(options)(value, serializationStates);
     }
 
+    private static JSONValue toJsonImpl(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T data, 
+            ref bool[size_t] serializationStates) if(isStaticArray!T) {
+        
+        U[] value = data[0..$];
+        return toJsonImpl!(options)(value, serializationStates);
+    }
+
     private static JSONValue toJsonImpl(SerializationOptions options = SerializationOptions.Default, T: U[], U)(T value, 
-            ref bool[size_t] serializationStates) {
+            ref bool[size_t] serializationStates) if(isDynamicArray!T) {
 
         static if(is(U == class)) { // class[]
             if(value is null) {
