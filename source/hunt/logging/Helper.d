@@ -10,13 +10,7 @@
  */
 
 module hunt.logging.Helper;
-
-version(HUNT_DEBUG) {
-    import hunt.logging.ConsoleLogger;
-} else {
-    import hunt.logging.Logger;
-}
-
+import hunt.logging.Logger;
 
 import core.runtime;
 import core.stdc.stdlib;

@@ -45,7 +45,7 @@ LogLayoutHandler layoutHandler() {
 		_layoutHandler = (string time_prior, string tid, string level, string myFunc, 
 				string msg, string file, size_t line) {
 			import std.format;
-			return format("%s (%s) [%s] %s - %s - %s:%d", time_prior, tid, level, myFunc, msg, file, line);
+			return format("%s | %s | %s | %s | %s | %s:%d", time_prior, tid, level, myFunc, msg, file, line);
 			//return time_prior ~ " (" ~ tid ~ ") [" ~ level ~ "] " ~ myFunc ~
 			//	" - " ~ msg ~ " - " ~ file ~ ":" ~ to!string(line);
 		};
@@ -268,18 +268,17 @@ version (Windows)
 string code(string func, LogLevel level, bool f = false)()
 {
 	return "void " ~ func
-		~ `(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
+		~ `(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args) nothrow
 	{
-		LogLayoutHandler handler = layoutHandler();
 
 		if(g_logger is null) {
 			Logger.writeFormatColor(`
 		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
-				? "f" : "") ~ `(args) , file , line , ` ~ level.stringof ~ `, handler));
+				? "f" : "") ~ `(args) , file , line , ` ~ level.stringof ~ `));
 		} else {
-			g_logger.write(`
+			g_logger.doWrite(`
 		~ level.stringof ~ ` , Logger.toFormat(func , Logger.logFormat` ~ (f
-				? "f" : "") ~ `(args) , file , line ,` ~ level.stringof ~ `, handler));
+				? "f" : "") ~ `(args) , file , line ,` ~ level.stringof ~ `));
 		}
 	}`;
 }
@@ -295,7 +294,7 @@ class Logger
 {
 	private LogLayoutHandler _layoutHandler;
 	private bool _isRunning = true;
-
+	private __gshared LogLevel g_logLevel = LogLevel.LOG_DEBUG;
 	__gshared Logger[string] g_logger;
 	static Logger createLogger(string name , LogConf conf)
 	{
@@ -307,6 +306,10 @@ class Logger
 	{
 		return g_logger[name];
 	}
+
+	static void setLogLevel(LogLevel level) {
+        g_logLevel = level;
+    }
 
 	this(LogConf conf, LogLayoutHandler handler = null)
 	{
@@ -347,75 +350,75 @@ class Logger
 
 	void log(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
-		write(level , toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
 	}
 
 	void logf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(LogLevel level , lazy A args)
 	{
-		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
 	void trace(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_DEBUG;
-		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+		doWrite(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
 	}
 
 	void tracef(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_DEBUG;
-		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
 	void info(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_INFO;
-		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+		doWrite(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
 	}
 
 	void infof(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_INFO;
-		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
 	void warning(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_WARNING;
-		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+		doWrite(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
 	}
 
 	void warningf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_WARNING;
-		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
 	void error(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_ERROR;
-		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+		doWrite(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
 	}
 
 	void errorf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_ERROR;
-		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
 	void critical(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_FATAL;
-		write(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
+		doWrite(level, toFormat(func , logFormat(args) , file , line , level, _layoutHandler));
 	}
 
 	void criticalf(string file = __FILE__ , size_t line = __LINE__ , string func = __FUNCTION__ , A ...)(lazy A args)
 	{
 		enum LogLevel level = LogLevel.LOG_FATAL;
-		write(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
+		doWrite(level , toFormat(func , logFormatf(args) , file , line , level, _layoutHandler));
 	}
 
-	void write(LogLevel level, string msg)
+	void doWrite(LogLevel level, lazy string msg) nothrow
 	{
 		if (level >= _conf.level)
 		{
@@ -430,7 +433,15 @@ class Logger
 			//#2 file
 			if (_conf.fileName != "")
 			{
-				send(_tid, msg);
+				try
+                    send(_tid, msg);
+                catch (Exception ex) {
+                    collectException( {
+                        write(PRINT_COLOR_RED); 
+                        write(ex); 
+                        writeln(PRINT_COLOR_NONE); 
+                    }());
+                }
 			}
 		}
 	}
@@ -498,7 +509,7 @@ protected:
 			mkdirRecurse(dir);
 	}
 
-	static string toString(LogLevel level)
+	static string toString(LogLevel level) nothrow
 	{
 		string l;
 		final switch (level) with (LogLevel)
@@ -587,8 +598,8 @@ protected:
 			myFunc = funcs[$ - 1];
 		else
 			myFunc = func;
-
-		// LogLayoutHandler handler = layoutHandler();
+		if(handler is null)
+			handler = layoutHandler();
 		if(handler !is null) {
 			return handler(time_prior, tid, toString(level), myFunc, msg, file, line);
 		} else {
@@ -613,59 +624,93 @@ protected:
 		enum PRINT_COLOR_YELLOW = "\033[1;33m";
 	}
 
-	static void writeFormatColor(LogLevel level, string msg)
-	{
-		version (Posix)
-		{
-			string prior_color;
-			switch (level) with (LogLevel)
-			{
-				case LOG_ERROR:
-				case LOG_FATAL:
-					prior_color = PRINT_COLOR_RED;
-					break;
-				case LOG_WARNING:
-					prior_color = PRINT_COLOR_YELLOW;
-					break;
-				case LOG_INFO:
-					prior_color = PRINT_COLOR_GREEN;
-					break;
-				default:
-					prior_color = string.init;
-			}
+	static void writeFormatColor(LogLevel level, lazy string msg) nothrow {
+        if (level < g_logLevel)
+            return;
 
-			writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
-		}
-		else version (Windows)
-		{
-			import std.windows.charset;
-            import core.stdc.stdio;
+        version (Posix) {
+            version (Android) {
+                string prior_color;
+                android_LogPriority logPrioity = android_LogPriority.ANDROID_LOG_INFO;
+                switch (level) with (LogLevel) {
+                case LOG_ERROR:
+                case LOG_FATAL:
+                    prior_color = PRINT_COLOR_RED;
+                    logPrioity = android_LogPriority.ANDROID_LOG_ERROR;
+                    break;
+                case LOG_WARNING:
+                    prior_color = PRINT_COLOR_YELLOW;
+                    logPrioity = android_LogPriority.ANDROID_LOG_WARN;
+                    break;
+                case LOG_INFO:
+                    prior_color = PRINT_COLOR_GREEN;
+                    break;
+                default:
+                    prior_color = string.init;
+                }
 
-			enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+                try {
+                    __android_log_write(logPrioity,
+                            LOG_TAG, toStringz(prior_color ~ msg ~ PRINT_COLOR_NONE));
+                } catch(Exception ex) {
+                    collectException( {
+                        write(PRINT_COLOR_RED); 
+                        write(ex); 
+                        writeln(PRINT_COLOR_NONE); 
+                    }());
+                }
 
-			ushort color;
-			switch (level) with (LogLevel)
-			{
-			case LOG_ERROR:
-			case LOG_FATAL:
-				color = FOREGROUND_RED;
-				break;
-			case LOG_WARNING:
-				color = FOREGROUND_GREEN | FOREGROUND_RED;
-				break;
-			case LOG_INFO:
-				color = FOREGROUND_GREEN;
-				break;
-			default:
-				color = defaultColor;
-			}
+            } else {
+                string prior_color;
+                switch (level) with (LogLevel) {
+                case LOG_ERROR:
+                case LOG_FATAL:
+                    prior_color = PRINT_COLOR_RED;
+                    break;
+                case LOG_WARNING:
+                    prior_color = PRINT_COLOR_YELLOW;
+                    break;
+                case LOG_INFO:
+                    prior_color = PRINT_COLOR_GREEN;
+                    break;
+                default:
+                    prior_color = string.init;
+                }
+                try {
+                    writeln(prior_color ~ msg ~ PRINT_COLOR_NONE);
+                } catch(Exception ex) {
+                    collectException( {
+                        write(PRINT_COLOR_RED); 
+                        write(ex); 
+                        writeln(PRINT_COLOR_NONE); 
+                    }());
+                }
+            }
 
-			SetConsoleTextAttribute(g_hout, color);
-            printf("%s\n", toMBSz(msg));
-			if(color != defaultColor)
-				SetConsoleTextAttribute(g_hout, defaultColor);
-		}
-	}
+        } else version (Windows) {
+            enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+
+            ushort color;
+            switch (level) with (LogLevel) {
+            case LOG_ERROR:
+            case LOG_FATAL:
+                color = FOREGROUND_RED;
+                break;
+            case LOG_WARNING:
+                color = FOREGROUND_GREEN | FOREGROUND_RED;
+                break;
+            case LOG_INFO:
+                color = FOREGROUND_GREEN;
+                break;
+            default:
+                color = defaultColor;
+            }
+
+            ConsoleHelper.writeWithAttribute(msg, color);
+        } else {
+            assert(false, "Unsupported OS.");
+        }
+    }
 }
 
 enum LogLevel
