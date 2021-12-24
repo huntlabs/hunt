@@ -18,7 +18,7 @@ import hunt.io.IoError;
 import hunt.event;
 import hunt.Exceptions;
 import hunt.Functions;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.CompilerHelper;
 
 import std.socket;
@@ -197,7 +197,7 @@ class TcpListener : AbstractListener {
 
               if (this.isError) {
                 canRead = false;
-                hunt.logging.ConsoleLogger.error("listener error: ", this.errorMessage);
+                hunt.logging.error("listener error: ", this.errorMessage);
                 this.close();
               }
             } catch (SocketOSException e)

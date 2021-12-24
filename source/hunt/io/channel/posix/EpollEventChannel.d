@@ -7,7 +7,7 @@ version (HAVE_EPOLL) :
 import hunt.event.selector.Selector;
 import hunt.io.channel.Common;
 import hunt.io.channel.AbstractChannel;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 // import std.conv;
 import std.socket;

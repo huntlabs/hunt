@@ -5,7 +5,7 @@ import hunt.util.ResoureManager;
 import hunt.util.worker.Task;
 import hunt.util.worker.Worker;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import core.atomic;
 import core.memory;

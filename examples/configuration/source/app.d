@@ -6,9 +6,11 @@ import std.exception;
 import std.path;
 
 import hunt.util.Configuration;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import settings;
+
+import core.time;
 
 void main() {
 	writeln("===== testing application.conf =====\n");
@@ -104,6 +106,7 @@ void testConfigBuilder1() {
 	ConfigBuilder manager = new ConfigBuilder(convertConfigPathToRelative("test.config"));
 
 	BuilderTest1Config config = manager.build!BuilderTest1Config();
+	assert(config.timeout.total!("msecs") == 234, config.timeout.toString());
 
 	writeln(manager.app.server1.ip.value());
 	writeln(manager.app.server1.port.value());

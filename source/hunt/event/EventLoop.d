@@ -13,7 +13,7 @@ module hunt.event.EventLoop;
 
 import hunt.event.selector;
 import hunt.io.channel.Common;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.worker;
 
 import core.thread;

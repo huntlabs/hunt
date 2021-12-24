@@ -14,7 +14,7 @@ module hunt.util.Lifecycle;
 import core.atomic;
 
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 /**
  * A common interface defining methods for start/stop lifecycle control.

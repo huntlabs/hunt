@@ -20,7 +20,7 @@ import hunt.io.BufferUtils;
 import hunt.event.selector.Selector;
 import hunt.io.SimpleQueue;
 import hunt.event;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.Functions;
 
 import std.exception;

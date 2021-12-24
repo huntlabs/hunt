@@ -19,7 +19,7 @@ import hunt.event.selector.Selector;
 import hunt.event.timer.Kqueue;
 import hunt.Exceptions;
 import hunt.io.channel;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.CompilerHelper;
 
 import std.exception;

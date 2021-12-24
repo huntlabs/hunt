@@ -8,7 +8,7 @@ import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.IoError;
 // import hunt.io.SimpleQueue;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.system.Error;
 import hunt.util.queue;
 import hunt.util.worker;

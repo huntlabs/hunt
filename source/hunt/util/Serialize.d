@@ -1435,7 +1435,7 @@ string toTextString(const ref JSONValue root, in bool pretty = false, in JSONOpt
 */
 mixin template SerializationMember(T) {
 	import std.traits;
-	debug(HUNT_DEBUG_MORE) import hunt.logging.ConsoleLogger;
+	debug(HUNT_DEBUG_MORE) import hunt.logging;
 
     alias baseClasses = BaseClassesTuple!T;
 

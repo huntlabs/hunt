@@ -7,7 +7,7 @@ import hunt.serialization.Common;
 import hunt.serialization.BinarySerializer;
 import hunt.serialization.BinaryDeserializer;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 template PtrType(T) {
     static if (is(T == bool) || is(T == char)) {

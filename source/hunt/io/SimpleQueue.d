@@ -1,7 +1,7 @@
 module hunt.io.SimpleQueue;
 
 import hunt.Exceptions;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import core.thread;
 import core.sync.semaphore : Semaphore;

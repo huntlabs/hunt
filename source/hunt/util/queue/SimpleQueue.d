@@ -1,6 +1,6 @@
 module hunt.util.queue.SimpleQueue;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.queue.Queue;
 
 import core.atomic;

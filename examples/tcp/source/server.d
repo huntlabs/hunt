@@ -18,7 +18,7 @@ import hunt.event;
 import hunt.io.TcpListener;
 import hunt.io.TcpStream;
 import hunt.io.IoError;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.Timer;
 
 import std.socket;

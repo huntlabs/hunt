@@ -36,7 +36,7 @@ import core.sys.linux.epoll;
 import hunt.event.selector.Selector;
 import hunt.Exceptions;
 import hunt.io.channel;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.event.timer;
 import hunt.system.Error;
 import hunt.util.worker;

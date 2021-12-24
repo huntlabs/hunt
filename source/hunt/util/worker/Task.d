@@ -1,7 +1,7 @@
 module hunt.util.worker.Task;
 
 import hunt.util.queue;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import core.atomic;
 import std.datetime;

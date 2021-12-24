@@ -12,7 +12,7 @@
 module hunt.serialization.JsonSerializer;
 
 import hunt.serialization.Common;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 
 import std.algorithm : map;

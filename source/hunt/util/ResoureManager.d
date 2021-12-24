@@ -1,6 +1,6 @@
 module hunt.util.ResoureManager;
 
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.Closeable;
 
 import hunt.util.worker.WorkerThread;

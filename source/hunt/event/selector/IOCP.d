@@ -19,7 +19,7 @@ import hunt.event.selector.Selector;
 import hunt.io.channel.Common;
 import hunt.io.channel;
 import hunt.event.timer;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.system.Error;
 import hunt.io.channel.iocp.AbstractStream;
 import core.sys.windows.windows;

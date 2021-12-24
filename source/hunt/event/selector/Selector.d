@@ -4,7 +4,7 @@ import hunt.Exceptions;
 import hunt.Functions;
 import hunt.io.channel.AbstractChannel;
 import hunt.io.channel.Common;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.util.worker;
 
 import core.atomic;

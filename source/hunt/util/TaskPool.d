@@ -1,7 +1,7 @@
 module hunt.util.TaskPool;
 
 import hunt.io.SimpleQueue;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.system.Memory;
 import hunt.util.Runnable;
 

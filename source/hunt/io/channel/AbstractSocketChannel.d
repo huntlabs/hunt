@@ -3,7 +3,7 @@ module hunt.io.channel.AbstractSocketChannel;
 import hunt.event.selector.Selector;
 import hunt.io.channel.AbstractChannel;
 import hunt.io.channel.Common;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 
 import core.time;
 import std.functional;

@@ -8,7 +8,7 @@ import hunt.event.selector.Selector;
 import hunt.io.channel.AbstractSocketChannel;
 import hunt.io.channel.Common;
 import hunt.io.channel.iocp.Common;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.Functions;
 
 import core.sys.windows.windows;

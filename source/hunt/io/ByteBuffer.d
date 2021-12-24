@@ -1048,7 +1048,7 @@ abstract class ByteBuffer : Buffer {
     // byte[] getRemaining() {
     //     // int len = remaining();
     //     // int index = ix(nextGetIndex(len));
-    //     // import hunt.logging.ConsoleLogger;
+    //     // import hunt.logging;
 
     //     // warningf("len: %d, next index: %s", len, index);
 

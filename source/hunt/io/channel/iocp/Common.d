@@ -10,7 +10,7 @@ pragma(lib, "Ws2_32");
 import hunt.io.ByteBuffer;
 import hunt.io.channel.AbstractChannel;
 import hunt.io.channel.Common;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.Functions;
 
 import core.atomic;

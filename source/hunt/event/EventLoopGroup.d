@@ -12,7 +12,7 @@
 module hunt.event.EventLoopGroup;
 
 import hunt.event.EventLoop;
-import hunt.logging.ConsoleLogger;
+import hunt.logging;
 import hunt.system.Memory;
 import hunt.util.Lifecycle;
 import hunt.util.worker;
