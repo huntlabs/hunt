@@ -203,7 +203,7 @@ final class JsonSerializer {
             }
         } else static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
             enum canDeserialize = false;
-            version(HUNT_DEBUG) warning("skipped a interface member (not JsonSerializable): " ~ member);
+            version(HUNT_DEBUG_MORE) warning("skipped a interface member (not JsonSerializable): " ~ member);
         } else {
             enum canDeserialize = true;
         }
@@ -219,7 +219,7 @@ final class JsonSerializer {
 
             auto jsonItemPtr = jsonKeyName in json;
             if(jsonItemPtr is null) {
-                version(HUNT_DEBUG) {
+                version(HUNT_DEBUG_MORE) {
                     if(jsonKeyName != member)
                         warningf("No data available for member: %s as %s", member, jsonKeyName);
                     else
@@ -704,7 +704,7 @@ final class JsonSerializer {
             debug(HUNT_DEBUG_MORE) infof("memberType: %s in %s", memberType.stringof, T.stringof);
 
             static if(is(memberType == interface) && !is(memberType : JsonSerializable)) {
-                version(HUNT_DEBUG) warning("skipped a interface member(not JsonSerializable): " ~ member);
+                version(HUNT_DEBUG_MORE) warning("skipped a interface member(not JsonSerializable): " ~ member);
             } else {
                 auto m = __traits(getMember, obj, member);
 
