@@ -455,7 +455,7 @@ protected:
                     warningf("Some data has not been sent yet: fd=%d", this.handle);
                 }
             }
-            version(HUNT_DEBUG) {
+            version(HUNT_NET_DEBUG) {
                 infof("Closing a connection with: %s, fd=%d", this.remoteAddress, this.handle);
             }
 

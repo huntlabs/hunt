@@ -86,17 +86,18 @@ abstract class AbstractChannel : Channel {
         version (HUNT_IO_DEBUG)
             tracef("onClose [fd=%d]...", this.handle);
         _isRegistered = false;
-        _inLoop.deregister(this);
+        _isClosed = true;
         clear();
 
+        _inLoop.deregister(this);
         version (HUNT_IO_DEBUG_MORE)
             tracef("onClose done [fd=%d]...", this.handle);
-
-        _isClosed = true;
     }
 
     protected void errorOccurred(ErrorCode code, string msg) {
-        debug warningf("isRegistered: %s, isClosed: %s, msg=%s", _isRegistered, _isClosed, msg);
+        debug warningf("isRegistered: %s, _isClosing: %s, isClosed: %s, code: %s, msg=%s", 
+            _isRegistered, _isClosing, _isClosed, code, msg);
+            
         if (errorHandler !is null) {
             errorHandler(new IoError(code, msg));
         }

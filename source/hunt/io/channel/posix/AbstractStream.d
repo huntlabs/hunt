@@ -154,12 +154,19 @@ abstract class AbstractStream : AbstractSocketChannel {
             if (_error) {
                 this._errorMessage = getErrorMessage(errno);
 
+                version(HUNT_NET_DEBUG) {
+                    warningf("Error occurred on read, code: %d, msg: %s, isClosing: %s, isClosed: %s", 
+                        errno, _errorMessage, isClosing(), isClosed());
+                }
+
                 if(errno == ECONNRESET) {
                     // https://stackoverflow.com/questions/1434451/what-does-connection-reset-by-peer-mean
                     onDisconnected();
                     errorOccurred(ErrorCode.CONNECTIONEESET , "connection reset by peer");
                 } else {
-                    errorOccurred(ErrorCode.INTERRUPTED , "Error occurred on read");
+                    if(!isClosed()) {
+                        errorOccurred(ErrorCode.INTERRUPTED , format("Error occurred on read, code: %d", errno));
+                    }
                 }
             } else {
                 debug warningf("warning on read: fd=%d, errno=%d, message=%s", this.handle,
