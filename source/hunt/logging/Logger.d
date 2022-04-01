@@ -436,11 +436,17 @@ class Logger
 				try
                     send(_tid, msg);
                 catch (Exception ex) {
-                    collectException( {
-                        write(PRINT_COLOR_RED); 
+					version(Posix) {
+						collectException( {
+							write(PRINT_COLOR_RED); 
+							write(ex); 
+							writeln(PRINT_COLOR_NONE); 
+						}());
+					} else {
+						collectException( {
                         write(ex); 
-                        writeln(PRINT_COLOR_NONE); 
                     }());
+					}
                 }
 			}
 		}
@@ -688,6 +694,7 @@ protected:
             }
 
         } else version (Windows) {
+			import hunt.system.WindowsHelper;
             enum defaultColor = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
 
             ushort color;
