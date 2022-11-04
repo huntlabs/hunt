@@ -14,6 +14,7 @@ module hunt.util.DateTime;
 import core.atomic;
 import core.stdc.time;
 import core.thread : Thread;
+import std.array;
 import std.datetime;
 import std.format : formattedWrite;
 import std.string;
@@ -403,11 +404,10 @@ class DateTime {
     private __gshared Thread dateThread;
     private static shared bool _isClockRunning = false;
 
-    shared static this() {
-        import std.array;
+    private static Appender!(char[])[2] bufs;
+    private static const(char)[][2] targets;
 
-        Appender!(char[])[2] bufs;
-        const(char)[][2] targets;
+    shared static this() {
 
         void tick(size_t index) {
             bufs[index].clear();
