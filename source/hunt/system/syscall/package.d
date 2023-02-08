@@ -16,7 +16,7 @@ version(Posix):
 
 extern (C) nothrow @nogc size_t syscall(size_t ident, ...);
 
-version(D_InlineAsm_X86_64)
+version(X86_64)
 {
     version(linux) public import hunt.system.syscall.os.Linux;
     else version(OSX) public import hunt.system.syscall.os.OSX;
