@@ -212,7 +212,10 @@ class AbstractSelector : Selector {
                 //     channel.onWrite();
                 // }
 
-                channel.close();
+                if(!channel.isClosed() && !channel.isClosing()) {
+                    // The close() may be called in onRead()
+                    channel.close();
+                }
             } else if (event == EPOLLIN) {
                 version (HUNT_IO_DEBUG)
                     tracef("channel read event: fd=%d", channel.handle);

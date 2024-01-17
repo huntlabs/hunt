@@ -213,7 +213,7 @@ class TcpStream : AbstractStream {
     // www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/
     // http://www.importnew.com/27624.html
     private void setKeepalive() {
-        version(HUNT_DEBUG) {
+        version(HUNT_NET_DEBUG) {
             infof("isKeepalive: %s, keepaliveTime: %d seconds, Interval: %d seconds", 
                 _tcpOption.isKeepalive, _tcpOption.keepaliveTime, _tcpOption.keepaliveInterval);
         }

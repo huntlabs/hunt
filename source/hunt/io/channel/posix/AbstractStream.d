@@ -174,7 +174,7 @@ abstract class AbstractStream : AbstractSocketChannel {
             }
 
         } else {
-            version (HUNT_DEBUG)
+            version (HUNT_NET_DEBUG)
                 infof("connection broken: %s, fd:%d", _remoteAddress.toString(), this.handle);
             onDisconnected();
         }
